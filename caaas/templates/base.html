@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %} - CAAAS</title>
+    <script src="/static/jquery-2.1.4.min.js" type="application/javascript"></script>
+    <script type="application/javascript">
+        var api_endpoint = "/api";
+    </script>
+    {% endblock %}
+</head>
+<body>
+    <div class="header"><em>CAaaS</em> &dash; Available nodes: <span id="num_nodes">0</span> Containers: <span id="num_containers">0</span></div>
+    <script>
+        function update_status() {
+            $.getJSON( api_endpoint + "/status")
+                .done(function( data ) {
+                    $("#num_nodes").text(data.num_nodes);
+                    $("#num_containers").text(data.num_containers);
+                });
+        }
+        update_status();
+        window.setInterval(update_status, 5000);
+    </script>
+    <div id="content">{% block content %}{% endblock %}</div>
+    <div id="footer">
+        {% block footer %}
+        &copy; Copyright 2015 by <a href="http://distsysgroup.wordpress.com/">DSG</a>.
+        {% endblock %}
+    </div>
+</body>
+</html>
