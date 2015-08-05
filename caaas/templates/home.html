@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<h1>DSG CAaaS system - Analytics on demand</h1>
+<p>Start an activity:</p>
+<ul>
+    <li><a href="/web/{{ user }}/spark-notebook">Give me a Spark notebook</a></li>
+    <li>Submit a Spark application</li>
+</ul>
+
+<p>Monitor my activities:</p>
+<ul>
+    <li><a href="/web/{{ user }}/status">Running applications</a></li>
+</ul>
+
+<p>Cluster status:</p>
+<ul>
+    <li><a href="/web/status">Overview</a></li>
+</ul>
+
+
+
+{% endblock %}

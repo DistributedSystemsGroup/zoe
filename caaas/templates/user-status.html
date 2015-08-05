@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{{ user }} status{% endblock %}
+{% block content %}
+<script type="application/javascript">
+    function gen_one_cluster(i, item) {
+        var block = $("<div></div>");
+        var cluster_name = item.name;
+        if (item.is_notebook) {
+            cluster_name += " (<a href=\"/api/{{ user }}/cluster/" + i + "/terminate\">terminate</a>)";
+        }
+        block.append("<p></p>").html(cluster_name);
+        var ul = $("<ul></ul>");
+        ul.append($("<li></li>").text("Num. containers: " + item.num_containers));
+        ul.append($("<li></li>").text("Notebook cluster: " + item.is_notebook));
+        block.append(ul);
+        return block;
+    }
+    (function() {
+        $.getJSON( api_endpoint + "/{{ user }}/status")
+                .done(function( data ) {
+                    $.each(data, function(i, item) {
+                        $("#cluster_list").append(gen_one_cluster(i, item))
+                    })
+                });
+    })();
+</script>
+
+<h1>Status overview for user {{ user }}</h1>
+
+<div id="cluster_list"></div>
+{% endblock %}

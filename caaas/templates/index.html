@@ -1,21 +1,24 @@
 {% extends "base.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
+
+<script>
+function process()
+{
+var url = "http://" + window.location.hostname + "/web/" +  $("#user").val();
+location.href = url;
+return false;
+}
+</script>
+
 <h1>DSG CAaaS system - Analytics on demand</h1>
-<p>Start an activity:</p>
-<ul>
-    <li><a href="/web/{{ user }}/spark-notebook">Give me a Spark notebook</a></li>
-    <li>Submit a Spark application</li>
-</ul>
 
-<p>Monitor my activities:</p>
-<ul>
-    <li><a href="/web/{{ user }}/status">Running applications</a></li>
-</ul>
+<form onSubmit="return process();">
+    <label>Type your username to start:
+    <input id="user" autofocus required pattern="[a-z]+"></label>
+    <input type="submit" value="Start">
+</form>
 
-<p>Cluster status:</p>
-<ul>
-    <li><a href="/web/status">Overview</a></li>
-</ul>
+<p>To create a new user, just type a new username in the box above, only lowercase letters are accepted.</p>
 
 {% endblock %}

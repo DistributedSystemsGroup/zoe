@@ -11,7 +11,7 @@
     {% endblock %}
 </head>
 <body>
-    <div class="header"><em>CAaaS</em> &dash; Available nodes: <span id="num_nodes">0</span> Containers: <span id="num_containers">0</span></div>
+    <div class="header"><em>CAaaS</em> -- Available nodes: <span id="num_nodes">0</span> Containers: <span id="num_containers">0</span></div>
     <script>
         function update_status() {
             $.getJSON( api_endpoint + "/status")

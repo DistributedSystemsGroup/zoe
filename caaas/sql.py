@@ -58,14 +58,21 @@ class CAaaSSQL:
         cursor.close()
         return row[0]
 
-    def count_containers(self, user_id=None):
+    def count_containers(self, user_id=None, cluster_id=None):
         cursor = self.cnx.cursor()
-        if user_id is None:
+        if user_id is None and cluster_id is None:
             q = "SELECT COUNT(*) FROM containers"
             cursor.execute(q)
-        else:
+        elif user_id is not None and cluster_id is None:
             q = "SELECT COUNT(*) FROM containers WHERE user_id=%s"
             cursor.execute(q, (user_id,))
+        elif user_id is None and cluster_id is not None:
+            q = "SELECT COUNT(*) FROM containers WHERE cluster_id=%s"
+            cursor.execute(q, (cluster_id,))
+        elif user_id is not None and cluster_id is not None:
+            q = "SELECT COUNT(*) FROM containers WHERE user_id=%s AND cluster_id=%s"
+            cursor.execute(q, (user_id, cluster_id))
+
         row = cursor.fetchone()
         cursor.close()
         return row[0]
@@ -150,3 +157,76 @@ class CAaaSSQL:
         self.cnx.commit()
         cursor.close()
         return nb_id
+
+    def get_clusters(self, user_id=None):
+        cursor = self.cnx.cursor(dictionary=True)
+        res = {}
+        if user_id is None:
+            q = "SELECT id, user_id, master_address, name FROM clusters"
+            cursor.execute(q)
+        else:
+            q = "SELECT id, user_id, master_address, name FROM clusters WHERE user_id=%s"
+            cursor.execute(q, (user_id,))
+        for row in cursor:
+            res[str(row["id"])] = {
+                "user_id": row["user_id"],
+                "master_address": row["master_address"],
+                "name": row["name"]
+            }
+        cursor.close()
+        return res
+
+    def get_containers(self, user_id=None, cluster_id=None):
+        cursor = self.cnx.cursor(dictionary=True)
+        res = {}
+        if user_id is None and cluster_id is None:
+            q = "SELECT id, docker_id, cluster_id, user_id, ip_address, contents FROM containers"
+            cursor.execute(q)
+        elif user_id is not None and cluster_id is None:
+            q = "SELECT id, docker_id, cluster_id, user_id, ip_address, contents FROM containers WHERE user_id=%s"
+            cursor.execute(q, (user_id,))
+        elif user_id is None and cluster_id is not None:
+            q = "SELECT id, docker_id, cluster_id, user_id, ip_address, contents FROM containers WHERE cluster_id=%s"
+            cursor.execute(q, (cluster_id,))
+        elif user_id is not None and cluster_id is not None:
+            q = "SELECT id, docker_id, cluster_id, user_id, ip_address, contents FROM containers WHERE user_id=%s AND cluster_id=%s"
+            cursor.execute(q, (user_id, cluster_id))
+
+        for row in cursor:
+            res[str(row["id"])] = {
+                "docker_id": row["docker_id"],
+                "cluster_id": row["cluster_id"],
+                "user_id": row["user_id"],
+                "ip_address": row["ip_address"],
+                "contents": row["contents"],
+            }
+        cursor.close()
+        return res
+
+    def remove_proxy(self, container_id):
+        cursor = self.cnx.cursor()
+        q = "DELETE FROM proxy WHERE container_id=%s"
+        cursor.execute(q, (container_id,))
+        self.cnx.commit()
+        cursor.close()
+
+    def remove_notebook(self, container_id):
+        cursor = self.cnx.cursor()
+        q = "DELETE FROM notebooks WHERE container_id=%s"
+        cursor.execute(q, (container_id,))
+        self.cnx.commit()
+        cursor.close()
+
+    def remove_container(self, container_id):
+        cursor = self.cnx.cursor()
+        q = "DELETE FROM containers WHERE id=%s"
+        cursor.execute(q, (container_id,))
+        self.cnx.commit()
+        cursor.close()
+
+    def remove_cluster(self, cluster_id):
+        cursor = self.cnx.cursor()
+        q = "DELETE FROM clusters WHERE id=%s"
+        cursor.execute(q, (cluster_id,))
+        self.cnx.commit()
+        cursor.close()

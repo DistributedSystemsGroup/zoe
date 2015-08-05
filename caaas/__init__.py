@@ -18,6 +18,7 @@ def get_db():
     """
     return _db
 
+
 from caaas.swarm import swarm
 import caaas.web
 import caaas.api

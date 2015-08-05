@@ -134,4 +134,20 @@ class Swarm:
         }
         return info
 
+    def _terminate_container(self, container_id, docker_id, contents):
+        db = get_db()
+        db.remove_proxy(container_id)
+        if contents == "spark-notebook":
+            db.remove_notebook(container_id)
+        self.cli.remove_container(docker_id, force=True)
+        db.remove_container(container_id)
+
+    def terminate_cluster(self, cluster_id):
+        db = get_db()
+        cont_list = db.get_containers(cluster_id=cluster_id)
+        for cid, cinfo in cont_list.items():
+            self._terminate_container(cid, cinfo["docker_id"], cinfo["contents"])
+        db.remove_cluster(cluster_id)
+        return True
+
 swarm = Swarm()
