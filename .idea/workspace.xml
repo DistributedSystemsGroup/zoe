@@ -2,16 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="75bc5abc-acc8-44ff-9d8a-85151a0cbca1" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/caaas/templates/user-status.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/__init__.py" afterPath="$PROJECT_DIR$/caaas/__init__.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apache-proxy.py" afterPath="$PROJECT_DIR$/apache-proxy.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/api.py" afterPath="$PROJECT_DIR$/caaas/api.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/templates/base.html" afterPath="$PROJECT_DIR$/caaas/templates/base.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/templates/index.html" afterPath="$PROJECT_DIR$/caaas/templates/index.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/sql.py" afterPath="$PROJECT_DIR$/caaas/sql.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/swarm.py" afterPath="$PROJECT_DIR$/caaas/swarm.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/web.py" afterPath="$PROJECT_DIR$/caaas/web.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\templates\index.html" afterPath="$PROJECT_DIR$/caaas/templates/home.html" />
     </list>
     <ignored path="caaas.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -25,7 +19,8 @@
   </component>
   <component name="ChangesViewManager" flattened_view="true" show_ignored="false" />
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/caaas$main.coverage" NAME="main Coverage Results" MODIFIED="1438783799097" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
+    <SUITE FILE_PATH="coverage/caaas$main.coverage" NAME="main Coverage Results" MODIFIED="1438785361954" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
+    <SUITE FILE_PATH="coverage/caaas$apache_proxy.coverage" NAME="apache-proxy Coverage Results" MODIFIED="1438786630433" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="CreatePatchCommitExecutor">
     <option name="PATCH_PATH" value="" />
@@ -128,11 +123,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="swarm.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="swarm.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/caaas/swarm.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.6770294">
-              <caret line="148" column="0" selection-start-line="148" selection-start-column="0" selection-end-line="148" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="148" column="81" selection-start-line="148" selection-start-column="81" selection-end-line="148" selection-end-column="81" />
               <folding>
                 <element signature="e#0#25#0" expanded="true" />
               </folding>
@@ -140,58 +135,47 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="sql.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="sql.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/caaas/sql.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="221" column="8" selection-start-line="221" selection-start-column="8" selection-end-line="221" selection-end-column="8" />
+            <state vertical-scroll-proportion="0.5542312">
+              <caret line="134" column="25" selection-start-line="134" selection-start-column="25" selection-end-line="134" selection-end-column="25" />
               <folding>
                 <element signature="e#0#22#0" expanded="true" />
                 <element signature="e#174#312#0" expanded="false" />
-                <element signature="e#754#981#0" expanded="false" />
-                <element signature="e#1028#1061#0" expanded="false" />
-                <element signature="e#1100#1330#0" expanded="false" />
-                <element signature="e#1384#1714#0" expanded="false" />
-                <element signature="e#2606#2924#0" expanded="false" />
-                <element signature="e#2971#3034#0" expanded="false" />
-                <element signature="e#3083#3389#0" expanded="false" />
-                <element signature="e#3428#3761#0" expanded="false" />
-                <element signature="e#3813#4062#0" expanded="false" />
-                <element signature="e#4127#4359#0" expanded="false" />
-                <element signature="e#4452#4779#0" expanded="false" />
-                <marker date="1438783550263" expanded="true" signature="414:450" placeholder="SELECT id FR..users..." />
-                <marker date="1438783550263" expanded="true" signature="794:834" placeholder="INSERT INTO ..." />
-                <marker date="1438783550263" expanded="true" signature="1140:1170" placeholder="SELECT id, u..users..." />
-                <marker date="1438783550263" expanded="true" signature="1456:1485" placeholder="SELECT COUNT..clusters..." />
-                <marker date="1438783550263" expanded="true" signature="1548:1592" placeholder="SELECT COUNT..clusters..." />
-                <marker date="1438783550263" expanded="true" signature="1882:1913" placeholder="SELECT COUNT..containers..." />
-                <marker date="1438783550263" expanded="true" signature="2019:2065" placeholder="SELECT COUNT..containers..." />
-                <marker date="1438783550263" expanded="true" signature="2185:2234" placeholder="SELECT COUNT..containers..." />
-                <marker date="1438783550263" expanded="true" signature="2361:2407" placeholder="SELECT COUNT..containers..." />
-                <marker date="1438783550263" expanded="true" signature="2361:2413" placeholder="SELECT COUNT..containers..." />
-                <marker date="1438783550263" expanded="true" signature="2361:2425" placeholder="SELECT COUNT..containers..." />
-                <marker date="1438783550263" expanded="true" signature="2661:2699" placeholder="SELECT * FRO..notebooks..." />
-                <marker date="1438783550263" expanded="true" signature="3123:3160" placeholder="SELECT url F..proxy..." />
-                <marker date="1438783550263" expanded="true" signature="3468:3525" placeholder="SELECT proxy..proxy..." />
-                <marker date="1438783550263" expanded="true" signature="3853:3905" placeholder="INSERT INTO ..." />
-                <marker date="1438783550263" expanded="true" signature="4167:4223" placeholder="UPDATE clust..." />
-                <marker date="1438783550263" expanded="true" signature="4492:4589" placeholder="INSERT INTO ..." />
-                <marker date="1438783550263" expanded="true" signature="4917:5009" placeholder="INSERT INTO ..." />
-                <marker date="1438783550263" expanded="true" signature="5290:5377" placeholder="INSERT INTO ..." />
-                <marker date="1438783550263" expanded="true" signature="5709:5763" placeholder="SELECT COUNT..clusters..." />
-                <marker date="1438783550263" expanded="true" signature="5826:5880" placeholder="SELECT id, u..clusters..." />
-                <marker date="1438783550263" expanded="true" signature="5826:5895" placeholder="SELECT COUNT..clusters..." />
-                <marker date="1438783550263" expanded="true" signature="6393:6472" placeholder="SELECT id, d..containers..." />
-                <marker date="1438783550263" expanded="true" signature="6578:6672" placeholder="SELECT id, u..clusters..." />
-                <marker date="1438783550263" expanded="true" signature="6792:6889" placeholder="SELECT id, d..containers..." />
-                <marker date="1438783550263" expanded="true" signature="7016:7110" placeholder="SELECT id, d..containers..." />
-                <marker date="1438783550263" expanded="true" signature="7016:7128" placeholder="SELECT id, d..containers..." />
-                <marker date="1438783550263" expanded="true" signature="7629:7646" placeholder="DELETE FROM ..." />
-                <marker date="1438783550263" expanded="true" signature="7629:7666" placeholder="DELETE FROM ..." />
-                <marker date="1438783550263" expanded="true" signature="7640:7641" placeholder="INSERT INTO ..." />
-                <marker date="1438783550263" expanded="true" signature="7856:7897" placeholder="DELETE FROM ..." />
-                <marker date="1438783550263" expanded="true" signature="8088:8120" placeholder="DELETE FROM ..." />
-                <marker date="1438783550263" expanded="true" signature="8307:8337" placeholder="DELETE FROM ..." />
+                <marker date="1438786583972" expanded="true" signature="414:450" placeholder="SELECT id FR..users..." />
+                <marker date="1438786583972" expanded="true" signature="854:894" placeholder="INSERT INTO ..." />
+                <marker date="1438786583972" expanded="true" signature="1200:1230" placeholder="SELECT id, u..users..." />
+                <marker date="1438786583972" expanded="true" signature="1542:1571" placeholder="SELECT COUNT..clusters..." />
+                <marker date="1438786583972" expanded="true" signature="1634:1678" placeholder="SELECT COUNT..clusters..." />
+                <marker date="1438786583972" expanded="true" signature="1994:2025" placeholder="SELECT COUNT..containers..." />
+                <marker date="1438786583972" expanded="true" signature="2131:2177" placeholder="SELECT COUNT..containers..." />
+                <marker date="1438786583972" expanded="true" signature="2297:2346" placeholder="SELECT COUNT..containers..." />
+                <marker date="1438786583972" expanded="true" signature="2473:2519" placeholder="SELECT COUNT..containers..." />
+                <marker date="1438786583972" expanded="true" signature="2473:2525" placeholder="SELECT COUNT..containers..." />
+                <marker date="1438786583972" expanded="true" signature="2473:2537" placeholder="SELECT COUNT..containers..." />
+                <marker date="1438786583972" expanded="true" signature="2799:2837" placeholder="SELECT * FRO..notebooks..." />
+                <marker date="1438786583972" expanded="true" signature="3321:3358" placeholder="SELECT url F..proxy..." />
+                <marker date="1438786583972" expanded="true" signature="3726:3783" placeholder="SELECT proxy..proxy..." />
+                <marker date="1438786583972" expanded="true" signature="4137:4189" placeholder="INSERT INTO ..." />
+                <marker date="1438786583972" expanded="true" signature="4451:4507" placeholder="UPDATE clust..." />
+                <marker date="1438786583972" expanded="true" signature="4776:4881" placeholder="INSERT INTO ..." />
+                <marker date="1438786583972" expanded="true" signature="5209:5309" placeholder="INSERT INTO ..." />
+                <marker date="1438786583972" expanded="true" signature="5590:5681" placeholder="INSERT INTO ..." />
+                <marker date="1438786583972" expanded="true" signature="6013:6067" placeholder="SELECT COUNT..clusters..." />
+                <marker date="1438786583972" expanded="true" signature="6130:6184" placeholder="SELECT id, u..clusters..." />
+                <marker date="1438786583972" expanded="true" signature="6130:6199" placeholder="SELECT COUNT..clusters..." />
+                <marker date="1438786583972" expanded="true" signature="6723:6802" placeholder="SELECT id, d..containers..." />
+                <marker date="1438786583972" expanded="true" signature="6908:7002" placeholder="SELECT id, u..clusters..." />
+                <marker date="1438786583972" expanded="true" signature="7122:7219" placeholder="SELECT id, d..containers..." />
+                <marker date="1438786583972" expanded="true" signature="7346:7440" placeholder="SELECT id, d..containers..." />
+                <marker date="1438786583972" expanded="true" signature="7346:7458" placeholder="SELECT id, d..containers..." />
+                <marker date="1438786583972" expanded="true" signature="7985:8002" placeholder="DELETE FROM ..." />
+                <marker date="1438786583972" expanded="true" signature="7985:8022" placeholder="DELETE FROM ..." />
+                <marker date="1438786583972" expanded="true" signature="7996:7997" placeholder="INSERT INTO ..." />
+                <marker date="1438786583972" expanded="true" signature="8212:8253" placeholder="DELETE FROM ..." />
+                <marker date="1438786583972" expanded="true" signature="8444:8476" placeholder="DELETE FROM ..." />
+                <marker date="1438786583972" expanded="true" signature="8663:8693" placeholder="DELETE FROM ..." />
               </folding>
             </state>
           </provider>
@@ -217,6 +201,16 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="apache-proxy.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/apache-proxy.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="37" column="0" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="base.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/caaas/templates/base.html">
           <provider selected="true" editor-type-id="text-editor">
@@ -231,7 +225,7 @@
         <entry file="file://$PROJECT_DIR$/caaas/api.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="49" column="0" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
+              <caret line="52" column="0" selection-start-line="52" selection-start-column="0" selection-end-line="52" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -252,26 +246,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="-8.5">
               <caret line="13" column="5" selection-start-line="13" selection-start-column="5" selection-end-line="13" selection-end-column="5" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="notebook.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/caaas/templates/notebook.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-0.65384614">
-              <caret line="1" column="31" selection-start-line="1" selection-start-column="31" selection-end-line="1" selection-end-column="31" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="home.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/caaas/templates/home.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-13.076923">
-              <caret line="20" column="0" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -310,20 +284,20 @@
         <option value="$PROJECT_DIR$/images/templates/submit.tmpl" />
         <option value="$PROJECT_DIR$/images/templates/worker.tmpl" />
         <option value="$PROJECT_DIR$/images/build_images.sh" />
-        <option value="$APPLICATION_CONFIG_DIR$/consoles/db/a32fd6de-3ffa-40c0-9ec8-8953a89c53e0/console.sql" />
         <option value="$PROJECT_DIR$/images/notebook/Dockerfile" />
         <option value="$PROJECT_DIR$/images/notebook/files/start-notebook.sh" />
-        <option value="$PROJECT_DIR$/apache-proxy.py" />
         <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/caaas/__init__.py" />
         <option value="$PROJECT_DIR$/caaas/templates/base.html" />
         <option value="$PROJECT_DIR$/caaas/templates/index.html" />
         <option value="$PROJECT_DIR$/caaas/templates/home.html" />
         <option value="$PROJECT_DIR$/caaas/web.py" />
-        <option value="$PROJECT_DIR$/caaas/sql.py" />
-        <option value="$PROJECT_DIR$/caaas/api.py" />
         <option value="$PROJECT_DIR$/caaas/templates/user-status.html" />
         <option value="$PROJECT_DIR$/caaas/swarm.py" />
+        <option value="$PROJECT_DIR$/caaas/api.py" />
+        <option value="$PROJECT_DIR$/apache-proxy.py" />
+        <option value="$APPLICATION_CONFIG_DIR$/consoles/db/a32fd6de-3ffa-40c0-9ec8-8953a89c53e0/console.sql" />
+        <option value="$PROJECT_DIR$/caaas/sql.py" />
       </list>
     </option>
   </component>
@@ -754,8 +728,27 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
     </configuration>
-    <list size="1">
+    <configuration default="false" name="apache-proxy" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="caaas" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/apache-proxy.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <list size="2">
       <item index="0" class="java.lang.String" itemvalue="Python.main" />
+      <item index="1" class="java.lang.String" itemvalue="Python.apache-proxy" />
     </list>
   </component>
   <component name="ShelveChangesManager" show_recycled="false" />
@@ -773,7 +766,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="169" y="11" width="1606" height="998" extended-state="0" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32911393" sideWeight="0.5059701" order="13" side_tool="true" content_ui="tabs" />
@@ -788,7 +781,7 @@
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.12742561" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.29988465" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.29988465" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32911393" sideWeight="0.49552238" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -813,6 +806,13 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/apache-proxy.py</url>
+          <line>81</line>
+          <option name="timeStamp" value="21" />
+        </line-breakpoint>
+      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
@@ -820,7 +820,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="21" />
+      <option name="time" value="22" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -894,50 +894,39 @@
           <folding>
             <element signature="e#0#22#0" expanded="true" />
             <element signature="e#174#312#0" expanded="false" />
-            <element signature="e#754#981#0" expanded="false" />
-            <element signature="e#1028#1061#0" expanded="false" />
-            <element signature="e#1100#1330#0" expanded="false" />
-            <element signature="e#1384#1714#0" expanded="false" />
-            <element signature="e#2606#2924#0" expanded="false" />
-            <element signature="e#2971#3034#0" expanded="false" />
-            <element signature="e#3083#3389#0" expanded="false" />
-            <element signature="e#3428#3761#0" expanded="false" />
-            <element signature="e#3813#4062#0" expanded="false" />
-            <element signature="e#4127#4359#0" expanded="false" />
-            <element signature="e#4452#4779#0" expanded="false" />
-            <marker date="1438783550263" expanded="true" signature="414:450" placeholder="SELECT id FR..users..." />
-            <marker date="1438783550263" expanded="true" signature="794:834" placeholder="INSERT INTO ..." />
-            <marker date="1438783550263" expanded="true" signature="1140:1170" placeholder="SELECT id, u..users..." />
-            <marker date="1438783550263" expanded="true" signature="1456:1485" placeholder="SELECT COUNT..clusters..." />
-            <marker date="1438783550263" expanded="true" signature="1548:1592" placeholder="SELECT COUNT..clusters..." />
-            <marker date="1438783550263" expanded="true" signature="1882:1913" placeholder="SELECT COUNT..containers..." />
-            <marker date="1438783550263" expanded="true" signature="2019:2065" placeholder="SELECT COUNT..containers..." />
-            <marker date="1438783550263" expanded="true" signature="2185:2234" placeholder="SELECT COUNT..containers..." />
-            <marker date="1438783550263" expanded="true" signature="2361:2407" placeholder="SELECT COUNT..containers..." />
-            <marker date="1438783550263" expanded="true" signature="2361:2413" placeholder="SELECT COUNT..containers..." />
-            <marker date="1438783550263" expanded="true" signature="2361:2425" placeholder="SELECT COUNT..containers..." />
-            <marker date="1438783550263" expanded="true" signature="2661:2699" placeholder="SELECT * FRO..notebooks..." />
-            <marker date="1438783550263" expanded="true" signature="3123:3160" placeholder="SELECT url F..proxy..." />
-            <marker date="1438783550263" expanded="true" signature="3468:3525" placeholder="SELECT proxy..proxy..." />
-            <marker date="1438783550263" expanded="true" signature="3853:3905" placeholder="INSERT INTO ..." />
-            <marker date="1438783550263" expanded="true" signature="4167:4223" placeholder="UPDATE clust..." />
-            <marker date="1438783550263" expanded="true" signature="4492:4589" placeholder="INSERT INTO ..." />
-            <marker date="1438783550263" expanded="true" signature="4917:5009" placeholder="INSERT INTO ..." />
-            <marker date="1438783550263" expanded="true" signature="5290:5377" placeholder="INSERT INTO ..." />
-            <marker date="1438783550263" expanded="true" signature="5709:5763" placeholder="SELECT COUNT..clusters..." />
-            <marker date="1438783550263" expanded="true" signature="5826:5880" placeholder="SELECT id, u..clusters..." />
-            <marker date="1438783550263" expanded="true" signature="5826:5895" placeholder="SELECT COUNT..clusters..." />
-            <marker date="1438783550263" expanded="true" signature="6393:6472" placeholder="SELECT id, d..containers..." />
-            <marker date="1438783550263" expanded="true" signature="6578:6672" placeholder="SELECT id, u..clusters..." />
-            <marker date="1438783550263" expanded="true" signature="6792:6889" placeholder="SELECT id, d..containers..." />
-            <marker date="1438783550263" expanded="true" signature="7016:7110" placeholder="SELECT id, d..containers..." />
-            <marker date="1438783550263" expanded="true" signature="7016:7128" placeholder="SELECT id, d..containers..." />
-            <marker date="1438783550263" expanded="true" signature="7629:7646" placeholder="DELETE FROM ..." />
-            <marker date="1438783550263" expanded="true" signature="7629:7666" placeholder="DELETE FROM ..." />
-            <marker date="1438783550263" expanded="true" signature="7640:7641" placeholder="INSERT INTO ..." />
-            <marker date="1438783550263" expanded="true" signature="7856:7897" placeholder="DELETE FROM ..." />
-            <marker date="1438783550263" expanded="true" signature="8088:8120" placeholder="DELETE FROM ..." />
-            <marker date="1438783550263" expanded="true" signature="8307:8337" placeholder="DELETE FROM ..." />
+            <marker date="1438786583972" expanded="true" signature="414:450" placeholder="SELECT id FR..users..." />
+            <marker date="1438786583972" expanded="true" signature="854:894" placeholder="INSERT INTO ..." />
+            <marker date="1438786583972" expanded="true" signature="1200:1230" placeholder="SELECT id, u..users..." />
+            <marker date="1438786583972" expanded="true" signature="1542:1571" placeholder="SELECT COUNT..clusters..." />
+            <marker date="1438786583972" expanded="true" signature="1634:1678" placeholder="SELECT COUNT..clusters..." />
+            <marker date="1438786583972" expanded="true" signature="1994:2025" placeholder="SELECT COUNT..containers..." />
+            <marker date="1438786583972" expanded="true" signature="2131:2177" placeholder="SELECT COUNT..containers..." />
+            <marker date="1438786583972" expanded="true" signature="2297:2346" placeholder="SELECT COUNT..containers..." />
+            <marker date="1438786583972" expanded="true" signature="2473:2519" placeholder="SELECT COUNT..containers..." />
+            <marker date="1438786583972" expanded="true" signature="2473:2525" placeholder="SELECT COUNT..containers..." />
+            <marker date="1438786583972" expanded="true" signature="2473:2537" placeholder="SELECT COUNT..containers..." />
+            <marker date="1438786583972" expanded="true" signature="2799:2837" placeholder="SELECT * FRO..notebooks..." />
+            <marker date="1438786583972" expanded="true" signature="3321:3358" placeholder="SELECT url F..proxy..." />
+            <marker date="1438786583972" expanded="true" signature="3726:3783" placeholder="SELECT proxy..proxy..." />
+            <marker date="1438786583972" expanded="true" signature="4137:4189" placeholder="INSERT INTO ..." />
+            <marker date="1438786583972" expanded="true" signature="4451:4507" placeholder="UPDATE clust..." />
+            <marker date="1438786583972" expanded="true" signature="4776:4881" placeholder="INSERT INTO ..." />
+            <marker date="1438786583972" expanded="true" signature="5209:5309" placeholder="INSERT INTO ..." />
+            <marker date="1438786583972" expanded="true" signature="5590:5681" placeholder="INSERT INTO ..." />
+            <marker date="1438786583972" expanded="true" signature="6013:6067" placeholder="SELECT COUNT..clusters..." />
+            <marker date="1438786583972" expanded="true" signature="6130:6184" placeholder="SELECT id, u..clusters..." />
+            <marker date="1438786583972" expanded="true" signature="6130:6199" placeholder="SELECT COUNT..clusters..." />
+            <marker date="1438786583972" expanded="true" signature="6723:6802" placeholder="SELECT id, d..containers..." />
+            <marker date="1438786583972" expanded="true" signature="6908:7002" placeholder="SELECT id, u..clusters..." />
+            <marker date="1438786583972" expanded="true" signature="7122:7219" placeholder="SELECT id, d..containers..." />
+            <marker date="1438786583972" expanded="true" signature="7346:7440" placeholder="SELECT id, d..containers..." />
+            <marker date="1438786583972" expanded="true" signature="7346:7458" placeholder="SELECT id, d..containers..." />
+            <marker date="1438786583972" expanded="true" signature="7985:8002" placeholder="DELETE FROM ..." />
+            <marker date="1438786583972" expanded="true" signature="7985:8022" placeholder="DELETE FROM ..." />
+            <marker date="1438786583972" expanded="true" signature="7996:7997" placeholder="INSERT INTO ..." />
+            <marker date="1438786583972" expanded="true" signature="8212:8253" placeholder="DELETE FROM ..." />
+            <marker date="1438786583972" expanded="true" signature="8444:8476" placeholder="DELETE FROM ..." />
+            <marker date="1438786583972" expanded="true" signature="8663:8693" placeholder="DELETE FROM ..." />
           </folding>
         </state>
       </provider>
@@ -1166,14 +1155,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/a32fd6de-3ffa-40c0-9ec8-8953a89c53e0/console.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/images/notebook/files/start-notebook.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1192,16 +1173,6 @@
       <provider selected="true" editor-type-id="com.intellij.database.editor.DatabaseTableFileEditorProvider">
         <state>
           <filtering enabled="true" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/apache-proxy.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="65" column="0" selection-start-line="65" selection-start-column="0" selection-end-line="65" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#37#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1280,69 +1251,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/caaas/sql.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="221" column="8" selection-start-line="221" selection-start-column="8" selection-end-line="221" selection-end-column="8" />
-          <folding>
-            <element signature="e#0#22#0" expanded="true" />
-            <element signature="e#174#312#0" expanded="false" />
-            <element signature="e#754#981#0" expanded="false" />
-            <element signature="e#1028#1061#0" expanded="false" />
-            <element signature="e#1100#1330#0" expanded="false" />
-            <element signature="e#1384#1714#0" expanded="false" />
-            <element signature="e#2606#2924#0" expanded="false" />
-            <element signature="e#2971#3034#0" expanded="false" />
-            <element signature="e#3083#3389#0" expanded="false" />
-            <element signature="e#3428#3761#0" expanded="false" />
-            <element signature="e#3813#4062#0" expanded="false" />
-            <element signature="e#4127#4359#0" expanded="false" />
-            <element signature="e#4452#4779#0" expanded="false" />
-            <marker date="1438783550263" expanded="true" signature="414:450" placeholder="SELECT id FR..users..." />
-            <marker date="1438783550263" expanded="true" signature="794:834" placeholder="INSERT INTO ..." />
-            <marker date="1438783550263" expanded="true" signature="1140:1170" placeholder="SELECT id, u..users..." />
-            <marker date="1438783550263" expanded="true" signature="1456:1485" placeholder="SELECT COUNT..clusters..." />
-            <marker date="1438783550263" expanded="true" signature="1548:1592" placeholder="SELECT COUNT..clusters..." />
-            <marker date="1438783550263" expanded="true" signature="1882:1913" placeholder="SELECT COUNT..containers..." />
-            <marker date="1438783550263" expanded="true" signature="2019:2065" placeholder="SELECT COUNT..containers..." />
-            <marker date="1438783550263" expanded="true" signature="2185:2234" placeholder="SELECT COUNT..containers..." />
-            <marker date="1438783550263" expanded="true" signature="2361:2407" placeholder="SELECT COUNT..containers..." />
-            <marker date="1438783550263" expanded="true" signature="2361:2413" placeholder="SELECT COUNT..containers..." />
-            <marker date="1438783550263" expanded="true" signature="2361:2425" placeholder="SELECT COUNT..containers..." />
-            <marker date="1438783550263" expanded="true" signature="2661:2699" placeholder="SELECT * FRO..notebooks..." />
-            <marker date="1438783550263" expanded="true" signature="3123:3160" placeholder="SELECT url F..proxy..." />
-            <marker date="1438783550263" expanded="true" signature="3468:3525" placeholder="SELECT proxy..proxy..." />
-            <marker date="1438783550263" expanded="true" signature="3853:3905" placeholder="INSERT INTO ..." />
-            <marker date="1438783550263" expanded="true" signature="4167:4223" placeholder="UPDATE clust..." />
-            <marker date="1438783550263" expanded="true" signature="4492:4589" placeholder="INSERT INTO ..." />
-            <marker date="1438783550263" expanded="true" signature="4917:5009" placeholder="INSERT INTO ..." />
-            <marker date="1438783550263" expanded="true" signature="5290:5377" placeholder="INSERT INTO ..." />
-            <marker date="1438783550263" expanded="true" signature="5709:5763" placeholder="SELECT COUNT..clusters..." />
-            <marker date="1438783550263" expanded="true" signature="5826:5880" placeholder="SELECT id, u..clusters..." />
-            <marker date="1438783550263" expanded="true" signature="5826:5895" placeholder="SELECT COUNT..clusters..." />
-            <marker date="1438783550263" expanded="true" signature="6393:6472" placeholder="SELECT id, d..containers..." />
-            <marker date="1438783550263" expanded="true" signature="6578:6672" placeholder="SELECT id, u..clusters..." />
-            <marker date="1438783550263" expanded="true" signature="6792:6889" placeholder="SELECT id, d..containers..." />
-            <marker date="1438783550263" expanded="true" signature="7016:7110" placeholder="SELECT id, d..containers..." />
-            <marker date="1438783550263" expanded="true" signature="7016:7128" placeholder="SELECT id, d..containers..." />
-            <marker date="1438783550263" expanded="true" signature="7629:7646" placeholder="DELETE FROM ..." />
-            <marker date="1438783550263" expanded="true" signature="7629:7666" placeholder="DELETE FROM ..." />
-            <marker date="1438783550263" expanded="true" signature="7640:7641" placeholder="INSERT INTO ..." />
-            <marker date="1438783550263" expanded="true" signature="7856:7897" placeholder="DELETE FROM ..." />
-            <marker date="1438783550263" expanded="true" signature="8088:8120" placeholder="DELETE FROM ..." />
-            <marker date="1438783550263" expanded="true" signature="8307:8337" placeholder="DELETE FROM ..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas/api.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="49" column="0" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/caaas/templates/user-status.html">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-5.230769">
@@ -1353,10 +1261,78 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/caaas/swarm.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6770294">
-          <caret line="148" column="0" selection-start-line="148" selection-start-column="0" selection-end-line="148" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="148" column="81" selection-start-line="148" selection-start-column="81" selection-end-line="148" selection-end-column="81" />
           <folding>
             <element signature="e#0#25#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas/api.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="52" column="0" selection-start-line="52" selection-start-column="0" selection-end-line="52" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apache-proxy.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="37" column="0" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/a32fd6de-3ffa-40c0-9ec8-8953a89c53e0/console.sql">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas/sql.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.5542312">
+          <caret line="134" column="25" selection-start-line="134" selection-start-column="25" selection-end-line="134" selection-end-column="25" />
+          <folding>
+            <element signature="e#0#22#0" expanded="true" />
+            <element signature="e#174#312#0" expanded="false" />
+            <marker date="1438786583972" expanded="true" signature="414:450" placeholder="SELECT id FR..users..." />
+            <marker date="1438786583972" expanded="true" signature="854:894" placeholder="INSERT INTO ..." />
+            <marker date="1438786583972" expanded="true" signature="1200:1230" placeholder="SELECT id, u..users..." />
+            <marker date="1438786583972" expanded="true" signature="1542:1571" placeholder="SELECT COUNT..clusters..." />
+            <marker date="1438786583972" expanded="true" signature="1634:1678" placeholder="SELECT COUNT..clusters..." />
+            <marker date="1438786583972" expanded="true" signature="1994:2025" placeholder="SELECT COUNT..containers..." />
+            <marker date="1438786583972" expanded="true" signature="2131:2177" placeholder="SELECT COUNT..containers..." />
+            <marker date="1438786583972" expanded="true" signature="2297:2346" placeholder="SELECT COUNT..containers..." />
+            <marker date="1438786583972" expanded="true" signature="2473:2519" placeholder="SELECT COUNT..containers..." />
+            <marker date="1438786583972" expanded="true" signature="2473:2525" placeholder="SELECT COUNT..containers..." />
+            <marker date="1438786583972" expanded="true" signature="2473:2537" placeholder="SELECT COUNT..containers..." />
+            <marker date="1438786583972" expanded="true" signature="2799:2837" placeholder="SELECT * FRO..notebooks..." />
+            <marker date="1438786583972" expanded="true" signature="3321:3358" placeholder="SELECT url F..proxy..." />
+            <marker date="1438786583972" expanded="true" signature="3726:3783" placeholder="SELECT proxy..proxy..." />
+            <marker date="1438786583972" expanded="true" signature="4137:4189" placeholder="INSERT INTO ..." />
+            <marker date="1438786583972" expanded="true" signature="4451:4507" placeholder="UPDATE clust..." />
+            <marker date="1438786583972" expanded="true" signature="4776:4881" placeholder="INSERT INTO ..." />
+            <marker date="1438786583972" expanded="true" signature="5209:5309" placeholder="INSERT INTO ..." />
+            <marker date="1438786583972" expanded="true" signature="5590:5681" placeholder="INSERT INTO ..." />
+            <marker date="1438786583972" expanded="true" signature="6013:6067" placeholder="SELECT COUNT..clusters..." />
+            <marker date="1438786583972" expanded="true" signature="6130:6184" placeholder="SELECT id, u..clusters..." />
+            <marker date="1438786583972" expanded="true" signature="6130:6199" placeholder="SELECT COUNT..clusters..." />
+            <marker date="1438786583972" expanded="true" signature="6723:6802" placeholder="SELECT id, d..containers..." />
+            <marker date="1438786583972" expanded="true" signature="6908:7002" placeholder="SELECT id, u..clusters..." />
+            <marker date="1438786583972" expanded="true" signature="7122:7219" placeholder="SELECT id, d..containers..." />
+            <marker date="1438786583972" expanded="true" signature="7346:7440" placeholder="SELECT id, d..containers..." />
+            <marker date="1438786583972" expanded="true" signature="7346:7458" placeholder="SELECT id, d..containers..." />
+            <marker date="1438786583972" expanded="true" signature="7985:8002" placeholder="DELETE FROM ..." />
+            <marker date="1438786583972" expanded="true" signature="7985:8022" placeholder="DELETE FROM ..." />
+            <marker date="1438786583972" expanded="true" signature="7996:7997" placeholder="INSERT INTO ..." />
+            <marker date="1438786583972" expanded="true" signature="8212:8253" placeholder="DELETE FROM ..." />
+            <marker date="1438786583972" expanded="true" signature="8444:8476" placeholder="DELETE FROM ..." />
+            <marker date="1438786583972" expanded="true" signature="8663:8693" placeholder="DELETE FROM ..." />
           </folding>
         </state>
       </provider>

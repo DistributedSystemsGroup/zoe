@@ -45,5 +45,8 @@ def api_terminate_cluster(username, cluster_id):
     if cluster_list[cluster_id]["user_id"] != user_id:
         ret["status"] = "unauthorized"
     else:
-        swarm.terminate_cluster(cluster_id)
+        if swarm.terminate_cluster(cluster_id):
+            ret["status"] = "ok"
+        else:
+            ret["status"] = "error"
     return jsonify(**ret)

@@ -16,10 +16,12 @@ class CAaaSSQL:
 
         cursor.execute(q, (username,))
         if cursor.rowcount == 0:
+            self.cnx.commit()
             cursor.close()
             return self._create_user(username)
         else:
             row = cursor.fetchone()
+            self.cnx.commit()
             cursor.close()
             return row["id"]
 
@@ -43,6 +45,7 @@ class CAaaSSQL:
         cursor.execute(q)
         for row in cursor:
             user_list.append(row)
+        self.cnx.commit()
         cursor.close()
         return user_list
 
@@ -55,6 +58,7 @@ class CAaaSSQL:
             q = "SELECT COUNT(*) FROM clusters WHERE user_id=%s"
             cursor.execute(q, (user_id,))
         row = cursor.fetchone()
+        self.cnx.commit()
         cursor.close()
         return row[0]
 
@@ -74,6 +78,7 @@ class CAaaSSQL:
             cursor.execute(q, (user_id, cluster_id))
 
         row = cursor.fetchone()
+        self.cnx.commit()
         cursor.close()
         return row[0]
 
@@ -82,10 +87,12 @@ class CAaaSSQL:
         q = "SELECT * FROM notebooks WHERE user_id=%s"
         cursor.execute(q, (user_id,))
         if cursor.rowcount == 0:
+            self.cnx.commit()
             cursor.close()
             return None
         else:
             row = cursor.fetchone()
+            self.cnx.commit()
             cursor.close()
             return row
 
@@ -98,10 +105,12 @@ class CAaaSSQL:
         q = "SELECT url FROM proxy WHERE proxy_id=%s"
         cursor.execute(q, (proxy_id,))
         if cursor.rowcount == 0:
+            self.cnx.commit()
             cursor.close()
             return None
         else:
             row = cursor.fetchone()
+            self.cnx.commit()
             cursor.close()
             return row[0]
 
@@ -112,6 +121,7 @@ class CAaaSSQL:
         proxy_list = []
         for proxy_id, url, proxy_type, container_id in cursor:
             proxy_list.append((proxy_id, url, proxy_type, container_id))
+        self.cnx.commit()
         cursor.close()
         return proxy_list
 
@@ -134,7 +144,7 @@ class CAaaSSQL:
 
     def new_container(self, cluster_id, user_id, docker_id, ip_address, contents):
         cursor = self.cnx.cursor()
-        q = "INSERT INTO containers (user_id, cluster_id, docker_id, ip_address, contents) VALUES (%s, %s, %s)"
+        q = "INSERT INTO containers (user_id, cluster_id, docker_id, ip_address, contents) VALUES (%s, %s, %s, %s, %s)"
         cursor.execute(q, (user_id, cluster_id, docker_id, ip_address, contents))
         cont_id = cursor.lastrowid
         self.cnx.commit()
@@ -143,7 +153,7 @@ class CAaaSSQL:
 
     def new_proxy_entry(self, proxy_id, cluster_id, address, proxy_type, container_id):
         cursor = self.cnx.cursor()
-        q = "INSERT INTO proxy (proxy_id, url, cluster_id, proxy_type, container_id)  VALUES (%s, %s, %s)"
+        q = "INSERT INTO proxy (proxy_id, url, cluster_id, proxy_type, container_id)  VALUES (%s, %s, %s, %s, %s)"
         cursor.execute(q, (proxy_id, address, cluster_id, proxy_type, container_id))
         self.cnx.commit()
         cursor.close()
@@ -151,7 +161,7 @@ class CAaaSSQL:
 
     def new_notebook(self, cluster_id, address, user_id, container_id):
         cursor = self.cnx.cursor()
-        q = "INSERT INTO notebooks (cluster_id, address, user_id, container_id)  VALUES (%s, %s, %s)"
+        q = "INSERT INTO notebooks (cluster_id, address, user_id, container_id)  VALUES (%s, %s, %s, %s)"
         cursor.execute(q, (cluster_id, address, user_id, container_id))
         nb_id = cursor.lastrowid
         self.cnx.commit()
@@ -173,6 +183,7 @@ class CAaaSSQL:
                 "master_address": row["master_address"],
                 "name": row["name"]
             }
+        self.cnx.commit()
         cursor.close()
         return res
 
@@ -200,6 +211,7 @@ class CAaaSSQL:
                 "ip_address": row["ip_address"],
                 "contents": row["contents"],
             }
+        self.cnx.commit()
         cursor.close()
         return res
 

@@ -41,8 +41,8 @@ def get_proxy_entries():
 def generate_file(proxy_entries):
     output = ""
     jinja_template = Template(ENTRY_TEMPLATE)
-    for proxy_id, proxy_url, proxy_type in proxy_entries:
-        netloc = urlparse(proxy_url)["netloc"]
+    for proxy_id, proxy_url, proxy_type, cont_id in proxy_entries:
+        netloc = urlparse(proxy_url)[1]
         jinja_dict = {
             "proxy_id": proxy_id,
             "proxy_url": proxy_url,
@@ -80,6 +80,7 @@ if __name__ == "__main__":
     while True:
         print("Looping...")
         entries = get_proxy_entries()
+        print(entries)
         output = generate_file(entries)
         if check_difference(output):
             commit_and_reload(output)
