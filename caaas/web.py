@@ -1,7 +1,6 @@
 from flask import render_template
 
-from caaas import app
-from caaas.swarm import swarm
+from caaas import app, swarm, get_db
 
 
 @app.route("/web/<username>")
@@ -14,4 +13,14 @@ def web_index(username):
 
 @app.route("/web/<username>/spark-notebook")
 def web_notebook(username):
-    pass
+    user_id = get_db().get_user_id(username)
+    template_vars = {
+        "user": username,
+        "notebook_address": swarm.get_notebook(user_id)
+    }
+    return render_template('notebook.html', **template_vars)
+
+
+@app.route("/web/status")
+def web_status():
+    return render_template('status.html')

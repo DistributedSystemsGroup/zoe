@@ -18,3 +18,6 @@ WORKDIR /opt
 RUN ln -s spark-${SPARK_VERSION}-bin-${HADOOP_VERSION} spark
 ENV SPARK_HOME /opt/spark
 ENV PATH /opt/spark/bin:/opt/spark/sbin:${PATH}
+
+COPY files/* /opt/
+RUN chmod +x /opt/*.sh

@@ -17,7 +17,7 @@ def main():
     swarm.start_update_thread()
 
     app.debug = True
-    app.run()
+    app.run(host="0.0.0.0")
 
 if __name__ == "__main__":
     main()
