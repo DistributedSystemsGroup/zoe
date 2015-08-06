@@ -1,5 +1,5 @@
 [docker]
-swarm-manager = 127.0.0.1:2380
+swarm-manager = tcp://127.0.0.1:2380
 
 [db]
 user = caaas

@@ -1,6 +1,6 @@
 from flask import render_template
 
-from caaas import app, swarm, get_db
+from caaas import app, sm, CAaaState
 
 
 @app.route("/web/")
@@ -10,6 +10,8 @@ def index():
 
 @app.route("/web/<username>")
 def web_index(username):
+    state = CAaaState()
+    state.get_user_id(username)  # creates the user if it does not exists
     template_vars = {
         "user": username
     }
@@ -18,7 +20,6 @@ def web_index(username):
 
 @app.route("/web/<username>/status")
 def web_user_status(username):
-    user_id = get_db().get_user_id(username)
     template_vars = {
         "user": username
     }
@@ -27,10 +28,11 @@ def web_user_status(username):
 
 @app.route("/web/<username>/spark-notebook")
 def web_notebook(username):
-    user_id = get_db().get_user_id(username)
+    state = CAaaState()
+    user_id = state.get_user_id(username)
     template_vars = {
         "user": username,
-        "notebook_address": swarm.get_notebook(user_id)
+        "notebook_address": sm.get_notebook(user_id)
     }
     return render_template('notebook.html', **template_vars)
 

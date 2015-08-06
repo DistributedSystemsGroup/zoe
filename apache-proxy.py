@@ -1,11 +1,10 @@
-from configparser import ConfigParser
 from jinja2 import Template
 from hashlib import md5
 from os import system
 from time import sleep
 from urllib.parse import urlparse
 
-from caaas import init_db, get_db
+from caaas import CAaaState
 
 OUTFILE = "/tmp/caaas-proxy.conf"
 
@@ -27,14 +26,8 @@ ENTRY_TEMPLATE = """
 """
 
 
-def read_config():
-    conf = ConfigParser()
-    conf.read('caaas.ini')
-    return conf
-
-
 def get_proxy_entries():
-    db = get_db()
+    db = CAaaState()
     return db.get_all_proxy()
 
 
@@ -72,9 +65,6 @@ def commit_and_reload(generated_file):
 
 
 if __name__ == "__main__":
-    conf = read_config()
-    init_db(conf['db']['user'], conf['db']['pass'], conf['db']['server'], conf['db']['db'])
-
     print("CAaaS Apache proxy synchronizer starting")
 
     while True:

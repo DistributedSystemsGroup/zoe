@@ -1,24 +1,13 @@
-from caaas.sql import CAaaSSQL
+from caaas.sql import CAaaState
+from caaas.cluster_description import SparkClusterDescription
 
 from flask import Flask
 app = Flask(__name__)
 
-_db = None
+from caaas.swarm_manager import SwarmManager
 
+sm = SwarmManager()
+sm.connect()
 
-def init_db(user, passw, server, dbname):
-    global _db
-    _db = CAaaSSQL()
-    _db.connect(user, passw, server, dbname)
-
-
-def get_db():
-    """
-    :rtype: CAaaSSQL
-    """
-    return _db
-
-
-from caaas.swarm import swarm
 import caaas.web
 import caaas.api

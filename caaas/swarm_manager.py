@@ -1,13 +1,12 @@
 from docker import Client
 from docker import errors as docker_errors
 from docker.utils import create_host_config
-from threading import Thread
 import time
 from uuid import uuid4 as uuid
 
-from caaas import get_db
-from caaas.cluster_description import SparkClusterDescription
-
+from caaas import CAaaState
+from caaas import SparkClusterDescription
+from utils import config
 
 REGISTRY = "10.0.0.2:5000"
 MASTER_IMAGE = REGISTRY + "/venza/spark-master:1.4.1"
@@ -27,35 +26,25 @@ class SwarmStatus:
         self.num_containers = 0
 
 
-class Swarm:
+class SwarmManager:
     def __init__(self):
         self.status = SwarmStatus()
         self.cli = None
-        self.manager = None
+        self.last_update_timestamp = 0
 
-    def connect(self, swarm_manager):
-        self.manager = swarm_manager
-        self.cli = Client(base_url="tcp://" + self.manager)
-
-    def start_update_thread(self):
-        assert self.manager is not None
-        th = Thread(target=self._thread_cb)
-        th.start()
-
-    def _thread_cb(self):
-        print("Stats update thread started")
-        while True:
-            self.update_status()
-            time.sleep(1)
+    def connect(self):
+        manager = config.get_swarm_manager_address()
+        self.cli = Client(base_url=manager)
 
     def update_status(self):
         assert self.cli is not None
         info = self.cli.info()
         self.status.num_containers = info["Containers"]
         self.status.num_nodes = info["DriverStatus"][3][1]
+        self.last_update_timestamp = time.time()
 
     def get_notebook(self, user_id):
-        db = get_db()
+        db = CAaaState()
         nb = db.get_notebook(user_id)
         if nb is None:
             self.start_cluster_with_notebook(user_id)
@@ -64,13 +53,11 @@ class Swarm:
 
     def start_cluster_with_notebook(self, user_id):
         cluster_descr = SparkClusterDescription()
-        cluster_descr.num_workers = 2
-        cluster_descr.worker_cores = "2"
-        cluster_descr.executor_ram_size = "4g"
+        cluster_descr.for_spark_notebook()
         self._create_new_spark_cluster(user_id, "notebook", cluster_descr, with_notebook=True)
 
     def _create_new_spark_cluster(self, user_id, name, cluster_descr, with_notebook):
-        db = get_db()
+        db = CAaaState()
         try:
             cluster_id = db.new_cluster(user_id, name)
             master_info = self._spawn_spark_master(cluster_id, user_id, cluster_descr)
@@ -84,7 +71,7 @@ class Swarm:
             # FIXME: should rollback all changes to DB
 
     def _spawn_spark_master(self, cluster_id, user_id, cluster_descr):
-        db = get_db()
+        db = CAaaState()
         options = {
             "environment": {},
         }
@@ -95,7 +82,7 @@ class Swarm:
         return info
 
     def _spawn_spark_worker(self, cluster_id, user_id, cluster_descr, master_info):
-        db = get_db()
+        db = CAaaState()
         options = {
             "environment": {
                 "SPARK_MASTER_IP": master_info["docker_ip"],
@@ -109,7 +96,7 @@ class Swarm:
         return info
 
     def _spawn_spark_notebook(self, cluster_id, user_id, cluster_descr, master_info):
-        db = get_db()
+        db = CAaaState()
         proxy_id = get_uuid()
         options = {
             "environment": {
@@ -140,7 +127,7 @@ class Swarm:
         return info
 
     def _terminate_container(self, container_id, docker_id, contents):
-        db = get_db()
+        db = CAaaState()
         db.remove_proxy(container_id)
         if contents == "spark-notebook":
             db.remove_notebook(container_id)
@@ -148,11 +135,10 @@ class Swarm:
         db.remove_container(container_id)
 
     def terminate_cluster(self, cluster_id):
-        db = get_db()
+        db = CAaaState()
         cont_list = db.get_containers(cluster_id=cluster_id)
         for cid, cinfo in cont_list.items():
             self._terminate_container(cid, cinfo["docker_id"], cinfo["contents"])
         db.remove_cluster(cluster_id)
         return True
 
-swarm = Swarm()
