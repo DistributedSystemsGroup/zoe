@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Aug 03, 2015 at 12:09 PM
+-- Generation Time: Aug 06, 2015 at 10:16 AM
 -- Server version: 5.5.44-MariaDB-1ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.11
 
@@ -32,10 +32,10 @@ DROP TABLE IF EXISTS `clusters`;
 CREATE TABLE IF NOT EXISTS `clusters` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
-  `master_address` varchar(512) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
-  `name` varchar(256) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `master_address` varchar(512) CHARACTER SET ascii NOT NULL,
+  `name` varchar(256) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=11 ;
 
 -- --------------------------------------------------------
 
@@ -46,11 +46,13 @@ CREATE TABLE IF NOT EXISTS `clusters` (
 DROP TABLE IF EXISTS `containers`;
 CREATE TABLE IF NOT EXISTS `containers` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `docker_id` varchar(1024) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `docker_id` varchar(1024) CHARACTER SET ascii NOT NULL,
   `cluster_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
+  `ip_address` varchar(16) NOT NULL,
+  `contents` varchar(512) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=37 ;
 
 -- --------------------------------------------------------
 
@@ -63,10 +65,28 @@ CREATE TABLE IF NOT EXISTS `notebooks` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `cluster_id` int(11) NOT NULL,
   `time_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `address` varchar(512) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `address` varchar(512) CHARACTER SET ascii NOT NULL,
   `user_id` int(11) NOT NULL,
+  `container_id` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `proxy`
+--
+
+DROP TABLE IF EXISTS `proxy`;
+CREATE TABLE IF NOT EXISTS `proxy` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `proxy_id` varchar(512) NOT NULL,
+  `url` varchar(512) NOT NULL,
+  `cluster_id` int(11) NOT NULL,
+  `proxy_type` varchar(64) NOT NULL,
+  `container_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=37 ;
 
 -- --------------------------------------------------------
 
@@ -77,9 +97,9 @@ CREATE TABLE IF NOT EXISTS `notebooks` (
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `username` varchar(32) COLLATE utf8_bin NOT NULL,
+  `username` varchar(32) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

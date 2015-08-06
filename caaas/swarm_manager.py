@@ -6,6 +6,7 @@ from uuid import uuid4 as uuid
 
 from caaas import CAaaState
 from caaas import SparkClusterDescription
+from caaas.proxy_manager import get_notebook_address
 from utils import config
 
 REGISTRY = "10.0.0.2:5000"
@@ -49,7 +50,7 @@ class SwarmManager:
         if nb is None:
             self.start_cluster_with_notebook(user_id)
             nb = db.get_notebook(user_id)
-        return nb["address"]
+        return get_notebook_address(nb)
 
     def start_cluster_with_notebook(self, user_id):
         cluster_descr = SparkClusterDescription()
@@ -78,7 +79,7 @@ class SwarmManager:
         info = self._spawn_container(MASTER_IMAGE, options)
         info["spark_master_address"] = "http://" + info["docker_ip"] + ":8080"
         cont_id = db.new_container(cluster_id, user_id, info["docker_id"], info["docker_ip"], "spark-master")
-        db.new_proxy_entry(get_uuid(), cluster_id, info["spark_master_address"], "spark-master", cont_id)
+        db.new_proxy_entry(get_uuid(), cluster_id, info["spark_master_address"], "web interface", cont_id)
         return info
 
     def _spawn_spark_worker(self, cluster_id, user_id, cluster_descr, master_info):
@@ -92,7 +93,7 @@ class SwarmManager:
         }
         info = self._spawn_container(WORKER_IMAGE, options)
         cont_id = db.new_container(cluster_id, user_id, info["docker_id"], info["docker_ip"], "spark-worker")
-        db.new_proxy_entry(get_uuid(), cluster_id, "http://" + info["docker_ip"] + ":8081", "spark-worker", cont_id)
+        db.new_proxy_entry(get_uuid(), cluster_id, "http://" + info["docker_ip"] + ":8081", "web interface", cont_id)
         return info
 
     def _spawn_spark_notebook(self, cluster_id, user_id, cluster_descr, master_info):
@@ -107,8 +108,8 @@ class SwarmManager:
         }
         info = self._spawn_container(CONTAINER_IMAGE, options)
         cont_id = db.new_container(cluster_id, user_id, info["docker_id"], info["docker_ip"], "spark-notebook")
-        db.new_proxy_entry(proxy_id, cluster_id, "http://" + info["docker_ip"] + ":9000/proxy/" + proxy_id, "spark-notebook", cont_id)
-        db.new_notebook(cluster_id, "http://bigfoot-m2.eurecom.fr/proxy/" + proxy_id, user_id, cont_id)
+        db.new_proxy_entry(proxy_id, cluster_id, "http://" + info["docker_ip"] + ":9000/proxy/" + proxy_id, "notebook", cont_id)
+        db.new_proxy_entry(get_uuid(), cluster_id, "http://" + info["docker_ip"] + ":4040", "spark application", cont_id)
         return info
 
     def _spawn_container(self, image, options):
@@ -129,8 +130,6 @@ class SwarmManager:
     def _terminate_container(self, container_id, docker_id, contents):
         db = CAaaState()
         db.remove_proxy(container_id)
-        if contents == "spark-notebook":
-            db.remove_notebook(container_id)
         self.cli.remove_container(docker_id, force=True)
         db.remove_container(container_id)
 
@@ -141,4 +140,3 @@ class SwarmManager:
             self._terminate_container(cid, cinfo["docker_id"], cinfo["contents"])
         db.remove_cluster(cluster_id)
         return True
-

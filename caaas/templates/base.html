@@ -11,7 +11,6 @@
     {% endblock %}
 </head>
 <body>
-    <div class="header"><em>CAaaS</em> -- Available nodes: <span id="num_nodes">0</span> Containers: <span id="num_containers">0</span></div>
     <script>
         function update_status() {
             $.getJSON( api_endpoint + "/status")
@@ -23,10 +22,12 @@
         update_status();
         window.setInterval(update_status, 5000);
     </script>
+    <h1>DSG CAaaS system - Analytics on demand</h1>
     <div id="content">{% block content %}{% endblock %}</div>
     <div id="footer">
         {% block footer %}
-        &copy; Copyright 2015 by <a href="http://distsysgroup.wordpress.com/">DSG</a>.
+            <div class="caaas_status"><p><em>CAaaS</em> status: <span id="num_nodes">0</span> available nodes, <span id="num_containers">0</span> containers running</p></div>
+            <h6>&copy; Copyright 2015 by <a href="http://distsysgroup.wordpress.com/">DSG</a></h6>
         {% endblock %}
     </div>
 </body>

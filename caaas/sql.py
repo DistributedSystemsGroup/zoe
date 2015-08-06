@@ -94,16 +94,15 @@ class CAaaState:
 
     def get_notebook(self, user_id):
         cursor = self._get_cursor(dictionary=True)
-        q = "SELECT * FROM notebooks WHERE user_id=%s"
+        q = "SELECT id FROM clusters WHERE user_id=%s and name='notebook'"
         cursor.execute(q, (user_id,))
         if cursor.rowcount == 0:
-            self.cnx.commit()
-            cursor.close()
+            self._close_cursor(cursor)
             return None
         else:
             row = cursor.fetchone()
             self._close_cursor(cursor)
-            return row
+            return row["id"]
 
     def has_notebook(self, user_id):
         ret = self.get_notebook(user_id)
@@ -111,7 +110,7 @@ class CAaaState:
 
     def get_url_proxy(self, proxy_id):
         cursor = self._get_cursor()
-        q = "SELECT url FROM proxy WHERE proxy_id=%s"
+        q = "SELECT internal_url FROM proxy WHERE proxy_id=%s"
         cursor.execute(q, (proxy_id,))
         if cursor.rowcount == 0:
             self._close_cursor(cursor)
@@ -121,15 +120,17 @@ class CAaaState:
             self._close_cursor(cursor)
             return row[0]
 
-    def get_all_proxy(self):
+    def get_proxy_for_service(self, cluster_id, service_name):
         cursor = self._get_cursor()
-        q = "SELECT proxy_id, url, proxy_type, container_id FROM proxy"
-        cursor.execute(q)
-        proxy_list = []
-        for proxy_id, url, proxy_type, container_id in cursor:
-            proxy_list.append((proxy_id, url, proxy_type, container_id))
-        self._close_cursor(cursor)
-        return proxy_list
+        q = "SELECT proxy_id FROM proxy WHERE cluster_id=%s AND service_name=%s"
+        cursor.execute(q, (cluster_id, service_name))
+        if cursor.rowcount == 0:
+            self._close_cursor(cursor)
+            return None
+        else:
+            row = cursor.fetchone()
+            self._close_cursor(cursor)
+            return row[0]
 
     def new_cluster(self, user_id, name):
         cursor = self._get_cursor()
@@ -154,20 +155,12 @@ class CAaaState:
         self._close_cursor(cursor)
         return cont_id
 
-    def new_proxy_entry(self, proxy_id, cluster_id, address, proxy_type, container_id):
+    def new_proxy_entry(self, proxy_id, cluster_id, address, service_name, container_id):
         cursor = self._get_cursor()
-        q = "INSERT INTO proxy (proxy_id, url, cluster_id, proxy_type, container_id)  VALUES (%s, %s, %s, %s, %s)"
-        cursor.execute(q, (proxy_id, address, cluster_id, proxy_type, container_id))
+        q = "INSERT INTO proxy (proxy_id, internal_url, cluster_id, service_name, container_id)  VALUES (%s, %s, %s, %s, %s)"
+        cursor.execute(q, (proxy_id, address, cluster_id, service_name, container_id))
         self._close_cursor(cursor)
         return proxy_id
-
-    def new_notebook(self, cluster_id, address, user_id, container_id):
-        cursor = self._get_cursor()
-        q = "INSERT INTO notebooks (cluster_id, address, user_id, container_id)  VALUES (%s, %s, %s, %s)"
-        cursor.execute(q, (cluster_id, address, user_id, container_id))
-        nb_id = cursor.lastrowid
-        self._close_cursor(cursor)
-        return nb_id
 
     def get_clusters(self, user_id=None):
         cursor = self._get_cursor(dictionary=True)
@@ -184,6 +177,20 @@ class CAaaState:
                 "master_address": row["master_address"],
                 "name": row["name"]
             }
+        self._close_cursor(cursor)
+        return res
+
+    def get_cluster(self, cluster_id):
+        cursor = self._get_cursor(dictionary=True)
+        q = "SELECT user_id, master_address, name, time_created FROM clusters WHERE id=%s"
+        cursor.execute(q, (cluster_id,))
+        row = cursor.fetchone()
+        res = {
+            "user_id": row["user_id"],
+            "master_address": row["master_address"],
+            "name": row["name"],
+            "time_created": row["time_created"]
+        }
         self._close_cursor(cursor)
         return res
 
@@ -214,15 +221,31 @@ class CAaaState:
         self._close_cursor(cursor)
         return res
 
+    def get_proxies(self, cluster_id=None, container_id=None):
+        cursor = self._get_cursor()
+        if cluster_id is None and container_id is None:
+            q = "SELECT proxy_id, internal_url, service_name, container_id FROM proxy"
+            cursor.execute(q)
+        elif container_id is not None:
+            q = "SELECT proxy_id, internal_url, service_name, container_id FROM proxy WHERE container_id=%s"
+            cursor.execute(q, (container_id,))
+        else:
+            q = "SELECT proxy_id, internal_url, service_name, container_id FROM proxy WHERE cluster_id=%s"
+            cursor.execute(q, (cluster_id,))
+        proxy_list = []
+        for proxy_id, url, service_name, container_id in cursor:
+            proxy_list.append({
+                'proxy_id': proxy_id,
+                'internal_url': url,
+                'service_name': service_name,
+                'container_id': container_id
+            })
+        self._close_cursor(cursor)
+        return proxy_list
+
     def remove_proxy(self, container_id):
         cursor = self._get_cursor()
         q = "DELETE FROM proxy WHERE container_id=%s"
-        cursor.execute(q, (container_id,))
-        self._close_cursor(cursor)
-
-    def remove_notebook(self, container_id):
-        cursor = self._get_cursor()
-        q = "DELETE FROM notebooks WHERE container_id=%s"
         cursor.execute(q, (container_id,))
         self._close_cursor(cursor)
 

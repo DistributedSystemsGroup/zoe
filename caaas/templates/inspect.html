@@ -1,0 +1,18 @@
+{% extends "base_user.html" %}
+{% block title %}Inspect cluster {{ cluster_name }}{% endblock %}
+{% block content %}
+<h2>Detailed information for cluster {{ cluster_name }}</h2>
+    <p>Containers:</p>
+<ul>
+    {% for c in containers %}
+        <li>{{ c[0] }}</li>
+        <ul>
+            {% for p in c[1] %}
+                <li><a href="{{ p[1] }}">{{ p[0] }}</a></li>
+            {% endfor %}
+        </ul>
+    {% endfor %}
+</ul>
+
+
+{% endblock %}

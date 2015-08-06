@@ -9,16 +9,22 @@ from caaas import CAaaState
 OUTFILE = "/tmp/caaas-proxy.conf"
 
 ENTRY_TEMPLATE = """
+# CAaaS proxy entry for service {{ service_name }}
 <Location /proxy/{{ proxy_id }}>
     ProxyHtmlEnable On
     ProxyHTMLExtended On
-    ProxyPass {{ proxy_url }}
+    ProxyPass {{ proxy_url }} retry=1
     ProxyPassReverse {{ proxy_url }}
-    {% if proxy_type != "spark-notebook" %}
+    {% if service_name != "notebook" %}
     ProxyHTMLURLMap ^/(.*)$ /proxy/{{ proxy_id }}/$1 RL
+    ProxyHTMLURLMap ^logPage(.*)$ /proxy/{{ proxy_id }}/logPage$1 RL
+    ProxyHTMLURLMap ^app(.*)$ /proxy/{{ proxy_id }}/app$1 RL
+    {% for node in nodes %}
+    ProxyHTMLURLMap ^http://{{ node[0] }}(.*)$ /proxy/{{node[1]}}$1 RL
+    {% endfor %}
     {% endif %}
 </Location>
-{% if proxy_type == "spark-notebook" %}
+{% if service_name == "notebook" %}
 <Location /proxy/{{ proxy_id }}/ws/>
     ProxyPass ws://{{ netloc }}/proxy/{{ proxy_id }}/ws/
 </Location>
@@ -28,19 +34,24 @@ ENTRY_TEMPLATE = """
 
 def get_proxy_entries():
     db = CAaaState()
-    return db.get_all_proxy()
+    return db.get_proxies()
 
 
 def generate_file(proxy_entries):
     output = ""
     jinja_template = Template(ENTRY_TEMPLATE)
-    for proxy_id, proxy_url, proxy_type, cont_id in proxy_entries:
-        netloc = urlparse(proxy_url)[1]
+    node_list = []
+    for p in proxy_entries:
+        netloc = urlparse(p["internal_url"])[1]
+        node_list.append((netloc, p["proxy_id"]))
+    for p in proxy_entries:
+        netloc = urlparse(p["internal_url"])[1]
         jinja_dict = {
-            "proxy_id": proxy_id,
-            "proxy_url": proxy_url,
-            "proxy_type": proxy_type,
-            "netloc": netloc
+            "proxy_id": p["proxy_id"],
+            "proxy_url": p["internal_url"],
+            "service_name": p["service_name"],
+            "netloc": netloc,
+            "nodes": node_list
         }
         apache_entry = jinja_template.render(jinja_dict)
         output += apache_entry + "\n"

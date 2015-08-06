@@ -20,3 +20,7 @@ def get_database_config():
         'buffered': True
     }
     return db_config
+
+
+def get_proxy_base():
+    return conf["proxy"]["base_url"]

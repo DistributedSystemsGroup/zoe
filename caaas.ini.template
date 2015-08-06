@@ -6,3 +6,6 @@ user = caaas
 pass = changeme
 server = 127.0.0.1
 db = caaas
+
+[proxy]
+base_url = http://some-host/some-path
