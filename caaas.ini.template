@@ -1,5 +1,6 @@
 [docker]
 swarm-manager = tcp://127.0.0.1:2380
+volume-path = /mnt/cephfs/caaas
 
 [db]
 user = caaas
@@ -9,3 +10,14 @@ db = caaas
 
 [proxy]
 base_url = http://some-host/some-path
+
+[caaas]
+history_per_user_count = 20
+history_path = /var/cache/caaas/app_history
+cleanup_thread_interval = 5
+base_flask_url = http://bigfoot-m2.eurecom.fr
+
+[smtp]
+user = user@gmail.com
+pass = pass
+server = smtp.gmail.com:25

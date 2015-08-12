@@ -61,7 +61,7 @@ def web_inspect(username, cluster_id):
     clist = []
     for cid, cinfo in containers.items():
         plist = get_container_addresses(cid)
-        clist.append([cinfo["contents"], plist])
+        clist.append([cinfo["contents"], plist, cid])
     template_vars = {
         "cluster_name": cluster["name"],
         "containers": clist,
@@ -83,3 +83,35 @@ def web_terminate(username, cluster_id):
         "user": username
     }
     return render_template('terminate.html', **template_vars)
+
+
+@app.route("/web/<username>/container/<container_id>/logs")
+def web_logs(username, container_id):
+    state = CAaaState()
+    user_id = state.get_user_id(username)
+    # FIXME: check user_id
+    cont = state.get_container(container_id)
+    logs = sm.get_log(container_id)
+    if logs is None:
+        ret = {
+            'user': username
+        }
+    else:
+        logs = logs.decode("ascii")
+        ret = {
+            'user': username,
+            'cont_contents': cont['contents'],
+            "cont_logs": logs
+        }
+    return render_template('logs.html', **ret)
+
+
+@app.route("/web/<username>/submit-spark-app")
+def web_spark_submit(username):
+    state = CAaaState()
+    user_id = state.get_user_id(username)
+    # FIXME: check user_id
+    template_vars = {
+        'user': username
+    }
+    return render_template('submit.html', **template_vars)

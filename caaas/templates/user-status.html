@@ -8,15 +8,11 @@
     <p>You have no clusters running at this time</p>
 {% endif %}
 
+<ul>
 {% for c in clusters %}
-    <div class="cluster">
-    <p>{{ clusters[c]["name"] }} (<a href="/web/{{ user }}/cluster/{{ c }}/inspect">inspect</a>,
-        <a href="/web/{{ user }}/cluster/{{ c }}/terminate">terminate</a>)</p>
-    <ul>
-        <li>Num. containers: {{ clusters[c]["num_containers"] }}</li>
-        <li>Notebook cluster: {{ clusters[c]["is_notebook"] }}</li>
-    </ul>
-    </div>
+    <li>{{ clusters[c]["name"] }} (<a href="/web/{{ user }}/cluster/{{ c }}/inspect">inspect</a>,
+        <a href="/web/{{ user }}/cluster/{{ c }}/terminate">terminate</a>)</li>
 {% endfor %}
+</ul>
 </div>
 {% endblock %}

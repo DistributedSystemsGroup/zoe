@@ -1,4 +1,5 @@
 import mysql.connector
+import mysql.connector.cursor
 import mysql.connector.errors
 
 from utils.config import get_database_config
@@ -14,7 +15,7 @@ class CAaaState:
         db_config = get_database_config()
         self.cnx = mysql.connector.connect(**db_config)
 
-    def _get_cursor(self, dictionary=False):
+    def _get_cursor(self, dictionary=False) -> mysql.connector.cursor.MySQLCursor:
         try:
             cursor = self.cnx.cursor(dictionary=dictionary)
         except (mysql.connector.errors.OperationalError, AttributeError):
@@ -50,6 +51,14 @@ class CAaaState:
     def get_user_id(self, username):
         return self._check_user(username)
 
+    def get_user_email(self, user_id):
+        cursor = self._get_cursor()
+        q = "SELECT username FROM users WHERE id=%s"
+        cursor.execute(q, (user_id,))
+        row = cursor.fetchone()
+        self._close_cursor(cursor)
+        return row[0]
+
     def get_all_users(self):
         cursor = self._get_cursor()
         q = "SELECT id, username FROM users"
@@ -60,6 +69,18 @@ class CAaaState:
             user_list.append(row)
         self._close_cursor(cursor)
         return user_list
+
+    def count_apps_finished(self, user_id=None):
+        cursor = self._get_cursor()
+        if user_id is None:
+            q = "SELECT COUNT(*) FROM applications WHERE time_finished IS NOT NULL"
+            cursor.execute(q)
+        else:
+            q = "SELECT COUNT(*) FROM applications WHERE user_id=%s AND time_finished IS NOT NULL"
+            cursor.execute(q, (user_id,))
+        row = cursor.fetchone()
+        self._close_cursor(cursor)
+        return row[0]
 
     def count_clusters(self, user_id=None):
         cursor = self._get_cursor()
@@ -221,6 +242,34 @@ class CAaaState:
         self._close_cursor(cursor)
         return res
 
+    def get_container(self, container_id):
+        cursor = self._get_cursor(dictionary=True)
+        res = {}
+        q = "SELECT id, docker_id, cluster_id, user_id, ip_address, contents FROM containers WHERE id=%s"
+        cursor.execute(q, (container_id,))
+
+        for row in cursor:
+            res = {
+                "id": row["id"],
+                "docker_id": row["docker_id"],
+                "cluster_id": row["cluster_id"],
+                "user_id": row["user_id"],
+                "ip_address": row["ip_address"],
+                "contents": row["contents"],
+            }
+        self._close_cursor(cursor)
+        return res
+
+    def get_submit_containers(self) -> (int, int):
+        cursor = self._get_cursor(dictionary=True)
+        res = []
+        q = "SELECT id, cluster_id FROM containers WHERE contents='spark-submit'"
+        cursor.execute(q)
+        for row in cursor:
+            res.append((row["id"], row["cluster_id"]))
+        self._close_cursor(cursor)
+        return res
+
     def get_proxies(self, cluster_id=None, container_id=None):
         cursor = self._get_cursor()
         if cluster_id is None and container_id is None:
@@ -260,3 +309,65 @@ class CAaaState:
         q = "DELETE FROM clusters WHERE id=%s"
         cursor.execute(q, (cluster_id,))
         self._close_cursor(cursor)
+
+    def new_application(self, user_id: int, execution_name: str, spark_options: str, commandline: str) -> int:
+        cursor = self._get_cursor()
+        q = "INSERT INTO applications (execution_name, cmd, spark_options, user_id) VALUES (%s, %s, %s, %s)"
+        cursor.execute(q, (execution_name, commandline, spark_options, user_id))
+        app_id = cursor.lastrowid
+        self._close_cursor(cursor)
+        return app_id
+
+    def remove_oldest_application(self, user_id) -> str:
+        cursor = self._get_cursor()
+        q = "SELECT id FROM applications WHERE user_id=%s AND time_finished IS NOT NULL ORDER BY time_finished ASC LIMIT 1"
+        cursor.execute(q, (user_id,))
+        app_id = cursor.fetchone()[0]
+        q = "DELETE FROM applications WHERE id=%s"
+        cursor.execute(q, (app_id,))
+        self._close_cursor(cursor)
+        return app_id
+
+    def application_ready(self, app_id):
+        cursor = self._get_cursor()
+        q = "UPDATE applications SET status='ready' WHERE id=%s"
+        cursor.execute(q, (app_id,))
+        self._close_cursor(cursor)
+
+    def application_started(self, app_id, cluster_id):
+        cursor = self._get_cursor()
+        q = "UPDATE applications SET cluster_id=%s, time_started=CURRENT_TIMESTAMP, status='running' WHERE id=%s"
+        cursor.execute(q, (cluster_id, app_id))
+        self._close_cursor(cursor)
+
+    def application_killed(self, app_id):
+        cursor = self._get_cursor()
+        q = "UPDATE applications SET time_finished=CURRENT_TIMESTAMP, status='killed' WHERE id=%s"
+        cursor.execute(q, (app_id,))
+        self._close_cursor(cursor)
+
+    def application_finished(self, app_id):
+        cursor = self._get_cursor()
+        q = "UPDATE applications SET time_finished=CURRENT_TIMESTAMP, status='finished' WHERE id=%s"
+        cursor.execute(q, (app_id,))
+        self._close_cursor(cursor)
+
+    def get_application(self, app_id: int) -> dict:
+        cursor = self._get_cursor(dictionary=True)
+        q = "SELECT * FROM applications WHERE id=%s"
+        cursor.execute(q, (app_id,))
+
+        res = dict(cursor.fetchone())
+        self._close_cursor(cursor)
+        return res
+
+    def find_app_for_cluster(self, cluster_id: int):
+        cursor = self._get_cursor()
+        q = "SELECT id FROM applications WHERE cluster_id=%s"
+        cursor.execute(q, (cluster_id,))
+        if cursor.rowcount > 0:
+            res = cursor.fetchone()[0]
+        else:
+            res = None
+        self._close_cursor(cursor)
+        return res

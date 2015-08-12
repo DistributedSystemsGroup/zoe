@@ -12,8 +12,8 @@ return false;
 </script>
 
 <form onSubmit="return process();">
-    <label>Type your username to start:
-    <input id="user" autofocus required pattern="[a-z]+"></label>
+    <label for="user">Type your username to start:</label>
+    <input id="user" autofocus required type="email" autocomplete="on">
     <input type="submit" value="Start">
 </form>
 

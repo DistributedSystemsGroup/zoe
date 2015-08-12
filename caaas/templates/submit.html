@@ -1,0 +1,65 @@
+{% extends "base_user.html" %}
+{% block title %}Submit Spark application{% endblock %}
+{% block content %}
+    <h2>Submit Spark application</h2>
+    <p>Use the form below to submit a Spark application.</p>
+    <form enctype="multipart/form-data" id="app_upload">
+        <label for="exec_name">Execution name:</label>
+        <input type="text" autofocus autocomplete="on" required pattern="[a-z0-9_\-]+" name="exec_name" id="exec_name"><br/>
+
+        <label for="cmd_line">Command line:</label>
+        <input type="text" autocomplete="on" required name="cmd_line" id="cmd_line" size="150"><br/>
+
+        <label for="spark_options">Spark options:</label>
+        <input type="text" autocomplete="on" name="spark_options" id="spark_options" size="100"><br/>
+
+        <label for="upload">Spark application package:</label>
+        <input type="file" name="file" id="upload" accept="application/zip"><br/>
+
+        <input type="button" value="Submit" id="submit">
+    </form>
+    <progress style="display: none" id="progress"></progress>
+
+    <script type="application/javascript">
+    function progressHandlingFunction(e){
+        if(e.lengthComputable){
+            $('progress').attr({value:e.loaded,max:e.total});
+        }
+    }
+
+    function completeHandler(e) {
+        $("#progress").hide();
+    }
+
+    function errorHandler(e) {
+        $("#progress").hide();
+    }
+
+    $('#submit').on('click', function(){
+        var formData = new FormData($('#app_upload')[0]);
+        $("#progress").show();
+        $.ajax({
+            url: '/api/{{ user }}/spark-submit',  //Server script to process data
+            type: 'POST',
+            xhr: function() {  // Custom XMLHttpRequest
+                var myXhr = $.ajaxSettings.xhr();
+                if(myXhr.upload){ // Check if upload property exists
+                    myXhr.upload.addEventListener('progress', progressHandlingFunction, false); // For handling the progress of the upload
+                }
+                return myXhr;
+            },
+            //Ajax events
+            //beforeSend: beforeSendHandler,
+            success: completeHandler,
+            error: errorHandler,
+            // Form data
+            data: formData,
+            //Options to tell jQuery not to process data or worry about content-type.
+            cache: false,
+            contentType: false,
+            processData: false
+        });
+    });
+    </script>
+
+{% endblock %}

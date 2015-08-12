@@ -75,14 +75,17 @@ def commit_and_reload(generated_file):
     system("sudo service apache2 reload")
 
 
+def update_proxy():
+    entries = get_proxy_entries()
+    output = generate_file(entries)
+    if check_difference(output):
+        commit_and_reload(output)
+
+
 if __name__ == "__main__":
     print("CAaaS Apache proxy synchronizer starting")
-
     while True:
-        print("Looping...")
-        entries = get_proxy_entries()
-        print(entries)
-        output = generate_file(entries)
-        if check_difference(output):
-            commit_and_reload(output)
+        # print("Checking proxy entries...")
+        update_proxy()
+        # print("Checking for completed applications to clean up")
         sleep(1)
