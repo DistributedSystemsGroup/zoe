@@ -11,7 +11,8 @@ def index():
 
 @app.route("/web/status")
 def web_status():
-    return render_template('status.html')
+    status = sm.swarm_status()
+    return render_template('status.html', **status)
 
 
 @app.route("/web/<username>")
@@ -24,19 +25,19 @@ def web_index(username):
     return render_template('home.html', **template_vars)
 
 
-@app.route("/web/<username>/status")
-def web_user_status(username):
-    db = CAaaState()
-    user_id = db.get_user_id(username)
-    cluster_list = db.get_clusters(user_id)
-    for clid in cluster_list:
-        cluster_list[clid]["is_notebook"] = cluster_list[clid]["name"] == "notebook"
-        cluster_list[clid]["num_containers"] = db.count_containers(user_id, clid)
+@app.route("/web/<username>/apps")
+def web_user_apps(username):
+    state = CAaaState()
+    user_id = state.get_user_id(username)
+    apps = state.get_applications(user_id)
     template_vars = {
         "user": username,
-        "clusters": cluster_list
+        "apps": apps,
+        "has_notebook": state.has_notebook(user_id),
+        "notebook_address": sm.get_notebook(user_id),
+        "notebook_cluster_id": state.get_notebook(user_id)
     }
-    return render_template('user-status.html', **template_vars)
+    return render_template('apps.html', **template_vars)
 
 
 @app.route("/web/<username>/spark-notebook")

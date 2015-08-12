@@ -3,18 +3,18 @@
 {% block content %}
 <p>Start an activity:</p>
 <ul>
-    <li><a href="/web/{{ user }}/spark-notebook">Give me a Spark notebook</a></li>
-    <li><a href="/web/{{ user }}/submit-spark-app">Submit a Spark application</a></li>
+    <li><a href="{{ url_for("web_notebook", username=user) }}">Give me a Spark notebook</a></li>
+    <li><a href="{{ url_for("web_spark_submit", username=user) }}">Submit a Spark application</a></li>
 </ul>
 
-<p>Monitor my activities:</p>
+<p>My activities:</p>
 <ul>
-    <li><a href="/web/{{ user }}/status">Running applications</a></li>
+    <li><a href="{{ url_for("web_user_apps", username=user) }}">Applications</a></li>
 </ul>
 
 <p>Cluster status:</p>
 <ul>
-    <li><a href="/web/status">Overview</a></li>
+    <li><a href="{{ url_for("web_status") }}">Overview</a></li>
 </ul>
 
 

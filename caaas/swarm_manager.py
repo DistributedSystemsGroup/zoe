@@ -28,6 +28,7 @@ class ContainerOptions:
         self.volume_binds = []
         self.volumes = []
         self.command = ""
+        self.memory_limit = '2g'
 
     def add_env_variable(self, name, value):
         self.env[name] = value
@@ -50,6 +51,12 @@ class ContainerOptions:
 
     def get_command(self):
         return self.command
+
+    def set_memory_limit(self, limit):
+        self.memory_limit = limit
+
+    def get_memory_limit(self):
+        return self.memory_limit
 
 
 class SwarmManager:
@@ -127,6 +134,7 @@ class SwarmManager:
         options.add_env_variable("SPARK_MASTER_IP", master_info["docker_ip"])
         options.add_env_variable("SPARK_WORKER_RAM", cluster_descr.executor_ram_size)
         options.add_env_variable("SPARK_WORKER_CORES", cluster_descr.worker_cores)
+        options.set_memory_limit(cluster_descr.executor_ram_size)
         info = self._spawn_container(WORKER_IMAGE, options)
         cont_id = db.new_container(cluster_id, user_id, info["docker_id"], info["docker_ip"], "spark-worker-" + str(count))
         db.new_proxy_entry(get_uuid(), cluster_id, "http://" + info["docker_ip"] + ":8081", "web interface", cont_id)
@@ -139,6 +147,7 @@ class SwarmManager:
         options.add_env_variable("SPARK_MASTER_IP", master_info["docker_ip"])
         options.add_env_variable("SPARK_EXECUTOR_RAM", cluster_descr.executor_ram_size)
         options.add_env_variable("PROXY_ID", proxy_id)
+        options.set_memory_limit(cluster_descr.executor_ram_size)
         info = self._spawn_container(NOTEBOOK_IMAGE, options)
         cont_id = db.new_container(cluster_id, user_id, info["docker_id"], info["docker_ip"], "spark-notebook")
         db.new_proxy_entry(proxy_id, cluster_id, "http://" + info["docker_ip"] + ":9000/proxy/" + proxy_id, "notebook", cont_id)
@@ -155,13 +164,16 @@ class SwarmManager:
         options.add_env_variable("SPARK_OPTIONS", app["spark_options"])
         options.add_volume_bind(app["path"], '/app', True)
         options.set_command("/opt/submit.sh /app " + app["cmd"])
+        options.set_memory_limit(cluster_descr.executor_ram_size)
         info = self._spawn_container(SUBMIT_IMAGE, options)
         cont_id = state.new_container(cluster_id, user_id, info["docker_id"], info["docker_ip"], "spark-submit")
         state.new_proxy_entry(get_uuid(), cluster_id, "http://" + info["docker_ip"] + ":4040", "spark application", cont_id)
         return info
 
     def _spawn_container(self, image, options):
-        host_config = create_host_config(network_mode="bridge", binds=options.get_volume_binds())
+        host_config = create_host_config(network_mode="bridge",
+                                         binds=options.get_volume_binds(),
+                                         mem_limit=options.get_memory_limit())
         cont = self.cli.create_container(image=image,
                                          environment=options.get_environment(),
                                          network_disabled=False,
@@ -218,3 +230,6 @@ class SwarmManager:
             return False
         ret = self.cli.inspect_container(container=cont["docker_id"])
         return ret["State"]["Running"]
+
+    def swarm_status(self):
+        return self.cli.info()

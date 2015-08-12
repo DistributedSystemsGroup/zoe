@@ -1,0 +1,53 @@
+{% extends "base_user.html" %}
+{% block title %}{{ user }} status{% endblock %}
+{% block content %}
+<h2>Status overview for user {{ user }}</h2>
+    {% if apps|length == 0 and not has_notebook %}
+        <p>You have no clusters running at this time</p>
+    {% endif %}
+
+    {% if has_notebook %}
+        <p>You have a notebook running:
+        <a href="{{ notebook_address }}">open</a>
+        <a href="{{ url_for("web_terminate", username=user, cluster_id=notebook_cluster_id) }}">terminate</a>
+        </p>
+    {% endif %}
+
+    <table id="app_list">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Command line</th>
+        <th>Spark options</th>
+        <th>Started</th>
+        <th>Finished</th>
+        <th>Status</th>
+        <th>Logs</th>
+    </tr>
+    </thead>
+        {% for a in apps %}
+            <tr>
+            <td>{{ a["execution_name"] }}</td>
+            <td>{{ a["cmd"] }}</td>
+            <td>{{ a["spark_options"] }}</td>
+            <td>{{ a["time_started"] }}</td>
+            <td>{{ a["time_finished"] }}</td>
+            <td>{{ a["status"] }}</td>
+            <td>
+                {% if a["status"] == "finished" %}
+                <a href="{{ url_for("api_history_log_archive", username=user, app_id=a["id"]) }}">Zip</a>
+                {% endif %}
+                {% if a["status"] == "running" %}
+                <a href="{{ url_for("web_inspect", username=user, app_id=a["cluster_id"]) }}">Inspect</a>
+                {% endif %}
+            </td>
+            <td>
+                {% if a["status"] == "running" %}
+                {{ url_for("web_terminate", username=user, cluster_id=a["cluster_id"]) }}
+                {% endif %}
+            </td>
+            </tr>
+            <!-- FIXME: add a re-run link -->
+        {% endfor %}
+    </table>
+{% endblock %}

@@ -1,28 +1,19 @@
 {% extends "base_user.html" %}
 {% block title %}Status{% endblock %}
 {% block content %}
-<script type="application/javascript">
-    function gen_one_user(i, item) {
-        var block = $("<div></div>");
-        block.append("<p></p>").text(i);
-        var ul = $("<ul></ul>");
-        ul.append($("<li></li>").text("Num. clusters: " + item.num_clusters));
-        ul.append($("<li></li>").text("Num. containers: " + item.num_containers));
-        ul.append($("<li></li>").text("Has a notebook: " + item.has_notebook));
-        block.append(ul);
-        return block;
-    }
-    (function() {
-        $.getJSON( api_endpoint + "/full-status")
-                .done(function( data ) {
-                    $.each(data, function(i, item) {
-                        $("#userlist").append(gen_one_user(i, item))
-                    })
-                });
-    })();
-</script>
-
 <h2>System status overview</h2>
-
+    <ul>
+    <li>Containers: {{ Containers }}</li>
+    <li>Images: {{ Images }}</li>
+    <li>MemTotal: {{ MemTotal }}</li>
+    <li>Memory limit: {{ MemoryLimit }}</li>
+    <li>NCPU: {{ NCPU }}</li>
+    <li>Driver status:</li>
+    <ul>
+        {% for entry in DriverStatus %}
+            <li>{{ entry[0] }}: {{ entry[1] }}</li>
+        {% endfor %}
+    </ul>
+    </ul>
 <div id="userlist"></div>
 {% endblock %}

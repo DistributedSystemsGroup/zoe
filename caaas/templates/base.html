@@ -17,6 +17,9 @@
                 .done(function( data ) {
                     $("#num_nodes").text(data.num_nodes);
                     $("#num_containers").text(data.num_containers);
+                }).error(function( data ) {
+                    $("#num_nodes").text("N/A");
+                    $("#num_containers").text("N/A");
                 });
         }
         update_status();
@@ -26,7 +29,7 @@
     <div id="content">{% block content %}{% endblock %}</div>
     <div id="footer">
         {% block footer %}
-            <div class="caaas_status"><p><em>CAaaS</em> status: <span id="num_nodes">0</span> available nodes, <span id="num_containers">0</span> containers running</p></div>
+            <div class="caaas_status"><p><em>CAaaS</em> status: <span id="num_nodes">N/A</span> available nodes, <span id="num_containers">N/A</span> containers running</p></div>
             <h6>&copy; Copyright 2015 by <a href="http://distsysgroup.wordpress.com/">DSG</a></h6>
         {% endblock %}
     </div>

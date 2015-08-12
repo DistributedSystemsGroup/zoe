@@ -352,6 +352,20 @@ class CAaaState:
         cursor.execute(q, (app_id,))
         self._close_cursor(cursor)
 
+    def get_applications(self, user_id=None) -> dict:
+        cursor = self._get_cursor(dictionary=True)
+        if user_id is None:
+            q = "SELECT * FROM applications"
+            cursor.execute(q)
+        else:
+            q = "SELECT * FROM applications WHERE user_id=%s"
+            cursor.execute(q, (user_id,))
+        res = []
+        for row in cursor:
+            res.append((dict(row)))
+        self._close_cursor(cursor)
+        return res
+
     def get_application(self, app_id: int) -> dict:
         cursor = self._get_cursor(dictionary=True)
         q = "SELECT * FROM applications WHERE id=%s"
