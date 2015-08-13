@@ -48,11 +48,11 @@ def generate_file(proxy_entries):
     node_list = []
     for p in proxy_entries:
         netloc = urlparse(p["internal_url"])[1]
-        node_list.append((netloc, p["proxy_id"]))
+        node_list.append((netloc, p["id"]))
     for p in proxy_entries:
         netloc = urlparse(p["internal_url"])[1]
         jinja_dict = {
-            "proxy_id": p["proxy_id"],
+            "proxy_id": p["id"],
             "proxy_url": p["internal_url"],
             "service_name": p["service_name"],
             "netloc": netloc,
@@ -100,7 +100,7 @@ def update_proxy_access_timestamps():
 
     state = CAaaState()
     for proxy in state.get_proxies():
-        proxy_id = proxy['proxy_id']
+        proxy_id = proxy['id']
         if proxy_id in last_accesses:
             state.update_proxy_access(proxy_id, last_accesses[proxy_id])
 

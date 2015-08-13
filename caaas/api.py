@@ -21,68 +21,71 @@ def api_status():
     return jsonify(**data)
 
 
-@app.route("/api/<username>/cluster/<cluster_id>/terminate")
-def api_terminate_cluster(username, cluster_id):
+@app.route("/api/<user_id>/cluster/<cluster_id>/terminate")
+def api_terminate_cluster(user_id, cluster_id):
     db = CAaaState()
-    user_id = db.get_user_id(username)
-    cluster_list = db.get_clusters(user_id)
     ret = {}
+    if not db.check_user_id(user_id):
+        ret["status"] = "unauthorized"
+        return jsonify(**ret)
+
+    cluster_list = db.get_clusters(user_id)
     if cluster_list[cluster_id]["user_id"] != user_id:
         ret["status"] = "unauthorized"
+        return jsonify(**ret)
+
+    if sm.terminate_cluster(cluster_id):
+        ret["status"] = "ok"
     else:
-        if sm.terminate_cluster(cluster_id):
-            ret["status"] = "ok"
-        else:
-            ret["status"] = "error"
+        ret["status"] = "error"
     return jsonify(**ret)
 
 
-@app.route("/api/<username>/container/<container_id>/logs")
-def api_container_logs(username, container_id):
+@app.route("/api/<user_id>/container/<container_id>/logs")
+def api_container_logs(user_id, container_id):
     db = CAaaState()
-    user_id = db.get_user_id(username)
-    # FIXME: check user_id
+    ret = {}
+    if not db.check_user_id(user_id):
+        ret["status"] = "unauthorized"
+        return jsonify(**ret)
+
     logs = sm.get_log(container_id)
     if logs is None:
-        ret = {
-            "status": "no such container",
-            "logs": ""
-        }
+        ret["status"] = "no such container"
+        ret["logs"] = ''
     else:
         logs = logs.decode("ascii").split("\n")
-        ret = {
-            "status": "ok",
-            "logs": logs
-        }
+        ret["status"] = "ok"
+        ret["logs"] = logs
     return jsonify(**ret)
 
 
-@app.route("/api/<username>/spark-submit", methods=['POST'])
-def api_spark_submit(username):
+@app.route("/api/<user_id>/spark-submit", methods=['POST'])
+def api_spark_submit(user_id):
+    state = CAaaState()
+    ret = {}
+    if not state.check_user_id(user_id):
+        ret["status"] = "unauthorized"
+        return jsonify(**ret)
+
     file_data = request.files['file']
     form_data = request.form
-    state = CAaaState()
-    user_id = state.get_user_id(username)
-    # FIXME: check user_id
     if not is_zipfile(file_data.stream):
-        ret = {
-            "status": "not a zip file"
-        }
+        ret["status"] = "not a zip file"
         return jsonify(**ret)
     app_id = application_submitted(user_id, form_data["exec_name"], form_data["spark_options"], form_data["cmd_line"], file_data)
     setup_volume(user_id, app_id, file_data.stream)
     sm.spark_submit(user_id, app_id)
-    ret = {
-        "status": "ok"
-    }
+    ret["status"] = "ok"
     return jsonify(**ret)
 
 
-@app.route("/api/<username>/history/<app_id>/logs")
-def api_history_log_archive(username, app_id):
+@app.route("/api/<user_id>/history/<app_id>/logs")
+def api_history_log_archive(user_id, app_id):
     state = CAaaState()
-    user_id = state.get_user_id(username)
-    # FIXME: check user_id
+    if not state.check_user_id(user_id):
+        return jsonify(status="unauthorized")
+
     ah = AppHistory(user_id)
     path = ah.get_log_archive_path(app_id)
     return send_file(path, mimetype="application/zip")

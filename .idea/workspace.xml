@@ -2,28 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="75bc5abc-acc8-44ff-9d8a-85151a0cbca1" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/requirements.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/images/swarm_pull.sh" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/caaas/utils.py" />
-      <change type="DELETED" beforePath="E:\User Data\vcs\caaas\utils\__init__.py" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dataSources.ids" afterPath="$PROJECT_DIR$/.idea/dataSources.ids" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/__init__.py" afterPath="$PROJECT_DIR$/caaas/__init__.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apache-proxy.py" afterPath="$PROJECT_DIR$/apache-proxy.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/api.py" afterPath="$PROJECT_DIR$/caaas/api.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas.ini.template" afterPath="$PROJECT_DIR$/caaas.ini.template" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/cleanup_thread.py" afterPath="$PROJECT_DIR$/caaas/cleanup_thread.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/templates/base.html" afterPath="$PROJECT_DIR$/caaas/templates/base.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dataSources.xml" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/templates/notebook.html" afterPath="$PROJECT_DIR$/caaas/templates/notebook.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/templates/index.html" afterPath="$PROJECT_DIR$/caaas/templates/index.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/proxy_manager.py" afterPath="$PROJECT_DIR$/caaas/proxy_manager.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/spark_app_execution.py" afterPath="$PROJECT_DIR$/caaas/spark_app_execution.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/sql.py" afterPath="$PROJECT_DIR$/caaas/sql.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/templates/submit.html" afterPath="$PROJECT_DIR$/caaas/templates/submit.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/swarm_manager.py" afterPath="$PROJECT_DIR$/caaas/swarm_manager.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/templates/terminate.html" afterPath="$PROJECT_DIR$/caaas/templates/terminate.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/web.py" afterPath="$PROJECT_DIR$/caaas/web.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\utils\config.py" afterPath="$PROJECT_DIR$/caaas/config_parser.py" />
     </list>
     <ignored path="caaas.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -37,7 +26,7 @@
   </component>
   <component name="ChangesViewManager" flattened_view="true" show_ignored="false" />
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/caaas$main.coverage" NAME="main Coverage Results" MODIFIED="1439466994264" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
+    <SUITE FILE_PATH="coverage/caaas$main.coverage" NAME="main Coverage Results" MODIFIED="1439470587968" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/caaas$apache_proxy.coverage" NAME="apache-proxy Coverage Results" MODIFIED="1439272960154" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="CreatePatchCommitExecutor">
@@ -59,6 +48,10 @@
       </PATH_ELEMENT>
       <PATH_ELEMENT>
         <option name="myItemId" value="caaas" />
+        <option name="myItemType" value="com.intellij.database.view.DbNodeDescriptor" />
+      </PATH_ELEMENT>
+      <PATH_ELEMENT>
+        <option name="myItemId" value="users" />
         <option name="myItemType" value="com.intellij.database.view.DbNodeDescriptor" />
       </PATH_ELEMENT>
     </PATH>
@@ -141,80 +134,102 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="swarm_manager.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/caaas/swarm_manager.py">
+      <file leaf-file-name="home.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/caaas/templates/home.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#11#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="utils.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/caaas/utils.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+            <state vertical-scroll-proportion="-7.8461537">
+              <caret line="12" column="5" selection-start-line="12" selection-start-column="5" selection-end-line="12" selection-end-column="5" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="web.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/caaas/web.py">
+      <file leaf-file-name="base.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/caaas/templates/base.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.41278064">
-              <caret line="54" column="0" selection-start-line="54" selection-start-column="0" selection-end-line="54" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#33#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="caaas.ini" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/caaas.ini">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="16" column="28" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="28" />
+            <state vertical-scroll-proportion="-10.461538">
+              <caret line="16" column="0" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="cleanup_thread.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/caaas/cleanup_thread.py">
+      <file leaf-file-name="sql.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/caaas/sql.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="109" column="0" selection-start-line="109" selection-start-column="0" selection-end-line="109" selection-end-column="0" />
+            <state vertical-scroll-proportion="-8.328152">
+              <caret line="78" column="0" selection-start-line="78" selection-start-column="0" selection-end-line="78" selection-end-column="0" />
               <folding>
-                <element signature="e#0#40#0" expanded="true" />
+                <element signature="e#0#22#0" expanded="true" />
+                <marker date="1439470515502" expanded="true" signature="1085:1118" placeholder="SELECT id FR..users..." />
+                <marker date="1439470515502" expanded="true" signature="1487:1524" placeholder="INSERT INTO ..." />
+                <marker date="1439470515502" expanded="true" signature="1746:1782" placeholder="SELECT COUNT..users..." />
+                <marker date="1439470515502" expanded="true" signature="2091:2124" placeholder="SELECT usern..users..." />
+                <marker date="1439470515502" expanded="true" signature="2334:2361" placeholder="SELECT id, u..users..." />
+                <marker date="1439470515502" expanded="true" signature="2665:2730" placeholder="SELECT COUNT..applications..." />
+                <marker date="1439470515502" expanded="true" signature="2793:2873" placeholder="SELECT COUNT..applications..." />
+                <marker date="1439470515502" expanded="true" signature="3132:3161" placeholder="SELECT COUNT..clusters..." />
+                <marker date="1439470515502" expanded="true" signature="3224:3268" placeholder="SELECT COUNT..clusters..." />
+                <marker date="1439470515502" expanded="true" signature="3571:3602" placeholder="SELECT COUNT..containers..." />
+                <marker date="1439470515502" expanded="true" signature="3708:3754" placeholder="SELECT COUNT..containers..." />
+                <marker date="1439470515502" expanded="true" signature="3874:3923" placeholder="SELECT COUNT..containers..." />
+                <marker date="1439470515502" expanded="true" signature="4050:4114" placeholder="SELECT COUNT..containers..." />
+                <marker date="1439470515502" expanded="true" signature="4363:4423" placeholder="SELECT id FR..clusters..." />
+                <marker date="1439470515502" expanded="true" signature="4876:4916" placeholder="SELECT inter..proxy..." />
+                <marker date="1439470515502" expanded="true" signature="5283:5341" placeholder="SELECT id FR..proxy..." />
+                <marker date="1439470515502" expanded="true" signature="5702:5754" placeholder="INSERT INTO ..." />
+                <marker date="1439470515502" expanded="true" signature="6003:6050" placeholder="UPDATE clust..." />
+                <marker date="1439470515502" expanded="true" signature="6294:6399" placeholder="INSERT INTO ..." />
+                <marker date="1439470515502" expanded="true" signature="6716:6821" placeholder="INSERT INTO ..." />
+                <marker date="1439470515502" expanded="true" signature="7125:7179" placeholder="SELECT id, u..clusters..." />
+                <marker date="1439470515502" expanded="true" signature="7242:7311" placeholder="SELECT id, u..clusters..." />
+                <marker date="1439470515502" expanded="true" signature="7728:7760" placeholder="SELECT * FRO..clusters..." />
+                <marker date="1439470515502" expanded="true" signature="8113:8192" placeholder="SELECT id, d..containers..." />
+                <marker date="1439470515502" expanded="true" signature="8298:8392" placeholder="SELECT id, d..containers..." />
+                <marker date="1439470515502" expanded="true" signature="8512:8609" placeholder="SELECT id, d..containers..." />
+                <marker date="1439470515502" expanded="true" signature="8736:8848" placeholder="SELECT id, d..containers..." />
+                <marker date="1439470515502" expanded="true" signature="9395:9484" placeholder="SELECT id, d..containers..." />
+                <marker date="1439470515502" expanded="true" signature="10046:10113" placeholder="SELECT id, c..containers..." />
+                <marker date="1439470515502" expanded="true" signature="10465:10484" placeholder="SELECT * FRO..proxy..." />
+                <marker date="1439470515502" expanded="true" signature="10572:10611" placeholder="SELECT * FRO..proxy..." />
+                <marker date="1439470515502" expanded="true" signature="10693:10730" placeholder="SELECT * FRO..proxy..." />
+                <marker date="1439470515502" expanded="true" signature="11024:11061" placeholder="DELETE FROM ..." />
+                <marker date="1439470515502" expanded="true" signature="11239:11271" placeholder="DELETE FROM ..." />
+                <marker date="1439470515502" expanded="true" signature="11445:11475" placeholder="DELETE FROM ..." />
+                <marker date="1439470515502" expanded="true" signature="11716:11810" placeholder="INSERT INTO ..." />
+                <marker date="1439470515502" expanded="true" signature="12091:12200" placeholder="SELECT id FR..applications..." />
+                <marker date="1439470515502" expanded="true" signature="12291:12325" placeholder="DELETE FROM ..." />
+                <marker date="1439470515502" expanded="true" signature="12514:12562" placeholder="UPDATE appli..." />
+                <marker date="1439470515502" expanded="true" signature="12743:12840" placeholder="UPDATE appli..." />
+                <marker date="1439470515502" expanded="true" signature="13019:13101" placeholder="UPDATE appli..." />
+                <marker date="1439470515502" expanded="true" signature="13271:13355" placeholder="UPDATE appli..." />
+                <marker date="1439470515502" expanded="true" signature="13582:13608" placeholder="SELECT * FRO..applications..." />
+                <marker date="1439470515502" expanded="true" signature="13671:13712" placeholder="SELECT * FRO..applications..." />
+                <marker date="1439470515502" expanded="true" signature="14009:14045" placeholder="SELECT * FRO..applications..." />
+                <marker date="1439470515502" expanded="true" signature="14282:14327" placeholder="SELECT id FR..applications..." />
+                <marker date="1439470515502" expanded="true" signature="14640:14681" placeholder="UPDATE proxy..." />
+                <marker date="1439470515502" expanded="true" signature="14870:14947" placeholder="SELECT clust..proxy..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="notebook.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/caaas/templates/notebook.html">
+      <file leaf-file-name="submit.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/caaas/templates/submit.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-5.8846154">
-              <caret line="9" column="0" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+            <state vertical-scroll-proportion="-33.346153">
+              <caret line="51" column="25" selection-start-line="51" selection-start-column="25" selection-end-line="51" selection-end-column="25" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="config_parser.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/caaas/config_parser.py">
+      <file leaf-file-name="apache-proxy.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/apache-proxy.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#37#0" expanded="true" />
-              </folding>
+              <caret line="103" column="0" selection-start-line="103" selection-start-column="0" selection-end-line="103" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -223,81 +238,50 @@
         <entry file="file://$PROJECT_DIR$/caaas/proxy_manager.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
+              <caret line="14" column="0" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="terminate.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/caaas/templates/terminate.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-3.9230769">
+              <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="web.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/caaas/web.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="90" column="0" selection-start-line="90" selection-start-column="0" selection-end-line="90" selection-end-column="0" />
               <folding>
-                <element signature="e#0#31#0" expanded="true" />
+                <element signature="e#0#33#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="spark_app_execution.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/caaas/spark_app_execution.py">
+      <file leaf-file-name="status.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/caaas/templates/status.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#27#0" expanded="true" />
-              </folding>
+            <state vertical-scroll-proportion="-8.5">
+              <caret line="13" column="43" selection-start-line="13" selection-start-column="43" selection-end-line="13" selection-end-column="43" />
+              <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="sql.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/caaas/sql.py">
+      <file leaf-file-name="api.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/caaas/api.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="19" column="28" selection-start-line="19" selection-start-column="28" selection-end-line="19" selection-end-column="28" />
-              <folding>
-                <element signature="e#0#22#0" expanded="true" />
-                <marker date="1439465965403" expanded="true" signature="1085:1121" placeholder="SELECT id FR..users..." />
-                <marker date="1439465965403" expanded="true" signature="1490:1530" placeholder="INSERT INTO ..." />
-                <marker date="1439465965403" expanded="true" signature="1833:1869" placeholder="SELECT usern..users..." />
-                <marker date="1439465965403" expanded="true" signature="2079:2109" placeholder="SELECT id, u..users..." />
-                <marker date="1439465965403" expanded="true" signature="2413:2478" placeholder="SELECT COUNT..applications..." />
-                <marker date="1439465965403" expanded="true" signature="2541:2621" placeholder="SELECT COUNT..applications..." />
-                <marker date="1439465965403" expanded="true" signature="2880:2909" placeholder="SELECT COUNT..clusters..." />
-                <marker date="1439465965403" expanded="true" signature="2972:3016" placeholder="SELECT COUNT..clusters..." />
-                <marker date="1439465965403" expanded="true" signature="3319:3350" placeholder="SELECT COUNT..containers..." />
-                <marker date="1439465965403" expanded="true" signature="3456:3502" placeholder="SELECT COUNT..containers..." />
-                <marker date="1439465965403" expanded="true" signature="3622:3671" placeholder="SELECT COUNT..containers..." />
-                <marker date="1439465965403" expanded="true" signature="3798:3862" placeholder="SELECT COUNT..containers..." />
-                <marker date="1439465965403" expanded="true" signature="4111:4171" placeholder="SELECT id FR..clusters..." />
-                <marker date="1439465965403" expanded="true" signature="4624:4670" placeholder="SELECT inter..proxy..." />
-                <marker date="1439465965403" expanded="true" signature="5037:5101" placeholder="SELECT proxy..proxy..." />
-                <marker date="1439465965403" expanded="true" signature="5462:5514" placeholder="INSERT INTO ..." />
-                <marker date="1439465965403" expanded="true" signature="5763:5810" placeholder="UPDATE clust..." />
-                <marker date="1439465965403" expanded="true" signature="6054:6159" placeholder="INSERT INTO ..." />
-                <marker date="1439465965403" expanded="true" signature="6476:6587" placeholder="INSERT INTO ..." />
-                <marker date="1439465965403" expanded="true" signature="6891:6945" placeholder="SELECT id, u..clusters..." />
-                <marker date="1439465965403" expanded="true" signature="7008:7077" placeholder="SELECT id, u..clusters..." />
-                <marker date="1439465965403" expanded="true" signature="7494:7526" placeholder="SELECT * FRO..clusters..." />
-                <marker date="1439465965403" expanded="true" signature="7879:7958" placeholder="SELECT id, d..containers..." />
-                <marker date="1439465965403" expanded="true" signature="8064:8158" placeholder="SELECT id, d..containers..." />
-                <marker date="1439465965403" expanded="true" signature="8278:8375" placeholder="SELECT id, d..containers..." />
-                <marker date="1439465965403" expanded="true" signature="8502:8614" placeholder="SELECT id, d..containers..." />
-                <marker date="1439465965403" expanded="true" signature="9161:9250" placeholder="SELECT id, d..containers..." />
-                <marker date="1439465965403" expanded="true" signature="9812:9879" placeholder="SELECT id, c..containers..." />
-                <marker date="1439465965403" expanded="true" signature="10231:10250" placeholder="SELECT * FRO..proxy..." />
-                <marker date="1439465965403" expanded="true" signature="10338:10377" placeholder="SELECT * FRO..proxy..." />
-                <marker date="1439465965403" expanded="true" signature="10459:10496" placeholder="SELECT * FRO..proxy..." />
-                <marker date="1439465965403" expanded="true" signature="10790:10827" placeholder="DELETE FROM ..." />
-                <marker date="1439465965403" expanded="true" signature="11005:11037" placeholder="DELETE FROM ..." />
-                <marker date="1439465965403" expanded="true" signature="11211:11241" placeholder="DELETE FROM ..." />
-                <marker date="1439465965403" expanded="true" signature="11482:11576" placeholder="INSERT INTO ..." />
-                <marker date="1439465965403" expanded="true" signature="11857:11966" placeholder="SELECT id FR..applications..." />
-                <marker date="1439465965403" expanded="true" signature="12057:12091" placeholder="DELETE FROM ..." />
-                <marker date="1439465965403" expanded="true" signature="12280:12328" placeholder="UPDATE appli..." />
-                <marker date="1439465965403" expanded="true" signature="12509:12606" placeholder="UPDATE appli..." />
-                <marker date="1439465965403" expanded="true" signature="12785:12867" placeholder="UPDATE appli..." />
-                <marker date="1439465965403" expanded="true" signature="13037:13121" placeholder="UPDATE appli..." />
-                <marker date="1439465965403" expanded="true" signature="13348:13374" placeholder="SELECT * FRO..applications..." />
-                <marker date="1439465965403" expanded="true" signature="13437:13478" placeholder="SELECT * FRO..applications..." />
-                <marker date="1439465965403" expanded="true" signature="13775:13811" placeholder="SELECT * FRO..applications..." />
-                <marker date="1439465965403" expanded="true" signature="14048:14093" placeholder="SELECT id FR..applications..." />
-                <marker date="1439465965403" expanded="true" signature="14406:14453" placeholder="UPDATE proxy..." />
-                <marker date="1439465965403" expanded="true" signature="14642:14719" placeholder="SELECT clust..proxy..." />
-              </folding>
+              <caret line="19" column="0" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -335,40 +319,40 @@
         <option value="$PROJECT_DIR$/images/notebook/files/application.conf" />
         <option value="$PROJECT_DIR$/images/notebook/files/start-notebook.sh" />
         <option value="$PROJECT_DIR$/caaas/swarm.py" />
-        <option value="$PROJECT_DIR$/caaas/templates/terminate.html" />
         <option value="$PROJECT_DIR$/caaas/templates/base_user.html" />
         <option value="$PROJECT_DIR$/caaas/templates/inspect.html" />
         <option value="$PROJECT_DIR$/images/submit/files/submit.sh" />
         <option value="$PROJECT_DIR$/caaas/templates/logs.html" />
         <option value="$PROJECT_DIR$/caaas/spark_application.py" />
         <option value="$PROJECT_DIR$/caaas/templates/user-status.html" />
-        <option value="$PROJECT_DIR$/caaas/templates/index.html" />
         <option value="$PROJECT_DIR$/caaas/cluster_description.py" />
         <option value="$PROJECT_DIR$/images/files/submit.sh" />
         <option value="$PROJECT_DIR$/caaas/templates/status.html" />
         <option value="$PROJECT_DIR$/caaas/templates/apps.html" />
         <option value="$PROJECT_DIR$/caaas/templates/home.html" />
-        <option value="$PROJECT_DIR$/caaas/templates/base.html" />
         <option value="$PROJECT_DIR$/images/swarm_pull.sh" />
-        <option value="$PROJECT_DIR$/caaas/templates/submit.html" />
         <option value="$PROJECT_DIR$/caaas.ini.template" />
         <option value="$PROJECT_DIR$/utils/config.py" />
         <option value="$PROJECT_DIR$/utils/__init__.py" />
         <option value="$PROJECT_DIR$/caaas.ini" />
         <option value="$PROJECT_DIR$/requirements.txt" />
         <option value="$PROJECT_DIR$/caaas/config_parser.py" />
-        <option value="$PROJECT_DIR$/caaas/proxy_manager.py" />
-        <option value="$PROJECT_DIR$/apache-proxy.py" />
         <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/caaas/__init__.py" />
         <option value="$PROJECT_DIR$/caaas/utils.py" />
-        <option value="$PROJECT_DIR$/caaas/api.py" />
         <option value="$PROJECT_DIR$/caaas/swarm_manager.py" />
-        <option value="$PROJECT_DIR$/caaas/sql.py" />
         <option value="$PROJECT_DIR$/caaas/spark_app_execution.py" />
         <option value="$PROJECT_DIR$/caaas/cleanup_thread.py" />
         <option value="$PROJECT_DIR$/caaas/templates/notebook.html" />
+        <option value="$PROJECT_DIR$/caaas/api.py" />
+        <option value="$PROJECT_DIR$/caaas/templates/index.html" />
+        <option value="$PROJECT_DIR$/caaas/templates/terminate.html" />
         <option value="$PROJECT_DIR$/caaas/web.py" />
+        <option value="$PROJECT_DIR$/caaas/templates/submit.html" />
+        <option value="$PROJECT_DIR$/caaas/templates/base.html" />
+        <option value="$PROJECT_DIR$/apache-proxy.py" />
+        <option value="$PROJECT_DIR$/caaas/proxy_manager.py" />
+        <option value="$PROJECT_DIR$/caaas/sql.py" />
       </list>
     </option>
   </component>
@@ -1034,13 +1018,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/caaas/templates/base_user.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-1.3076923">
-          <caret line="2" column="40" selection-start-line="2" selection-start-column="40" selection-end-line="2" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.PyCharm40/system/remote_sources/461916380/-102312246/flask/app.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1103,64 +1080,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/caaas/templates/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-11.769231">
-          <caret line="18" column="0" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas/templates/inspect.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-11.769231">
-          <caret line="18" column="14" selection-start-line="18" selection-start-column="14" selection-end-line="18" selection-end-column="14" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas/templates/logs.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-2.6153846">
-          <caret line="4" column="20" selection-start-line="4" selection-start-column="20" selection-end-line="4" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas/templates/terminate.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.0">
-          <caret line="0" column="21" selection-start-line="0" selection-start-column="21" selection-end-line="0" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas/templates/status.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-8.5">
-          <caret line="13" column="43" selection-start-line="13" selection-start-column="43" selection-end-line="13" selection-end-column="43" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas/templates/apps.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-7.1923075">
-          <caret line="11" column="90" selection-start-line="11" selection-start-column="90" selection-end-line="11" selection-end-column="90" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas/templates/home.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="12" column="5" selection-start-line="12" selection-start-column="5" selection-end-line="12" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas/templates/base.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="31" column="142" selection-start-line="31" selection-start-column="142" selection-end-line="31" selection-end-column="142" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/images/build_images.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1173,14 +1092,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas/templates/submit.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="5" column="55" selection-start-line="5" selection-start-column="55" selection-end-line="5" selection-end-column="55" />
           <folding />
         </state>
       </provider>
@@ -1214,16 +1125,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/apache-proxy.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="11" column="0" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1242,16 +1143,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/caaas/api.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#45#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/caaas/cluster_description.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1265,17 +1156,7 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
           <folding>
-            <element signature="e#0#37#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas/proxy_manager.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
+            <element signature="e#0#37#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1298,69 +1179,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/caaas/sql.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="19" column="28" selection-start-line="19" selection-start-column="28" selection-end-line="19" selection-end-column="28" />
-          <folding>
-            <element signature="e#0#22#0" expanded="true" />
-            <marker date="1439465965403" expanded="true" signature="1085:1121" placeholder="SELECT id FR..users..." />
-            <marker date="1439465965403" expanded="true" signature="1490:1530" placeholder="INSERT INTO ..." />
-            <marker date="1439465965403" expanded="true" signature="1833:1869" placeholder="SELECT usern..users..." />
-            <marker date="1439465965403" expanded="true" signature="2079:2109" placeholder="SELECT id, u..users..." />
-            <marker date="1439465965403" expanded="true" signature="2413:2478" placeholder="SELECT COUNT..applications..." />
-            <marker date="1439465965403" expanded="true" signature="2541:2621" placeholder="SELECT COUNT..applications..." />
-            <marker date="1439465965403" expanded="true" signature="2880:2909" placeholder="SELECT COUNT..clusters..." />
-            <marker date="1439465965403" expanded="true" signature="2972:3016" placeholder="SELECT COUNT..clusters..." />
-            <marker date="1439465965403" expanded="true" signature="3319:3350" placeholder="SELECT COUNT..containers..." />
-            <marker date="1439465965403" expanded="true" signature="3456:3502" placeholder="SELECT COUNT..containers..." />
-            <marker date="1439465965403" expanded="true" signature="3622:3671" placeholder="SELECT COUNT..containers..." />
-            <marker date="1439465965403" expanded="true" signature="3798:3862" placeholder="SELECT COUNT..containers..." />
-            <marker date="1439465965403" expanded="true" signature="4111:4171" placeholder="SELECT id FR..clusters..." />
-            <marker date="1439465965403" expanded="true" signature="4624:4670" placeholder="SELECT inter..proxy..." />
-            <marker date="1439465965403" expanded="true" signature="5037:5101" placeholder="SELECT proxy..proxy..." />
-            <marker date="1439465965403" expanded="true" signature="5462:5514" placeholder="INSERT INTO ..." />
-            <marker date="1439465965403" expanded="true" signature="5763:5810" placeholder="UPDATE clust..." />
-            <marker date="1439465965403" expanded="true" signature="6054:6159" placeholder="INSERT INTO ..." />
-            <marker date="1439465965403" expanded="true" signature="6476:6587" placeholder="INSERT INTO ..." />
-            <marker date="1439465965403" expanded="true" signature="6891:6945" placeholder="SELECT id, u..clusters..." />
-            <marker date="1439465965403" expanded="true" signature="7008:7077" placeholder="SELECT id, u..clusters..." />
-            <marker date="1439465965403" expanded="true" signature="7494:7526" placeholder="SELECT * FRO..clusters..." />
-            <marker date="1439465965403" expanded="true" signature="7879:7958" placeholder="SELECT id, d..containers..." />
-            <marker date="1439465965403" expanded="true" signature="8064:8158" placeholder="SELECT id, d..containers..." />
-            <marker date="1439465965403" expanded="true" signature="8278:8375" placeholder="SELECT id, d..containers..." />
-            <marker date="1439465965403" expanded="true" signature="8502:8614" placeholder="SELECT id, d..containers..." />
-            <marker date="1439465965403" expanded="true" signature="9161:9250" placeholder="SELECT id, d..containers..." />
-            <marker date="1439465965403" expanded="true" signature="9812:9879" placeholder="SELECT id, c..containers..." />
-            <marker date="1439465965403" expanded="true" signature="10231:10250" placeholder="SELECT * FRO..proxy..." />
-            <marker date="1439465965403" expanded="true" signature="10338:10377" placeholder="SELECT * FRO..proxy..." />
-            <marker date="1439465965403" expanded="true" signature="10459:10496" placeholder="SELECT * FRO..proxy..." />
-            <marker date="1439465965403" expanded="true" signature="10790:10827" placeholder="DELETE FROM ..." />
-            <marker date="1439465965403" expanded="true" signature="11005:11037" placeholder="DELETE FROM ..." />
-            <marker date="1439465965403" expanded="true" signature="11211:11241" placeholder="DELETE FROM ..." />
-            <marker date="1439465965403" expanded="true" signature="11482:11576" placeholder="INSERT INTO ..." />
-            <marker date="1439465965403" expanded="true" signature="11857:11966" placeholder="SELECT id FR..applications..." />
-            <marker date="1439465965403" expanded="true" signature="12057:12091" placeholder="DELETE FROM ..." />
-            <marker date="1439465965403" expanded="true" signature="12280:12328" placeholder="UPDATE appli..." />
-            <marker date="1439465965403" expanded="true" signature="12509:12606" placeholder="UPDATE appli..." />
-            <marker date="1439465965403" expanded="true" signature="12785:12867" placeholder="UPDATE appli..." />
-            <marker date="1439465965403" expanded="true" signature="13037:13121" placeholder="UPDATE appli..." />
-            <marker date="1439465965403" expanded="true" signature="13348:13374" placeholder="SELECT * FRO..applications..." />
-            <marker date="1439465965403" expanded="true" signature="13437:13478" placeholder="SELECT * FRO..applications..." />
-            <marker date="1439465965403" expanded="true" signature="13775:13811" placeholder="SELECT * FRO..applications..." />
-            <marker date="1439465965403" expanded="true" signature="14048:14093" placeholder="SELECT id FR..applications..." />
-            <marker date="1439465965403" expanded="true" signature="14406:14453" placeholder="UPDATE proxy..." />
-            <marker date="1439465965403" expanded="true" signature="14642:14719" placeholder="SELECT clust..proxy..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/caaas/spark_app_execution.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
           <folding>
-            <element signature="e#0#27#0" expanded="true" />
+            <element signature="e#0#27#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1375,14 +1199,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/caaas/templates/notebook.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-5.8846154">
-          <caret line="9" column="0" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/caaas.ini">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1391,12 +1207,182 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/caaas/templates/apps.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="9.461538">
+          <caret line="11" column="90" selection-start-line="11" selection-start-column="90" selection-end-line="11" selection-end-column="90" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas/templates/base_user.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-1.3076923">
+          <caret line="2" column="40" selection-start-line="2" selection-start-column="40" selection-end-line="2" selection-end-column="40" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas/templates/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-8.5">
+          <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas/templates/inspect.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-11.769231">
+          <caret line="18" column="14" selection-start-line="18" selection-start-column="14" selection-end-line="18" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas/templates/logs.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-2.6153846">
+          <caret line="4" column="20" selection-start-line="4" selection-start-column="20" selection-end-line="4" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas/templates/notebook.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-5.8846154">
+          <caret line="9" column="0" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas/templates/status.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-8.5">
+          <caret line="13" column="43" selection-start-line="13" selection-start-column="43" selection-end-line="13" selection-end-column="43" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas/templates/terminate.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-3.9230769">
+          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/caaas/web.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.41278064">
-          <caret line="54" column="0" selection-start-line="54" selection-start-column="0" selection-end-line="54" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="90" column="0" selection-start-line="90" selection-start-column="0" selection-end-line="90" selection-end-column="0" />
           <folding>
             <element signature="e#0#33#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas/templates/home.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-7.8461537">
+          <caret line="12" column="5" selection-start-line="12" selection-start-column="5" selection-end-line="12" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas/templates/submit.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-33.346153">
+          <caret line="51" column="25" selection-start-line="51" selection-start-column="25" selection-end-line="51" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas/api.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="19" column="0" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas/templates/base.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-10.461538">
+          <caret line="16" column="0" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apache-proxy.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="103" column="0" selection-start-line="103" selection-start-column="0" selection-end-line="103" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas/proxy_manager.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="14" column="0" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas/sql.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-8.328152">
+          <caret line="78" column="0" selection-start-line="78" selection-start-column="0" selection-end-line="78" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#22#0" expanded="true" />
+            <marker date="1439470515502" expanded="true" signature="1085:1118" placeholder="SELECT id FR..users..." />
+            <marker date="1439470515502" expanded="true" signature="1487:1524" placeholder="INSERT INTO ..." />
+            <marker date="1439470515502" expanded="true" signature="1746:1782" placeholder="SELECT COUNT..users..." />
+            <marker date="1439470515502" expanded="true" signature="2091:2124" placeholder="SELECT usern..users..." />
+            <marker date="1439470515502" expanded="true" signature="2334:2361" placeholder="SELECT id, u..users..." />
+            <marker date="1439470515502" expanded="true" signature="2665:2730" placeholder="SELECT COUNT..applications..." />
+            <marker date="1439470515502" expanded="true" signature="2793:2873" placeholder="SELECT COUNT..applications..." />
+            <marker date="1439470515502" expanded="true" signature="3132:3161" placeholder="SELECT COUNT..clusters..." />
+            <marker date="1439470515502" expanded="true" signature="3224:3268" placeholder="SELECT COUNT..clusters..." />
+            <marker date="1439470515502" expanded="true" signature="3571:3602" placeholder="SELECT COUNT..containers..." />
+            <marker date="1439470515502" expanded="true" signature="3708:3754" placeholder="SELECT COUNT..containers..." />
+            <marker date="1439470515502" expanded="true" signature="3874:3923" placeholder="SELECT COUNT..containers..." />
+            <marker date="1439470515502" expanded="true" signature="4050:4114" placeholder="SELECT COUNT..containers..." />
+            <marker date="1439470515502" expanded="true" signature="4363:4423" placeholder="SELECT id FR..clusters..." />
+            <marker date="1439470515502" expanded="true" signature="4876:4916" placeholder="SELECT inter..proxy..." />
+            <marker date="1439470515502" expanded="true" signature="5283:5341" placeholder="SELECT id FR..proxy..." />
+            <marker date="1439470515502" expanded="true" signature="5702:5754" placeholder="INSERT INTO ..." />
+            <marker date="1439470515502" expanded="true" signature="6003:6050" placeholder="UPDATE clust..." />
+            <marker date="1439470515502" expanded="true" signature="6294:6399" placeholder="INSERT INTO ..." />
+            <marker date="1439470515502" expanded="true" signature="6716:6821" placeholder="INSERT INTO ..." />
+            <marker date="1439470515502" expanded="true" signature="7125:7179" placeholder="SELECT id, u..clusters..." />
+            <marker date="1439470515502" expanded="true" signature="7242:7311" placeholder="SELECT id, u..clusters..." />
+            <marker date="1439470515502" expanded="true" signature="7728:7760" placeholder="SELECT * FRO..clusters..." />
+            <marker date="1439470515502" expanded="true" signature="8113:8192" placeholder="SELECT id, d..containers..." />
+            <marker date="1439470515502" expanded="true" signature="8298:8392" placeholder="SELECT id, d..containers..." />
+            <marker date="1439470515502" expanded="true" signature="8512:8609" placeholder="SELECT id, d..containers..." />
+            <marker date="1439470515502" expanded="true" signature="8736:8848" placeholder="SELECT id, d..containers..." />
+            <marker date="1439470515502" expanded="true" signature="9395:9484" placeholder="SELECT id, d..containers..." />
+            <marker date="1439470515502" expanded="true" signature="10046:10113" placeholder="SELECT id, c..containers..." />
+            <marker date="1439470515502" expanded="true" signature="10465:10484" placeholder="SELECT * FRO..proxy..." />
+            <marker date="1439470515502" expanded="true" signature="10572:10611" placeholder="SELECT * FRO..proxy..." />
+            <marker date="1439470515502" expanded="true" signature="10693:10730" placeholder="SELECT * FRO..proxy..." />
+            <marker date="1439470515502" expanded="true" signature="11024:11061" placeholder="DELETE FROM ..." />
+            <marker date="1439470515502" expanded="true" signature="11239:11271" placeholder="DELETE FROM ..." />
+            <marker date="1439470515502" expanded="true" signature="11445:11475" placeholder="DELETE FROM ..." />
+            <marker date="1439470515502" expanded="true" signature="11716:11810" placeholder="INSERT INTO ..." />
+            <marker date="1439470515502" expanded="true" signature="12091:12200" placeholder="SELECT id FR..applications..." />
+            <marker date="1439470515502" expanded="true" signature="12291:12325" placeholder="DELETE FROM ..." />
+            <marker date="1439470515502" expanded="true" signature="12514:12562" placeholder="UPDATE appli..." />
+            <marker date="1439470515502" expanded="true" signature="12743:12840" placeholder="UPDATE appli..." />
+            <marker date="1439470515502" expanded="true" signature="13019:13101" placeholder="UPDATE appli..." />
+            <marker date="1439470515502" expanded="true" signature="13271:13355" placeholder="UPDATE appli..." />
+            <marker date="1439470515502" expanded="true" signature="13582:13608" placeholder="SELECT * FRO..applications..." />
+            <marker date="1439470515502" expanded="true" signature="13671:13712" placeholder="SELECT * FRO..applications..." />
+            <marker date="1439470515502" expanded="true" signature="14009:14045" placeholder="SELECT * FRO..applications..." />
+            <marker date="1439470515502" expanded="true" signature="14282:14327" placeholder="SELECT id FR..applications..." />
+            <marker date="1439470515502" expanded="true" signature="14640:14681" placeholder="UPDATE proxy..." />
+            <marker date="1439470515502" expanded="true" signature="14870:14947" placeholder="SELECT clust..proxy..." />
           </folding>
         </state>
       </provider>

@@ -11,7 +11,7 @@ def get_container_addresses(container_id):
     proxy_list = state.get_proxies(container_id=container_id)
     urls = []
     for p in proxy_list:
-        external_url = _generate_proxied_url(p["proxy_id"])
+        external_url = _generate_proxied_url(p["id"])
         urls.append((p["service_name"], external_url))
     return urls
 

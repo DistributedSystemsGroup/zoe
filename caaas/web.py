@@ -86,7 +86,8 @@ def web_terminate(username, cluster_id):
     template_vars = {
         "cluster_name": cluster["name"],
         "cluster_id": cluster_id,
-        "user": username
+        "user": username,
+        "user_id": user_id
     }
     return render_template('terminate.html', **template_vars)
 
@@ -118,6 +119,7 @@ def web_spark_submit(username):
     user_id = state.get_user_id(username)
     # FIXME: check user_id
     template_vars = {
+        'user_id': user_id,
         'user': username
     }
     return render_template('submit.html', **template_vars)

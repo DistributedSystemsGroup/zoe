@@ -13,7 +13,7 @@
 <body>
     <script>
         function update_status() {
-            $.getJSON( api_endpoint + "/status")
+            $.getJSON("{{ url_for("api_status") }}")
                 .done(function( data ) {
                     $("#num_nodes").text(data.num_nodes);
                     $("#num_containers").text(data.num_containers);

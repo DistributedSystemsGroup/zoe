@@ -35,7 +35,7 @@ class CAaaState:
 
     def _check_user(self, username):
         cursor = self._get_cursor(dictionary=True)
-        q = "SELECT id FROM users WHERE username=%s"
+        q = "SELECT id FROM users WHERE email=%s"
 
         cursor.execute(q, (username,))
         if cursor.rowcount == 0:
@@ -48,18 +48,26 @@ class CAaaState:
 
     def _create_user(self, username):
         cursor = self._get_cursor()
-        q = "INSERT INTO users (username) VALUES (%s)"
+        q = "INSERT INTO users (email) VALUES (%s)"
         cursor.execute(q, (username,))
         user_id = cursor.lastrowid
         self._close_cursor(cursor)
         return user_id
+
+    def check_user_id(self, user_id):
+        cursor = self._get_cursor()
+        q = "SELECT COUNT(*) FROM users WHERE id=%s"
+        cursor.execute(q, (user_id,))
+        count = cursor.fetchone()[0]
+        self._close_cursor(cursor)
+        return count == 1
 
     def get_user_id(self, username):
         return self._check_user(username)
 
     def get_user_email(self, user_id):
         cursor = self._get_cursor()
-        q = "SELECT username FROM users WHERE id=%s"
+        q = "SELECT email FROM users WHERE id=%s"
         cursor.execute(q, (user_id,))
         row = cursor.fetchone()
         self._close_cursor(cursor)
@@ -67,7 +75,7 @@ class CAaaState:
 
     def get_all_users(self):
         cursor = self._get_cursor()
-        q = "SELECT id, username FROM users"
+        q = "SELECT id, email FROM users"
 
         user_list = []
         cursor.execute(q)
@@ -137,7 +145,7 @@ class CAaaState:
 
     def get_url_proxy(self, proxy_id):
         cursor = self._get_cursor()
-        q = "SELECT internal_url FROM proxy WHERE proxy_id=%s"
+        q = "SELECT internal_url FROM proxy WHERE id=%s"
         cursor.execute(q, (proxy_id,))
         if cursor.rowcount == 0:
             self._close_cursor(cursor)
@@ -149,7 +157,7 @@ class CAaaState:
 
     def get_proxy_for_service(self, cluster_id, service_name):
         cursor = self._get_cursor()
-        q = "SELECT proxy_id FROM proxy WHERE cluster_id=%s AND service_name=%s"
+        q = "SELECT id FROM proxy WHERE cluster_id=%s AND service_name=%s"
         cursor.execute(q, (cluster_id, service_name))
         if cursor.rowcount == 0:
             self._close_cursor(cursor)
@@ -184,7 +192,7 @@ class CAaaState:
 
     def new_proxy_entry(self, proxy_id, cluster_id, address, service_name, container_id):
         cursor = self._get_cursor()
-        q = "INSERT INTO proxy (proxy_id, internal_url, cluster_id, service_name, container_id)  VALUES (%s, %s, %s, %s, %s)"
+        q = "INSERT INTO proxy (id, internal_url, cluster_id, service_name, container_id)  VALUES (%s, %s, %s, %s, %s)"
         cursor.execute(q, (proxy_id, address, cluster_id, service_name, container_id))
         self._close_cursor(cursor)
         return proxy_id
@@ -384,7 +392,7 @@ class CAaaState:
 
     def update_proxy_access(self, proxy_id, access_ts):
         cursor = self._get_cursor()
-        q = "UPDATE proxy SET last_access=%s WHERE proxy_id=%s"
+        q = "UPDATE proxy SET last_access=%s WHERE id=%s"
         cursor.execute(q, (access_ts, proxy_id))
         self._close_cursor(cursor)
 

@@ -40,7 +40,7 @@
         var formData = new FormData($('#app_upload')[0]);
         $("#progress").show();
         $.ajax({
-            url: '/api/{{ user }}/spark-submit',  //Server script to process data
+            url: '{{ url_for("api_spark_submit", user_id=user_id) }}',  //Server script to process data
             type: 'POST',
             xhr: function() {  // Custom XMLHttpRequest
                 var myXhr = $.ajaxSettings.xhr();

@@ -3,7 +3,7 @@
 {% block content %}
 <script type="application/javascript">
     (function() {
-        $.getJSON( api_endpoint + "/{{ user }}/cluster/{{ cluster_id }}/terminate")
+        $.getJSON("{{ url_for("api_terminate_cluster", user_id, cluster_id) }}")
                 .done(function( data ) {
                     if (data.status == "ok") {
                         $("#result").empty().append("Cluster terminated succesfully");
