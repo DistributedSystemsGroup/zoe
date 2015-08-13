@@ -11,11 +11,12 @@ function process()
 </script>
 
 <form onSubmit="return process();">
-    <label for="user">Type your username to start:</label>
-    <input id="user" autofocus required type="email" autocomplete="on" name="email">
+    <label for="user">Type your email address to start:</label>
+    <input id="user" autofocus required type="email" autocomplete="on" name="email" size="30">
     <input type="submit" value="Start">
 </form>
 
-<p>To create a new user, just type a new username in the box above, only lowercase letters are accepted.</p>
+<p>If you are a new user, just type your email address in the box above, it will be used to send notifications about the applications
+    you start.</p>
 
 {% endblock %}

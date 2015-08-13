@@ -5,7 +5,7 @@
       <entry url="file://$PROJECT_DIR$">
         <entryData>
           <resourceRoots>
-            <path value="file://$PROJECT_DIR$/caaas/static" />
+            <path value="file://$PROJECT_DIR$/caaas" />
           </resourceRoots>
         </entryData>
       </entry>

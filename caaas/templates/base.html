@@ -8,6 +8,7 @@
     <script type="application/javascript">
         var api_endpoint = "/api";
     </script>
+    <link rel="stylesheet" href="/static/caaas.css" type="text/css">
     {% endblock %}
 </head>
 <body>
@@ -29,8 +30,17 @@
     <div id="content">{% block content %}{% endblock %}</div>
     <div id="footer">
         {% block footer %}
-            <div class="caaas_status"><p><em>CAaaS</em> status: <span id="num_nodes">N/A</span> available nodes, <span id="num_containers">N/A</span> containers running</p></div>
-            <h6>&copy; Copyright 2015 by <a href="http://distsysgroup.wordpress.com/">DSG</a></h6>
+            <div class="caaas_status_line">
+                <p>
+                    <span id="app_name"><a href="{{ url_for("web_status") }}">CAaaS</a></span>
+                    <span id="status">
+                        [<span id="num_nodes">N/A</span> swarm nodes, <span id="num_containers">N/A</span> active containers]
+                    </span>
+                </p>
+            </div>
+            <div class="copyright">
+                <h6>&copy; Copyright 2015 by <a href="http://distsysgroup.wordpress.com/">DSG</a></h6>
+            </div>
         {% endblock %}
     </div>
 </body>

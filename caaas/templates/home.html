@@ -1,22 +1,17 @@
-{% extends "base_user.html" %}
+{% extends "base.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
-<p>Start an activity:</p>
-<ul>
-    <li><a href="{{ url_for("web_notebook", user_id=user_id) }}">Give me a Spark notebook</a></li>
-    <li><a href="{{ url_for("web_spark_submit", user_id=user_id) }}">Submit a Spark application</a></li>
-</ul>
 
-<p>My activities:</p>
-<ul>
-    <li><a href="{{ url_for("web_user_apps", user_id=user_id) }}">Applications</a></li>
-</ul>
+    <div id="activities">
+        <a class="activity" href="{{ url_for("web_notebook", user_id=user_id) }}">Give me a Spark notebook</a>
 
-<p>Cluster status:</p>
-<ul>
-    <li><a href="{{ url_for("web_status") }}">Overview</a></li>
-</ul>
+        <a class="activity" href="{{ url_for("web_spark_submit", user_id=user_id) }}">Submit a Spark application</a>
 
-<p>Your email address used for notifications is: {{ email }}</p>
+        <a class="activity" href="{{ url_for("web_user_apps", user_id=user_id) }}">History</a>
+    </div>
+
+    <div class="user_info">
+        <p>Email address used for notifications: <a href="mailto:{{ email }}">{{ email }}</a></p>
+    </div>
 
 {% endblock %}
