@@ -2,13 +2,14 @@
 {% block title %}Submit Spark application{% endblock %}
 {% block content %}
     <h2>Submit Spark application</h2>
-    <p>Use the form below to submit a Spark application.</p>
+    <p>Use the form below to submit a Spark application.<br>
+    The application should be packaged in a zip archive containing all the files needed by the application.</p>
     <form enctype="multipart/form-data" id="app_upload">
         <label for="exec_name">Execution name:</label>
-        <input type="text" autofocus autocomplete="on" required pattern="[a-z0-9_\-]+" name="exec_name" id="exec_name"><br/>
+        <input type="text" autofocus autocomplete="on" required pattern="[a-z0-9_\-]+" name="exec_name" id="exec_name" placeholder="myapp-run-25"><br/>
 
         <label for="cmd_line">Command line:</label>
-        <input type="text" autocomplete="on" required name="cmd_line" id="cmd_line" size="150"><br/>
+        <input type="text" autocomplete="on" required name="cmd_line" id="cmd_line" size="150" placeholder="wordcount.py hdfs://192.168.45.157/datasets/gutenberg_big_2x.txt hdfs://192.168.45.157/tmp/cntwdc1"><br/>
 
         <label for="spark_options">Spark options:</label>
         <input type="text" autocomplete="on" name="spark_options" id="spark_options" size="100"><br/>

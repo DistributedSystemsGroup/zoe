@@ -1,12 +1,16 @@
-from docker import Client
-from docker import errors as docker_errors
-from docker.utils import create_host_config
 import time
 import os
 
-from caaas import CAaaState, SparkClusterDescription, AppHistory
+from docker import Client
+from docker import errors as docker_errors
+from docker.utils import create_host_config
+
+from caaas.cluster_description import SparkClusterDescription
+from caaas.config_parser import config
 from caaas.proxy_manager import get_notebook_address
-from utils import config, get_uuid
+from caaas.spark_app_execution import AppHistory
+from caaas.sql import CAaaState
+from caaas.utils import get_uuid
 
 REGISTRY = "10.0.0.2:5000"
 MASTER_IMAGE = REGISTRY + "/venza/spark-master:1.4.1"
@@ -66,7 +70,7 @@ class SwarmManager:
         self.last_update_timestamp = 0
 
     def connect(self):
-        manager = config.get_swarm_manager_address()
+        manager = config.docker_swarm_manager
         self.cli = Client(base_url=manager)
 
     def update_status(self):
@@ -157,7 +161,7 @@ class SwarmManager:
     def _spawn_spark_submit(self, user_id, cluster_id, app_id, cluster_descr, master_info):
         state = CAaaState()
         app = state.get_application(app_id)
-        app["path"] = os.path.join(config.volume_path(), str(user_id), str(app_id))
+        app["path"] = os.path.join(config.docker_volume_path, str(user_id), str(app_id))
         options = ContainerOptions()
         options.add_env_variable("SPARK_MASTER_IP", master_info["docker_ip"])
         options.add_env_variable("SPARK_EXECUTOR_RAM", cluster_descr.executor_ram_size)
@@ -233,3 +237,7 @@ class SwarmManager:
 
     def swarm_status(self):
         return self.cli.info()
+
+
+sm = SwarmManager()
+sm.connect()

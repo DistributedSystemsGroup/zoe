@@ -1,4 +1,5 @@
-from caaas import app, start_cleanup_thread
+from caaas import app
+from caaas.cleanup_thread import start_cleanup_thread
 
 
 def main():

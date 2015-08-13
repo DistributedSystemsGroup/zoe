@@ -10,12 +10,16 @@ db = caaas
 
 [proxy]
 base_url = http://some-host/some-path
+apache_config = /tmp/caaas-proxy.conf
+apache_access_log = /var/log/apache2/access.log
 
 [caaas]
 history_per_user_count = 20
 history_path = /var/cache/caaas/app_history
 cleanup_thread_interval = 5
 base_flask_url = http://bigfoot-m2.eurecom.fr
+cleanup_notebooks_older_than = 24
+cleanup_notebooks_warning = 22
 
 [smtp]
 user = user@gmail.com

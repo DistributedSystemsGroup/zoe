@@ -1,7 +1,10 @@
 from flask import render_template
 
-from caaas import app, sm, CAaaState
+from caaas import app
+from caaas.config_parser import config
 from caaas.proxy_manager import get_container_addresses
+from caaas.sql import CAaaState
+from caaas.swarm_manager import sm
 
 
 @app.route("/web/")
@@ -46,7 +49,9 @@ def web_notebook(username):
     user_id = state.get_user_id(username)
     template_vars = {
         "user": username,
-        "notebook_address": sm.get_notebook(user_id)
+        "notebook_address": sm.get_notebook(user_id),
+        "max_age": config.cleanup_notebooks_older_than,
+        "wrn_time": int(config.cleanup_notebooks_older_than) - int(config.cleanup_notebooks_warning)
     }
     return render_template('notebook.html', **template_vars)
 

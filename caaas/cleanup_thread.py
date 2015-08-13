@@ -1,15 +1,28 @@
+from datetime import datetime, timedelta
 import threading
 import time
+from traceback import print_exc
 import smtplib
 from email.mime.text import MIMEText
+
 from jinja2 import Template
 
-from caaas import CAaaState, sm
-from utils import config
+from caaas.config_parser import config
+from caaas.proxy_manager import get_notebook_address
+from caaas.sql import CAaaState
+from caaas.swarm_manager import sm
 
-EMAIL_TEMPLATE = """Application {{ name }} has finished executing after {{ runtime }}.
+APP_FINISH_EMAIL_TEMPLATE = """Application {{ name }} has finished executing after {{ runtime }}.
 
 At this URL you can download the execution logs: {{ log_url }}
+"""
+
+NOTEBOOK_KILLED_EMAIL_TEMPLATE = """Your Spark notebook has not been used in the past {{ max_age }} hours and has been terminated."""
+
+NOTEBOOK_WARNING_EMAIL_TEMPLATE = """Your Spark notebook has not been used in the past {{ wrn_age }} hours
+and will be terminated unless you access it in the next {{ grace_time }} hours.
+
+Notebook URL: {{ nb_url }}
 """
 
 
@@ -46,36 +59,72 @@ def start_cleanup_thread():
 
 def _loop():
     while True:
-        clean_completed_apps()
-        time.sleep(config.get_cleanup_interval())
+        # noinspection PyBroadException
+        try:
+            clean_completed_apps()
+            check_notebooks()
+            time.sleep(int(config.cleanup_thread_interval))
+        except:
+            print_exc()
+
+
+def check_notebooks():
+    state = CAaaState()
+    td = timedelta(hours=int(config.cleanup_notebooks_older_than))
+    old_age = datetime.now() - td
+    nb_too_old = state.get_old_spark_notebooks(old_age)
+    for cluster_id in nb_too_old:
+        user_id = state.get_cluster(cluster_id)["user_id"]
+        sm.terminate_cluster(cluster_id)
+        subject = "[CAaas] Notebook terminated"
+        user_email = state.get_user_email(user_id)
+        template_vars = {'max_age': config.cleanup_notebooks_older_than}
+        send_email(user_email, subject, NOTEBOOK_KILLED_EMAIL_TEMPLATE, template_vars)
+
+    td = timedelta(hours=int(config.cleanup_notebooks_warning))
+    wrn_age = datetime.now() - td
+    nb_wrn = state.get_old_spark_notebooks(wrn_age)
+    for cluster_id in nb_wrn:
+        user_id = state.get_cluster(cluster_id)["user_id"]
+        subject = "[CAaas] Notebook termination advance warning"
+        user_email = state.get_user_email(user_id)
+        template_vars = {
+            'grace_time': int(config.cleanup_notebooks_older_than) - int(config.cleanup_notebooks_warning),
+            'wrn_age': config.cleanup_notebooks_warning,
+            'nb_url': get_notebook_address(cluster_id)
+        }
+        send_email(user_email, subject, NOTEBOOK_WARNING_EMAIL_TEMPLATE, template_vars)
 
 
 def app_cleanup(app_id, cluster_id):
     sm.save_logs(app_id, cluster_id)
-    send_email(app_id)
-    sm.terminate_cluster(cluster_id)
 
-
-def send_email(app_id):
     state = CAaaState()
     app = state.get_application(app_id)
     username = state.get_user_email(app["user_id"])
-    jinja_template = Template(EMAIL_TEMPLATE)
-    body = jinja_template.render({
+    template_vars = {
         'cmdline': app["cmd"],
         'runtime': do_duration((app["time_finished"] - app["time_started"]).total_seconds()),
         'name': app["execution_name"],
-        'log_url': config.get_flask_server_url() + '/api/' + username + "/history/" + str(app_id) + "/logs"
-    })
+        'log_url': config.flask_base_url + "/api/{}/history/{}/logs".format(username, app_id)
+    }
+    subject = '[CAaaS] Spark execution {} finished'.format(app["execution_name"])
+    send_email(username, subject, APP_FINISH_EMAIL_TEMPLATE, template_vars)
+
+    sm.terminate_cluster(cluster_id)
+
+
+def send_email(address, subject, template, template_vars):
+    jinja_template = Template(template)
+    body = jinja_template.render(template_vars)
     msg = MIMEText(body)
-    msg['Subject'] = '[CAaaS] Spark execution {} finished'.format(app["execution_name"])
+    msg['Subject'] = subject
     msg['From'] = 'noreply@bigfoot.eurecom.fr'
-    msg['To'] = state.get_user_email(app["user_id"])
-    mail_server = config.get_smtp_info()
-    s = smtplib.SMTP(mail_server["server"])
+    msg['To'] = address
+    s = smtplib.SMTP(config.smtp_server)
     s.ehlo()
     s.starttls()
-    s.login(mail_server["user"], mail_server["pass"])
+    s.login(config.smtp_user, config.smtp_pass)
     s.send_message(msg)
     s.quit()
 

@@ -1,9 +1,9 @@
-from caaas import CAaaState
-from utils.config import get_proxy_base
+from caaas.sql import CAaaState
+from caaas.config_parser import config
 
 
 def _generate_proxied_url(proxy_id):
-    return get_proxy_base() + "/" + proxy_id
+    return config.proxy_base_url + "/" + proxy_id
 
 
 def get_container_addresses(container_id):

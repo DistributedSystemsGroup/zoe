@@ -2,7 +2,7 @@ import mysql.connector
 import mysql.connector.cursor
 import mysql.connector.errors
 
-from utils.config import get_database_config
+from caaas.config_parser import config
 
 
 class CAaaState:
@@ -12,7 +12,13 @@ class CAaaState:
     def _reconnect(self):
         if self.cnx is not None:
             self.cnx.disconnect()
-        db_config = get_database_config()
+        db_config = {
+            'user': config.db_user,
+            'password': config.db_pass,
+            'host': config.db_server,
+            'database': config.db_db,
+            'buffered': True
+        }
         self.cnx = mysql.connector.connect(**db_config)
 
     def _get_cursor(self, dictionary=False) -> mysql.connector.cursor.MySQLCursor:
@@ -163,8 +169,8 @@ class CAaaState:
 
     def set_master_address(self, cluster_id, address):
         cursor = self._get_cursor()
-        q = "UPDATE clusters SET master_address=%s WHERE clusters.id=%s"
-        print(address, cluster_id)
+        q = "UPDATE clusters SET master_address=%s WHERE id=%s"
+        cursor.execute(q, (address, cluster_id))
         self._close_cursor(cursor)
         cursor.close()
 
@@ -203,15 +209,10 @@ class CAaaState:
 
     def get_cluster(self, cluster_id):
         cursor = self._get_cursor(dictionary=True)
-        q = "SELECT user_id, master_address, name, time_created FROM clusters WHERE id=%s"
+        q = "SELECT * FROM clusters WHERE id=%s"
         cursor.execute(q, (cluster_id,))
         row = cursor.fetchone()
-        res = {
-            "user_id": row["user_id"],
-            "master_address": row["master_address"],
-            "name": row["name"],
-            "time_created": row["time_created"]
-        }
+        res = dict(row)
         self._close_cursor(cursor)
         return res
 
@@ -271,24 +272,19 @@ class CAaaState:
         return res
 
     def get_proxies(self, cluster_id=None, container_id=None):
-        cursor = self._get_cursor()
+        cursor = self._get_cursor(dictionary=True)
         if cluster_id is None and container_id is None:
-            q = "SELECT proxy_id, internal_url, service_name, container_id FROM proxy"
+            q = "SELECT * FROM proxy"
             cursor.execute(q)
         elif container_id is not None:
-            q = "SELECT proxy_id, internal_url, service_name, container_id FROM proxy WHERE container_id=%s"
+            q = "SELECT * FROM proxy WHERE container_id=%s"
             cursor.execute(q, (container_id,))
         else:
-            q = "SELECT proxy_id, internal_url, service_name, container_id FROM proxy WHERE cluster_id=%s"
+            q = "SELECT * FROM proxy WHERE cluster_id=%s"
             cursor.execute(q, (cluster_id,))
         proxy_list = []
-        for proxy_id, url, service_name, container_id in cursor:
-            proxy_list.append({
-                'proxy_id': proxy_id,
-                'internal_url': url,
-                'service_name': service_name,
-                'container_id': container_id
-            })
+        for row in cursor:
+            proxy_list.append(dict(row))
         self._close_cursor(cursor)
         return proxy_list
 
@@ -385,3 +381,17 @@ class CAaaState:
             res = None
         self._close_cursor(cursor)
         return res
+
+    def update_proxy_access(self, proxy_id, access_ts):
+        cursor = self._get_cursor()
+        q = "UPDATE proxy SET last_access=%s WHERE proxy_id=%s"
+        cursor.execute(q, (access_ts, proxy_id))
+        self._close_cursor(cursor)
+
+    def get_old_spark_notebooks(self, older_than):
+        cursor = self._get_cursor()
+        q = "SELECT cluster_id FROM proxy WHERE service_name='notebook' AND last_access < %s"
+        cursor.execute(q, (older_than,))
+        ret = [row[0] for row in cursor]
+        self._close_cursor(cursor)
+        return ret

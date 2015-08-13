@@ -2,14 +2,14 @@ from zipfile import ZipFile
 import os
 import shutil
 
-from caaas import CAaaState
-from utils import config
+from caaas.sql import CAaaState
+from caaas.config_parser import config
 
 
 class AppHistory:
     def __init__(self, user_id):
-        self.base_path = config.get_app_history_path()
-        self.per_user_max_count = config.get_app_history_count()
+        self.base_path = config.history_storage_path
+        self.per_user_max_count = int(config.history_per_user_count)
         self.user_id = str(user_id)
 
     def _app_path(self, app_id):
@@ -60,7 +60,7 @@ def application_submitted(user_id, execution_name, spark_options, commandline, f
 
 def setup_volume(user_id, app_id, app_pkg):
     app_pkg = ZipFile(app_pkg)
-    exec_path = config.volume_path()
+    exec_path = config.docker_volume_path
     exec_path = os.path.join(exec_path, str(user_id), str(app_id))
     os.makedirs(exec_path)
     app_pkg.extractall(exec_path)

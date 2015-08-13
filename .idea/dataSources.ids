@@ -43,6 +43,7 @@
       <column name="cluster_id" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <column name="service_name" sqlType="VARCHAR" precision="64" scale="0" nullable="true" jdbcType="12"/>
       <column name="container_id" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
+      <column name="last_access" sqlType="TIMESTAMP" precision="19" scale="0" nullable="true" jdbcType="93"/>
       <primary-key name="PRIMARY" columns="id"/>
     </table>
     <table name="users" schema="" catalog="caaas" type="TABLE">

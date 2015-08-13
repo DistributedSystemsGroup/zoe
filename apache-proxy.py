@@ -1,12 +1,17 @@
-from jinja2 import Template
 from hashlib import md5
 from os import system
 from time import sleep
 from urllib.parse import urlparse
+import re
+from datetime import datetime
 
-from caaas import CAaaState
+from jinja2 import Template
 
-OUTFILE = "/tmp/caaas-proxy.conf"
+from caaas.sql import CAaaState
+from caaas.config_parser import config
+
+LOOP_INTERVAL = 1  # seconds
+ACCESS_TIME_REFRESH_INTERVAL = 60  # seconds
 
 ENTRY_TEMPLATE = """
 # CAaaS proxy entry for service {{ service_name }}
@@ -63,7 +68,7 @@ def check_difference(generated_file):
     m_new.update(generated_file.encode('ascii'))
     m_old = md5()
     try:
-        m_old.update(open(OUTFILE).read().encode('ascii'))
+        m_old.update(open(config.proxy_apache_config).read().encode('ascii'))
     except FileNotFoundError:
         return True
     return m_new.digest() != m_old.digest()
@@ -71,7 +76,7 @@ def check_difference(generated_file):
 
 def commit_and_reload(generated_file):
     print("Apache config requires an update, committing and reloading")
-    open(OUTFILE, "w").write(generated_file)
+    open(config.proxy_apache_config, "w").write(generated_file)
     system("sudo service apache2 reload")
 
 
@@ -82,10 +87,33 @@ def update_proxy():
         commit_and_reload(output)
 
 
+def update_proxy_access_timestamps():
+    regex = re.compile('[0-9.]+ - - \[(.*)\] "GET /proxy/([0-9a-z\-]+)/')
+    log = open(config.proxy_apache_access_log, 'r')
+    last_accesses = {}
+    for line in log:
+        match = re.match(regex, line)
+        if match is not None:
+            proxy_id = match.group(2)
+            timestamp = datetime.strptime(match.group(1), "%d/%b/%Y:%H:%M:%S %z")
+            last_accesses[proxy_id] = timestamp
+
+    state = CAaaState()
+    for proxy in state.get_proxies():
+        proxy_id = proxy['proxy_id']
+        if proxy_id in last_accesses:
+            state.update_proxy_access(proxy_id, last_accesses[proxy_id])
+
+
 if __name__ == "__main__":
-    print("CAaaS Apache proxy synchronizer starting")
+    print("CAaaS Apache proxy synchronization starting")
+    access_time_refresh_delay = ACCESS_TIME_REFRESH_INTERVAL
     while True:
         # print("Checking proxy entries...")
         update_proxy()
         # print("Checking for completed applications to clean up")
-        sleep(1)
+        sleep(LOOP_INTERVAL)
+        access_time_refresh_delay -= LOOP_INTERVAL
+        if access_time_refresh_delay <= 0:
+            update_proxy_access_timestamps()
+            access_time_refresh_delay = ACCESS_TIME_REFRESH_INTERVAL

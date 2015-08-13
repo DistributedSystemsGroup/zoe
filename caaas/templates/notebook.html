@@ -5,4 +5,7 @@
 
 <p>You notebook is available at: <a href="{{ notebook_address }}">{{ notebook_address }}</a></p>
 
+    <p>Please note that notebooks are automatically terminated {{ max_age }} hours after the last time they are accessed.
+    A warning email will be sent {{ wrn_time }} hours before.</p>
+
 {% endblock %}
