@@ -30,7 +30,7 @@ def api_status():
     return jsonify(**data)
 
 
-@app.route("/api/<user_id>/cluster/<cluster_id>/terminate")
+@app.route("/api/<int:user_id>/cluster/<int:cluster_id>/terminate")
 def api_terminate_cluster(user_id, cluster_id):
     db = CAaaState()
     ret = {}
@@ -50,7 +50,7 @@ def api_terminate_cluster(user_id, cluster_id):
     return jsonify(**ret)
 
 
-@app.route("/api/<user_id>/container/<container_id>/logs")
+@app.route("/api/<int:user_id>/container/<int:container_id>/logs")
 def api_container_logs(user_id, container_id):
     db = CAaaState()
     ret = {}
@@ -69,7 +69,7 @@ def api_container_logs(user_id, container_id):
     return jsonify(**ret)
 
 
-@app.route("/api/<user_id>/spark-submit", methods=['POST'])
+@app.route("/api/<int:user_id>/spark-submit", methods=['POST'])
 def api_spark_submit(user_id):
     state = CAaaState()
     ret = {}
@@ -89,7 +89,7 @@ def api_spark_submit(user_id):
     return jsonify(**ret)
 
 
-@app.route("/api/<user_id>/history/<app_id>/logs")
+@app.route("/api/<int:user_id>/history/<app_id>/logs")
 def api_history_log_archive(user_id, app_id):
     state = CAaaState()
     if not state.check_user_id(user_id):

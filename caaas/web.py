@@ -27,7 +27,7 @@ def web_login(email):
     return redirect(url_for("web_index", user_id=user_id))
 
 
-@app.route("/web/<user_id>")
+@app.route("/web/<int:user_id>")
 def web_index(user_id):
     state = CAaaState()
     if not state.check_user_id(user_id):
@@ -39,7 +39,7 @@ def web_index(user_id):
     return render_template('home.html', **template_vars)
 
 
-@app.route("/web/<user_id>/apps")
+@app.route("/web/<int:user_id>/apps")
 def web_user_apps(user_id):
     state = CAaaState()
     if not state.check_user_id(user_id):
@@ -56,7 +56,7 @@ def web_user_apps(user_id):
     return render_template('apps.html', **template_vars)
 
 
-@app.route("/web/<user_id>/spark-notebook")
+@app.route("/web/<int:user_id>/spark-notebook")
 def web_notebook(user_id):
     state = CAaaState()
     if not state.check_user_id(user_id):
@@ -71,7 +71,7 @@ def web_notebook(user_id):
     return render_template('notebook.html', **template_vars)
 
 
-@app.route("/web/<user_id>/cluster/<cluster_id>/inspect")
+@app.route("/web/<int:user_id>/cluster/<int:cluster_id>/inspect")
 def web_inspect(user_id, cluster_id):
     state = CAaaState()
     if not state.check_user_id(user_id):
@@ -93,7 +93,7 @@ def web_inspect(user_id, cluster_id):
     return render_template('inspect.html', **template_vars)
 
 
-@app.route("/web/<user_id>/cluster/<cluster_id>/terminate")
+@app.route("/web/<int:user_id>/cluster/<int:cluster_id>/terminate")
 def web_terminate(user_id, cluster_id):
     state = CAaaState()
     if not state.check_user_id(user_id):
@@ -110,7 +110,7 @@ def web_terminate(user_id, cluster_id):
     return render_template('terminate.html', **template_vars)
 
 
-@app.route("/web/<user_id>/container/<container_id>/logs")
+@app.route("/web/<int:user_id>/container/<int:container_id>/logs")
 def web_logs(user_id, container_id):
     state = CAaaState()
     if not state.check_user_id(user_id):
@@ -133,7 +133,7 @@ def web_logs(user_id, container_id):
         return render_template('logs.html', **ret)
 
 
-@app.route("/web/<user_id>/submit-spark-app")
+@app.route("/web/<int:user_id>/submit-spark-app")
 def web_spark_submit(user_id):
     state = CAaaState()
     if not state.check_user_id(user_id):

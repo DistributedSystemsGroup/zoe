@@ -9,6 +9,7 @@
     {% if has_notebook %}
         <p>You have a notebook running:
         <a href="{{ notebook_address }}">open</a>
+        <a href="{{ url_for("web_inspect", user_id=user_id, cluster_id=notebook_cluster_id) }}">inspect</a>
         <a href="{{ url_for("web_terminate", user_id=user_id, cluster_id=notebook_cluster_id) }}">terminate</a>
         </p>
     {% endif %}

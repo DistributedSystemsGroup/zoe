@@ -2,23 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="75bc5abc-acc8-44ff-9d8a-85151a0cbca1" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/__init__.py" afterPath="$PROJECT_DIR$/caaas/__init__.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/api.py" afterPath="$PROJECT_DIR$/caaas/api.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/templates/apps.html" afterPath="$PROJECT_DIR$/caaas/templates/apps.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/templates/base_user.html" afterPath="$PROJECT_DIR$/caaas/templates/base_user.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/images/build_images.sh" afterPath="$PROJECT_DIR$/images/build_images.sh" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/images/gen_dockerfiles.py" afterPath="$PROJECT_DIR$/images/gen_dockerfiles.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/templates/home.html" afterPath="$PROJECT_DIR$/caaas/templates/home.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/templates/index.html" afterPath="$PROJECT_DIR$/caaas/templates/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/templates/inspect.html" afterPath="$PROJECT_DIR$/caaas/templates/inspect.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/sql.py" afterPath="$PROJECT_DIR$/caaas/sql.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/images/master/files/start-master.sh" afterPath="$PROJECT_DIR$/images/master/files/start-master.sh" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/images/files/start-worker.sh" afterPath="$PROJECT_DIR$/images/files/start-worker.sh" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/images/worker/files/start-worker.sh" afterPath="$PROJECT_DIR$/images/worker/files/start-worker.sh" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/templates/status.html" afterPath="$PROJECT_DIR$/caaas/templates/status.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/images/swarm_pull.sh" afterPath="$PROJECT_DIR$/images/swarm_pull.sh" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/utils.py" afterPath="$PROJECT_DIR$/caaas/utils.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas/web.py" afterPath="$PROJECT_DIR$/caaas/web.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="caaas.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -32,7 +19,7 @@
   </component>
   <component name="ChangesViewManager" flattened_view="true" show_ignored="false" />
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/caaas$main.coverage" NAME="main Coverage Results" MODIFIED="1439472255829" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
+    <SUITE FILE_PATH="coverage/caaas$main.coverage" NAME="main Coverage Results" MODIFIED="1439475055425" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/caaas$apache_proxy.coverage" NAME="apache-proxy Coverage Results" MODIFIED="1439272960154" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="CreatePatchCommitExecutor">
@@ -140,13 +127,47 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="swarm_manager.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="swarm_manager.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/caaas/swarm_manager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.6078665">
+            <state vertical-scroll-proportion="0.0">
               <caret line="30" column="21" selection-start-line="30" selection-start-column="21" selection-end-line="30" selection-end-column="21" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="apps.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/caaas/templates/apps.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-7.8461537">
+              <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="web.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/caaas/web.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="137" column="23" selection-start-line="137" selection-start-column="23" selection-end-line="137" selection-end-column="23" />
+              <folding>
+                <element signature="e#0#59#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="api.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/caaas/api.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.58894646">
+              <caret line="92" column="45" selection-start-line="92" selection-start-column="45" selection-end-line="92" selection-end-column="45" />
+              <folding>
+                <element signature="e#0#45#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -188,7 +209,7 @@
         <entry file="file://$PROJECT_DIR$/caaas/sql.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="305" column="8" selection-start-line="305" selection-start-column="8" selection-end-line="305" selection-end-column="8" />
+              <caret line="49" column="0" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
               <folding>
                 <element signature="e#0#22#0" expanded="true" />
                 <marker date="1439472763522" expanded="true" signature="1064:1101" placeholder="INSERT INTO ..." />
@@ -308,11 +329,8 @@
         <option value="$PROJECT_DIR$/caaas/proxy_manager.py" />
         <option value="$PROJECT_DIR$/caaas/templates/base_user.html" />
         <option value="$PROJECT_DIR$/caaas/templates/inspect.html" />
-        <option value="$PROJECT_DIR$/caaas/templates/apps.html" />
         <option value="$PROJECT_DIR$/caaas/templates/home.html" />
         <option value="$PROJECT_DIR$/caaas/sql.py" />
-        <option value="$PROJECT_DIR$/caaas/api.py" />
-        <option value="$PROJECT_DIR$/caaas/web.py" />
         <option value="$PROJECT_DIR$/caaas/templates/index.html" />
         <option value="$PROJECT_DIR$/caaas/__init__.py" />
         <option value="$PROJECT_DIR$/images/files/start-worker.sh" />
@@ -323,6 +341,9 @@
         <option value="$PROJECT_DIR$/images/worker/files/start-worker.sh" />
         <option value="$PROJECT_DIR$/images/swarm_pull.sh" />
         <option value="$PROJECT_DIR$/images/build_images.sh" />
+        <option value="$PROJECT_DIR$/caaas/templates/apps.html" />
+        <option value="$PROJECT_DIR$/caaas/web.py" />
+        <option value="$PROJECT_DIR$/caaas/api.py" />
       </list>
     </option>
   </component>
@@ -868,7 +889,7 @@
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32871974" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24967659" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.29988465" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.29988465" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32911393" sideWeight="0.49552238" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -927,7 +948,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="43" />
+      <option name="time" value="44" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
@@ -1164,14 +1185,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/caaas/templates/apps.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-12.769231">
-          <caret line="45" column="56" selection-start-line="45" selection-start-column="52" selection-end-line="45" selection-end-column="56" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/caaas/templates/home.html">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-13.076923">
@@ -1220,16 +1233,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/caaas/web.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="27" column="0" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#59#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/caaas/templates/index.html">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-5.230769">
@@ -1260,16 +1263,6 @@
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#40#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas/api.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="24" column="13" selection-start-line="24" selection-start-column="13" selection-end-line="24" selection-end-column="13" />
-          <folding>
-            <element signature="e#0#45#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1348,10 +1341,38 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/caaas/config_parser.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#37#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas/swarm_manager.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="30" column="21" selection-start-line="30" selection-start-column="21" selection-end-line="30" selection-end-column="21" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas/templates/apps.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-7.8461537">
+          <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/caaas/sql.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="305" column="8" selection-start-line="305" selection-start-column="8" selection-end-line="305" selection-end-column="8" />
+          <caret line="49" column="0" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
           <folding>
             <element signature="e#0#22#0" expanded="true" />
             <marker date="1439472763522" expanded="true" signature="1064:1101" placeholder="INSERT INTO ..." />
@@ -1406,22 +1427,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/caaas/config_parser.py">
+    <entry file="file://$PROJECT_DIR$/caaas/web.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+          <caret line="137" column="23" selection-start-line="137" selection-start-column="23" selection-end-line="137" selection-end-column="23" />
           <folding>
-            <element signature="e#0#37#0" expanded="true" />
+            <element signature="e#0#59#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/caaas/swarm_manager.py">
+    <entry file="file://$PROJECT_DIR$/caaas/api.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6078665">
-          <caret line="30" column="21" selection-start-line="30" selection-start-column="21" selection-end-line="30" selection-end-column="21" />
+        <state vertical-scroll-proportion="0.58894646">
+          <caret line="92" column="45" selection-start-line="92" selection-start-column="45" selection-end-line="92" selection-end-column="45" />
           <folding>
-            <element signature="e#0#11#0" expanded="true" />
+            <element signature="e#0#45#0" expanded="true" />
           </folding>
         </state>
       </provider>
