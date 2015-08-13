@@ -1,7 +1,7 @@
 {% extends "base_user.html" %}
-{% block title %}{{ user }} status{% endblock %}
+{% block title %}User usage history{% endblock %}
 {% block content %}
-<h2>Status overview for user {{ user }}</h2>
+<h2>Usage history</h2>
     {% if apps|length == 0 and not has_notebook %}
         <p>You have no clusters running at this time</p>
     {% endif %}
@@ -9,7 +9,7 @@
     {% if has_notebook %}
         <p>You have a notebook running:
         <a href="{{ notebook_address }}">open</a>
-        <a href="{{ url_for("web_terminate", username=user, cluster_id=notebook_cluster_id) }}">terminate</a>
+        <a href="{{ url_for("web_terminate", user_id=user_id, cluster_id=notebook_cluster_id) }}">terminate</a>
         </p>
     {% endif %}
 
@@ -35,15 +35,15 @@
             <td>{{ a["status"] }}</td>
             <td>
                 {% if a["status"] == "finished" %}
-                <a href="{{ url_for("api_history_log_archive", username=user, app_id=a["id"]) }}">Zip</a>
+                <a href="{{ url_for("api_history_log_archive", user_id=user_id, app_id=a["id"]) }}">Zip</a>
                 {% endif %}
                 {% if a["status"] == "running" %}
-                <a href="{{ url_for("web_inspect", username=user, app_id=a["cluster_id"]) }}">Inspect</a>
+                <a href="{{ url_for("web_inspect", user_id=user_id, app_id=a["cluster_id"]) }}">Inspect</a>
                 {% endif %}
             </td>
             <td>
                 {% if a["status"] == "running" %}
-                {{ url_for("web_terminate", username=user, cluster_id=a["cluster_id"]) }}
+                {{ url_for("web_terminate", user_id=user_id, cluster_id=a["cluster_id"]) }}
                 {% endif %}
             </td>
             </tr>

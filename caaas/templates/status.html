@@ -9,11 +9,10 @@
     <li>Memory limit: {{ MemoryLimit }}</li>
     <li>NCPU: {{ NCPU }}</li>
     <li>Driver status:</li>
-    <ul>
+    <li><ul>
         {% for entry in DriverStatus %}
             <li>{{ entry[0] }}: {{ entry[1] }}</li>
         {% endfor %}
+    </ul></li>
     </ul>
-    </ul>
-<div id="userlist"></div>
 {% endblock %}

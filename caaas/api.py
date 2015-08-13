@@ -10,6 +10,15 @@ from caaas.swarm_manager import sm
 STATS_CACHING_EXPIRATION = 1  # seconds
 
 
+@app.route("/api/login/<email>")
+def api_login(email):
+    state = CAaaState()
+    user_id = state.get_user_id(email)
+    if user_id is None:
+        user_id = state.new_user(email)
+    return jsonify(user_id=user_id)
+
+
 @app.route("/api/status")
 def api_status():
     if time.time() - sm.last_update_timestamp > STATS_CACHING_EXPIRATION:

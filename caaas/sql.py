@@ -33,23 +33,10 @@ class CAaaState:
         self.cnx.commit()
         cursor.close()
 
-    def _check_user(self, username):
-        cursor = self._get_cursor(dictionary=True)
-        q = "SELECT id FROM users WHERE email=%s"
-
-        cursor.execute(q, (username,))
-        if cursor.rowcount == 0:
-            self._close_cursor(cursor)
-            return self._create_user(username)
-        else:
-            row = cursor.fetchone()
-            self._close_cursor(cursor)
-            return row["id"]
-
-    def _create_user(self, username):
+    def new_user(self, email):
         cursor = self._get_cursor()
         q = "INSERT INTO users (email) VALUES (%s)"
-        cursor.execute(q, (username,))
+        cursor.execute(q, (email,))
         user_id = cursor.lastrowid
         self._close_cursor(cursor)
         return user_id
@@ -62,8 +49,16 @@ class CAaaState:
         self._close_cursor(cursor)
         return count == 1
 
-    def get_user_id(self, username):
-        return self._check_user(username)
+    def get_user_id(self, email):
+        cursor = self._get_cursor()
+        q = "SELECT id FROM users WHERE email=%s"
+        cursor.execute(q, (email,))
+        if cursor.rowcount == 0:
+            return None
+        else:
+            row = cursor.fetchone()[0]
+            self._close_cursor(cursor)
+            return row
 
     def get_user_email(self, user_id):
         cursor = self._get_cursor()

@@ -5,15 +5,14 @@
 <script>
 function process()
 {
-    var url = "http://" + window.location.hostname + "/web/" +  $("#user").val();
-    location.href = url;
+    location.href = "http://" + window.location.hostname + "/web/login/" +  $("#user").val();
     return false;
 }
 </script>
 
 <form onSubmit="return process();">
     <label for="user">Type your username to start:</label>
-    <input id="user" autofocus required type="email" autocomplete="on">
+    <input id="user" autofocus required type="email" autocomplete="on" name="email">
     <input type="submit" value="Start">
 </form>
 

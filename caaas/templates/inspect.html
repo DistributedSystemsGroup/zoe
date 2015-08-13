@@ -10,7 +10,7 @@
             {% for p in c[1] %}
                 <li><a href="{{ p[1] }}">{{ p[0] }}</a></li>
             {% endfor %}
-            <li><a href="/web/{{ user }}/container/{{ c[2] }}/logs">Logs</a></li>
+            <li><a href="{{ url_for("web_logs", user_id=user_id, container_id=c[2]) }}">Logs</a></li>
         </ul>
     {% endfor %}
 </ul>

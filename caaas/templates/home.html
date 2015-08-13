@@ -3,13 +3,13 @@
 {% block content %}
 <p>Start an activity:</p>
 <ul>
-    <li><a href="{{ url_for("web_notebook", username=user) }}">Give me a Spark notebook</a></li>
-    <li><a href="{{ url_for("web_spark_submit", username=user) }}">Submit a Spark application</a></li>
+    <li><a href="{{ url_for("web_notebook", user_id=user_id) }}">Give me a Spark notebook</a></li>
+    <li><a href="{{ url_for("web_spark_submit", user_id=user_id) }}">Submit a Spark application</a></li>
 </ul>
 
 <p>My activities:</p>
 <ul>
-    <li><a href="{{ url_for("web_user_apps", username=user) }}">Applications</a></li>
+    <li><a href="{{ url_for("web_user_apps", user_id=user_id) }}">Applications</a></li>
 </ul>
 
 <p>Cluster status:</p>
@@ -17,6 +17,6 @@
     <li><a href="{{ url_for("web_status") }}">Overview</a></li>
 </ul>
 
-
+<p>Your email address used for notifications is: {{ email }}</p>
 
 {% endblock %}

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Aug 06, 2015 at 10:16 AM
+-- Generation Time: Aug 13, 2015 at 03:56 PM
 -- Server version: 5.5.44-MariaDB-1ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.11
 
@@ -25,6 +25,26 @@ USE `caaas`;
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `applications`
+--
+
+DROP TABLE IF EXISTS `applications`;
+CREATE TABLE IF NOT EXISTS `applications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `execution_name` varchar(512) NOT NULL,
+  `cmd` varchar(1024) NOT NULL,
+  `spark_options` varchar(1024) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `time_started` timestamp NULL DEFAULT NULL,
+  `time_finished` timestamp NULL DEFAULT NULL,
+  `cluster_id` int(11) DEFAULT NULL,
+  `status` varchar(16) CHARACTER SET ascii NOT NULL DEFAULT 'setup',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=22 ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `clusters`
 --
 
@@ -34,8 +54,9 @@ CREATE TABLE IF NOT EXISTS `clusters` (
   `user_id` int(11) NOT NULL,
   `master_address` varchar(512) CHARACTER SET ascii NOT NULL,
   `name` varchar(256) NOT NULL,
+  `time_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=11 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=53 ;
 
 -- --------------------------------------------------------
 
@@ -52,24 +73,7 @@ CREATE TABLE IF NOT EXISTS `containers` (
   `ip_address` varchar(16) NOT NULL,
   `contents` varchar(512) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=37 ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `notebooks`
---
-
-DROP TABLE IF EXISTS `notebooks`;
-CREATE TABLE IF NOT EXISTS `notebooks` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `cluster_id` int(11) NOT NULL,
-  `time_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `address` varchar(512) CHARACTER SET ascii NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `container_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=250 ;
 
 -- --------------------------------------------------------
 
@@ -79,14 +83,14 @@ CREATE TABLE IF NOT EXISTS `notebooks` (
 
 DROP TABLE IF EXISTS `proxy`;
 CREATE TABLE IF NOT EXISTS `proxy` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `proxy_id` varchar(512) NOT NULL,
-  `url` varchar(512) NOT NULL,
+  `id` varchar(128) CHARACTER SET ascii NOT NULL,
+  `internal_url` varchar(512) DEFAULT NULL,
   `cluster_id` int(11) NOT NULL,
-  `proxy_type` varchar(64) NOT NULL,
+  `service_name` varchar(64) DEFAULT NULL,
   `container_id` int(11) NOT NULL,
+  `last_access` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=37 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -97,7 +101,7 @@ CREATE TABLE IF NOT EXISTS `proxy` (
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `username` varchar(32) NOT NULL,
+  `email` varchar(128) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;
 
