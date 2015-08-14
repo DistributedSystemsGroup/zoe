@@ -1,4 +1,4 @@
-from flask import jsonify, request, send_file
+from flask import jsonify, request, send_file, abort
 import time
 from zipfile import is_zipfile
 
@@ -38,7 +38,10 @@ def api_terminate_cluster(user_id, cluster_id):
         ret["status"] = "unauthorized"
         return jsonify(**ret)
 
+    cluster_id = str(cluster_id)
     cluster_list = db.get_clusters(user_id)
+    if cluster_id not in cluster_list:
+        return abort(404)
     if cluster_list[cluster_id]["user_id"] != user_id:
         ret["status"] = "unauthorized"
         return jsonify(**ret)

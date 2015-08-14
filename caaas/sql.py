@@ -202,7 +202,7 @@ class CAaaState:
             q = "SELECT id, user_id, master_address, name FROM clusters WHERE user_id=%s"
             cursor.execute(q, (user_id,))
         for row in cursor:
-            res[str(row["id"])] = {
+            res[str(row["id"])] = {  # FIXME: IDs should be int or str, no casting!
                 "user_id": row["user_id"],
                 "master_address": row["master_address"],
                 "name": row["name"]
@@ -354,10 +354,10 @@ class CAaaState:
     def get_applications(self, user_id=None) -> dict:
         cursor = self._get_cursor(dictionary=True)
         if user_id is None:
-            q = "SELECT * FROM applications"
+            q = "SELECT * FROM applications ORDER BY time_started DESC"
             cursor.execute(q)
         else:
-            q = "SELECT * FROM applications WHERE user_id=%s"
+            q = "SELECT * FROM applications WHERE user_id=%s ORDER BY time_started DESC"
             cursor.execute(q, (user_id,))
         res = []
         for row in cursor:

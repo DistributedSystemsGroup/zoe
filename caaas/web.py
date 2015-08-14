@@ -2,7 +2,7 @@ from flask import render_template, redirect, url_for, abort
 
 from caaas import app
 from caaas.config_parser import config
-from caaas.proxy_manager import get_container_addresses
+from caaas.proxy_manager import get_container_addresses, get_notebook_address
 from caaas.sql import CAaaState
 from caaas.swarm_manager import sm
 
@@ -46,12 +46,13 @@ def web_user_apps(user_id):
         return redirect(url_for('index'))
 
     apps = state.get_applications(user_id)
+    nb_id = state.get_notebook(user_id)
     template_vars = {
         "user_id": user_id,
         "apps": apps,
         "has_notebook": state.has_notebook(user_id),
-        "notebook_address": sm.get_notebook(user_id),
-        "notebook_cluster_id": state.get_notebook(user_id)
+        "notebook_address": get_notebook_address(nb_id),
+        "notebook_cluster_id": nb_id
     }
     return render_template('apps.html', **template_vars)
 

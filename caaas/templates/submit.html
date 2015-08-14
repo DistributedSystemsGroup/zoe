@@ -29,7 +29,8 @@
     }
 
     function completeHandler(e) {
-        $("#progress").hide();
+        location.href = "http://" + window.location.hostname + "/web/{{ user_id }}/apps";
+        return false;
     }
 
     function errorHandler(e) {

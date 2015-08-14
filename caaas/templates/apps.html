@@ -26,11 +26,12 @@
         <th>Logs</th>
     </tr>
     </thead>
+    <tbody>
         {% for a in apps %}
-            <tr>
+            <tr class="{{ loop.cycle('odd', 'even') }}">
             <td>{{ a["execution_name"] }}</td>
-            <td>{{ a["cmd"] }}</td>
-            <td>{{ a["spark_options"] }}</td>
+            <td class="long-text">{{ a["cmd"] }}</td>
+            <td class="long-text">{{ a["spark_options"] }}</td>
             <td>{{ a["time_started"] }}</td>
             <td>{{ a["time_finished"] }}</td>
             <td>{{ a["status"] }}</td>
@@ -39,16 +40,17 @@
                 <a href="{{ url_for("api_history_log_archive", user_id=user_id, app_id=a["id"]) }}">Zip</a>
                 {% endif %}
                 {% if a["status"] == "running" %}
-                <a href="{{ url_for("web_inspect", user_id=user_id, app_id=a["cluster_id"]) }}">Inspect</a>
+                <a href="{{ url_for("web_inspect", user_id=user_id, cluster_id=a["cluster_id"]) }}">Inspect</a>
                 {% endif %}
             </td>
             <td>
                 {% if a["status"] == "running" %}
-                {{ url_for("web_terminate", user_id=user_id, cluster_id=a["cluster_id"]) }}
+                <a href="{{ url_for("web_terminate", user_id=user_id, cluster_id=a["cluster_id"]) }}">Terminate</a>
                 {% endif %}
             </td>
             </tr>
             <!-- FIXME: add a re-run link -->
         {% endfor %}
+    </tbody>
     </table>
 {% endblock %}

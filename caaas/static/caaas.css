@@ -41,6 +41,22 @@ div.user_info {
     padding-top: 20px;
 }
 
+table#app_list {
+    border-collapse: collapse;
+}
+
+table#app_list tr {
+    border-top: 1px black solid;
+}
+
+table#app_list td {
+    padding-right: 1.5em;
+}
+
+td.long-text {
+    font-size: xx-small;
+}
+
 div.caaas_status_line {
     float: left;
 }

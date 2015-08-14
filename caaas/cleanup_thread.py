@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
-import threading
 import time
 from traceback import print_exc
 import smtplib
 from email.mime.text import MIMEText
+import logging
+log = logging.getLogger(__name__)
 
 from jinja2 import Template
 
@@ -51,21 +52,15 @@ def do_duration(seconds):
     return template.format(d=d, h=h, m=m, s=s)
 
 
-def start_cleanup_thread():
-    th = threading.Thread(target=_loop)
-    th.daemon = True
-    th.start()
-
-
-def _loop():
-    while True:
-        # noinspection PyBroadException
-        try:
-            clean_completed_apps()
-            check_notebooks()
-            time.sleep(int(config.cleanup_thread_interval))
-        except:
-            print_exc()
+def cleanup_task():
+    ts = time.time()
+    # noinspection PyBroadException
+    try:
+        clean_completed_apps()
+        check_notebooks()
+    except:
+        print_exc()
+    log.debug("Cleanup task completed in {:.3}s".format(time.time() - ts))
 
 
 def check_notebooks():
@@ -101,15 +96,15 @@ def app_cleanup(app_id, cluster_id):
 
     state = CAaaState()
     app = state.get_application(app_id)
-    username = state.get_user_email(app["user_id"])
+    email = state.get_user_email(app["user_id"])
     template_vars = {
         'cmdline': app["cmd"],
         'runtime': do_duration((app["time_finished"] - app["time_started"]).total_seconds()),
         'name': app["execution_name"],
-        'log_url': config.flask_base_url + "/api/{}/history/{}/logs".format(username, app_id)
+        'log_url': config.flask_base_url + "/api/{}/history/{}/logs".format(app["user_id"], app_id)
     }
     subject = '[CAaaS] Spark execution {} finished'.format(app["execution_name"])
-    send_email(username, subject, APP_FINISH_EMAIL_TEMPLATE, template_vars)
+    send_email(email, subject, APP_FINISH_EMAIL_TEMPLATE, template_vars)
 
     sm.terminate_cluster(cluster_id)
 
@@ -134,7 +129,7 @@ def clean_completed_apps():
     cont_ids = state.get_submit_containers()
     for cont_id, cluster_id in cont_ids:
         if not sm.check_container_alive(cont_id):
-            print("Found an app to cleanup")
             app_id = state.find_app_for_cluster(cluster_id)
+            log.info("App {} needs to be cleaned up".format(app_id))
             state.application_finished(app_id)
             app_cleanup(app_id, cluster_id)

@@ -3,7 +3,10 @@ from caaas.config_parser import config
 
 
 def _generate_proxied_url(proxy_id):
-    return config.proxy_base_url + "/" + proxy_id
+    if proxy_id is not None:
+        return config.proxy_base_url + "/" + proxy_id
+    else:
+        return None
 
 
 def get_container_addresses(container_id):
