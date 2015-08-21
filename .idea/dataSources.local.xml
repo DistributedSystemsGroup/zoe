@@ -7,5 +7,11 @@
       <schema-pattern>caaas.*</schema-pattern>
       <default-schemas>caaas.*</default-schemas>
     </data-source>
+    <data-source name="MySQL - @m1 devel" uuid="33b1ec79-4374-4ff8-a8f8-26c89b418a79">
+      <secret-storage>master_key</secret-storage>
+      <user-name>caaas_devel</user-name>
+      <schema-pattern>caaas.*</schema-pattern>
+      <default-schemas>caaas.*</default-schemas>
+    </data-source>
   </component>
 </project>

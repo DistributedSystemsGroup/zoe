@@ -10,6 +10,6 @@ class CAaasConfig:
         found = parser.read(conf_file)
         if not found:
             raise ValueError('Configuration file not found')
-        self.__dict__.update(parser.items('caaas'))
+        self.__dict__.update(parser.items('caaas_web'))
 
-config = CAaasConfig(os.path.join(MAIN_PATH, 'caaas.ini'))
+config = CAaasConfig(os.path.join(MAIN_PATH, 'caaas_web.ini'))

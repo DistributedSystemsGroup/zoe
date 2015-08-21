@@ -2,10 +2,10 @@ from flask import jsonify, request, send_file, abort
 import time
 from zipfile import is_zipfile
 
-from caaas import app
-from caaas.sql import CAaaState
-from caaas.spark_app_execution import application_submitted, setup_volume, AppHistory
-from caaas.swarm_manager import sm
+from caaas_web import app
+from caaas_web.sql import CAaaState
+from caaas_web.spark_app_execution import application_submitted, setup_volume, AppHistory
+from caaas_web.swarm_manager import sm
 
 STATS_CACHING_EXPIRATION = 1  # seconds
 

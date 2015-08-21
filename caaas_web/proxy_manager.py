@@ -1,5 +1,5 @@
-from caaas.sql import CAaaState
-from caaas.config_parser import config
+from caaas_web.sql import CAaaState
+from caaas_web.config_parser import config
 
 
 def _generate_proxied_url(proxy_id):

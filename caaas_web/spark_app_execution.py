@@ -2,8 +2,8 @@ from zipfile import ZipFile
 import os
 import shutil
 
-from caaas.sql import CAaaState
-from caaas.config_parser import config
+from caaas_web.sql import CAaaState
+from caaas_web.config_parser import config
 
 
 class AppHistory:

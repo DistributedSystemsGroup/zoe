@@ -3,12 +3,12 @@ from tornado.wsgi import WSGIContainer
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop, PeriodicCallback
 
-from caaas import app
-from caaas.cleanup_thread import cleanup_task
-from caaas.config_parser import config
+from caaas_web import app
+from caaas_web.cleanup_thread import cleanup_task
+from caaas_web.config_parser import config
 
 DEBUG = True
-log = logging.getLogger("caaas")
+log = logging.getLogger("caaas_web")
 
 
 def main():

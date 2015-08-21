@@ -2,7 +2,7 @@ import mysql.connector
 import mysql.connector.cursor
 import mysql.connector.errors
 
-from caaas.config_parser import config
+from caaas_web.config_parser import config
 
 
 class CAaaState:

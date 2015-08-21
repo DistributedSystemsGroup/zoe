@@ -1,5 +1,5 @@
 from flask import Flask
 app = Flask(__name__)
 
-import caaas.web
-import caaas.api
+import caaas_web.web
+import caaas_web.api

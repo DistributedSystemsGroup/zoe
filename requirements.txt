@@ -2,3 +2,5 @@ tornado
 Flask
 docker-py
 mysql-connector-python
+SQLAlchemy
+rpyc

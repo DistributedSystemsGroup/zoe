@@ -5,12 +5,12 @@ from docker import Client
 from docker import errors as docker_errors
 from docker.utils import create_host_config
 
-from caaas.cluster_description import SparkClusterDescription
-from caaas.config_parser import config
-from caaas.proxy_manager import get_notebook_address
-from caaas.spark_app_execution import AppHistory
-from caaas.sql import CAaaState
-from caaas.utils import get_uuid
+from caaas_web.cluster_description import SparkClusterDescription
+from caaas_web.config_parser import config
+from caaas_web.proxy_manager import get_notebook_address
+from caaas_web.spark_app_execution import AppHistory
+from caaas_web.sql import CAaaState
+from caaas_web.utils import get_uuid
 
 REGISTRY = "10.0.0.2:5000"
 MASTER_IMAGE = REGISTRY + "/venza/spark-master:1.4.1"

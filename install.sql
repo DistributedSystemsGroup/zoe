@@ -17,7 +17,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8 */;
 
 --
--- Database: `caaas`
+-- Database: `caaas_web`
 --
 CREATE DATABASE IF NOT EXISTS `caaas` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 USE `caaas`;

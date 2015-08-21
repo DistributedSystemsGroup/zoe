@@ -8,10 +8,10 @@ log = logging.getLogger(__name__)
 
 from jinja2 import Template
 
-from caaas.config_parser import config
-from caaas.proxy_manager import get_notebook_address
-from caaas.sql import CAaaState
-from caaas.swarm_manager import sm
+from caaas_web.config_parser import config
+from caaas_web.proxy_manager import get_notebook_address
+from caaas_web.sql import CAaaState
+from caaas_web.swarm_manager import sm
 
 APP_FINISH_EMAIL_TEMPLATE = """Application {{ name }} has finished executing after {{ runtime }}.
 

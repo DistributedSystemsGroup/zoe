@@ -1,10 +1,10 @@
 from flask import render_template, redirect, url_for, abort
 
-from caaas import app
-from caaas.config_parser import config
-from caaas.proxy_manager import get_container_addresses, get_notebook_address
-from caaas.sql import CAaaState
-from caaas.swarm_manager import sm
+from caaas_web import app
+from caaas_web.config_parser import config
+from caaas_web.proxy_manager import get_container_addresses, get_notebook_address
+from caaas_web.sql import CAaaState
+from caaas_web.swarm_manager import sm
 
 
 @app.route("/web/")

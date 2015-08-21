@@ -7,8 +7,8 @@ from datetime import datetime
 
 from jinja2 import Template
 
-from caaas.sql import CAaaState
-from caaas.config_parser import config
+from caaas_web.sql import CAaaState
+from caaas_web.config_parser import config
 
 LOOP_INTERVAL = 1  # seconds
 ACCESS_TIME_REFRESH_INTERVAL = 60  # seconds
