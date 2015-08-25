@@ -1,5 +1,10 @@
+import time
+import logging
+log = logging.getLogger(__name__)
+
 import docker
 import docker.utils
+import docker.errors
 
 from common.configuration import conf
 
@@ -27,9 +32,10 @@ class SwarmClient:
         assert 'Filters' in info["DriverStatus"][idx][0]
         pl_status.active_filters = info["DriverStatus"][idx][1].split(", ")
 
+        pl_status.timestamp = time.time()
         return pl_status
 
-    def spawn_container(self, image, options):
+    def spawn_container(self, image, options) -> dict:
         host_config = docker.utils.create_host_config(network_mode="bridge",
                                                       binds=options.get_volume_binds(),
                                                       mem_limit=options.get_memory_limit())
@@ -40,13 +46,23 @@ class SwarmClient:
                                          detach=True,
                                          volumes=options.get_volumes(),
                                          command=options.get_command())
-        self.cli.start(container=cont.get('Id'))
-        return self.inspect_container(cont.get('Id'))
+        try:
+            self.cli.start(container=cont.get('Id'))
+            info = self.inspect_container(cont.get('Id'))
+        except docker.errors.APIError as e:
+            self.cli.remove_container(container=cont.get('Id'), force=True)
+            log.error(str(e))
+            return None
+        return info
 
-    def inspect_container(self, docker_id):
-        docker_info = self.cli.inspect_container(container=docker_id)
+    def inspect_container(self, docker_id) -> dict:
+        try:
+            docker_info = self.cli.inspect_container(container=docker_id)
+        except docker.errors.APIError:
+            return None
         info = {
-            "docker_ip": docker_info["NetworkSettings"]["IPAddress"]
+            "ip_address": docker_info["NetworkSettings"]["IPAddress"],
+            "docker_id": docker_id
         }
         return info
 

@@ -10,12 +10,10 @@ from common.status import PlatformStatusReport
 class PlatformStatus:
     def __init__(self):
         self.swarm_status = SwarmStatus()
-        self.swarm_status_timestamp = time.time()
         self.swarm = SwarmClient()
 
     def update(self):
         self.swarm_status = self.swarm.info()
-        self.swarm_status_timestamp = time.time()
 
     def update_task(self, interval):
         self.update()
@@ -23,4 +21,5 @@ class PlatformStatus:
 
     def generate_report(self) -> PlatformStatusReport:
         report = PlatformStatusReport()
+        report.include_swarm_status(self.swarm_status)
         return report

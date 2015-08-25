@@ -2,93 +2,33 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="75bc5abc-acc8-44ff-9d8a-85151a0cbca1" name="Default" comment="Fix a few bugs and add some css to the apps page">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/caaas_client/__init__.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/caaas_scheduler/__init__.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/common/__init__.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/common/state/__init__.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/common/state/application.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/common/application_resources.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/caaas-scheduler.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/caaasctl.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/caaas_client/client.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/common/state/cluster.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/common/configuration.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/common/state/container.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/common/exceptions.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/caaas_scheduler/periodic_tasks.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/caaas_scheduler/platform.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/caaas_scheduler/platform_status.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/caaas_scheduler/rpyc_server.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/caaas_scheduler/rpyc_service.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/caaas_scheduler/scheduler.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/common/status.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/caaas_scheduler/swarm_client.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/caaas_scheduler/swarm_status.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/common/state/user.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/common/state/execution.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/common/state/proxy.py" />
+      <change type="DELETED" beforePath="E:\User Data\vcs\caaas\caaas.ini.template" afterPath="" />
+      <change type="DELETED" beforePath="E:\User Data\vcs\caaas\install.sql" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dataSources.ids" afterPath="$PROJECT_DIR$/.idea/dataSources.ids" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apache-proxy.py" afterPath="$PROJECT_DIR$/apache-proxy.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/common/state/__init__.py" afterPath="$PROJECT_DIR$/common/state/__init__.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/common/state/application.py" afterPath="$PROJECT_DIR$/common/state/application.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/common/application_resources.py" afterPath="$PROJECT_DIR$/common/application_resources.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas-scheduler.py" afterPath="$PROJECT_DIR$/caaas-scheduler.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaasctl.py" afterPath="$PROJECT_DIR$/caaasctl.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas_client/client.py" afterPath="$PROJECT_DIR$/caaas_client/client.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/common/state/cluster.py" afterPath="$PROJECT_DIR$/common/state/cluster.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/common/configuration.py" afterPath="$PROJECT_DIR$/common/configuration.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/common/state/container.py" afterPath="$PROJECT_DIR$/common/state/container.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dataSources.xml" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/encodings.xml" afterPath="$PROJECT_DIR$/.idea/encodings.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/install.sql" afterPath="$PROJECT_DIR$/install.sql" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/requirements.txt" afterPath="$PROJECT_DIR$/requirements.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/webResources.xml" afterPath="$PROJECT_DIR$/.idea/webResources.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/common/exceptions.py" afterPath="$PROJECT_DIR$/common/exceptions.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas_scheduler/platform.py" afterPath="$PROJECT_DIR$/caaas_scheduler/platform.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas_scheduler/platform_status.py" afterPath="$PROJECT_DIR$/caaas_scheduler/platform_status.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas_scheduler/rpyc_server.py" afterPath="$PROJECT_DIR$/caaas_scheduler/rpyc_server.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas_scheduler/rpyc_service.py" afterPath="$PROJECT_DIR$/caaas_scheduler/rpyc_service.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas_scheduler/scheduler.py" afterPath="$PROJECT_DIR$/caaas_scheduler/scheduler.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/common/status.py" afterPath="$PROJECT_DIR$/common/status.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas_scheduler/swarm_client.py" afterPath="$PROJECT_DIR$/caaas_scheduler/swarm_client.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/caaas_scheduler/swarm_status.py" afterPath="$PROJECT_DIR$/caaas_scheduler/swarm_status.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\__init__.py" afterPath="$PROJECT_DIR$/caaas_web/__init__.py" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\api.py" afterPath="$PROJECT_DIR$/caaas_web/api.py" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\cleanup_thread.py" afterPath="$PROJECT_DIR$/caaas_web/cleanup_thread.py" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\cluster_description.py" afterPath="$PROJECT_DIR$/caaas_web/cluster_description.py" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\config_parser.py" afterPath="$PROJECT_DIR$/caaas_web/config_parser.py" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\proxy_manager.py" afterPath="$PROJECT_DIR$/caaas_web/proxy_manager.py" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\spark_app_execution.py" afterPath="$PROJECT_DIR$/caaas_web/spark_app_execution.py" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\sql.py" afterPath="$PROJECT_DIR$/caaas_web/sql.py" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\static\caaas.css" afterPath="$PROJECT_DIR$/caaas_web/static/caaas.css" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\static\jquery-2.1.4.min.js" afterPath="$PROJECT_DIR$/caaas_web/static/jquery-2.1.4.min.js" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\swarm_manager.py" afterPath="$PROJECT_DIR$/caaas_web/swarm_manager.py" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\templates\apps.html" afterPath="$PROJECT_DIR$/caaas_web/templates/apps.html" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\templates\base.html" afterPath="$PROJECT_DIR$/caaas_web/templates/base.html" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\templates\base_user.html" afterPath="$PROJECT_DIR$/caaas_web/templates/base_user.html" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\templates\home.html" afterPath="$PROJECT_DIR$/caaas_web/templates/home.html" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\templates\index.html" afterPath="$PROJECT_DIR$/caaas_web/templates/index.html" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\templates\inspect.html" afterPath="$PROJECT_DIR$/caaas_web/templates/inspect.html" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\templates\logs.html" afterPath="$PROJECT_DIR$/caaas_web/templates/logs.html" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\templates\notebook.html" afterPath="$PROJECT_DIR$/caaas_web/templates/notebook.html" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\templates\status.html" afterPath="$PROJECT_DIR$/caaas_web/templates/status.html" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\templates\submit.html" afterPath="$PROJECT_DIR$/caaas_web/templates/submit.html" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\templates\terminate.html" afterPath="$PROJECT_DIR$/caaas_web/templates/terminate.html" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\utils.py" afterPath="$PROJECT_DIR$/caaas_web/utils.py" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\caaas\web.py" afterPath="$PROJECT_DIR$/caaas_web/web.py" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\build_images.sh" afterPath="$PROJECT_DIR$/scripts/images/build_images.sh" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\files\remove_alias.sh" afterPath="$PROJECT_DIR$/scripts/images/files/remove_alias.sh" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\files\spark-defaults.conf" afterPath="$PROJECT_DIR$/scripts/images/files/spark-defaults.conf" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\files\start-master.sh" afterPath="$PROJECT_DIR$/scripts/images/files/start-master.sh" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\files\start-shell.sh" afterPath="$PROJECT_DIR$/scripts/images/files/start-shell.sh" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\files\start-worker.sh" afterPath="$PROJECT_DIR$/scripts/images/files/start-worker.sh" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\files\submit.sh" afterPath="$PROJECT_DIR$/scripts/images/files/submit.sh" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\gen_dockerfiles.py" afterPath="$PROJECT_DIR$/scripts/images/gen_dockerfiles.py" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\master\Dockerfile" afterPath="$PROJECT_DIR$/scripts/images/master/Dockerfile" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\master\files\remove_alias.sh" afterPath="$PROJECT_DIR$/scripts/images/master/files/remove_alias.sh" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\master\files\spark-shell.sh" afterPath="$PROJECT_DIR$/scripts/images/master/files/spark-shell.sh" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\master\files\start-master.sh" afterPath="$PROJECT_DIR$/scripts/images/master/files/start-master.sh" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\notebook\Dockerfile" afterPath="$PROJECT_DIR$/scripts/images/notebook/Dockerfile" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\notebook\files\application.conf" afterPath="$PROJECT_DIR$/scripts/images/notebook/files/application.conf" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\notebook\files\start-notebook.sh" afterPath="$PROJECT_DIR$/scripts/images/notebook/files/start-notebook.sh" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\shell\Dockerfile" afterPath="$PROJECT_DIR$/scripts/images/shell/Dockerfile" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\shell\files\remove_alias.sh" afterPath="$PROJECT_DIR$/scripts/images/shell/files/remove_alias.sh" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\shell\files\start-shell.sh" afterPath="$PROJECT_DIR$/scripts/images/shell/files/start-shell.sh" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\submit\Dockerfile" afterPath="$PROJECT_DIR$/scripts/images/submit/Dockerfile" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\submit\files\remove_alias.sh" afterPath="$PROJECT_DIR$/scripts/images/submit/files/remove_alias.sh" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\submit\files\submit.sh" afterPath="$PROJECT_DIR$/scripts/images/submit/files/submit.sh" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\swarm_pull.sh" afterPath="$PROJECT_DIR$/scripts/images/swarm_pull.sh" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\templates\common.tmpl" afterPath="$PROJECT_DIR$/scripts/images/templates/common.tmpl" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\templates\master.tmpl" afterPath="$PROJECT_DIR$/scripts/images/templates/master.tmpl" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\templates\shell.tmpl" afterPath="$PROJECT_DIR$/scripts/images/templates/shell.tmpl" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\templates\submit.tmpl" afterPath="$PROJECT_DIR$/scripts/images/templates/submit.tmpl" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\templates\worker.tmpl" afterPath="$PROJECT_DIR$/scripts/images/templates/worker.tmpl" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\worker\Dockerfile" afterPath="$PROJECT_DIR$/scripts/images/worker/Dockerfile" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\worker\files\remove_alias.sh" afterPath="$PROJECT_DIR$/scripts/images/worker/files/remove_alias.sh" />
-      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\images\worker\files\start-worker.sh" afterPath="$PROJECT_DIR$/scripts/images/worker/files/start-worker.sh" />
+      <change type="MOVED" beforePath="E:\User Data\vcs\caaas\main.py" afterPath="$PROJECT_DIR$/caaas-web.py" />
     </list>
     <ignored path="caaas.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -105,7 +45,7 @@
     <SUITE FILE_PATH="coverage/caaas$setup_db.coverage" NAME="setup_db Coverage Results" MODIFIED="1440148200724" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/caaas$main.coverage" NAME="main Coverage Results" MODIFIED="1439994607232" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
     <SUITE FILE_PATH="coverage/caaas$caaasctl.coverage" NAME="caaasctl Coverage Results" MODIFIED="1440173670774" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/caaas$caaas_scheduler.coverage" NAME="caaas-scheduler Coverage Results" MODIFIED="1440168922331" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/caaas$caaas_scheduler.coverage" NAME="caaas-scheduler Coverage Results" MODIFIED="1440504811731" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/caaas$apache_proxy.coverage" NAME="apache-proxy Coverage Results" MODIFIED="1439272960154" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="CreatePatchCommitExecutor">
@@ -121,6 +61,14 @@
         <option name="myItemId" />
         <option name="myItemType" value="com.intellij.database.view.DbRootNodeDescriptor" />
       </PATH_ELEMENT>
+      <PATH_ELEMENT>
+        <option name="myItemId" value="MySQL - @m1 devel" />
+        <option name="myItemType" value="com.intellij.database.view.DbNodeDescriptor" />
+      </PATH_ELEMENT>
+      <PATH_ELEMENT>
+        <option name="myItemId" value="caaas_devel" />
+        <option name="myItemType" value="com.intellij.database.view.DbNodeDescriptor" />
+      </PATH_ELEMENT>
     </PATH>
     <PATH>
       <PATH_ELEMENT>
@@ -128,15 +76,15 @@
         <option name="myItemType" value="com.intellij.database.view.DbRootNodeDescriptor" />
       </PATH_ELEMENT>
       <PATH_ELEMENT>
-        <option name="myItemId" value="MySQL - @m1" />
+        <option name="myItemId" value="MySQL - @m1 devel" />
         <option name="myItemType" value="com.intellij.database.view.DbNodeDescriptor" />
       </PATH_ELEMENT>
       <PATH_ELEMENT>
-        <option name="myItemId" value="caaas" />
+        <option name="myItemId" value="caaas_devel" />
         <option name="myItemType" value="com.intellij.database.view.DbNodeDescriptor" />
       </PATH_ELEMENT>
       <PATH_ELEMENT>
-        <option name="myItemId" value="users" />
+        <option name="myItemId" value="proxies" />
         <option name="myItemType" value="com.intellij.database.view.DbNodeDescriptor" />
       </PATH_ELEMENT>
     </PATH>
@@ -165,7 +113,7 @@
         <entry file="file://$PROJECT_DIR$/caaas_scheduler/platform.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="47" column="0" selection-start-line="47" selection-start-column="0" selection-end-line="47" selection-end-column="0" />
+              <caret line="32" column="16" selection-start-line="32" selection-start-column="16" selection-end-line="32" selection-end-column="16" />
               <folding>
                 <element signature="e#0#70#0" expanded="true" />
               </folding>
@@ -173,11 +121,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="client.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/caaas_client/client.py">
+      <file leaf-file-name="rpyc_service.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/caaas_scheduler/rpyc_service.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="1.0068965">
-              <caret line="40" column="0" selection-start-line="40" selection-start-column="0" selection-end-line="40" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="44" column="0" selection-start-line="44" selection-start-column="0" selection-end-line="44" selection-end-column="0" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -185,12 +133,50 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="exceptions.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/common/exceptions.py">
+      <file leaf-file-name="status.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/common/status.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.8241379">
+              <caret line="79" column="0" selection-start-line="79" selection-start-column="0" selection-end-line="79" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#26#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="platform_status.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/caaas_scheduler/platform_status.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
-              <folding />
+              <caret line="19" column="19" selection-start-line="19" selection-start-column="19" selection-end-line="19" selection-end-column="19" />
+              <folding>
+                <element signature="e#0#11#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="scheduler.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/caaas_scheduler/scheduler.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="80" column="32" selection-start-line="80" selection-start-column="32" selection-end-line="80" selection-end-column="32" />
+              <folding>
+                <element signature="e#0#14#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="client.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/caaas_client/client.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="86" column="0" selection-start-line="86" selection-start-column="0" selection-end-line="86" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#11#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -199,42 +185,10 @@
         <entry file="file://$PROJECT_DIR$/caaasctl.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="31" column="61" selection-start-line="31" selection-start-column="61" selection-end-line="31" selection-end-column="61" />
+              <caret line="118" column="125" selection-start-line="118" selection-start-column="125" selection-end-line="118" selection-end-column="125" />
               <folding>
                 <element signature="e#0#46#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="__init__.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/common/state/__init__.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="20" column="0" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="user.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/common/state/user.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="17" column="0" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#46#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="container.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/common/state/container.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -243,19 +197,7 @@
         <entry file="file://$PROJECT_DIR$/common/state/cluster.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="12" column="4" selection-start-line="12" selection-start-column="4" selection-end-line="12" selection-end-column="86" />
-              <folding>
-                <element signature="e#0#46#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="__init__.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/common/__init__.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <caret line="9" column="42" selection-start-line="9" selection-start-column="42" selection-end-line="9" selection-end-column="42" />
               <folding />
             </state>
           </provider>
@@ -265,8 +207,22 @@
         <entry file="file://$PROJECT_DIR$/common/state/application.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
-              <folding />
+              <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#76#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="execution.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/common/state/execution.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="44" column="0" selection-start-line="44" selection-start-column="0" selection-end-line="44" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#29#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -288,8 +244,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/images/swarm_pull.sh" />
-        <option value="$PROJECT_DIR$/images/build_images.sh" />
         <option value="$PROJECT_DIR$/caaas/templates/home.html" />
         <option value="$PROJECT_DIR$/caaas/templates/index.html" />
         <option value="$PROJECT_DIR$/caaas/templates/notebook.html" />
@@ -311,34 +265,36 @@
         <option value="$PROJECT_DIR$/caaas-scheduler/jsonrpc_server.py" />
         <option value="$PROJECT_DIR$/caaas-scheduler/rpyc_service.py" />
         <option value="$PROJECT_DIR$/caaas-scheduler/loop.py" />
-        <option value="$PROJECT_DIR$/caaas_scheduler/rpyc_server.py" />
         <option value="$PROJECT_DIR$/caaas_scheduler/periodic_tasks.py" />
         <option value="$PROJECT_DIR$/caaas_scheduler/schduler.py" />
         <option value="$PROJECT_DIR$/caaas_scheduler/__init__.py" />
         <option value="$PROJECT_DIR$/setup_db.py" />
-        <option value="$PROJECT_DIR$/common/configuration.py" />
         <option value="$PROJECT_DIR$/requirements.txt" />
-        <option value="$PROJECT_DIR$/common/status.py" />
         <option value="$PROJECT_DIR$/caaas_client/__init__.py" />
-        <option value="$PROJECT_DIR$/caaas_scheduler/platform_status.py" />
-        <option value="$PROJECT_DIR$/caaas-scheduler.py" />
         <option value="$PROJECT_DIR$/common/state/application_resources.py" />
         <option value="$PROJECT_DIR$/common/state/application_state.py" />
-        <option value="$PROJECT_DIR$/caaas_scheduler/rpyc_service.py" />
         <option value="$PROJECT_DIR$/common/application.py" />
-        <option value="$PROJECT_DIR$/caaas_scheduler/swarm_client.py" />
+        <option value="$PROJECT_DIR$/common/state/user.py" />
         <option value="$PROJECT_DIR$/caaas_scheduler/swarm_status.py" />
+        <option value="$PROJECT_DIR$/caaas-scheduler.py" />
+        <option value="$PROJECT_DIR$/caaas_scheduler/swarm_client.py" />
+        <option value="$PROJECT_DIR$/common/exceptions.py" />
+        <option value="$PROJECT_DIR$/common/state/proxy.py" />
+        <option value="$PROJECT_DIR$/common/state/container.py" />
+        <option value="$PROJECT_DIR$/caaas_scheduler/platform_status.py" />
+        <option value="$PROJECT_DIR$/common/state/__init__.py" />
+        <option value="$PROJECT_DIR$/common/configuration.py" />
         <option value="$PROJECT_DIR$/common/application_resources.py" />
         <option value="$PROJECT_DIR$/caaas_scheduler/scheduler.py" />
-        <option value="$PROJECT_DIR$/caaas_scheduler/platform.py" />
+        <option value="$PROJECT_DIR$/caaas_scheduler/rpyc_server.py" />
         <option value="$PROJECT_DIR$/common/state/cluster.py" />
-        <option value="$PROJECT_DIR$/common/state/user.py" />
         <option value="$PROJECT_DIR$/common/state/application.py" />
-        <option value="$PROJECT_DIR$/common/state/container.py" />
-        <option value="$PROJECT_DIR$/common/state/__init__.py" />
         <option value="$PROJECT_DIR$/caaasctl.py" />
-        <option value="$PROJECT_DIR$/common/exceptions.py" />
+        <option value="$PROJECT_DIR$/caaas_scheduler/rpyc_service.py" />
         <option value="$PROJECT_DIR$/caaas_client/client.py" />
+        <option value="$PROJECT_DIR$/common/state/execution.py" />
+        <option value="$PROJECT_DIR$/caaas_scheduler/platform.py" />
+        <option value="$PROJECT_DIR$/common/status.py" />
       </list>
     </option>
   </component>
@@ -354,8 +310,8 @@
     <order />
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="220" />
-    <option name="y" value="34" />
+    <option name="x" value="240" />
+    <option name="y" value="39" />
     <option name="width" value="1606" />
     <option name="height" value="998" />
   </component>
@@ -440,6 +396,7 @@
       <sortByType />
     </navigator>
     <panes>
+      <pane id="Scratches" />
       <pane id="Scope">
         <subPane subId="Problems">
           <PATH>
@@ -582,7 +539,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -620,7 +576,7 @@
       <recent name="E:\User Data\vcs\caaas" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.caaasctl">
+  <component name="RunManager" selected="Python.caaas-scheduler">
     <configuration default="true" type="BashConfigurationType" factoryName="Bash">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="INTERPRETER_PATH" value="" />
@@ -842,8 +798,8 @@
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
-        <env name="PYTHONPATH" value="E:\User Data\vcs\caaas" />
         <env name="PYTHONUNBUFFERED" value="1" />
+        <env name="PYTHONPATH" value="E:\User Data\vcs\caaas" />
         <env name="PYCHARM_HOSTED" value="1" />
         <env name="PYTHONIOENCODING" value="UTF-8" />
       </envs>
@@ -900,23 +856,23 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="220" y="34" width="1606" height="998" extended-state="0" />
-    <editor active="false" />
+    <frame x="240" y="39" width="1606" height="998" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32949308" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32911393" sideWeight="0.5059701" order="13" side_tool="true" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="File Transfer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32718894" sideWeight="0.49402985" order="14" side_tool="false" content_ui="tabs" />
+      <window_info id="File Transfer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32641292" sideWeight="0.49402985" order="14" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.328341" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.19723183" sideWeight="0.49402985" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.20504528" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2076326" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.12742561" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32756633" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24967659" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.29873127" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.29873127" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32871974" sideWeight="0.49552238" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -982,7 +938,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="48" />
+      <option name="time" value="55" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
@@ -991,34 +947,6 @@
     </watches-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/scripts/images/master/files/start-master.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="9" column="0" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/images/worker/files/start-worker.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/images/build_images.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas_web/config_parser.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1052,20 +980,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="5" column="99" selection-start-line="5" selection-start-column="99" selection-end-line="5" selection-end-column="99" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas_web/proxy_manager.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="9" column="0" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="18" column="0" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
         </state>
       </provider>
     </entry>
@@ -1129,9 +1043,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#18#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1147,17 +1058,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="52" column="52" selection-start-line="52" selection-start-column="52" selection-end-line="52" selection-end-column="52" />
-          <folding>
-            <element signature="e#0#59#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas_scheduler/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1165,7 +1065,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="1" column="36" selection-start-line="1" selection-start-column="23" selection-end-line="1" selection-end-column="36" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1177,20 +1076,13 @@
           <nodes />
           <notes />
           <edges />
-          <settings layout="Hierarchic Group" zoom="1.0" x="516.0" y="320.5" />
+          <settings layout="Hierarchic Group" zoom="1.0" x="516.0" y="321.0" />
           <SelectedNodes />
           <Categories>
-            <Category>Key columns</Category>
             <Category>Columns</Category>
+            <Category>Key columns</Category>
           </Categories>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/33b1ec79-4374-4ff8-a8f8-26c89b418a79/console.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+          <SCOPE>All</SCOPE>
         </state>
       </provider>
     </entry>
@@ -1202,19 +1094,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/common/status.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/images/files/submit.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1222,117 +1105,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas-scheduler.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="30" column="0" selection-start-line="30" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#14#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas_scheduler/periodic_tasks.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas_scheduler/platform_status.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="21" column="44" selection-start-line="21" selection-start-column="44" selection-end-line="21" selection-end-column="44" />
-          <folding>
-            <element signature="e#0#11#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas_scheduler/rpyc_server.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="139" column="47" selection-start-line="139" selection-start-column="47" selection-end-line="139" selection-end-column="47" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas_scheduler/rpyc_service.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="27" column="0" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#11#0" expanded="false" />
-            <marker date="1440166414369" expanded="true" signature="-1:-1" placeholder="..." />
-            <marker date="1440166414369" expanded="true" signature="-1:-1" placeholder="..." />
-            <marker date="1440166414369" expanded="true" signature="-1:-1" placeholder="..." />
-            <marker date="1440166414369" expanded="true" signature="-1:-1" placeholder="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas_scheduler/swarm_client.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="4" column="0" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas_scheduler/swarm_status.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/common/configuration.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="3" column="108" selection-start-line="3" selection-start-column="108" selection-end-line="3" selection-end-column="108" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas_web/swarm_manager.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="14" column="0" selection-start-line="14" selection-start-column="0" selection-end-line="19" selection-end-column="57" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/common/application_resources.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="5" column="16" selection-start-line="5" selection-start-column="16" selection-end-line="5" selection-end-column="16" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas_scheduler/scheduler.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="63" column="0" selection-start-line="63" selection-start-column="0" selection-end-line="63" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#52#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/caaas_scheduler/platform.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="47" column="0" selection-start-line="47" selection-start-column="0" selection-end-line="47" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#70#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1344,56 +1116,58 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/common/state/cluster.py">
+    <entry file="file://$APPLICATION_CONFIG_DIR$/consoles/db/33b1ec79-4374-4ff8-a8f8-26c89b418a79/console.sql">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="12" column="4" selection-start-line="12" selection-start-column="4" selection-end-line="12" selection-end-column="86" />
-          <folding>
-            <element signature="e#0#46#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/common/state/container.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/common/state/__init__.py">
+    <entry file="file://$USER_HOME$/.PyCharm40/system/remote_sources/461916380/-102312246/sqlalchemy/orm/attributes.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="20" column="0" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
+          <caret line="234" column="0" selection-start-line="234" selection-start-column="0" selection-end-line="234" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/common/state/user.py">
+    <entry file="file://$PROJECT_DIR$/caaas_scheduler/swarm_status.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="17" column="0" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#46#0" expanded="true" />
-          </folding>
+          <caret line="25" column="0" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/caaasctl.py">
+    <entry file="file://$PROJECT_DIR$/caaas_scheduler/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="31" column="61" selection-start-line="31" selection-start-column="61" selection-end-line="31" selection-end-column="61" />
-          <folding>
-            <element signature="e#0#46#0" expanded="true" />
-          </folding>
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/common/state/application.py">
+    <entry file="file://$PROJECT_DIR$/caaas_scheduler/swarm_client.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+          <caret line="54" column="0" selection-start-line="54" selection-start-column="0" selection-end-line="54" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas_web/proxy_manager.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="9" column="0" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas_web/swarm_manager.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="142" column="24" selection-start-line="142" selection-start-column="24" selection-end-line="142" selection-end-column="24" />
           <folding />
         </state>
       </provider>
@@ -1401,17 +1175,190 @@
     <entry file="file://$PROJECT_DIR$/common/exceptions.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+          <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/state/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="18" column="0" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas-web.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="18" column="0" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas-scheduler.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="25" column="0" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas_scheduler/periodic_tasks.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/configuration.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="3" column="34" selection-start-line="3" selection-start-column="34" selection-end-line="3" selection-end-column="34" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas_scheduler/rpyc_server.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="149" column="0" selection-start-line="149" selection-start-column="0" selection-end-line="149" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#14#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/application_resources.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+          <folding>
+            <marker date="1440491357248" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1440491357248" expanded="true" signature="-1:-1" placeholder="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/state/user.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="17" column="0" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/state/proxy.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/state/container.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="11" column="4" selection-start-line="11" selection-start-column="4" selection-end-line="11" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/state/cluster.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="9" column="42" selection-start-line="9" selection-start-column="42" selection-end-line="9" selection-end-column="42" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas_scheduler/platform_status.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="19" column="19" selection-start-line="19" selection-start-column="19" selection-end-line="19" selection-end-column="19" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaasctl.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="118" column="125" selection-start-line="118" selection-start-column="125" selection-end-line="118" selection-end-column="125" />
+          <folding>
+            <element signature="e#0#46#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/caaas_client/client.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.0068965">
-          <caret line="40" column="0" selection-start-line="40" selection-start-column="0" selection-end-line="40" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="86" column="0" selection-start-line="86" selection-start-column="0" selection-end-line="86" selection-end-column="0" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas_scheduler/rpyc_service.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="44" column="0" selection-start-line="44" selection-start-column="0" selection-end-line="44" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/state/execution.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="44" column="0" selection-start-line="44" selection-start-column="0" selection-end-line="44" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#29#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/state/application.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#76#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas_scheduler/scheduler.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="80" column="32" selection-start-line="80" selection-start-column="32" selection-end-line="80" selection-end-column="32" />
+          <folding>
+            <element signature="e#0#14#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/caaas_scheduler/platform.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="32" column="16" selection-start-line="32" selection-start-column="16" selection-end-line="32" selection-end-column="16" />
+          <folding>
+            <element signature="e#0#70#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/status.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.8241379">
+          <caret line="79" column="0" selection-start-line="79" selection-start-column="0" selection-end-line="79" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#26#0" expanded="true" />
           </folding>
         </state>
       </provider>

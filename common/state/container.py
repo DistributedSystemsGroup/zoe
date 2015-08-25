@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
 
 from common.state import Base
 
@@ -11,6 +12,8 @@ class Container(Base):
     cluster_id = Column(Integer, ForeignKey('clusters.id'))
     ip_address = Column(String(16))
     readable_name = Column(String(32))
+
+    proxies = relationship("Proxy", order_by="Proxy.id", backref="container")
 
     def __repr__(self):
         return "<Container(name='%s', id='%s', docker_id='%s', cluster_id='%s', ip_address='%s')>" % (

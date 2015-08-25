@@ -1,12 +1,7 @@
-import json
-
 from sqlalchemy import Column, Integer, String, PickleType, Text, ForeignKey
+from sqlalchemy.orm import relationship
 
 from common.state import Base
-
-
-class TextPickleType(PickleType):
-    impl = Text
 
 
 class Application(Base):
@@ -14,8 +9,10 @@ class Application(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(64))
-    required_resources = Column(TextPickleType(pickler=json))  # JSON resource description
+    required_resources = Column(PickleType())  # JSON resource description
     user_id = Column(Integer, ForeignKey('users.id'))
+
+    executions = relationship("Execution", order_by="Execution.id", backref="application")
 
     type = Column(String(20))  # Needed by sqlalchemy to manage class inheritance
 
@@ -23,6 +20,15 @@ class Application(Base):
         'polymorphic_on': type,
         'polymorphic_identity': 'application'
     }
+
+    def to_dict(self) -> dict:
+        ret = {
+            'id': self.id,
+            'name': self.name,
+            'required_resources': self.required_resources.__dict__.copy(),
+            'user_id': self.user_id
+        }
+        return ret
 
     def __repr__(self):
         return "<Application(name='%s', id='%s', required_resourced='%s')>" % (
@@ -36,3 +42,9 @@ class SparkApplication(Application):
     __mapper_args__ = {
         'polymorphic_identity': 'spark-application'
     }
+
+    def to_dict(self) -> dict:
+        ret = super().to_dict()
+        ret["master_image"] = self.master_image
+        ret["worker_image"] = self.worker_image
+        return ret

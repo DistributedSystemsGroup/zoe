@@ -1,3 +1,6 @@
+import time
+
+
 class SwarmNodeStatus:
     def __init__(self, name):
         self.name = name
@@ -19,3 +22,4 @@ class SwarmStatus:
         self.placement_strategy = ''
         self.active_filters = []
         self.nodes = []
+        self.timestamp = time.time()

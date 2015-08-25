@@ -1,10 +1,10 @@
 import rpyc
 from sqlalchemy.orm.exc import NoResultFound
 
-from common.state import AlchemySession, SparkApplication, User
+from common.state import AlchemySession, SparkApplication, User, Application, Cluster, SparkSubmitExecution, Execution
 from common.application_resources import SparkApplicationResources
 from common.status import PlatformStatusReport
-from common.exceptions import UserIDDoesNotExist
+from common.exceptions import UserIDDoesNotExist, ApplicationStillRunning
 
 REGISTRY = "10.0.0.2:5000"
 MASTER_IMAGE = REGISTRY + "/venza/spark-master:1.4.1"
@@ -42,8 +42,48 @@ class CAaaSClient:
         resources = SparkApplicationResources()
         resources.worker_count = worker_count
         resources.worker_resources["memory_limit"] = executor_memory
-        resources.worker_resources["worker_cores"] = str(executor_cores)
-        app = SparkApplication(master_image=MASTER_IMAGE, worker_image=WORKER_IMAGE, name='empty-cluster', required_resources=resources)
+        resources.worker_resources["cores"] = executor_cores
+        app = SparkApplication(master_image=MASTER_IMAGE, worker_image=WORKER_IMAGE, name='empty-cluster', required_resources=resources, user_id=user_id)
         self.state.add(app)
         self.state.commit()
         return app
+
+    def spark_application_get(self, application_id):
+        try:
+            return self.state.query(SparkApplication).filter_by(id=application_id).one()
+        except NoResultFound:
+            return None
+
+    def execution_spark_submit_new(self, application: Application, name, commandline, spark_options):
+        execution = SparkSubmitExecution(name=name,
+                                         application_id=application.id,
+                                         status="submitted",
+                                         commandline=commandline,
+                                         spark_opts=spark_options)
+        self.state.add(execution)
+        self.state.commit()
+        return self.server.execution_schedule(execution.id)
+
+    def execution_spark_cluster_new(self, application: Application, name):
+        execution = Execution(name=name,
+                              application_id=application.id,
+                              status="submitted")
+        self.state.add(execution)
+        self.state.commit()
+        return self.server.execution_schedule(execution.id)
+
+    def application_remove(self, application: Application):
+        running = self.state.query(Cluster).filter_by(app_id=application.id).count()
+        if running > 0:
+            raise ApplicationStillRunning(application)
+        self.state.delete(application)
+        self.state.commit()
+
+    def application_status(self, application: Application):
+        return self.server.application_status(application.id)
+
+    def execution_get(self, execution_id: int) -> Execution:
+        return self.state.query(Execution).filter_by(id=execution_id).one()
+
+    def execution_terminate(self, execution: Execution):
+        self.server.terminate_execution(execution.id)

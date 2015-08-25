@@ -4,7 +4,7 @@ import signal
 
 from caaas_scheduler.rpyc_service import CAaaSSchedulerRPCService
 from caaas_scheduler.rpyc_server import RPyCAsyncIOServer
-from caaas_scheduler.scheduler import CAaaSSCheduler
+from caaas_scheduler.scheduler import caaas_sched
 
 
 def sigint_handler():
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     rpyc_server = RPyCAsyncIOServer(CAaaSSchedulerRPCService, '0.0.0.0', port=4000, auto_register=True)
     rpyc_server.start()
 
-    CAaaSSCheduler().init_tasks()
+    caaas_sched.init_tasks()
 
     try:
         loop.run_forever()

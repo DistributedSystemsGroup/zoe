@@ -1,8 +1,9 @@
 import asyncio
 import logging
-import time
 import threading
 from rpyc.utils.server import UDPRegistryClient, AuthenticationError, Connection, Channel, SocketStream
+
+from caaas_scheduler.periodic_tasks import periodic_task
 
 
 class RPyCAsyncIOServer:
@@ -130,27 +131,11 @@ class RPyCAsyncIOServer:
             self.logger.info("goodbye [%s]:%s", h, p)
 
     def _bg_register(self):
-        interval = self.registrar.REREGISTER_INTERVAL
-        self.logger.info("started background auto-register thread (interval = %s)", interval)
-        tnext = 0
-        while True:
-            t = time.time()
-            if t >= tnext:
-                did_register = False
-                aliases = self.service.get_service_aliases()
-                try:
-                    did_register = self.registrar.register(aliases, self.port, interface=self.hostname)
-                except Exception:
-                    self.logger.exception("error registering services")
-
-                # If registration worked out, retry to register again after
-                # interval time. Otherwise, try to register soon again.
-                if did_register:
-                    tnext = t + interval
-                else:
-                    self.logger.info("registering services did not work - retry")
-
-            time.sleep(1)
+        aliases = self.service.get_service_aliases()
+        try:
+            self.registrar.register(aliases, self.port, interface=self.hostname)
+        except:
+            self.logger.exception("error registering services")
 
     def start(self):
         """Starts the server. Use :meth:`close` to stop"""
@@ -160,8 +145,5 @@ class RPyCAsyncIOServer:
 
         self.logger.info("server started on [%s]:%s", self.hostname, self.port)
         if self.auto_register:
-            t = threading.Thread(target=self._bg_register)
-            t.setDaemon(True)
-            t.start()
-
-
+            self._bg_register()
+            periodic_task(self._bg_register, self.registrar.REREGISTER_INTERVAL)

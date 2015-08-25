@@ -57,5 +57,69 @@
       <identifier-quote-string>`</identifier-quote-string>
     </database-info>
     <case-sensitivity plain-identifiers="exact" quoted-identifiers="exact"/>
+    <schema name="" catalog="caaas_devel"/>
+    <table name="applications" schema="" catalog="caaas_devel" type="TABLE">
+      <column name="id" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4" autoIncrement="true"/>
+      <column name="name" sqlType="VARCHAR" precision="64" scale="0" nullable="true" jdbcType="12"/>
+      <column name="required_resources" sqlType="BLOB" precision="65535" scale="0" nullable="true" jdbcType="-4"/>
+      <column name="user_id" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4"/>
+      <column name="type" sqlType="VARCHAR" precision="20" scale="0" nullable="true" jdbcType="12"/>
+      <column name="master_image" sqlType="VARCHAR" precision="256" scale="0" nullable="true" jdbcType="12"/>
+      <column name="worker_image" sqlType="VARCHAR" precision="256" scale="0" nullable="true" jdbcType="12"/>
+      <primary-key name="PRIMARY" columns="id"/>
+      <foreign-key name="applications_ibfk_1" columns="user_id" ref-table="users" ref-schema="" ref-catalog="caaas_devel" ref-columns="id" update-rule="3" delete-rule="3" deferrability="2"/>
+      <exported-key name="executions_ibfk_1" table="executions" schema="" catalog="caaas_devel" columns="application_id"/>
+    </table>
+    <table name="clusters" schema="" catalog="caaas_devel" type="TABLE">
+      <column name="id" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4" autoIncrement="true"/>
+      <column name="execution_id" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4"/>
+      <primary-key name="PRIMARY" columns="id"/>
+      <foreign-key name="clusters_ibfk_1" columns="execution_id" ref-table="executions" ref-schema="" ref-catalog="caaas_devel" ref-columns="id" update-rule="3" delete-rule="3" deferrability="2"/>
+      <exported-key name="containers_ibfk_1" table="containers" schema="" catalog="caaas_devel" columns="cluster_id"/>
+      <exported-key name="proxies_ibfk_1" table="proxies" schema="" catalog="caaas_devel" columns="cluster_id"/>
+    </table>
+    <table name="containers" schema="" catalog="caaas_devel" type="TABLE">
+      <column name="id" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4" autoIncrement="true"/>
+      <column name="docker_id" sqlType="VARCHAR" precision="128" scale="0" nullable="true" jdbcType="12"/>
+      <column name="cluster_id" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4"/>
+      <column name="ip_address" sqlType="VARCHAR" precision="16" scale="0" nullable="true" jdbcType="12"/>
+      <column name="readable_name" sqlType="VARCHAR" precision="32" scale="0" nullable="true" jdbcType="12"/>
+      <primary-key name="PRIMARY" columns="id"/>
+      <foreign-key name="containers_ibfk_1" columns="cluster_id" ref-table="clusters" ref-schema="" ref-catalog="caaas_devel" ref-columns="id" update-rule="3" delete-rule="3" deferrability="2"/>
+      <exported-key name="proxies_ibfk_2" table="proxies" schema="" catalog="caaas_devel" columns="container_id"/>
+    </table>
+    <table name="executions" schema="" catalog="caaas_devel" type="TABLE">
+      <column name="id" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4" autoIncrement="true"/>
+      <column name="name" sqlType="VARCHAR" precision="64" scale="0" nullable="true" jdbcType="12"/>
+      <column name="assigned_resources" sqlType="BLOB" precision="65535" scale="0" nullable="true" jdbcType="-4"/>
+      <column name="application_id" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4"/>
+      <column name="time_scheduled" sqlType="DATETIME" precision="19" scale="0" nullable="true" jdbcType="93"/>
+      <column name="time_started" sqlType="DATETIME" precision="19" scale="0" nullable="true" jdbcType="93"/>
+      <column name="time_finished" sqlType="DATETIME" precision="19" scale="0" nullable="true" jdbcType="93"/>
+      <column name="status" sqlType="VARCHAR" precision="32" scale="0" nullable="true" jdbcType="12"/>
+      <column name="type" sqlType="VARCHAR" precision="20" scale="0" nullable="true" jdbcType="12"/>
+      <column name="commandline" sqlType="VARCHAR" precision="1024" scale="0" nullable="true" jdbcType="12"/>
+      <column name="spark_opts" sqlType="VARCHAR" precision="1024" scale="0" nullable="true" jdbcType="12"/>
+      <primary-key name="PRIMARY" columns="id"/>
+      <foreign-key name="executions_ibfk_1" columns="application_id" ref-table="applications" ref-schema="" ref-catalog="caaas_devel" ref-columns="id" update-rule="3" delete-rule="3" deferrability="2"/>
+      <exported-key name="clusters_ibfk_1" table="clusters" schema="" catalog="caaas_devel" columns="execution_id"/>
+    </table>
+    <table name="proxies" schema="" catalog="caaas_devel" type="TABLE">
+      <column name="id" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4" autoIncrement="true"/>
+      <column name="internal_url" sqlType="VARCHAR" precision="1024" scale="0" nullable="true" jdbcType="12"/>
+      <column name="cluster_id" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4"/>
+      <column name="container_id" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4"/>
+      <column name="service_name" sqlType="VARCHAR" precision="32" scale="0" nullable="true" jdbcType="12"/>
+      <column name="last_access" sqlType="DATETIME" precision="19" scale="0" nullable="true" jdbcType="93"/>
+      <primary-key name="PRIMARY" columns="id"/>
+      <foreign-key name="proxies_ibfk_1" columns="cluster_id" ref-table="clusters" ref-schema="" ref-catalog="caaas_devel" ref-columns="id" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="proxies_ibfk_2" columns="container_id" ref-table="containers" ref-schema="" ref-catalog="caaas_devel" ref-columns="id" update-rule="3" delete-rule="3" deferrability="2"/>
+    </table>
+    <table name="users" schema="" catalog="caaas_devel" type="TABLE">
+      <column name="id" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4" autoIncrement="true"/>
+      <column name="email" sqlType="VARCHAR" precision="128" scale="0" nullable="true" jdbcType="12"/>
+      <primary-key name="PRIMARY" columns="id"/>
+      <exported-key name="applications_ibfk_1" table="applications" schema="" catalog="caaas_devel" columns="user_id"/>
+    </table>
   </data-source>
 </component>
