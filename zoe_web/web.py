@@ -1,10 +1,7 @@
 from flask import render_template, redirect, url_for, abort
 
 from zoe_web import app
-from zoe_web.config_parser import config
-from zoe_web.proxy_manager import get_container_addresses, get_notebook_address
-from zoe_web.sql import CAaaState
-from zoe_web.swarm_manager import sm
+from zoe_client import ZoeClient
 
 
 @app.route("/web/")
@@ -14,45 +11,42 @@ def index():
 
 @app.route("/web/status")
 def web_status():
-    status = sm.swarm_status()
-    return render_template('status.html', **status)
+    client = ZoeClient()
+    status = client.platform_status()
+    return render_template('status.html', status=status)
 
 
 @app.route("/web/login/<email>")
 def web_login(email):
-    state = CAaaState()
-    user_id = state.get_user_id(email)
+    client = ZoeClient()
+    user_id = client.user_get(email)
     if user_id is None:
-        user_id = state.new_user(email)
+        user_id = client.user_new(email)
     return redirect(url_for("web_index", user_id=user_id))
 
 
 @app.route("/web/<int:user_id>")
 def web_index(user_id):
-    state = CAaaState()
-    if not state.check_user_id(user_id):
+    client = ZoeClient()
+    if not client.user_check(user_id):
         return redirect(url_for('index'))
     template_vars = {
         "user_id": user_id,
-        "email": state.get_user_email(user_id)
+        "email": client.user_get_email(user_id)
     }
     return render_template('home.html', **template_vars)
 
 
 @app.route("/web/<int:user_id>/apps")
 def web_user_apps(user_id):
-    state = CAaaState()
-    if not state.check_user_id(user_id):
+    client = ZoeClient()
+    if not client.user_check(user_id):
         return redirect(url_for('index'))
 
-    apps = state.get_applications(user_id)
-    nb_id = state.get_notebook(user_id)
+    apps = client.spark_application_list(user_id)
     template_vars = {
         "user_id": user_id,
-        "apps": apps,
-        "has_notebook": state.has_notebook(user_id),
-        "notebook_address": get_notebook_address(nb_id),
-        "notebook_cluster_id": nb_id
+        "apps": apps
     }
     return render_template('apps.html', **template_vars)
 

@@ -11,5 +11,6 @@ conf = {
     'proxy_update_accesses': 300,
     'check_health': 30,
     'notebook_max_age_no_activity': 24,
-    'notebook_warning_age_no_activity': 2
+    'notebook_warning_age_no_activity': 2,
+    'email_task_interval': 300
 }

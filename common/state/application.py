@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, PickleType, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, PickleType, ForeignKey
 from sqlalchemy.orm import relationship
 
 from common.state import Base
@@ -41,6 +41,16 @@ class Application(Base):
                 ret.append(e)
         return ret
 
+    def extract(self):
+        ret = PlainApplication()
+        ret.id = self.id
+        ret.name = self.name
+        ret.required_resources = self.required_resources
+        ret.user_id = self.user_id
+        ret.executions = [x.id for x in self.executions]
+        ret.type = self.type
+        return ret
+
 
 class SparkApplication(Application):
     master_image = Column(String(256))
@@ -56,6 +66,12 @@ class SparkApplication(Application):
         ret["worker_image"] = self.worker_image
         return ret
 
+    def extract(self):
+        ret = super().extract()
+        ret.master_image = self.master_image
+        ret.worker_image = self.worker_image
+        return ret
+
 
 class SparkNotebookApplication(SparkApplication):
     notebook_image = Column(String(256))
@@ -67,6 +83,11 @@ class SparkNotebookApplication(SparkApplication):
     def to_dict(self) -> dict:
         ret = super().to_dict()
         ret["notebook_image"] = self.notebook_image
+        return ret
+
+    def extract(self):
+        ret = super().extract()
+        ret.notebook_image = self.notebook_image
         return ret
 
 
@@ -81,3 +102,12 @@ class SparkSubmitApplication(SparkApplication):
         ret = super().to_dict()
         ret["submit_image"] = self.submit_image
         return ret
+
+    def extract(self):
+        ret = super().extract()
+        ret.submit_image = self.submit_image
+        return ret
+
+
+class PlainApplication:
+    pass

@@ -18,26 +18,26 @@ def setup_db_cmd(_):
 
 def user_new_cmd(args):
     client = ZoeClient()
-    clid = client.user_new(args.email)
-    print("New user ID: {}".format(clid))
+    user = client.user_new(args.email)
+    print("New user ID: {}".format(user.id))
 
 
 def user_get_cmd(args):
     client = ZoeClient()
-    clid = client.user_get(args.email)
-    print("User ID: {}".format(clid))
+    user = client.user_get(args.email)
+    print("User ID: {}".format(user.email))
 
 
 def spark_cluster_new_cmd(args):
     client = ZoeClient()
-    application = client.spark_application_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name)
-    print("Spark application added with ID: {}".format(application.id))
+    application_id = client.spark_application_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name)
+    print("Spark application added with ID: {}".format(application_id))
 
 
 def spark_notebook_new_cmd(args):
     client = ZoeClient()
-    application = client.spark_notebook_application_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name)
-    print("Spark application added with ID: {}".format(application.id))
+    application_id = client.spark_notebook_application_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name)
+    print("Spark application added with ID: {}".format(application_id))
 
 
 def spark_submit_new_cmd(args):
@@ -45,17 +45,17 @@ def spark_submit_new_cmd(args):
         print("Error: the file specified is not a zip archive")
         return
     client = ZoeClient()
-    application = client.spark_submit_application_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name, args.file)
-    print("Spark application added with ID: {}".format(application.id))
+    application_id = client.spark_submit_application_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name, args.file)
+    print("Spark application added with ID: {}".format(application_id))
 
 
 def run_spark_cmd(args):
     client = ZoeClient()
-    application = client.spark_application_get(args.id)
+    application = client.application_get(args.id)
     if application is None:
         print("Error: application {} does not exist".format(args.id))
         return
-    ret = client.execution_spark_new(application, args.name, args.cmd, args.spark_opts)
+    ret = client.execution_spark_new(application.id, args.name, args.cmd, args.spark_opts)
 
     if ret:
         print("Application scheduled successfully, use the app-inspect command to check its status")
@@ -65,28 +65,28 @@ def run_spark_cmd(args):
 
 def app_rm_cmd(args):
     client = ZoeClient()
-    application = client.spark_application_get(args.id)
+    application = client.application_get(args.id)
     if application is None:
         print("Error: application {} does not exist".format(args.id))
         return
     if args.force:
-        a = client.application_status(application)
-        for eid in a["executions"]:
+        a = client.application_get(application.id)
+        for eid in a.executions:
             e = client.execution_get(eid)
             if e.status == "running":
                 print("Terminating execution {}".format(e.name))
                 client.execution_terminate(e)
 
-    client.application_remove(application)
+    client.application_remove(application.id)
 
 
 def app_inspect_cmd(args):
     client = ZoeClient()
-    application = client.spark_application_get(args.id)
+    application = client.application_get(args.id)
     if application is None:
         print("Error: application {} does not exist".format(args.id))
         return
-    app_report = client.application_status(application)
+    app_report = client.application_status(application.id)
     print(app_report)
 
 
@@ -105,7 +105,7 @@ def exec_kill_cmd(args):
     if execution is None:
         print("Error: execution {} does not exist".format(args.id))
         return
-    client.execution_terminate(execution)
+    client.execution_terminate(execution.id)
 
 
 def log_get_cmd(args):

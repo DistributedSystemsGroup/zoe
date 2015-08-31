@@ -1,9 +1,13 @@
 import rpyc
 from sqlalchemy.orm.exc import NoResultFound
 
-from common.state import AlchemySession, SparkApplication, User, Application, Cluster, SparkSubmitExecution, Execution, SparkNotebookApplication, SparkSubmitApplication
+from common.state import AlchemySession
+from common.state.application import Application, SparkNotebookApplication, SparkSubmitApplication, SparkApplication, PlainApplication
+from common.state.container import Container
+from common.state.execution import Execution, SparkSubmitExecution, PlainExecution
+from common.state.user import User, PlainUser
 from common.application_resources import SparkApplicationResources
-from common.status import PlatformStatusReport
+from common.status import PlatformStatusReport, ApplicationStatusReport
 from common.exceptions import UserIDDoesNotExist, ApplicationStillRunning
 import common.object_storage as storage
 
@@ -21,20 +25,27 @@ class ZoeClient:
         self.server = self.server_connection.root
         self.state = AlchemySession()
 
-    def user_new(self, email) -> int:
+    # Users
+    def user_new(self, email: str) -> PlainUser:
         user = User(email=email)
         self.state.add(user)
         self.state.commit()
-        return user.id
+        return user.extract()
 
-    def user_get(self, email) -> int:
+    def user_get(self, email: str) -> PlainUser:
         user = self.state.query(User).filter_by(email=email).one()
-        return user.id
+        return user.extract()
 
+    def user_check(self, user_id: int) -> bool:
+        user = self.state.query(User).filter_by(id=user_id).one()
+        return user is not None
+
+    # Platform
     def platform_status(self) -> PlatformStatusReport:
         return self.server.get_platform_status()
 
-    def spark_application_new(self, user_id: int, worker_count: int, executor_memory: str, executor_cores: int, name: str) -> SparkApplication:
+    # Applications
+    def spark_application_new(self, user_id: int, worker_count: int, executor_memory: str, executor_cores: int, name: str) -> int:
         try:
             self.state.query(User).filter_by(id=user_id).one()
         except NoResultFound:
@@ -52,9 +63,9 @@ class ZoeClient:
                                user_id=user_id)
         self.state.add(app)
         self.state.commit()
-        return app
+        return app.id
 
-    def spark_notebook_application_new(self, user_id: int, worker_count: int, executor_memory: str, executor_cores: int, name: str):
+    def spark_notebook_application_new(self, user_id: int, worker_count: int, executor_memory: str, executor_cores: int, name: str) -> int:
         try:
             self.state.query(User).filter_by(id=user_id).one()
         except NoResultFound:
@@ -73,9 +84,9 @@ class ZoeClient:
                                        user_id=user_id)
         self.state.add(app)
         self.state.commit()
-        return app
+        return app.id
 
-    def spark_submit_application_new(self, user_id: int, worker_count: int, executor_memory: str, executor_cores: int, name: str, file: str) -> SparkSubmitApplication:
+    def spark_submit_application_new(self, user_id: int, worker_count: int, executor_memory: str, executor_cores: int, name: str, file: str) -> int:
         try:
             self.state.query(User).filter_by(id=user_id).one()
         except NoResultFound:
@@ -97,15 +108,54 @@ class ZoeClient:
         storage.application_data_upload(app, open(file, "rb").read())
 
         self.state.commit()
-        return app
+        return app.id
 
-    def spark_application_get(self, application_id) -> Application:
+    def application_get(self, application_id) -> PlainApplication:
         try:
-            return self.state.query(SparkApplication).filter_by(id=application_id).one()
+            ret = self.state.query(Application).filter_by(id=application_id).one()
+            return ret.extract()
         except NoResultFound:
             return None
 
-    def execution_spark_new(self, application: Application, name, commandline=None, spark_options=None):
+    def application_remove(self, application_id: int):
+        try:
+            application = self.state.query(Application).filter_by(id=application_id).one()
+        except NoResultFound:
+            return
+        running = self.state.query(Execution).filter_by(application_id=application.id, time_finished=None).count()
+        if running > 0:
+            raise ApplicationStillRunning(application)
+
+        storage.application_data_delete(application)
+        for e in application.executions:
+            self.execution_delete(e)
+
+        self.state.delete(application)
+        self.state.commit()
+
+    def application_status(self, application_id: int) -> ApplicationStatusReport:
+        try:
+            application = self.state.query(Application).filter_by(id=application_id).one()
+        except NoResultFound:
+            return None
+        return self.server.application_status(application.id)
+
+    def spark_application_list(self, user_id) -> [PlainApplication]:
+        try:
+            self.state.query(User).filter_by(id=user_id).one()
+        except NoResultFound:
+            raise UserIDDoesNotExist(user_id)
+
+        apps = self.state.query(Application).filter_by(user_id=user_id).all()
+        return [x.extract() for x in apps]
+
+    # Executions
+    def execution_spark_new(self, application_id: int, name, commandline=None, spark_options=None) -> bool:
+        try:
+            application = self.state.query(Application).filter_by(id=application_id).one()
+        except NoResultFound:
+            return None
+
         if type(application) is SparkSubmitApplication:
             if commandline is None:
                 raise ValueError("Spark submit application requires a commandline")
@@ -122,40 +172,36 @@ class ZoeClient:
         self.state.commit()
         return self.server.execution_schedule(execution.id)
 
-    def application_remove(self, application: Application):
-        running = self.state.query(Execution).filter_by(application_id=application.id, time_finished=None).count()
-        if running > 0:
-            raise ApplicationStillRunning(application)
-
-        storage.application_data_delete(application)
-        for e in application.executions:
-            self.execution_delete(e)
-
-        self.state.delete(application)
-        self.state.commit()
-
-    def application_status(self, application: Application):
-        return self.server.application_status(application.id)
-
-    def spark_application_list(self, user_id):
+    def execution_get(self, execution_id: int) -> PlainExecution:
         try:
-            self.state.query(User).filter_by(id=user_id).one()
+            ret = self.state.query(Execution).filter_by(id=execution_id).one()
         except NoResultFound:
-            raise UserIDDoesNotExist(user_id)
+            return None
+        return ret.extract()
 
-        return self.state.query(Application).filter_by(user_id=user_id).all()
+    def execution_terminate(self, execution_id: int):
+        try:
+            self.state.query(Execution).filter_by(id=execution_id).one()
+        except NoResultFound:
+            pass
+        self.server.terminate_execution(execution_id)
 
-    def execution_get(self, execution_id: int) -> Execution:
-        return self.state.query(Execution).filter_by(id=execution_id).one()
+    def execution_delete(self, execution_id: int):
+        try:
+            execution = self.state.query(Execution).filter_by(id=execution_id).one()
+        except NoResultFound:
+            return
 
-    def execution_terminate(self, execution: Execution):
-        self.server.terminate_execution(execution.id)
-
-    def execution_delete(self, execution: Execution):
         if execution.status == "running":
             raise ApplicationStillRunning(execution.application)
         storage.logs_archive_delete(execution)
         self.state.delete(execution)
 
+    # Logs
     def log_get(self, container_id: int) -> str:
-        return self.server.log_get(container_id)
+        try:
+            self.state.query(Container).filter_by(id=container_id).one()
+        except NoResultFound:
+            return None
+        else:
+            return self.server.log_get(container_id)

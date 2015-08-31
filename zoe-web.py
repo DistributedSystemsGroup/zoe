@@ -4,8 +4,9 @@ from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop, PeriodicCallback
 
 from zoe_web import app
-from zoe_web.cleanup_thread import cleanup_task
-from zoe_web.config_parser import config
+from zoe_web.emails import email_task
+
+from common.configuration import conf
 
 DEBUG = True
 log = logging.getLogger("zoe_web")
@@ -23,7 +24,7 @@ def main():
     http_server = HTTPServer(WSGIContainer(app))
     http_server.listen(4000, "0.0.0.0")
     ioloop = IOLoop.instance()
-    PeriodicCallback(cleanup_task, int(config.cleanup_thread_interval) * 1000).start()
+    PeriodicCallback(email_task, int(conf["email_task_interval"]) * 1000).start()
     ioloop.start()
 
 

@@ -15,3 +15,13 @@ class User(Base):
     def __repr__(self):
         return "<User(id='%s', email='%s')>" % (
             self.id, self.app_id)
+
+    def extract(self):
+        ret = PlainUser()
+        ret.id = self.id
+        ret.email = self.email
+        return ret
+
+
+class PlainUser:
+    pass

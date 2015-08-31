@@ -1,5 +1,4 @@
 from flask import jsonify, request, send_file, abort
-import time
 from zipfile import is_zipfile
 
 from zoe_web import app
@@ -8,26 +7,6 @@ from zoe_web.spark_app_execution import application_submitted, setup_volume, App
 from zoe_web.swarm_manager import sm
 
 STATS_CACHING_EXPIRATION = 1  # seconds
-
-
-@app.route("/api/login/<email>")
-def api_login(email):
-    state = CAaaState()
-    user_id = state.get_user_id(email)
-    if user_id is None:
-        user_id = state.new_user(email)
-    return jsonify(user_id=user_id)
-
-
-@app.route("/api/status")
-def api_status():
-    if time.time() - sm.last_update_timestamp > STATS_CACHING_EXPIRATION:
-        sm.update_status()
-    data = {
-        'num_containers': int(sm.status.num_containers),
-        'num_nodes': int(sm.status.num_nodes)
-    }
-    return jsonify(**data)
 
 
 @app.route("/api/<int:user_id>/cluster/<int:cluster_id>/terminate")

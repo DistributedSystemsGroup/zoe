@@ -8,10 +8,7 @@ log = logging.getLogger(__name__)
 
 from jinja2 import Template
 
-from zoe_web.config_parser import config
 from zoe_web.proxy_manager import get_notebook_address
-from zoe_web.sql import CAaaState
-from zoe_web.swarm_manager import sm
 
 APP_FINISH_EMAIL_TEMPLATE = """Application {{ name }} has finished executing after {{ runtime }}.
 
@@ -52,7 +49,7 @@ def do_duration(seconds):
     return template.format(d=d, h=h, m=m, s=s)
 
 
-def cleanup_task():
+def email_task():
     ts = time.time()
     # noinspection PyBroadException
     try:

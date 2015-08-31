@@ -53,6 +53,21 @@ class Execution(Base):
         return "<Execution(name='%s', id='%s', assigned_resourced='%s', application_id='%s', )>" % (
             self.name, self.id, self.assigned_resources, self.application_id)
 
+    def extract(self):
+        ret = PlainExecution()
+        ret.id = self.id
+        ret.name = self.name
+        ret.assigned_resources = self.assigned_resources
+        ret.application_id = self.application_id
+        ret.time_started = self.time_started
+        ret.time_scheduled = self.time_scheduled
+        ret.time_finished = self.time_finished
+        ret.status = self.status
+        ret.termination_notice = self.termination_notice
+        ret.cluster_id = self.cluster.id
+        ret.type = self.type
+        return ret
+
 
 class SparkSubmitExecution(Execution):
     commandline = Column(String(1024))
@@ -61,3 +76,12 @@ class SparkSubmitExecution(Execution):
     __mapper_args__ = {
         'polymorphic_identity': 'spark-submit-application'
     }
+
+    def extract(self):
+        ret = super().extract()
+        ret.commandline = self.commandline
+        ret.spark_opts = self.spark_opts
+
+
+class PlainExecution:
+    pass
