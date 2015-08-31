@@ -10,5 +10,6 @@ conf = {
     'apache-log-file': '/var/log/apache2/access.log',
     'proxy_update_accesses': 300,
     'check_health': 30,
-    'notebook_max_age_no_activity': 24
+    'notebook_max_age_no_activity': 24,
+    'notebook_warning_age_no_activity': 2
 }

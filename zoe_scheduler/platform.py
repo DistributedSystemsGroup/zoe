@@ -203,6 +203,8 @@ class PlatformManager:
                     pr = state.query(Proxy).filter_by(container_id=c.id, service_name="Spark Notebook interface")
                     if datetime.now() - pr.last_access > timedelta(hours=conf["notebook_max_age_no_activity"]):
                         self.terminate_execution(state, e)
+                    if datetime.now() - pr.last_access > timedelta(hours=conf["notebook_max_age_no_activity"]) - timedelta(hours=conf["notebook_warning_age_no_activity"]):
+                        e.termination_notice = True
 
         state.commit()
 
