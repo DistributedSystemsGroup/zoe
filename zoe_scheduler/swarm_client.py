@@ -83,7 +83,8 @@ class ContainerOptions:
         self.memory_limit = '2g'
 
     def add_env_variable(self, name, value):
-        self.env[name] = value
+        if value is not None:
+            self.env[name] = value
 
     def get_environment(self):
         return self.env
