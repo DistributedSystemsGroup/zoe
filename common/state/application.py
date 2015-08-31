@@ -48,3 +48,29 @@ class SparkApplication(Application):
         ret["master_image"] = self.master_image
         ret["worker_image"] = self.worker_image
         return ret
+
+
+class SparkNotebookApplication(SparkApplication):
+    notebook_image = Column(String(256))
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'spark-notebook'
+    }
+
+    def to_dict(self) -> dict:
+        ret = super().to_dict()
+        ret["notebook_image"] = self.notebook_image
+        return ret
+
+
+class SparkSubmitApplication(SparkApplication):
+    submit_image = Column(String(256))
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'spark-submit'
+    }
+
+    def to_dict(self) -> dict:
+        ret = super().to_dict()
+        ret["submit_image"] = self.submit_image
+        return ret

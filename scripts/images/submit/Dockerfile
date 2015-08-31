@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --force-yes software-properties-common 
 RUN apt-add-repository -y ppa:webupd8team/java
 RUN /bin/echo debconf shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
 
-RUN apt-get update && apt-get -y install oracle-java7-installer oracle-java7-set-default curl
+RUN apt-get update && apt-get -y install oracle-java7-installer oracle-java7-set-default curl unzip redis-tools
 
 RUN curl -s http://mirrors.ircam.fr/pub/apache/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-${HADOOP_VERSION}.tgz | tar -xz -C /opt/
 

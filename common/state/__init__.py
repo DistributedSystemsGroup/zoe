@@ -11,7 +11,7 @@ AlchemySession = sessionmaker(bind=_engine)
 
 from common.state.container import Container
 from common.state.cluster import Cluster
-from common.state.application import Application, SparkApplication
+from common.state.application import Application, SparkApplication, SparkNotebookApplication, SparkSubmitApplication
 from common.state.user import User
 from common.state.proxy import Proxy
 from common.state.execution import Execution, SparkSubmitExecution

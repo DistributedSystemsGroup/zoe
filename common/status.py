@@ -1,6 +1,6 @@
 from pprint import pformat
 
-from caaas_scheduler.swarm_status import SwarmStatus
+from zoe_scheduler.swarm_status import SwarmStatus
 from common.state import Application, Execution, SparkSubmitExecution
 
 
@@ -49,8 +49,8 @@ class ApplicationStatusReport(Report):
         else:
             exrep['finished_at'] = execution.time_finished.timestamp()
 
-        if type(execution) is SparkSubmitExecution:
-            exrep["commandline"] = execution.commmandline
+        if isinstance(execution, SparkSubmitExecution):
+            exrep["commandline"] = execution.commandline
             exrep["spark_opts"] = execution.spark_opts
 
         exrep["cluster"] = []

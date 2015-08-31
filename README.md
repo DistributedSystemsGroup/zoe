@@ -1,6 +1,12 @@
-# CAaaS - Container Analytics as a Service
+# Zoe - Container Analytics as a Service
 
-This web application uses a Docker Swarm cluster to run on-demand Spark clusters.
+This application uses a Docker Swarm cluster to run on-demand Spark clusters.
+
+IT is composed of three components:
+
+* zoectl: command-line client
+* zoe-scheduler: the main daemon that performs application scheduling and talks to Swarm
+* zoe-web: the web service
 
 ## Requirements
 
@@ -34,7 +40,7 @@ ProxyHTMLEvents onclick ondblclick onmousedown onmouseup \
     onunload onsubmit onreset onselect onchange
 
 ProxyRequests Off
-IncludeOptional /tmp/caaas-proxy.conf*
+IncludeOptional /tmp/zoe-proxy.conf*
 ```
 
 If you need to proxy the web application itself, add also these directives:
