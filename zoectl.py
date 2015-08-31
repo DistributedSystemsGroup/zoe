@@ -69,6 +69,14 @@ def app_rm_cmd(args):
     if application is None:
         print("Error: application {} does not exist".format(args.id))
         return
+    if args.force:
+        a = client.application_status(application)
+        for eid in a["executions"]:
+            e = client.execution_get(eid)
+            if e.status == "running":
+                print("Terminating execution {}".format(e.name))
+                client.execution_terminate(e)
+
     client.application_remove(application)
 
 
@@ -154,7 +162,7 @@ def process_arguments() -> Namespace:
 
     argparser_app_rm = subparser.add_parser('app-rm', help="Delete an application")
     argparser_app_rm.add_argument('id', type=int, help="Application id")
-#    argparser_app_rm.add_argument('-f', '--force', action="store_true", help="Kill also all active executions, if any") TODO
+    argparser_app_rm.add_argument('-f', '--force', action="store_true", help="Kill also all active executions, if any")
     argparser_app_rm.set_defaults(func=app_rm_cmd)
 
     argparser_app_inspect = subparser.add_parser('app-inspect', help="Gather details about an application and its active executions")

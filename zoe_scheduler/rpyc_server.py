@@ -1,8 +1,9 @@
 import asyncio
 import logging
+log = logging.getLogger("rpyc")
 from rpyc.utils.server import UDPRegistryClient, AuthenticationError, Connection, Channel, SocketStream
 
-from zoe_scheduler.periodic_tasks import periodic_task
+from zoe_scheduler.periodic_tasks import PeriodicTask
 
 
 class RPyCAsyncIOServer:
@@ -24,15 +25,13 @@ class RPyCAsyncIOServer:
                           server will attempt to register only if a registrar was explicitly given.
     :param protocol_config: the :data:`configuration dictionary <rpyc.core.protocol.DEFAULT_CONFIG>`
                             that is passed to the RPyC connection
-    :param logger: the ``logger`` to use (of the built-in ``logging`` module). If ``None``, a
-                   default logger will be created.
     :param listener_timeout: the timeout of the listener socket; set to ``None`` to disable (e.g.
                              on embedded platforms with limited battery)
     """
 
     def __init__(self, service, hostname="", ipv6=False, port=0,
             backlog=10, reuse_addr=True, authenticator=None, registrar=None,
-            auto_register=None, protocol_config=None, logger=None, listener_timeout=0.5):
+            auto_register=None, protocol_config=None, listener_timeout=0.5):
 
         if not protocol_config:
             protocol_config = {}
@@ -49,11 +48,7 @@ class RPyCAsyncIOServer:
         self.hostname = hostname
         self.port = port
 
-        if logger is None:
-            logger = logging.getLogger("%s/%d" % (self.service.get_service_name(), self.port))
-        self.logger = logger
-        if "logger" not in self.protocol_config:
-            self.protocol_config["logger"] = self.logger
+        self.logger = log
         if registrar is None:
             registrar = UDPRegistryClient(logger = self.logger)
         self.registrar = registrar
@@ -145,4 +140,4 @@ class RPyCAsyncIOServer:
         self.logger.info("server started on [%s]:%s", self.hostname, self.port)
         if self.auto_register:
             self._bg_register()
-            periodic_task(self._bg_register, self.registrar.REREGISTER_INTERVAL)
+            PeriodicTask(self._bg_register, self.registrar.REREGISTER_INTERVAL)

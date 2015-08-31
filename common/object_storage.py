@@ -23,6 +23,12 @@ def application_data_download(application: Application) -> bytes:
     return r.get(key)
 
 
+def application_data_delete(application: Application):
+    r = _connect()
+    key = "app-{}".format(application.id)
+    r.delete(key)
+
+
 def logs_archive_upload(execution: Execution, data: bytes) -> bool:
     r = _connect()
     key = "log-{}".format(execution.id)
@@ -33,3 +39,9 @@ def logs_archive_download(execution: Execution) -> bytes:
     r = _connect()
     key = "log-{}".format(execution.id)
     return r.get(key)
+
+
+def logs_archive_delete(execution: Execution):
+    r = _connect()
+    key = "log-{}".format(execution.id)
+    r.delete(key)

@@ -34,6 +34,13 @@ class Application(Base):
         return "<Application(name='%s', id='%s', required_resourced='%s')>" % (
             self.name, self.id, self.required_resources)
 
+    def executions_running(self):
+        ret = []
+        for e in self.executions:
+            if e.status == "running":
+                ret.append(e)
+        return ret
+
 
 class SparkApplication(Application):
     master_image = Column(String(256))

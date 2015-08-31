@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, PickleType, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, PickleType, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 
 from common.state import Base
@@ -17,6 +17,7 @@ class Execution(Base):
     time_started = Column(DateTime)
     time_finished = Column(DateTime)
     status = Column(String(32))
+    termination_notice = Column(Boolean, default=False)
 
     cluster = relationship("Cluster", uselist=False, backref="execution")
 
@@ -42,6 +43,11 @@ class Execution(Base):
     def set_terminated(self):
         self.status = "terminated"
         self.time_finished = datetime.now()
+
+    def find_container(self, name):
+        for c in self.cluster.containers:
+            if c.readable_name == name:
+                return c
 
     def __repr__(self):
         return "<Execution(name='%s', id='%s', assigned_resourced='%s', application_id='%s', )>" % (

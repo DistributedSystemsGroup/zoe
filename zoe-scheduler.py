@@ -15,6 +15,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     logging.getLogger('requests').setLevel(logging.WARNING)
     logging.getLogger('asyncio').setLevel(logging.INFO)
+    logging.getLogger('rpyc').setLevel(logging.WARNING)
     log = logging.getLogger('zoe')
 
     loop = asyncio.get_event_loop()

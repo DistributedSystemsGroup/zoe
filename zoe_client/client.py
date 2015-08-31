@@ -126,6 +126,11 @@ class ZoeClient:
         running = self.state.query(Execution).filter_by(application_id=application.id, time_finished=None).count()
         if running > 0:
             raise ApplicationStillRunning(application)
+
+        storage.application_data_delete(application)
+        for e in application.executions:
+            self.execution_delete(e)
+
         self.state.delete(application)
         self.state.commit()
 
@@ -145,6 +150,12 @@ class ZoeClient:
 
     def execution_terminate(self, execution: Execution):
         self.server.terminate_execution(execution.id)
+
+    def execution_delete(self, execution: Execution):
+        if execution.status == "running":
+            raise ApplicationStillRunning(execution.application)
+        storage.logs_archive_delete(execution)
+        self.state.delete(execution)
 
     def log_get(self, container_id: int) -> str:
         return self.server.log_get(container_id)

@@ -51,14 +51,14 @@ class ProxyManager:
         jinja_template = Template(ENTRY_TEMPLATE)
         node_list = []
         for p in proxy_entries:
-            netloc = urlparse(p["internal_url"])[1]
-            node_list.append((netloc, p["id"]))
+            netloc = urlparse(p.internal_url)[1]
+            node_list.append((netloc, p.id))
         for p in proxy_entries:
-            netloc = urlparse(p["internal_url"])[1]
+            netloc = urlparse(p.internal_url)[1]
             jinja_dict = {
-                "proxy_id": p["id"],
-                "proxy_url": p["internal_url"],
-                "service_name": p["service_name"],
+                "proxy_id": p.id,
+                "proxy_url": p.internal_url,
+                "service_name": p.service_name,
                 "netloc": netloc,
                 "nodes": node_list
             }
@@ -67,7 +67,7 @@ class ProxyManager:
         return output
 
     def _commit_and_reload(self, generated_file):
-        open(self.filepath, "w").write(generated_file)
+        open(self.apache_conf_filepath, "w").write(generated_file)
         system("sudo service apache2 reload")
         log.info("Apache reloaded")
 
@@ -77,6 +77,7 @@ class ProxyManager:
         self._commit_and_reload(output)
 
     def update_proxy_access_timestamps(self):
+        log.debug("Running update proxy accesses task")
         regex = re.compile('[0-9.]+ - - \[(.*)\] "GET /proxy/([0-9a-z\-]+)/')
         logf = open(self.apache_access_log, 'r')
         last_accesses = {}
@@ -88,11 +89,12 @@ class ProxyManager:
                 last_accesses[proxy_id] = timestamp
 
         state = AlchemySession()
-        for proxy in state.get_proxies():
+        for proxy in state.query(Proxy).all():
             proxy_id = proxy['id']
             if proxy_id in last_accesses:
                 proxy = state.query(Proxy).filter_by(id=proxy_id).one()
                 proxy.last_access = last_accesses[proxy_id]
+                proxy.container.cluster.execution.termination_notice = False
                 state.commit()
 
 pm = ProxyManager()

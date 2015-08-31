@@ -1,11 +1,17 @@
-from sqlalchemy.orm import object_session
+from datetime import datetime, timedelta
+import logging
+log = logging.getLogger(__name__)
+from io import BytesIO
+import zipfile
 
 from zoe_scheduler.swarm_client import SwarmClient, ContainerOptions
+from zoe_scheduler.proxy_manager import pm
 
-from common.state import AlchemySession, Cluster, Container, SparkApplication, Proxy, Execution, SparkNotebookApplication, SparkSubmitApplication, SparkSubmitExecution
+from common.state import AlchemySession, Application, Cluster, Container, SparkApplication, Proxy, Execution, SparkNotebookApplication, SparkSubmitApplication, SparkSubmitExecution
 from common.application_resources import ApplicationResources
 from common.exceptions import CannotCreateCluster
 from common.configuration import conf
+from common.object_storage import logs_archive_upload
 
 
 class PlatformManager:
@@ -19,6 +25,7 @@ class PlatformManager:
         self._application_to_containers(state, execution)
         execution.set_started()
         state.commit()
+        pm.update_proxy()
         return True
 
     def _application_to_containers(self, state: AlchemySession, execution: Execution):
@@ -150,15 +157,57 @@ class PlatformManager:
 
     def terminate_execution(self, state: AlchemySession, execution: Execution):
         cluster = execution.cluster
+        logs = []
         if cluster is not None:
             containers = cluster.containers
             for c in containers:
+                logs.append((c.readable_name, c.ip_address, self.log_get(c)))
                 self.swarm.terminate_container(c.docker_id)
                 state.delete(c)
             for p in cluster.proxies:
                 state.delete(p)
             state.delete(cluster)
         execution.set_terminated()
+        self._archive_execution_logs(execution, logs)
+        pm.update_proxy()
 
     def log_get(self, container: Container) -> str:
         return self.swarm.log_get(container.docker_id)
+
+    def _archive_execution_logs(self, execution: Execution, logs: list):
+        zipdata = BytesIO()
+        with zipfile.ZipFile(zipdata, "w", compression=zipfile.ZIP_DEFLATED) as logzip:
+            for c in logs:
+                fname = c[0] + "-" + c[1] + ".txt"
+                logzip.writestr(fname, c[2])
+        logs_archive_upload(execution, zipdata.getvalue())
+
+    def is_container_alive(self, container: Container) -> bool:
+        ret = self.swarm.inspect_container(container.docker_id)
+        return ret["running"]
+
+    def check_executions_health(self):
+        log.debug("Running check health task")
+        state = AlchemySession()
+        all_containers = state.query(Container).all()
+        for c in all_containers:
+            if not self.is_container_alive(c):
+                self._container_died(state, c)
+
+        notebooks = state.query(SparkNotebookApplication).all()
+        for nb in notebooks:
+            execs = nb.executions_running()
+            for e in execs:
+                c = e.find_container("spark-notebook")
+                if c is not None:
+                    pr = state.query(Proxy).filter_by(container_id=c.id, service_name="Spark Notebook interface")
+                    if datetime.now() - pr.last_access > timedelta(hours=conf["notebook_max_age_no_activity"]):
+                        self.terminate_execution(state, e)
+
+        state.commit()
+
+    def _container_died(self, state: AlchemySession, container: Container):
+        if container.readable_name == "spark-submit" or container.readable_name == "spark-master":
+            self.terminate_execution(state, container.cluster.execution)
+        else:
+            log.warning("Container {} (ID: {}) died unexpectedly")

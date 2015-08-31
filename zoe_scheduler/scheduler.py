@@ -1,8 +1,10 @@
 import asyncio
+import logging
+log = logging.getLogger(__name__)
 
 from zoe_scheduler.platform import PlatformManager
 from zoe_scheduler.platform_status import PlatformStatus
-from zoe_scheduler.periodic_tasks import periodic_task
+from zoe_scheduler.periodic_tasks import PeriodicTask
 from zoe_scheduler.proxy_manager import pm
 
 from common.configuration import conf
@@ -64,9 +66,11 @@ class ZoeScheduler:
         self.scheduler_policy = SimpleSchedulerPolicy(self.platform_status)
 
     def init_tasks(self):
-        self.platform_status.update_task(conf["status_refresh_interval"])
-        periodic_task(self.schedule, conf['scheduler_task_interval'])
-        periodic_task(pm.update_proxy_access_timestamps, conf['proxy_update_accesses'])
+        self.platform_status.update()
+        PeriodicTask(self.platform_status.update, conf["status_refresh_interval"])
+        PeriodicTask(self.schedule, conf['scheduler_task_interval'])
+        PeriodicTask(pm.update_proxy_access_timestamps, conf['proxy_update_accesses'])
+        PeriodicTask(self.platform.check_executions_health, conf["check_health"])
 
     def incoming(self, execution: Execution) -> bool:
         if not self.scheduler_policy.admission_control(execution.application.required_resources):
@@ -84,6 +88,7 @@ class ZoeScheduler:
             self.scheduler_policy.started(execution_id, resources)
 
     def schedule(self):
+        log.debug("Running schedule task")
         self._check_runnable()
 
     def terminate_execution(self, state, execution: Execution):

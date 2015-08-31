@@ -64,6 +64,24 @@ class SwarmClient:
             "ip_address": docker_info["NetworkSettings"]["IPAddress"],
             "docker_id": docker_id
         }
+        if docker_info["State"]["Running"]:
+            info["state"] = "running"
+            info["running"] = True
+        elif docker_info["State"]["Paused"]:
+            info["state"] = "paused"
+            info["running"] = True
+        elif docker_info["State"]["Restarting"]:
+            info["state"] = "restarting"
+            info["running"] = True
+        elif docker_info["State"]["OOMKilled"]:
+            info["state"] = "killed"
+            info["running"] = False
+        elif docker_info["State"]["Dead"]:
+            info["state"] = "killed"
+            info["running"] = False
+        else:
+            info["state"] = "unknown"
+            info["running"] = False
         return info
 
     def terminate_container(self, docker_id):

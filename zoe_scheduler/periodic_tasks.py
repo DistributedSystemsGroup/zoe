@@ -1,12 +1,21 @@
 import asyncio
+import logging
+log = logging.getLogger(__name__)
 
 
-@asyncio.coroutine
-def periodic_routine(func, interval):
-    while True:
-        yield from asyncio.sleep(interval)
-        func()
+class PeriodicTask(object):
+    def __init__(self, func, interval):
+        self.func = func
+        self.interval = interval
+        self._loop = asyncio.get_event_loop()
+        self._set()
 
+    def _set(self):
+        self._handler = self._loop.call_later(self.interval, self._run)
 
-def periodic_task(func, interval) -> asyncio.Task:
-    return asyncio.Task(periodic_routine(func, interval))
+    def _run(self):
+        try:
+            self.func()
+        except:
+            log.exception("Exception in periodic task")
+        self._set()
