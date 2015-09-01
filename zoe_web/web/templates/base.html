@@ -3,12 +3,9 @@
 <head>
     {% block head %}
     <meta charset="UTF-8">
-    <title>{% block title %}{% endblock %} - CAAAS</title>
+    <title>{% block title %}{% endblock %} - Zoe</title>
     <script src="/static/jquery-2.1.4.min.js" type="application/javascript"></script>
-    <script type="application/javascript">
-        var api_endpoint = "/api";
-    </script>
-    <link rel="stylesheet" href="/static/caaas.css" type="text/css">
+    <link rel="stylesheet" href="/static/zoe.css" type="text/css">
     {% endblock %}
 </head>
 <body>
@@ -26,13 +23,13 @@
         update_status();
         window.setInterval(update_status, 5000);
     </script>
-    <h1>DSG CAaaS system - Analytics on demand</h1>
+    <h1>Zoe - Analytics on demand</h1>
     <div id="content">{% block content %}{% endblock %}</div>
     <div id="footer">
         {% block footer %}
-            <div class="caaas_status_line">
+            <div class="status_line">
                 <p>
-                    <span id="app_name"><a href="{{ url_for("web_status") }}">CAaaS</a></span>
+                    <span id="app_name"><a href="{{ url_for("web_status") }}">Zoe</a></span>
                     <span id="status">
                         [<span id="num_nodes">N/A</span> swarm nodes, <span id="num_containers">N/A</span> active containers]
                     </span>

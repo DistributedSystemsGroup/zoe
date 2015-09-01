@@ -1,13 +1,9 @@
-from flask import jsonify, request, send_file, abort
+from flask import jsonify, request, send_file, abort, Blueprint
 from zipfile import is_zipfile
 
-from zoe_web import app
-from zoe_web.sql import CAaaState
-from zoe_web.spark_app_execution import application_submitted, setup_volume, AppHistory
-from zoe_web.swarm_manager import sm
 
-STATS_CACHING_EXPIRATION = 1  # seconds
 
+zoeweb_api = Blueprint('zoeweb_api', __name__)
 
 @app.route("/api/<int:user_id>/cluster/<int:cluster_id>/terminate")
 def api_terminate_cluster(user_id, cluster_id):

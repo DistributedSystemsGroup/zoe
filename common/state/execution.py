@@ -84,4 +84,16 @@ class SparkSubmitExecution(Execution):
 
 
 class PlainExecution:
-    pass
+    id = None
+    name = None
+    assigned_resources = None
+    application_id = None
+    time_started = None
+    time_scheduled = None
+    time_finished = None
+    status = None
+    termination_notice = None
+    cluster_id = None
+    type = None
+    commandline = None
+    spark_opts = None

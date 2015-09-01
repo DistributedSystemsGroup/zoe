@@ -110,4 +110,13 @@ class SparkSubmitApplication(SparkApplication):
 
 
 class PlainApplication:
-    pass
+    id = None
+    name = None
+    required_resources = None
+    user_id = None
+    executions = None
+    type = None
+    master_image = None
+    worker_image = None
+    notebook_image = None
+    submit_image = None

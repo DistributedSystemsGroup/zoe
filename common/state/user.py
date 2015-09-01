@@ -24,4 +24,6 @@ class User(Base):
 
 
 class PlainUser:
-    pass
+    id = None
+    email = None
+

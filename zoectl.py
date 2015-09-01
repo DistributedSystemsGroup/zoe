@@ -75,7 +75,7 @@ def app_rm_cmd(args):
             e = client.execution_get(eid)
             if e.status == "running":
                 print("Terminating execution {}".format(e.name))
-                client.execution_terminate(e)
+                client.execution_terminate(e.id)
 
     client.application_remove(application.id)
 
@@ -92,7 +92,7 @@ def app_inspect_cmd(args):
 
 def app_list_cmd(args):
     client = ZoeClient()
-    applications = client.spark_application_list(args.id)
+    applications = client.application_list(args.id)
     if len(applications) > 0:
         print("{:4} {:20} {:25}".format("ID", "Name", "Type"))
     for app in applications:

@@ -140,7 +140,7 @@ class ZoeClient:
             return None
         return self.server.application_status(application.id)
 
-    def spark_application_list(self, user_id) -> [PlainApplication]:
+    def application_list(self, user_id) -> [PlainApplication]:
         try:
             self.state.query(User).filter_by(id=user_id).one()
         except NoResultFound:
