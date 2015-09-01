@@ -1,8 +1,8 @@
 from flask import Blueprint, abort
 
-api = Blueprint('api', __name__)
+api_bp = Blueprint('api', __name__)
 
 
-@api.route('/status/basic')
+@api_bp.route('/status/basic')
 def basic_status():
     abort(404)

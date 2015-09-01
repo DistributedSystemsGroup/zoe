@@ -12,5 +12,8 @@ conf = {
     'check_health': 30,
     'notebook_max_age_no_activity': 24,
     'notebook_warning_age_no_activity': 2,
-    'email_task_interval': 300
+    'email_task_interval': 300,
+    'client_rpyc_autodiscovery': True,
+    'client_rpyc_server': None,
+    'client_rpyc_port': None
 }

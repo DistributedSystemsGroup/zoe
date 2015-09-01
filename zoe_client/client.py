@@ -10,6 +10,7 @@ from common.application_resources import SparkApplicationResources
 from common.status import PlatformStatusReport, ApplicationStatusReport
 from common.exceptions import UserIDDoesNotExist, ApplicationStillRunning
 import common.object_storage as storage
+from common.configuration import conf
 
 REGISTRY = "10.0.0.2:5000"
 MASTER_IMAGE = REGISTRY + "/zoe/spark-master-1.4.1:1.2"
@@ -208,3 +209,10 @@ class ZoeClient:
             return None
         else:
             return self.server.log_get(container_id)
+
+
+def get_zoe_client():
+    if conf['client_rpyc_autodiscovery']:
+        return ZoeClient()
+    else:
+        return ZoeClient(conf['client_rpyc_server'], conf['client_rpyc_port'])

@@ -4,23 +4,15 @@ from argparse import ArgumentParser, Namespace
 import logging
 from zipfile import is_zipfile
 
-from zoe_client import ZoeClient
+from zoe_client import get_zoe_client
 from common.state import create_tables
+from common.configuration import conf
 
 argparser = None
 
 
-def get_zoe_client(args):
-    if args.rpyc_server is None:
-        return ZoeClient()
-    if args.rpyc_server is not None and args.rpyc_port is None:
-        return ZoeClient(args.rpyc_server)
-    else:
-        return ZoeClient(args.rpyc_server, args.rpyc_port)
-
-
 def status_cmd(_):
-    client = ZoeClient()
+    client = get_zoe_client()
     status_report = client.platform_status()
     print(status_report)
 
@@ -30,25 +22,25 @@ def setup_db_cmd(_):
 
 
 def user_new_cmd(args):
-    client = ZoeClient()
+    client = get_zoe_client()
     user = client.user_new(args.email)
     print("New user ID: {}".format(user.id))
 
 
 def user_get_cmd(args):
-    client = ZoeClient()
+    client = get_zoe_client()
     user = client.user_get(args.email)
     print("User ID: {}".format(user.email))
 
 
 def spark_cluster_new_cmd(args):
-    client = ZoeClient()
+    client = get_zoe_client()
     application_id = client.spark_application_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name)
     print("Spark application added with ID: {}".format(application_id))
 
 
 def spark_notebook_new_cmd(args):
-    client = ZoeClient()
+    client = get_zoe_client()
     application_id = client.spark_notebook_application_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name)
     print("Spark application added with ID: {}".format(application_id))
 
@@ -57,13 +49,13 @@ def spark_submit_new_cmd(args):
     if not is_zipfile(args.file):
         print("Error: the file specified is not a zip archive")
         return
-    client = ZoeClient()
+    client = get_zoe_client()
     application_id = client.spark_submit_application_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name, args.file)
     print("Spark application added with ID: {}".format(application_id))
 
 
 def run_spark_cmd(args):
-    client = ZoeClient()
+    client = get_zoe_client()
     application = client.application_get(args.id)
     if application is None:
         print("Error: application {} does not exist".format(args.id))
@@ -77,7 +69,7 @@ def run_spark_cmd(args):
 
 
 def app_rm_cmd(args):
-    client = ZoeClient()
+    client = get_zoe_client()
     application = client.application_get(args.id)
     if application is None:
         print("Error: application {} does not exist".format(args.id))
@@ -94,7 +86,7 @@ def app_rm_cmd(args):
 
 
 def app_inspect_cmd(args):
-    client = ZoeClient()
+    client = get_zoe_client()
     application = client.application_get(args.id)
     if application is None:
         print("Error: application {} does not exist".format(args.id))
@@ -104,7 +96,7 @@ def app_inspect_cmd(args):
 
 
 def app_list_cmd(args):
-    client = ZoeClient()
+    client = get_zoe_client()
     applications = client.application_list(args.id)
     if len(applications) > 0:
         print("{:4} {:20} {:25}".format("ID", "Name", "Type"))
@@ -113,7 +105,7 @@ def app_list_cmd(args):
 
 
 def exec_kill_cmd(args):
-    client = ZoeClient()
+    client = get_zoe_client()
     execution = client.execution_get(args.id)
     if execution is None:
         print("Error: execution {} does not exist".format(args.id))
@@ -122,7 +114,7 @@ def exec_kill_cmd(args):
 
 
 def log_get_cmd(args):
-    client = ZoeClient()
+    client = get_zoe_client()
     log = client.log_get(args.id)
     if log is None:
         print("Error: No log found for container ID {}".format(args.id))
@@ -130,6 +122,7 @@ def log_get_cmd(args):
 
 
 def process_arguments() -> Namespace:
+    global argparser
     argparser = ArgumentParser(description="Zoe - Container Analytics as a Service command-line client")
     argparser.add_argument('-d', '--debug', action='store_true', default=False, help='Enable debug output')
     argparser.add_argument('--rpyc-server', default=None, help='Specify an RPyC server instead of using autodiscovery')
@@ -213,7 +206,17 @@ def main():
     else:
         logging.basicConfig(level=logging.INFO)
 
+    if args.rpyc_server is None:
+        conf['client_rpyc_autodiscovery'] = True
+    else:
+        conf['client_rpyc_autodiscovery'] = False
+        conf['client_rpyc_server'] = args.rpyc_server
+        conf['client_rpyc_port'] = args.rpyc_port
+
     args.func(args)
 
-
-main()
+if __name__ == "__main__":
+    try:
+        main()
+    except AttributeError:
+        argparser.print_help()
