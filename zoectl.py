@@ -7,6 +7,17 @@ from zipfile import is_zipfile
 from zoe_client import ZoeClient
 from common.state import create_tables
 
+argparser = None
+
+
+def get_zoe_client(args):
+    if args.rpyc_server is None:
+        return ZoeClient()
+    if args.rpyc_server is not None and args.rpyc_port is None:
+        return ZoeClient(args.rpyc_server)
+    else:
+        return ZoeClient(args.rpyc_server, args.rpyc_port)
+
 
 def status_cmd(_):
     client = ZoeClient()
@@ -121,6 +132,8 @@ def log_get_cmd(args):
 def process_arguments() -> Namespace:
     argparser = ArgumentParser(description="Zoe - Container Analytics as a Service command-line client")
     argparser.add_argument('-d', '--debug', action='store_true', default=False, help='Enable debug output')
+    argparser.add_argument('--rpyc-server', default=None, help='Specify an RPyC server instead of using autodiscovery')
+    argparser.add_argument('--rpyc-port', default=4000, type=int, help='Specify an RPyC server port, default is 4000')
     subparser = argparser.add_subparsers(title='subcommands', description='valid subcommands')
 
     argparser_status = subparser.add_parser('status', help="Show the platform status")

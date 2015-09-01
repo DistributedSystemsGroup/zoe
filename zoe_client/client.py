@@ -20,8 +20,11 @@ NOTEBOOK_IMAGE = REGISTRY + "/zoe/spark-notebook-1.4.1:1.2"
 
 
 class ZoeClient:
-    def __init__(self):
-        self.server_connection = rpyc.connect_by_service("ZoeSchedulerRPC")
+    def __init__(self, rpyc_server=None, rpyc_port=4000):
+        if rpyc_server is None:
+            self.server_connection = rpyc.connect_by_service("ZoeSchedulerRPC")
+        else:
+            self.server_connection = rpyc.connect(rpyc_server, rpyc_port)
         self.server = self.server_connection.root
         self.state = AlchemySession()
 
