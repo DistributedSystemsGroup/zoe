@@ -30,7 +30,7 @@ def user_new_cmd(args):
 def user_get_cmd(args):
     client = get_zoe_client()
     user = client.user_get(args.email)
-    print("User ID: {}".format(user.email))
+    print("User ID: {}".format(user.id))
 
 
 def spark_cluster_new_cmd(args):
@@ -216,7 +216,4 @@ def main():
     args.func(args)
 
 if __name__ == "__main__":
-    try:
-        main()
-    except AttributeError:
-        argparser.print_help()
+    main()

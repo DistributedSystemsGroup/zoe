@@ -11,7 +11,7 @@
 <body>
     <script>
         function update_status() {
-            $.getJSON("{{ url_for("api_status") }}")
+            $.getJSON("{{ url_for("api.status_basic") }}")
                 .done(function( data ) {
                     $("#num_nodes").text(data.num_nodes);
                     $("#num_containers").text(data.num_containers);
@@ -29,7 +29,7 @@
         {% block footer %}
             <div class="status_line">
                 <p>
-                    <span id="app_name"><a href="{{ url_for("web_status") }}">Zoe</a></span>
+                    <span id="app_name"><a href="{{ url_for("web.status_platform") }}">Zoe</a></span>
                     <span id="status">
                         [<span id="num_nodes">N/A</span> swarm nodes, <span id="num_containers">N/A</span> active containers]
                     </span>

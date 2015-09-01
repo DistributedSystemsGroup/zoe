@@ -6,9 +6,7 @@ from common.state import Application, Execution, SparkSubmitExecution
 
 class Report:
     def __init__(self):
-        self.report = {
-            'executions': []
-        }
+        self.report = {}
 
     def __str__(self):
         return pformat(self.report)
@@ -16,14 +14,13 @@ class Report:
 
 class PlatformStatusReport(Report):
     def include_swarm_status(self, sw_status: SwarmStatus):
-        self.report["swarm"] = {
-            'total cores': sw_status.cores_total
-        }
+        self.report["swarm"] = sw_status.to_dict()
 
 
 class ApplicationStatusReport(Report):
     def __init__(self, application: Application):
         super().__init__()
+        self.report["executions"] = []
         self._app_to_dict(application)
 
     def _app_to_dict(self, application: Application):

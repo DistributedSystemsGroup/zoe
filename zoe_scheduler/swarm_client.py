@@ -8,7 +8,7 @@ import docker.errors
 
 from common.configuration import conf
 
-from zoe_scheduler.swarm_status import SwarmStatus
+from zoe_scheduler.swarm_status import SwarmStatus, SwarmNodeStatus
 
 
 class SwarmClient:
@@ -30,8 +30,23 @@ class SwarmClient:
         pl_status.placement_strategy = info["DriverStatus"][idx][1]
         idx = 2
         assert 'Filters' in info["DriverStatus"][idx][0]
-        pl_status.active_filters = info["DriverStatus"][idx][1].split(", ")
+        pl_status.active_filters = [x.strip() for x in info["DriverStatus"][idx][1].split(", ")]
+        idx = 3
+        assert 'Nodes' in info["DriverStatus"][idx][0]
+        node_count = int(info["DriverStatus"][idx][1])
+        idx = 4
+        for node in range(node_count):
+            ns = SwarmNodeStatus(info["DriverStatus"][idx + node][0])
+            ns.docker_endpoint = info["DriverStatus"][idx + node][1]
+            ns.container_count = int(info["DriverStatus"][idx + node + 1][1])
+            ns.cores_reserved = int(info["DriverStatus"][idx + node + 2][1].split(' / ')[0])
+            ns.cores_total = int(info["DriverStatus"][idx + node + 2][1].split(' / ')[1])
+            ns.memory_reserved = info["DriverStatus"][idx + node + 3][1].split(' / ')[0]
+            ns.memory_total = info["DriverStatus"][idx + node + 3][1].split(' / ')[1]
+            ns.labels = ns.cores_reserved = info["DriverStatus"][idx + node + 4][1:]
 
+            pl_status.nodes.append(ns)
+            idx += 4
         pl_status.timestamp = time.time()
         return pl_status
 

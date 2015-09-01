@@ -12,6 +12,18 @@ class SwarmNodeStatus:
         self.memory_reserved = 0
         self.labels = {}
 
+    def to_dict(self):
+        return {
+            'name': self.name,
+            'docker_endpoint': self.docker_endpoint,
+            'container_count': self.container_count,
+            'cores_total': self.cores_total,
+            'cores_reserved': self.cores_reserved,
+            'memory_total': self.memory_total,
+            'memory_reserved': self.memory_reserved,
+            'labels': self.labels.copy()
+        }
+
 
 class SwarmStatus:
     def __init__(self):
@@ -23,3 +35,16 @@ class SwarmStatus:
         self.active_filters = []
         self.nodes = []
         self.timestamp = time.time()
+
+    def to_dict(self):
+        ret = {
+            'container_count': self.container_count,
+            'image_count': self.image_count,
+            'memory_total': self.memory_total,
+            'cores_total': self.cores_total,
+            'placement_strategy': self.placement_strategy,
+            'active_filters': self.active_filters.copy(),
+            'timestamp': self.timestamp,
+            'nodes': [x.to_dict() for x in self.nodes]
+        }
+        return ret

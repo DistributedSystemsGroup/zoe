@@ -17,6 +17,7 @@ from common.object_storage import logs_archive_upload
 class PlatformManager:
     def __init__(self):
         self.swarm = SwarmClient()
+        pm.update_proxy()
 
     def start_execution(self, execution_id: int, resources: ApplicationResources) -> bool:
         state = AlchemySession()

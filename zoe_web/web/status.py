@@ -5,17 +5,12 @@ from zoe_web.web import web_bp
 import zoe_web.utils as web_utils
 
 
-@web_bp.route('/')
-def index():
-    return render_template('index.html')
-
-
-@web_bp.route('/home')
-def home():
+@web_bp.route('/status/platform')
+def status_platform():
     client = get_zoe_client()
     user = web_utils.check_user(client)
     template_vars = {
         "user_id": user.id,
         "email": user.email
     }
-    return render_template('home.html', **template_vars)
+    return render_template('status.html', **template_vars)

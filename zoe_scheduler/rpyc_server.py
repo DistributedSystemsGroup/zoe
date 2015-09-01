@@ -43,7 +43,9 @@ class RPyCAsyncIOServer:
             self.auto_register = bool(registrar)
         else:
             self.auto_register = auto_register
-        self.protocol_config = protocol_config
+        self.protocol_config = {"allow_public_attrs": True}
+        if protocol_config is not None:
+            self.protocol_config.update(protocol_config)
 
         self.hostname = hostname
         self.port = port
