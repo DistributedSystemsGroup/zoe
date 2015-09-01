@@ -64,13 +64,22 @@ class ZoeScheduler:
         self.platform = PlatformManager()
         self.platform_status = PlatformStatus()
         self.scheduler_policy = SimpleSchedulerPolicy(self.platform_status)
+        self.tasks = []
 
     def init_tasks(self):
         self.platform_status.update()
-        PeriodicTask(self.platform_status.update, conf["status_refresh_interval"])
-        PeriodicTask(self.schedule, conf['scheduler_task_interval'])
-        PeriodicTask(pm.update_proxy_access_timestamps, conf['proxy_update_accesses'])
-        PeriodicTask(self.platform.check_executions_health, conf["check_health"])
+        tsk = PeriodicTask(self.platform_status.update, conf["status_refresh_interval"])
+        self.tasks.append(tsk)
+        tsk = PeriodicTask(self.schedule, conf['scheduler_task_interval'])
+        self.tasks.append(tsk)
+        tsk = PeriodicTask(pm.update_proxy_access_timestamps, conf['proxy_update_accesses'])
+        self.tasks.append(tsk)
+        tsk = PeriodicTask(self.platform.check_executions_health, conf["check_health"])
+        self.tasks.append(tsk)
+
+    def stop_tasks(self):
+        for tsk in self.tasks:
+            tsk.stop()
 
     def incoming(self, execution: Execution) -> bool:
         if not self.scheduler_policy.admission_control(execution.application.required_resources):

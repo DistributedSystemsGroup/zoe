@@ -3,7 +3,7 @@ import logging
 log = logging.getLogger(__name__)
 
 
-class PeriodicTask(object):
+class PeriodicTask:
     def __init__(self, func, interval):
         self.func = func
         self.interval = interval
@@ -19,3 +19,6 @@ class PeriodicTask(object):
         except:
             log.exception("Exception in periodic task")
         self._set()
+
+    def stop(self):
+        self._handler.cancel()

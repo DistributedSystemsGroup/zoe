@@ -140,4 +140,8 @@ class RPyCAsyncIOServer:
         self.logger.info("server started on [%s]:%s", self.hostname, self.port)
         if self.auto_register:
             self._bg_register()
-            PeriodicTask(self._bg_register, self.registrar.REREGISTER_INTERVAL)
+            self.register_task = PeriodicTask(self._bg_register, self.registrar.REREGISTER_INTERVAL)
+
+    def stop(self):
+        self.register_task.stop()
+        self.server.close()

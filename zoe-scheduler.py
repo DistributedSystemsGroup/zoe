@@ -12,6 +12,12 @@ from zoe_scheduler.scheduler import zoe_sched
 def sigint_handler():
     log.warning('CTRL-C detected, terminating event loop...')
     loop.stop()
+    zoe_sched.stop_tasks()
+    rpyc_server.stop()
+    try:
+        loop.run_forever()
+    except RuntimeError:
+        pass
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
@@ -27,10 +33,6 @@ if __name__ == "__main__":
 
     zoe_sched.init_tasks()
 
-    try:
-        loop.run_forever()
-    except KeyboardInterrupt:
-        log.warning('CTRL-C detected, terminating event loop...')
+    loop.run_forever()
 
-    loop.run_until_complete(rpyc_server.server.wait_closed())
     loop.close()
