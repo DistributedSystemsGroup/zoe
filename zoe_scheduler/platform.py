@@ -1,17 +1,19 @@
 from datetime import datetime, timedelta
 import logging
-log = logging.getLogger(__name__)
+
 from io import BytesIO
 import zipfile
 
 from zoe_scheduler.swarm_client import SwarmClient, ContainerOptions
 from zoe_scheduler.proxy_manager import pm
 
-from common.state import AlchemySession, Application, Cluster, Container, SparkApplication, Proxy, Execution, SparkNotebookApplication, SparkSubmitApplication, SparkSubmitExecution
+from common.state import AlchemySession, Cluster, Container, SparkApplication, Proxy, Execution, SparkNotebookApplication, SparkSubmitApplication, SparkSubmitExecution
 from common.application_resources import ApplicationResources
 from common.exceptions import CannotCreateCluster
 from common.configuration import conf
 from common.object_storage import logs_archive_upload
+
+log = logging.getLogger(__name__)
 
 
 class PlatformManager:
@@ -28,6 +30,7 @@ class PlatformManager:
         except CannotCreateCluster:
             return False
         execution.set_started()
+        print(execution.status)
         state.commit()
         pm.update_proxy()
         return True
@@ -96,14 +99,16 @@ class PlatformManager:
         resources = execution.assigned_resources
         nb_requirements = resources.notebook_resources
 
-        # Do this here so we can use the ID later for building proxy URLs
+        # Create this proxy entry here as we need to pass the ID in the container environment
         container = Container(readable_name="spark-notebook", cluster=cluster)
         state.add(container)
+        nb_url_proxy = Proxy(service_name="Spark Notebook interface", container=container, cluster=cluster)
+        state.add(nb_url_proxy)
         state.flush()
 
         nb_opts = ContainerOptions()
         nb_opts.add_env_variable("SPARK_MASTER_IP", master.ip_address)
-        nb_opts.add_env_variable("PROXY_ID", container.id)
+        nb_opts.add_env_variable("PROXY_ID", nb_url_proxy.id)
         if "memory_limit" in execution.assigned_resources.worker_resources:
             nb_opts.add_env_variable("SPARK_EXECUTOR_RAM", execution.assigned_resources.worker_resources["memory_limit"])
         if "memory_limit" in nb_requirements:
@@ -120,9 +125,7 @@ class PlatformManager:
         nb_app_url = "http://" + nb_info["ip_address"] + ":4040"
         nb_app_proxy = Proxy(service_name="Spark application web interface", container=container, cluster=cluster, internal_url=nb_app_url)
         state.add(nb_app_proxy)
-        nb_url = "http://" + nb_info["ip_address"] + ":9000/proxy/%d" % container.id
-        nb_url_proxy = Proxy(service_name="Spark Notebook interface", container=container, cluster=cluster, internal_url=nb_url)
-        state.add(nb_url_proxy)
+        nb_url_proxy.internal_url = "http://" + nb_info["ip_address"] + ":9000/proxy/%d" % nb_url_proxy.id
 
     def _spawn_submit_client(self, state: AlchemySession, execution: SparkSubmitExecution, cluster: Cluster, master: Container):
         application = execution.application
@@ -159,7 +162,7 @@ class PlatformManager:
         nb_app_proxy = Proxy(service_name="Spark application web interface", container=container, cluster=cluster, internal_url=nb_app_url)
         state.add(nb_app_proxy)
 
-    def terminate_execution(self, state: AlchemySession, execution: Execution):
+    def execution_terminate(self, state: AlchemySession, execution: Execution):
         cluster = execution.cluster
         logs = []
         if cluster is not None:
@@ -191,7 +194,6 @@ class PlatformManager:
         return ret["running"]
 
     def check_executions_health(self):
-        log.debug("Running check health task")
         state = AlchemySession()
         all_containers = state.query(Container).all()
         for c in all_containers:
@@ -204,16 +206,19 @@ class PlatformManager:
             for e in execs:
                 c = e.find_container("spark-notebook")
                 if c is not None:
-                    pr = state.query(Proxy).filter_by(container_id=c.id, service_name="Spark Notebook interface")
+                    pr = state.query(Proxy).filter_by(container_id=c.id, service_name="Spark Notebook interface").one()
                     if datetime.now() - pr.last_access > timedelta(hours=conf["notebook_max_age_no_activity"]):
-                        self.terminate_execution(state, e)
+                        log.info("Killing spark notebook {} for inactivity".format(e.id))
+                        self.execution_terminate(state, e)
                     if datetime.now() - pr.last_access > timedelta(hours=conf["notebook_max_age_no_activity"]) - timedelta(hours=conf["notebook_warning_age_no_activity"]):
+                        log.info("Spark notebook {} is on notice for inactivity".format(e.id))
                         e.termination_notice = True
 
         state.commit()
 
     def _container_died(self, state: AlchemySession, container: Container):
         if container.readable_name == "spark-submit" or container.readable_name == "spark-master":
-            self.terminate_execution(state, container.cluster.execution)
+            log.debug("found a dead spark-submit container, cleaning up")
+            self.execution_terminate(state, container.cluster.execution)
         else:
             log.warning("Container {} (ID: {}) died unexpectedly")

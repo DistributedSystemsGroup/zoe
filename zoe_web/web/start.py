@@ -25,10 +25,10 @@ def home():
     past_executions = []
     for r in reports:
         for e in r.report['executions']:
-            if e['status'] == "running" or e['status'] == "scheduled":
-                active_executions.append((r, e))
+            if e['status'] == "running" or e['status'] == "scheduled" or e['status'] == "submitted":
+                active_executions.append((r.report, e, client.execution_get_proxy_path(e['id'])))
             else:
-                past_executions.append((r, e))
+                past_executions.append((r.report, e))
     template_vars['active_executions'] = active_executions
     template_vars['past_executions'] = past_executions
     return render_template('home.html', **template_vars)

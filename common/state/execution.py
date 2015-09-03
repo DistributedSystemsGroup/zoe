@@ -64,7 +64,8 @@ class Execution(Base):
         ret.time_finished = self.time_finished
         ret.status = self.status
         ret.termination_notice = self.termination_notice
-        ret.cluster_id = self.cluster.id
+        if self.cluster is not None:
+            ret.cluster_id = self.cluster.id
         ret.type = self.type
         return ret
 

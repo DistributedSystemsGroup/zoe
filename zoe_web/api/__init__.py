@@ -61,6 +61,19 @@ def application_new():
     return jsonify(status="ok")
 
 
+@api_bp.route('/applications/delete/<app_id>', methods=['GET', 'POST'])
+def application_delete(app_id):
+    client = get_zoe_client()
+    _api_check_user(client)
+
+    try:
+        client.application_remove(app_id)
+    except ApplicationStillRunning:
+        return jsonify(status="error", msg="The application has active executions and cannot be deleted")
+    else:
+        return jsonify(status="ok")
+
+
 @api_bp.route('/executions/new', methods=['POST'])
 def execution_new():
     client = get_zoe_client()
@@ -81,14 +94,11 @@ def execution_new():
         return jsonify(status="error")
 
 
-@api_bp.route('/applications/delete/<app_id>', methods=['GET', 'POST'])
-def application_delete(app_id):
+@api_bp.route('/executions/terminate/<exec_id>')
+def execution_terminate(exec_id):
     client = get_zoe_client()
     _api_check_user(client)
 
-    try:
-        client.application_remove(app_id)
-    except ApplicationStillRunning:
-        return jsonify(status="error", msg="The application has active executions and cannot be deleted")
-    else:
-        return jsonify(status="ok")
+    client.execution_terminate(exec_id)
+
+    return jsonify(status="ok")

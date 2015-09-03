@@ -75,23 +75,21 @@ class ZoeScheduler:
         if not self.scheduler_policy.admission_control(execution.application.required_resources):
             return False
         self.scheduler_policy.insert(execution.id, execution.application.required_resources)
-        self._check_runnable()
         return True
 
     def _check_runnable(self):  # called periodically, does not use state to keep database load low
         execution_id, resources = self.scheduler_policy.runnable()
         if execution_id is None:
             return
-
+        log.debug("Found a runnable execution!")
         if self.platform.start_execution(execution_id, resources):
             self.scheduler_policy.started(execution_id, resources)
 
     def schedule(self):
-        log.debug("Running schedule task")
         self._check_runnable()
 
-    def terminate_execution(self, state, execution: Execution):
-        self.platform.terminate_execution(state, execution)
+    def execution_terminate(self, state, execution: Execution):
+        self.platform.execution_terminate(state, execution)
         self.scheduler_policy.terminated(execution.id)
 
 

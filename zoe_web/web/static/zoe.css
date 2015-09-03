@@ -14,42 +14,21 @@ a:visited {
     text-decoration: none;
 }
 
-div#activities {
-    padding-left: 3em;
-}
-
-a.activity {
-    width: 100px;
-    height: 80px;
-    border: 1px black solid;
-    border-radius: 15px;
-    float: left;
-    margin-right: 10px;
-    padding: 1em;
-    text-align: center;
-    display: block;
-}
-
-a.activity:hover {
-    transition: background-color 200ms linear;
-    background-color: khaki;
-}
-
 div.user_info {
     font-size: smaller;
     clear: both;
     padding-top: 20px;
 }
 
-table#app_list {
+table.app_list {
     border-collapse: collapse;
 }
 
-table#app_list tr {
+table.app_list tr {
     border-top: 1px black solid;
 }
 
-table#app_list td {
+table.app_list td {
     padding-right: 1.5em;
 }
 
@@ -57,7 +36,7 @@ td.long-text {
     font-size: xx-small;
 }
 
-div.caaas_status_line {
+div.status_line {
     float: left;
 }
 

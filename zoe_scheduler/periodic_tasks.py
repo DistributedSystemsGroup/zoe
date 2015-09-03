@@ -21,7 +21,10 @@ class PeriodicTaskManager:
     def _generic_task(self, name, delay, func):
         log.info("Task {} started".format(name))
         while True:
-            func()
+            try:
+                func()
+            except:
+                log.exception("Task {} raised an exception".format(name))
             stop = self.terminate.wait(delay)
             if stop:
                 break

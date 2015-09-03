@@ -9,7 +9,7 @@
         <p>You have no applications defined. <a href="{{ url_for("web.application_new") }}">Click here</a> to create a new one!</p>
     {% else %}
 
-    <table id="app_list">
+    <table id="app_list" class="app_list">
     <thead>
     <tr>
         <th>Name</th>
@@ -44,7 +44,7 @@
         <p>You have no active executions at this time.</p>
     {% else %}
 
-    <table id="exec_list">
+    <table id="exec_list" class="app_list">
     <thead>
     <tr>
         <th>Application name</th>
@@ -62,8 +62,13 @@
             <td>{{ e[1]['name'] }}</td>
             <td>{{ e[1]['status'] }}</td>
             <td>{{ e[1]['scheduled_at']|format_timestamp }}</td>
-            <td>{{ e[1]['started_at']|replace('None', 'not yet')|format_timestamp }}</td>
+            {% if e[1]['started_at'] == 'None' %}
+            <td>not yet</td>
+            {% else %}
+            <td>{{ e[1]['started_at']|format_timestamp }}</td>
+            {% endif %}
             <td>{{ e[1]['cluster']|count }}</td>
+            <td><a href="{{ e[2] }}">Open</a></td>
             <td><a href="{{ url_for('web.execution_terminate', exec_id=e[1]['id']) }}">Terminate</a></td>
             </tr>
         {% endfor %}
@@ -78,7 +83,7 @@
         <p>Empty history.</p>
     {% else %}
 
-    <table id="hist_list">
+    <table id="hist_list" class="app_list">
     <thead>
     <tr>
         <th>Application name</th>
@@ -90,15 +95,21 @@
     </tr>
     </thead>
     <tbody>
-        {% for e in active_executions %}
+        {% for e in past_executions %}
             <tr class="{{ loop.cycle('odd', 'even') }}">
             <td>{{ e[0]['name'] }}</td>
             <td>{{ e[1]['name'] }}</td>
             <td>{{ e[1]['status'] }}</td>
             <td>{{ e[1]['scheduled_at']|format_timestamp }}</td>
+            {% if e[1]['started_at'] == 'None' %}
+            <td>never</td>
+            {% else %}
             <td>{{ e[1]['started_at']|format_timestamp }}</td>
+            {% endif %}
             <td>{{ e[1]['finished_at']|format_timestamp }}</td>
+            {% if e[1]['started_at'] != None %}
             <td><a href="">Logs</a></td>
+            {% endif %}
             </tr>
         {% endfor %}
     </tbody>

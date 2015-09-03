@@ -93,7 +93,7 @@ def web_terminate(user_id, execution_id):
         "execution_id": execution_id,
         "user_id": user_id
     }
-    return render_template('terminate.html', **template_vars)
+    return render_template('execution_terminate.html', **template_vars)
 
 
 @app.route("/web/<int:user_id>/container/<int:container_id>/logs")

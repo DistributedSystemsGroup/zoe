@@ -15,5 +15,6 @@ conf = {
     'email_task_interval': 300,
     'client_rpyc_autodiscovery': True,
     'client_rpyc_server': None,
-    'client_rpyc_port': None
+    'client_rpyc_port': None,
+    'proxy_path_prefix': '/proxy'
 }

@@ -20,7 +20,7 @@ ENTRY_TEMPLATE = """
     ProxyHTMLExtended On
     ProxyPass {{ proxy_url }} retry=1
     ProxyPassReverse {{ proxy_url }}
-    {% if service_name != "notebook" %}
+    {% if service_name != "Spark Notebook interface" %}
     ProxyHTMLURLMap ^/(.*)$ /proxy/{{ proxy_id }}/$1 RL
     ProxyHTMLURLMap ^logPage(.*)$ /proxy/{{ proxy_id }}/logPage$1 RL
     ProxyHTMLURLMap ^app(.*)$ /proxy/{{ proxy_id }}/app$1 RL
@@ -29,7 +29,7 @@ ENTRY_TEMPLATE = """
     {% endfor %}
     {% endif %}
 </Location>
-{% if service_name == "notebook" %}
+{% if service_name == "Spark Notebook interface" %}
 <Location /proxy/{{ proxy_id }}/ws/>
     ProxyPass ws://{{ netloc }}/proxy/{{ proxy_id }}/ws/
 </Location>
@@ -77,7 +77,6 @@ class ProxyManager:
         self._commit_and_reload(output)
 
     def update_proxy_access_timestamps(self):
-        log.debug("Running update proxy accesses task")
         regex = re.compile('[0-9.]+ - - \[(.*)\] "GET /proxy/([0-9a-z\-]+)/')
         logf = open(self.apache_access_log, 'r')
         last_accesses = {}
@@ -90,10 +89,10 @@ class ProxyManager:
 
         state = AlchemySession()
         for proxy in state.query(Proxy).all():
-            proxy_id = proxy['id']
-            if proxy_id in last_accesses:
-                proxy = state.query(Proxy).filter_by(id=proxy_id).one()
-                proxy.last_access = last_accesses[proxy_id]
+            if proxy.id in last_accesses:
+                log.debug("Updating access timestamp for proxy ID {}".format(proxy.id))
+                proxy = state.query(Proxy).filter_by(id=proxy.id).one()
+                proxy.last_access = last_accesses[proxy.id]
                 proxy.container.cluster.execution.termination_notice = False
                 state.commit()
 

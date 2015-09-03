@@ -20,10 +20,10 @@ class ZoeSchedulerRPCService(rpyc.Service):
         pl_status = self.sched.platform_status.generate_report()
         return pl_status
 
-    def exposed_terminate_execution(self, execution_id: int) -> bool:
+    def exposed_execution_terminate(self, execution_id: int) -> bool:
         state = AlchemySession()
         execution = state.query(Execution).filter_by(id=execution_id).one()
-        self.sched.terminate_execution(state, execution)
+        self.sched.execution_terminate(state, execution)
         state.commit()
         return True
 

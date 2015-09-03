@@ -5,6 +5,7 @@ from common.state import AlchemySession
 from common.state.application import Application, SparkNotebookApplication, SparkSubmitApplication, SparkApplication, PlainApplication
 from common.state.container import Container
 from common.state.execution import Execution, SparkSubmitExecution, PlainExecution
+from common.state.proxy import Proxy
 from common.state.user import User, PlainUser
 from common.application_resources import SparkApplicationResources
 from common.status import PlatformStatusReport, ApplicationStatusReport
@@ -155,7 +156,7 @@ class ZoeClient:
 
         storage.application_data_delete(application)
         for e in application.executions:
-            self.execution_delete(e)
+            self.execution_delete(e.id)
 
         self.state.delete(application)
         self.state.commit()
@@ -212,13 +213,31 @@ class ZoeClient:
             return None
         return ret.extract()
 
+    def execution_get_proxy_path(self, execution_id):
+        try:
+            execution = self.state.query(Execution).filter_by(id=execution_id).one()
+        except NoResultFound:
+            return None
+        if execution is None:
+            return None
+        if isinstance(execution.application, SparkNotebookApplication):
+            c = execution.find_container("spark-notebook")
+            pr = self.state.query(Proxy).filter_by(container_id=c.id, service_name="Spark Notebook interface").one()
+            return conf['proxy_path_prefix'] + '/{}'.format(pr.id)
+        elif isinstance(execution.application, SparkSubmitApplication):
+            c = execution.find_container("spark-submit")
+            pr = self.state.query(Proxy).filter_by(container_id=c.id, service_name="Spark application web interface").one()
+            return conf['proxy_path_prefix'] + '/{}'.format(pr.id)
+        else:
+            return None
+
     def execution_terminate(self, execution_id: int):
         try:
             self.state.query(Execution).filter_by(id=execution_id).one()
         except NoResultFound:
             pass
         self._connect()
-        self.server.terminate_execution(execution_id)
+        self.server.execution_terminate(execution_id)
         self._close()
 
     def execution_delete(self, execution_id: int):

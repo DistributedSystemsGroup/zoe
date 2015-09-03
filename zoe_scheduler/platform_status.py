@@ -13,7 +13,6 @@ class PlatformStatus:
         self.swarm = SwarmClient()
 
     def update(self):
-        log.debug("Running platform status update task")
         self.swarm_status = self.swarm.info()
 
     def generate_report(self) -> PlatformStatusReport:
