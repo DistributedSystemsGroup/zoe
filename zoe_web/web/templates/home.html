@@ -108,7 +108,7 @@
             {% endif %}
             <td>{{ e[1]['finished_at']|format_timestamp }}</td>
             {% if e[1]['started_at'] != None %}
-            <td><a href="">Logs</a></td>
+            <td><a href="{{ url_for('api.history_logs_get', execution_id=e[1]['id']) }}">Logs</a></td>
             {% endif %}
             </tr>
         {% endfor %}

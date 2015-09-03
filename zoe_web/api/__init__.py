@@ -1,6 +1,7 @@
+from io import BytesIO
 from zipfile import is_zipfile
 
-from flask import Blueprint, jsonify, request, session
+from flask import Blueprint, jsonify, request, session, abort, send_file
 
 from zoe_client import get_zoe_client
 from common.exceptions import ApplicationStillRunning
@@ -102,3 +103,15 @@ def execution_terminate(exec_id):
     client.execution_terminate(exec_id)
 
     return jsonify(status="ok")
+
+
+@api_bp.route('/history/logs/<execution_id>')
+def history_logs_get(execution_id):
+    client = get_zoe_client()
+    _api_check_user(client)
+
+    logs = client.log_history_get(execution_id)
+    if logs is None:
+        return abort(404)
+    else:
+        return send_file(BytesIO(logs), mimetype="application/zip")

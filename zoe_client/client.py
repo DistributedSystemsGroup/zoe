@@ -263,6 +263,12 @@ class ZoeClient:
             self._close()
             return ret
 
+    def log_history_get(self, execution_id):
+        execution = self.execution_get(execution_id)
+        if execution is None:
+            return None
+        return storage.logs_archive_download(execution)
+
 
 def get_zoe_client():
     if conf['client_rpyc_autodiscovery']:
