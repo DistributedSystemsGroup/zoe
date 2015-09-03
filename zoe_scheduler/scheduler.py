@@ -1,15 +1,15 @@
-import asyncio
 import logging
-log = logging.getLogger(__name__)
 
 from zoe_scheduler.platform import PlatformManager
 from zoe_scheduler.platform_status import PlatformStatus
-from zoe_scheduler.periodic_tasks import PeriodicTask
+from zoe_scheduler.periodic_tasks import PeriodicTaskManager
 from zoe_scheduler.proxy_manager import pm
 
 from common.configuration import conf
 from common.state import Execution
 from common.application_resources import ApplicationResources
+
+log = logging.getLogger(__name__)
 
 
 class SimpleSchedulerPolicy:
@@ -64,28 +64,18 @@ class ZoeScheduler:
         self.platform = PlatformManager()
         self.platform_status = PlatformStatus()
         self.scheduler_policy = SimpleSchedulerPolicy(self.platform_status)
-        self.tasks = []
 
-    def init_tasks(self):
-        self.platform_status.update()
-        tsk = PeriodicTask(self.platform_status.update, conf["status_refresh_interval"])
-        self.tasks.append(tsk)
-        tsk = PeriodicTask(self.schedule, conf['scheduler_task_interval'])
-        self.tasks.append(tsk)
-        tsk = PeriodicTask(pm.update_proxy_access_timestamps, conf['proxy_update_accesses'])
-        self.tasks.append(tsk)
-        tsk = PeriodicTask(self.platform.check_executions_health, conf["check_health"])
-        self.tasks.append(tsk)
-
-    def stop_tasks(self):
-        for tsk in self.tasks:
-            tsk.stop()
+    def init_tasks(self, tm: PeriodicTaskManager):
+        tm.add_task("platform status updater", self.platform_status.update, conf["status_refresh_interval"])
+        tm.add_task("scheduler", self.schedule, conf['scheduler_task_interval'])
+        tm.add_task("proxy access timestamp updater", pm.update_proxy_access_timestamps, conf['proxy_update_accesses'])
+        tm.add_task("execution health checker", self.platform.check_executions_health, conf["check_health"])
 
     def incoming(self, execution: Execution) -> bool:
         if not self.scheduler_policy.admission_control(execution.application.required_resources):
             return False
         self.scheduler_policy.insert(execution.id, execution.application.required_resources)
-        asyncio.get_event_loop().call_soon(self._check_runnable)
+        self._check_runnable()
         return True
 
     def _check_runnable(self):  # called periodically, does not use state to keep database load low

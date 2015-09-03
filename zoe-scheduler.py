@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
 import argparse
-import asyncio
 import logging
-log = logging.getLogger('zoe')
-import signal
+
+from rpyc.utils.server import ThreadedServer
 
 from zoe_scheduler.rpyc_service import ZoeSchedulerRPCService
-from zoe_scheduler.rpyc_server import RPyCAsyncIOServer
 from zoe_scheduler.scheduler import zoe_sched
+from zoe_scheduler.periodic_tasks import PeriodicTaskManager
 
+log = logging.getLogger('zoe')
 loop = None
 rpyc_server = None
 
@@ -38,24 +38,26 @@ def main():
     args = process_arguments()
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
-        logging.getLogger('asyncio').setLevel(logging.INFO)
     else:
         logging.basicConfig(level=logging.INFO)
-        logging.getLogger('asyncio').setLevel(logging.WARNING)
 
     logging.getLogger('requests').setLevel(logging.WARNING)
-    logging.getLogger('rpyc').setLevel(logging.WARNING)
+    rpyc_logger = logging.getLogger('rpyc')
+    rpyc_logger.setLevel(logging.WARNING)
 
-    loop = asyncio.get_event_loop()
-    loop.add_signal_handler(signal.SIGINT, sigint_handler)
-    rpyc_server = RPyCAsyncIOServer(ZoeSchedulerRPCService, '0.0.0.0', port=4000, auto_register=True)
+    tm = PeriodicTaskManager()
+
+#    rpyc_server = RPyCAsyncIOServer(ZoeSchedulerRPCService, '0.0.0.0', port=4000, auto_register=True)
+    rpyc_server = ThreadedServer(ZoeSchedulerRPCService, '0.0.0.0', port=4000,
+                                 auto_register=not args.rpyc_no_auto_register,
+                                 protocol_config={"allow_public_attrs": True},
+                                 logger=rpyc_logger)
+
+    zoe_sched.init_tasks(tm)
+
     rpyc_server.start()
 
-    zoe_sched.init_tasks()
-
-    loop.run_forever()
-
-    loop.close()
+    tm.stop_all()
 
 if __name__ == "__main__":
     main()

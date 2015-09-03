@@ -1,24 +1,34 @@
-import asyncio
+from threading import Thread, Event
 import logging
+
 log = logging.getLogger(__name__)
 
 
-class PeriodicTask:
-    def __init__(self, func, interval):
-        self.func = func
-        self.interval = interval
-        self._loop = asyncio.get_event_loop()
-        self._set()
+class PeriodicTaskManager:
+    """
+    This is for internal tasks of the Zoe scheduler component, do not confuse this for the application scheduler.
+    """
+    def __init__(self):
+        self.tasks = []
+        self.terminate = Event()
+        self.terminate.clear()
 
-    def _set(self):
-        self._handler = self._loop.call_later(self.interval, self._run)
+    def add_task(self, name, func, delay):
+        th = Thread(name=name, target=self._generic_task, args=(name, delay, func))
+        th.daemon = True
+        th.start()
 
-    def _run(self):
-        try:
-            self.func()
-        except:
-            log.exception("Exception in periodic task")
-        self._set()
+    def _generic_task(self, name, delay, func):
+        log.info("Task {} started".format(name))
+        while True:
+            func()
+            stop = self.terminate.wait(delay)
+            if stop:
+                break
+        log.info("Task {} ended".format(name))
 
-    def stop(self):
-        self._handler.cancel()
+    def stop_all(self):
+        self.terminate.set()
+        for t in self.tasks:
+            t.join()
+        log.info("All tasks terminated")
