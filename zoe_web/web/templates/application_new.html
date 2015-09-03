@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}New application{% endblock %}
+{% block content %}
+
+<h1>New application</h1>
+
+    <p>Use the form below to create a new Zoe application.</p>
+    <form enctype="multipart/form-data" id="app_new">
+
+        <label for="app_name">Name:</label>
+        <input type="text" autofocus autocomplete="on" required pattern="[a-z0-9_\-]+" name="app_name" id="app_name" placeholder="myapp-25"><br/>
+
+        <label for="app_type">Type:</label><br/>
+        <input type="radio" name="app_type" value="spark-notebook" onclick="handleAppTypeClick(this)" checked>&nbsp;Spark Notebook<br/>
+        <input type="radio" name="app_type" value="ipython-notebook" onclick="handleAppTypeClick(this)" disabled>&nbsp;iPython Notebook (coming soon)<br/>
+        <input type="radio" name="app_type" value="spark-submit" onclick="handleAppTypeClick(this)">&nbsp;Spark Application<br/>
+
+        <p>Minimum required resources:</p>
+        <label for="num_workers">Number of worker nodes</label>
+        <input type="number" min="1" step="1" value="2" required name="num_workers"><br/>
+
+        <label for="num_cores">Number of cores per worker node</label>
+        <input type="number" min="2" step="1" value="2" required name="num_cores"><br/>
+
+        <label for="ram">Amount of RAM per worker node (gigabytes)</label>
+        <input type="number" min="1" step="1" value="2" required name="ram"><br/>
+
+        <label for="upload" class="spark-submit">Zip file containing the Spark application:</label>
+        <input class="spark-submit" type="file" name="file" id="upload" accept="application/zip"><br/>
+
+        <input type="submit" value="Submit" id="submit">
+    </form>
+    <progress style="display: none" id="progress"></progress>
+
+    <script type="application/javascript">
+    var curAppType = 'spark-notebook';
+    $(".spark-submit").hide();
+    $("#upload").required = false;
+    function handleAppTypeClick(radio) {
+        curAppType = radio.value;
+        if (curAppType == "spark-submit") {
+            $(".spark-submit").show();
+            $("#upload").attr('required', true);
+        } else {
+            $(".spark-submit").hide();
+            $("#upload").attr('required', false);
+        }
+    }
+
+    function progressHandlingFunction(e){
+        if(e.lengthComputable){
+            $('progress').attr({value:e.loaded,max:e.total});
+        }
+    }
+
+    function completeHandler(e) {
+        if (e.status == "ok") {
+            location.href = "{{ url_for('web.home') }}";
+        } else {
+            alert("Error: " + e.msg);
+        }
+        return false;
+    }
+
+    function errorHandler(e) {
+        $("#progress").hide();
+    }
+
+    $('#app_new').on('submit', function(event) {
+        event.preventDefault();
+        $("#progress").show();
+        $.ajax({
+            url: '{{ url_for("api.application_new") }}',  // Server script to process data
+            type: 'POST',
+            xhr: function() {  // Custom XMLHttpRequest
+                var myXhr = $.ajaxSettings.xhr();
+                if(myXhr.upload){ // Check if upload property exists
+                    myXhr.upload.addEventListener('progress', progressHandlingFunction, false); // For handling the progress of the upload
+                }
+                return myXhr;
+            },
+            //Ajax events
+            //beforeSend: beforeSendHandler,
+            success: completeHandler,
+            error: errorHandler,
+            // Form data
+            data: new FormData(this),
+            //Options to tell jQuery not to process data or worry about content-type.
+            cache: false,
+            contentType: false,
+            processData: false
+        });
+        return false;
+    });
+    </script>
+
+{% endblock %}

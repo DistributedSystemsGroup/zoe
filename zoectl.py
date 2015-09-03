@@ -29,7 +29,7 @@ def user_new_cmd(args):
 
 def user_get_cmd(args):
     client = get_zoe_client()
-    user = client.user_get(args.email)
+    user = client.user_get_by_email(args.email)
     print("User ID: {}".format(user.id))
 
 
@@ -213,7 +213,11 @@ def main():
         conf['client_rpyc_server'] = args.rpyc_server
         conf['client_rpyc_port'] = args.rpyc_port
 
-    args.func(args)
+    try:
+        args.func(args)
+    except AttributeError:
+        argparser.print_help()
+        return
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}New application{% endblock %}
+{% block content %}
+
+<h1>New {{ app.name }} execution</h1>
+
+    {% if app.type == "spark-notebook" %}
+        <form enctype="multipart/form-data" id="exec_new">
+        <input type="hidden" name="app_id" value="{{ app.id }}">
+            <label>Set a name to identify this notebook:
+                <input type="text" autofocus autocomplete="on" required pattern="[a-z0-9_\-]+" name="exec_name" id="exec_name" placeholder="kmeans-test">
+            </label>
+            <input type="submit" value="Start" id="submit">
+        </form>
+    {% else %}
+        <form enctype="multipart/form-data" id="exec_new">
+        <input type="hidden" name="app_id" value="{{ app.id }}">
+            <label>Set a name to identify this execution:
+                <input type="text" autofocus autocomplete="on" required pattern="[a-z0-9_\-]+" name="exec_name" id="exec_name" placeholder="wordcount-twitter-2">
+            </label>
+
+            <label>Command line:
+                <input type="text" autofocus autocomplete="on" required name="cmdline" id="cmdline" placeholder="wordcount.py hdfs://192.168.45.157/datasets/gutenberg_big_2x.txt hdfs://192.168.45.157/tmp/cntwdc1">
+            </label>
+
+            <label>Spark options (optional):
+                <input type="text" autofocus autocomplete="on" name="spark_opts" id="spark_opts" placeholder="">
+            </label>
+            <input type="submit" value="Start" id="submit">
+        </form>
+    {% endif %}
+    <p id="scheduled" style="display: none">Your execution request has been schduled and will be served as soon as possible.
+    You can monitor application status from the <a href="{{ url_for("web.home") }}">home page</a>.</p>
+    <p id="schedule_error" style="display: none">Your execution request has been denied. The system is not currently able to satisfy the
+        application resource requirements.</p>
+    You can monitor application status from the <a href="{{ url_for("web.home") }}">home page</a>.</p>
+    <p id="communication_error" style="display: none">Error: there is a communication problem with the Zoe web server. Is the network
+        still available?.</p>
+
+    <script type="application/javascript">
+    function completeHandler(e) {
+        if (e.status == "ok") {
+            $("#scheduled").show();
+        } else {
+            $("#schedule_error").show();
+        }
+        return false;
+    }
+
+    function errorHandler(e) {
+        $("#communication_error").show();
+    }
+
+    $('#exec_new').on('submit', function(event) {
+        event.preventDefault();
+        $("#exec_new").hide();
+        $.ajax({
+            url: '{{ url_for("api.execution_new") }}',  // Server script to process data
+            type: 'POST',
+            //Ajax events
+            success: completeHandler,
+            error: errorHandler,
+            // Form data
+            data: new FormData(this),
+            //Options to tell jQuery not to process data or worry about content-type.
+            cache: false,
+            contentType: false,
+            processData: false
+        });
+        return false;
+    });
+    </script>
+
+{% endblock %}

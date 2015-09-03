@@ -23,7 +23,10 @@ class PlatformManager:
         state = AlchemySession()
         execution = state.query(Execution).filter_by(id=execution_id).one()
         execution.assigned_resources = resources
-        self._application_to_containers(state, execution)
+        try:
+            self._application_to_containers(state, execution)
+        except CannotCreateCluster:
+            return False
         execution.set_started()
         state.commit()
         pm.update_proxy()

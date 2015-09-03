@@ -22,12 +22,21 @@ NOTEBOOK_IMAGE = REGISTRY + "/zoe/spark-notebook-1.4.1:1.2"
 
 class ZoeClient:
     def __init__(self, rpyc_server=None, rpyc_port=4000):
-        if rpyc_server is None:
+        self.rpyc_server = rpyc_server
+        self.rpyc_port = rpyc_port
+        self.state = AlchemySession()
+        self.server = None
+        self.server_connection = None
+
+    def _connect(self):
+        if self.rpyc_server is None:
             self.server_connection = rpyc.connect_by_service("ZoeSchedulerRPC")
         else:
-            self.server_connection = rpyc.connect(rpyc_server, rpyc_port)
+            self.server_connection = rpyc.connect(self.rpyc_server, self.rpyc_port)
         self.server = self.server_connection.root
-        self.state = AlchemySession()
+
+    def _close(self):
+        return
 
     # Users
     def user_new(self, email: str) -> PlainUser:
@@ -36,17 +45,31 @@ class ZoeClient:
         self.state.commit()
         return user.extract()
 
-    def user_get(self, email: str) -> PlainUser:
-        user = self.state.query(User).filter_by(email=email).one()
+    def user_get_by_email(self, email: str) -> PlainUser:
+        try:
+            user = self.state.query(User).filter_by(email=email).one()
+        except NoResultFound:
+            return None
         return user.extract()
 
+    def user_get(self, user_id: int) -> bool:
+        try:
+            user = self.state.query(User).filter_by(id=user_id).one()
+        except NoResultFound:
+            return None
+        else:
+            return user.extract()
+
     def user_check(self, user_id: int) -> bool:
-        user = self.state.query(User).filter_by(id=user_id).one()
-        return user is not None
+        user = self.state.query(User).filter_by(id=user_id).count()
+        return user == 1
 
     # Platform
     def platform_status(self) -> PlatformStatusReport:
-        return self.server.get_platform_status()
+        self._connect()
+        ret = self.server.get_platform_status()
+        self._close()
+        return ret
 
     # Applications
     def spark_application_new(self, user_id: int, worker_count: int, executor_memory: str, executor_cores: int, name: str) -> int:
@@ -142,7 +165,10 @@ class ZoeClient:
             application = self.state.query(Application).filter_by(id=application_id).one()
         except NoResultFound:
             return None
-        return self.server.application_status(application.id)
+        self._connect()
+        ret = self.server.application_status(application.id)
+        self._close()
+        return ret
 
     def application_list(self, user_id) -> [PlainApplication]:
         try:
@@ -174,7 +200,10 @@ class ZoeClient:
                                   status="submitted")
         self.state.add(execution)
         self.state.commit()
-        return self.server.execution_schedule(execution.id)
+        self._connect()
+        ret = self.server.execution_schedule(execution.id)
+        self._close()
+        return ret
 
     def execution_get(self, execution_id: int) -> PlainExecution:
         try:
@@ -188,7 +217,9 @@ class ZoeClient:
             self.state.query(Execution).filter_by(id=execution_id).one()
         except NoResultFound:
             pass
+        self._connect()
         self.server.terminate_execution(execution_id)
+        self._close()
 
     def execution_delete(self, execution_id: int):
         try:
@@ -208,7 +239,10 @@ class ZoeClient:
         except NoResultFound:
             return None
         else:
-            return self.server.log_get(container_id)
+            self._connect()
+            ret = self.server.log_get(container_id)
+            self._close()
+            return ret
 
 
 def get_zoe_client():

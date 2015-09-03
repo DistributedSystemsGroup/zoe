@@ -54,6 +54,7 @@ class RPyCAsyncIOServer:
         if registrar is None:
             registrar = UDPRegistryClient(logger = self.logger)
         self.registrar = registrar
+        self.register_task = None
 
         # The asyncio Server object
         self.server = None
@@ -76,6 +77,7 @@ class RPyCAsyncIOServer:
         """returns the listener socket's file descriptor"""
         return self.server.sockets[0]
 
+    @asyncio.coroutine
     def _accept_method(self, reader, writer):
         self._authenticate_and_serve_client(reader, writer)
 

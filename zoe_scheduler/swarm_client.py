@@ -51,23 +51,25 @@ class SwarmClient:
         return pl_status
 
     def spawn_container(self, image, options) -> dict:
-        host_config = docker.utils.create_host_config(network_mode="bridge",
-                                                      binds=options.get_volume_binds(),
-                                                      mem_limit=options.get_memory_limit())
-        cont = self.cli.create_container(image=image,
-                                         environment=options.get_environment(),
-                                         network_disabled=False,
-                                         host_config=host_config,
-                                         detach=True,
-                                         volumes=options.get_volumes(),
-                                         command=options.get_command())
+        cont = None
         try:
+            host_config = docker.utils.create_host_config(network_mode="bridge",
+                                                          binds=options.get_volume_binds(),
+                                                          mem_limit=options.get_memory_limit())
+            cont = self.cli.create_container(image=image,
+                                             environment=options.get_environment(),
+                                             network_disabled=False,
+                                             host_config=host_config,
+                                             detach=True,
+                                             volumes=options.get_volumes(),
+                                             command=options.get_command())
             self.cli.start(container=cont.get('Id'))
-            info = self.inspect_container(cont.get('Id'))
         except docker.errors.APIError as e:
-            self.cli.remove_container(container=cont.get('Id'), force=True)
+            if cont is not None:
+                self.cli.remove_container(container=cont.get('Id'), force=True)
             log.error(str(e))
             return None
+        info = self.inspect_container(cont.get('Id'))
         return info
 
     def inspect_container(self, docker_id) -> dict:

@@ -14,8 +14,21 @@ def index():
 def home():
     client = get_zoe_client()
     user = web_utils.check_user(client)
+    apps = client.application_list(user.id)
     template_vars = {
         "user_id": user.id,
-        "email": user.email
+        "email": user.email,
+        'apps': apps,
     }
+    reports = [client.application_status(app.id) for app in apps]
+    active_executions = []
+    past_executions = []
+    for r in reports:
+        for e in r.report['executions']:
+            if e['status'] == "running" or e['status'] == "scheduled":
+                active_executions.append((r, e))
+            else:
+                past_executions.append((r, e))
+    template_vars['active_executions'] = active_executions
+    template_vars['past_executions'] = past_executions
     return render_template('home.html', **template_vars)
