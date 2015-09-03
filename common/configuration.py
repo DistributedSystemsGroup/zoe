@@ -1,5 +1,5 @@
 conf = {
-    'docker_swarm_manager': 'tcp://m2:2380',
+    'docker_swarm_manager': 'tcp://bf1.bigfoot.eurecom.fr:2380',
     'status_refresh_interval': 10,
     'scheduler_task_interval': 10,
     'db_connection': 'mysql+mysqlconnector://zoe:6sz2tfPuzBcCLdEz@m1.bigfoot.eurecom.fr/zoe',

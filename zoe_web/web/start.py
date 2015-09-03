@@ -20,12 +20,15 @@ def home():
         "email": user.email,
         'apps': apps,
     }
-    reports = [client.application_status(app.id) for app in apps]
+    reports = []
+    for app in apps:
+        r = client.application_status(app.id)
+        reports.append(r)
     active_executions = []
     past_executions = []
     for r in reports:
         for e in r.report['executions']:
-            if e['status'] == "running" or e['status'] == "scheduled" or e['status'] == "submitted":
+            if e['status'] == "running":  # or e['status'] == "scheduled" or e['status'] == "submitted":
                 active_executions.append((r.report, e, client.execution_get_proxy_path(e['id'])))
             else:
                 past_executions.append((r.report, e))

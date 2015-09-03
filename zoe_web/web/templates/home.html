@@ -9,7 +9,7 @@
         <p>You have no applications defined. <a href="{{ url_for("web.application_new") }}">Click here</a> to create a new one!</p>
     {% else %}
 
-    <table id="app_list" class="app_list">
+    <table id="app_list" class="app_list sortable">
     <thead>
     <tr>
         <th>Name</th>
@@ -44,7 +44,7 @@
         <p>You have no active executions at this time.</p>
     {% else %}
 
-    <table id="exec_list" class="app_list">
+    <table id="exec_list" class="app_list sortable">
     <thead>
     <tr>
         <th>Application name</th>
@@ -83,7 +83,7 @@
         <p>Empty history.</p>
     {% else %}
 
-    <table id="hist_list" class="app_list">
+    <table id="hist_list" class="app_list sortable">
     <thead>
     <tr>
         <th>Application name</th>

@@ -49,8 +49,9 @@ def spark_submit_new_cmd(args):
     if not is_zipfile(args.file):
         print("Error: the file specified is not a zip archive")
         return
+    fcontents = open(args.file, "rb").read()
     client = get_zoe_client()
-    application_id = client.spark_submit_application_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name, args.file)
+    application_id = client.spark_submit_application_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name, fcontents)
     print("Spark application added with ID: {}".format(application_id))
 
 

@@ -17,15 +17,15 @@
         <input type="hidden" name="app_id" value="{{ app.id }}">
             <label>Set a name to identify this execution:
                 <input type="text" autofocus autocomplete="on" required pattern="[a-z0-9_\-]+" name="exec_name" id="exec_name" placeholder="wordcount-twitter-2">
-            </label>
+            </label><br/>
 
             <label>Command line:
-                <input type="text" autofocus autocomplete="on" required name="cmdline" id="cmdline" placeholder="wordcount.py hdfs://192.168.45.157/datasets/gutenberg_big_2x.txt hdfs://192.168.45.157/tmp/cntwdc1">
-            </label>
+                <input type="text" autocomplete="on" required name="commandline" id="commandline" size="100" placeholder="wordcount.py hdfs://192.168.45.157/datasets/gutenberg_big_2x.txt hdfs://192.168.45.157/tmp/cntwdc1">
+            </label><br/>
 
             <label>Spark options (optional):
-                <input type="text" autofocus autocomplete="on" name="spark_opts" id="spark_opts" placeholder="">
-            </label>
+                <input type="text" autocomplete="on" name="spark_opts" id="spark_opts" size="100"><br/>
+            </label><br/>
             <input type="submit" value="Start" id="submit">
         </form>
     {% endif %}
@@ -46,7 +46,7 @@
         return false;
     }
 
-    function errorHandler(e) {
+    function errorHandler() {
         $("#communication_error").show();
     }
 

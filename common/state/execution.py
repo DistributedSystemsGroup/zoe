@@ -82,6 +82,7 @@ class SparkSubmitExecution(Execution):
         ret = super().extract()
         ret.commandline = self.commandline
         ret.spark_opts = self.spark_opts
+        return ret
 
 
 class PlainExecution:

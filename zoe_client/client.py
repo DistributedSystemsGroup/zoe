@@ -30,6 +30,8 @@ class ZoeClient:
         self.server_connection = None
 
     def _connect(self):
+        if self.server is not None:
+            return  # already connected
         if self.rpyc_server is None:
             self.server_connection = rpyc.connect_by_service("ZoeSchedulerRPC")
         else:
@@ -114,7 +116,7 @@ class ZoeClient:
         self.state.commit()
         return app.id
 
-    def spark_submit_application_new(self, user_id: int, worker_count: int, executor_memory: str, executor_cores: int, name: str, file: str) -> int:
+    def spark_submit_application_new(self, user_id: int, worker_count: int, executor_memory: str, executor_cores: int, name: str, file_data: bytes) -> int:
         try:
             self.state.query(User).filter_by(id=user_id).one()
         except NoResultFound:
@@ -133,7 +135,7 @@ class ZoeClient:
                                      user_id=user_id)
         self.state.add(app)
         self.state.flush()
-        storage.application_data_upload(app, open(file, "rb").read())
+        storage.application_data_upload(app, file_data)
 
         self.state.commit()
         return app.id

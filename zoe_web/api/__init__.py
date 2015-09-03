@@ -55,7 +55,9 @@ def application_new():
         file_data = request.files['file']
         if not is_zipfile(file_data.stream):
             return jsonify(status='error', msg='not a zip file')
-        client.spark_submit_application_new(user.id, int(form_data["num_workers"]), form_data["ram"] + 'g', int(form_data["num_cores"]), form_data["app_name"], file_data)
+        file_data.stream.seek(0)
+        fcontents = file_data.stream.read()
+        client.spark_submit_application_new(user.id, int(form_data["num_workers"]), form_data["ram"] + 'g', int(form_data["num_cores"]), form_data["app_name"], fcontents)
     else:
         return jsonify(status="error", msg='unknown application type')
 
