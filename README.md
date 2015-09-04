@@ -1,8 +1,8 @@
 # Zoe - Container Analytics as a Service
 
-This application uses a Docker Swarm cluster to run on-demand Spark clusters.
+This application uses Docker Swarm to run on-demand Spark clusters.
 
-IT is composed of three components:
+It is composed of three components:
 
 * zoectl: command-line client
 * zoe-scheduler: the main daemon that performs application scheduling and talks to Swarm
@@ -15,9 +15,29 @@ IT is composed of three components:
 * A Docker registry containing Spark images
 * Apache to act as a reverse proxy
 
-## Apache configuration
+## Configuration
 
-Put this in your virtual host entry:
+Zoe configuration is kept, for now, in a Python file: `common/configuration.py`
+
+### Swarm/Docker
+
+For testing you can use also a single Docker instance, just set its endpoint in the configuration file mentioned above.
+
+To use Swarm, we use an undocumented network configuration, with the docker bridges connected to a physical interface, so that
+containers on different hosts can talk to each other on the same layer 2 domain.
+
+### Docker registry
+
+Use the scripts in the [zoe-docker-images](https://github.com/DistributedSystemsGroup/zoe-docker-images) repository to create
+and populate a private registry with Spark images. The images are quite standard and can be used also without Zoe, for examples
+on how to do that, see the `scripts/start_cluster.sh` script.
+
+### Apache configuration
+
+Zoe generates dynamically proxy entries to let users access to the various web interfaces contained in the Spark containers.
+To do this, it needs to be able to reload Apache and to write to a configuration file included in the VirtualHost directive.
+
+Here is an example configuration for a virtual host:
 ```
 ProxyHTMLLinks a href
 ProxyHTMLLinks area href
@@ -40,25 +60,17 @@ ProxyHTMLEvents onclick ondblclick onmousedown onmouseup \
     onunload onsubmit onreset onselect onchange
 
 ProxyRequests Off
+
+<Location />
+        ProxyHtmlEnable On
+        ProxyHTMLExtended On
+        ProxyPass http://127.0.0.1:5000/ retry=0
+        ProxyPassReverse http://127.0.0.1:5000/
+</Location>
+
 IncludeOptional /tmp/zoe-proxy.conf*
 ```
 
-If you need to proxy the web application itself, add also these directives:
-```
-<Location /web/>
-    ProxyHtmlEnable On
-    ProxyHTMLExtended On
-    ProxyPass http://192.168.45.25:5000/web/
-    ProxyPassReverse http://192.168.45.25:5000/web/
-    ProxyHTMLURLMap /web/ /web/
-</Location>
-<Location /api/>
-    ProxyHtmlEnable On
-    ProxyHTMLExtended On
-    ProxyPass http://192.168.45.25:5000/api/
-    ProxyPassReverse http://192.168.45.25:5000/api/
-    ProxyHTMLURLMap /api/ /api/
-</Location>
-```
+This configuration will also proxy zoe-web, that starts on port 5000 by default.
 
-The script `apache-proxy.py` needs to be run to update apache whenever containers are created or destroyed.
+Please note that putting the generated config file in /tmp can be a serious security problem, depending on your setup.
