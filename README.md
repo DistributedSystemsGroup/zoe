@@ -13,11 +13,14 @@ It is composed of three components:
 * MySQL to keep all the state
 * Docker Swarm
 * A Docker registry containing Spark images
+* Redis
 * Apache to act as a reverse proxy
 
 ## Configuration
 
 Zoe configuration is kept, for now, in a Python file: `common/configuration.py`
+
+The cookie secret key is defined in `zoe_web/__init__.py`.
 
 ### Swarm/Docker
 
@@ -31,6 +34,11 @@ containers on different hosts can talk to each other on the same layer 2 domain.
 Use the scripts in the [zoe-docker-images](https://github.com/DistributedSystemsGroup/zoe-docker-images) repository to create
 and populate a private registry with Spark images. The images are quite standard and can be used also without Zoe, for examples
 on how to do that, see the `scripts/start_cluster.sh` script.
+
+### Redis
+
+Redis is used for storing Spark applications and logs, in zip archives. It is not the best use of redis, but it provides a
+very simple to use interface. We are looking for a different solution and this requirement will likely disappear soon.
 
 ### Apache configuration
 

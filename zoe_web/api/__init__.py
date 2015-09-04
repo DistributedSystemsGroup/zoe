@@ -77,6 +77,18 @@ def application_delete(app_id):
         return jsonify(status="ok")
 
 
+@api_bp.route('/applications/download/<int:app_id>')
+def application_binary_download(app_id: int):
+    client = get_zoe_client()
+    _api_check_user(client)
+
+    data = client.application_get_binary(app_id)
+    if data is None:
+        return jsonify(status="error")
+    else:
+        return send_file(BytesIO(data), mimetype="application/zip", as_attachment=True, attachment_filename="app-{}.zip".format(app_id))
+
+
 @api_bp.route('/executions/new', methods=['POST'])
 def execution_new():
     client = get_zoe_client()
@@ -128,4 +140,4 @@ def history_logs_get(execution_id: int):
     if logs is None:
         return abort(404)
     else:
-        return send_file(BytesIO(logs), mimetype="application/zip")
+        return send_file(BytesIO(logs), mimetype="application/zip", as_attachment=True, attachment_filename="logs-{}.zip".format(execution_id))

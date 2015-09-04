@@ -140,12 +140,19 @@ class ZoeClient:
         self.state.commit()
         return app.id
 
-    def application_get(self, application_id) -> PlainApplication:
+    def application_get(self, application_id: int) -> PlainApplication:
         try:
             ret = self.state.query(Application).filter_by(id=application_id).one()
             return ret.extract()
         except NoResultFound:
             return None
+
+    def application_get_binary(self, application_id: int) -> bytes:
+        try:
+            application = self.state.query(Application).filter_by(id=application_id).one()
+        except NoResultFound:
+            return None
+        return storage.application_data_download(application)
 
     def application_remove(self, application_id: int):
         try:

@@ -6,6 +6,7 @@ import zipfile
 
 from zoe_scheduler.swarm_client import SwarmClient, ContainerOptions
 from zoe_scheduler.proxy_manager import pm
+from zoe_scheduler.emails import notify_execution_finished, notify_notebook_notice, notify_notebook_termination
 
 from common.state import AlchemySession, Cluster, Container, SparkApplication, Proxy, Execution, SparkNotebookApplication, SparkSubmitApplication, SparkSubmitExecution
 from common.application_resources import ApplicationResources
@@ -210,9 +211,11 @@ class PlatformManager:
                     if datetime.now() - pr.last_access > timedelta(hours=conf["notebook_max_age_no_activity"]):
                         log.info("Killing spark notebook {} for inactivity".format(e.id))
                         self.execution_terminate(state, e)
+                        notify_notebook_termination(e)
                     if datetime.now() - pr.last_access > timedelta(hours=conf["notebook_max_age_no_activity"]) - timedelta(hours=conf["notebook_warning_age_no_activity"]):
                         log.info("Spark notebook {} is on notice for inactivity".format(e.id))
                         e.termination_notice = True
+                        notify_notebook_notice(e)
 
         state.commit()
 
@@ -220,5 +223,6 @@ class PlatformManager:
         if container.readable_name == "spark-submit" or container.readable_name == "spark-master":
             log.debug("found a dead spark-submit container, cleaning up")
             self.execution_terminate(state, container.cluster.execution)
+            notify_execution_finished(container.cluster.execution)
         else:
             log.warning("Container {} (ID: {}) died unexpectedly")

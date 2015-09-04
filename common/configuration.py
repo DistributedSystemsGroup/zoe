@@ -16,5 +16,9 @@ conf = {
     'client_rpyc_autodiscovery': True,
     'client_rpyc_server': None,
     'client_rpyc_port': None,
-    'proxy_path_prefix': '/proxy'
+    'proxy_path_prefix': '/proxy',
+    'smtp_server': 'smtp.gmail.com',
+    'smtp_user': 'bigfoot.data@gmail.com',
+    'smtp_pass': open('smtp_pass.txt', 'r').read().strip(),
+    'web_server_name': 'bigfoot-m2.eurecom.fr'
 }
