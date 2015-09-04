@@ -4,4 +4,5 @@ python:
 install:
   - pip install --allow-all-external -r requirements.txt
   - pip install nose
+  - touch smtp_pass.txt
 script: nosetests
