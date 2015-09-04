@@ -35,7 +35,7 @@ def login():
     form_data = request.form
     email = form_data["email"]
     client = get_zoe_client()
-    user = client.user_get(email)
+    user = client.user_get_by_email(email)
     if user is None:
         user = client.user_new(email)
     session["user_id"] = user.id
