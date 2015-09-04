@@ -9,8 +9,10 @@ import zoe_web.utils as web_utils
 def status_platform():
     client = get_zoe_client()
     user = web_utils.check_user(client)
+    platform_report = client.platform_status().report
+
     template_vars = {
         "user_id": user.id,
-        "email": user.email
+        "platform": platform_report
     }
-    return render_template('status.html', **template_vars)
+    return render_template('platform_status.html', **template_vars)

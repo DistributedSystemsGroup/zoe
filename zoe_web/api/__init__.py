@@ -97,8 +97,20 @@ def execution_new():
         return jsonify(status="error")
 
 
-@api_bp.route('/executions/terminate/<exec_id>')
-def execution_terminate(exec_id):
+@api_bp.route('/executions/logs/container/<int:container_id>')
+def execution_logs(container_id: int):
+    client = get_zoe_client()
+    _api_check_user(client)
+
+    log = client.log_get(container_id)
+    if log is None:
+        return jsonify(status="error", msg="no log found")
+    else:
+        return jsonify(status="ok", log=log)
+
+
+@api_bp.route('/executions/terminate/<int:exec_id>')
+def execution_terminate(exec_id: int):
     client = get_zoe_client()
     _api_check_user(client)
 
@@ -107,8 +119,8 @@ def execution_terminate(exec_id):
     return jsonify(status="ok")
 
 
-@api_bp.route('/history/logs/<execution_id>')
-def history_logs_get(execution_id):
+@api_bp.route('/history/logs/<int:execution_id>')
+def history_logs_get(execution_id: int):
     client = get_zoe_client()
     _api_check_user(client)
 
