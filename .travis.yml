@@ -1,5 +1,5 @@
 language: python
 python:
   - "3.4"
-install: "pip install -r requirements.txt"
+install: "pip install --allow-all-external -r requirements.txt"
 script: nosetests3
