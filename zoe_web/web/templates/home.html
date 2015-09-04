@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+
+    <div id="my_applications">
+    <h3>My applications <span class="new">(<a href="{{ url_for("web.application_new") }}">add new</a>)</span></h3>
+
+    {% if apps|count == 0 %}
+        <p>You have no applications defined. <a href="{{ url_for("web.application_new") }}">Click here</a> to create a new one!</p>
+    {% else %}
+
+    <table id="app_list" class="app_list sortable">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Req. containers</th>
+        <th>Worker RAM</th>
+        <th>Cores per worker</th>
+        <th>Master image</th>
+    </tr>
+    </thead>
+    <tbody>
+        {% for a in apps %}
+            <tr class="{{ loop.cycle('odd', 'even') }}">
+            <td>{{ a.name }}</td>
+            <td>{{ a.type }}</td>
+            <td>{{ a.required_resources.container_count }}</td>
+            <td>{{ a.required_resources.worker_resources["memory_limit"] }}</td>
+            <td>{{ a.required_resources.worker_resources["cores"] }}</td>
+            <td>{{ a.master_image|replace('10.0.0.2:5000/zoe/', '') }}</td>
+            <td><a href="{{ url_for('web.execution_new', app_id=a.id) }}">Run</a></td>
+            <td><a href="{{ url_for('web.application_delete', app_id=a.id) }}">Delete</a></td>
+            </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+    {% endif %}
+    </div>
+
+    <div id="my_executions">
+    <h3>Active executions</h3>
+    {% if active_executions|count == 0 %}
+        <p>You have no active executions at this time.</p>
+    {% else %}
+
+    <table id="exec_list" class="app_list sortable">
+    <thead>
+    <tr>
+        <th>Application name</th>
+        <th>Execution name</th>
+        <th>Status</th>
+        <th>Scheduled at</th>
+        <th>Started at</th>
+        <th>Container count</th>
+    </tr>
+    </thead>
+    <tbody>
+        {% for e in active_executions %}
+            <tr class="{{ loop.cycle('odd', 'even') }}">
+            <td>{{ e[0]['name'] }}</td>
+            <td>{{ e[1]['name'] }}</td>
+            <td>{{ e[1]['status'] }}</td>
+            <td>{{ e[1]['scheduled_at']|format_timestamp }}</td>
+            {% if e[1]['started_at'] == 'None' %}
+            <td>not yet</td>
+            {% else %}
+            <td>{{ e[1]['started_at']|format_timestamp }}</td>
+            {% endif %}
+            <td>{{ e[1]['cluster']|count }}</td>
+            <td><a href="{{ e[2] }}">Open</a></td>
+            <td><a href="{{ url_for('web.execution_terminate', exec_id=e[1]['id']) }}">Terminate</a></td>
+            </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+    {% endif %}
+    </div>
+
+    <div id="my_history">
+    <h3>Execution history</h3>
+    {% if past_executions|count == 0 %}
+        <p>Empty history.</p>
+    {% else %}
+
+    <table id="hist_list" class="app_list sortable">
+    <thead>
+    <tr>
+        <th>Application name</th>
+        <th>Execution name</th>
+        <th>Status</th>
+        <th>Scheduled at</th>
+        <th>Started at</th>
+        <th>Finished at</th>
+    </tr>
+    </thead>
+    <tbody>
+        {% for e in past_executions %}
+            <tr class="{{ loop.cycle('odd', 'even') }}">
+            <td>{{ e[0]['name'] }}</td>
+            <td>{{ e[1]['name'] }}</td>
+            <td>{{ e[1]['status'] }}</td>
+            <td>{{ e[1]['scheduled_at']|format_timestamp }}</td>
+            {% if e[1]['started_at'] == 'None' %}
+            <td>never</td>
+            {% else %}
+            <td>{{ e[1]['started_at']|format_timestamp }}</td>
+            {% endif %}
+            <td>{{ e[1]['finished_at']|format_timestamp }}</td>
+            {% if e[1]['started_at'] != None %}
+            <td><a href="{{ url_for('api.history_logs_get', execution_id=e[1]['id']) }}">Logs</a></td>
+            {% endif %}
+            </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+    {% endif %}
+
+    </div>
+
+    <div class="user_info">
+        <p>Email address used for notifications: <a href="mailto:{{ email }}">{{ email }}</a></p>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,55 @@
+body {
+    font-family: sans-serif;
+    max-width: 800px;
+    margin-left: 20px;
+}
+
+a:link {
+    color: rgba(79, 140, 30, 1);
+    text-decoration: none;
+}
+
+a:visited {
+    color: rgba(79, 140, 30, 1);
+    text-decoration: none;
+}
+
+div.user_info {
+    font-size: smaller;
+    clear: both;
+    padding-top: 20px;
+}
+
+table.app_list {
+    border-collapse: collapse;
+}
+
+table.app_list tr {
+    border-top: 1px black solid;
+}
+
+table.app_list td {
+    padding-right: 1.5em;
+}
+
+td.long-text {
+    font-size: xx-small;
+}
+
+div.status_line {
+    float: left;
+}
+
+span#app_name {
+    font-family: cursive;
+    font-size: larger;
+}
+
+span#status {
+    font-size: smaller;
+}
+
+div.copyright {
+    float: left;
+    padding-left: 3em;
+}
