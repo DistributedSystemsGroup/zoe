@@ -13,6 +13,7 @@ from common.application_resources import ApplicationResources
 from common.exceptions import CannotCreateCluster
 from common.configuration import conf
 from common.object_storage import logs_archive_upload
+from common.urls import generate_application_binary_url
 
 log = logging.getLogger(__name__)
 
@@ -143,7 +144,7 @@ class PlatformManager:
         cli_opts.add_env_variable("PROXY_ID", container.id)
         cli_opts.add_env_variable("APPLICATION_ID", application.id)
         cli_opts.add_env_variable("SPARK_OPTIONS", execution.spark_opts)
-        cli_opts.add_env_variable("REDIS_CLI_OPTIONS", "-h {} -p {} -n {}".format(conf["redis_server"], conf["redis_port"], conf["redis_db"]))
+        cli_opts.add_env_variable("APPLICATION_URL", generate_application_binary_url(application))
         cli_opts.add_env_variable("SPARK_OPTIONS", execution.spark_opts)
         if "memory_limit" in execution.assigned_resources.worker_resources:
             cli_opts.add_env_variable("SPARK_EXECUTOR_RAM", execution.assigned_resources.worker_resources["memory_limit"])

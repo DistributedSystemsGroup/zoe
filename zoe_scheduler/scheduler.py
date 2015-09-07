@@ -84,6 +84,8 @@ class ZoeScheduler:
         log.debug("Found a runnable execution!")
         if self.platform.start_execution(execution_id, resources):
             self.scheduler_policy.started(execution_id, resources)
+        else:  # Some error happened
+            log.error('Execution ID {} cannot be started'.format(execution_id))
 
     def schedule(self):
         self._check_runnable()
