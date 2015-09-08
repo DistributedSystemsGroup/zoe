@@ -1,4 +1,3 @@
-from datetime import datetime, timedelta
 import smtplib
 from email.mime.text import MIMEText
 import logging
@@ -7,7 +6,7 @@ from jinja2 import Template
 
 from common.status import SparkSubmitExecution, Execution
 from common.urls import generate_log_history_url, generate_notebook_url
-from common.configuration import conf
+from common.configuration import zoeconf
 
 log = logging.getLogger(__name__)
 
@@ -71,8 +70,8 @@ def notify_notebook_notice(execution: Execution):
 
     subject = "[Zoe] Notebook termination warning"
     template_vars = {
-        'grace_time': conf['notebook_max_age_no_activity'] - conf['notebook_warning_age_no_activity'],
-        'wrn_age': conf['notebook_warning_age_no_activity'],
+        'grace_time': zoeconf.notebook_max_age_no_activity - zoeconf.notebook_warning_age_no_activity,
+        'wrn_age': zoeconf.notebook_warning_age_no_activity,
         'nb_url': generate_notebook_url(execution)
     }
     send_email(email, subject, NOTEBOOK_WARNING_EMAIL_TEMPLATE, template_vars)
@@ -83,7 +82,7 @@ def notify_notebook_termination(execution: Execution):
     email = app.user.email
 
     subject = "[Zoe] Notebook terminated"
-    template_vars = {'max_age': conf['notebook_max_age_no_activity']}
+    template_vars = {'max_age': zoeconf.notebook_max_age_no_activity}
     send_email(email, subject, NOTEBOOK_KILLED_EMAIL_TEMPLATE, template_vars)
 
 
@@ -94,9 +93,9 @@ def send_email(address, subject, template, template_vars):
     msg['Subject'] = subject
     msg['From'] = 'noreply@bigfoot.eurecom.fr'
     msg['To'] = address
-    s = smtplib.SMTP(conf['smtp_server'])
+    s = smtplib.SMTP(zoeconf.smtp_server)
     s.ehlo()
     s.starttls()
-    s.login(conf['smtp_user'], conf['smtp_pass'])
+    s.login(zoeconf.smtp_user, zoeconf.smtp_password)
     s.send_message(msg)
     s.quit()

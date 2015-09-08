@@ -11,7 +11,7 @@ from zoe_scheduler.emails import notify_execution_finished, notify_notebook_noti
 from common.state import AlchemySession, Cluster, Container, SparkApplication, Proxy, Execution, SparkNotebookApplication, SparkSubmitApplication, SparkSubmitExecution
 from common.application_resources import ApplicationResources
 from common.exceptions import CannotCreateCluster
-from common.configuration import conf
+from common.configuration import zoeconf
 from common.object_storage import logs_archive_upload
 from common.urls import generate_application_binary_url
 
@@ -209,11 +209,11 @@ class PlatformManager:
                 c = e.find_container("spark-notebook")
                 if c is not None:
                     pr = state.query(Proxy).filter_by(container_id=c.id, service_name="Spark Notebook interface").one()
-                    if datetime.now() - pr.last_access > timedelta(hours=conf["notebook_max_age_no_activity"]):
+                    if datetime.now() - pr.last_access > timedelta(hours=zoeconf.notebook_max_age_no_activity):
                         log.info("Killing spark notebook {} for inactivity".format(e.id))
                         self.execution_terminate(state, e)
                         notify_notebook_termination(e)
-                    if datetime.now() - pr.last_access > timedelta(hours=conf["notebook_max_age_no_activity"]) - timedelta(hours=conf["notebook_warning_age_no_activity"]):
+                    if datetime.now() - pr.last_access > timedelta(hours=zoeconf.notebook_max_age_no_activity) - timedelta(hours=zoeconf.notebook_warning_age_no_activity):
                         log.info("Spark notebook {} is on notice for inactivity".format(e.id))
                         e.termination_notice = True
                         notify_notebook_notice(e)

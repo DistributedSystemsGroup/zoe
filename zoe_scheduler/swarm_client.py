@@ -1,19 +1,19 @@
 import time
 import logging
-log = logging.getLogger(__name__)
 
 import docker
 import docker.utils
 import docker.errors
 
-from common.configuration import conf
-
+from common.configuration import zoeconf
 from zoe_scheduler.swarm_status import SwarmStatus, SwarmNodeStatus
+
+log = logging.getLogger(__name__)
 
 
 class SwarmClient:
     def __init__(self):
-        manager = conf['docker_swarm_manager']
+        manager = zoeconf.docker_swarm_manager
         self.cli = docker.Client(base_url=manager)
 
     def info(self) -> SwarmStatus:

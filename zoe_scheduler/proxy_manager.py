@@ -3,12 +3,13 @@ from urllib.parse import urlparse
 import re
 from datetime import datetime
 import logging
-log = logging.getLogger(__name__)
 
 from jinja2 import Template
 
-from common.configuration import conf
+from common.configuration import zoeconf
 from common.state import AlchemySession, Proxy
+
+log = logging.getLogger(__name__)
 
 LOOP_INTERVAL = 1  # seconds
 ACCESS_TIME_REFRESH_INTERVAL = 60  # seconds
@@ -39,8 +40,8 @@ ENTRY_TEMPLATE = """
 
 class ProxyManager:
     def __init__(self):
-        self.apache_conf_filepath = conf["apache-proxy-config-file"]
-        self.apache_access_log = conf["apache-log-file"]
+        self.apache_conf_filepath = zoeconf.apache_proxy_config_file
+        self.apache_access_log = zoeconf.apache_log_file
 
     def _get_proxy_entries(self):
         state = AlchemySession()

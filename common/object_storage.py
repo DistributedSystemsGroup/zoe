@@ -2,24 +2,24 @@ import os
 import logging
 
 from common.state import Application, Execution
-from common.configuration import conf
+from common.configuration import zoeconf
 
 log = logging.getLogger(__name__)
 
 
 def application_data_upload(application: Application, data: bytes) -> bool:
-    fpath = os.path.join(conf['history_path'], 'apps', 'app-{}.zip'.format(application.id))
+    fpath = os.path.join(zoeconf.history_path, 'apps', 'app-{}.zip'.format(application.id))
     open(fpath, "wb").write(data)
 
 
 def application_data_download(application: Application) -> bytes:
-    fpath = os.path.join(conf['history_path'], 'apps', 'app-{}.zip'.format(application.id))
+    fpath = os.path.join(zoeconf.history_path, 'apps', 'app-{}.zip'.format(application.id))
     data = open(fpath, "rb").read()
     return data
 
 
 def application_data_delete(application: Application):
-    fpath = os.path.join(conf['history_path'], 'apps', 'app-{}.zip'.format(application.id))
+    fpath = os.path.join(zoeconf.history_path, 'apps', 'app-{}.zip'.format(application.id))
     try:
         os.unlink(fpath)
     except OSError:
@@ -27,18 +27,18 @@ def application_data_delete(application: Application):
 
 
 def logs_archive_upload(execution: Execution, data: bytes) -> bool:
-    fpath = os.path.join(conf['history_path'], 'logs', 'log-{}.zip'.format(execution.id))
+    fpath = os.path.join(zoeconf.history_path, 'logs', 'log-{}.zip'.format(execution.id))
     open(fpath, "wb").write(data)
 
 
 def logs_archive_download(execution: Execution) -> bytes:
-    fpath = os.path.join(conf['history_path'], 'logs', 'log-{}.zip'.format(execution.id))
+    fpath = os.path.join(zoeconf.history_path, 'logs', 'log-{}.zip'.format(execution.id))
     data = open(fpath, "rb").read()
     return data
 
 
 def logs_archive_delete(execution: Execution):
-    fpath = os.path.join(conf['history_path'], 'logs', 'log-{}.zip'.format(execution.id))
+    fpath = os.path.join(zoeconf.history_path, 'logs', 'log-{}.zip'.format(execution.id))
     try:
         os.unlink(fpath)
     except OSError:

@@ -59,4 +59,4 @@ docs/_build/
 # PyBuilder
 target/
 .idea/
-smtp_pass.txt
+zoe.conf

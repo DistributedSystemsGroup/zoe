@@ -4,11 +4,11 @@ import argparse
 import logging
 from tornado.wsgi import WSGIContainer
 from tornado.httpserver import HTTPServer
-from tornado.ioloop import IOLoop, PeriodicCallback
+from tornado.ioloop import IOLoop
 
 from zoe_web import app
 
-from common.configuration import conf
+from common.configuration import rpycconf
 
 log = logging.getLogger("zoe_web")
 
@@ -32,11 +32,11 @@ def main():
     logging.getLogger("tornado").setLevel(logging.WARNING)
 
     if args.rpyc_server is None:
-        conf['client_rpyc_autodiscovery'] = True
+        rpycconf['client_rpyc_autodiscovery'] = True
     else:
-        conf['client_rpyc_autodiscovery'] = False
-        conf['client_rpyc_server'] = args.rpyc_server
-        conf['client_rpyc_port'] = args.rpyc_port
+        rpycconf['client_rpyc_autodiscovery'] = False
+        rpycconf['client_rpyc_server'] = args.rpyc_server
+        rpycconf['client_rpyc_port'] = args.rpyc_port
 
     log.info("Starting HTTP server...")
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024

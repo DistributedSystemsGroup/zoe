@@ -11,7 +11,7 @@ from common.application_resources import SparkApplicationResources
 from common.status import PlatformStatusReport, ApplicationStatusReport
 from common.exceptions import UserIDDoesNotExist, ApplicationStillRunning
 import common.object_storage as storage
-from common.configuration import conf
+from common.configuration import zoeconf, rpycconf
 
 REGISTRY = "10.1.0.1:5000"
 MASTER_IMAGE = REGISTRY + "/zoe/spark-master-1.4.1:1.3"
@@ -232,11 +232,11 @@ class ZoeClient:
         if isinstance(execution.application, SparkNotebookApplication):
             c = execution.find_container("spark-notebook")
             pr = self.state.query(Proxy).filter_by(container_id=c.id, service_name="Spark Notebook interface").one()
-            return conf['proxy_path_prefix'] + '/{}'.format(pr.id)
+            return zoeconf.proxy_path_url_prefix + '/{}'.format(pr.id)
         elif isinstance(execution.application, SparkSubmitApplication):
             c = execution.find_container("spark-submit")
             pr = self.state.query(Proxy).filter_by(container_id=c.id, service_name="Spark application web interface").one()
-            return conf['proxy_path_prefix'] + '/{}'.format(pr.id)
+            return zoeconf.proxy_path_url_prefix + '/{}'.format(pr.id)
         else:
             return None
 
@@ -280,7 +280,7 @@ class ZoeClient:
 
 
 def get_zoe_client():
-    if conf['client_rpyc_autodiscovery']:
+    if rpycconf['client_rpyc_autodiscovery']:
         return ZoeClient()
     else:
-        return ZoeClient(conf['client_rpyc_server'], conf['client_rpyc_port'])
+        return ZoeClient(rpycconf['client_rpyc_server'], rpycconf['client_rpyc_port'])

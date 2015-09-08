@@ -6,7 +6,7 @@ from zipfile import is_zipfile
 
 from zoe_client import get_zoe_client
 from common.state import create_tables
-from common.configuration import conf
+from common.configuration import zoeconf, rpycconf
 
 argparser = None
 
@@ -122,6 +122,10 @@ def log_get_cmd(args):
     print(log)
 
 
+def gen_config_cmd(args):
+    zoeconf.write(open(args.output_file, "w"))
+
+
 def process_arguments() -> Namespace:
     global argparser
     argparser = ArgumentParser(description="Zoe - Container Analytics as a Service command-line client")
@@ -197,6 +201,10 @@ def process_arguments() -> Namespace:
     argparser_log_get.add_argument('id', type=int, help="Container id")
     argparser_log_get.set_defaults(func=log_get_cmd)
 
+    argparser_log_get = subparser.add_parser('write-config', help="Generates a sample file containing current configuration values")
+    argparser_log_get.add_argument('output_file', help="Filename to create with default configuration")
+    argparser_log_get.set_defaults(func=gen_config_cmd)
+
     return argparser.parse_args()
 
 
@@ -208,11 +216,11 @@ def main():
         logging.basicConfig(level=logging.INFO)
 
     if args.rpyc_server is None:
-        conf['client_rpyc_autodiscovery'] = True
+        rpycconf['client_rpyc_autodiscovery'] = True
     else:
-        conf['client_rpyc_autodiscovery'] = False
-        conf['client_rpyc_server'] = args.rpyc_server
-        conf['client_rpyc_port'] = args.rpyc_port
+        rpycconf['client_rpyc_autodiscovery'] = False
+        rpycconf['client_rpyc_server'] = args.rpyc_server
+        rpycconf['client_rpyc_port'] = args.rpyc_port
 
     try:
         args.func(args)

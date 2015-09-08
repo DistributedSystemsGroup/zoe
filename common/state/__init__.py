@@ -2,11 +2,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-from common.configuration import conf
+from common.configuration import zoeconf
 
 Base = declarative_base()
 
-_engine = create_engine(conf["db_connection"], echo=False)
+_engine = create_engine(zoeconf.db_url, echo=False)
 AlchemySession = sessionmaker(bind=_engine)
 
 from common.state.container import Container

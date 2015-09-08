@@ -2,7 +2,6 @@ from flask import render_template, redirect, url_for, abort
 
 from zoe_web import app
 from zoe_client import ZoeClient
-from common.configuration import conf
 
 
 @app.route("/web/<int:user_id>/cluster/<int:app_id>/inspect")
