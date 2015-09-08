@@ -1,47 +1,45 @@
-import redis
+import os
+import logging
 
 from common.state import Application, Execution
 from common.configuration import conf
 
-
-def _connect():
-    server = conf["redis_server"]
-    port = conf["redis_port"]
-    db = conf["redis_db"]
-    return redis.StrictRedis(host=server, port=port, db=db)
+log = logging.getLogger(__name__)
 
 
 def application_data_upload(application: Application, data: bytes) -> bool:
-    r = _connect()
-    key = "app-{}".format(application.id)
-    r.set(key, data)
+    fpath = os.path.join(conf['history_path'], 'apps', 'app-{}.zip'.format(application.id))
+    open(fpath, "wb").write(data)
 
 
 def application_data_download(application: Application) -> bytes:
-    r = _connect()
-    key = "app-{}".format(application.id)
-    return r.get(key)
+    fpath = os.path.join(conf['history_path'], 'apps', 'app-{}.zip'.format(application.id))
+    data = open(fpath, "rb").read()
+    return data
 
 
 def application_data_delete(application: Application):
-    r = _connect()
-    key = "app-{}".format(application.id)
-    r.delete(key)
+    fpath = os.path.join(conf['history_path'], 'apps', 'app-{}.zip'.format(application.id))
+    try:
+        os.unlink(fpath)
+    except OSError:
+        log.warning("Binary data for application {} not found, cannot delete".format(application.id))
 
 
 def logs_archive_upload(execution: Execution, data: bytes) -> bool:
-    r = _connect()
-    key = "log-{}".format(execution.id)
-    r.set(key, data)
+    fpath = os.path.join(conf['history_path'], 'logs', 'log-{}.zip'.format(execution.id))
+    open(fpath, "wb").write(data)
 
 
 def logs_archive_download(execution: Execution) -> bytes:
-    r = _connect()
-    key = "log-{}".format(execution.id)
-    return r.get(key)
+    fpath = os.path.join(conf['history_path'], 'logs', 'log-{}.zip'.format(execution.id))
+    data = open(fpath, "rb").read()
+    return data
 
 
 def logs_archive_delete(execution: Execution):
-    r = _connect()
-    key = "log-{}".format(execution.id)
-    r.delete(key)
+    fpath = os.path.join(conf['history_path'], 'logs', 'log-{}.zip'.format(execution.id))
+    try:
+        os.unlink(fpath)
+    except OSError:
+        log.warning("Logs archive for execution {} not found, cannot delete".format(execution.id))

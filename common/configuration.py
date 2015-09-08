@@ -20,5 +20,6 @@ conf = {
     'smtp_server': 'smtp.gmail.com',
     'smtp_user': 'bigfoot.data@gmail.com',
     'smtp_pass': open('smtp_pass.txt', 'r').read().strip(),
-    'web_server_name': 'bigfoot-m2.eurecom.fr'
+    'web_server_name': 'bigfoot-m2.eurecom.fr',
+    'history_path': "/var/lib/zoe/history"
 }

@@ -29,10 +29,20 @@ For testing you can use also a single Docker instance, just set its endpoint in 
 To use Swarm, we use an undocumented network configuration, with the docker bridges connected to a physical interface, so that
 containers on different hosts can talk to each other on the same layer 2 domain.
 
-### Docker registry
+### Images: Docker Hub Vs local Docker registry
 
-Use the scripts in the [zoe-docker-images](https://github.com/DistributedSystemsGroup/zoe-docker-images) repository to create
-and populate a private registry with Spark images. The images are quite standard and can be used also without Zoe, for examples
+The images used by Zoe are available on the Docker Hub:
+
+* https://hub.docker.com/r/zoerepo/spark-scala-notebook/
+* https://hub.docker.com/r/zoerepo/spark-master/
+* https://hub.docker.com/r/zoerepo/spark-worker/
+* https://hub.docker.com/r/zoerepo/spark-submit/
+
+Since the Docker Hub can be quite slow, we strongly suggest setting up a private registry. The `build_images.sh` script in the
+[zoe-docker-images](https://github.com/DistributedSystemsGroup/zoe-docker-images) repository can help you populate the registry
+bypassing the Hub.
+
+The images are quite standard and can be used also without Zoe, for examples
 on how to do that, see the `scripts/start_cluster.sh` script.
 
 ### Redis

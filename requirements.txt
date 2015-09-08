@@ -4,4 +4,3 @@ docker-py
 mysql-connector-python
 SQLAlchemy
 rpyc
-redis
