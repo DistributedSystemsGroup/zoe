@@ -7,6 +7,18 @@ from common.configuration import zoeconf
 log = logging.getLogger(__name__)
 
 
+def init_history_paths() -> bool:
+    if not os.path.exists(zoeconf.history_path):
+        try:
+            os.makedirs(zoeconf.history_path)
+        except OSError:
+            log.error("Cannot create history directory in {}".format(zoeconf.history_path))
+            return False
+        os.makedirs(os.path.join(zoeconf.history_path, 'apps'))
+        os.makedirs(os.path.join(zoeconf.history_path, 'logs'))
+    return True
+
+
 def application_data_upload(application: Application, data: bytes) -> bool:
     fpath = os.path.join(zoeconf.history_path, 'apps', 'app-{}.zip'.format(application.id))
     open(fpath, "wb").write(data)

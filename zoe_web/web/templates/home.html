@@ -64,11 +64,12 @@
             <td>{{ e[1]['scheduled_at']|format_timestamp }}</td>
             {% if e[1]['started_at'] == 'None' %}
             <td>not yet</td>
+            <td></td>
             {% else %}
             <td>{{ e[1]['started_at']|format_timestamp }}</td>
+            <td><a href="{{ e[2] }}">Open</a></td>
             {% endif %}
             <td>{{ e[1]['cluster']|count }}</td>
-            <td><a href="{{ e[2] }}">Open</a></td>
             <td><a href="{{ url_for('web.execution_terminate', exec_id=e[1]['id']) }}">Terminate</a></td>
             </tr>
         {% endfor %}

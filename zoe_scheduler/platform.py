@@ -214,9 +214,10 @@ class PlatformManager:
                         self.execution_terminate(state, e)
                         notify_notebook_termination(e)
                     if datetime.now() - pr.last_access > timedelta(hours=zoeconf.notebook_max_age_no_activity) - timedelta(hours=zoeconf.notebook_warning_age_no_activity):
-                        log.info("Spark notebook {} is on notice for inactivity".format(e.id))
-                        e.termination_notice = True
-                        notify_notebook_notice(e)
+                        if not e.termination_notice:
+                            log.info("Spark notebook {} is on notice for inactivity".format(e.id))
+                            e.termination_notice = True
+                            notify_notebook_notice(e)
 
         state.commit()
 

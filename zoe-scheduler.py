@@ -8,6 +8,7 @@ from rpyc.utils.server import ThreadedServer
 from zoe_scheduler.rpyc_service import ZoeSchedulerRPCService
 from zoe_scheduler.scheduler import zoe_sched
 from zoe_scheduler.periodic_tasks import PeriodicTaskManager
+from common.object_storage import init_history_paths
 
 log = logging.getLogger('zoe')
 loop = None
@@ -45,9 +46,11 @@ def main():
     rpyc_logger = logging.getLogger('rpyc')
     rpyc_logger.setLevel(logging.WARNING)
 
+    if not init_history_paths():
+        return
+
     tm = PeriodicTaskManager()
 
-#    rpyc_server = RPyCAsyncIOServer(ZoeSchedulerRPCService, '0.0.0.0', port=4000, auto_register=True)
     rpyc_server = ThreadedServer(ZoeSchedulerRPCService, '0.0.0.0', port=4000,
                                  auto_register=not args.rpyc_no_auto_register,
                                  protocol_config={"allow_public_attrs": True},
