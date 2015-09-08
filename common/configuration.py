@@ -13,7 +13,8 @@ config_paths = [
 
 defaults = {
     'docker': {
-        'swarm_manager_url': 'tcp://swarm.example.com:2380'
+        'swarm_manager_url': 'tcp://swarm.example.com:2380',
+        'private_registry': '10.1.0.1:5000'
     },
     'intervals': {
         'status_refresh': 10,
@@ -122,6 +123,10 @@ class ZoeConfig(ConfigParser):
     @property
     def cookies_secret_key(self):
         return self.get('flask', 'secret_key')
+
+    @property
+    def docker_private_registry(self) -> str:
+        return self.get('docker', 'private_registry')
 
 zoeconf = ZoeConfig()
 zoeconf.read(config_paths)

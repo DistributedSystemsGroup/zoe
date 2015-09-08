@@ -13,12 +13,11 @@ from common.exceptions import UserIDDoesNotExist, ApplicationStillRunning
 import common.object_storage as storage
 from common.configuration import zoeconf, rpycconf
 
-REGISTRY = "10.1.0.1:5000"
-MASTER_IMAGE = REGISTRY + "/zoe/spark-master-1.4.1:1.3"
-WORKER_IMAGE = REGISTRY + "/zoe/spark-worker-1.4.1:1.3"
-SHELL_IMAGE = REGISTRY + "/zoe/spark-shell-1.4.1:1.3"
-SUBMIT_IMAGE = REGISTRY + "/zoe/spark-submit-1.4.1:1.3"
-NOTEBOOK_IMAGE = REGISTRY + "/zoe/spark-notebook-1.4.1:1.3"
+REGISTRY = zoeconf.docker_private_registry
+MASTER_IMAGE = REGISTRY + "/zoerepo/spark-master"
+WORKER_IMAGE = REGISTRY + "/zoerepo/spark-worker"
+SUBMIT_IMAGE = REGISTRY + "/zoerepo/spark-submit"
+NOTEBOOK_IMAGE = REGISTRY + "/zoerepo/spark-notebook"
 
 
 class ZoeClient:
