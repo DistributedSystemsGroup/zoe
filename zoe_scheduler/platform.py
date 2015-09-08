@@ -225,6 +225,7 @@ class PlatformManager:
         if container.readable_name == "spark-submit" or container.readable_name == "spark-master":
             log.debug("found a dead spark-submit container, cleaning up")
             self.execution_terminate(state, container.cluster.execution)
+            container.cluster.execution.set_finished()
             notify_execution_finished(container.cluster.execution)
         else:
             log.warning("Container {} (ID: {}) died unexpectedly")
