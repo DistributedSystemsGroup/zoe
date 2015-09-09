@@ -84,17 +84,21 @@ class ProxyManager:
         for line in logf:
             match = re.match(regex, line)
             if match is not None:
-                proxy_id = match.group(2)
+                proxy_id = int(match.group(2))
                 timestamp = datetime.strptime(match.group(1), "%d/%b/%Y:%H:%M:%S %z")
-                last_accesses[proxy_id] = timestamp
+                last_accesses[proxy_id] = timestamp.replace(tzinfo=None)
 
         state = AlchemySession()
+        something_to_commit = False
         for proxy in state.query(ProxyState).all():
             if proxy.id in last_accesses:
-                log.debug("Updating access timestamp for proxy ID {}".format(proxy.id))
                 proxy = state.query(ProxyState).filter_by(id=proxy.id).one()
-                proxy.last_access = last_accesses[proxy.id]
+                if proxy.last_access != last_accesses[proxy.id]:
+                    log.debug("Updating access timestamp for proxy ID {}".format(proxy.id))
+                    proxy.last_access = last_accesses[proxy.id]
+                    something_to_commit = True
                 proxy.container.cluster.execution.termination_notice = False
-                state.commit()
+        if something_to_commit:
+            state.commit()
 
 pm = ProxyManager()
