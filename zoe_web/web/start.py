@@ -34,7 +34,7 @@ def home():
             else:
                 past_executions.append((a, e))
 
-    past_executions.sort(key=lambda x: x[1].time_finished)
+    past_executions.sort(key=lambda x: x[1].time_finished, reverse=True)
 
     template_vars['active_executions'] = active_executions
     template_vars['past_executions'] = past_executions
