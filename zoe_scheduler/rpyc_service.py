@@ -3,7 +3,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from zoe_scheduler.scheduler import zoe_sched
 
-from common.stats import PlatformStats
+from common.stats import PlatformStats, ContainerStats
 from common.state import AlchemySession, ContainerState
 from common.state.execution import ExecutionState
 
@@ -16,6 +16,9 @@ class ZoeSchedulerRPCService(rpyc.Service):
 
     def on_disconnect(self):
         pass
+
+    def exposed_container_stats(self, container_id: int) -> ContainerStats:
+        return self.sched.platform.container_stats(container_id)
 
     def exposed_execution_schedule(self, execution_id: int) -> bool:
         state = AlchemySession()

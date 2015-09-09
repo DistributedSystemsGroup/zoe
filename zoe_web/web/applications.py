@@ -63,11 +63,11 @@ def application_delete(app_id):
 def execution_inspect(execution_id):
     client = get_zoe_client()
     user = web_utils.check_user(client)
-    execution_status = client.execution_status(execution_id)
+    execution = client.execution_get(execution_id)
 
     template_vars = {
         "user_id": user.id,
         "email": user.email,
-        'execution': execution_status
+        'execution': execution
     }
     return render_template('execution_inspect.html', **template_vars)

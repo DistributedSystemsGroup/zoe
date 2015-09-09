@@ -141,6 +141,14 @@ class ZoeClient:
         self.state.commit()
         return app.id
 
+    # Containers
+    def container_stats(self, container_id):
+        try:
+            self.state.query(ContainerState).filter_by(id=container_id).one()
+        except NoResultFound:
+            return None
+        return self.server.container_stats(container_id)
+
     # Executions
     def execution_delete(self, execution_id: int) -> None:
         try:

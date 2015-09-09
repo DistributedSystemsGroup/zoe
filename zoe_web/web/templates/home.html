@@ -62,7 +62,7 @@
             <td>{{ e[1].name }}</td>
             <td>{{ e[1].status }}</td>
             <td><script>format_timestamp({{ e[1].time_scheduled.timestamp() }})</script></td>
-            {% if e[1].time_started == 'None' %}
+            {% if e[1].time_started == None %}
             <td>not yet</td>
             {% else %}
             <td><script>format_timestamp({{ e[1].time_started.timestamp() }})</script></td>
@@ -71,6 +71,7 @@
             {% if e[1].time_started != 'None' %}
             <td><a href="{{ e[2] }}">Open</a></td>
             {% endif %}
+            <td><a href="{{ url_for('web.execution_inspect', execution_id=e[1].id) }}">Inspect</a></td>
             <td><a href="{{ url_for('web.execution_terminate', exec_id=e[1].id) }}">Terminate</a></td>
             </tr>
         {% endfor %}

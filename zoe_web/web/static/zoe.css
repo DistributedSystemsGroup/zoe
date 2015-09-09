@@ -1,6 +1,6 @@
 body {
     font-family: sans-serif;
-    max-width: 800px;
+    max-width: 90%;
     margin-left: 20px;
 }
 
@@ -52,4 +52,15 @@ span#status {
 div.copyright {
     float: left;
     padding-left: 3em;
+}
+
+textarea#log {
+    width: 90%;
+    height: 40em;
+}
+
+span.fakelink {
+    color: rgba(79, 140, 30, 1);
+    text-decoration: none;
+    cursor: pointer;
 }

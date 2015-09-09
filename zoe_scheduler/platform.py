@@ -229,3 +229,8 @@ class PlatformManager:
             notify_execution_finished(container.cluster.execution)
         else:
             log.warning("Container {} (ID: {}) died unexpectedly")
+
+    def container_stats(self, container_id):
+        state = AlchemySession()
+        container = state.query(ContainerState).filter_by(id=container_id).one()
+        return self.swarm.stats(container.docker_id)

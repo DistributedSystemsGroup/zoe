@@ -125,6 +125,12 @@ def gen_config_cmd(args):
     zoeconf.write(open(args.output_file, "w"))
 
 
+def container_stats_cmd(args):
+    client = get_zoe_client()
+    stats = client.container_stats(args.container_id)
+    print(stats)
+
+
 def process_arguments() -> Namespace:
     global argparser
     argparser = ArgumentParser(description="Zoe - Container Analytics as a Service command-line client")
@@ -203,6 +209,10 @@ def process_arguments() -> Namespace:
     argparser_log_get = subparser.add_parser('write-config', help="Generates a sample file containing current configuration values")
     argparser_log_get.add_argument('output_file', help="Filename to create with default configuration")
     argparser_log_get.set_defaults(func=gen_config_cmd)
+
+    argparser_container_stats = subparser.add_parser('container-stats', help="Retrieve statistics on a running container")
+    argparser_container_stats.add_argument('container_id', help="ID of the container")
+    argparser_container_stats.set_defaults(func=container_stats_cmd)
 
     return argparser.parse_args()
 

@@ -121,6 +121,18 @@ def execution_logs(container_id: int):
         return jsonify(status="ok", log=log)
 
 
+@api_bp.route('/executions/stats/container/<int:container_id>')
+def execution_stats(container_id: int):
+    client = get_zoe_client()
+    _api_check_user(client)
+
+    stats = client.container_stats(container_id)
+    if stats is None:
+        return jsonify(status="error", msg="no stats found")
+    else:
+        return jsonify(status="ok", **stats.to_dict())
+
+
 @api_bp.route('/executions/terminate/<int:exec_id>')
 def execution_terminate(exec_id: int):
     client = get_zoe_client()

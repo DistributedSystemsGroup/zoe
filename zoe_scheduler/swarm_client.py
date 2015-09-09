@@ -6,7 +6,7 @@ import docker.utils
 import docker.errors
 
 from common.configuration import zoeconf
-from common.stats import SwarmStats, SwarmNodeStats
+from common.stats import SwarmStats, SwarmNodeStats, ContainerStats
 
 log = logging.getLogger(__name__)
 
@@ -108,10 +108,10 @@ class SwarmClient:
         logdata = self.cli.logs(container=docker_id, stdout=True, stderr=True, stream=False, timestamps=False, tail="all")
         return logdata.decode("utf-8")
 
-    def stats(self, docker_id) -> dict:
+    def stats(self, docker_id) -> ContainerStats:
         stats_stream = self.cli.stats(docker_id, decode=True)
         for s in stats_stream:
-            return s
+            return ContainerStats(s)
 
 
 class ContainerOptions:
