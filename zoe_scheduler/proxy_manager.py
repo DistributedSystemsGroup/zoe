@@ -7,7 +7,7 @@ import logging
 from jinja2 import Template
 
 from common.configuration import zoeconf
-from common.state import AlchemySession, Proxy
+from common.state import AlchemySession, ProxyState
 
 log = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class ProxyManager:
 
     def _get_proxy_entries(self):
         state = AlchemySession()
-        return state.query(Proxy).all()
+        return state.query(ProxyState).all()
 
     def _generate_file(self, proxy_entries):
         output = ""
@@ -89,10 +89,10 @@ class ProxyManager:
                 last_accesses[proxy_id] = timestamp
 
         state = AlchemySession()
-        for proxy in state.query(Proxy).all():
+        for proxy in state.query(ProxyState).all():
             if proxy.id in last_accesses:
                 log.debug("Updating access timestamp for proxy ID {}".format(proxy.id))
-                proxy = state.query(Proxy).filter_by(id=proxy.id).one()
+                proxy = state.query(ProxyState).filter_by(id=proxy.id).one()
                 proxy.last_access = last_accesses[proxy.id]
                 proxy.container.cluster.execution.termination_notice = False
                 state.commit()

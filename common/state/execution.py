@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 from common.state import Base
 
 
-class Execution(Base):
+class ExecutionState(Base):
     __tablename__ = 'executions'
 
     id = Column(Integer, primary_key=True)
@@ -19,7 +19,7 @@ class Execution(Base):
     status = Column(String(32))
     termination_notice = Column(Boolean, default=False)
 
-    cluster = relationship("Cluster", uselist=False, backref="execution")
+    cluster = relationship("ClusterState", uselist=False, backref="execution")
 
     type = Column(String(32))  # Needed by sqlalchemy to manage class inheritance
 
@@ -49,28 +49,11 @@ class Execution(Base):
             if c.readable_name == name:
                 return c
 
-    def __repr__(self):
-        return "<Execution(name='%s', id='%s', assigned_resourced='%s', application_id='%s', )>" % (
-            self.name, self.id, self.assigned_resources, self.application_id)
-
     def extract(self):
-        ret = PlainExecution()
-        ret.id = self.id
-        ret.name = self.name
-        ret.assigned_resources = self.assigned_resources
-        ret.application_id = self.application_id
-        ret.time_started = self.time_started
-        ret.time_scheduled = self.time_scheduled
-        ret.time_finished = self.time_finished
-        ret.status = self.status
-        ret.termination_notice = self.termination_notice
-        if self.cluster is not None:
-            ret.cluster_id = self.cluster.id
-        ret.type = self.type
-        return ret
+        return Execution(self)
 
 
-class SparkSubmitExecution(Execution):
+class SparkSubmitExecutionState(ExecutionState):
     commandline = Column(String(1024))
     spark_opts = Column(String(1024))
 
@@ -79,23 +62,32 @@ class SparkSubmitExecution(Execution):
     }
 
     def extract(self):
-        ret = super().extract()
-        ret.commandline = self.commandline
-        ret.spark_opts = self.spark_opts
-        return ret
+        return Execution(self)
 
 
-class PlainExecution:
-    id = None
-    name = None
-    assigned_resources = None
-    application_id = None
-    time_started = None
-    time_scheduled = None
-    time_finished = None
-    status = None
-    termination_notice = None
-    cluster_id = None
-    type = None
-    commandline = None
-    spark_opts = None
+class Execution:
+    def __init__(self, execution: ExecutionState):
+        self.id = execution.id
+        self.name = execution.name
+        self.assigned_resources = execution.assigned_resources
+        self.application_id = execution.application_id
+        self.time_started = execution.time_started
+        self.time_scheduled = execution.time_scheduled
+        self.time_finished = execution.time_finished
+        self.status = execution.status
+        self.termination_notice = execution.termination_notice
+        if execution.cluster is not None:
+            self.cluster_id = execution.cluster.id
+        else:
+            self.cluster_id = None
+        self.type = execution.type
+
+        if isinstance(execution, SparkSubmitExecutionState):
+            self.commandline = execution.commandline
+            self.spark_opts = execution.spark_opts
+
+        self.containers = []
+
+        if execution.cluster is not None:
+            for c in execution.cluster.containers:
+                self.containers.append(c.extract())

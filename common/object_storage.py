@@ -1,7 +1,7 @@
 import os
 import logging
 
-from common.state import Application, Execution
+from common.state import ApplicationState, ExecutionState
 from common.configuration import zoeconf
 
 log = logging.getLogger(__name__)
@@ -19,18 +19,18 @@ def init_history_paths() -> bool:
     return True
 
 
-def application_data_upload(application: Application, data: bytes) -> bool:
+def application_data_upload(application: ApplicationState, data: bytes) -> bool:
     fpath = os.path.join(zoeconf.history_path, 'apps', 'app-{}.zip'.format(application.id))
     open(fpath, "wb").write(data)
 
 
-def application_data_download(application: Application) -> bytes:
+def application_data_download(application: ApplicationState) -> bytes:
     fpath = os.path.join(zoeconf.history_path, 'apps', 'app-{}.zip'.format(application.id))
     data = open(fpath, "rb").read()
     return data
 
 
-def application_data_delete(application: Application):
+def application_data_delete(application: ApplicationState):
     fpath = os.path.join(zoeconf.history_path, 'apps', 'app-{}.zip'.format(application.id))
     try:
         os.unlink(fpath)
@@ -38,18 +38,18 @@ def application_data_delete(application: Application):
         log.warning("Binary data for application {} not found, cannot delete".format(application.id))
 
 
-def logs_archive_upload(execution: Execution, data: bytes) -> bool:
+def logs_archive_upload(execution: ExecutionState, data: bytes) -> bool:
     fpath = os.path.join(zoeconf.history_path, 'logs', 'log-{}.zip'.format(execution.id))
     open(fpath, "wb").write(data)
 
 
-def logs_archive_download(execution: Execution) -> bytes:
+def logs_archive_download(execution: ExecutionState) -> bytes:
     fpath = os.path.join(zoeconf.history_path, 'logs', 'log-{}.zip'.format(execution.id))
     data = open(fpath, "rb").read()
     return data
 
 
-def logs_archive_delete(execution: Execution):
+def logs_archive_delete(execution: ExecutionState):
     fpath = os.path.join(zoeconf.history_path, 'logs', 'log-{}.zip'.format(execution.id))
     try:
         os.unlink(fpath)

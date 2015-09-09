@@ -9,12 +9,12 @@ Base = declarative_base()
 _engine = create_engine(zoeconf.db_url, echo=False)
 AlchemySession = sessionmaker(bind=_engine)
 
-from common.state.container import Container
-from common.state.cluster import Cluster
-from common.state.application import Application, SparkApplication, SparkNotebookApplication, SparkSubmitApplication
-from common.state.user import User
-from common.state.proxy import Proxy
-from common.state.execution import Execution, SparkSubmitExecution
+from common.state.container import ContainerState
+from common.state.cluster import ClusterState
+from common.state.application import ApplicationState, SparkApplicationState, SparkNotebookApplicationState, SparkSubmitApplicationState
+from common.state.user import UserState
+from common.state.proxy import ProxyState
+from common.state.execution import ExecutionState, SparkSubmitExecutionState
 
 
 def create_tables():

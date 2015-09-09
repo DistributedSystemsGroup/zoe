@@ -1,21 +1,24 @@
 import logging
-log = logging.getLogger(__name__)
 
-from zoe_scheduler.swarm_status import SwarmStatus
+from common.stats import PlatformStats
 from zoe_scheduler.swarm_client import SwarmClient
 
-from common.status import PlatformStatusReport
+log = logging.getLogger(__name__)
 
 
 class PlatformStatus:
-    def __init__(self):
-        self.swarm_status = SwarmStatus()
+    def __init__(self, scheduler):
         self.swarm = SwarmClient()
+        self.swarm_status = None
+        self.scheduler = scheduler
+        self.scheduler_status = None
 
     def update(self):
         self.swarm_status = self.swarm.info()
+        self.scheduler_status = self.scheduler.scheduler_policy.stats()
 
-    def generate_report(self) -> PlatformStatusReport:
-        report = PlatformStatusReport()
-        report.include_swarm_status(self.swarm_status)
-        return report
+    def stats(self):
+        ret = PlatformStats()
+        ret.scheduler = self.scheduler_status
+        ret.swarm = self.swarm_status
+        return ret

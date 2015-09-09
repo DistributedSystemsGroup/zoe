@@ -1,4 +1,5 @@
 import logging
+import time
 
 from zoe_scheduler.platform import PlatformManager
 from zoe_scheduler.platform_status import PlatformStatus
@@ -6,8 +7,9 @@ from zoe_scheduler.periodic_tasks import PeriodicTaskManager
 from zoe_scheduler.proxy_manager import pm
 
 from common.configuration import zoeconf
-from common.state import Execution
+from common.state import ExecutionState
 from common.application_resources import ApplicationResources
+from common.stats import SchedulerStats
 
 log = logging.getLogger(__name__)
 
@@ -58,11 +60,18 @@ class SimpleSchedulerPolicy:
         else:
             return False
 
+    def stats(self):
+        ret = SchedulerStats()
+        ret.count_running = len(self.running_list)
+        ret.count_waiting = len(self.waiting_list)
+        ret.timestamp = time.time()
+        return ret
+
 
 class ZoeScheduler:
     def __init__(self):
         self.platform = PlatformManager()
-        self.platform_status = PlatformStatus()
+        self.platform_status = PlatformStatus(self)
         self.scheduler_policy = SimpleSchedulerPolicy(self.platform_status)
 
     def init_tasks(self, tm: PeriodicTaskManager):
@@ -71,7 +80,7 @@ class ZoeScheduler:
         tm.add_task("proxy access timestamp updater", pm.update_proxy_access_timestamps, zoeconf.interval_proxy_update_accesses)
         tm.add_task("execution health checker", self.platform.check_executions_health, zoeconf.interval_check_health)
 
-    def incoming(self, execution: Execution) -> bool:
+    def incoming(self, execution: ExecutionState) -> bool:
         if not self.scheduler_policy.admission_control(execution.application.required_resources):
             return False
         self.scheduler_policy.insert(execution.id, execution.application.required_resources)
@@ -90,7 +99,7 @@ class ZoeScheduler:
     def schedule(self):
         self._check_runnable()
 
-    def execution_terminate(self, state, execution: Execution):
+    def execution_terminate(self, state, execution: ExecutionState):
         self.platform.execution_terminate(state, execution)
         self.scheduler_policy.terminated(execution.id)
 

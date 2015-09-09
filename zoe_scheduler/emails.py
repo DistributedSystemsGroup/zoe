@@ -4,7 +4,7 @@ import logging
 
 from jinja2 import Template
 
-from common.status import SparkSubmitExecution, Execution
+from common.state.execution import SparkSubmitExecutionState, ExecutionState
 from common.urls import generate_log_history_url, generate_notebook_url
 from common.configuration import zoeconf
 
@@ -49,7 +49,7 @@ def do_duration(seconds):
     return template.format(d=d, h=h, m=m, s=s)
 
 
-def notify_execution_finished(execution: SparkSubmitExecution):
+def notify_execution_finished(execution: SparkSubmitExecutionState):
     app = execution.application
     email = app.user.email
 
@@ -64,7 +64,7 @@ def notify_execution_finished(execution: SparkSubmitExecution):
     send_email(email, subject, APP_FINISH_EMAIL_TEMPLATE, template_vars)
 
 
-def notify_notebook_notice(execution: Execution):
+def notify_notebook_notice(execution: ExecutionState):
     app = execution.application
     email = app.user.email
 
@@ -77,7 +77,7 @@ def notify_notebook_notice(execution: Execution):
     send_email(email, subject, NOTEBOOK_WARNING_EMAIL_TEMPLATE, template_vars)
 
 
-def notify_notebook_termination(execution: Execution):
+def notify_notebook_termination(execution: ExecutionState):
     app = execution.application
     email = app.user.email
 

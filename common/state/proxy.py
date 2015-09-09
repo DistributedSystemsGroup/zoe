@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, func
 from common.state import Base
 
 
-class Proxy(Base):
+class ProxyState(Base):
     __tablename__ = 'proxies'
 
     id = Column(Integer, primary_key=True)
@@ -13,6 +13,15 @@ class Proxy(Base):
     service_name = Column(String(32))
     last_access = Column(DateTime, default=func.now())
 
-    def __repr__(self):
-        return "<Proxy(service_name='%s', id='%s', internal_url='%s', cluster_id='%s', container_id='%s', last_access='%s')>" % (
-            self.service_name, self.id, self.internal_url, self.cluster_id, self.container_id, self.last_access)
+    def extract(self):
+        return Proxy(self)
+
+
+class Proxy:
+    def __init__(self, proxy: ProxyState):
+        self.id = proxy.id
+        self.internal_url = proxy.internal_url
+        self.cluster_id = proxy.cluster_id
+        self.container_id = proxy.container_id
+        self.service_name = proxy.service_name
+        self.last_access = proxy.last_access

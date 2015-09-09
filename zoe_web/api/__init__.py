@@ -22,10 +22,10 @@ def _api_check_user(zoe_client):
 @api_bp.route('/status/basic')
 def status_basic():
     client = get_zoe_client()
-    platform_report = client.platform_status()
+    platform_stats = client.platform_stats()
     ret = {
-        'num_nodes': len(platform_report.report["swarm"]["nodes"]),
-        'num_containers': platform_report.report["swarm"]["container_count"]
+        'num_nodes': len(platform_stats.swarm.nodes),
+        'num_containers': platform_stats.swarm.container_count
     }
     return jsonify(**ret)
 
@@ -50,14 +50,14 @@ def application_new():
     form_data = request.form
 
     if form_data['app_type'] == "spark-notebook":
-        client.spark_notebook_application_new(user.id, int(form_data["num_workers"]), form_data["ram"] + 'g', int(form_data["num_cores"]), form_data["app_name"])
+        client.application_spark_notebook_new(user.id, int(form_data["num_workers"]), form_data["ram"] + 'g', int(form_data["num_cores"]), form_data["app_name"])
     elif form_data['app_type'] == "spark-submit":
         file_data = request.files['file']
         if not is_zipfile(file_data.stream):
             return jsonify(status='error', msg='not a zip file')
         file_data.stream.seek(0)
         fcontents = file_data.stream.read()
-        client.spark_submit_application_new(user.id, int(form_data["num_workers"]), form_data["ram"] + 'g', int(form_data["num_cores"]), form_data["app_name"], fcontents)
+        client.application_spark_submit_new(user.id, int(form_data["num_workers"]), form_data["ram"] + 'g', int(form_data["num_cores"]), form_data["app_name"], fcontents)
     else:
         return jsonify(status="error", msg='unknown application type')
 

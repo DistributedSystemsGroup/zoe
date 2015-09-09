@@ -2,6 +2,14 @@
 {% block title %}Status{% endblock %}
 {% block content %}
 <h2>System status overview</h2>
+
+<h3>Scheduler stats</h3>
+    <ul>
+        <li>Running applications: {{ platform.scheduler.count_running }}</li>
+        <li>Waiting applications: {{ platform.scheduler.count_waiting }}</li>
+    </ul>
+
+<h3>Swarm staus</h3>
     <ul>
         <li>Running containers: {{ platform.swarm.container_count }}</li>
         <li>Images: {{ platform.swarm.image_count }}</li>

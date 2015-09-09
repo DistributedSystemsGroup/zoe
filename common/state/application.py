@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from common.state import Base
 
 
-class Application(Base):
+class ApplicationState(Base):
     __tablename__ = 'applications'
 
     id = Column(Integer, primary_key=True)
@@ -12,7 +12,7 @@ class Application(Base):
     required_resources = Column(PickleType())  # JSON resource description
     user_id = Column(Integer, ForeignKey('users.id'))
 
-    executions = relationship("Execution", order_by="Execution.id", backref="application")
+    executions = relationship("ExecutionState", order_by="ExecutionState.id", backref="application")
 
     type = Column(String(20))  # Needed by sqlalchemy to manage class inheritance
 
@@ -20,19 +20,6 @@ class Application(Base):
         'polymorphic_on': type,
         'polymorphic_identity': 'application'
     }
-
-    def to_dict(self) -> dict:
-        ret = {
-            'id': self.id,
-            'name': self.name,
-            'required_resources': self.required_resources.__dict__.copy(),
-            'user_id': self.user_id
-        }
-        return ret
-
-    def __repr__(self):
-        return "<Application(name='%s', id='%s', required_resourced='%s')>" % (
-            self.name, self.id, self.required_resources)
 
     def executions_running(self):
         ret = []
@@ -42,17 +29,10 @@ class Application(Base):
         return ret
 
     def extract(self):
-        ret = PlainApplication()
-        ret.id = self.id
-        ret.name = self.name
-        ret.required_resources = self.required_resources
-        ret.user_id = self.user_id
-        ret.executions = [x.id for x in self.executions]
-        ret.type = self.type
-        return ret
+        return Application(self)
 
 
-class SparkApplication(Application):
+class SparkApplicationState(ApplicationState):
     master_image = Column(String(256))
     worker_image = Column(String(256))
 
@@ -60,63 +40,67 @@ class SparkApplication(Application):
         'polymorphic_identity': 'spark-application'
     }
 
-    def to_dict(self) -> dict:
-        ret = super().to_dict()
-        ret["master_image"] = self.master_image
-        ret["worker_image"] = self.worker_image
-        return ret
-
     def extract(self):
-        ret = super().extract()
-        ret.master_image = self.master_image
-        ret.worker_image = self.worker_image
-        return ret
+        return Application(self)
 
 
-class SparkNotebookApplication(SparkApplication):
+class SparkNotebookApplicationState(SparkApplicationState):
     notebook_image = Column(String(256))
 
     __mapper_args__ = {
         'polymorphic_identity': 'spark-notebook'
     }
 
-    def to_dict(self) -> dict:
-        ret = super().to_dict()
-        ret["notebook_image"] = self.notebook_image
-        return ret
-
     def extract(self):
-        ret = super().extract()
-        ret.notebook_image = self.notebook_image
-        return ret
+        return Application(self)
 
 
-class SparkSubmitApplication(SparkApplication):
+class SparkSubmitApplicationState(SparkApplicationState):
     submit_image = Column(String(256))
 
     __mapper_args__ = {
         'polymorphic_identity': 'spark-submit'
     }
 
-    def to_dict(self) -> dict:
-        ret = super().to_dict()
-        ret["submit_image"] = self.submit_image
-        return ret
-
     def extract(self):
-        ret = super().extract()
-        ret.submit_image = self.submit_image
-        return ret
+        return Application(self)
 
 
-class PlainApplication:
-    id = None
-    name = None
-    required_resources = None
-    user_id = None
-    executions = None
-    type = None
-    master_image = None
-    worker_image = None
-    notebook_image = None
-    submit_image = None
+class Application:
+    """
+    :type id: int
+    :type name: str
+    :type required_resources: ApplicationResources
+    :type user_id: int
+    :type type: str
+    :type master_image: str
+    :type worker_image: str
+    :type notebook_image: str
+    :type submit_image: str
+    :type executions: list[Execution]
+    """
+    def __init__(self, application: ApplicationState) -> None:
+        self.id = application.id
+        self.name = application.name
+        self.required_resources = application.required_resources
+        self.user_id = application.user_id
+        self.type = application.type
+        if isinstance(application, SparkApplicationState):
+            self.master_image = application.master_image
+            self.worker_image = application.worker_image
+        if isinstance(application, SparkNotebookApplicationState):
+            self.notebook_image = application.notebook_image
+        if isinstance(application, SparkSubmitApplicationState):
+            self.submit_image = application.submit_image
+
+        self.executions = []
+
+        for e in application.executions:
+            self.executions.append(e.extract())
+
+    def __str__(self):
+        s = "Application"
+        s += " - Name: {}".format(self.name)
+        s += " - Type: {}".format(self.type)
+        # FIXME add missing fields
+        return s

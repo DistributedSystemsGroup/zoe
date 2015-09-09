@@ -6,7 +6,7 @@ import docker.utils
 import docker.errors
 
 from common.configuration import zoeconf
-from zoe_scheduler.swarm_status import SwarmStatus, SwarmNodeStatus
+from common.stats import SwarmStats, SwarmNodeStats
 
 log = logging.getLogger(__name__)
 
@@ -16,9 +16,9 @@ class SwarmClient:
         manager = zoeconf.docker_swarm_manager
         self.cli = docker.Client(base_url=manager)
 
-    def info(self) -> SwarmStatus:
+    def info(self) -> SwarmStats:
         info = self.cli.info()
-        pl_status = SwarmStatus()
+        pl_status = SwarmStats()
         pl_status.container_count = info["Containers"]
         pl_status.image_count = info["Images"]
         pl_status.memory_total = info["MemTotal"]
@@ -36,7 +36,7 @@ class SwarmClient:
         node_count = int(info["DriverStatus"][idx][1])
         idx = 4
         for node in range(node_count):
-            ns = SwarmNodeStatus(info["DriverStatus"][idx + node][0])
+            ns = SwarmNodeStats(info["DriverStatus"][idx + node][0])
             ns.docker_endpoint = info["DriverStatus"][idx + node][1]
             ns.container_count = int(info["DriverStatus"][idx + node + 1][1])
             ns.cores_reserved = int(info["DriverStatus"][idx + node + 2][1].split(' / ')[0])
@@ -107,6 +107,11 @@ class SwarmClient:
     def log_get(self, docker_id) -> str:
         logdata = self.cli.logs(container=docker_id, stdout=True, stderr=True, stream=False, timestamps=False, tail="all")
         return logdata.decode("utf-8")
+
+    def stats(self, docker_id) -> dict:
+        stats_stream = self.cli.stats(docker_id, decode=True)
+        for s in stats_stream:
+            return s
 
 
 class ContainerOptions:

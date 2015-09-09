@@ -11,10 +11,10 @@ from common.configuration import zoeconf, rpycconf
 argparser = None
 
 
-def status_cmd(_):
+def stats_cmd(_):
     client = get_zoe_client()
-    status_report = client.platform_status()
-    print(status_report)
+    stats = client.platform_stats()
+    print(stats)
 
 
 def setup_db_cmd(_):
@@ -35,13 +35,13 @@ def user_get_cmd(args):
 
 def spark_cluster_new_cmd(args):
     client = get_zoe_client()
-    application_id = client.spark_application_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name)
+    application_id = client.application_spark_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name)
     print("Spark application added with ID: {}".format(application_id))
 
 
 def spark_notebook_new_cmd(args):
     client = get_zoe_client()
-    application_id = client.spark_notebook_application_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name)
+    application_id = client.application_spark_notebook_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name)
     print("Spark application added with ID: {}".format(application_id))
 
 
@@ -51,7 +51,7 @@ def spark_submit_new_cmd(args):
         return
     fcontents = open(args.file, "rb").read()
     client = get_zoe_client()
-    application_id = client.spark_submit_application_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name, fcontents)
+    application_id = client.application_spark_submit_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name, fcontents)
     print("Spark application added with ID: {}".format(application_id))
 
 
@@ -92,8 +92,7 @@ def app_inspect_cmd(args):
     if application is None:
         print("Error: application {} does not exist".format(args.id))
         return
-    app_report = client.application_status(application.id)
-    print(app_report)
+    print(application)
 
 
 def app_list_cmd(args):
@@ -134,8 +133,8 @@ def process_arguments() -> Namespace:
     argparser.add_argument('--rpyc-port', default=4000, type=int, help='Specify an RPyC server port, default is 4000')
     subparser = argparser.add_subparsers(title='subcommands', description='valid subcommands')
 
-    argparser_status = subparser.add_parser('status', help="Show the platform status")
-    argparser_status.set_defaults(func=status_cmd)
+    argparser_stats = subparser.add_parser('stats', help="Show the platform statistics")
+    argparser_stats.set_defaults(func=stats_cmd)
 
     argparser_user_new = subparser.add_parser('user-new', help="Create a new user")
     argparser_user_new.add_argument('email', help="User email address")

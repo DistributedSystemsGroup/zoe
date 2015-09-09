@@ -58,20 +58,20 @@
     <tbody>
         {% for e in active_executions %}
             <tr class="{{ loop.cycle('odd', 'even') }}">
-            <td>{{ e[0]['name'] }}</td>
-            <td>{{ e[1]['name'] }}</td>
-            <td>{{ e[1]['status'] }}</td>
-            <td><script>format_timestamp({{ e[1]['scheduled_at'] }})</script></td>
-            {% if e[1]['started_at'] == 'None' %}
+            <td>{{ e[0].name }}</td>
+            <td>{{ e[1].name }}</td>
+            <td>{{ e[1].status }}</td>
+            <td><script>format_timestamp({{ e[1].time_scheduled.timestamp() }})</script></td>
+            {% if e[1].time_started == 'None' %}
             <td>not yet</td>
             {% else %}
-            <td><script>format_timestamp({{ e[1]['started_at'] }})</script></td>
+            <td><script>format_timestamp({{ e[1].time_started.timestamp() }})</script></td>
             {% endif %}
-            <td>{{ e[1]['cluster']|count }}</td>
-            {% if e[1]['started_at'] != 'None' %}
+            <td>{{ e[1].containers|count }}</td>
+            {% if e[1].time_started != 'None' %}
             <td><a href="{{ e[2] }}">Open</a></td>
             {% endif %}
-            <td><a href="{{ url_for('web.execution_terminate', exec_id=e[1]['id']) }}">Terminate</a></td>
+            <td><a href="{{ url_for('web.execution_terminate', exec_id=e[1].id) }}">Terminate</a></td>
             </tr>
         {% endfor %}
     </tbody>
@@ -98,13 +98,13 @@
     <tbody>
         {% for e in past_executions %}
             <tr class="{{ loop.cycle('odd', 'even') }}">
-            <td>{{ e[0]['name'] }}</td>
-            <td>{{ e[1]['name'] }}</td>
-            <td>{{ e[1]['status'] }}</td>
-            <td><script>format_timestamp({{ e[1]['scheduled_at'] }})</script></td>
-            <td><script>document.write(moment.duration({{ e[1]['finished_at'] }} - {{ e[1]['scheduled_at'] }}).humanize())</script></td>
-            {% if e[1]['started_at'] != None %}
-            <td><a href="{{ url_for('api.history_logs_get', execution_id=e[1]['id']) }}">Logs</a></td>
+            <td>{{ e[0].name }}</td>
+            <td>{{ e[1].name }}</td>
+            <td>{{ e[1].status }}</td>
+            <td><script>format_timestamp({{ e[1].time_scheduled.timestamp() }})</script></td>
+            <td><script>document.write(moment.duration({{ e[1].time_finished.timestamp() }} - {{ e[1].time_scheduled.timestamp() }}).humanize())</script></td>
+            {% if e[1].time_started != None %}
+            <td><a href="{{ url_for('api.history_logs_get', execution_id=e[1].id) }}">Logs</a></td>
             {% endif %}
             </tr>
         {% endfor %}

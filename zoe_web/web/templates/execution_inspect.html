@@ -1,0 +1,14 @@
+{% extends "base_user.html" %}
+{% block title %}Inspect execution {{ execution.name }}{% endblock %}
+{% block content %}
+<h2>Detailed information for execution {{ execution.name }}</h2>
+    <div id="container_list">
+    <ul>
+    {% for c in execution.cluster.containers %}
+        <li class="containerr_name" id="{{ c.id }}">{{ c.readable_name }}</li>
+    </ul>
+    </div>
+    {% endfor %}
+
+
+{% endblock %}

@@ -3,6 +3,7 @@ from flask import render_template
 from zoe_client import get_zoe_client
 from zoe_web.web import web_bp
 import zoe_web.utils as web_utils
+from common.state.execution import Execution
 
 
 @web_bp.route('/')
@@ -20,21 +21,21 @@ def home():
         "email": user.email,
         'apps': apps,
     }
-    reports = []
-    for app in apps:
-        r = client.application_status(app.id)
-        reports.append(r)
     active_executions = []
     past_executions = []
-    for r in reports:
-        for e in r.report['executions']:
-            if e['status'] == "running" or e['status'] == "scheduled" or e['status'] == "submitted":
-                if e['status'] == "running":
-                    active_executions.append((r.report, e, client.execution_get_proxy_path(e['id'])))
+    for a in apps:
+        for e in a.executions:
+            assert isinstance(e, Execution)
+            if e.status == "running" or e.status == "scheduled" or e.status == "submitted":
+                if e.status == "running":
+                    active_executions.append((a, e, client.execution_get_proxy_path(e.id)))
                 else:
-                    active_executions.append((r.report, e))
+                    active_executions.append((a, e))
             else:
-                past_executions.append((r.report, e))
+                past_executions.append((a, e))
+
+    past_executions.sort(key=lambda x: x[1].time_finished)
+
     template_vars['active_executions'] = active_executions
     template_vars['past_executions'] = past_executions
     return render_template('home.html', **template_vars)
