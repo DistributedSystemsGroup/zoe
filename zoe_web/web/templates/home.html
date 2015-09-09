@@ -103,7 +103,7 @@
             <td>{{ e[1].name }}</td>
             <td>{{ e[1].status }}</td>
             <td><script>format_timestamp({{ e[1].time_scheduled.timestamp() }})</script></td>
-            <td><script>document.write(moment.duration({{ e[1].time_finished.timestamp() }} - {{ e[1].time_scheduled.timestamp() }}).humanize())</script></td>
+            <td><script>document.write(moment.duration({{ e[1].time_finished.timestamp() }} - {{ e[1].time_scheduled.timestamp() }}, "seconds").humanize())</script></td>
             {% if e[1].time_started != None %}
             <td><a href="{{ url_for('api.history_logs_get', execution_id=e[1].id) }}">Logs</a></td>
             {% endif %}
