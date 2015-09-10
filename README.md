@@ -1,8 +1,8 @@
-# Zoe - Container Analytics as a Service
+# Zoe - Container-based Analytics as a Service
 
-This application uses Docker Swarm to run on-demand Spark clusters.
+This service uses Docker Swarm to run on-demand analytics clusters. Currently, only Apache Spark is supported.
 
-It is composed of three components:
+Zoe is composed of three components:
 
 * zoectl: command-line client
 * zoe-scheduler: the main daemon that performs application scheduling and talks to Swarm
@@ -13,11 +13,11 @@ It is composed of three components:
 * MySQL to keep all the state
 * Docker Swarm
 * A Docker registry containing Spark images
-* Apache to act as a reverse proxy
+* Apache Web Server to act as a reverse proxy
 
 ## Configuration
 
-Zoe configuration is read from an 'ini' file, the following locations are searched for a file names `zoe.conf`:
+Zoe configuration is read from an 'ini' file, the following locations are searched for file names `zoe.conf`:
 * working path (.)
 * /etc/zoe
 
@@ -25,7 +25,7 @@ A sample configuration file, containing default values for all options can be ge
 
 ### Swarm/Docker
 
-For testing you can use also a single Docker instance, just set its endpoint in the configuration file mentioned above.
+For testing purposes, you can use a single Docker instance, by setting its endpoint in the configuration file mentioned above.
 
 To use Swarm, we use an undocumented network configuration, with the docker bridges connected to a physical interface, so that
 containers on different hosts can talk to each other on the same layer 2 domain.
@@ -43,13 +43,12 @@ Since the Docker Hub can be quite slow, we strongly suggest setting up a private
 [zoe-docker-images](https://github.com/DistributedSystemsGroup/zoe-docker-images) repository can help you populate the registry
 bypassing the Hub.
 
-The images are quite standard and can be used also without Zoe, for examples
-on how to do that, see the `scripts/start_cluster.sh` script.
+The images are quite standard and can be used also without Zoe. Examples on how to do that, are available in the `scripts/start_cluster.sh` script.
 
-### Apache configuration
+### Apache Web Server configuration
 
-Zoe generates dynamically proxy entries to let users access to the various web interfaces contained in the Spark containers.
-To do this, it needs to be able to reload Apache and to write to a configuration file included in the VirtualHost directive.
+Zoe dynamically generates proxy entries to let users access the various web interfaces available for Apache Spark.
+To do this, it needs to be able to reload the server and write to a configuration file included in the VirtualHost directive.
 
 Here is an example configuration for a virtual host:
 ```
