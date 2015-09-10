@@ -1,19 +1,18 @@
+import base64
 import logging
 
-import rpyc
 from sqlalchemy.orm.exc import NoResultFound
 
 from zoe_client.ipc import ZoeIPCClient
 from common.state import AlchemySession
 from common.state.application import ApplicationState, SparkNotebookApplicationState, SparkSubmitApplicationState, SparkApplicationState, Application
-from common.state.container import ContainerState
-from common.state.execution import ExecutionState, SparkSubmitExecutionState, Execution
+from common.state.execution import ExecutionState, Execution
 from common.state.proxy import ProxyState
 from common.state.user import UserState
 from common.application_resources import SparkApplicationResources
 from common.exceptions import UserIDDoesNotExist, ApplicationStillRunning
 import common.object_storage as storage
-from common.configuration import zoeconf, rpycconf
+from common.configuration import zoeconf
 from zoe_client.entities import User
 
 log = logging.getLogger(__name__)
@@ -26,16 +25,9 @@ NOTEBOOK_IMAGE = REGISTRY + "/zoerepo/spark-notebook"
 
 
 class ZoeClient:
-    def __init__(self, rpyc_server=None, rpyc_port=4000):
-        self.ipc_server = ZoeIPCClient("localhost")
-        self.rpyc_server = rpyc_server
-        self.rpyc_port = rpyc_port
+    def __init__(self, ipc_server='localhost', ipc_port=8723):
+        self.ipc_server = ZoeIPCClient(ipc_server, ipc_port)
         self.state = AlchemySession()
-        if self.rpyc_server is None:
-            self.server_connection = rpyc.connect_by_service("ZoeSchedulerRPC")
-        else:
-            self.server_connection = rpyc.connect(self.rpyc_server, self.rpyc_port)
-        self.server = self.server_connection.root
 
     # Applications
     def application_get(self, application_id: int) -> Application:
@@ -149,11 +141,7 @@ class ZoeClient:
 
     # Containers
     def container_stats(self, container_id):
-        try:
-            self.state.query(ContainerState).filter_by(id=container_id).one()
-        except NoResultFound:
-            return None
-        return self.server.container_stats(container_id)
+        return self.ipc_server.ask('container_stats', container_id=container_id)
 
     # Executions
     def execution_delete(self, execution_id: int) -> None:
@@ -193,51 +181,23 @@ class ZoeClient:
             return None
 
     def execution_spark_new(self, application_id: int, name, commandline=None, spark_options=None) -> bool:
-        try:
-            application = self.state.query(ApplicationState).filter_by(id=application_id).one()
-        except NoResultFound:
-            return None
-
-        if type(application) is SparkSubmitApplicationState:
-            if commandline is None:
-                raise ValueError("Spark submit application requires a commandline")
-            execution = SparkSubmitExecutionState(name=name,
-                                                  application_id=application.id,
-                                                  status="submitted",
-                                                  commandline=commandline,
-                                                  spark_opts=spark_options)
-        else:
-            execution = ExecutionState(name=name,
-                                       application_id=application.id,
-                                       status="submitted")
-        self.state.add(execution)
-        self.state.commit()
-        ret = self.server.execution_schedule(execution.id)
-        return ret
+        ret = self.ipc_server.ask('execution_spark_new', application_id=application_id, name=name, commandline=commandline, spark_options=spark_options)
+        return ret is not None
 
     def execution_terminate(self, execution_id: int) -> None:
-        try:
-            self.state.query(ExecutionState).filter_by(id=execution_id).one()
-        except NoResultFound:
-            pass
-        self.server.execution_terminate(execution_id)
+        ret = self.ipc_server.ask('execution_terminate', execution_id=execution_id)
+        return ret is not None
 
     # Logs
     def log_get(self, container_id: int) -> str:
-        try:
-            self.state.query(ContainerState).filter_by(id=container_id).one()
-        except NoResultFound:
-            return None
-        else:
-            ret = self.server.log_get(container_id)
-            return ret
+        clog = self.ipc_server.ask('log_get', container_id=container_id)
+        if clog is not None:
+            return clog['log']
 
     def log_history_get(self, execution_id):
-        try:
-            execution = self.state.query(ExecutionState).filter_by(id=execution_id).one()
-        except NoResultFound:
-            return None
-        return storage.logs_archive_download(execution)
+        data = self.ipc_server.ask('log_history_get', execution_id=execution_id)
+        log_data = base64.b64decode(data['zip_data'])
+        return log_data
 
     # Platform
     def platform_stats(self) -> dict:
@@ -263,10 +223,3 @@ class ZoeClient:
         user_dict = self.ipc_server.ask('user_get_by_email', user_email=email)
         if user_dict is not None:
             return User(user_dict)
-
-
-def get_zoe_client() -> ZoeClient:
-    if rpycconf['client_rpyc_autodiscovery']:
-        return ZoeClient()
-    else:
-        return ZoeClient(rpycconf['client_rpyc_server'], rpycconf['client_rpyc_port'])

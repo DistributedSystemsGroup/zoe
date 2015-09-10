@@ -1,13 +1,14 @@
 from flask import render_template
 
-from zoe_client import get_zoe_client
+from zoe_client import ZoeClient
+from common.configuration import ipcconf
 from zoe_web.web import web_bp
 import zoe_web.utils as web_utils
 
 
 @web_bp.route('/status/platform')
 def status_platform():
-    client = get_zoe_client()
+    client = ZoeClient(ipcconf['server'], ipcconf['port'])
     user = web_utils.check_user(client)
     platform_stats = client.platform_stats()
 

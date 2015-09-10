@@ -8,7 +8,7 @@ from tornado.ioloop import IOLoop
 
 from zoe_web import app
 
-from common.configuration import rpycconf
+from common.configuration import ipcconf
 
 log = logging.getLogger("zoe_web")
 
@@ -16,8 +16,8 @@ log = logging.getLogger("zoe_web")
 def process_arguments() -> argparse.Namespace:
     argparser = argparse.ArgumentParser(description="Zoe Web - Container Analytics as a Service web client")
     argparser.add_argument('-d', '--debug', action='store_true', default=False, help='Enable debug output')
-    argparser.add_argument('--rpyc-server', default=None, help='Specify an RPyC server instead of using autodiscovery')
-    argparser.add_argument('--rpyc-port', default=4000, type=int, help='Specify an RPyC server port, default is 4000')
+    argparser.add_argument('--ipc-server', default='localhost', help='Address of the Zoe scheduler process')
+    argparser.add_argument('--ipc-port', default=8723, type=int, help='Port of the Zoe scheduler process')
 
     return argparser.parse_args()
 
@@ -31,12 +31,8 @@ def main():
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("tornado").setLevel(logging.WARNING)
 
-    if args.rpyc_server is None:
-        rpycconf['client_rpyc_autodiscovery'] = True
-    else:
-        rpycconf['client_rpyc_autodiscovery'] = False
-        rpycconf['client_rpyc_server'] = args.rpyc_server
-        rpycconf['client_rpyc_port'] = args.rpyc_port
+    ipcconf['server'] = args.ipc_server
+    ipcconf['port'] = args.ipc_port
 
     log.info("Starting HTTP server...")
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024

@@ -45,7 +45,9 @@ class ProxyManager:
 
     def _get_proxy_entries(self):
         state = AlchemySession()
-        return state.query(ProxyState).all()
+        ret = state.query(ProxyState).all()
+        state.close()
+        return ret
 
     def _generate_file(self, proxy_entries):
         output = ""
@@ -100,5 +102,6 @@ class ProxyManager:
                 proxy.container.cluster.execution.termination_notice = False
         if something_to_commit:
             state.commit()
+        state.close()
 
 pm = ProxyManager()

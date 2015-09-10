@@ -3,7 +3,8 @@ from zipfile import is_zipfile
 
 from flask import Blueprint, jsonify, request, session, abort, send_file
 
-from zoe_client import get_zoe_client
+from zoe_client import ZoeClient
+from common.configuration import ipcconf
 from common.exceptions import ApplicationStillRunning
 
 api_bp = Blueprint('api', __name__)
@@ -21,11 +22,11 @@ def _api_check_user(zoe_client):
 
 @api_bp.route('/status/basic')
 def status_basic():
-    client = get_zoe_client()
+    client = ZoeClient(ipcconf['server'], ipcconf['port'])
     platform_stats = client.platform_stats()
     ret = {
-        'num_nodes': len(platform_stats.swarm.nodes),
-        'num_containers': platform_stats.swarm.container_count
+        'num_nodes': len(platform_stats['swarm']['nodes']),
+        'num_containers': platform_stats['swarm']['container_count']
     }
     return jsonify(**ret)
 
@@ -34,7 +35,7 @@ def status_basic():
 def login():
     form_data = request.form
     email = form_data["email"]
-    client = get_zoe_client()
+    client = ZoeClient(ipcconf['server'], ipcconf['port'])
     user = client.user_get_by_email(email)
     if user is None:
         user = client.user_new(email)
@@ -44,7 +45,7 @@ def login():
 
 @api_bp.route('/applications/new', methods=['POST'])
 def application_new():
-    client = get_zoe_client()
+    client = ZoeClient(ipcconf['server'], ipcconf['port'])
     user = _api_check_user(client)
 
     form_data = request.form
@@ -66,7 +67,7 @@ def application_new():
 
 @api_bp.route('/applications/delete/<app_id>', methods=['GET', 'POST'])
 def application_delete(app_id):
-    client = get_zoe_client()
+    client = ZoeClient(ipcconf['server'], ipcconf['port'])
     _api_check_user(client)
 
     try:
@@ -79,7 +80,7 @@ def application_delete(app_id):
 
 @api_bp.route('/applications/download/<int:app_id>')
 def application_binary_download(app_id: int):
-    client = get_zoe_client()
+    client = ZoeClient(ipcconf['server'], ipcconf['port'])
     _api_check_user(client)
 
     data = client.application_get_binary(app_id)
@@ -91,7 +92,7 @@ def application_binary_download(app_id: int):
 
 @api_bp.route('/executions/new', methods=['POST'])
 def execution_new():
-    client = get_zoe_client()
+    client = ZoeClient(ipcconf['server'], ipcconf['port'])
     _api_check_user(client)
 
     form_data = request.form
@@ -111,7 +112,7 @@ def execution_new():
 
 @api_bp.route('/executions/logs/container/<int:container_id>')
 def execution_logs(container_id: int):
-    client = get_zoe_client()
+    client = ZoeClient(ipcconf['server'], ipcconf['port'])
     _api_check_user(client)
 
     log = client.log_get(container_id)
@@ -122,20 +123,20 @@ def execution_logs(container_id: int):
 
 
 @api_bp.route('/executions/stats/container/<int:container_id>')
-def execution_stats(container_id: int):
-    client = get_zoe_client()
+def container_stats(container_id: int):
+    client = ZoeClient(ipcconf['server'], ipcconf['port'])
     _api_check_user(client)
 
     stats = client.container_stats(container_id)
     if stats is None:
         return jsonify(status="error", msg="no stats found")
     else:
-        return jsonify(status="ok", **stats.to_dict())
+        return jsonify(status="ok", **stats)
 
 
 @api_bp.route('/executions/terminate/<int:exec_id>')
 def execution_terminate(exec_id: int):
-    client = get_zoe_client()
+    client = ZoeClient(ipcconf['server'], ipcconf['port'])
     _api_check_user(client)
 
     client.execution_terminate(exec_id)
@@ -145,7 +146,7 @@ def execution_terminate(exec_id: int):
 
 @api_bp.route('/history/logs/<int:execution_id>')
 def history_logs_get(execution_id: int):
-    client = get_zoe_client()
+    client = ZoeClient(ipcconf['server'], ipcconf['port'])
     _api_check_user(client)
 
     logs = client.log_history_get(execution_id)

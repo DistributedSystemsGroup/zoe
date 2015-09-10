@@ -1,9 +1,8 @@
 from configparser import ConfigParser
 
-rpycconf = {
-    'client_rpyc_autodiscovery': True,
-    'client_rpyc_server': None,
-    'client_rpyc_port': None,
+ipcconf = {
+    'server': None,
+    'port': None,
 }
 
 config_paths = [

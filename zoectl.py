@@ -3,18 +3,23 @@
 from argparse import ArgumentParser, Namespace
 import logging
 from zipfile import is_zipfile
+from pprint import pprint
 
-from zoe_client import get_zoe_client
+from zoe_client import ZoeClient
 from common.state import create_tables
-from common.configuration import zoeconf, rpycconf
+from common.configuration import zoeconf
 
 argparser = None
 
 
-def stats_cmd(_):
-    client = get_zoe_client()
+def get_zoe_client(args) -> ZoeClient:
+    return ZoeClient(args.ipc_server, args.ipc_port)
+
+
+def stats_cmd(args):
+    client = get_zoe_client(args)
     stats = client.platform_stats()
-    print(stats)
+    pprint(stats)
 
 
 def setup_db_cmd(_):
@@ -22,25 +27,25 @@ def setup_db_cmd(_):
 
 
 def user_new_cmd(args):
-    client = get_zoe_client()
+    client = get_zoe_client(args)
     user = client.user_new(args.email)
     print("New user ID: {}".format(user.id))
 
 
 def user_get_cmd(args):
-    client = get_zoe_client()
+    client = get_zoe_client(args)
     user = client.user_get_by_email(args.email)
     print("User ID: {}".format(user.id))
 
 
 def spark_cluster_new_cmd(args):
-    client = get_zoe_client()
+    client = get_zoe_client(args)
     application_id = client.application_spark_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name)
     print("Spark application added with ID: {}".format(application_id))
 
 
 def spark_notebook_new_cmd(args):
-    client = get_zoe_client()
+    client = get_zoe_client(args)
     application_id = client.application_spark_notebook_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name)
     print("Spark application added with ID: {}".format(application_id))
 
@@ -50,13 +55,13 @@ def spark_submit_new_cmd(args):
         print("Error: the file specified is not a zip archive")
         return
     fcontents = open(args.file, "rb").read()
-    client = get_zoe_client()
+    client = get_zoe_client(args)
     application_id = client.application_spark_submit_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name, fcontents)
     print("Spark application added with ID: {}".format(application_id))
 
 
 def run_spark_cmd(args):
-    client = get_zoe_client()
+    client = get_zoe_client(args)
     application = client.application_get(args.id)
     if application is None:
         print("Error: application {} does not exist".format(args.id))
@@ -70,7 +75,7 @@ def run_spark_cmd(args):
 
 
 def app_rm_cmd(args):
-    client = get_zoe_client()
+    client = get_zoe_client(args)
     application = client.application_get(args.id)
     if application is None:
         print("Error: application {} does not exist".format(args.id))
@@ -87,7 +92,7 @@ def app_rm_cmd(args):
 
 
 def app_inspect_cmd(args):
-    client = get_zoe_client()
+    client = get_zoe_client(args)
     application = client.application_get(args.id)
     if application is None:
         print("Error: application {} does not exist".format(args.id))
@@ -96,7 +101,7 @@ def app_inspect_cmd(args):
 
 
 def app_list_cmd(args):
-    client = get_zoe_client()
+    client = get_zoe_client(args)
     applications = client.application_list(args.id)
     if len(applications) > 0:
         print("{:4} {:20} {:25}".format("ID", "Name", "Type"))
@@ -105,7 +110,7 @@ def app_list_cmd(args):
 
 
 def exec_kill_cmd(args):
-    client = get_zoe_client()
+    client = get_zoe_client(args)
     execution = client.execution_get(args.id)
     if execution is None:
         print("Error: execution {} does not exist".format(args.id))
@@ -114,7 +119,7 @@ def exec_kill_cmd(args):
 
 
 def log_get_cmd(args):
-    client = get_zoe_client()
+    client = get_zoe_client(args)
     log = client.log_get(args.id)
     if log is None:
         print("Error: No log found for container ID {}".format(args.id))
@@ -126,7 +131,7 @@ def gen_config_cmd(args):
 
 
 def container_stats_cmd(args):
-    client = get_zoe_client()
+    client = get_zoe_client(args)
     stats = client.container_stats(args.container_id)
     print(stats)
 
@@ -135,8 +140,8 @@ def process_arguments() -> Namespace:
     global argparser
     argparser = ArgumentParser(description="Zoe - Container Analytics as a Service command-line client")
     argparser.add_argument('-d', '--debug', action='store_true', default=False, help='Enable debug output')
-    argparser.add_argument('--rpyc-server', default=None, help='Specify an RPyC server instead of using autodiscovery')
-    argparser.add_argument('--rpyc-port', default=4000, type=int, help='Specify an RPyC server port, default is 4000')
+    argparser.add_argument('--ipc-server', default='localhost', help='Address of the Zoe scheduler process')
+    argparser.add_argument('--ipc-port', default=8723, type=int, help='Port of the Zoe scheduler process')
     subparser = argparser.add_subparsers(title='subcommands', description='valid subcommands')
 
     argparser_stats = subparser.add_parser('stats', help="Show the platform statistics")
@@ -223,13 +228,6 @@ def main():
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
-
-    if args.rpyc_server is None:
-        rpycconf['client_rpyc_autodiscovery'] = True
-    else:
-        rpycconf['client_rpyc_autodiscovery'] = False
-        rpycconf['client_rpyc_server'] = args.rpyc_server
-        rpycconf['client_rpyc_port'] = args.rpyc_port
 
     try:
         args.func(args)

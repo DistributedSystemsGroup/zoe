@@ -75,7 +75,6 @@ class ZoeScheduler:
 
     def init_tasks(self, tm: PeriodicTaskManager):
         tm.add_task("platform status updater", self.platform_status.update, zoeconf.interval_status_refresh)
-        tm.add_task("scheduler", self.schedule, zoeconf.interval_scheduler_task)
         tm.add_task("proxy access timestamp updater", pm.update_proxy_access_timestamps, zoeconf.interval_proxy_update_accesses)
         tm.add_task("execution health checker", self.platform.check_executions_health, zoeconf.interval_check_health)
 
@@ -94,6 +93,11 @@ class ZoeScheduler:
             self.scheduler_policy.started(execution_id, resources)
         else:  # Some error happened
             log.error('Execution ID {} cannot be started'.format(execution_id))
+
+    def loop(self): # FIXME the scheduler should wait on events, not sleep
+        while True:
+            self.schedule()
+            time.sleep(zoeconf.interval_scheduler_task)
 
     def schedule(self):
         self._check_runnable()

@@ -9,4 +9,3 @@ app.register_blueprint(web_bp, url_prefix='')
 app.register_blueprint(api_bp, url_prefix='/api')
 
 app.secret_key = zoeconf.cookies_secret_key
-
