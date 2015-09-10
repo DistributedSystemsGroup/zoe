@@ -1,6 +1,6 @@
 import logging
 
-from common.stats import PlatformStats
+from zoe_scheduler.stats import PlatformStats
 from zoe_scheduler.swarm_client import SwarmClient
 
 log = logging.getLogger(__name__)

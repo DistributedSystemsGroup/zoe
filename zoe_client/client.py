@@ -1,17 +1,22 @@
+import logging
+
 import rpyc
 from sqlalchemy.orm.exc import NoResultFound
 
+from zoe_client.ipc import ZoeIPCClient
 from common.state import AlchemySession
 from common.state.application import ApplicationState, SparkNotebookApplicationState, SparkSubmitApplicationState, SparkApplicationState, Application
 from common.state.container import ContainerState
 from common.state.execution import ExecutionState, SparkSubmitExecutionState, Execution
 from common.state.proxy import ProxyState
-from common.state.user import UserState, User
+from common.state.user import UserState
 from common.application_resources import SparkApplicationResources
-from common.stats import PlatformStats
 from common.exceptions import UserIDDoesNotExist, ApplicationStillRunning
 import common.object_storage as storage
 from common.configuration import zoeconf, rpycconf
+from zoe_client.entities import User
+
+log = logging.getLogger(__name__)
 
 REGISTRY = zoeconf.docker_private_registry
 MASTER_IMAGE = REGISTRY + "/zoerepo/spark-master"
@@ -22,6 +27,7 @@ NOTEBOOK_IMAGE = REGISTRY + "/zoerepo/spark-notebook"
 
 class ZoeClient:
     def __init__(self, rpyc_server=None, rpyc_port=4000):
+        self.ipc_server = ZoeIPCClient("localhost")
         self.rpyc_server = rpyc_server
         self.rpyc_port = rpyc_port
         self.state = AlchemySession()
@@ -234,36 +240,29 @@ class ZoeClient:
         return storage.logs_archive_download(execution)
 
     # Platform
-    def platform_stats(self) -> PlatformStats:
-        ret = self.server.platform_stats()
-        return ret
+    def platform_stats(self) -> dict:
+        stats = self.ipc_server.ask('platform_stats')
+        return stats
 
     # Users
     def user_check(self, user_id: int) -> bool:
-        user = self.state.query(UserState).filter_by(id=user_id).count()
-        return user == 1
+        user = self.user_get(user_id)
+        return user is not None
 
     def user_new(self, email: str) -> User:
-        user = UserState(email=email)
-        self.state.add(user)
-        self.state.commit()
-        return user.extract()
+        user_dict = self.ipc_server.ask('user_new', email=email)
+        if user_dict is not None:
+            return User(user_dict)
 
     def user_get(self, user_id: int) -> User:
-        try:
-            user = self.state.query(UserState).filter_by(id=user_id).one()
-        except NoResultFound:
-            return None
-        else:
-            return user.extract()
+        user_dict = self.ipc_server.ask('user_get', user_id=user_id)
+        if user_dict is not None:
+            return User(user_dict)
 
     def user_get_by_email(self, email: str) -> User:
-        try:
-            user = self.state.query(UserState).filter_by(email=email).one()
-        except NoResultFound:
-            return None
-        else:
-            return user.extract()
+        user_dict = self.ipc_server.ask('user_get_by_email', user_email=email)
+        if user_dict is not None:
+            return User(user_dict)
 
 
 def get_zoe_client() -> ZoeClient:

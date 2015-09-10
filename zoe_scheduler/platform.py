@@ -1,19 +1,17 @@
 from datetime import datetime, timedelta
 import logging
-
 from io import BytesIO
 import zipfile
 
 from zoe_scheduler.swarm_client import SwarmClient, ContainerOptions
 from zoe_scheduler.proxy_manager import pm
 from zoe_scheduler.emails import notify_execution_finished, notify_notebook_notice, notify_notebook_termination
-
 from common.state import AlchemySession, ClusterState, ContainerState, SparkApplicationState, ProxyState, ExecutionState, SparkNotebookApplicationState, SparkSubmitApplicationState, SparkSubmitExecutionState
 from common.application_resources import ApplicationResources
 from common.exceptions import CannotCreateCluster
 from common.configuration import zoeconf
 from common.object_storage import logs_archive_upload
-from common.urls import generate_application_binary_url
+from zoe_scheduler.urls import generate_application_binary_url
 
 log = logging.getLogger(__name__)
 

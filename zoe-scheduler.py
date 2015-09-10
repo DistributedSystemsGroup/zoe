@@ -8,6 +8,7 @@ from rpyc.utils.server import ThreadedServer
 from zoe_scheduler.rpyc_service import ZoeSchedulerRPCService
 from zoe_scheduler.scheduler import zoe_sched
 from zoe_scheduler.periodic_tasks import PeriodicTaskManager
+from zoe_scheduler.ipc import ZoeIPCServer
 from common.object_storage import init_history_paths
 
 log = logging.getLogger('zoe')
@@ -30,6 +31,7 @@ def process_arguments() -> argparse.Namespace:
     argparser = argparse.ArgumentParser(description="Zoe Scheduler - Container Analytics as a Service scheduling component")
     argparser.add_argument('-d', '--debug', action='store_true', help='Enable debug output')
     argparser.add_argument('--rpyc-no-auto-register', action='store_true', help='Do not register automatically in the RPyC registry')
+    argparser.add_argument('--ipc-server-port', type=int, default=8723, help='Port the IPC server should bind to')
 
     return argparser.parse_args()
 
@@ -46,6 +48,8 @@ def main():
     rpyc_logger = logging.getLogger('rpyc')
     rpyc_logger.setLevel(logging.WARNING)
 
+    ipc_server = ZoeIPCServer(zoe_sched, args.ipc_server_port)
+
     if not init_history_paths():
         return
 
@@ -57,6 +61,8 @@ def main():
                                  logger=rpyc_logger)
 
     zoe_sched.init_tasks(tm)
+
+    ipc_server.start_loop()
 
     rpyc_server.start()
 

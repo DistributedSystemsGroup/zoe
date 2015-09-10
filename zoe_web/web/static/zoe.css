@@ -32,10 +32,6 @@ table.app_list td {
     padding-right: 1.5em;
 }
 
-td.long-text {
-    font-size: xx-small;
-}
-
 div.status_line {
     float: left;
 }

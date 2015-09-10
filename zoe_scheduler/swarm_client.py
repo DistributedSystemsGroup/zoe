@@ -6,7 +6,7 @@ import docker.utils
 import docker.errors
 
 from common.configuration import zoeconf
-from common.stats import SwarmStats, SwarmNodeStats, ContainerStats
+from zoe_scheduler.stats import SwarmStats, SwarmNodeStats, ContainerStats
 
 log = logging.getLogger(__name__)
 

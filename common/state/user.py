@@ -15,8 +15,8 @@ class UserState(Base):
     def extract(self):
         return User(self)
 
-
-class User:
-    def __init__(self, user: UserState):
-        self.id = user.id
-        self.email = user.email
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'email': self.email
+        }

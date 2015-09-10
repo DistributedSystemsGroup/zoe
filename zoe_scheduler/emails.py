@@ -5,7 +5,7 @@ import logging
 from jinja2 import Template
 
 from common.state.execution import SparkSubmitExecutionState, ExecutionState
-from common.urls import generate_log_history_url, generate_notebook_url
+from zoe_scheduler.urls import generate_log_history_url, generate_notebook_url
 from common.configuration import zoeconf
 
 log = logging.getLogger(__name__)

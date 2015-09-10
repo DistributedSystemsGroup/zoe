@@ -5,11 +5,10 @@ from zoe_scheduler.platform import PlatformManager
 from zoe_scheduler.platform_status import PlatformStatus
 from zoe_scheduler.periodic_tasks import PeriodicTaskManager
 from zoe_scheduler.proxy_manager import pm
-
 from common.configuration import zoeconf
 from common.state import ExecutionState
 from common.application_resources import ApplicationResources
-from common.stats import SchedulerStats
+from zoe_scheduler.stats import SchedulerStats
 
 log = logging.getLogger(__name__)
 

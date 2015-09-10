@@ -2,8 +2,7 @@ import rpyc
 from sqlalchemy.orm.exc import NoResultFound
 
 from zoe_scheduler.scheduler import zoe_sched
-
-from common.stats import PlatformStats, ContainerStats
+from zoe_scheduler.stats import PlatformStats, ContainerStats
 from common.state import AlchemySession, ContainerState
 from common.state.execution import ExecutionState
 

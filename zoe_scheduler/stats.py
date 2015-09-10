@@ -7,6 +7,11 @@ class Stats:
     def __init__(self):
         self.timestamp = None
 
+    def to_dict(self) -> dict:
+        ret = {}
+        ret.update(vars(self))
+        return ret
+
 
 class SwarmNodeStats(Stats):
     def __init__(self, name):
@@ -20,17 +25,6 @@ class SwarmNodeStats(Stats):
         self.memory_reserved = 0
         self.labels = {}
 
-    def __str__(self):
-        s = " -- Node {}\n".format(self.name)
-        s += " -- Docker endpoint: {}\n".format(self.docker_endpoint)
-        s += " -- Container count: {}\n".format(self.container_count)
-        s += " -- Memory total: {}\n".format(self.memory_total)
-        s += " -- Memory reserved: {}\n".format(self.memory_reserved)
-        s += " -- Cores total: {}\n".format(self.cores_total)
-        s += " -- Cores reserved: {}\n".format(self.cores_reserved)
-        s += " -- Labels: {}\n".format(self.labels)
-        return s
-
 
 class SwarmStats(Stats):
     def __init__(self):
@@ -43,16 +37,20 @@ class SwarmStats(Stats):
         self.active_filters = []
         self.nodes = []
 
-    def __str__(self):
-        s = " - Container count: {}\n".format(self.container_count)
-        s += " - Image count: {}\n".format(self.image_count)
-        s += " - Memory total: {}\n".format(self.memory_total)
-        s += " - Cores total: {}\n".format(self.cores_total)
-        s += " - Placement strategy: {}\n".format(self.placement_strategy)
-        s += " - Active filters: {}\n".format(self.active_filters)
+    def to_dict(self) -> dict:
+        ret = {
+            'container_count': self.container_count,
+            'image_count': self.image_count,
+            'memory_total': self.memory_total,
+            'cores_total': self.cores_total,
+            'placement_strategy': self.placement_strategy,
+            'active_filters': self.active_filters,
+            'nodes': []
+        }
         for node in self.nodes:
-            s += str(node)
-        return s
+            ret['nodes'].append(node.to_dict())
+
+        return ret
 
 
 class SchedulerStats(Stats):
@@ -61,9 +59,6 @@ class SchedulerStats(Stats):
         self.count_running = 0
         self.count_waiting = 0
 
-    def __str__(self):
-        return " - Apps running: {}\n - Apps waiting: {}\n".format(self.count_running, self.count_waiting)
-
 
 class PlatformStats(Stats):
     def __init__(self):
@@ -71,8 +66,11 @@ class PlatformStats(Stats):
         self.swarm = SwarmStats()
         self.scheduler = SchedulerStats()
 
-    def __str__(self):
-        return "Swarm:\n{}\nScheduler:\n{}\n".format(self.swarm, self.scheduler)
+    def to_dict(self) -> dict:
+        return {
+            'swarm': self.swarm.to_dict(),
+            'scheduler': self.scheduler.to_dict()
+        }
 
 
 class ContainerStats(Stats):
@@ -96,11 +94,6 @@ class ContainerStats(Stats):
 
         self.net_bytes_rx = docker_stats['network']['rx_bytes']
         self.net_bytes_tx = docker_stats['network']['tx_bytes']
-
-    def to_dict(self) -> dict:
-        ret = {}
-        ret.update(vars(self))
-        return ret
 
 
 documentation_sample = {
