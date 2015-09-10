@@ -5,15 +5,13 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from zoe_client.ipc import ZoeIPCClient
 from common.state import AlchemySession
-from common.state.application import ApplicationState, SparkNotebookApplicationState, SparkSubmitApplicationState, SparkApplicationState, Application
-from common.state.execution import ExecutionState, Execution
-from common.state.proxy import ProxyState
+from common.state.application import ApplicationState, Application
+from common.state.execution import ExecutionState
 from common.state.user import UserState
-from common.application_resources import SparkApplicationResources
 from common.exceptions import UserIDDoesNotExist, ApplicationStillRunning
 import common.object_storage as storage
 from common.configuration import zoeconf
-from zoe_client.entities import User
+from zoe_client.entities import User, Execution
 
 log = logging.getLogger(__name__)
 
@@ -75,69 +73,44 @@ class ZoeClient:
         self.state.commit()
 
     def application_spark_new(self, user_id: int, worker_count: int, executor_memory: str, executor_cores: int, name: str) -> int:
-        try:
-            self.state.query(UserState).filter_by(id=user_id).one()
-        except NoResultFound:
-            raise UserIDDoesNotExist(user_id)
-
-        resources = SparkApplicationResources()
-        resources.worker_count = worker_count
-        resources.container_count = worker_count + 1
-        resources.worker_resources["memory_limit"] = executor_memory
-        resources.worker_resources["cores"] = executor_cores
-        app = SparkApplicationState(master_image=MASTER_IMAGE,
-                                    worker_image=WORKER_IMAGE,
-                                    name=name,
-                                    required_resources=resources,
-                                    user_id=user_id)
-        self.state.add(app)
-        self.state.commit()
-        return app.id
+        answer = self.ipc_server.ask('application_spark_new',
+                                     user_id=user_id,
+                                     worker_count=worker_count,
+                                     executor_memory=executor_memory,
+                                     executor_cores=executor_cores,
+                                     name=name,
+                                     master_image=MASTER_IMAGE,
+                                     worker_image=WORKER_IMAGE)
+        if answer is not None:
+            return answer['app_id']
 
     def application_spark_notebook_new(self, user_id: int, worker_count: int, executor_memory: str, executor_cores: int, name: str) -> int:
-        try:
-            self.state.query(UserState).filter_by(id=user_id).one()
-        except NoResultFound:
-            raise UserIDDoesNotExist(user_id)
-
-        resources = SparkApplicationResources()
-        resources.worker_count = worker_count
-        resources.container_count = worker_count + 2
-        resources.worker_resources["memory_limit"] = executor_memory
-        resources.worker_resources["cores"] = executor_cores
-        app = SparkNotebookApplicationState(master_image=MASTER_IMAGE,
-                                            worker_image=WORKER_IMAGE,
-                                            notebook_image=NOTEBOOK_IMAGE,
-                                            name=name,
-                                            required_resources=resources,
-                                            user_id=user_id)
-        self.state.add(app)
-        self.state.commit()
-        return app.id
+        answer = self.ipc_server.ask('application_spark_notebook_new',
+                                     user_id=user_id,
+                                     worker_count=worker_count,
+                                     executor_memory=executor_memory,
+                                     executor_cores=executor_cores,
+                                     name=name,
+                                     master_image=MASTER_IMAGE,
+                                     worker_image=WORKER_IMAGE,
+                                     notebook_image=NOTEBOOK_IMAGE)
+        if answer is not None:
+            return answer['app_id']
 
     def application_spark_submit_new(self, user_id: int, worker_count: int, executor_memory: str, executor_cores: int, name: str, file_data: bytes) -> int:
-        try:
-            self.state.query(UserState).filter_by(id=user_id).one()
-        except NoResultFound:
-            raise UserIDDoesNotExist(user_id)
-
-        resources = SparkApplicationResources()
-        resources.worker_count = worker_count
-        resources.container_count = worker_count + 2
-        resources.worker_resources["memory_limit"] = executor_memory
-        resources.worker_resources["cores"] = executor_cores
-        app = SparkSubmitApplicationState(master_image=MASTER_IMAGE,
-                                          worker_image=WORKER_IMAGE,
-                                          submit_image=SUBMIT_IMAGE,
-                                          name=name,
-                                          required_resources=resources,
-                                          user_id=user_id)
-        self.state.add(app)
-        self.state.flush()
-        storage.application_data_upload(app, file_data)
-
-        self.state.commit()
-        return app.id
+        file_data = base64.b64encode(file_data).decode('ascii')
+        answer = self.ipc_server.ask('application_spark_submit_new',
+                                     user_id=user_id,
+                                     worker_count=worker_count,
+                                     executor_memory=executor_memory,
+                                     executor_cores=executor_cores,
+                                     name=name,
+                                     file_data=file_data,
+                                     master_image=MASTER_IMAGE,
+                                     worker_image=WORKER_IMAGE,
+                                     submit_image=SUBMIT_IMAGE)
+        if answer is not None:
+            return answer['app_id']
 
     # Containers
     def container_stats(self, container_id):
@@ -145,40 +118,18 @@ class ZoeClient:
 
     # Executions
     def execution_delete(self, execution_id: int) -> None:
-        try:
-            execution = self.state.query(ExecutionState).filter_by(id=execution_id).one()
-        except NoResultFound:
-            return
-
-        if execution.status == "running":
-            raise ApplicationStillRunning(execution.application)
-        storage.logs_archive_delete(execution)
-        self.state.delete(execution)
+        ret = self.ipc_server.ask('execution_delete', execution_id=execution_id)
+        return ret is not None
 
     def execution_get(self, execution_id: int) -> Execution:
-        try:
-            execution = self.state.query(ExecutionState).filter_by(id=execution_id).one()
-        except NoResultFound:
-            return None
-        return execution.extract()
+        exec_dict = self.ipc_server.ask('execution_get', execution_id=execution_id)
+        if exec_dict is not None:
+            return Execution(exec_dict)
 
     def execution_get_proxy_path(self, execution_id):
-        try:
-            execution = self.state.query(ExecutionState).filter_by(id=execution_id).one()
-        except NoResultFound:
-            return None
-        if execution is None:
-            return None
-        if isinstance(execution.application, SparkNotebookApplicationState):
-            c = execution.find_container("spark-notebook")
-            pr = self.state.query(ProxyState).filter_by(container_id=c.id, service_name="Spark Notebook interface").one()
-            return zoeconf.proxy_path_url_prefix + '/{}'.format(pr.id)
-        elif isinstance(execution.application, SparkSubmitApplicationState):
-            c = execution.find_container("spark-submit")
-            pr = self.state.query(ProxyState).filter_by(container_id=c.id, service_name="Spark application web interface").one()
-            return zoeconf.proxy_path_url_prefix + '/{}'.format(pr.id)
-        else:
-            return None
+        answer = self.ipc_server.ask('execution_get_proxy_path', execution_id=execution_id)
+        if answer is not None:
+            return answer['path']
 
     def execution_spark_new(self, application_id: int, name, commandline=None, spark_options=None) -> bool:
         ret = self.ipc_server.ask('execution_spark_new', application_id=application_id, name=name, commandline=commandline, spark_options=spark_options)

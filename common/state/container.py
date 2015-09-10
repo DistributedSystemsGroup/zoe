@@ -15,23 +15,15 @@ class ContainerState(Base):
 
     proxies = relationship("ProxyState", order_by="ProxyState.id", backref="container")
 
-    def extract(self):
-        """
-        Generates a normal object not attached to SQLAlchemy
-        :rtype : Container
-        """
-        return Container(self)
+    def to_dict(self) -> dict:
+        ret = {
+            'id': self.id,
+            'docker_id': self.docker_id,
+            'cluster_id': self.cluster_id,
+            'ip_address': self.ip_address,
+            'readable_name': self.readable_name,
+            'proxies': []
+        }
 
-
-class Container:
-    def __init__(self, container: ContainerState):
-        self.id = container.id
-        self.docker_id = container.docker_id
-        self.cluster_id = container.cluster_id
-        self.ip_address = container.ip_address
-        self.readable_name = container.readable_name
-
-        self.proxies = []
-
-        for p in container.proxies:
-            self.proxies.append(p.extract())
+        for p in self.proxies:
+            ret['proxies'].append(p.to_dict)

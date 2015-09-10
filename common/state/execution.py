@@ -49,8 +49,28 @@ class ExecutionState(Base):
             if c.readable_name == name:
                 return c
 
-    def extract(self):
-        return Execution(self)
+    def to_dict(self) -> dict:
+        ret = {
+            'id': self.id,
+            'name': self.name,
+            'application_id': self.application_id,
+            'time_scheduled': self.time_scheduled,
+            'time_started': self.time_started,
+            'time_finished': self.time_finished,
+            'status': self.status,
+            'termination_notice': self.termination_notice,
+            'type': self.type,
+            'assigned_resources': self.assigned_resources.to_dict()
+        }
+
+        if self.cluster is not None:
+            ret['cluster_id'] = self.cluster.id
+            ret['containers'] = [c.to_dict() for c in self.cluster.containers]
+        else:
+            ret['cluster_id'] = None
+            ret['containers'] = []
+
+        return ret
 
 
 class SparkSubmitExecutionState(ExecutionState):
@@ -61,33 +81,8 @@ class SparkSubmitExecutionState(ExecutionState):
         'polymorphic_identity': 'spark-submit-application'
     }
 
-    def extract(self):
-        return Execution(self)
-
-
-class Execution:
-    def __init__(self, execution: ExecutionState):
-        self.id = execution.id
-        self.name = execution.name
-        self.assigned_resources = execution.assigned_resources
-        self.application_id = execution.application_id
-        self.time_started = execution.time_started
-        self.time_scheduled = execution.time_scheduled
-        self.time_finished = execution.time_finished
-        self.status = execution.status
-        self.termination_notice = execution.termination_notice
-        if execution.cluster is not None:
-            self.cluster_id = execution.cluster.id
-        else:
-            self.cluster_id = None
-        self.type = execution.type
-
-        if isinstance(execution, SparkSubmitExecutionState):
-            self.commandline = execution.commandline
-            self.spark_opts = execution.spark_opts
-
-        self.containers = []
-
-        if execution.cluster is not None:
-            for c in execution.cluster.containers:
-                self.containers.append(c.extract())
+    def to_dict(self) -> dict:
+        ret = super().to_dict()
+        ret['commandline'] = self.commandline
+        ret['spark_opts'] = self.spark_opts
+        return ret
