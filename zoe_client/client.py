@@ -1,17 +1,9 @@
 import base64
 import logging
 
-from sqlalchemy.orm.exc import NoResultFound
-
 from zoe_client.ipc import ZoeIPCClient
-from common.state import AlchemySession
-from common.state.application import ApplicationState, Application
-from common.state.execution import ExecutionState
-from common.state.user import UserState
-from common.exceptions import UserIDDoesNotExist, ApplicationStillRunning
-import common.object_storage as storage
 from common.configuration import zoeconf
-from zoe_client.entities import User, Execution
+from zoe_client.entities import User, Execution, Application
 
 log = logging.getLogger(__name__)
 
@@ -25,22 +17,17 @@ NOTEBOOK_IMAGE = REGISTRY + "/zoerepo/spark-notebook"
 class ZoeClient:
     def __init__(self, ipc_server='localhost', ipc_port=8723):
         self.ipc_server = ZoeIPCClient(ipc_server, ipc_port)
-        self.state = AlchemySession()
 
     # Applications
     def application_get(self, application_id: int) -> Application:
-        try:
-            application = self.state.query(ApplicationState).filter_by(id=application_id).one()
-        except NoResultFound:
-            return None
-        return application.extract()
+        answer = self.ipc_server.ask('application_get', application_id=application_id)
+        if answer is not None:
+            return Application(answer['app'])
 
     def application_get_binary(self, application_id: int) -> bytes:
-        try:
-            application = self.state.query(ApplicationState).filter_by(id=application_id).one()
-        except NoResultFound:
-            return None
-        return storage.application_data_download(application)
+        data = self.ipc_server.ask('application_get_binary', application_id=application_id)
+        app_data = base64.b64decode(data['zip_data'])
+        return app_data
 
     def application_list(self, user_id):
         """
@@ -48,29 +35,15 @@ class ZoeClient:
         :type user_id: int
         :rtype : list[Application]
         """
-        try:
-            self.state.query(UserState).filter_by(id=user_id).one()
-        except NoResultFound:
-            raise UserIDDoesNotExist(user_id)
+        answer = self.ipc_server.ask('application_list', user_id=user_id)
+        if answer is None:
+            return []
+        else:
+            return [Application(x) for x in answer['apps']]
 
-        apps = self.state.query(ApplicationState).filter_by(user_id=user_id).all()
-        return [x.extract() for x in apps]
-
-    def application_remove(self, application_id: int):
-        try:
-            application = self.state.query(ApplicationState).filter_by(id=application_id).one()
-        except NoResultFound:
-            return
-        running = self.state.query(ExecutionState).filter_by(application_id=application.id, time_finished=None).count()
-        if running > 0:
-            raise ApplicationStillRunning(application)
-
-        storage.application_data_delete(application)
-        for e in application.executions:
-            self.execution_delete(e.id)
-
-        self.state.delete(application)
-        self.state.commit()
+    def application_remove(self, application_id: int, force: bool) -> bool:
+        answer = self.ipc_server.ask('application_remove', application_id=application_id, force=force)
+        return answer is not None
 
     def application_spark_new(self, user_id: int, worker_count: int, executor_memory: str, executor_cores: int, name: str) -> int:
         answer = self.ipc_server.ask('application_spark_new',

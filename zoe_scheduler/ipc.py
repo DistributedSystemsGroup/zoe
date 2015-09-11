@@ -70,8 +70,51 @@ class ZoeIPCServer:
 
     # ############# Exposed methods below ################
     # Applications
+    def application_get(self, application_id: int) -> dict:
+        try:
+            application = self.state.query(ApplicationState).filter_by(id=application_id).one()
+        except NoResultFound:
+            return self._reply_error('no such application')
+        return self._reply_ok(app=application.to_dict())
+
+    def application_get_binary(self, application_id: int) -> dict:
+        try:
+            application = self.state.query(ApplicationState).filter_by(id=application_id).one()
+        except NoResultFound:
+            return self._reply_error('no such application')
+        else:
+            app_data = storage.application_data_download(application)
+            app_data = base64.b64encode(app_data)
+            return self._reply_ok(zip_data=app_data.decode('ascii'))
+
+    def application_list(self, user_id: int) -> dict:
+        try:
+            self.state.query(UserState).filter_by(id=user_id).one()
+        except NoResultFound:
+            return self._reply_error('no such user')
+
+        apps = self.state.query(ApplicationState).filter_by(user_id=user_id).all()
+        return self._reply_ok(apps=[x.to_dict() for x in apps])
+
+    def application_remove(self, application_id: int, force=False) -> dict:
+        try:
+            application = self.state.query(ApplicationState).filter_by(id=application_id).one()
+        except NoResultFound:
+            return self._reply_error('no such application')
+        running = self.state.query(ExecutionState).filter_by(application_id=application.id, time_finished=None).all()
+        if not force and len(running) > 0:
+            return self._reply_error('there are active execution, cannot delete')
+
+        storage.application_data_delete(application)
+        for e in application.executions:
+            self.execution_delete(e.id)
+
+        self.state.delete(application)
+        self.state.commit()
+        return self._reply_ok()
+
     def application_spark_new(self, user_id: int, worker_count: int, executor_memory: str, executor_cores: int, name: str,
-                              master_image: str, worker_image: str) -> int:
+                              master_image: str, worker_image: str) -> dict:
         try:
             self.state.query(UserState).filter_by(id=user_id).one()
         except NoResultFound:
@@ -92,7 +135,7 @@ class ZoeIPCServer:
         return self._reply_ok(app_id=app.id)
 
     def application_spark_notebook_new(self, user_id: int, worker_count: int, executor_memory: str, executor_cores: int, name: str,
-                                       master_image: str, worker_image: str, notebook_image: str) -> int:
+                                       master_image: str, worker_image: str, notebook_image: str) -> dict:
         try:
             self.state.query(UserState).filter_by(id=user_id).one()
         except NoResultFound:

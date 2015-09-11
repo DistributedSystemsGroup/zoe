@@ -50,3 +50,36 @@ class Proxy:
         self.container_id = proxy['container_id']
         self.service_name = proxy['service_name']
         self.last_access = proxy['last_access']
+
+
+class Application:
+    """
+    :type id: int
+    :type name: str
+    :type required_resources: ApplicationResources
+    :type user_id: int
+    :type type: str
+    :type master_image: str
+    :type worker_image: str
+    :type notebook_image: str
+    :type submit_image: str
+    :type executions: list[Execution]
+    """
+    def __init__(self, application: dict):
+        self.id = application['id']
+        self.name = application['name']
+        self.required_resources = application['required_resources']
+        self.user_id = application['user_id']
+        self.type = application['type']
+        if 'spark' in self.type:
+            self.master_image = application['master_image']
+            self.worker_image = application['worker_image']
+        if self.type == 'spark-notebook':
+            self.notebook_image = application['notebook_image']
+        if self.type == 'spark-submit':
+            self.submit_image = application['submit_image']
+
+        self.executions = []
+
+        for e in application['executions']:
+            self.executions.append(Execution(e))
