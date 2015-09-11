@@ -6,7 +6,6 @@ from zipfile import is_zipfile
 from pprint import pprint
 
 from zoe_client import ZoeClient
-from common.state import create_tables
 from common.configuration import zoeconf
 
 argparser = None
@@ -20,10 +19,6 @@ def stats_cmd(args):
     client = get_zoe_client(args)
     stats = client.platform_stats()
     pprint(stats)
-
-
-def setup_db_cmd(_):
-    create_tables()
 
 
 def user_new_cmd(args):
@@ -83,12 +78,12 @@ def app_rm_cmd(args):
     if args.force:
         a = client.application_get(application.id)
         for eid in a.executions:
-            e = client.execution_get(eid)
+            e = client.execution_get(eid.id)
             if e.status == "running":
                 print("Terminating execution {}".format(e.name))
                 client.execution_terminate(e.id)
 
-    client.application_remove(application.id)
+    client.application_remove(application.id, args.force)
 
 
 def app_inspect_cmd(args):
@@ -154,9 +149,6 @@ def process_arguments() -> Namespace:
     argparser_user_get = subparser.add_parser('user-get', help="Get the user id for an existing user")
     argparser_user_get.add_argument('email', help="User email address")
     argparser_user_get.set_defaults(func=user_get_cmd)
-
-    argparser_setup_db = subparser.add_parser('setup-db', help="Create the tables in the database")
-    argparser_setup_db.set_defaults(func=setup_db_cmd)
 
     argparser_spark_cluster_create = subparser.add_parser('app-spark-cluster-new', help="Setup a new empty Spark cluster")
     argparser_spark_cluster_create.add_argument('--user-id', type=int, required=True, help='Application owner')
