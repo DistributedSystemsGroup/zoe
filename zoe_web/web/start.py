@@ -4,7 +4,7 @@ from zoe_client import ZoeClient
 from common.configuration import ipcconf
 from zoe_web.web import web_bp
 import zoe_web.utils as web_utils
-from common.state.execution import Execution
+from zoe_client.entities import Execution
 
 
 @web_bp.route('/')

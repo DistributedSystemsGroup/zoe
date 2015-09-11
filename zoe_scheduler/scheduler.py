@@ -1,4 +1,5 @@
 import logging
+from threading import Barrier
 import time
 
 from zoe_scheduler.platform import PlatformManager
@@ -73,10 +74,12 @@ class ZoeScheduler:
         self.platform_status = PlatformStatus(self)
         self.scheduler_policy = SimpleSchedulerPolicy(self.platform_status)
 
-    def init_tasks(self, tm: PeriodicTaskManager):
-        tm.add_task("platform status updater", self.platform_status.update, zoeconf.interval_status_refresh)
-        tm.add_task("proxy access timestamp updater", pm.update_proxy_access_timestamps, zoeconf.interval_proxy_update_accesses)
-        tm.add_task("execution health checker", self.platform.check_executions_health, zoeconf.interval_check_health)
+    def init_tasks(self, tm: PeriodicTaskManager) -> Barrier:
+        barrier = Barrier(4)  # number of tasks + main thread
+        tm.add_task("platform status updater", self.platform_status.update, zoeconf.interval_status_refresh, barrier)
+        tm.add_task("proxy access timestamp updater", pm.update_proxy_access_timestamps, zoeconf.interval_proxy_update_accesses, barrier)
+        tm.add_task("execution health checker", self.platform.check_executions_health, zoeconf.interval_check_health, barrier)
+        return barrier
 
     def incoming(self, execution: ExecutionState) -> bool:
         if not self.scheduler_policy.admission_control(execution.application.required_resources):

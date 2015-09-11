@@ -40,7 +40,8 @@ def main():
 
     tm = PeriodicTaskManager()
 
-    zoe_sched.init_tasks(tm)
+    barrier = zoe_sched.init_tasks(tm)
+    barrier.wait()  # wait for all tasks to be ready and running
 
     ipc_server.start_thread()
 

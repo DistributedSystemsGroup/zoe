@@ -5,7 +5,6 @@ from flask import Blueprint, jsonify, request, session, abort, send_file
 
 from zoe_client import ZoeClient
 from common.configuration import ipcconf
-from common.exceptions import ApplicationStillRunning
 
 api_bp = Blueprint('api', __name__)
 
@@ -70,9 +69,7 @@ def application_delete(app_id):
     client = ZoeClient(ipcconf['server'], ipcconf['port'])
     _api_check_user(client)
 
-    try:
-        client.application_remove(app_id)
-    except ApplicationStillRunning:
+    if client.application_remove(app_id, False):
         return jsonify(status="error", msg="The application has active executions and cannot be deleted")
     else:
         return jsonify(status="ok")
