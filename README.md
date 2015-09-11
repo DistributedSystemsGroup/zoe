@@ -1,4 +1,4 @@
-# Zoe - Container Analytics as a Service
+# Zoe - Container-based Analytics as a Service
 
 This application uses Docker Swarm to run Analytics as a Service applications. Currently only Spark is supported, but we are planning inclusion of other frameworks.
 
@@ -13,7 +13,7 @@ It is composed of:
 * MySQL to keep all the state
 * Docker Swarm
 * A Docker registry containing Spark images
-* Apache to act as a reverse proxy
+* Apache Web Server to act as a reverse proxy
 
 ## How to install
 
@@ -67,13 +67,11 @@ Since the Docker Hub can be quite slow, we strongly suggest setting up a private
 [zoe-docker-images](https://github.com/DistributedSystemsGroup/zoe-docker-images) repository can help you populate the registry
 bypassing the Hub.
 
-The images are quite standard and can be used also without Zoe, for examples
-on how to do that, see the `scripts/start_cluster.sh` script.
+The images are quite standard and can be used also without Zoe. Examples on how to do that, are available in the `scripts/start_cluster.sh` script.
 
 Set the registry address:port in section `[docker]` in `zoe.conf`. If use Docker Hub, set the option to an empty string.
 
-### Apache configuration
-
+### Apache Web Server configuration
 Install the Apache web server.
 
 A sample virtual host file containing the directives required by Zoe is available in `scripts/apache-sample.conf`.
@@ -88,4 +86,4 @@ To do this, it needs to be able to reload Apache and to write to a configuration
 Zoe is executing `sudo service apache2 reload` whenever nedded, so make sure the user that runs Zoe is able to run that command
 succesfully.
 
-Change as required options `web_server_name`, `access_log` and `proxy_config_file` in the section `[apache]` of `zoe.conf`.
+Change as needed the options `web_server_name`, `access_log` and `proxy_config_file` in the section `[apache]` of `zoe.conf`.
