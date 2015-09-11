@@ -30,7 +30,6 @@ class PlatformManager:
         except CannotCreateCluster:
             return False
         execution.set_started()
-        print(execution.status)
         state.commit()
         pm.update_proxy()
         return True

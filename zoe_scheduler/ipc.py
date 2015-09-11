@@ -1,4 +1,6 @@
 import base64
+from datetime import datetime
+import json
 import logging
 import threading
 
@@ -34,16 +36,27 @@ class ZoeIPCServer:
         self.th.start()
 
     def _loop(self):
-        self.state = AlchemySession()  # thread-local session
         log.debug("IPC server thread started")
         while True:
             message = self.socket.recv_json()
+            self.state = AlchemySession()
             try:
                 reply = self._dispatch(message)
             except:
                 log.exception("Uncaught exception in IPC server thread")
                 reply = self._reply_error('exception')
-            self.socket.send_json(reply)
+            finally:
+                self.state.close()
+                self.state = None
+            json_reply = json.dumps(reply, default=self._json_default_serializer)
+            self.socket.send_string(json_reply)
+
+    def _json_default_serializer(self, obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        else:
+            log.error('Cannot serialize type {}'.format(type(obj)))
+            raise TypeError
 
     def _dispatch(self, message: dict) -> dict:
         if "command" not in message or "args" not in message:
@@ -247,6 +260,7 @@ class ZoeIPCServer:
                                        application_id=application.id,
                                        status="submitted")
         self.state.add(execution)
+        self.state.flush()
 
         ret = self.sched.incoming(execution)
         if ret:

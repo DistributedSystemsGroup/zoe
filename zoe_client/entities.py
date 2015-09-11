@@ -1,3 +1,13 @@
+import dateutil.parser
+
+
+def deserialize_datetime(isoformat):
+    if isoformat is None:
+        return None
+    else:
+        return dateutil.parser.parse(isoformat)
+
+
 class User:
     def __init__(self, user: dict):
         self.id = user['id']
@@ -10,9 +20,9 @@ class Execution:
         self.name = execution['name']
         self.assigned_resources = execution['assigned_resources']
         self.application_id = execution['application_id']
-        self.time_started = execution['time_started']
-        self.time_scheduled = execution['time_scheduled']
-        self.time_finished = execution['time_finished']
+        self.time_started = deserialize_datetime(execution['time_started'])
+        self.time_scheduled = deserialize_datetime(execution['time_scheduled'])
+        self.time_finished = deserialize_datetime(execution['time_finished'])
         self.status = execution['status']
         self.termination_notice = execution['termination_notice']
         self.cluster_id = execution['cluster_id']
@@ -49,7 +59,7 @@ class Proxy:
         self.cluster_id = proxy['cluster_id']
         self.container_id = proxy['container_id']
         self.service_name = proxy['service_name']
-        self.last_access = proxy['last_access']
+        self.last_access = deserialize_datetime(proxy['last_access'])
 
 
 class Application:

@@ -9,12 +9,17 @@ class ZoeIPCClient:
     def __init__(self, server, port=8723):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
+        self.socket.RCVTIMEO = 2000
         self.socket.connect("tcp://%s:%d" % (server, port))
         log.debug("ZMQ socket connected")
 
     def _ask(self, message: dict) -> dict:
         self.socket.send_json(message)
-        answer = self.socket.recv_json()
+        try:
+            answer = self.socket.recv_json()
+        except zmq.ZMQError as e:
+            log.error("IPC server error: {}".format(e.msg))
+            return None
         if self._is_error(answer):
             log.info("IPC error: {}".format(self._error(answer)))
             return None

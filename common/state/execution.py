@@ -59,9 +59,13 @@ class ExecutionState(Base):
             'time_finished': self.time_finished,
             'status': self.status,
             'termination_notice': self.termination_notice,
-            'type': self.type,
-            'assigned_resources': self.assigned_resources.to_dict()
+            'type': self.type
         }
+
+        if self.assigned_resources is None:
+            ret['assigned_resources'] = None
+        else:
+            ret['assigned_resources'] = self.assigned_resources.to_dict()
 
         if self.cluster is not None:
             ret['cluster_id'] = self.cluster.id

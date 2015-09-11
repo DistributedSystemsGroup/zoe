@@ -2,6 +2,9 @@
 {% block title %}Inspect execution {{ execution.name }}{% endblock %}
 {% block content %}
 <h2>Detailed information for execution {{ execution.name }}</h2>
+{% if execution.containers|count == 0 %}
+    <p>This application execution has no running containers</p>
+{% else %}
     <div id="contents">
     <div id="container_list">
     <ul>
@@ -73,5 +76,6 @@
     get_log({{ (execution.containers|first).id }});
     get_stats({{ (execution.containers|first).id }});
 </script>
+{% endif %}
 
 {% endblock %}

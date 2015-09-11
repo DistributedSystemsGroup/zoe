@@ -26,4 +26,6 @@ class ContainerState(Base):
         }
 
         for p in self.proxies:
-            ret['proxies'].append(p.to_dict)
+            ret['proxies'].append(p.to_dict())
+
+        return ret
