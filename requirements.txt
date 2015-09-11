@@ -1,6 +1,7 @@
 tornado
 Flask
 docker-py
+--allow-external mysql-connector-python
 mysql-connector-python
 python-dateutil
 SQLAlchemy
