@@ -2,6 +2,8 @@ language: python
 python:
   - "3.4"
 install:
-  - pip install --allow-all-external -r requirements.txt
-  - pip install nose
-script: nosetests
+  - pip install -r requirements.txt
+  - pip install pytest
+script:
+  - py.test
+  - sphinx-build -nW -b html -d docs/_build/doctrees docs/ docs/_build/html
