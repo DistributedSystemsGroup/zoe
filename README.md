@@ -1,6 +1,6 @@
 # Zoe - Container-based Analytics as a Service
 
-This application uses Docker Swarm to run Analytics as a Service applications. Currently only Spark is supported, but we are planning inclusion of other frameworks.
+Zoe uses Docker Swarm to run Analytics as a Service applications. Currently only Spark is supported, but we are planning inclusion of other frameworks.
 
 It is composed of:
 
