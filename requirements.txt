@@ -1,8 +1,9 @@
-tornado
-Flask
 docker-py
+Flask
 --allow-external mysql-connector-python
 mysql-connector-python
 python-dateutil
+Sphinx
 SQLAlchemy
+tornado
 zmq
