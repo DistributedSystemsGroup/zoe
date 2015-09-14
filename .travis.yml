@@ -5,7 +5,7 @@ install:
   - pip install -r requirements.txt
   - pip install pytest
 before_script:
-  - cp .travis/zoe.conf .
+  - cp .travis/zoe-travis.sample ./zoe.conf
   - bash .travis/create_db.sh
 script:
   - py.test
