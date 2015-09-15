@@ -7,7 +7,7 @@ from zoe_scheduler.platform_status import PlatformStatus
 from zoe_scheduler.periodic_tasks import PeriodicTaskManager
 from zoe_scheduler.proxy_manager import pm
 from common.configuration import zoeconf
-from common.state import ExecutionState
+from zoe_scheduler.state.execution import ExecutionState
 from common.application_resources import ApplicationResources
 from zoe_scheduler.stats import SchedulerStats
 
@@ -97,7 +97,12 @@ class ZoeScheduler:
         else:  # Some error happened
             log.error('Execution ID {} cannot be started'.format(execution_id))
 
-    def loop(self): # FIXME the scheduler should wait on events, not sleep
+    def loop(self):  # FIXME the scheduler should wait on events, not sleep
+        """
+        This method is the scheduling task. It is the loop the main thread runs, started from the zoe-scheduler executable.
+        It does not use an sqlalchemy session.
+        :return: None
+        """
         while True:
             self.schedule()
             time.sleep(zoeconf.interval_scheduler_task)
@@ -108,6 +113,3 @@ class ZoeScheduler:
     def execution_terminate(self, state, execution: ExecutionState):
         self.platform.execution_terminate(state, execution)
         self.scheduler_policy.terminated(execution.id)
-
-
-zoe_sched = ZoeScheduler()

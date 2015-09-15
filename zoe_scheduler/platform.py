@@ -6,11 +6,16 @@ import zipfile
 from zoe_scheduler.swarm_client import SwarmClient, ContainerOptions
 from zoe_scheduler.proxy_manager import pm
 from zoe_scheduler.emails import notify_execution_finished, notify_notebook_notice, notify_notebook_termination
-from common.state import AlchemySession, ClusterState, ContainerState, SparkApplicationState, ProxyState, ExecutionState, SparkNotebookApplicationState, SparkSubmitApplicationState, SparkSubmitExecutionState
+from zoe_scheduler.state import AlchemySession
+from zoe_scheduler.state.application import SparkApplicationState, SparkNotebookApplicationState, SparkSubmitApplicationState
+from zoe_scheduler.state.cluster import ClusterState
+from zoe_scheduler.state.container import ContainerState
+from zoe_scheduler.state.execution import ExecutionState, SparkSubmitExecutionState
+from zoe_scheduler.state.proxy import ProxyState
 from common.application_resources import ApplicationResources
-from common.exceptions import CannotCreateCluster
+from zoe_scheduler.exceptions import CannotCreateCluster
 from common.configuration import zoeconf
-from common.object_storage import logs_archive_upload
+from zoe_scheduler.object_storage import logs_archive_upload
 from zoe_scheduler.urls import generate_application_binary_url
 
 log = logging.getLogger(__name__)
@@ -217,6 +222,7 @@ class PlatformManager:
                             notify_notebook_notice(e)
 
         state.commit()
+        state.close()
 
     def _container_died(self, state: AlchemySession, container: ContainerState):
         if container.readable_name == "spark-submit" or container.readable_name == "spark-master":

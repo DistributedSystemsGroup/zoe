@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 
-from common.state import Base
+from zoe_scheduler.state import Base
 
 
 class ContainerState(Base):

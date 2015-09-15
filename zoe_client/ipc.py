@@ -17,6 +17,9 @@ class ZoeIPCClient:
         self.socket.send_json(message)
         try:
             answer = self.socket.recv_json()
+        except zmq.error.Again:
+            log.error("ZMQ is asking to try again, we drop the message")
+            return None
         except zmq.ZMQError as e:
             log.error("IPC server error: {}".format(e.msg))
             return None

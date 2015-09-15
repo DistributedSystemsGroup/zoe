@@ -1,8 +1,3 @@
-import time
-
-from common.state import ApplicationState, ExecutionState, ContainerState, ProxyState
-
-
 class Stats:
     def __init__(self):
         self.timestamp = None

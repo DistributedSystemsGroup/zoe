@@ -1,7 +1,8 @@
 import os
 import logging
 
-from common.state import ApplicationState, ExecutionState
+from zoe_scheduler.state.application import ApplicationState
+from zoe_scheduler.state.execution import ExecutionState
 from common.configuration import zoeconf
 
 log = logging.getLogger(__name__)

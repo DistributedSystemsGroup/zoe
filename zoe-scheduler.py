@@ -3,17 +3,15 @@
 import argparse
 import logging
 
-from zoe_scheduler.scheduler import zoe_sched
+from zoe_scheduler.scheduler import ZoeScheduler
 from zoe_scheduler.periodic_tasks import PeriodicTaskManager
 from zoe_scheduler.ipc import ZoeIPCServer
-from common.object_storage import init_history_paths
+from zoe_scheduler.object_storage import init_history_paths
+from zoe_scheduler.state import init as state_init
+
+from common.configuration import zoeconf
 
 log = logging.getLogger('zoe')
-
-
-def sigint_handler():
-    log.warning('CTRL-C detected, terminating event loop...')
-    zoe_sched.stop_tasks()
 
 
 def process_arguments() -> argparse.Namespace:
@@ -32,6 +30,10 @@ def main():
         logging.basicConfig(level=logging.INFO)
 
     logging.getLogger('requests').setLevel(logging.WARNING)
+
+    state_init(zoeconf.db_url)
+
+    zoe_sched = ZoeScheduler()
 
     ipc_server = ZoeIPCServer(zoe_sched, args.ipc_server_port)
 

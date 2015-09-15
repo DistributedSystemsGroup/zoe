@@ -1,5 +1,7 @@
-from common.state.execution import ExecutionState
-from common.state import ProxyState, AlchemySession, ApplicationState
+from zoe_scheduler.state import AlchemySession
+from zoe_scheduler.state.application import ApplicationState
+from zoe_scheduler.state.execution import ExecutionState
+from zoe_scheduler.state.proxy import ProxyState
 from common.configuration import zoeconf
 
 

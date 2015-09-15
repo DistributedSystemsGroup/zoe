@@ -8,15 +8,14 @@ from sqlalchemy.orm.exc import NoResultFound
 import zmq
 
 from common.application_resources import SparkApplicationResources
-from common.state import AlchemySession
-from common.state.application import ApplicationState, SparkSubmitApplicationState, SparkNotebookApplicationState, SparkApplicationState
-from common.state.container import ContainerState
-from common.state.execution import ExecutionState, SparkSubmitExecutionState
-from common.state.proxy import ProxyState
-from common.state.user import UserState
-import common.object_storage as storage
+from zoe_scheduler.state import AlchemySession
+from zoe_scheduler.state.application import ApplicationState, SparkSubmitApplicationState, SparkNotebookApplicationState, SparkApplicationState
+from zoe_scheduler.state.container import ContainerState
+from zoe_scheduler.state.execution import ExecutionState, SparkSubmitExecutionState
+from zoe_scheduler.state.proxy import ProxyState
+from zoe_scheduler.state.user import UserState
+import zoe_scheduler.object_storage as storage
 from common.configuration import zoeconf
-
 from zoe_scheduler.scheduler import ZoeScheduler
 
 log = logging.getLogger(__name__)

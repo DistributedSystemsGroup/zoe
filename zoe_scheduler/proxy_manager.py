@@ -7,7 +7,8 @@ import logging
 from jinja2 import Template
 
 from common.configuration import zoeconf
-from common.state import AlchemySession, ProxyState
+from zoe_scheduler.state import AlchemySession
+from zoe_scheduler.state.proxy import ProxyState
 
 log = logging.getLogger(__name__)
 

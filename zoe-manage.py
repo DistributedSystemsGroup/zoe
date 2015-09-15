@@ -3,7 +3,7 @@
 from argparse import ArgumentParser, Namespace
 import logging
 
-from common.state import create_tables
+from zoe_scheduler.state import create_tables
 
 argparser = None
 

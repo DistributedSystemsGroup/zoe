@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, String, PickleType, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 
-from common.state import Base
+from zoe_scheduler.state import Base
 
 
 class ExecutionState(Base):

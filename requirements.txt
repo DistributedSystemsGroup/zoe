@@ -3,6 +3,7 @@ Flask
 --allow-external mysql-connector-python
 mysql-connector-python
 python-dateutil
+pytest
 Sphinx
 SQLAlchemy
 tornado

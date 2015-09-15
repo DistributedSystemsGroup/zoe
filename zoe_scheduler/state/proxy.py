@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, func
 
-from common.state import Base
+from zoe_scheduler.state import Base
 
 
 class ProxyState(Base):
