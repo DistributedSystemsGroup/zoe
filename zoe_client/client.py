@@ -7,16 +7,16 @@ from zoe_client.entities import User, Execution, Application
 
 log = logging.getLogger(__name__)
 
-REGISTRY = zoeconf.docker_private_registry
-MASTER_IMAGE = REGISTRY + "/zoerepo/spark-master"
-WORKER_IMAGE = REGISTRY + "/zoerepo/spark-worker"
-SUBMIT_IMAGE = REGISTRY + "/zoerepo/spark-submit"
-NOTEBOOK_IMAGE = REGISTRY + "/zoerepo/spark-notebook"
+MASTER_IMAGE = "/zoerepo/spark-master"
+WORKER_IMAGE = "/zoerepo/spark-worker"
+SUBMIT_IMAGE = "/zoerepo/spark-submit"
+NOTEBOOK_IMAGE = "/zoerepo/spark-notebook"
 
 
 class ZoeClient:
     def __init__(self, ipc_server='localhost', ipc_port=8723):
         self.ipc_server = ZoeIPCClient(ipc_server, ipc_port)
+        self.image_registry = zoeconf().docker_private_registry
 
     # Applications
     def application_get(self, application_id: int) -> Application:
@@ -52,8 +52,8 @@ class ZoeClient:
                                      executor_memory=executor_memory,
                                      executor_cores=executor_cores,
                                      name=name,
-                                     master_image=MASTER_IMAGE,
-                                     worker_image=WORKER_IMAGE)
+                                     master_image=self.image_registry + MASTER_IMAGE,
+                                     worker_image=self.image_registry + WORKER_IMAGE)
         if answer is not None:
             return answer['app_id']
 
@@ -64,9 +64,9 @@ class ZoeClient:
                                      executor_memory=executor_memory,
                                      executor_cores=executor_cores,
                                      name=name,
-                                     master_image=MASTER_IMAGE,
-                                     worker_image=WORKER_IMAGE,
-                                     notebook_image=NOTEBOOK_IMAGE)
+                                     master_image=self.image_registry + MASTER_IMAGE,
+                                     worker_image=self.image_registry + WORKER_IMAGE,
+                                     notebook_image=self.image_registry + NOTEBOOK_IMAGE)
         if answer is not None:
             return answer['app_id']
 
@@ -79,9 +79,9 @@ class ZoeClient:
                                      executor_cores=executor_cores,
                                      name=name,
                                      file_data=file_data,
-                                     master_image=MASTER_IMAGE,
-                                     worker_image=WORKER_IMAGE,
-                                     submit_image=SUBMIT_IMAGE)
+                                     master_image=self.image_registry + MASTER_IMAGE,
+                                     worker_image=self.image_registry + WORKER_IMAGE,
+                                     submit_image=self.image_registry + SUBMIT_IMAGE)
         if answer is not None:
             return answer['app_id']
 

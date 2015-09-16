@@ -8,8 +8,9 @@ from zoe_scheduler.periodic_tasks import PeriodicTaskManager
 from zoe_scheduler.ipc import ZoeIPCServer
 from zoe_scheduler.object_storage import init_history_paths
 from zoe_scheduler.state import init as state_init
+from zoe_scheduler.proxy_manager import init as proxy_init
 
-from common.configuration import zoeconf
+from common.configuration import init as conf_init
 
 log = logging.getLogger('zoe')
 
@@ -31,7 +32,9 @@ def main():
 
     logging.getLogger('requests').setLevel(logging.WARNING)
 
+    zoeconf = conf_init()
     state_init(zoeconf.db_url)
+    proxy_init()
 
     zoe_sched = ZoeScheduler()
 

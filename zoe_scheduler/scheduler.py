@@ -5,7 +5,7 @@ import time
 from zoe_scheduler.platform import PlatformManager
 from zoe_scheduler.platform_status import PlatformStatus
 from zoe_scheduler.periodic_tasks import PeriodicTaskManager
-from zoe_scheduler.proxy_manager import pm
+from zoe_scheduler.proxy_manager import proxy_manager
 from common.configuration import zoeconf
 from zoe_scheduler.state.execution import ExecutionState
 from common.application_resources import ApplicationResources
@@ -76,9 +76,9 @@ class ZoeScheduler:
 
     def init_tasks(self, tm: PeriodicTaskManager) -> Barrier:
         barrier = Barrier(4)  # number of tasks + main thread
-        tm.add_task("platform status updater", self.platform_status.update, zoeconf.interval_status_refresh, barrier)
-        tm.add_task("proxy access timestamp updater", pm.update_proxy_access_timestamps, zoeconf.interval_proxy_update_accesses, barrier)
-        tm.add_task("execution health checker", self.platform.check_executions_health, zoeconf.interval_check_health, barrier)
+        tm.add_task("platform status updater", self.platform_status.update, zoeconf().interval_status_refresh, barrier)
+        tm.add_task("proxy access timestamp updater", proxy_manager().update_proxy_access_timestamps, zoeconf().interval_proxy_update_accesses, barrier)
+        tm.add_task("execution health checker", self.platform.check_executions_health, zoeconf().interval_check_health, barrier)
         return barrier
 
     def incoming(self, execution: ExecutionState) -> bool:
@@ -105,7 +105,7 @@ class ZoeScheduler:
         """
         while True:
             self.schedule()
-            time.sleep(zoeconf.interval_scheduler_task)
+            time.sleep(zoeconf().interval_scheduler_task)
 
     def schedule(self):
         self._check_runnable()

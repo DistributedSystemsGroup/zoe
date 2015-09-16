@@ -6,7 +6,7 @@ from zipfile import is_zipfile
 from pprint import pprint
 
 from zoe_client import ZoeClient
-from common.configuration import zoeconf
+from common.configuration import init as conf_init, zoeconf
 
 argparser = None
 
@@ -122,7 +122,7 @@ def log_get_cmd(args):
 
 
 def gen_config_cmd(args):
-    zoeconf.write(open(args.output_file, "w"))
+    zoeconf().write(open(args.output_file, "w"))
 
 
 def container_stats_cmd(args):
@@ -220,6 +220,8 @@ def main():
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
+
+    conf_init()
 
     try:
         args.func(args)

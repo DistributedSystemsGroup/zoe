@@ -8,7 +8,7 @@ from tornado.ioloop import IOLoop
 
 from zoe_web import app
 
-from common.configuration import ipcconf
+from common.configuration import ipcconf, init as conf_init
 
 log = logging.getLogger("zoe_web")
 
@@ -34,8 +34,11 @@ def main():
     ipcconf['server'] = args.ipc_server
     ipcconf['port'] = args.ipc_port
 
+    zoeconf = conf_init()
+
     log.info("Starting HTTP server...")
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+    app.secret_key = zoeconf.cookies_secret_key
 
     http_server = HTTPServer(WSGIContainer(app))
     http_server.listen(5000, "0.0.0.0")

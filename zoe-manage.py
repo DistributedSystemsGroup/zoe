@@ -3,13 +3,15 @@
 from argparse import ArgumentParser, Namespace
 import logging
 
-from zoe_scheduler.state import create_tables
+from zoe_scheduler.state import create_tables, init as state_init
+from common.configuration import init as conf_init, zoeconf
 
 argparser = None
+db_engine = None
 
 
 def setup_db_cmd(_):
-    create_tables()
+    create_tables(db_engine)
 
 
 def process_arguments() -> Namespace:
@@ -25,11 +27,16 @@ def process_arguments() -> Namespace:
 
 
 def main():
+    global db_engine
     args = process_arguments()
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
+
+    conf_init()
+
+    db_engine = state_init(zoeconf().db_url)
 
     try:
         args.func(args)

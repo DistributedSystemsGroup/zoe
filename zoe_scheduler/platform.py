@@ -4,7 +4,7 @@ from io import BytesIO
 import zipfile
 
 from zoe_scheduler.swarm_client import SwarmClient, ContainerOptions
-from zoe_scheduler.proxy_manager import pm
+from zoe_scheduler.proxy_manager import proxy_manager
 from zoe_scheduler.emails import notify_execution_finished, notify_notebook_notice, notify_notebook_termination
 from zoe_scheduler.state import AlchemySession
 from zoe_scheduler.state.application import SparkApplicationState, SparkNotebookApplicationState, SparkSubmitApplicationState
@@ -24,7 +24,6 @@ log = logging.getLogger(__name__)
 class PlatformManager:
     def __init__(self):
         self.swarm = SwarmClient()
-        pm.update_proxy()
 
     def start_execution(self, execution_id: int, resources: ApplicationResources) -> bool:
         state = AlchemySession()
@@ -36,7 +35,7 @@ class PlatformManager:
             return False
         execution.set_started()
         state.commit()
-        pm.update_proxy()
+        proxy_manager().update_proxy()
         return True
 
     def _application_to_containers(self, state: AlchemySession, execution: ExecutionState):
@@ -180,7 +179,7 @@ class PlatformManager:
             state.delete(cluster)
         execution.set_terminated()
         self._archive_execution_logs(execution, logs)
-        pm.update_proxy()
+        proxy_manager().update_proxy()
 
     def log_get(self, container: ContainerState) -> str:
         return self.swarm.log_get(container.docker_id)
@@ -211,11 +210,11 @@ class PlatformManager:
                 c = e.find_container("spark-notebook")
                 if c is not None:
                     pr = state.query(ProxyState).filter_by(container_id=c.id, service_name="Spark Notebook interface").one()
-                    if datetime.now() - pr.last_access > timedelta(hours=zoeconf.notebook_max_age_no_activity):
+                    if datetime.now() - pr.last_access > timedelta(hours=zoeconf().notebook_max_age_no_activity):
                         log.info("Killing spark notebook {} for inactivity".format(e.id))
                         self.execution_terminate(state, e)
                         notify_notebook_termination(e)
-                    if datetime.now() - pr.last_access > timedelta(hours=zoeconf.notebook_max_age_no_activity) - timedelta(hours=zoeconf.notebook_warning_age_no_activity):
+                    if datetime.now() - pr.last_access > timedelta(hours=zoeconf().notebook_max_age_no_activity) - timedelta(hours=zoeconf().notebook_warning_age_no_activity):
                         if not e.termination_notice:
                             log.info("Spark notebook {} is on notice for inactivity".format(e.id))
                             e.termination_notice = True

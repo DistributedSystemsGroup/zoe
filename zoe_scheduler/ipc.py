@@ -230,12 +230,12 @@ class ZoeIPCServer:
         if isinstance(execution.application, SparkNotebookApplicationState):
             c = execution.find_container("spark-notebook")
             pr = self.state.query(ProxyState).filter_by(container_id=c.id, service_name="Spark Notebook interface").one()
-            path = zoeconf.proxy_path_url_prefix + '/{}'.format(pr.id)
+            path = zoeconf().proxy_path_url_prefix + '/{}'.format(pr.id)
             return self._reply_ok(path=path)
         elif isinstance(execution.application, SparkSubmitApplicationState):
             c = execution.find_container("spark-submit")
             pr = self.state.query(ProxyState).filter_by(container_id=c.id, service_name="Spark application web interface").one()
-            path = zoeconf.proxy_path_url_prefix + '/{}'.format(pr.id)
+            path = zoeconf().proxy_path_url_prefix + '/{}'.format(pr.id)
             return self._reply_ok(path=path)
         else:
             return self._reply_error('unknown application type')

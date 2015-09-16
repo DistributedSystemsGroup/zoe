@@ -41,8 +41,8 @@ ENTRY_TEMPLATE = """
 
 class ProxyManager:
     def __init__(self):
-        self.apache_conf_filepath = zoeconf.apache_proxy_config_file
-        self.apache_access_log = zoeconf.apache_log_file
+        self.apache_conf_filepath = zoeconf().apache_proxy_config_file
+        self.apache_access_log = zoeconf().apache_log_file
 
     def _get_proxy_entries(self):
         state = AlchemySession()
@@ -105,4 +105,14 @@ class ProxyManager:
             state.commit()
         state.close()
 
-pm = ProxyManager()
+_pm = None
+
+
+def init():
+    global _pm
+    _pm = ProxyManager()
+    _pm.update_proxy()
+
+
+def proxy_manager() -> ProxyManager:
+    return _pm

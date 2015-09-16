@@ -70,8 +70,8 @@ def notify_notebook_notice(execution: ExecutionState):
 
     subject = "[Zoe] Notebook termination warning"
     template_vars = {
-        'grace_time': zoeconf.notebook_max_age_no_activity - zoeconf.notebook_warning_age_no_activity,
-        'wrn_age': zoeconf.notebook_warning_age_no_activity,
+        'grace_time': zoeconf().notebook_max_age_no_activity - zoeconf().notebook_warning_age_no_activity,
+        'wrn_age': zoeconf().notebook_warning_age_no_activity,
         'nb_url': generate_notebook_url(execution)
     }
     send_email(email, subject, NOTEBOOK_WARNING_EMAIL_TEMPLATE, template_vars)
@@ -82,7 +82,7 @@ def notify_notebook_termination(execution: ExecutionState):
     email = app.user.email
 
     subject = "[Zoe] Notebook terminated"
-    template_vars = {'max_age': zoeconf.notebook_max_age_no_activity}
+    template_vars = {'max_age': zoeconf().notebook_max_age_no_activity}
     send_email(email, subject, NOTEBOOK_KILLED_EMAIL_TEMPLATE, template_vars)
 
 
@@ -93,9 +93,9 @@ def send_email(address, subject, template, template_vars):
     msg['Subject'] = subject
     msg['From'] = 'noreply@bigfoot.eurecom.fr'
     msg['To'] = address
-    s = smtplib.SMTP(zoeconf.smtp_server)
+    s = smtplib.SMTP(zoeconf().smtp_server)
     s.ehlo()
     s.starttls()
-    s.login(zoeconf.smtp_user, zoeconf.smtp_password)
+    s.login(zoeconf().smtp_user, zoeconf().smtp_password)
     s.send_message(msg)
     s.quit()

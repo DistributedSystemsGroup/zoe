@@ -45,6 +45,8 @@ defaults = {
     }
 }
 
+_zoeconf = None
+
 
 class ZoeConfig(ConfigParser):
     def __init__(self):
@@ -127,5 +129,16 @@ class ZoeConfig(ConfigParser):
     def docker_private_registry(self) -> str:
         return self.get('docker', 'private_registry')
 
-zoeconf = ZoeConfig()
-zoeconf.read(config_paths)
+
+def init(config_file=None) -> ZoeConfig:
+    global _zoeconf
+    _zoeconf = ZoeConfig()
+    if config_file is None:
+        _zoeconf.read(config_paths)
+    else:
+        _zoeconf.read_file(open(config_file))
+    return _zoeconf
+
+
+def zoeconf() -> ZoeConfig:
+    return _zoeconf

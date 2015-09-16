@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 
 class SwarmClient:
     def __init__(self):
-        manager = zoeconf.docker_swarm_manager
+        manager = zoeconf().docker_swarm_manager
         self.cli = docker.Client(base_url=manager)
 
     def info(self) -> SwarmStats:

@@ -10,4 +10,5 @@ API documentation
 .. toctree::
   :maxdepth: 2
 
+  developer/introduction
   developer/client
