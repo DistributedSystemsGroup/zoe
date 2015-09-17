@@ -5,7 +5,7 @@ with open("common/version.py") as fp:
     exec(fp.read(), version)
 version = version['__version__']
 
-long_description = open('README.md').read()
+long_description = open('README.rst').read()
 
 setup(
     name='zoe',
@@ -72,7 +72,7 @@ setup(
                       'python-dateutil>=2.4.2',
                       'SQLAlchemy>=1.0.8',
                       'tornado>=4.2.1',
-                      'zmq>=14.0.1'
+                      'pyzmq>=14.0.1'
                       ],
 
     # List additional groups of dependencies here (e.g. development
