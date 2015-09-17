@@ -4,6 +4,7 @@ Flask
 mysql-connector-python
 python-dateutil
 pytest
+pytest-cov
 Sphinx
 SQLAlchemy
 tornado

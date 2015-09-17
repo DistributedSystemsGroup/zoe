@@ -23,10 +23,14 @@ Resources:
 -  Docker images:
    https://github.com/DistributedSystemsGroup/zoe-docker-images
 
-|Documentation Status| |Requirements Status|
+|Pypi version| |Python version| |Documentation Status| |Requirements Status|
 
 Zoe is licensed under the terms of the Apache 2.0 license.
 
+.. |Pypi version| image:: https://img.shields.io/pypi/v/zoe-analytics.svg
+   :target: https://pypi.python.org/pypi/zoe-analytics
+.. |Python version| image:: https://img.shields.io/pypi/pyversions/Zoe.svg
+   :target: https://pypi.python.org/pypi/zoe-analytics
 .. |Documentation Status| image:: https://readthedocs.org/projects/zoe-analytics/badge/?version=latest
    :target: https://readthedocs.org/projects/zoe-analytics/?badge=latest
 .. |Requirements Status| image:: https://requires.io/github/DistributedSystemsGroup/zoe/requirements.svg?branch=master
