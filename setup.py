@@ -8,7 +8,7 @@ version = version['__version__']
 long_description = open('README.rst').read()
 
 setup(
-    name='zoe',
+    name='zoe-analytics',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
