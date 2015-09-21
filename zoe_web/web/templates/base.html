@@ -37,7 +37,7 @@
         {% block footer %}
             <div class="status_line">
                 <p>
-                    <span id="app_name"><a href="{{ url_for("web.status_platform") }}">Zoe</a></span>
+                    <span id="app_name"><a href="{{ url_for("web.status_platform") }}">Zoe</a> v. {{ version }}</span>
                     <span id="status">
                         [<span id="num_nodes">N/A</span> swarm nodes, <span id="num_containers">N/A</span> active containers]
                     </span>
