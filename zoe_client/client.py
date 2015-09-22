@@ -1,31 +1,31 @@
 import base64
 import logging
 
+from sqlalchemy.orm.exc import NoResultFound
+
+from zoe_client.state import AlchemySession
 from zoe_client.ipc import ZoeIPCClient
 from common.configuration import zoeconf
-from zoe_client.entities import User, Execution, Application
+from zoe_client.entities import Execution, Application, User
+from zoe_client.state.user import UserState
 
 log = logging.getLogger(__name__)
-
-MASTER_IMAGE = "/zoerepo/spark-master"
-WORKER_IMAGE = "/zoerepo/spark-worker"
-SUBMIT_IMAGE = "/zoerepo/spark-submit"
-NOTEBOOK_IMAGE = "/zoerepo/spark-notebook"
 
 
 class ZoeClient:
     def __init__(self, ipc_server='localhost', ipc_port=8723):
         self.ipc_server = ZoeIPCClient(ipc_server, ipc_port)
         self.image_registry = zoeconf().docker_private_registry
+        self.state = AlchemySession()
 
     # Applications
-    def application_get(self, application_id: int) -> Application:
-        answer = self.ipc_server.ask('application_get', application_id=application_id)
-        if answer is not None:
-            return Application(answer['app'])
+    def application_binary_put(self, application_id: int, app_data: bytes) -> bool:
+        file_data = base64.b64encode(app_data)
+        answer = self.ipc_server.ask('application_binary_put', application_id=application_id, bin_data=file_data)
+        return answer is not None
 
-    def application_get_binary(self, application_id: int) -> bytes:
-        data = self.ipc_server.ask('application_get_binary', application_id=application_id)
+    def application_binary_get(self, application_id: int) -> bytes:
+        data = self.ipc_server.ask('application_binary_get', application_id=application_id)
         app_data = base64.b64decode(data['zip_data'])
         return app_data
 
@@ -41,49 +41,27 @@ class ZoeClient:
         else:
             return [Application(x) for x in answer['apps']]
 
+    def application_new(self, user_id: int, description: dict) -> int:
+        if not self.user_check(user_id):
+            return None
+        answer = self.ipc_server.ask('application_new', user_id=user_id, description=description)
+        if answer is not None:
+            return answer['application_id']
+
     def application_remove(self, application_id: int, force: bool) -> bool:
         answer = self.ipc_server.ask('application_remove', application_id=application_id, force=force)
         return answer is not None
 
-    def application_spark_new(self, user_id: int, worker_count: int, executor_memory: str, executor_cores: int, name: str) -> int:
-        answer = self.ipc_server.ask('application_spark_new',
-                                     user_id=user_id,
-                                     worker_count=worker_count,
-                                     executor_memory=executor_memory,
-                                     executor_cores=executor_cores,
-                                     name=name,
-                                     master_image=self.image_registry + MASTER_IMAGE,
-                                     worker_image=self.image_registry + WORKER_IMAGE)
+    def application_start(self, application_id: int) -> int:
+        answer = self.ipc_server.ask('application_start', application_id=application_id)
         if answer is not None:
-            return answer['app_id']
+            return answer["execution_id"]
+        else:
+            return None
 
-    def application_spark_notebook_new(self, user_id: int, worker_count: int, executor_memory: str, executor_cores: int, name: str) -> int:
-        answer = self.ipc_server.ask('application_spark_notebook_new',
-                                     user_id=user_id,
-                                     worker_count=worker_count,
-                                     executor_memory=executor_memory,
-                                     executor_cores=executor_cores,
-                                     name=name,
-                                     master_image=self.image_registry + MASTER_IMAGE,
-                                     worker_image=self.image_registry + WORKER_IMAGE,
-                                     notebook_image=self.image_registry + NOTEBOOK_IMAGE)
-        if answer is not None:
-            return answer['app_id']
-
-    def application_spark_submit_new(self, user_id: int, worker_count: int, executor_memory: str, executor_cores: int, name: str, file_data: bytes) -> int:
-        file_data = base64.b64encode(file_data).decode('ascii')
-        answer = self.ipc_server.ask('application_spark_submit_new',
-                                     user_id=user_id,
-                                     worker_count=worker_count,
-                                     executor_memory=executor_memory,
-                                     executor_cores=executor_cores,
-                                     name=name,
-                                     file_data=file_data,
-                                     master_image=self.image_registry + MASTER_IMAGE,
-                                     worker_image=self.image_registry + WORKER_IMAGE,
-                                     submit_image=self.image_registry + SUBMIT_IMAGE)
-        if answer is not None:
-            return answer['app_id']
+    def application_validate(self, description: dict) -> bool:
+        answer = self.ipc_server.ask('application_validate', description=description)
+        return answer is not None
 
     # Containers
     def container_stats(self, container_id):
@@ -98,15 +76,6 @@ class ZoeClient:
         exec_dict = self.ipc_server.ask('execution_get', execution_id=execution_id)
         if exec_dict is not None:
             return Execution(exec_dict)
-
-    def execution_get_proxy_path(self, execution_id):
-        answer = self.ipc_server.ask('execution_get_proxy_path', execution_id=execution_id)
-        if answer is not None:
-            return answer['path']
-
-    def execution_spark_new(self, application_id: int, name, commandline=None, spark_options=None) -> bool:
-        ret = self.ipc_server.ask('execution_spark_new', application_id=application_id, name=name, commandline=commandline, spark_options=spark_options)
-        return ret is not None
 
     def execution_terminate(self, execution_id: int) -> None:
         ret = self.ipc_server.ask('execution_terminate', execution_id=execution_id)
@@ -130,20 +99,26 @@ class ZoeClient:
 
     # Users
     def user_check(self, user_id: int) -> bool:
-        user = self.user_get(user_id)
-        return user is not None
+        num = self.state.query(UserState).filter_by(id=user_id).count()
+        return num == 1
 
     def user_new(self, email: str) -> User:
-        user_dict = self.ipc_server.ask('user_new', email=email)
-        if user_dict is not None:
-            return User(user_dict)
+        user = UserState(email=email)
+        self.state.add(user)
+        self.state.commit()
+        return User(user.to_dict())
 
     def user_get(self, user_id: int) -> User:
-        user_dict = self.ipc_server.ask('user_get', user_id=user_id)
-        if user_dict is not None:
-            return User(user_dict)
+        try:
+            user = self.state.query(UserState).filter_by(id=user_id).one()
+        except NoResultFound:
+            return None
+        return User(user.to_dict())
 
     def user_get_by_email(self, email: str) -> User:
-        user_dict = self.ipc_server.ask('user_get_by_email', user_email=email)
-        if user_dict is not None:
-            return User(user_dict)
+        try:
+            user = self.state.query(UserState).filter_by(email=email).one()
+        except NoResultFound:
+            return None
+        else:
+            return User(user.to_dict())

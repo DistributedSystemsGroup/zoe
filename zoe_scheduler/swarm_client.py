@@ -2,7 +2,6 @@ import time
 import logging
 
 import docker
-import docker.utils
 import docker.errors
 
 from common.configuration import zoeconf
@@ -52,10 +51,11 @@ class SwarmClient:
 
     def spawn_container(self, image, options) -> dict:
         cont = None
+        image = zoeconf().docker_private_registry + image
         try:
-            host_config = docker.utils.create_host_config(network_mode="bridge",
-                                                          binds=options.get_volume_binds(),
-                                                          mem_limit=options.get_memory_limit())
+            host_config = self.cli.create_host_config(network_mode="bridge",
+                                                      binds=options.get_volume_binds(),
+                                                      mem_limit=options.get_memory_limit())
             cont = self.cli.create_container(image=image,
                                              environment=options.get_environment(),
                                              network_disabled=False,
@@ -105,7 +105,10 @@ class SwarmClient:
         self.cli.remove_container(docker_id, force=True)
 
     def log_get(self, docker_id) -> str:
-        logdata = self.cli.logs(container=docker_id, stdout=True, stderr=True, stream=False, timestamps=False, tail="all")
+        try:
+            logdata = self.cli.logs(container=docker_id, stdout=True, stderr=True, stream=False, timestamps=False, tail="all")
+        except docker.errors.NotFound:
+            return None
         return logdata.decode("utf-8")
 
     def stats(self, docker_id) -> ContainerStats:

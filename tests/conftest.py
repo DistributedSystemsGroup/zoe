@@ -1,10 +1,9 @@
+import json
 import pytest
 
-from common.application_resources import SparkApplicationResources
-
 from zoe_scheduler.state import init as state_init, Base, AlchemySession
-from zoe_scheduler.state.application import SparkSubmitApplicationState
-from zoe_scheduler.state import UserState
+from zoe_scheduler.state.application import ApplicationState
+from zoe_scheduler.application_description import ZoeApplication
 
 from common.configuration import init as conf_init, zoeconf
 
@@ -57,18 +56,18 @@ def state_session(state_connection, request):
 
 
 @pytest.fixture(scope='function')
-def application(state_session):
-    user = UserState()
-    user.email = 'a@b.c'
-
-    app = SparkSubmitApplicationState()
-    app.submit_image = "test"
-    app.worker_image = "test"
-    app.master_image = "test"
-    app.name = "testapp"
-    app.user = user
-    app.required_resources = SparkApplicationResources()
+def application(state_session, notebook_test):
+    app = ApplicationState()
+    app.user_id = 1
+    app.description = ZoeApplication.from_dict(notebook_test)
     state_session.add(app)
 
     state_session.flush()
     return app
+
+
+@pytest.fixture(scope='session')
+def notebook_test():
+    jsondata = open("tests/resources/spark-notebook-test.json", "r")
+    dictdata = json.load(jsondata)
+    return dictdata

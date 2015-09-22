@@ -18,19 +18,12 @@ defaults = {
     'intervals': {
         'status_refresh': 10,
         'scheduler_task': 10,
-        'proxy_update_accesses': 300,
         'check_health': 30,
         'notebook_max_age_no_activity': 24,
         'notebook_warning_age_no_activity': 2
     },
     'db': {
         'url': 'mysql+mysqlconnector://zoe:pass@dbhost/zoe'
-    },
-    'apache': {
-        'proxy_config_file': '/tmp/zoe-proxy.conf',
-        'access_log': '/var/log/apache2/access.log',
-        'web_server_name': 'bigfoot-m2.eurecom.fr',
-        'proxy_path_prefix': '/proxy'
     },
     'smtp': {
         'server': 'smtp.exmaple.com',
@@ -42,6 +35,10 @@ defaults = {
     },
     'flask': {
         'secret_key': b"\xc3\xb0\xa7\xff\x8fH'\xf7m\x1c\xa2\x92F\x1d\xdcz\x05\xe6CJN5\x83!"
+    },
+    'network': {
+        'scheduler_internal_server_port': 4390,
+        'scheduler_internal_hostname': '127.0.0.1'
     }
 }
 
@@ -64,10 +61,6 @@ class ZoeConfig(ConfigParser):
     @property
     def web_server_name(self) -> str:
         return self.get('apache', 'web_server_name')
-
-    @property
-    def proxy_path_url_prefix(self) -> str:
-        return self.get('apache', 'proxy_path_prefix')
 
     @property
     def smtp_server(self) -> str:
@@ -94,18 +87,6 @@ class ZoeConfig(ConfigParser):
         return self.getint('intervals', 'check_health')
 
     @property
-    def interval_proxy_update_accesses(self) -> int:
-        return self.getint('intervals', 'proxy_update_accesses')
-
-    @property
-    def apache_log_file(self) -> str:
-        return self.get('apache', 'access_log')
-
-    @property
-    def apache_proxy_config_file(self) -> str:
-        return self.get('apache', 'proxy_config_file')
-
-    @property
     def db_url(self) -> str:
         return self.get('db', 'url')
 
@@ -128,6 +109,14 @@ class ZoeConfig(ConfigParser):
     @property
     def docker_private_registry(self) -> str:
         return self.get('docker', 'private_registry')
+
+    @property
+    def scheduler_internal_server_port(self) -> int:
+        return self.getint('network', 'scheduler_internal_server_port')
+
+    @property
+    def scheduler_internal_hostname(self) -> str:
+        return self.get('network', 'scheduler_internal_hostname')
 
 
 def init(config_file=None) -> ZoeConfig:

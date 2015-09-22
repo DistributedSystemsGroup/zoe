@@ -1,12 +1,15 @@
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser, Namespace, FileType
+import json
 import logging
 from zipfile import is_zipfile
 from pprint import pprint
 
 from zoe_client import ZoeClient
 from common.configuration import init as conf_init, zoeconf
+from zoe_client.state import create_tables, init as state_init
 
 argparser = None
+db_engine = None
 
 
 def get_zoe_client(args) -> ZoeClient:
@@ -31,36 +34,26 @@ def user_get_cmd(args):
     print("User ID: {}".format(user.id))
 
 
-def spark_cluster_new_cmd(args):
+def app_new_cmd(args):
     client = get_zoe_client(args)
-    application_id = client.application_spark_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name)
-    print("Spark application added with ID: {}".format(application_id))
+    app_descr = json.load(args.jsonfile)
+    application_id = client.application_new(args.user_id, app_descr)
+    print("Application added with ID: {}".format(application_id))
 
 
-def spark_notebook_new_cmd(args):
+def app_bin_put_cmd(args):
     client = get_zoe_client(args)
-    application_id = client.application_spark_notebook_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name)
-    print("Spark application added with ID: {}".format(application_id))
-
-
-def spark_submit_new_cmd(args):
-    if not is_zipfile(args.file):
-        print("Error: the file specified is not a zip archive")
+    if not is_zipfile(args.zipfile):
+        print("Error: application binary must be a zip file")
         return
-    fcontents = open(args.file, "rb").read()
+    args.zipfile.rewind()
+    zipdata = args.zipfile.read()
+    client.application_binary_put(args.app_id, zipdata)
+
+
+def app_start_cmd(args):
     client = get_zoe_client(args)
-    application_id = client.application_spark_submit_new(args.user_id, args.worker_count, args.executor_memory, args.executor_cores, args.name, fcontents)
-    print("Spark application added with ID: {}".format(application_id))
-
-
-def run_spark_cmd(args):
-    client = get_zoe_client(args)
-    application = client.application_get(args.id)
-    if application is None:
-        print("Error: application {} does not exist".format(args.id))
-        return
-    ret = client.execution_spark_new(application.id, args.name, args.cmd, args.spark_opts)
-
+    ret = client.application_start(args.id)
     if ret:
         print("Application scheduled successfully, use the app-inspect command to check its status")
     else:
@@ -69,19 +62,7 @@ def run_spark_cmd(args):
 
 def app_rm_cmd(args):
     client = get_zoe_client(args)
-    application = client.application_get(args.id)
-    if application is None:
-        print("Error: application {} does not exist".format(args.id))
-        return
-    if args.force:
-        a = client.application_get(application.id)
-        for eid in a.executions:
-            e = client.execution_get(eid.id)
-            if e.status == "running":
-                print("Terminating execution {}".format(e.name))
-                client.execution_terminate(e.id)
-
-    client.application_remove(application.id, args.force)
+    client.application_remove(args.id, args.force)
 
 
 def app_inspect_cmd(args):
@@ -148,30 +129,15 @@ def process_arguments() -> Namespace:
     argparser_user_get.add_argument('email', help="User email address")
     argparser_user_get.set_defaults(func=user_get_cmd)
 
-    argparser_spark_cluster_create = subparser.add_parser('app-spark-cluster-new', help="Setup a new empty Spark cluster")
-    argparser_spark_cluster_create.add_argument('--user-id', type=int, required=True, help='Application owner')
-    argparser_spark_cluster_create.add_argument('--name', required=True, help='Application name')
-    argparser_spark_cluster_create.add_argument('--worker-count', type=int, default=2, help='Number of workers')
-    argparser_spark_cluster_create.add_argument('--executor-memory', default='2g', help='Maximum memory available per-worker, the system assumes only one executor per worker')
-    argparser_spark_cluster_create.add_argument('--executor-cores', default='2', type=int, help='Number of cores to assign to each executor')
-    argparser_spark_cluster_create.set_defaults(func=spark_cluster_new_cmd)
+    argparser_app_new = subparser.add_parser('app-new', help="Upload a JSON application description")
+    argparser_app_new.add_argument('--user-id', type=int, required=True, help='Application owner')
+    argparser_app_new.add_argument('jsonfile', type=FileType("r"), help='Application description')
+    argparser_app_new.set_defaults(func=app_new_cmd)
 
-    argparser_spark_nb_create = subparser.add_parser('app-spark-notebook-new', help="Setup a new Spark Notebook application")
-    argparser_spark_nb_create.add_argument('--user-id', type=int, required=True, help='Notebook owner')
-    argparser_spark_nb_create.add_argument('--name', required=True, help='Notebook name')
-    argparser_spark_nb_create.add_argument('--worker-count', type=int, default=2, help='Number of workers')
-    argparser_spark_nb_create.add_argument('--executor-memory', default='2g', help='Maximum memory available per-worker, the system assumes only one executor per worker')
-    argparser_spark_nb_create.add_argument('--executor-cores', default='2', type=int, help='Number of cores to assign to each executor')
-    argparser_spark_nb_create.set_defaults(func=spark_notebook_new_cmd)
-
-    argparser_spark_submit_create = subparser.add_parser('app-spark-new', help="Setup a new Spark submit application")
-    argparser_spark_submit_create.add_argument('--user-id', type=int, required=True, help='Application owner')
-    argparser_spark_submit_create.add_argument('--name', required=True, help='Application name')
-    argparser_spark_submit_create.add_argument('--worker-count', type=int, default=2, help='Number of workers')
-    argparser_spark_submit_create.add_argument('--executor-memory', default='2g', help='Maximum memory available per-worker, the system assumes only one executor per worker')
-    argparser_spark_submit_create.add_argument('--executor-cores', default='2', type=int, help='Number of cores to assign to each executor')
-    argparser_spark_submit_create.add_argument('--file', required=True, help='zip archive containing the application files')
-    argparser_spark_submit_create.set_defaults(func=spark_submit_new_cmd)
+    argparser_app_binary_put = subparser.add_parser('app-binary-put', help="Upload an application binary")
+    argparser_app_binary_put.add_argument('--app-id', type=int, required=True, help='Application ID')
+    argparser_app_binary_put.add_argument('zipfile', type=FileType("rb"), help='Application zip file')
+    argparser_app_binary_put.set_defaults(func=app_bin_put_cmd)
 
     argparser_app_rm = subparser.add_parser('app-rm', help="Delete an application")
     argparser_app_rm.add_argument('id', type=int, help="Application id")
@@ -186,14 +152,11 @@ def process_arguments() -> Namespace:
     argparser_app_inspect.add_argument('id', type=int, help="User id")
     argparser_app_inspect.set_defaults(func=app_list_cmd)
 
-    argparser_spark_app_run = subparser.add_parser('run', help="Execute a previously registered Spark application")
-    argparser_spark_app_run.add_argument('id', type=int, help="Application id")
-    argparser_spark_app_run.add_argument('--name', required=True, help='Execution name')
-    argparser_spark_app_run.add_argument('--cmd', help="Command-line to pass to spark-submit")
-    argparser_spark_app_run.add_argument('--spark-opts', help="Optional Spark options to pass to spark-submit")
-    argparser_spark_app_run.set_defaults(func=run_spark_cmd)
+    argparser_app_run = subparser.add_parser('start', help="Start a previously registered application")
+    argparser_app_run.add_argument('id', type=int, help="Application id")
+    argparser_app_run.set_defaults(func=app_start_cmd)
 
-    argparser_execution_kill = subparser.add_parser('execution-kill', help="Terminates an execution")
+    argparser_execution_kill = subparser.add_parser('terminate', help="Terminates an execution")
     argparser_execution_kill.add_argument('id', type=int, help="Execution id")
     argparser_execution_kill.set_defaults(func=exec_kill_cmd)
 
@@ -220,9 +183,10 @@ def zoe():
         logging.basicConfig(level=logging.INFO)
 
     conf_init()
+    state_init(zoeconf().db_url)
 
-    try:
-        args.func(args)
-    except AttributeError:
-        argparser.print_help()
-        return
+#    try:
+    args.func(args)
+#    except AttributeError:
+#        argparser.print_help()
+#        return

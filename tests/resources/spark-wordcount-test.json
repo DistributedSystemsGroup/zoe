@@ -1,0 +1,90 @@
+{
+  "name": "Spark wordcount test",
+  "version": 0,
+  "will_end": true,
+  "priority": 512,
+  "requires_binary": true,
+  "processes": [
+    {
+      "name": "spark-master",
+      "version": 0,
+      "docker_image": "/zoerepo/spark-master",
+      "monitor": false,
+      "required_resources": {
+        "memory": 2147483648
+      },
+      "ports": [
+        [
+          "8080",
+          "Spark master web interface",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "spark-worker-1",
+      "version": 0,
+      "docker_image": "/zoerepo/spark-worker",
+      "monitor": false,
+      "required_resources": {
+        "memory": 4294967296
+      },
+      "ports": [
+        [
+          "8081",
+          "Spark worker web interface",
+          false
+        ]
+      ],
+      "environment": [
+        ["SPARK_WORKER_CORES", "4"],
+        ["SPARK_WORKER_RAM", "4g"],
+        ["SPARK_MASTER_IP", "{cluster[spark-master][ip_address]}"]
+      ]
+    },
+    {
+      "name": "spark-worker-2",
+      "version": 0,
+      "docker_image": "/zoerepo/spark-worker",
+      "monitor": false,
+      "required_resources": {
+        "memory": 4294967296
+      },
+      "ports": [
+        [
+          "8081",
+          "Spark worker web interface",
+          false
+        ]
+      ],
+      "environment": [
+        ["SPARK_WORKER_CORES", "4"],
+        ["SPARK_WORKER_RAM", "4g"],
+        ["SPARK_MASTER_IP", "{cluster[spark-master][ip_address]}"]
+      ]
+    },
+    {
+      "name": "spark-submit",
+      "version": 0,
+      "docker_image": "/zoerepo/spark-submit",
+      "monitor": true,
+      "required_resources": {
+        "memory": 4294967296
+      },
+      "ports": [
+        [
+          "4040",
+          "Spark application web interface",
+          true
+        ]
+      ],
+      "environment": [
+        ["SPARK_MASTER_IP", "{cluster[spark-master][ip_address]}"],
+        ["SPARK_OPTIONS", ""],
+        ["SPARK_EXECUTOR_RAM", "4g"],
+        ["APPLICATION_URL", "{application_binary_url}"]
+      ],
+      "command": "/opt/submit.sh wordcount.py hdfs://192.168.45.157/datasets/gutenberg_big_2x.txt hdfs://192.168.45.157/tmp/cntwdc1"
+    }
+  ]
+}

@@ -11,4 +11,3 @@ class ClusterState(Base):
     execution_id = Column(Integer, ForeignKey('executions.id'))
 
     containers = relationship("ContainerState", order_by="ContainerState.id", backref="cluster")
-    proxies = relationship("ProxyState", order_by="ProxyState.id", backref="cluster")

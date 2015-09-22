@@ -1,3 +1,5 @@
+import http.server
+import socketserver
 import os
 import logging
 
@@ -56,3 +58,18 @@ def logs_archive_delete(execution: ExecutionState):
         os.unlink(fpath)
     except OSError:
         log.warning("Logs archive for execution {} not found, cannot delete".format(execution.id))
+
+
+def generate_application_binary_url(application: ApplicationState) -> str:
+    return 'http://' + zoeconf().scheduler_internal_hostname + '/apps/{}'.format(application.id)
+
+
+def internal_http_task():
+    """
+    Must be run in a thread by itself
+    """
+    os.chdir(zoeconf().history_path)
+    httpd = socketserver.TCPServer(("", zoeconf().scheduler_internal_server_port), http.server.SimpleHTTPRequestHandler)
+
+    print("serving at port", zoeconf().scheduler_internal_server_port)
+    httpd.serve_forever()

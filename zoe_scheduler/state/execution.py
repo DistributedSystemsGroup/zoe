@@ -21,13 +21,6 @@ class ExecutionState(Base):
 
     cluster = relationship("ClusterState", uselist=False, backref="execution")
 
-    type = Column(String(32))  # Needed by sqlalchemy to manage class inheritance
-
-    __mapper_args__ = {
-        'polymorphic_on': type,
-        'polymorphic_identity': 'execution'
-    }
-
     def set_scheduled(self):
         self.status = "scheduled"
         self.time_scheduled = datetime.now()
@@ -59,7 +52,6 @@ class ExecutionState(Base):
             'time_finished': self.time_finished,
             'status': self.status,
             'termination_notice': self.termination_notice,
-            'type': self.type
         }
 
         if self.assigned_resources is None:
@@ -76,17 +68,10 @@ class ExecutionState(Base):
 
         return ret
 
-
-class SparkSubmitExecutionState(ExecutionState):
-    commandline = Column(String(1024))
-    spark_opts = Column(String(1024))
-
-    __mapper_args__ = {
-        'polymorphic_identity': 'spark-submit-application'
-    }
-
-    def to_dict(self) -> dict:
-        ret = super().to_dict()
-        ret['commandline'] = self.commandline
-        ret['spark_opts'] = self.spark_opts
+    def gen_environment_substitution(self):
+        ret = {}
+        for cont in self.cluster.containers:
+            ret[cont.readable_name] = {
+                'ip_address': cont.ip_address
+            }
         return ret

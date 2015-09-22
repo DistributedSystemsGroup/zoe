@@ -9,3 +9,8 @@ class ZoeException(Exception):
 class CannotCreateCluster(ZoeException):
     def __init__(self, application):
         self.value = "Cannot create a cluster for application {}".format(application.id)
+
+
+class InvalidApplicationDescription(ZoeException):
+    def __init__(self, msg):
+        self.value = msg

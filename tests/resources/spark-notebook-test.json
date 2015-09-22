@@ -1,0 +1,93 @@
+{
+  "name": "Spark notebook test",
+  "version": 0,
+  "will_end": false,
+  "priority": 512,
+  "requires_binary": false,
+  "processes": [
+    {
+      "name": "spark-master",
+      "version": 0,
+      "docker_image": "/zoerepo/spark-master",
+      "monitor": false,
+      "required_resources": {
+        "memory": 2147483648
+      },
+      "ports": [
+        [
+          "8080",
+          "Spark master web interface",
+          false
+        ]
+      ]
+    },
+    {
+      "name": "spark-worker-1",
+      "version": 0,
+      "docker_image": "/zoerepo/spark-worker",
+      "monitor": false,
+      "required_resources": {
+        "memory": 4294967296
+      },
+      "ports": [
+        [
+          "8081",
+          "Spark worker web interface",
+          false
+        ]
+      ],
+      "environment": [
+        ["SPARK_WORKER_CORES", "4"],
+        ["SPARK_WORKER_RAM", "4g"],
+        ["SPARK_MASTER_IP", "{cluster[spark-master][ip_address]}"]
+      ]
+    },
+    {
+      "name": "spark-worker-2",
+      "version": 0,
+      "docker_image": "/zoerepo/spark-worker",
+      "monitor": false,
+      "required_resources": {
+        "memory": 4294967296
+      },
+      "ports": [
+        [
+          "8081",
+          "Spark worker web interface",
+          false
+        ]
+      ],
+      "environment": [
+        ["SPARK_WORKER_CORES", "4"],
+        ["SPARK_WORKER_RAM", "4g"],
+        ["SPARK_MASTER_IP", "{cluster[spark-master][ip_address]}"]
+      ]
+    },
+    {
+      "name": "spark-notebook",
+      "version": 0,
+      "docker_image": "/zoerepo/spark-scala-notebook",
+      "monitor": true,
+      "required_resources": {
+        "memory": 4294967296
+      },
+      "ports": [
+        [
+          "4040",
+          "Spark application web interface",
+          false
+        ],
+        [
+          "9000",
+          "Spark Notebook interface",
+          true
+        ]
+      ],
+      "environment": [
+        ["SPARK_MASTER_IP", "{cluster[spark-master][ip_address]}"],
+        ["SPARK_OPTIONS", ""],
+        ["SPARK_EXECUTOR_RAM", "4g"]
+      ]
+    }
+  ]
+}

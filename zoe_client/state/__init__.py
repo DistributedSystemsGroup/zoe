@@ -5,9 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 AlchemySession = sessionmaker()
 
-from zoe_scheduler.state.cluster import ClusterState
-from zoe_scheduler.state.container import ContainerState
-from zoe_scheduler.state.execution import ExecutionState
+from zoe_client.state.user import UserState
 
 
 def init(db_url):

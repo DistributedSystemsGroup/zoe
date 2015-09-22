@@ -5,7 +5,6 @@ from zoe_scheduler.scheduler import ZoeScheduler
 from zoe_scheduler.periodic_tasks import PeriodicTaskManager
 from zoe_scheduler.ipc import ZoeIPCServer
 from zoe_scheduler.object_storage import init_history_paths
-from zoe_scheduler.proxy_manager import init as proxy_init
 from zoe_scheduler.state import create_tables, init as state_init
 from common.configuration import init as conf_init, zoeconf
 
@@ -75,7 +74,6 @@ def zoe_scheduler():
 
     conf_init()
     state_init(zoeconf().db_url)
-    proxy_init()
 
     zoe_sched = ZoeScheduler()
 

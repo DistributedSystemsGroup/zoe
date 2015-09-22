@@ -6,8 +6,7 @@ Requirements
 
 * MySQL to keep all the state
 * Docker Swarm
-* A Docker registry containing Spark images
-* Apache Web Server to act as a reverse proxy
+* A Docker registry containing Zoe images
 
 How to install
 --------------
@@ -69,22 +68,3 @@ bypassing the Hub.
 The images are quite standard and can be used also without Zoe. Examples on how to do that, are available in the ``scripts/start_cluster.sh`` script.
 
 Set the registry address:port in section ``[docker]`` in ``zoe.conf``. If use Docker Hub, set the option to an empty string.
-
-Apache Web Server configuration
--------------------------------
-
-Install the Apache web server.
-
-A sample virtual host file containing the directives required by Zoe is available in ``scripts/apache-sample.conf``.
-
-This configuration will also proxy zoe-web, that starts on port 5000 by default.
-
-Please note that putting the generated config file in /tmp can be a serious security problem, depending on your setup.
-
-Zoe generates dynamically proxy entries to let users access to the various web interfaces contained in the Spark containers.
-To do this, it needs to be able to reload Apache and to write to a configuration file included in the VirtualHost directive.
-
-Zoe is executing ``sudo service apache2 reload`` whenever nedded, so make sure the user that runs Zoe is able to run that command
-successfully.
-
-Change as needed the options ``web_server_name``, ``access_log`` and ``proxy_config_file`` in the section ``[apache]`` of ``zoe.conf``.
