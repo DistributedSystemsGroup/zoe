@@ -1,27 +1,29 @@
-from io import BytesIO
 import logging
-import zipfile
 
-from zoe_scheduler.swarm_client import SwarmClient, ContainerOptions
+from zoe_scheduler.application_description import ZoeApplication, ZoeApplicationProcess
+from zoe_scheduler.exceptions import CannotCreateCluster
+from zoe_scheduler.object_storage import logs_archive_create, generate_application_binary_url
+from zoe_scheduler.platform_status import PlatformStatus
 from zoe_scheduler.state import AlchemySession
 from zoe_scheduler.state.cluster import ClusterState
 from zoe_scheduler.state.container import ContainerState
 from zoe_scheduler.state.execution import ExecutionState
-from zoe_scheduler.exceptions import CannotCreateCluster
-from zoe_scheduler.application_description import ZoeApplicationProcess
-from zoe_scheduler.object_storage import logs_archive_upload, generate_application_binary_url
+from zoe_scheduler.swarm_client import SwarmClient, ContainerOptions
+from zoe_scheduler.stats import ContainerStats
 
 log = logging.getLogger(__name__)
 
 
 class PlatformManager:
-    def __init__(self):
+    def __init__(self, scheduler):
         self.swarm = SwarmClient()
+        self.status = PlatformStatus(scheduler)
+        scheduler.platform = self
 
-    def start_execution(self, execution_id: int, resources: dict) -> bool:
+    def start_execution(self, execution_id: int, app_description: ZoeApplication) -> bool:
         state = AlchemySession()
         execution = state.query(ExecutionState).filter_by(id=execution_id).one()
-        execution.assigned_resources = resources
+        execution.app_description = app_description
         try:
             self._application_to_containers(state, execution)
         except CannotCreateCluster:
@@ -31,10 +33,9 @@ class PlatformManager:
         return True
 
     def _application_to_containers(self, state: AlchemySession, execution: ExecutionState):
-        # TODO: use the resources assigned by the scheduler, not the ones required by the application
         cluster = ClusterState(execution_id=execution.id)
         execution.cluster = cluster
-        for process in execution.application.description.processes:
+        for process in execution.app_description.processes:
             self._spawn_process(state, execution, process)
 
     def _spawn_process(self, state: AlchemySession, execution: ExecutionState, process_description: ZoeApplicationProcess) -> bool:
@@ -82,18 +83,10 @@ class PlatformManager:
                 state.delete(c)
             state.delete(cluster)
         execution.set_terminated()
-        self._archive_execution_logs(execution, logs)
+        logs_archive_create(execution, logs)
 
     def log_get(self, container: ContainerState) -> str:
         return self.swarm.log_get(container.docker_id)
-
-    def _archive_execution_logs(self, execution: ExecutionState, logs: list):
-        zipdata = BytesIO()
-        with zipfile.ZipFile(zipdata, "w", compression=zipfile.ZIP_DEFLATED) as logzip:
-            for c in logs:
-                fname = c[0] + "-" + c[1] + ".txt"
-                logzip.writestr(fname, c[2])
-        logs_archive_upload(execution, zipdata.getvalue())
 
     def is_container_alive(self, container: ContainerState) -> bool:
         ret = self.swarm.inspect_container(container.docker_id)
@@ -120,7 +113,7 @@ class PlatformManager:
         else:
             log.warning("Container {} (ID: {}) died unexpectedly".format(container.readable_name, container.id))
 
-    def container_stats(self, container_id):
+    def container_stats(self, container_id: int) -> ContainerStats:
         state = AlchemySession()
         container = state.query(ContainerState).filter_by(id=container_id).one()
         return self.swarm.stats(container.docker_id)

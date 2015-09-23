@@ -1,103 +1,69 @@
 import logging
-from threading import Barrier
-import time
+import queue
 
-from zoe_scheduler.platform import PlatformManager
-from zoe_scheduler.platform_status import PlatformStatus
-from zoe_scheduler.periodic_tasks import PeriodicTaskManager
-from common.configuration import zoeconf
+from zoe_scheduler.state import AlchemySession
 from zoe_scheduler.state.execution import ExecutionState
-from zoe_scheduler.stats import SchedulerStats
-from zoe_scheduler.object_storage import internal_http_task
+from zoe_scheduler.scheduler_policies.base import BaseSchedulerPolicy
 
 log = logging.getLogger(__name__)
 
 
-class SimpleSchedulerPolicy:
-    def __init__(self, platform_status: PlatformStatus):
-        self.platform_status = platform_status
-        self.waiting_list = []
-        self.running_list = []
+class ZoeScheduler:
+    """
+    :type platform: PlatformManager
+    :type scheduler_policy: BaseSchedulerPolicy
+    """
+    def __init__(self):
+        self.platform = None
+        self.scheduler_policy = None
+        self.event_queue = queue.Queue()
 
-    def admission_control(self, required_resources: dict) -> bool:
-        if required_resources['total_memory'] < self.platform_status.swarm_status.memory_total:
+    def set_policy(self, policy_class):
+        """
+        This method is called during initialization, it instantiates the policy class that will be used for scheduling executions.
+        :param policy_class: The policy class the will be used for scheduling
+        :return: None
+        """
+        self.scheduler_policy = policy_class(self.platform.status)
+
+    def incoming(self, execution: ExecutionState) -> bool:
+        """
+        This method is called in the IPC thread context. It passes the execution request ID and the requested resources to the scheduling policy.
+        :param execution: The execution request
+        :return: True if the request was queued successfully, False otherwise
+        """
+        app_descr = execution.application.description
+        if self.scheduler_policy.admission_control(app_descr):
+            self.event_queue.put(("submission", (execution.id, app_descr)))
             return True
         else:
             return False
 
-    def insert(self, execution_id: int, resources: dict):
-        self.waiting_list.append((execution_id, resources))
-
-    def runnable(self) -> (int, dict):
-        try:
-            exec_id, resources = self.waiting_list.pop(0)
-        except IndexError:
-            return None, None
-
-        assigned_resources = resources  # Could modify the amount of resource assigned before running
-        return exec_id, assigned_resources
-
-    def started(self, execution_id: int, resources: dict):
-        self.running_list.append((execution_id, resources))
-
-    def terminated(self, execution_id: int):
-        if self.find_execution_running(execution_id):
-            self.running_list = [x for x in self.running_list if x[0] != execution_id]
-        if self.find_execution_waiting(execution_id):
-            self.waiting_list = [x for x in self.waiting_list if x[0] != execution_id]
-
-    def find_execution_running(self, exec_id) -> bool:
-        for e, r in self.running_list:
-            if e == exec_id:
-                return True
-        return False
-
-    def find_execution_waiting(self, exec_id) -> bool:
-        for e, r in self.waiting_list:
-            if e == exec_id:
-                return True
-        else:
-            return False
-
-    def stats(self):
-        ret = SchedulerStats()
-        ret.count_running = len(self.running_list)
-        ret.count_waiting = len(self.waiting_list)
-        ret.timestamp = time.time()
-        return ret
-
-
-class ZoeScheduler:
-    def __init__(self):
-        self.platform = PlatformManager()
-        self.platform_status = PlatformStatus(self)
-        self.scheduler_policy = SimpleSchedulerPolicy(self.platform_status)
-
-    def init_tasks(self, tm: PeriodicTaskManager) -> Barrier:
-        barrier = Barrier(4)  # number of tasks + main thread
-        tm.add_task("platform status updater", self.platform_status.update, zoeconf().interval_status_refresh, barrier)
-        tm.add_task("execution health checker", self.platform.check_executions_health, zoeconf().interval_check_health, barrier)
-        tm.add_task("internal http server", internal_http_task, 0, barrier)
-        return barrier
-
-    def incoming(self, execution: ExecutionState) -> bool:
-        req_res = execution.application.description.resource_requirements()
-        if not self.scheduler_policy.admission_control(req_res):
-            return False
-        self.scheduler_policy.insert(execution.id, req_res)
-        return True
+    def execution_terminate(self, state: AlchemySession, execution: ExecutionState) -> None:
+        """
+        This method is called in the IPC thread context. It terminates the given execution.
+        :param state: SQLAlchemy session containing the scheduler state
+        :param execution: the execution to terminate
+        :return: None
+        """
+        self.platform.execution_terminate(state, execution)
+        self.event_queue.put(("termination", execution.id))
 
     def _check_runnable(self):  # called periodically, does not use state
-        execution_id, resources = self.scheduler_policy.runnable()
+        """
+        This method is called by the main scheduler loop to check if there is an execution that can be run. In case there is
+        it starts it.
+        :return: None
+        """
+        execution_id, app_description = self.scheduler_policy.runnable_get()
         if execution_id is None:
             return
         log.debug("Found a runnable execution!")
-        if self.platform.start_execution(execution_id, resources):
-            self.scheduler_policy.started(execution_id, resources)
-        else:  # Some error happened
+        success = self.platform.start_execution(execution_id, app_description)
+        if not success:  # Some error happened
             log.error('Execution ID {} cannot be started'.format(execution_id))
 
-    def loop(self):  # FIXME the scheduler should wait on events, not sleep
+    def loop(self):
         """
         This method is the scheduling task. It is the loop the main thread runs, started from the zoe-scheduler executable.
         It does not use an sqlalchemy session.
@@ -105,14 +71,19 @@ class ZoeScheduler:
         """
         while True:
             try:
-                self.schedule()
+                event, data = self.event_queue.get()
+                if event == "termination":
+                    pass
+                elif event == "submission":
+                    execution_id = data[0]
+                    app_descr = data[1]
+                    self.scheduler_policy.execution_submission(execution_id, app_descr)
+                else:
+                    log.error("Unknown event received")
+                self.event_queue.task_done()
+
+                self._check_runnable()  # Check if an execution can be started
+            except KeyboardInterrupt as e:
+                raise e
             except:
                 log.exception("Uncaught exception in scheduler loop")
-            time.sleep(zoeconf().interval_scheduler_task)
-
-    def schedule(self):
-        self._check_runnable()
-
-    def execution_terminate(self, state, execution: ExecutionState):
-        self.platform.execution_terminate(state, execution)
-        self.scheduler_policy.terminated(execution.id)

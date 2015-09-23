@@ -11,7 +11,7 @@ class ExecutionState(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(64))
-    assigned_resources = Column(PickleType())
+    app_description = Column(PickleType())
     application_id = Column(Integer, ForeignKey('applications.id'))
     time_scheduled = Column(DateTime)
     time_started = Column(DateTime)
@@ -54,10 +54,10 @@ class ExecutionState(Base):
             'termination_notice': self.termination_notice,
         }
 
-        if self.assigned_resources is None:
-            ret['assigned_resources'] = None
+        if self.app_description is None:
+            ret['app_description'] = None
         else:
-            ret['assigned_resources'] = self.assigned_resources.to_dict()
+            ret['app_description'] = self.app_description.to_dict()
 
         if self.cluster is not None:
             ret['cluster_id'] = self.cluster.id

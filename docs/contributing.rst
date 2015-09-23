@@ -12,3 +12,4 @@ API documentation
 
   developer/introduction
   developer/client
+  developer/scheduler

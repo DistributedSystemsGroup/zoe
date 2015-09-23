@@ -102,7 +102,6 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
         'console_scripts': [
-            'zoe-manage=zoe_scheduler.entrypoint:zoe_manage',
             'zoe-scheduler=zoe_scheduler.entrypoint:zoe_scheduler',
             'zoe-web=zoe_web.entrypoint:zoe_web',
             'zoe=zoe_client.entrypoint:zoe'

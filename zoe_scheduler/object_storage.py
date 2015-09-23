@@ -1,7 +1,10 @@
 import http.server
-import socketserver
-import os
+from io import BytesIO
 import logging
+import os
+import socketserver
+import threading
+import zipfile
 
 from zoe_scheduler.state.application import ApplicationState
 from zoe_scheduler.state.execution import ExecutionState
@@ -41,6 +44,15 @@ def application_data_delete(application: ApplicationState):
         log.warning("Binary data for application {} not found, cannot delete".format(application.id))
 
 
+def logs_archive_create(execution: ExecutionState, logs: list):
+    zipdata = BytesIO()
+    with zipfile.ZipFile(zipdata, "w", compression=zipfile.ZIP_DEFLATED) as logzip:
+        for c in logs:
+            fname = c[0] + "-" + c[1] + ".txt"
+            logzip.writestr(fname, c[2])
+        logs_archive_upload(execution, zipdata.getvalue())
+
+
 def logs_archive_upload(execution: ExecutionState, data: bytes) -> bool:
     fpath = os.path.join(zoeconf().history_path, 'logs', 'log-{}.zip'.format(execution.id))
     open(fpath, "wb").write(data)
@@ -64,12 +76,13 @@ def generate_application_binary_url(application: ApplicationState) -> str:
     return 'http://' + zoeconf().scheduler_internal_hostname + '/apps/{}'.format(application.id)
 
 
-def internal_http_task():
-    """
-    Must be run in a thread by itself
-    """
+def object_server(terminate: threading.Event, started: threading.Semaphore):
+    log.info("Object server started")
     os.chdir(zoeconf().history_path)
     httpd = socketserver.TCPServer(("", zoeconf().scheduler_internal_server_port), http.server.SimpleHTTPRequestHandler)
-
-    print("serving at port", zoeconf().scheduler_internal_server_port)
-    httpd.serve_forever()
+    httpd.timeout = 1
+    started.release()
+    while not terminate.wait(0):
+        httpd.handle_request()
+        httpd.service_actions()
+    log.info("Object server terminated")

@@ -65,13 +65,11 @@ class ZoeApplication:
             ret['processes'].append(p.to_dict())
         return ret
 
-    def resource_requirements(self):
+    def total_memory(self) -> int:
         memory = 0
         for p in self.processes:
             memory += p.required_resources['memory']
-        return {
-            'total_memory': memory,
-        }
+        return memory
 
 
 class ZoeApplicationProcess:

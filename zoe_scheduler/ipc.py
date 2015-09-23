@@ -28,25 +28,24 @@ class ZoeIPCServer:
         self.state = None
         self.sched = scheduler
 
-    def start_thread(self):
-        self.th = threading.Thread(target=self._loop, name="IPC server", daemon=True)
-        self.th.start()
-
-    def _loop(self):
-        log.debug("IPC server thread started")
-        while True:
-            message = self.socket.recv_json()
-            self.state = AlchemySession()
-            try:
-                reply = self._dispatch(message)
-            except:
-                log.exception("Uncaught exception in IPC server thread")
-                reply = self._reply_error('exception')
-            finally:
-                self.state.close()
-                self.state = None
-            json_reply = json.dumps(reply, default=self._json_default_serializer)
-            self.socket.send_string(json_reply)
+    def ipc_server(self, terminate: threading.Event, started: threading.Semaphore):
+        log.info("IPC server started")
+        started.release()
+        while not terminate.wait(0):
+            if self.socket.poll(timeout=1) != 0:
+                message = self.socket.recv_json()
+                self.state = AlchemySession()
+                try:
+                    reply = self._dispatch(message)
+                except:
+                    log.exception("Uncaught exception in IPC server thread")
+                    reply = self._reply_error('exception')
+                finally:
+                    self.state.close()
+                    self.state = None
+                json_reply = json.dumps(reply, default=self._json_default_serializer)
+                self.socket.send_string(json_reply)
+        log.info("IPC server terminated")
 
     def _json_default_serializer(self, obj):
         if isinstance(obj, datetime):

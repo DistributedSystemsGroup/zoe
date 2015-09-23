@@ -51,7 +51,6 @@ class SwarmStats(Stats):
 class SchedulerStats(Stats):
     def __init__(self):
         super().__init__()
-        self.count_running = 0
         self.count_waiting = 0
 
 
