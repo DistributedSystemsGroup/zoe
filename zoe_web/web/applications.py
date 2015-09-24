@@ -1,7 +1,7 @@
 from flask import render_template, url_for, redirect
 
 from zoe_client import ZoeClient
-from common.configuration import ipcconf
+from zoe_scheduler.configuration import ipcconf
 from zoe_web.web import web_bp
 import zoe_web.utils as web_utils
 

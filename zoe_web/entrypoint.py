@@ -1,12 +1,12 @@
 import argparse
 import logging
+
 from tornado.wsgi import WSGIContainer
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 
 from zoe_web import app
-
-from common.configuration import ipcconf, init as conf_init
+from zoe_scheduler.configuration import ipcconf, init as conf_init
 
 log = logging.getLogger("zoe_web")
 

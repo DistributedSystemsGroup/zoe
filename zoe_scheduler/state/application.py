@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, PickleType, ForeignKey
+from sqlalchemy import Column, Integer, PickleType
 from sqlalchemy.orm import relationship
 
 from zoe_scheduler.state import Base

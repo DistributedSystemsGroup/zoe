@@ -4,7 +4,7 @@ from zipfile import is_zipfile
 from flask import Blueprint, jsonify, request, session, abort, send_file
 
 from zoe_client import ZoeClient
-from common.configuration import ipcconf
+from zoe_scheduler.configuration import ipcconf
 
 api_bp = Blueprint('api', __name__)
 

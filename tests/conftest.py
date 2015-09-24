@@ -1,11 +1,11 @@
 import json
+
 import pytest
 
 from zoe_scheduler.state import init as state_init, Base, AlchemySession
 from zoe_scheduler.state.application import ApplicationState
 from zoe_scheduler.application_description import ZoeApplication
-
-from common.configuration import init as conf_init, zoeconf
+from zoe_scheduler.configuration import init as conf_init, scheduler_conf
 
 
 def pytest_addoption(parser):
@@ -27,7 +27,7 @@ def configuration(environment):
 
 @pytest.fixture(scope='session')
 def state_connection(request, configuration):
-    engine = state_init(zoeconf().db_url)
+    engine = state_init(scheduler_conf().db_url)
     connection = engine.connect()
     trans = connection.begin()
 

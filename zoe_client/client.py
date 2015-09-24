@@ -5,7 +5,6 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from zoe_client.state import AlchemySession
 from zoe_client.ipc import ZoeIPCClient
-from common.configuration import zoeconf
 from zoe_client.entities import Execution, Application, User
 from zoe_client.state.user import UserState
 
@@ -15,7 +14,6 @@ log = logging.getLogger(__name__)
 class ZoeClient:
     def __init__(self, ipc_server='localhost', ipc_port=8723):
         self.ipc_server = ZoeIPCClient(ipc_server, ipc_port)
-        self.image_registry = zoeconf().docker_private_registry
         self.state = AlchemySession()
 
     # Applications

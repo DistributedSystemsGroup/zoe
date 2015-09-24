@@ -15,15 +15,16 @@ import zoe_scheduler.object_storage as storage
 from zoe_scheduler.application_description import ZoeApplication
 from zoe_scheduler.scheduler import ZoeScheduler
 from zoe_scheduler.exceptions import InvalidApplicationDescription
+from zoe_scheduler.configuration import scheduler_conf
 
 log = logging.getLogger(__name__)
 
 
 class ZoeIPCServer:
-    def __init__(self, scheduler: ZoeScheduler, port=8723):
+    def __init__(self, scheduler: ZoeScheduler):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
-        self.socket.bind("tcp://*:%s" % port)
+        self.socket.bind("tcp://%s:%s" % (scheduler_conf().ipc_listen_address, scheduler_conf().ipc_listen_port))
         self.th = None
         self.state = None
         self.sched = scheduler
@@ -221,5 +222,5 @@ class ZoeIPCServer:
 
     # Platform
     def platform_stats(self) -> dict:
-        ret = self.sched.platform_status.stats()
+        ret = self.sched.platform.status.stats()
         return self._reply_ok(**ret.to_dict())

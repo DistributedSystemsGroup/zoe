@@ -59,4 +59,5 @@ docs/_build/
 # PyBuilder
 target/
 .idea/
-zoe.conf
+zoe-scheduler.conf
+zoe-client.conf

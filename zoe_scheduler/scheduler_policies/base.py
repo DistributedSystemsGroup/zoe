@@ -14,7 +14,7 @@ class BaseSchedulerPolicy:
 
     def execution_submission(self, execution_id: int, app_description: ZoeApplication) -> None:
         """
-        Enqueues a new execution request.
+        A new execution request has been submitted and needs to scheduled. The request has passed admission control.
         :param execution_id: a unique identifier for this execution request
         :param app_description: the application to be executed
         :return: None
