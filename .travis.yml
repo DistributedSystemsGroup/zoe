@@ -8,4 +8,4 @@ before_script:
   - bash tests/resources/create_db.sh
 script:
   - PYTHONPATH=. py.test --test-environment travis --cov=zoe_scheduler --cov=zoe_client --cov=zoe_web
-  - sphinx-build -nW -b html -d docs/_build/doctrees docs/ docs/_build/html
+  - PYTHONPATH=. sphinx-build -nW -b html -d docs/_build/doctrees docs/ docs/_build/html
