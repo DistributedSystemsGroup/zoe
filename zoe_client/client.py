@@ -6,7 +6,7 @@ from zoe_client.lib.ipc import ZoeIPCClient
 from zoe_client.scheduler_classes.execution import Execution
 from zoe_client.state import session
 from zoe_client.state.application import ApplicationState
-import zoe_client.zoe_storage_client as storage
+import common.zoe_storage_client as storage
 
 log = logging.getLogger(__name__)
 

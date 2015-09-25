@@ -5,10 +5,6 @@ import pytest
 from zoe_storage_server.configuration import conf_init
 
 
-def pytest_addoption(parser):
-    parser.addoption("--test-environment", default="local", help="Test environment: 'local' or 'travis'")
-
-
 @pytest.fixture(scope='session')
 def configuration(request):
     env = request.config.getoption("--test-environment")

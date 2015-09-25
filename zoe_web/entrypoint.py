@@ -6,7 +6,7 @@ from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 
 from zoe_web import app
-from zoe_client.configuration import conf_init, client_conf
+from common.configuration import conf_init, client_conf
 from zoe_client.state import init as state_init
 
 log = logging.getLogger("zoe_web")

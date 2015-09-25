@@ -1,7 +1,7 @@
 from flask import render_template, url_for, redirect
 
 from zoe_client import ZoeClient
-from zoe_client.configuration import client_conf 
+from common.configuration import client_conf
 from zoe_web.web import web_bp
 import zoe_web.utils as web_utils
 

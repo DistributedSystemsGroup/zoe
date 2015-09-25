@@ -2,9 +2,7 @@ from configparser import ConfigParser
 
 config_paths = [
     'zoe.conf',
-    'zoe-client.conf',
     '/etc/zoe/zoe.conf',
-    '/etc/zoe/zoe-client.conf'
 ]
 
 defaults = {
@@ -20,6 +18,16 @@ defaults = {
         'smtp_password': 'changeme',
         'cookie_secret': b"\xc3\xb0\xa7\xff\x8fH'\xf7m\x1c\xa2\x92F\x1d\xdcz\x05\xe6CJN5\x83!",
         'web_server_name': 'localhost'
+    },
+    'zoe_scheduler': {
+        'swarm_manager_url': 'tcp://swarm.example.com:2380',
+        'docker_private_registry': '10.1.0.1:5000',
+        'status_refresh_interval': 10,
+        'check_terminated_interval': 30,
+        'db_connect': 'mysql+mysqlconnector://zoe:pass@dbhost/zoe',
+        'ipc_listen_address': '127.0.0.1',
+        'ipc_listen_port': 8723,
+        'object_storage_url': 'http://127.0.0.1:4390'
     }
 }
 

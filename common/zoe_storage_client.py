@@ -3,7 +3,7 @@ import logging
 import requests
 import requests.exceptions
 
-from zoe_client.configuration import client_conf
+from common.configuration import client_conf
 
 log = logging.getLogger(__name__)
 

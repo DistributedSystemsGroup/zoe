@@ -6,7 +6,7 @@ from pprint import pprint
 import sys
 
 from zoe_client import ZoeClient
-from zoe_client.configuration import conf_init, client_conf
+from common.configuration import conf_init, client_conf
 from zoe_client.state import init as state_init, create_tables
 import zoe_client.users as users
 
