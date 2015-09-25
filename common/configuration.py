@@ -6,11 +6,13 @@ config_paths = [
 ]
 
 defaults = {
+    'common': {
+        'object_storage_url': 'http://localhost:4390'
+    },
     'zoe_client': {
         'db_connect': 'mysql+mysqlconnector://zoe:pass@dbhost/zoe',
         'scheduler_ipc_address': 'localhost',
         'scheduler_ipc_port': 8723,
-        'object_storage_url': 'http://localhost:4390'
     },
     'zoe_web': {
         'smtp_server': 'smtp.exmaple.com',
@@ -27,7 +29,6 @@ defaults = {
         'db_connect': 'mysql+mysqlconnector://zoe:pass@dbhost/zoe',
         'ipc_listen_address': '127.0.0.1',
         'ipc_listen_port': 8723,
-        'object_storage_url': 'http://127.0.0.1:4390'
     },
     'zoe_storage': {
         'storage_path': "/var/lib/zoe/history",
@@ -63,7 +64,7 @@ class ZoeConfig(ConfigParser):
 
     @property
     def object_storage_url(self) -> str:
-        return self.get('zoe_client', 'object_storage_url')
+        return self.get('common', 'object_storage_url')
 
     @property
     def web_server_name(self) -> str:
