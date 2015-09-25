@@ -28,13 +28,18 @@ defaults = {
         'ipc_listen_address': '127.0.0.1',
         'ipc_listen_port': 8723,
         'object_storage_url': 'http://127.0.0.1:4390'
+    },
+    'zoe_storage': {
+        'storage_path': "/var/lib/zoe/history",
+        'http_listen_address': '127.0.0.1',
+        'http_listen_port': 4390,
     }
 }
 
 _zoeconf = None
 
 
-class ZoeClientConfig(ConfigParser):
+class ZoeConfig(ConfigParser):
     def __init__(self):
         super().__init__(interpolation=None)
         self.read_dict(defaults)
@@ -80,10 +85,54 @@ class ZoeClientConfig(ConfigParser):
     def cookies_secret_key(self):
         return self.get('zoe_web', 'cookie_secret')
 
+    @property
+    def check_terminated_interval(self) -> int:
+        return self.getint('zoe_scheduler', 'check_terminated_interval')
 
-def conf_init(config_file=None) -> ZoeClientConfig:
+    @property
+    def db_url(self) -> str:
+        return self.get('zoe_scheduler', 'db_connect')
+
+    @property
+    def status_refresh_interval(self) -> int:
+        return self.getint('zoe_scheduler', 'status_refresh_interval')
+
+    @property
+    def docker_swarm_manager(self) -> str:
+        return self.get('zoe_scheduler', 'swarm_manager_url')
+
+    @property
+    def docker_private_registry(self) -> str:
+        return self.get('zoe_scheduler', 'docker_private_registry')
+
+    @property
+    def ipc_listen_port(self) -> int:
+        return self.getint('zoe_scheduler', 'ipc_listen_port')
+
+    @property
+    def ipc_listen_address(self) -> str:
+        return self.get('zoe_scheduler', 'ipc_listen_address')
+
+    @property
+    def object_storage_url(self) -> str:
+        return self.get('zoe_scheduler', 'object_storage_url')
+
+    @property
+    def storage_path(self) -> str:
+        return self.get('zoe_storage', 'storage_path')
+
+    @property
+    def http_listen_port(self) -> int:
+        return self.getint('zoe_storage', 'http_listen_port')
+
+    @property
+    def http_listen_address(self) -> str:
+        return self.get('zoe_storage', 'http_listen_address')
+
+
+def conf_init(config_file=None) -> ZoeConfig:
     global _zoeconf
-    _zoeconf = ZoeClientConfig()
+    _zoeconf = ZoeConfig()
     if config_file is None:
         _zoeconf.read(config_paths)
     else:
@@ -91,5 +140,5 @@ def conf_init(config_file=None) -> ZoeClientConfig:
     return _zoeconf
 
 
-def client_conf() -> ZoeClientConfig:
+def zoe_conf() -> ZoeConfig:
     return _zoeconf

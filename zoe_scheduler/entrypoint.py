@@ -8,7 +8,7 @@ from zoe_scheduler.ipc import ZoeIPCServer
 from zoe_scheduler.platform_manager import PlatformManager
 from zoe_scheduler.scheduler_policies import SimpleSchedulerPolicy
 from zoe_scheduler.state import create_tables, init as state_init
-from zoe_scheduler.configuration import init as conf_init, scheduler_conf
+from common.configuration import conf_init, zoe_conf
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ def zoe_scheduler():
 
     conf_init()
 
-    db_engine = state_init(scheduler_conf().db_url)
+    db_engine = state_init(zoe_conf().db_url)
     if args.setup_db:
         create_tables(db_engine)
         sys.exit(0)
@@ -48,8 +48,8 @@ def zoe_scheduler():
     ipc_server = ZoeIPCServer(zoe_sched)
 
     tm = ThreadManager()
-    tm.add_periodic_task("execution health checker", pm.check_executions_health, scheduler_conf().check_terminated_interval)
-    tm.add_periodic_task("platform status updater", pm.status.update, scheduler_conf().status_refresh_interval)
+    tm.add_periodic_task("execution health checker", pm.check_executions_health, zoe_conf().check_terminated_interval)
+    tm.add_periodic_task("platform status updater", pm.status.update, zoe_conf().status_refresh_interval)
     tm.add_thread("IPC server", ipc_server.ipc_server)
 
     tm.start_all()

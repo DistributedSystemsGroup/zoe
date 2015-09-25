@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from zoe_storage_server.configuration import conf_init
+from common.configuration import conf_init
 
 
 @pytest.fixture(scope='session')

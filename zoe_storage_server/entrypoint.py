@@ -2,7 +2,7 @@ from argparse import ArgumentParser, Namespace
 import logging
 import http.server
 
-from zoe_storage_server.configuration import conf_init, storage_conf
+from common.configuration import conf_init, zoe_conf
 from zoe_storage_server.http_handler import ZoeObjectStoreHTTPRequestHandler
 
 log = logging.getLogger(__name__)
@@ -26,8 +26,8 @@ def object_server():
 
     conf_init()
 
-    log.info("Object server listening on %s:%d" % (storage_conf().http_listen_address, storage_conf().http_listen_port))
-    httpd = http.server.HTTPServer((storage_conf().http_listen_address, storage_conf().http_listen_port), ZoeObjectStoreHTTPRequestHandler)
+    log.info("Object server listening on %s:%d" % (zoe_conf().http_listen_address, zoe_conf().http_listen_port))
+    httpd = http.server.HTTPServer((zoe_conf().http_listen_address, zoe_conf().http_listen_port), ZoeObjectStoreHTTPRequestHandler)
     httpd.timeout = 1
     httpd.allow_reuse_address = True
     httpd.serve_forever()

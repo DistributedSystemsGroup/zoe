@@ -12,7 +12,7 @@ from zoe_scheduler.state.execution import ExecutionState
 from common.application_description import ZoeApplication
 from zoe_scheduler.scheduler import ZoeScheduler
 from common.exceptions import InvalidApplicationDescription
-from zoe_scheduler.configuration import scheduler_conf
+from common.configuration import zoe_conf
 
 log = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ class ZoeIPCServer:
     def __init__(self, scheduler: ZoeScheduler):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
-        self.socket.bind("tcp://%s:%s" % (scheduler_conf().ipc_listen_address, scheduler_conf().ipc_listen_port))
+        self.socket.bind("tcp://%s:%s" % (zoe_conf().ipc_listen_address, zoe_conf().ipc_listen_port))
         self.th = None
         self.state = None
         self.sched = scheduler

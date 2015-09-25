@@ -5,7 +5,7 @@ import logging
 from jinja2 import Template
 
 from zoe_scheduler.state.execution import ExecutionState
-from zoe_scheduler.configuration import zoeconf
+from common.configuration import zoe_conf
 
 log = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ At this URL you can download the execution logs: {{ log_url }}
 
 def generate_log_history_url(execution: ExecutionState) -> str:
     zoe_web_log_history_path = '/api/history/logs/'
-    return 'http://' + zoeconf().web_server_name + zoe_web_log_history_path + str(execution.id)
+    return 'http://' + zoe_conf().web_server_name + zoe_web_log_history_path + str(execution.id)
 
 
 def do_duration(seconds):
@@ -66,9 +66,9 @@ def send_email(address, subject, template, template_vars):
     msg['Subject'] = subject
     msg['From'] = 'noreply@bigfoot.eurecom.fr'
     msg['To'] = address
-    s = smtplib.SMTP(zoeconf().smtp_server)
+    s = smtplib.SMTP(zoe_conf().smtp_server)
     s.ehlo()
     s.starttls()
-    s.login(zoeconf().smtp_user, zoeconf().smtp_password)
+    s.login(zoe_conf().smtp_user, zoe_conf().smtp_password)
     s.send_message(msg)
     s.quit()

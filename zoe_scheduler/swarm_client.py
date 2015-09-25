@@ -4,7 +4,7 @@ import logging
 import docker
 import docker.errors
 
-from zoe_scheduler.configuration import scheduler_conf
+from common.configuration import zoe_conf
 from zoe_scheduler.stats import SwarmStats, SwarmNodeStats, ContainerStats
 
 log = logging.getLogger(__name__)
@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 
 class SwarmClient:
     def __init__(self):
-        manager = scheduler_conf().docker_swarm_manager
+        manager = zoe_conf().docker_swarm_manager
         self.cli = docker.Client(base_url=manager)
 
     def info(self) -> SwarmStats:
@@ -51,7 +51,7 @@ class SwarmClient:
 
     def spawn_container(self, image, options) -> dict:
         cont = None
-        image = scheduler_conf().docker_private_registry + image
+        image = zoe_conf().docker_private_registry + image
         try:
             host_config = self.cli.create_host_config(network_mode="bridge",
                                                       binds=options.get_volume_binds(),
