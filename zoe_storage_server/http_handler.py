@@ -10,7 +10,7 @@ class ZoeObjectStoreHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
     """
 
     def _read_request(self):
-        zos = ZoePersistentObjectStore()
+        zos = ZoePersistentObjectStore(storage_conf().storage_path)
         req = self.path.split("/")[1:]
         try:
             obj_type = req[0]
@@ -56,7 +56,7 @@ class ZoeObjectStoreHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
             self.send_error(400, "Expected form-data POST request")
             return
 
-        zos = ZoePersistentObjectStore()
+        zos = ZoePersistentObjectStore(storage_conf().storage_path)
         req = self.path.split("/")[1:]
         try:
             obj_type = req[0]
@@ -79,7 +79,7 @@ class ZoeObjectStoreHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_DELETE(self):
-        zos = ZoePersistentObjectStore()
+        zos = ZoePersistentObjectStore(storage_conf().storage_path)
         req = self.path.split("/")[1:]
         try:
             obj_type = req[0]

@@ -3,14 +3,12 @@ import logging
 import os
 from shutil import copyfileobj
 
-from zoe_storage_server.configuration import storage_conf
-
 log = logging.getLogger(__name__)
 
 
 class ZoePersistentObjectStore:
-    def __init__(self):
-        self.base_path = storage_conf().storage_path
+    def __init__(self, storage_path):
+        self.base_path = storage_path
         self.objects_path = os.path.join(self.base_path, 'objects')
         self._init_paths()
 
