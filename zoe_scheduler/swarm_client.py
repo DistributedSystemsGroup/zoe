@@ -101,8 +101,17 @@ class SwarmClient:
             info["running"] = False
         return info
 
-    def terminate_container(self, docker_id):
-        self.cli.remove_container(docker_id, force=True)
+    def terminate_container(self, docker_id, delete=False):
+        if delete:
+            try:
+                self.cli.remove_container(docker_id, force=True)
+            except docker.errors.NotFound:
+                log.warning("cannot remove a non-existent container")
+        else:
+            try:
+                self.cli.kill(docker_id)
+            except docker.errors.NotFound:
+                log.warning("cannot remove a non-existent container")
 
     def log_get(self, docker_id) -> str:
         try:

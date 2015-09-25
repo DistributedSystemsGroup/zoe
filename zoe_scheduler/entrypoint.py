@@ -5,7 +5,6 @@ import sys
 from zoe_scheduler.scheduler import ZoeScheduler
 from zoe_scheduler.thread_manager import ThreadManager
 from zoe_scheduler.ipc import ZoeIPCServer
-import zoe_scheduler.object_storage as object_storage
 from zoe_scheduler.platform_manager import PlatformManager
 from zoe_scheduler.scheduler_policies import SimpleSchedulerPolicy
 from zoe_scheduler.state import create_tables, init as state_init
@@ -48,11 +47,7 @@ def zoe_scheduler():
 
     ipc_server = ZoeIPCServer(zoe_sched)
 
-    if not object_storage.init_history_paths():
-        return
-
     tm = ThreadManager()
-    tm.add_thread("Object server", object_storage.object_server)
     tm.add_periodic_task("execution health checker", pm.check_executions_health, scheduler_conf().check_terminated_interval)
     tm.add_periodic_task("platform status updater", pm.status.update, scheduler_conf().status_refresh_interval)
     tm.add_thread("IPC server", ipc_server.ipc_server)

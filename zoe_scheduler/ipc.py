@@ -1,4 +1,3 @@
-import base64
 from datetime import datetime
 import json
 import logging
@@ -8,10 +7,8 @@ from sqlalchemy.orm.exc import NoResultFound
 import zmq
 
 from zoe_scheduler.state import AlchemySession
-from zoe_scheduler.state.application import ApplicationState
 from zoe_scheduler.state.container import ContainerState
 from zoe_scheduler.state.execution import ExecutionState
-import zoe_scheduler.object_storage as storage
 from zoe_scheduler.application_description import ZoeApplication
 from zoe_scheduler.scheduler import ZoeScheduler
 from zoe_scheduler.exceptions import InvalidApplicationDescription
@@ -79,93 +76,25 @@ class ZoeIPCServer:
         return {'status': 'error', 'answer': error_msg}
 
     # ############# Exposed methods below ################
-    # Application descriptions
-    def application_binary_get(self, application_id: int) -> dict:
-        try:
-            application = self.state.query(ApplicationState).filter_by(id=application_id).one()
-        except NoResultFound:
-            return self._reply_error('no such application')
-        else:
-            app_data = storage.application_data_download(application)
-            app_data = base64.b64encode(app_data)
-            return self._reply_ok(zip_data=app_data.decode('ascii'))
-
-    def application_binary_put(self, application_id: int, bin_data: bytes) -> dict:
-        try:
-            application = self.state.query(ApplicationState).filter_by(id=application_id).one()
-        except NoResultFound:
-            return self._reply_error('no such application')
-        else:
-            app_data = base64.b64decode(bin_data)
-            storage.application_data_upload(application, app_data)
-
-            return self._reply_ok(zip_data=app_data.decode('ascii'))
-
-    def application_list(self, user_id: int) -> dict:
-        apps = self.state.query(ApplicationState).filter_by(user_id=user_id).all()
-        return self._reply_ok(apps=[x.to_dict() for x in apps])
-
-    def application_new(self, user_id: int, description: dict) -> dict:
+    # Applications
+    def application_validate(self, description: dict) -> dict:
         try:
             descr = ZoeApplication.from_dict(description)
         except InvalidApplicationDescription as e:
             return self._reply_error('invalid application description: %s' % e.value)
+        else:
+            if self.sched.validate(descr):
+                return self._reply_ok()
+            else:
+                return self._reply_error('admission control refused this application description')
 
-        application = ApplicationState(user_id=user_id, description=descr)
-        self.state.add(application)
-        self.state.commit()
-        return self._reply_ok(application_id=application.id)
-
-    def application_start(self, application_id: int) -> dict:
+    def application_executions_get(self, application_id: int) -> dict:
         try:
-            application = self.state.query(ApplicationState).filter_by(id=application_id).one()
+            executions = self.state.query(ExecutionState).filter_by(application_id=application_id).all()
         except NoResultFound:
-            return self._reply_error('no such application')
-
-        if len(application.executions) > 0:
-            execution_name = str(int(sorted([x.name for x in application.executions])[-1]) + 1)
+            return self._reply_ok(executions=[])
         else:
-            execution_name = "1"
-
-        execution = ExecutionState(name=execution_name,
-                                   application_id=application.id,
-                                   status="submitted")
-        self.state.add(execution)
-        self.state.flush()
-
-        ret = self.sched.incoming(execution)
-        if ret:
-            execution.set_scheduled()
-            self.state.commit()
-            return self._reply_ok(execution_id=execution.id)
-        else:
-            self.state.rollback()
-            return self._reply_error('admission control refused this application execution')
-
-    def application_remove(self, application_id: int, force=False) -> dict:
-        try:
-            application = self.state.query(ApplicationState).filter_by(id=application_id).one()
-        except NoResultFound:
-            return self._reply_error('no such application')
-        running = self.state.query(ExecutionState).filter_by(application_id=application.id, time_finished=None).all()
-        if not force and len(running) > 0:
-            return self._reply_error('there are active execution, cannot delete')
-
-        if application.description.requires_binary:
-            storage.application_data_delete(application)
-        for e in application.executions:
-            self.execution_delete(e.id)
-
-        self.state.delete(application)
-        self.state.commit()
-        return self._reply_ok()
-
-    def application_validate(self, description: dict) -> dict:
-        ret = ZoeApplication.from_dict(description)
-        if ret is not None:
-            return self._reply_ok()
-        else:
-            return self._reply_error('application description failed to validate')
+            return self._reply_ok(executions=[x.to_dict() for x in executions])
 
     # Containers
     def container_stats(self, container_id: int) -> dict:
@@ -173,18 +102,27 @@ class ZoeIPCServer:
         return self._reply_ok(**ret)
 
     # Executions
-    def execution_delete(self, execution_id: int) -> dict:
+    def _execution_kill(self, execution_id: int) -> ExecutionState:
         try:
             execution = self.state.query(ExecutionState).filter_by(id=execution_id).one()
         except NoResultFound:
-            return self._reply_error('no such execution')
+            return None
 
         if execution.status == "running":
             self.sched.execution_terminate(self.state, execution)
             # FIXME remove it also from the scheduler, check for scheduled state
+        return execution
 
-        storage.logs_archive_delete(execution)
+    def execution_delete(self, execution_id: int) -> dict:
+        execution = self._execution_kill(execution_id)
+        if execution is None:
+            self._reply_error('no such execution')
         self.state.delete(execution)
+        self.state.commit()
+        return self._reply_ok()
+
+    def execution_kill(self, execution_id: int) -> dict:
+        self._execution_kill(execution_id)
         self.state.commit()
         return self._reply_ok()
 
@@ -193,13 +131,31 @@ class ZoeIPCServer:
             execution = self.state.query(ExecutionState).filter_by(id=execution_id).one()
         except NoResultFound:
             return self._reply_error('no such execution')
-        return self._reply_ok(**execution.to_dict())
+        return self._reply_ok(execution=execution.to_dict())
 
-    def execution_terminate(self, execution_id: int) -> dict:
-        execution = self.state.query(ExecutionState).filter_by(id=execution_id).one()
-        self.sched.execution_terminate(self.state, execution)
+    def execution_start(self, application_id: int, description: dict) -> dict:
+        try:
+            descr = ZoeApplication.from_dict(description)
+        except InvalidApplicationDescription as e:
+            return self._reply_error('invalid application description: %s' % e.value)
+
+        known_executions = self.state.query(ExecutionState).filter_by(application_id=application_id).all()
+        if len(known_executions) > 0:
+            execution_name = str(int(sorted([x.name for x in known_executions])[-1]) + 1)
+        else:
+            execution_name = "1"
+
+        execution = ExecutionState(name=execution_name,
+                                   application_id=application_id,
+                                   app_description=descr,
+                                   status="submitted")
+        self.state.add(execution)
+        self.state.flush()
+
+        self.sched.incoming(execution)
+        execution.set_scheduled()
         self.state.commit()
-        return self._reply_ok()
+        return self._reply_ok(execution=execution.to_dict())
 
     # Logs
     def log_get(self, container_id: int) -> dict:
@@ -210,15 +166,6 @@ class ZoeIPCServer:
         else:
             ret = self.sched.platform.log_get(container)
             return self._reply_ok(log=ret)
-
-    def log_history_get(self, execution_id) -> dict:
-        try:
-            execution = self.state.query(ExecutionState).filter_by(id=execution_id).one()
-        except NoResultFound:
-            return self._reply_error('no such execution')
-        log_data = storage.logs_archive_download(execution)
-        log_data = base64.b64encode(log_data)
-        return self._reply_ok(zip_data=log_data.decode('ascii'))
 
     # Platform
     def platform_stats(self) -> dict:

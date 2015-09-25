@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, PickleType, DateTime, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, PickleType, DateTime
 from sqlalchemy.orm import relationship
 
 from zoe_scheduler.state import Base
@@ -12,12 +12,11 @@ class ExecutionState(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(64))
     app_description = Column(PickleType())
-    application_id = Column(Integer, ForeignKey('applications.id'))
+    application_id = Column(Integer)
     time_scheduled = Column(DateTime)
     time_started = Column(DateTime)
     time_finished = Column(DateTime)
     status = Column(String(32))
-    termination_notice = Column(Boolean, default=False)
 
     cluster = relationship("ClusterState", uselist=False, backref="execution")
 
@@ -32,6 +31,9 @@ class ExecutionState(Base):
     def set_finished(self):
         self.status = "finished"
         self.time_finished = datetime.now()
+
+    def set_cleaning_up(self):
+        self.status = "cleaning up"
 
     def set_terminated(self):
         self.status = "terminated"
@@ -50,8 +52,7 @@ class ExecutionState(Base):
             'time_scheduled': self.time_scheduled,
             'time_started': self.time_started,
             'time_finished': self.time_finished,
-            'status': self.status,
-            'termination_notice': self.termination_notice,
+            'status': self.status
         }
 
         if self.app_description is None:

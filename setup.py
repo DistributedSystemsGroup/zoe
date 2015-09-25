@@ -72,7 +72,8 @@ setup(
                       'python-dateutil>=2.4.2',
                       'SQLAlchemy>=1.0.8',
                       'tornado>=4.2.1',
-                      'pyzmq>=14.0.1'
+                      'pyzmq>=14.0.1',
+                      'requests'
                       ],
 
     # List additional groups of dependencies here (e.g. development
@@ -103,6 +104,7 @@ setup(
     entry_points={
         'console_scripts': [
             'zoe-scheduler=zoe_scheduler.entrypoint:zoe_scheduler',
+            'zoe-storage=zoe_storage.entrypoint:object_server',
             'zoe-web=zoe_web.entrypoint:zoe_web',
             'zoe=zoe_client.entrypoint:zoe'
         ]

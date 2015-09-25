@@ -2,7 +2,7 @@ import logging
 
 from zoe_scheduler.application_description import ZoeApplication, ZoeApplicationProcess
 from zoe_scheduler.exceptions import CannotCreateCluster
-from zoe_scheduler.object_storage import logs_archive_create, generate_application_binary_url
+from zoe_scheduler.storage_helper import generate_application_binary_url, logs_archive_create
 from zoe_scheduler.platform_status import PlatformStatus
 from zoe_scheduler.state import AlchemySession
 from zoe_scheduler.state.cluster import ClusterState
@@ -46,7 +46,7 @@ class PlatformManager:
         # This information is used to substitute templates in the environment variables
         subst_dict = {
             "cluster": execution.gen_environment_substitution(),
-            "application_binary_url": generate_application_binary_url(execution.application)
+            "application_binary_url": generate_application_binary_url(execution.application_id)
         }
         for env_name, env_value in process_description.environment:
             try:
@@ -72,21 +72,20 @@ class PlatformManager:
         state.commit()
         return True
 
-    def execution_terminate(self, state: AlchemySession, execution: ExecutionState):
+    def execution_terminate(self, execution: ExecutionState):
         cluster = execution.cluster
-        logs = []
-        if cluster is not None:
-            containers = cluster.containers
-            for c in containers:
-                logs.append((c.readable_name, c.ip_address, self.log_get(c)))
-                self.swarm.terminate_container(c.docker_id)
-                state.delete(c)
-            state.delete(cluster)
-        execution.set_terminated()
-        logs_archive_create(execution, logs)
+        for c in cluster.containers:
+            if c.monitor:
+                self.swarm.terminate_container(c.docker_id, delete=False)
+                return
 
     def log_get(self, container: ContainerState) -> str:
         return self.swarm.log_get(container.docker_id)
+
+    def container_stats(self, container_id: int) -> ContainerStats:
+        state = AlchemySession()
+        container = state.query(ContainerState).filter_by(id=container_id).one()
+        return self.swarm.stats(container.docker_id)
 
     def is_container_alive(self, container: ContainerState) -> bool:
         ret = self.swarm.inspect_container(container.docker_id)
@@ -99,7 +98,8 @@ class PlatformManager:
         all_containers = state.query(ContainerState).all()
         for c in all_containers:
             if not self.is_container_alive(c):
-                self._container_died(state, c)
+                if c.cluster.execution.status == "running":
+                    self._container_died(state, c)
 
         state.commit()
         state.close()
@@ -107,13 +107,25 @@ class PlatformManager:
     def _container_died(self, state: AlchemySession, container: ContainerState):
         if container.monitor:
             log.debug("found a dead monitor container, cleaning up execution")
-            self.execution_terminate(state, container.cluster.execution)
+            container.cluster.execution.set_cleaning_up()
+            state.commit()
+            self._cleanup_execution(state, container.cluster.execution)
             container.cluster.execution.set_finished()
 #            notify_execution_finished(container.cluster.execution)
         else:
             log.warning("Container {} (ID: {}) died unexpectedly".format(container.readable_name, container.id))
 
-    def container_stats(self, container_id: int) -> ContainerStats:
-        state = AlchemySession()
-        container = state.query(ContainerState).filter_by(id=container_id).one()
-        return self.swarm.stats(container.docker_id)
+    def _cleanup_execution(self, state: AlchemySession, execution: ExecutionState):
+        cluster = execution.cluster
+        logs = []
+        if cluster is not None:
+            containers = cluster.containers
+            for c in containers:
+                l = self.log_get(c)
+                if l is not None:
+                    logs.append((c.readable_name, c.ip_address, l))
+                self.swarm.terminate_container(c.docker_id, delete=True)
+                state.delete(c)
+            state.delete(cluster)
+        execution.set_terminated()
+        logs_archive_create(execution.id, logs)

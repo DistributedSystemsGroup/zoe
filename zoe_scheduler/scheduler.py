@@ -1,6 +1,7 @@
 import logging
 import queue
 
+from zoe_scheduler.application_description import ZoeApplication
 from zoe_scheduler.state import AlchemySession
 from zoe_scheduler.state.execution import ExecutionState
 from zoe_scheduler.scheduler_policies.base import BaseSchedulerPolicy
@@ -26,18 +27,22 @@ class ZoeScheduler:
         """
         self.scheduler_policy = policy_class(self.platform.status)
 
-    def incoming(self, execution: ExecutionState) -> bool:
+    def validate(self, app_description: ZoeApplication) -> bool:
+        """
+        This method is called in the IPC thread context. It is used to validate an execution that is going to be started.
+        :param app_description:
+        :return: True if the execution is possible on this Zoe deployment, False otherwise
+        """
+        return self.scheduler_policy.admission_control(app_description)
+
+    def incoming(self, execution: ExecutionState):
         """
         This method is called in the IPC thread context. It passes the execution request ID and the requested resources to the scheduling policy.
+        Execution is guaranteed to start (sometime in the future) if the execution validation for this application description returned True.
         :param execution: The execution request
-        :return: True if the request was queued successfully, False otherwise
+        :return:
         """
-        app_descr = execution.application.description
-        if self.scheduler_policy.admission_control(app_descr):
-            self.event_queue.put(("submission", (execution.id, app_descr)))
-            return True
-        else:
-            return False
+        self.event_queue.put(("submission", (execution.id, execution.app_description)))
 
     def execution_terminate(self, state: AlchemySession, execution: ExecutionState) -> None:
         """
@@ -46,7 +51,7 @@ class ZoeScheduler:
         :param execution: the execution to terminate
         :return: None
         """
-        self.platform.execution_terminate(state, execution)
+        self.platform.execution_terminate(execution)
         self.event_queue.put(("termination", execution.id))
 
     def _check_runnable(self):  # called periodically, does not use state

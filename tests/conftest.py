@@ -3,7 +3,7 @@ import json
 import pytest
 
 from zoe_scheduler.state import init as state_init, Base, AlchemySession
-from zoe_scheduler.state.application import ApplicationState
+from zoe_client.state.application import ApplicationState
 from zoe_scheduler.application_description import ZoeApplication
 from zoe_scheduler.configuration import init as conf_init, scheduler_conf
 

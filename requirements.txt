@@ -5,6 +5,7 @@ mysql-connector-python
 python-dateutil
 pytest
 pytest-cov
+requests
 Sphinx
 SQLAlchemy
 tornado

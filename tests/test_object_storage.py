@@ -1,5 +1,3 @@
-from zoe_scheduler.object_storage import *
-
 fake_data = b"test" * 1024
 
 

@@ -11,7 +11,8 @@ defaults = {
     'zoe_client': {
         'db_connect': 'mysql+mysqlconnector://zoe:pass@dbhost/zoe',
         'scheduler_ipc_address': 'localhost',
-        'scheduler_ipc_port': 8723
+        'scheduler_ipc_port': 8723,
+        'object_storage_url': 'http://localhost:4390'
     },
     'zoe_web': {
         'smtp_server': 'smtp.exmaple.com',
@@ -46,6 +47,10 @@ class ZoeClientConfig(ConfigParser):
     @property
     def ipc_port(self) -> int:
         return self.getint('zoe_client', 'scheduler_ipc_port')
+
+    @property
+    def object_storage_url(self) -> str:
+        return self.get('zoe_client', 'object_storage_url')
 
     @property
     def web_server_name(self) -> str:

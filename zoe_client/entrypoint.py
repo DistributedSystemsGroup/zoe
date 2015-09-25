@@ -35,8 +35,8 @@ def user_get_cmd(args):
 def app_new_cmd(args):
     client = get_zoe_client()
     app_descr = json.load(args.jsonfile)
-    application_id = client.application_new(args.user_id, app_descr)
-    print("Application added with ID: {}".format(application_id))
+    application = client.application_new(args.user_id, app_descr)
+    print("Application added with ID: {}".format(application.id))
 
 
 def app_bin_put_cmd(args):
@@ -44,14 +44,14 @@ def app_bin_put_cmd(args):
     if not is_zipfile(args.zipfile):
         print("Error: application binary must be a zip file")
         return
-    args.zipfile.rewind()
+    args.zipfile.seek(0)
     zipdata = args.zipfile.read()
     client.application_binary_put(args.app_id, zipdata)
 
 
 def app_start_cmd(args):
     client = get_zoe_client()
-    ret = client.application_start(args.id)
+    ret = client.execution_start(args.id)
     if ret:
         print("Application scheduled successfully, use the app-inspect command to check its status")
     else:
@@ -60,7 +60,7 @@ def app_start_cmd(args):
 
 def app_rm_cmd(args):
     client = get_zoe_client()
-    client.application_remove(args.id, args.force)
+    client.application_remove(args.id)
 
 
 def app_inspect_cmd(args):
@@ -69,16 +69,21 @@ def app_inspect_cmd(args):
     if application is None:
         print("Error: application {} does not exist".format(args.id))
         return
-    print(application)
+    print("Application name: {}".format(application.description["name"]))
+    executions = client.application_executions_get(application_id=args.id)
+    for e in executions:
+        print(" - Execution {} {}".format(e.name, e.status))
+        for c in e.containers:
+            print(" -- Container {}, ID {}".format(c.readable_name, c.id))
 
 
 def app_list_cmd(args):
     client = get_zoe_client()
     applications = client.application_list(args.id)
     if len(applications) > 0:
-        print("{:4} {:20} {:25}".format("ID", "Name", "Type"))
+        print("{:4} {:20}".format("ID", "Name"))
     for app in applications:
-        print("{:4} {:20} {:25}".format(app.id, app.name, app.type))
+        print("{:4} {:20}".format(app.id, app.description['name']))
 
 
 def exec_kill_cmd(args):
@@ -87,7 +92,7 @@ def exec_kill_cmd(args):
     if execution is None:
         print("Error: execution {} does not exist".format(args.id))
         return
-    client.execution_terminate(execution.id)
+    client.execution_kill(execution.id)
 
 
 def log_get_cmd(args):
@@ -112,7 +117,7 @@ def process_arguments() -> Namespace:
     parser = ArgumentParser(description="Zoe - Container Analytics as a Service command-line client")
     parser.add_argument('-d', '--debug', action='store_true', default=False, help='Enable debug output')
     parser.add_argument('--ipc-server', help='Address of the Zoe scheduler process')
-    parser.add_argument('--ipc-port', type=int, help='Port of the Zoe scheduler process')
+    parser.add_argument('--ipc-port', help='Port of the Zoe scheduler process')
     parser.add_argument('--setup-db', action='store_true', help='Sets up the configured database for use with the Zoe client')
     subparser = parser.add_subparsers(title='subcommands', description='valid subcommands')
 
@@ -181,9 +186,9 @@ def zoe():
         logging.basicConfig(level=logging.INFO)
 
     conf_init()
-    if hasattr(args, "ipc_server"):
+    if args.ipc_server is not None:
         client_conf().set('zoe_client', 'scheduler_ipc_address', args.ipc_server)
-    if hasattr(args, "ipc_port"):
+    if args.ipc_port is not None:
         client_conf().set('zoe_client', 'scheduler_ipc_port', args.ipc_port)
 
     db_engine = state_init(client_conf().db_url)
@@ -196,3 +201,4 @@ def zoe():
         return
 
     args.func(args)
+    sys.exit(0)
