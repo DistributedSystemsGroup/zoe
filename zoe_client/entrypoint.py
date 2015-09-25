@@ -72,7 +72,7 @@ def app_inspect_cmd(args):
     print("Application name: {}".format(application.description["name"]))
     executions = client.application_executions_get(application_id=args.id)
     for e in executions:
-        print(" - Execution {} {}".format(e.name, e.status))
+        print(" - Execution {} (ID: {}) {}".format(e.name, e.id, e.status))
         for c in e.containers:
             print(" -- Container {}, ID {}".format(c.readable_name, c.id))
 
