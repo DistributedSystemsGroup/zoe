@@ -1,14 +1,14 @@
 from flask import render_template, redirect, url_for
 
 from zoe_client import ZoeClient
-from zoe_scheduler.configuration import ipcconf
+from zoe_client.configuration import client_conf
 from zoe_web.web import web_bp
 import zoe_web.utils as web_utils
 
 
 @web_bp.route('/status/platform')
 def status_platform():
-    client = ZoeClient(ipcconf['server'], ipcconf['port'])
+    client = ZoeClient(client_conf().ipc_server, client_conf().ipc_port)
     user = web_utils.check_user(client)
     if user is None:
         return redirect(url_for('web.index'))

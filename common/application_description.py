@@ -1,6 +1,6 @@
 import logging
 
-from zoe_scheduler.exceptions import InvalidApplicationDescription
+from common.exceptions import InvalidApplicationDescription
 
 log = logging.getLogger(__name__)
 

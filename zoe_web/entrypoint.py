@@ -6,7 +6,8 @@ from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 
 from zoe_web import app
-from zoe_scheduler.configuration import ipcconf, init as conf_init
+from zoe_client.configuration import conf_init, client_conf
+from zoe_client.state import init as state_init
 
 log = logging.getLogger("zoe_web")
 
@@ -14,8 +15,8 @@ log = logging.getLogger("zoe_web")
 def process_arguments() -> argparse.Namespace:
     argparser = argparse.ArgumentParser(description="Zoe Web - Container Analytics as a Service web client")
     argparser.add_argument('-d', '--debug', action='store_true', default=False, help='Enable debug output')
-    argparser.add_argument('--ipc-server', default='localhost', help='Address of the Zoe scheduler process')
-    argparser.add_argument('--ipc-port', default=8723, type=int, help='Port of the Zoe scheduler process')
+    argparser.add_argument('--ipc-server', help='Address of the Zoe scheduler process')
+    argparser.add_argument('--ipc-port', help='Port of the Zoe scheduler process')
 
     return argparser.parse_args()
 
@@ -33,14 +34,17 @@ def zoe_web() -> int:
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("tornado").setLevel(logging.WARNING)
 
-    ipcconf['server'] = args.ipc_server
-    ipcconf['port'] = args.ipc_port
+    conf_init()
+    if args.ipc_server is not None:
+        client_conf().set('zoe_client', 'scheduler_ipc_address', args.ipc_server)
+    if args.ipc_port is not None:
+        client_conf().set('zoe_client', 'scheduler_ipc_port', args.ipc_port)
 
-    zoeconf = conf_init()
+    state_init(client_conf().db_url)
 
     log.info("Starting HTTP server...")
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-    app.secret_key = zoeconf.cookies_secret_key
+    app.secret_key = client_conf().cookies_secret_key
 
     http_server = HTTPServer(WSGIContainer(app))
     http_server.listen(5000, "0.0.0.0")

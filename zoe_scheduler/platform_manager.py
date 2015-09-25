@@ -1,8 +1,8 @@
 import logging
 
-from zoe_scheduler.application_description import ZoeApplication, ZoeApplicationProcess
-from zoe_scheduler.exceptions import CannotCreateCluster
-from zoe_scheduler.storage_helper import generate_application_binary_url, logs_archive_create
+from common.application_description import ZoeApplication, ZoeApplicationProcess
+from common.exceptions import CannotCreateCluster
+from zoe_scheduler.zoe_storage_client import generate_application_binary_url, logs_archive_create
 from zoe_scheduler.platform_status import PlatformStatus
 from zoe_scheduler.state import AlchemySession
 from zoe_scheduler.state.cluster import ClusterState

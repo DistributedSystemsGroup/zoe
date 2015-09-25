@@ -9,9 +9,9 @@ import zmq
 from zoe_scheduler.state import AlchemySession
 from zoe_scheduler.state.container import ContainerState
 from zoe_scheduler.state.execution import ExecutionState
-from zoe_scheduler.application_description import ZoeApplication
+from common.application_description import ZoeApplication
 from zoe_scheduler.scheduler import ZoeScheduler
-from zoe_scheduler.exceptions import InvalidApplicationDescription
+from common.exceptions import InvalidApplicationDescription
 from zoe_scheduler.configuration import scheduler_conf
 
 log = logging.getLogger(__name__)

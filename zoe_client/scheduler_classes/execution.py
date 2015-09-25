@@ -1,17 +1,13 @@
 import dateutil.parser
 
+from zoe_client.scheduler_classes.container import Container
+
 
 def deserialize_datetime(isoformat):
     if isoformat is None:
         return None
     else:
         return dateutil.parser.parse(isoformat)
-
-
-class User:
-    def __init__(self, user: dict):
-        self.id = user['id']
-        self.email = user['email']
 
 
 class Execution:
@@ -30,12 +26,3 @@ class Execution:
 
         for c in execution['containers']:
             self.containers.append(Container(c))
-
-
-class Container:
-    def __init__(self, container: dict):
-        self.id = container['id']
-        self.docker_id = container['docker_id']
-        self.cluster_id = container['cluster_id']
-        self.ip_address = container['ip_address']
-        self.readable_name = container['readable_name']

@@ -48,8 +48,8 @@ def download_application(application_id) -> bytes:
     return _download(application_id, "apps")
 
 
-def download_log_archive(execution_id) -> bytes:
-    return _download(execution_id, "logs")
+def download_log_url(execution_id) -> bytes:
+    return client_conf().object_storage_url + '/logs/{}'.format(execution_id)
 
 
 def delete_application(application_id):

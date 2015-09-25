@@ -2,12 +2,11 @@ import logging
 
 from sqlalchemy.orm.exc import NoResultFound
 
-from zoe_client.ipc import ZoeIPCClient
-from zoe_client.entities import Execution
+from zoe_client.lib.ipc import ZoeIPCClient
+from zoe_client.scheduler_classes.execution import Execution
 from zoe_client.state import session
 from zoe_client.state.application import ApplicationState
-from zoe_client.state.user import UserState
-import zoe_client.storage_helper as storage
+import zoe_client.zoe_storage_client as storage
 
 log = logging.getLogger(__name__)
 
@@ -15,10 +14,10 @@ log = logging.getLogger(__name__)
 class ZoeClient:
     def __init__(self, ipc_server='localhost', ipc_port=8723):
         self.ipc_server = ZoeIPCClient(ipc_server, ipc_port)
+        self.state = session()
 
     def _check_application(self, application_id: int):
-        state = session()
-        app_count = state.query(ApplicationState).filter_by(id=application_id).count()
+        app_count = self.state.query(ApplicationState).filter_by(id=application_id).count()
         return app_count == 1
 
     # Applications
@@ -41,9 +40,8 @@ class ZoeClient:
         return [Execution(e) for e in answer["executions"]]
 
     def application_get(self, application_id):
-        state = session()
         try:
-            application = state.query(ApplicationState).filter_by(id=application_id).one()
+            application = self.state.query(ApplicationState).filter_by(id=application_id).one()
         except NoResultFound:
             return None
         else:
@@ -55,8 +53,7 @@ class ZoeClient:
         :param user_id: the user
         :returns a list of ApplicationState objects
         """
-        state = session()
-        return state.query(ApplicationState).filter_by(user_id=user_id).all()
+        return self.state.query(ApplicationState).filter_by(user_id=user_id).all()
 
     def application_new(self, user_id: int, description: dict) -> ApplicationState:
         answer = self.ipc_server.ask('application_validate', description=description)
@@ -64,10 +61,9 @@ class ZoeClient:
             log.error("Application description failed the scheduler validation")
             return None
 
-        state = session()
         application = ApplicationState(user_id=user_id, description=description)
-        state.add(application)
-        state.commit()
+        self.state.add(application)
+        self.state.commit()
         return application
 
     def application_remove(self, application_id: int):
@@ -82,11 +78,10 @@ class ZoeClient:
         for e in executions:
             self.execution_delete(e.id)
 
-        state = session()
-        application = state.query(ApplicationState).filter_by(id=application_id).one()
+        application = self.state.query(ApplicationState).filter_by(id=application_id).one()
         storage.delete_application(application_id)
-        state.delete(application)
-        state.commit()
+        self.state.delete(application)
+        self.state.commit()
 
     def application_validate(self, description: dict) -> bool:
         answer = self.ipc_server.ask('application_validate', description=description)
@@ -111,9 +106,8 @@ class ZoeClient:
             return Execution(answer["execution"])
 
     def execution_start(self, application_id: int) -> Execution:
-        state = session()
         try:
-            application = state.query(ApplicationState).filter_by(id=application_id).one()
+            application = self.state.query(ApplicationState).filter_by(id=application_id).one()
         except NoResultFound:
             log.error("No such application")
             return None
@@ -135,40 +129,7 @@ class ZoeClient:
         if answer is not None:
             return answer['log']
 
-    def log_history_get(self, execution_id: int) -> bytes:
-        return storage.download_log_archive(execution_id)
-
     # Platform
     def platform_stats(self) -> dict:
         stats = self.ipc_server.ask('platform_stats')
         return stats
-
-    # Users
-    def user_check(self, user_id: int) -> bool:
-        state = session()
-        num = state.query(UserState).filter_by(id=user_id).count()
-        return num == 1
-
-    def user_new(self, email: str) -> UserState:
-        state = session()
-        user = UserState(email=email)
-        state.add(user)
-        state.commit()
-        return user
-
-    def user_get(self, user_id: int) -> UserState:
-        state = session()
-        try:
-            user = state.query(UserState).filter_by(id=user_id).one()
-        except NoResultFound:
-            return None
-        return user
-
-    def user_get_by_email(self, email: str) -> UserState:
-        state = session()
-        try:
-            user = state.query(UserState).filter_by(email=email).one()
-        except NoResultFound:
-            return None
-        else:
-            return user

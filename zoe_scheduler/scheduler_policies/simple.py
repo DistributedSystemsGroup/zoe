@@ -3,7 +3,7 @@ import time
 from zoe_scheduler.platform_status import PlatformStatus
 from zoe_scheduler.stats import SchedulerStats
 from zoe_scheduler.scheduler_policies.base import BaseSchedulerPolicy
-from zoe_scheduler.application_description import ZoeApplication
+from common.application_description import ZoeApplication
 
 
 class SimpleSchedulerPolicy(BaseSchedulerPolicy):

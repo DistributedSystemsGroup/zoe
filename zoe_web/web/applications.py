@@ -1,14 +1,14 @@
 from flask import render_template, url_for, redirect
 
 from zoe_client import ZoeClient
-from zoe_scheduler.configuration import ipcconf
+from zoe_client.configuration import client_conf 
 from zoe_web.web import web_bp
 import zoe_web.utils as web_utils
 
 
 @web_bp.route('/apps/new')
 def application_new():
-    client = ZoeClient(ipcconf['server'], ipcconf['port'])
+    client = ZoeClient(client_conf().ipc_server, client_conf().ipc_port)
     user = web_utils.check_user(client)
     if user is None:
         return redirect(url_for('web.index'))
@@ -22,7 +22,7 @@ def application_new():
 
 @web_bp.route('/executions/new/<app_id>')
 def execution_new(app_id):
-    client = ZoeClient(ipcconf['server'], ipcconf['port'])
+    client = ZoeClient(client_conf().ipc_server, client_conf().ipc_port)
     user = web_utils.check_user(client)
     if user is None:
         return redirect(url_for('web.index'))
@@ -38,7 +38,7 @@ def execution_new(app_id):
 
 @web_bp.route('/executions/terminate/<exec_id>')
 def execution_terminate(exec_id):
-    client = ZoeClient(ipcconf['server'], ipcconf['port'])
+    client = ZoeClient(client_conf().ipc_server, client_conf().ipc_port)
     user = web_utils.check_user(client)
     if user is None:
         return redirect(url_for('web.index'))
@@ -54,7 +54,7 @@ def execution_terminate(exec_id):
 
 @web_bp.route('/apps/delete/<app_id>')
 def application_delete(app_id):
-    client = ZoeClient(ipcconf['server'], ipcconf['port'])
+    client = ZoeClient(client_conf().ipc_server, client_conf().ipc_port)
     user = web_utils.check_user(client)
     if user is None:
         return redirect(url_for('web.index'))
@@ -70,7 +70,7 @@ def application_delete(app_id):
 
 @web_bp.route('/executions/inspect/<execution_id>')
 def execution_inspect(execution_id):
-    client = ZoeClient(ipcconf['server'], ipcconf['port'])
+    client = ZoeClient(client_conf().ipc_server, client_conf().ipc_port)
     user = web_utils.check_user(client)
     if user is None:
         return redirect(url_for('web.index'))

@@ -1,7 +1,7 @@
 import logging
 import queue
 
-from zoe_scheduler.application_description import ZoeApplication
+from common.application_description import ZoeApplication
 from zoe_scheduler.state import AlchemySession
 from zoe_scheduler.state.execution import ExecutionState
 from zoe_scheduler.scheduler_policies.base import BaseSchedulerPolicy

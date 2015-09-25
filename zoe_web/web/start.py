@@ -1,10 +1,10 @@
 from flask import render_template, redirect, url_for
 
 from zoe_client import ZoeClient
-from zoe_scheduler.configuration import ipcconf
+from zoe_client.configuration import client_conf
 from zoe_web.web import web_bp
 import zoe_web.utils as web_utils
-from zoe_client.entities import Execution
+from zoe_client.scheduler_classes.execution import Execution
 
 
 @web_bp.route('/')
@@ -14,7 +14,7 @@ def index():
 
 @web_bp.route('/home')
 def home():
-    client = ZoeClient(ipcconf['server'], ipcconf['port'])
+    client = ZoeClient(client_conf().ipc_server, client_conf().ipc_port)
     user = web_utils.check_user(client)
     if user is None:
         return redirect(url_for('web.index'))
@@ -27,11 +27,12 @@ def home():
     active_executions = []
     past_executions = []
     for a in apps:
-        for e in a.executions:
+        executions = client.application_executions_get(a.id)
+        for e in executions:
             assert isinstance(e, Execution)
-            if e.status == "running" or e.status == "scheduled" or e.status == "submitted":
+            if e.status != "running" or e.status == "scheduled" or e.status == "submitted" or e.status == "cleaning up":
                 if e.status == "running":
-                    active_executions.append((a, e, client.execution_get_proxy_path(e.id)))
+                    active_executions.append((a, e, "client.execution_get_proxy_path(e.id)"))
                 else:
                     active_executions.append((a, e))
             else:

@@ -1,4 +1,4 @@
-from zoe_scheduler.application_description import ZoeApplication
+from common.application_description import ZoeApplication
 from zoe_scheduler.stats import SchedulerStats
 
 

@@ -8,6 +8,7 @@ import sys
 from zoe_client import ZoeClient
 from zoe_client.configuration import conf_init, client_conf
 from zoe_client.state import init as state_init, create_tables
+import zoe_client.users as users
 
 
 def get_zoe_client() -> ZoeClient:
@@ -21,14 +22,12 @@ def stats_cmd(_):
 
 
 def user_new_cmd(args):
-    client = get_zoe_client()
-    user = client.user_new(args.email)
+    user = users.user_new(args.email)
     print("New user ID: {}".format(user.id))
 
 
 def user_get_cmd(args):
-    client = get_zoe_client()
-    user = client.user_get_by_email(args.email)
+    user = users.user_get_by_email(args.email)
     print("User ID: {}".format(user.id))
 
 
