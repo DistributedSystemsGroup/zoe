@@ -1,34 +1,10 @@
 {% extends "base.html" %}
-{% block title %}New application{% endblock %}
+{% block title %}{{ app.description.name }} startup{% endblock %}
 {% block content %}
 
-<h1>New {{ app.name }} execution</h1>
+<h1>New {{ app.description.name }} execution</h1>
 
-    {% if app.type == "spark-notebook" %}
-        <form enctype="multipart/form-data" id="exec_new">
-        <input type="hidden" name="app_id" value="{{ app.id }}">
-            <label>Set a name to identify this notebook:
-                <input type="text" autofocus autocomplete="on" required pattern="[a-z0-9_\-]+" name="exec_name" id="exec_name" placeholder="kmeans-test">
-            </label>
-            <input type="submit" value="Start" id="submit">
-        </form>
-    {% else %}
-        <form enctype="multipart/form-data" id="exec_new">
-        <input type="hidden" name="app_id" value="{{ app.id }}">
-            <label>Set a name to identify this execution:
-                <input type="text" autofocus autocomplete="on" required pattern="[a-z0-9_\-]+" name="exec_name" id="exec_name" placeholder="wordcount-twitter-2">
-            </label><br/>
-
-            <label>Command line:
-                <input type="text" autocomplete="on" required name="commandline" id="commandline" size="100" placeholder="wordcount.py hdfs://192.168.45.157/datasets/gutenberg_big_2x.txt hdfs://192.168.45.157/tmp/cntwdc1">
-            </label><br/>
-
-            <label>Spark options (optional):
-                <input type="text" autocomplete="on" name="spark_opts" id="spark_opts" size="100"><br/>
-            </label><br/>
-            <input type="submit" value="Start" id="submit">
-        </form>
-    {% endif %}
+    <p id="starting">Starting execution...</p>
     <p id="scheduled" style="display: none">Your execution request has been schduled and will be served as soon as possible.
     You can monitor application status from the <a href="{{ url_for("web.home") }}">home page</a>.</p>
     <p id="schedule_error" style="display: none">Your execution request has been denied. The system is not currently able to satisfy the
@@ -39,35 +15,26 @@
     <script type="application/javascript">
     function completeHandler(e) {
         if (e.status == "ok") {
+            $("#starting").hide();
             $("#scheduled").show();
         } else {
+            $("#starting").hide();
             $("#schedule_error").show();
         }
         return false;
     }
 
     function errorHandler() {
+        $("#starting").hide();
         $("#communication_error").show();
     }
 
-    $('#exec_new').on('submit', function(event) {
-        event.preventDefault();
-        $("#exec_new").hide();
-        $.ajax({
-            url: '{{ url_for("api.execution_new") }}',  // Server script to process data
-            type: 'POST',
-            //Ajax events
-            success: completeHandler,
-            error: errorHandler,
-            // Form data
-            data: new FormData(this),
-            //Options to tell jQuery not to process data or worry about content-type.
-            cache: false,
-            contentType: false,
-            processData: false
-        });
-        return false;
-    });
+    function start() {
+        $.getJSON("{{ url_for("api.execution_start", app_id=app.id) }}")
+                .done(completeHandler)
+                .error(errorHandler);
+    }
+    start();
     </script>
 
 {% endblock %}

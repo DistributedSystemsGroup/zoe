@@ -6,7 +6,7 @@ from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 
 from zoe_web import app
-from common.configuration import conf_init, client_conf
+from common.configuration import conf_init, zoe_conf
 from zoe_client.state import init as state_init
 
 log = logging.getLogger("zoe_web")
@@ -36,15 +36,15 @@ def zoe_web() -> int:
 
     conf_init()
     if args.ipc_server is not None:
-        client_conf().set('zoe_client', 'scheduler_ipc_address', args.ipc_server)
+        zoe_conf().set('zoe_client', 'scheduler_ipc_address', args.ipc_server)
     if args.ipc_port is not None:
-        client_conf().set('zoe_client', 'scheduler_ipc_port', args.ipc_port)
+        zoe_conf().set('zoe_client', 'scheduler_ipc_port', args.ipc_port)
 
-    state_init(client_conf().db_url)
+    state_init(zoe_conf().db_url)
 
     log.info("Starting HTTP server...")
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-    app.secret_key = client_conf().cookies_secret_key
+    app.secret_key = zoe_conf().cookies_secret_key
 
     http_server = HTTPServer(WSGIContainer(app))
     http_server.listen(5000, "0.0.0.0")

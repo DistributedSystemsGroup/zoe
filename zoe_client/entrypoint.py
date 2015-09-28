@@ -5,19 +5,18 @@ from zipfile import is_zipfile
 from pprint import pprint
 import sys
 
-from zoe_client import ZoeClient
-from common.configuration import conf_init, client_conf
+from common.configuration import conf_init, zoe_conf
+
+import zoe_client.applications as apps
+import zoe_client.diagnostics as diags
+import zoe_client.executions as execs
 from zoe_client.state import init as state_init, create_tables
+from zoe_client.state.application import ApplicationState
 import zoe_client.users as users
 
 
-def get_zoe_client() -> ZoeClient:
-    return ZoeClient(client_conf().ipc_server, client_conf().ipc_port)
-
-
 def stats_cmd(_):
-    client = get_zoe_client()
-    stats = client.platform_stats()
+    stats = diags.platform_stats()
     pprint(stats)
 
 
@@ -32,25 +31,23 @@ def user_get_cmd(args):
 
 
 def app_new_cmd(args):
-    client = get_zoe_client()
     app_descr = json.load(args.jsonfile)
-    application = client.application_new(args.user_id, app_descr)
-    print("Application added with ID: {}".format(application.id))
+    application = apps.application_new(args.user_id, app_descr)
+    if application is not None:
+        print("Application added with ID: {}".format(application.id))
 
 
 def app_bin_put_cmd(args):
-    client = get_zoe_client()
     if not is_zipfile(args.zipfile):
         print("Error: application binary must be a zip file")
         return
     args.zipfile.seek(0)
     zipdata = args.zipfile.read()
-    client.application_binary_put(args.app_id, zipdata)
+    apps.application_binary_put(args.app_id, zipdata)
 
 
 def app_start_cmd(args):
-    client = get_zoe_client()
-    ret = client.execution_start(args.id)
+    ret = execs.execution_start(args.id)
     if ret:
         print("Application scheduled successfully, use the app-inspect command to check its status")
     else:
@@ -58,18 +55,16 @@ def app_start_cmd(args):
 
 
 def app_rm_cmd(args):
-    client = get_zoe_client()
-    client.application_remove(args.id)
+    apps.application_remove(args.id)
 
 
 def app_inspect_cmd(args):
-    client = get_zoe_client()
-    application = client.application_get(args.id)
+    application = apps.application_get(args.id)
     if application is None:
         print("Error: application {} does not exist".format(args.id))
         return
     print("Application name: {}".format(application.description["name"]))
-    executions = client.application_executions_get(application_id=args.id)
+    executions = apps.application_executions_get(application_id=args.id)
     for e in executions:
         print(" - Execution {} (ID: {}) {}".format(e.name, e.id, e.status))
         for c in e.containers:
@@ -77,38 +72,35 @@ def app_inspect_cmd(args):
 
 
 def app_list_cmd(args):
-    client = get_zoe_client()
-    applications = client.application_list(args.id)
+    applications = apps.application_list(args.id)
     if len(applications) > 0:
         print("{:4} {:20}".format("ID", "Name"))
     for app in applications:
-        print("{:4} {:20}".format(app.id, app.description['name']))
+        assert isinstance(app, ApplicationState)
+        print("{:4} {:20}".format(app.id, app.description.name))
 
 
 def exec_kill_cmd(args):
-    client = get_zoe_client()
-    execution = client.execution_get(args.id)
+    execution = execs.execution_get(args.id)
     if execution is None:
         print("Error: execution {} does not exist".format(args.id))
         return
-    client.execution_kill(execution.id)
+    execs.execution_kill(execution.id)
 
 
 def log_get_cmd(args):
-    client = get_zoe_client()
-    log = client.log_get(args.id)
+    log = diags.log_get(args.id)
     if log is None:
         print("Error: No log found for container ID {}".format(args.id))
     print(log)
 
 
 def gen_config_cmd(args):
-    client_conf().write(open(args.output_file, "w"))
+    zoe_conf().write(open(args.output_file, "w"))
 
 
 def container_stats_cmd(args):
-    client = get_zoe_client()
-    stats = client.container_stats(args.container_id)
+    stats = diags.container_stats(args.container_id)
     print(stats)
 
 
@@ -183,14 +175,15 @@ def zoe():
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
+    logging.getLogger("requests").setLevel(logging.WARNING)
 
     conf_init()
     if args.ipc_server is not None:
-        client_conf().set('zoe_client', 'scheduler_ipc_address', args.ipc_server)
+        zoe_conf().set('zoe_client', 'scheduler_ipc_address', args.ipc_server)
     if args.ipc_port is not None:
-        client_conf().set('zoe_client', 'scheduler_ipc_port', args.ipc_port)
+        zoe_conf().set('zoe_client', 'scheduler_ipc_port', args.ipc_port)
 
-    db_engine = state_init(client_conf().db_url)
+    db_engine = state_init(zoe_conf().db_url)
     if args.setup_db:
         create_tables(db_engine)
         sys.exit(0)

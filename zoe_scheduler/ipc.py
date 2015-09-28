@@ -77,17 +77,6 @@ class ZoeIPCServer:
 
     # ############# Exposed methods below ################
     # Applications
-    def application_validate(self, description: dict) -> dict:
-        try:
-            descr = ZoeApplication.from_dict(description)
-        except InvalidApplicationDescription as e:
-            return self._reply_error('invalid application description: %s' % e.value)
-        else:
-            if self.sched.validate(descr):
-                return self._reply_ok()
-            else:
-                return self._reply_error('admission control refused this application description')
-
     def application_executions_get(self, application_id: int) -> dict:
         try:
             executions = self.state.query(ExecutionState).filter_by(application_id=application_id).all()
@@ -108,7 +97,7 @@ class ZoeIPCServer:
         except NoResultFound:
             return None
 
-        if execution.status == "running":
+        if execution.status == "running" or execution.status == "scheduled":
             self.sched.execution_terminate(self.state, execution)
             # FIXME remove it also from the scheduler, check for scheduled state
         return execution
@@ -138,6 +127,9 @@ class ZoeIPCServer:
             descr = ZoeApplication.from_dict(description)
         except InvalidApplicationDescription as e:
             return self._reply_error('invalid application description: %s' % e.value)
+        else:
+            if not self.sched.validate(descr):
+                return self._reply_error('admission control refused this application description')
 
         known_executions = self.state.query(ExecutionState).filter_by(application_id=application_id).all()
         if len(known_executions) > 0:

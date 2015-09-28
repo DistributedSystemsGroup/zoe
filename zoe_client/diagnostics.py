@@ -1,4 +1,6 @@
 from zoe_client.lib.ipc import ZoeIPCClient
+from zoe_client.scheduler_classes.execution import Execution
+from zoe_client.scheduler_classes.container import Container
 
 
 # Logs
@@ -20,3 +22,11 @@ def platform_stats() -> dict:
 def container_stats(container_id):
     ipc_client = ZoeIPCClient()
     return ipc_client.ask('container_stats', container_id=container_id)
+
+
+def execution_exposed_url(execution: Execution):
+    for c in execution.containers:
+        assert isinstance(c, Container)
+        port = c.description.exposed_endpoint()
+        if port is not None:
+            return port.get_url(c.ip_address)

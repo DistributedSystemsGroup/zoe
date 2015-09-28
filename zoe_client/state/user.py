@@ -5,6 +5,10 @@ from zoe_client.state import Base
 
 
 class UserState(Base):
+    """
+    :type id: int
+    :type email: str
+    """
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True)

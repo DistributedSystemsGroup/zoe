@@ -2,7 +2,7 @@ import logging
 
 from common.application_description import ZoeApplication, ZoeApplicationProcess
 from common.exceptions import CannotCreateCluster
-from common.zoe_storage_client import generate_application_binary_url, logs_archive_create
+from common.zoe_storage_client import logs_archive_create, generate_storage_url
 from zoe_scheduler.platform_status import PlatformStatus
 from zoe_scheduler.state import AlchemySession
 from zoe_scheduler.state.cluster import ClusterState
@@ -46,7 +46,7 @@ class PlatformManager:
         # This information is used to substitute templates in the environment variables
         subst_dict = {
             "cluster": execution.gen_environment_substitution(),
-            "application_binary_url": generate_application_binary_url(execution.application_id)
+            "application_binary_url": generate_storage_url(execution.application_id, "apps")
         }
         for env_name, env_value in process_description.environment:
             try:
@@ -67,15 +67,22 @@ class PlatformManager:
                                    ip_address=cont_info["ip_address"],
                                    readable_name=process_description.name,
                                    cluster=execution.cluster,
-                                   monitor=process_description.monitor)
+                                   description=process_description)
         state.add(container)
         state.commit()
         return True
 
     def execution_terminate(self, execution: ExecutionState):
+        """
+        This method kills the "monitor" container, so that the cleanup thread will notice it and kill the other containers part of this cluster.
+        The container is not deleted, so logs can be retrieved and saved.
+        :param execution: The execution to be terminated
+        :return:
+        """
         cluster = execution.cluster
         for c in cluster.containers:
-            if c.monitor:
+            assert isinstance(c, ContainerState)
+            if c.description.monitor:
                 self.swarm.terminate_container(c.docker_id, delete=False)
                 return
 
@@ -98,17 +105,14 @@ class PlatformManager:
         all_containers = state.query(ContainerState).all()
         for c in all_containers:
             if not self.is_container_alive(c):
-                if c.cluster.execution.status == "running":
+                if c.cluster.execution.status == "running" or c.cluster.execution.status == "cleaning up":
                     self._container_died(state, c)
 
         state.commit()
         state.close()
 
     def _container_died(self, state: AlchemySession, container: ContainerState):
-        if container.monitor:
-            log.debug("found a dead monitor container, cleaning up execution")
-            container.cluster.execution.set_cleaning_up()
-            state.commit()
+        if container.description.monitor:
             self._cleanup_execution(state, container.cluster.execution)
             container.cluster.execution.set_finished()
 #            notify_execution_finished(container.cluster.execution)

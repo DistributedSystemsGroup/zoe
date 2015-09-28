@@ -1,9 +1,18 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, PickleType
 
 from zoe_scheduler.state import Base
+from common.application_description import ZoeApplicationProcess
 
 
 class ContainerState(Base):
+    """
+    :type id: int
+    :type docker_id: str
+    :type cluster_id: int
+    :type ip_address: str
+    :type readable_name: str
+    :type description: ZoeApplicationProcess
+    """
     __tablename__ = 'containers'
 
     id = Column(Integer, primary_key=True)
@@ -11,7 +20,7 @@ class ContainerState(Base):
     cluster_id = Column(Integer, ForeignKey('clusters.id'))
     ip_address = Column(String(16))
     readable_name = Column(String(32))
-    monitor = Column(Boolean)
+    description = Column(PickleType())
 
     def to_dict(self) -> dict:
         ret = {
@@ -20,7 +29,7 @@ class ContainerState(Base):
             'cluster_id': self.cluster_id,
             'ip_address': self.ip_address,
             'readable_name': self.readable_name,
-            'monitor': self.monitor
+            'description': self.description.to_dict()
         }
 
         return ret

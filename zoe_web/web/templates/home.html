@@ -13,23 +13,22 @@
     <thead>
     <tr>
         <th>Name</th>
-        <th>Type</th>
         <th>Req. containers</th>
-        <th>Worker RAM</th>
-        <th>Cores per worker</th>
-        <th>Master image</th>
+        <th>Req. RAM</th>
     </tr>
     </thead>
     <tbody>
         {% for a in apps %}
             <tr class="{{ loop.cycle('odd', 'even') }}">
-            <td>{{ a.name }}</td>
-            <td>{{ a.type }}</td>
-            <td>{{ a.required_resources.container_count }}</td>
-            <td>{{ a.required_resources.worker_resources["memory_limit"] }}</td>
-            <td>{{ a.required_resources.worker_resources["cores"] }}</td>
-            <td>{{ a.master_image }}</td>
-            <td><a href="{{ url_for('web.execution_new', app_id=a.id) }}">Run</a></td>
+            <td>{{ a.description.name }}</td>
+            <td>{{ a.description.container_count() }}</td>
+            <td><script>format_bytes({{ a.description.total_memory() }})</script></td>
+            <td><a href="{{ url_for('web.application_modify', app_id=a.id) }}">Modify</a></td>
+            {% if a.description.requires_binary and not binaries[a.id] %}
+            <td>Missing binary</td>
+            {% else %}
+            <td><a href="{{ url_for('web.execution_start', app_id=a.id) }}">Run</a></td>
+            {% endif %}
             <td><a href="{{ url_for('web.application_delete', app_id=a.id) }}">Delete</a></td>
             </tr>
         {% endfor %}
@@ -48,7 +47,7 @@
     <thead>
     <tr>
         <th>Application name</th>
-        <th>Execution name</th>
+        <th>#</th>
         <th>Status</th>
         <th>Scheduled</th>
         <th>Started</th>
@@ -58,7 +57,7 @@
     <tbody>
         {% for e in active_executions %}
             <tr class="{{ loop.cycle('odd', 'even') }}">
-            <td>{{ e[0].name }}</td>
+            <td>{{ e[0].description.name }}</td>
             <td>{{ e[1].name }}</td>
             <td>{{ e[1].status }}</td>
             <td><script>format_timestamp({{ e[1].time_scheduled.timestamp() }})</script></td>

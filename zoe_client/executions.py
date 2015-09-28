@@ -33,18 +33,15 @@ def execution_start(application_id: int) -> Execution:
     state = session()
     try:
         application = state.query(ApplicationState).filter_by(id=application_id).one()
+        assert isinstance(application, ApplicationState)
     except NoResultFound:
         log.error("No such application")
         return None
 
     ipc_client = ZoeIPCClient()
-    answer = ipc_client.ask('application_validate', description=application.description)
-    if answer is None:
-        log.error("Application description failed the scheduler validation")
-        return None
-
-    answer = ipc_client.ask('execution_start', application_id=application_id, description=application.description)
+    answer = ipc_client.ask('execution_start', application_id=application_id, description=application.description.to_dict())
     if answer is not None:
         return Execution(answer["execution"])
     else:
+        log.error("Application description failed the scheduler validation")
         return None

@@ -51,6 +51,15 @@ class ZoeApplication:
 
         for p in data['processes']:
             ret.processes.append(ZoeApplicationProcess.from_dict(p))
+
+        found_monitor = False
+        for p in ret.processes:
+            if p.monitor:
+                found_monitor = True
+                break
+        if not found_monitor:
+            raise InvalidApplicationDescription(msg="at least one process should have monitor set to True")
+
         return ret
 
     def to_dict(self) -> dict:
@@ -59,6 +68,7 @@ class ZoeApplication:
             'version': self.version,
             'will_end': self.will_end,
             'priority': self.priority,
+            'requires_binary': self.requires_binary,
             'processes': []
         }
         for p in self.processes:
@@ -71,6 +81,55 @@ class ZoeApplication:
             memory += p.required_resources['memory']
         return memory
 
+    def container_count(self) -> int:
+        return len(self.processes)
+    
+
+class ZoeProcessEndpoint:
+    def __init__(self):
+        self.name = ''
+        self.protocol = ''
+        self.port_number = 0
+        self.path = ''
+        self.is_main_endpoint = False
+
+    def to_dict(self) -> dict:
+        return {
+            'name': self.name,
+            'protocol': self.protocol,
+            'port_number': self.port_number,
+            'path': self.path,
+            'is_main_endpoint': self.is_main_endpoint
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        ret = cls()
+        required_keys = ['name', 'protocol', 'port_number', 'is_main_endpoint']
+        for k in required_keys:
+            try:
+                setattr(ret, k, data[k])
+            except KeyError:
+                raise InvalidApplicationDescription(msg="Missing required key: %s" % k)
+
+        try:
+            ret.port_number = int(ret.port_number)
+        except ValueError:
+            raise InvalidApplicationDescription(msg="port_number field should be an integer")
+
+        try:
+            ret.is_main_endpoint = bool(ret.is_main_endpoint)
+        except ValueError:
+            raise InvalidApplicationDescription(msg="is_main_endpoint field should be a boolean")
+
+        if 'path' in data:
+            ret.path = data['path']
+
+        return ret
+
+    def get_url(self, address):
+        return self.protocol + "://" + address + ":{}".format(self.port_number) + self.path
+
 
 class ZoeApplicationProcess:
     def __init__(self):
@@ -78,7 +137,7 @@ class ZoeApplicationProcess:
         self.version = 0
         self.docker_image = ''
         self.monitor = False  # if this process dies, the whole application is considered as complete and the execution is terminated
-        self.ports = []
+        self.ports = []  # A list of ZoeProcessEndpoint
         self.required_resources = {}
         self.environment = []  # Environment variables to pass to Docker
         self.command = None  # Commandline to pass to the Docker container
@@ -89,9 +148,10 @@ class ZoeApplicationProcess:
             'version': self.version,
             'docker_image': self.docker_image,
             'monitor': self.monitor,
-            'ports': self.ports.copy(),
+            'ports': [p.to_dict() for p in self.ports],
             'required_resources': self.required_resources.copy(),
-            'environment': self.environment.copy()
+            'environment': self.environment.copy(),
+            'command': self.command
         }
         return ret
 
@@ -122,9 +182,7 @@ class ZoeApplicationProcess:
         if not hasattr(data['ports'], '__iter__'):
             raise InvalidApplicationDescription(msg='ports should be an iterable')
         for pp in data['ports']:
-            if len(pp) != 3:
-                raise InvalidApplicationDescription(msg="ports entries must contain exactly three elements (port_number, name, is_main_port)")
-        ret.ports = data['ports'].copy()
+            ret.ports.append(ZoeProcessEndpoint.from_dict(pp))
 
         if 'required_resources' not in data:
             raise InvalidApplicationDescription(msg="Missing required key: required_resources")
@@ -152,3 +210,10 @@ class ZoeApplicationProcess:
         if 'command' in data:
             ret.command = data['command']
         return ret
+
+    def exposed_endpoint(self) -> ZoeProcessEndpoint:
+        for p in self.ports:
+            assert isinstance(p, ZoeProcessEndpoint)
+            if p.is_main_endpoint:
+                return p
+        return None

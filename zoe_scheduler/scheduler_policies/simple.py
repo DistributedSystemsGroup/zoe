@@ -21,6 +21,16 @@ class SimpleSchedulerPolicy(BaseSchedulerPolicy):
     def execution_submission(self, execution_id: int, app_description: ZoeApplication):
         self.waiting_list.append((execution_id, app_description))
 
+    def execution_kill(self, execution_id):
+        for e in self.waiting_list:
+            if e[0] == execution_id:
+                self.waiting_list.remove(e)
+                return
+        for e in self.running_list:
+            if e[0] == execution_id:
+                self.running_list.remove(e)
+                return
+
     def runnable_get(self) -> (int, ZoeApplication):
         try:
             exec_id, resources = self.waiting_list.pop(0)

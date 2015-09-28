@@ -6,8 +6,11 @@ from zoe_client.lib.ipc import ZoeIPCClient
 from zoe_client.scheduler_classes.execution import Execution
 from zoe_client.state import session
 from zoe_client.state.application import ApplicationState
+from zoe_client.users import user_check
 from zoe_client.executions import execution_delete
 
+from common.application_description import ZoeApplication
+from common.exceptions import InvalidApplicationDescription
 import common.zoe_storage_client as storage
 
 log = logging.getLogger(__name__)
@@ -21,7 +24,7 @@ def _check_application(state, application_id: int):
 def application_binary_get(application_id: int) -> bytes:
     state = session()
     if _check_application(state, application_id):
-        return storage.download_application(application_id)
+        return storage.get(application_id, "apps")
     else:
         return None
 
@@ -29,7 +32,7 @@ def application_binary_get(application_id: int) -> bytes:
 def application_binary_put(application_id: int, bin_data: bytes):
     state = session()
     if _check_application(state, application_id):
-        storage.upload_application(application_id, bin_data)
+        storage.put(application_id, "apps", bin_data)
     else:
         log.error("Trying to upload application data for non-existent application")
 
@@ -58,19 +61,25 @@ def application_list(user_id: int) -> list:
     :param user_id: the user
     :returns a list of ApplicationState objects
     """
+    if not user_check(user_id):
+        log.error("no such user")
+        return None
     state = session()
     return state.query(ApplicationState).filter_by(user_id=user_id).all()
 
 
 def application_new(user_id: int, description: dict) -> ApplicationState:
-    ipc_client = ZoeIPCClient()
-    answer = ipc_client.ask('application_validate', description=description)
-    if answer is None:
-        log.error("Application description failed the scheduler validation")
+    if not user_check(user_id):
+        log.error("no such user")
+        return None
+    try:
+        app = ZoeApplication.from_dict(description)
+    except InvalidApplicationDescription as e:
+        log.error("invalid application description: %s" % e.value)
         return None
 
     state = session()
-    application = ApplicationState(user_id=user_id, description=description)
+    application = ApplicationState(user_id=user_id, description=app)
     state.add(application)
     state.commit()
     return application
@@ -91,12 +100,6 @@ def application_remove(application_id: int):
         execution_delete(e.id)
 
     application = state.query(ApplicationState).filter_by(id=application_id).one()
-    storage.delete_application(application_id)
+    storage.delete(application_id, "apps")
     state.delete(application)
     state.commit()
-
-
-def application_validate(description: dict) -> bool:
-    ipc_client = ZoeIPCClient()
-    answer = ipc_client.ask('application_validate', description=description)
-    return answer is not None

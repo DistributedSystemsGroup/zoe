@@ -1,15 +1,15 @@
-from flask import render_template, url_for, redirect
+from flask import render_template, url_for, redirect, session, abort
 
-from zoe_client import ZoeClient
-from common.configuration import client_conf
+import zoe_client.applications as ap
+import zoe_client.executions as ex
+import zoe_client.users as us
+
 from zoe_web.web import web_bp
-import zoe_web.utils as web_utils
 
 
 @web_bp.route('/apps/new')
 def application_new():
-    client = ZoeClient(client_conf().ipc_server, client_conf().ipc_port)
-    user = web_utils.check_user(client)
+    user = us.user_get(session['user_id'])
     if user is None:
         return redirect(url_for('web.index'))
 
@@ -20,13 +20,19 @@ def application_new():
     return render_template('application_new.html', **template_vars)
 
 
-@web_bp.route('/executions/new/<app_id>')
-def execution_new(app_id):
-    client = ZoeClient(client_conf().ipc_server, client_conf().ipc_port)
-    user = web_utils.check_user(client)
+@web_bp.route('/app/modify/<app_id>')
+def application_modify(app_id):
+    return redirect(url_for('web.index'))
+
+
+@web_bp.route('/executions/start/<app_id>')
+def execution_start(app_id):
+    user = us.user_get(session["user_id"])
     if user is None:
         return redirect(url_for('web.index'))
-    application = client.application_get(app_id)
+    application = ap.application_get(app_id)
+    if application is None:
+        return abort(404)
 
     template_vars = {
         "user_id": user.id,
@@ -38,11 +44,10 @@ def execution_new(app_id):
 
 @web_bp.route('/executions/terminate/<exec_id>')
 def execution_terminate(exec_id):
-    client = ZoeClient(client_conf().ipc_server, client_conf().ipc_port)
-    user = web_utils.check_user(client)
+    user = us.user_get(session['user_id'])
     if user is None:
         return redirect(url_for('web.index'))
-    execution = client.execution_get(exec_id)
+    execution = ex.execution_get(exec_id)
 
     template_vars = {
         "user_id": user.id,
@@ -54,11 +59,10 @@ def execution_terminate(exec_id):
 
 @web_bp.route('/apps/delete/<app_id>')
 def application_delete(app_id):
-    client = ZoeClient(client_conf().ipc_server, client_conf().ipc_port)
-    user = web_utils.check_user(client)
+    user = us.user_get(session['user_id'])
     if user is None:
         return redirect(url_for('web.index'))
-    application = client.application_get(app_id)
+    application = ap.application_get(app_id)
 
     template_vars = {
         "user_id": user.id,
@@ -70,11 +74,10 @@ def application_delete(app_id):
 
 @web_bp.route('/executions/inspect/<execution_id>')
 def execution_inspect(execution_id):
-    client = ZoeClient(client_conf().ipc_server, client_conf().ipc_port)
-    user = web_utils.check_user(client)
+    user = us.user_get(session['user_id'])
     if user is None:
         return redirect(url_for('web.index'))
-    execution = client.execution_get(execution_id)
+    execution = ex.execution_get(execution_id)
 
     template_vars = {
         "user_id": user.id,

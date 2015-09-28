@@ -115,10 +115,6 @@ class ZoeConfig(ConfigParser):
         return self.get('zoe_scheduler', 'ipc_listen_address')
 
     @property
-    def object_storage_url(self) -> str:
-        return self.get('zoe_scheduler', 'object_storage_url')
-
-    @property
     def storage_path(self) -> str:
         return self.get('zoe_storage', 'storage_path')
 

@@ -17,7 +17,15 @@ class BaseSchedulerPolicy:
         A new execution request has been submitted and needs to scheduled. The request has passed admission control.
         :param execution_id: a unique identifier for this execution request
         :param app_description: the application to be executed
-        :return: None
+        :return:
+        """
+        raise NotImplementedError
+
+    def execution_kill(self, execution_id: int) -> None:
+        """
+        An execution has been killed, most probably by the user. Cleanup any status associated with that execution.
+        :param execution_id: the terminated execution
+        :return:
         """
         raise NotImplementedError
 

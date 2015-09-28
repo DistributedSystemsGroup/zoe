@@ -51,8 +51,10 @@ class ZoeScheduler:
         :param execution: the execution to terminate
         :return: None
         """
-        self.platform.execution_terminate(execution)
+        if execution.cluster is not None:
+            self.platform.execution_terminate(execution)
         self.event_queue.put(("termination", execution.id))
+        execution.set_cleaning_up()
 
     def _check_runnable(self):  # called periodically, does not use state
         """
@@ -78,7 +80,8 @@ class ZoeScheduler:
             try:
                 event, data = self.event_queue.get()
                 if event == "termination":
-                    pass
+                    exec_id = data
+                    self.scheduler_policy.execution_kill(exec_id)
                 elif event == "submission":
                     execution_id = data[0]
                     app_descr = data[1]

@@ -14,11 +14,13 @@
         "memory": 2147483648
       },
       "ports": [
-        [
-          "8080",
-          "Spark master web interface",
-          false
-        ]
+        {
+          "name": "Spark master web interface",
+          "protocol": "http",
+          "port_number": 8080,
+          "path": "/",
+          "is_main_endpoint": false
+        }
       ]
     },
     {
@@ -30,11 +32,13 @@
         "memory": 4294967296
       },
       "ports": [
-        [
-          "8081",
-          "Spark worker web interface",
-          false
-        ]
+        {
+          "name": "Spark worker web interface",
+          "protocol": "http",
+          "port_number": 8081,
+          "path": "/",
+          "is_main_endpoint": false
+        }
       ],
       "environment": [
         ["SPARK_WORKER_CORES", "4"],
@@ -51,11 +55,13 @@
         "memory": 4294967296
       },
       "ports": [
-        [
-          "8081",
-          "Spark worker web interface",
-          false
-        ]
+        {
+          "name": "Spark worker web interface",
+          "protocol": "http",
+          "port_number": 8081,
+          "path": "/",
+          "is_main_endpoint": false
+        }
       ],
       "environment": [
         ["SPARK_WORKER_CORES", "4"],
@@ -72,11 +78,13 @@
         "memory": 4294967296
       },
       "ports": [
-        [
-          "4040",
-          "Spark application web interface",
-          true
-        ]
+        {
+          "name": "Spark application web interface",
+          "protocol": "http",
+          "port_number": 4040,
+          "path": "/",
+          "is_main_endpoint": true
+        }
       ],
       "environment": [
         ["SPARK_MASTER_IP", "{cluster[spark-master][ip_address]}"],
