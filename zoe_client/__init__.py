@@ -1,1 +1,1 @@
-from zoe_client.client import ZoeClient
+from zoe_client.applications import ZoeClient
