@@ -22,19 +22,19 @@ def _check_application(state, application_id: int):
 
 
 def application_binary_get(application_id: int) -> bytes:
-    state = session()
-    if _check_application(state, application_id):
-        return storage.get(application_id, "apps")
-    else:
-        return None
+    with session() as state:
+        if _check_application(state, application_id):
+            return storage.get(application_id, "apps")
+        else:
+            return None
 
 
 def application_binary_put(application_id: int, bin_data: bytes):
-    state = session()
-    if _check_application(state, application_id):
-        storage.put(application_id, "apps", bin_data)
-    else:
-        log.error("Trying to upload application data for non-existent application")
+    with session() as state:
+        if _check_application(state, application_id):
+            storage.put(application_id, "apps", bin_data)
+        else:
+            log.error("Trying to upload application data for non-existent application")
 
 
 def application_executions_get(application_id) -> list:
@@ -46,13 +46,13 @@ def application_executions_get(application_id) -> list:
 
 
 def application_get(application_id):
-    state = session()
-    try:
-        application = state.query(ApplicationState).filter_by(id=application_id).one()
-    except NoResultFound:
-        return None
-    else:
-        return application
+    with session() as state:
+        try:
+            application = state.query(ApplicationState).filter_by(id=application_id).one()
+        except NoResultFound:
+            return None
+        else:
+            return application
 
 
 def application_list(user_id: int) -> list:
@@ -64,42 +64,37 @@ def application_list(user_id: int) -> list:
     if not user_check(user_id):
         log.error("no such user")
         return None
-    state = session()
-    return state.query(ApplicationState).filter_by(user_id=user_id).all()
+    with session() as state:
+        return state.query(ApplicationState).filter_by(user_id=user_id).all()
 
 
-def application_new(user_id: int, description: dict) -> ApplicationState:
+def application_new(user_id: int, description: ZoeApplication) -> ApplicationState:
     if not user_check(user_id):
         log.error("no such user")
         return None
-    try:
-        app = ZoeApplication.from_dict(description)
-    except InvalidApplicationDescription as e:
-        log.error("invalid application description: %s" % e.value)
-        return None
 
-    state = session()
-    application = ApplicationState(user_id=user_id, description=app)
-    state.add(application)
-    state.commit()
-    return application
+    with session() as state:
+        application = ApplicationState(user_id=user_id, description=description)
+        state.add(application)
+        state.commit()
+        return application
 
 
 def application_remove(application_id: int):
-    state = session()
-    if not _check_application(state, application_id):
-        log.error("Trying to remove a non-existent application")
-        return
+    with session() as state:
+        if not _check_application(state, application_id):
+            log.error("Trying to remove a non-existent application")
+            return
 
-    ipc_client = ZoeIPCClient()
-    answer = ipc_client.ask("application_executions_get", application_id=application_id)
-    if answer is None:
-        return
-    executions = [Execution(e) for e in answer["executions"]]
-    for e in executions:
-        execution_delete(e.id)
+        ipc_client = ZoeIPCClient()
+        answer = ipc_client.ask("application_executions_get", application_id=application_id)
+        if answer is None:
+            return
+        executions = [Execution(e) for e in answer["executions"]]
+        for e in executions:
+            execution_delete(e.id)
 
-    application = state.query(ApplicationState).filter_by(id=application_id).one()
-    storage.delete(application_id, "apps")
-    state.delete(application)
-    state.commit()
+        application = state.query(ApplicationState).filter_by(id=application_id).one()
+        storage.delete(application_id, "apps")
+        state.delete(application)
+        state.commit()

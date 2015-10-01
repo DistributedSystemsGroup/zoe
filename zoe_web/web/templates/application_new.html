@@ -4,48 +4,125 @@
 
 <h1>New application</h1>
 
-    <p>Use the form below to create a new Zoe application.</p>
-    <form enctype="multipart/form-data" id="app_new">
+    <form enctype="multipart/form-data" id="app_new" class="wizard clearfix">
+        <div class="step" data-state="app_type">
+            <h3 class="step-header">Application type</h3>
+            <section>
+                <label for="app_name">Name:</label>
+                <input type="text" autofocus autocomplete="on" required pattern="[a-z0-9_\-]+" name="app_name" id="app_name" placeholder="myapp"><br/>
 
-        <label for="app_name">Name:</label>
-        <input type="text" autofocus autocomplete="on" required pattern="[a-z0-9_\-]+" name="app_name" id="app_name" placeholder="myapp-25"><br/>
+                <label for="app_type">Type:</label><br/>
+                <input id="radio_nb" type="radio" name="app_type" value="spark-notebook" checked>&nbsp;Spark Notebook<br/>
+                <input id="radio_inb" type="radio" name="app_type" value="ipython-notebook" disabled>&nbsp;iPython Notebook (coming soon)<br/>
+                <input id="radio_sub" type="radio" name="app_type" value="spark-submit">&nbsp;Spark Application<br/>
+                <input id="radio_zk" type="radio" name="app_type" value="zookeeper" disabled>&nbsp;Zookeeper (coming soon)<br/>
+            </section>
+        </div>
 
-        <label for="app_type">Type:</label><br/>
-        <input type="radio" name="app_type" value="spark-notebook" onclick="handleAppTypeClick(this)" checked>&nbsp;Spark Notebook<br/>
-        <input type="radio" name="app_type" value="ipython-notebook" onclick="handleAppTypeClick(this)" disabled>&nbsp;iPython Notebook (coming soon)<br/>
-        <input type="radio" name="app_type" value="spark-submit" onclick="handleAppTypeClick(this)">&nbsp;Spark Application<br/>
+        <div class="branch" id="spark">
+            <div class="step">
+                <h3 class="step-header">Spark: minimum required resources</h3>
+                <section>
+                    <label for="master_mem_limit">Amount of RAM per worker node (gigabytes)</label>
+                    <input type="number" min="1" step="1" value="2" required name="master_mem_limit"><br/>
 
-        <p>Minimum required resources:</p>
-        <label for="num_workers">Number of worker nodes</label>
-        <input type="number" min="1" step="1" value="2" required name="num_workers"><br/>
+                    <label for="worker_count">Number of worker nodes</label>
+                    <input type="number" min="1" step="1" value="2" required name="worker_count"><br/>
 
-        <label for="num_cores">Number of cores per worker node</label>
-        <input type="number" min="2" step="1" value="2" required name="num_cores"><br/>
+                    <label for="worker_cores">Number of cores per worker node</label>
+                    <input type="number" min="2" step="1" value="2" required name="worker_cores"><br/>
 
-        <label for="ram">Amount of RAM per worker node (gigabytes)</label>
-        <input type="number" min="1" step="1" value="2" required name="ram"><br/>
+                    <label for="worker_mem_limit">Amount of RAM per worker node (gigabytes)</label>
+                    <input type="number" min="1" step="1" value="2" name="worker_mem_limit" required>
+                </section>
+            </div>
+            <div class="step" data-state="spark-settings">
+                <h3 class="step-header">Spark: settings</h3>
+                <section>
+                    <h4>Other settings</h4>
+                    <label for="spark_options">Spark options:</label>
+                    <input type="text" autofocus autocomplete="on" pattern="[a-z0-9_\-=]+" name="spark_options" id="spark_options" size="60">
+                </section>
+                <section>
+                    <h4>Images</h4>
+                    <label for="master_image">Spark Master Docker image:</label>
+                    <input type="text" autofocus autocomplete="on" required pattern="[a-z0-9_\-=]+" name="master_image" id="master_image" size="40" value="/zoerepo/spark-master"><br/>
+                    <label for="worker_image">Spark Worker Docker image:</label>
+                    <input type="text" autofocus autocomplete="on" required pattern="[a-z0-9_\-=]+" name="worker_image" id="worker_image" size="40" value="/zoerepo/spark-worker"><br/>
+                </section>
+            </div>
+            <div class="branch" id="spark-notebook">
+                <div class="submit step">
+                    <h3 class="step-header">Spark: Scala notebook settings</h3>
+                    <section>
+                        <label for="notebook_image">Spark Scala Notebook Docker image:</label>
+                        <input type="text" autofocus autocomplete="on" required pattern="[a-z0-9_\-=]+" name="notebook_image" id="notebook_image" size="40" value="/zoerepo/spark-scala-notebook">
+                    </section>
+                </div>
+            </div>
+            <div class="branch" id="spark-submit">
+                <div class="submit step">
+                    <h3 class="step-header">Spark: application settings</h3>
+                    <section>
+                        <h4>Other settings</h4>
+                        <label for="commandline">Spark options:</label>
+                        <input type="text" autocomplete="on" required name="commandline" id="commandline" size="100" placeholder="wordcount.py hdfs://192.168.45.157/datasets/gutenberg_big_2x.txt hdfs://192.168.45.157/tmp/cntwdc1"><br/>
 
-        <label for="upload" class="spark-submit">Zip file containing the Spark application:</label>
-        <input class="spark-submit" type="file" name="file" id="upload" accept="application/zip"><br/>
+                        <label for="upload" class="spark-submit">Zip file containing the Spark application:</label>
+                        <input class="spark-submit" type="file" name="file" id="upload" accept="application/zip"><br/>
+                    </section>
+                    <section>
+                        <h4>Image</h4>
+                        <label for="submit_image">Spark Submit Docker image:</label>
+                        <input type="text" autofocus autocomplete="on" required pattern="[a-z0-9_\-=]+" name="submit_image" id="submit_image" size="40" value="/zoerepo/spark-submit">
+                    </section>
+                </div>
+            </div>
+        </div>
 
-        <input type="submit" value="Submit" id="submit">
+        <div class="navigation">
+            <ul class="clearfix">
+                <li><button type="button" name="backward" class="backward">Backward</button></li>
+                <li><button type="button" name="forward" class="forward">Forward</button></li>
+                <li><button type="submit" name="process" class="submit">Submit</button></li>
+            </ul>
+        </div>
     </form>
-    <progress style="display: none" id="progress"></progress>
 
     <script type="application/javascript">
-    var curAppType = 'spark-notebook';
-    $(".spark-submit").hide();
-    $("#upload").required = false;
-    function handleAppTypeClick(radio) {
-        curAppType = radio.value;
-        if (curAppType == "spark-submit") {
-            $(".spark-submit").show();
-            $("#upload").attr('required', true);
-        } else {
-            $(".spark-submit").hide();
-            $("#upload").attr('required', false);
+    var form = $("#app_new");
+    form.wizard({
+        stepsWrapper: "#app_new",
+        submit: ".submit",
+        branches: ".branch",
+        header: ".step-header",
+        beforeForward: function (event, state) {
+            form.validate().settings.ignore = ":disabled,:hidden";
+            return $(this).wizard("form").valid();
+        },
+        transitions: {
+            'app_type': function( state, action ) {
+                var app_type = $("[name=app_type]:checked").val();
+                if (app_type == "spark-notebook" || app_type == "spark-submit") {
+                    return "spark";
+                }
+            },
+            'spark-settings': function(state, action) {
+                return $("[name=app_type]:checked").val();
+            }
         }
-    }
+    }).wizard("form").submit(function( event ) {
+        event.preventDefault();
+        form_submit(this);
+    }).validate({
+        errorPlacement: function( error, element ) {
+            if ( element.is( ":radio" ) || element.is( ":checkbox" ) ) {
+                error.insertBefore( element.next() );
+            } else {
+                error.insertAfter( element );
+            }
+        }
+    });
 
     function progressHandlingFunction(e){
         if(e.lengthComputable){
@@ -66,8 +143,8 @@
         $("#progress").hide();
     }
 
-    $('#app_new').on('submit', function(event) {
-        event.preventDefault();
+    function form_submit(form) {
+        $("#app_new").hide();
         $("#progress").show();
         $.ajax({
             url: '{{ url_for("api.application_new") }}',  // Server script to process data
@@ -84,14 +161,14 @@
             success: completeHandler,
             error: errorHandler,
             // Form data
-            data: new FormData(this),
+            data: new FormData(form),
             //Options to tell jQuery not to process data or worry about content-type.
             cache: false,
             contentType: false,
             processData: false
         });
         return false;
-    });
+    }
     </script>
 
 {% endblock %}

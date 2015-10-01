@@ -9,7 +9,7 @@
     <div id="container_list">
     <ul>
     {% for c in execution.containers %}
-        <li class="container_name" id="{{ c.id }}"><span onclick="get_container({{ c.id }})" class="fakelink">{{ c.readable_name }}</span></li>
+        <li class="container_name" id="{{ c.id }}"><span onclick="get_container({{ c.id }})" class="fakelink">{{ c.description.name }}</span></li>
     {% endfor %}
     </ul>
     </div>

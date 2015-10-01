@@ -5,9 +5,13 @@
     <meta charset="UTF-8">
     <title>{% block title %}{% endblock %} - Zoe</title>
     <script src="/static/jquery-2.1.4.min.js" type="application/javascript"></script>
+    <script src="/static/jquery-ui-1.11.4/jquery-ui.min.js" type="application/javascript"></script>
+    <script src="/static/jquery.wizard.js" type="application/javascript"></script>
+    <script src="/static/jquery.validate.min.js" type="application/javascript"></script>
     <script src="/static/sorttable.js" type="application/javascript"></script>
     <script src="/static/moment.min.js" type="application/javascript"></script>
     <link rel="stylesheet" href="/static/zoe.css" type="text/css">
+    <link rel="stylesheet" href="/static/jquery-ui-1.11.4/jquery-ui.min.css">
     {% endblock %}
 </head>
 <body>
@@ -23,7 +27,7 @@
                 });
         }
         update_status();
-        window.setInterval(update_status, 5000);
+//        window.setInterval(update_status, 5000);
 
         moment.locale(window.navigator.userLanguage || window.navigator.language);
 

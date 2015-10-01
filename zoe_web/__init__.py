@@ -8,8 +8,3 @@ from zoe_client.state import session
 app = Flask(__name__, static_url_path='/does-not-exist')
 app.register_blueprint(web_bp, url_prefix='')
 app.register_blueprint(api_bp, url_prefix='/api')
-
-
-@app.teardown_appcontext
-def shutdown_session(exception=None):
-    session().remove()

@@ -41,7 +41,7 @@ class ExecutionState(Base):
 
     def find_container(self, name):
         for c in self.cluster.containers:
-            if c.readable_name == name:
+            if c.description.name == name:
                 return c
 
     def to_dict(self) -> dict:
@@ -72,7 +72,7 @@ class ExecutionState(Base):
     def gen_environment_substitution(self):
         ret = {}
         for cont in self.cluster.containers:
-            ret[cont.readable_name] = {
+            ret[cont.description.name] = {
                 'ip_address': cont.ip_address
             }
         return ret

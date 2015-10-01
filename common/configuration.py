@@ -29,6 +29,9 @@ defaults = {
         'db_connect': 'mysql+mysqlconnector://zoe:pass@dbhost/zoe',
         'ipc_listen_address': '127.0.0.1',
         'ipc_listen_port': 8723,
+        'ddns_keyfile': '/path/to/rndc.key',
+        'ddns_server': '127.0.0.1',
+        'ddns_domain': 'swarm.example.com'
     },
     'zoe_storage': {
         'storage_path': "/var/lib/zoe/history",
@@ -125,6 +128,18 @@ class ZoeConfig(ConfigParser):
     @property
     def http_listen_address(self) -> str:
         return self.get('zoe_storage', 'http_listen_address')
+
+    @property
+    def ddns_keyfile(self) -> str:
+        return self.get('zoe_scheduler', 'ddns_keyfile')
+
+    @property
+    def ddns_server(self) -> str:
+        return self.get('zoe_scheduler', 'ddns_server')
+
+    @property
+    def ddns_domain(self) -> str:
+        return self.get('zoe_scheduler', 'ddns_domain')
 
 
 def conf_init(config_file=None) -> ZoeConfig:

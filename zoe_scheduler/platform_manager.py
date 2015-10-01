@@ -3,6 +3,7 @@ import logging
 from common.application_description import ZoeApplication, ZoeApplicationProcess
 from common.exceptions import CannotCreateCluster
 from common.zoe_storage_client import logs_archive_create, generate_storage_url
+from zoe_scheduler.dnsupdate import DDNSUpdater
 from zoe_scheduler.platform_status import PlatformStatus
 from zoe_scheduler.state import AlchemySession
 from zoe_scheduler.state.cluster import ClusterState
@@ -40,6 +41,7 @@ class PlatformManager:
 
     def _spawn_process(self, state: AlchemySession, execution: ExecutionState, process_description: ZoeApplicationProcess) -> bool:
         opts = ContainerOptions()
+        opts.name = process_description.name + "-{}".format(execution.id)
         opts.set_memory_limit(process_description.required_resources['memory'])
 
         # Generate a dictionary containing the current cluster status (before the new container is spawned)
@@ -65,11 +67,12 @@ class PlatformManager:
             raise CannotCreateCluster(execution)
         container = ContainerState(docker_id=cont_info["docker_id"],
                                    ip_address=cont_info["ip_address"],
-                                   readable_name=process_description.name,
+                                   readable_name=opts.name,
                                    cluster=execution.cluster,
                                    description=process_description)
         state.add(container)
         state.commit()
+        DDNSUpdater().add_a_record(container.readable_name, container.ip_address)
         return True
 
     def execution_terminate(self, execution: ExecutionState):
@@ -117,7 +120,7 @@ class PlatformManager:
             container.cluster.execution.set_finished()
 #            notify_execution_finished(container.cluster.execution)
         else:
-            log.warning("Container {} (ID: {}) died unexpectedly".format(container.readable_name, container.id))
+            log.warning("Container {} (ID: {}) died unexpectedly".format(container.description.name, container.id))
 
     def _cleanup_execution(self, state: AlchemySession, execution: ExecutionState):
         cluster = execution.cluster
@@ -125,11 +128,13 @@ class PlatformManager:
         if cluster is not None:
             containers = cluster.containers
             for c in containers:
+                assert isinstance(c, ContainerState)
                 l = self.log_get(c)
                 if l is not None:
-                    logs.append((c.readable_name, c.ip_address, l))
+                    logs.append((c.description.name, c.ip_address, l))
                 self.swarm.terminate_container(c.docker_id, delete=True)
                 state.delete(c)
+                DDNSUpdater().delete_a_record(c.readable_name, c.ip_address)
             state.delete(cluster)
         execution.set_terminated()
         logs_archive_create(execution.id, logs)

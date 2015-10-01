@@ -60,4 +60,4 @@ docs/_build/
 target/
 .idea/
 zoe.conf
-zoe-client.conf
+rndc.key

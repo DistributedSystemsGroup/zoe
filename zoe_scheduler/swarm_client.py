@@ -61,6 +61,7 @@ class SwarmClient:
                                              network_disabled=False,
                                              host_config=host_config,
                                              detach=True,
+                                             name=options.name,
                                              volumes=options.get_volumes(),
                                              command=options.get_command())
             self.cli.start(container=cont.get('Id'))
@@ -133,6 +134,7 @@ class ContainerOptions:
         self.volumes = []
         self.command = ""
         self.memory_limit = '2g'
+        self.name = ''
 
     def add_env_variable(self, name, value):
         if value is not None:

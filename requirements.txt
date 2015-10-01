@@ -10,3 +10,4 @@ Sphinx
 SQLAlchemy
 tornado
 pyzmq
+dnspython3

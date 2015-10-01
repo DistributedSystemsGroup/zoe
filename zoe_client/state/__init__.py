@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
@@ -20,5 +22,10 @@ def create_tables(engine):
     Base.metadata.create_all(engine)
 
 
+@contextmanager
 def session():
-    return scoped_session(AlchemySession)
+    s = scoped_session(AlchemySession)
+    try:
+        yield s
+    finally:
+        s.remove()

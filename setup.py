@@ -73,7 +73,8 @@ setup(
                       'SQLAlchemy>=1.0.8',
                       'tornado>=4.2.1',
                       'pyzmq>=14.0.1',
-                      'requests'
+                      'requests',
+                      'dnspython3'
                       ],
 
     # List additional groups of dependencies here (e.g. development

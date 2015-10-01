@@ -14,3 +14,8 @@ class CannotCreateCluster(ZoeException):
 class InvalidApplicationDescription(ZoeException):
     def __init__(self, msg):
         self.value = msg
+
+
+class MissingDataInPOST(ZoeException):
+    def __init__(self, msg):
+        self.value = msg

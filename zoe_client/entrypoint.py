@@ -6,12 +6,15 @@ from pprint import pprint
 import sys
 
 from common.configuration import conf_init, zoe_conf
+from common.application_description import ZoeApplication
+from common.exceptions import InvalidApplicationDescription
 
 import zoe_client.applications as apps
 import zoe_client.diagnostics as diags
 import zoe_client.executions as execs
 from zoe_client.state import init as state_init, create_tables
 from zoe_client.state.application import ApplicationState
+from zoe_client.scheduler_classes.container import Container
 import zoe_client.users as users
 
 
@@ -32,7 +35,13 @@ def user_get_cmd(args):
 
 def app_new_cmd(args):
     app_descr = json.load(args.jsonfile)
-    application = apps.application_new(args.user_id, app_descr)
+    try:
+        app = ZoeApplication.from_dict(app_descr)
+    except InvalidApplicationDescription as e:
+        print("invalid application description: %s" % e.value)
+        return
+
+    application = apps.application_new(args.user_id, app)
     if application is not None:
         print("Application added with ID: {}".format(application.id))
 
@@ -68,7 +77,8 @@ def app_inspect_cmd(args):
     for e in executions:
         print(" - Execution {} (ID: {}) {}".format(e.name, e.id, e.status))
         for c in e.containers:
-            print(" -- Container {}, ID {}".format(c.readable_name, c.id))
+            assert isinstance(c, Container)
+            print(" -- Container {}, ID {}".format(c.description.name, c.id))
 
 
 def app_list_cmd(args):

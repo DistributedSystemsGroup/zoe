@@ -1,4 +1,5 @@
 from io import BytesIO
+import logging
 from zipfile import is_zipfile
 
 from flask import Blueprint, jsonify, request, session, abort, send_file
@@ -7,9 +8,11 @@ import zoe_client.applications as ap
 import zoe_client.diagnostics as di
 import zoe_client.executions as ex
 import zoe_client.users as us
+from zoe_client.predefined_apps.spark import spark_notebook_app, spark_submit_app
 import common.zoe_storage_client as storage
 
 api_bp = Blueprint('api', __name__)
+log = logging.getLogger(__name__)
 
 
 def _api_check_user():
@@ -20,6 +23,14 @@ def _api_check_user():
         return jsonify(status='error', msg='unknown user')
     else:
         return user
+
+
+def _form_field(form: dict, key: str):
+    try:
+        return form[key]
+    except KeyError:
+        log.error("the submitted form is missing the {} field".format(key))
+        return None
 
 
 @api_bp.route('/status/basic')
@@ -49,15 +60,61 @@ def application_new():
 
     form_data = request.form
 
-    if form_data['app_type'] == "spark-notebook":
-        client.application_spark_notebook_new(user.id, int(form_data["num_workers"]), form_data["ram"] + 'g', int(form_data["num_cores"]), form_data["app_name"])
-    elif form_data['app_type'] == "spark-submit":
-        file_data = request.files['file']
-        if not is_zipfile(file_data.stream):
-            return jsonify(status='error', msg='not a zip file')
-        file_data.stream.seek(0)
-        fcontents = file_data.stream.read()
-        client.application_spark_submit_new(user.id, int(form_data["num_workers"]), form_data["ram"] + 'g', int(form_data["num_cores"]), form_data["app_name"], fcontents)
+    params = {}
+    app_name = _form_field(form_data, "app_name")
+    if app_name is None:
+        return jsonify(status='error', msg='missing app_name in POST')
+    fcontents = None
+    if form_data['app_type'] == "spark-notebook" or form_data['app_type'] == "spark-submit":
+        params['name'] = app_name
+        keys = ["worker_count", 'master_mem_limit', 'worker_cores', 'worker_mem_limit', 'spark_options', 'master_image', 'worker_image']
+        for key in keys:
+            v = _form_field(form_data, key)
+            if v is None:
+                return jsonify(status='error', msg='missing key in POST')
+            else:
+                params[key] = v
+        params['worker_count'] = int(params['worker_count'])
+        params['worker_cores'] = int(params['worker_cores'])
+        params['master_mem_limit'] = int(params['master_mem_limit']) * 1024 * 1024 * 1024  # 1GiB
+        params['worker_mem_limit'] = int(params['worker_mem_limit']) * 1024 * 1024 * 1024  # 1GiB
+
+        if form_data['app_type'] == "spark-notebook":
+            notebook_image = _form_field(form_data, 'notebook_image')
+            if notebook_image is None:
+                return jsonify(status='error', msg='missing notebook_image in POST')
+            params['notebook_image'] = notebook_image
+
+            app_descr = spark_notebook_app(**params)
+        elif form_data['app_type'] == "spark-submit":
+            keys = ['submit_image', 'commandline']
+            for key in keys:
+                v = _form_field(form_data, key)
+                if v is None:
+                    return jsonify(status='error', msg='missing key in POST')
+                else:
+                    params[key] = v
+
+            file_data = request.files['file']
+            if not is_zipfile(file_data.stream):
+                return jsonify(status='error', msg='not a zip file')
+            file_data.stream.seek(0)
+            fcontents = file_data.stream.read()
+
+            app_descr = spark_submit_app(**params)
+
+        else:
+            log.error("unknown application type: {}".format(form_data['app_type']))
+            return jsonify(status="error", msg='unknown application type')
+
+        app = ap.application_new(user.id, app_descr)
+        if app_descr.requires_binary and fcontents is None:
+            log.warn('Creating application without binary file, but the application type needs one')
+        elif app_descr.requires_binary and fcontents is not None:
+            storage.put(app.id, "apps", fcontents)
+        else:
+            log.warn('A binary file was provided, but the application does not need one, discarding')
+
     else:
         return jsonify(status="error", msg='unknown application type')
 

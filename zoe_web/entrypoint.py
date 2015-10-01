@@ -32,7 +32,7 @@ def zoe_web() -> int:
     else:
         logging.basicConfig(level=logging.INFO)
     logging.getLogger("requests").setLevel(logging.WARNING)
-    logging.getLogger("tornado").setLevel(logging.WARNING)
+    logging.getLogger("tornado").setLevel(logging.DEBUG)
 
     conf_init()
     if args.ipc_server is not None:
