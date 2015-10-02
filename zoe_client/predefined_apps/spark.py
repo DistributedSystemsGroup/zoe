@@ -14,6 +14,7 @@ def spark_master_proc(mem_limit: int, image: str) -> ZoeApplicationProcess:
     port.path = "/"
     port.is_main_endpoint = False
     proc.ports.append(port)
+    proc.environment.append(["SPARK_MASTER_IP", "spark-master-{execution_id}"])
     return proc
 
 
@@ -62,7 +63,6 @@ def spark_notebook_proc(mem_limit: int, image: str, spark_options: str) -> ZoeAp
     proc.environment.append(["SPARK_MASTER_IP", "spark-master-{execution_id}"])
     proc.environment.append(["SPARK_OPTIONS", spark_options])
     proc.environment.append(["SPARK_EXECUTOR_RAM", str(mem_limit)])
-    proc.environment.append([])
     return proc
 
 
@@ -107,7 +107,6 @@ def spark_submit_proc(mem_limit: int, image: str, command: str, spark_options: s
     proc.environment.append(["SPARK_EXECUTOR_RAM", str(mem_limit)])
     proc.environment.append(["APPLICATION_URL", "{application_binary_url}"])
     proc.command = command
-    proc.environment.append([])
     return proc
 
 

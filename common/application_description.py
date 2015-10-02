@@ -201,11 +201,13 @@ class ZoeApplicationProcess:
             if not hasattr(data['environment'], '__iter__'):
                 raise InvalidApplicationDescription(msg='environment should be an iterable')
             ret.environment = data['environment'].copy()
-            for n, v in ret.environment:
-                if not isinstance(n, str):
-                    raise InvalidApplicationDescription(msg='environment variable names must be strings: {}'.format(n))
-                if not isinstance(v, str):
-                    raise InvalidApplicationDescription(msg='environment variable values must be strings: {}'.format(v))
+            for e in ret.environment:
+                if len(e) != 2:
+                    raise InvalidApplicationDescription(msg='environment variable should have a name and a value')
+                if not isinstance(e[0], str):
+                    raise InvalidApplicationDescription(msg='environment variable names must be strings: {}'.format(e[0]))
+                if not isinstance(e[1], str):
+                    raise InvalidApplicationDescription(msg='environment variable values must be strings: {}'.format(e[1]))
 
         if 'command' in data:
             ret.command = data['command']

@@ -1,4 +1,5 @@
 import socket
+import re
 import logging
 
 import dns.ipv4
@@ -15,6 +16,7 @@ import dns.resolver
 from dns.exception import DNSException, SyntaxError
 
 from common.configuration import zoe_conf
+from common.exceptions import DDNSUpdateFailed
 
 log = logging.getLogger(__name__)
 
@@ -33,32 +35,26 @@ class DDNSUpdater:
         self.keyring = None
         self.algo = None
         self._read_key()
-        self.ttl = self._gen_ttl(ttl)
+        self.ttl = ttl
 
     def _get_fqdn(self, hostname):
         return hostname + "." + zoe_conf().ddns_domain
 
     def _read_key(self):
-        f = open(self.keyfile)
-        keyfile = f.read().splitlines()
+        try:
+            f = open(self.keyfile)
+        except FileNotFoundError:
+            raise DDNSUpdateFailed(msg="DDNS key not found, cannot update DNS")
+        keyfile = f.read()
         f.close()
-        hostname = keyfile[0].rsplit(' ')[1].replace('"', '').strip()
-        self.algo = keyfile[1].rsplit(' ')[1].replace(';','').replace('-','_').upper().strip()
-        key = keyfile[2].rsplit(' ')[1].replace('}','').replace(';','').replace('"', '').strip()
-        k = {hostname:key}
+        hostname = re.search(r'key \"(.*)\"', keyfile).group(1)
+        self.algo = re.search(r'algorithm (.*);', keyfile).group(1)
+        key = re.search(r'secret \"(.*)\";', keyfile).group(1)
+        k = {hostname: key}
         try:
             self.keyring = dns.tsigkeyring.from_text(k)
         except DNSException:
-            log.exception('{} is not a valid key file. The file should be in DNS KEY record format. See dnssec-keygen(8)'.format(self.keyfile))
-            raise
-
-    def _gen_ttl(self, ttl):
-        try:
-            ttl = dns.ttl.from_text(ttl)
-        except DNSException:
-            log.exception('TTL: {} is not valid'.format(ttl))
-            return None
-        return ttl
+            raise DDNSUpdateFailed(msg='{} is not a valid key file. The file should be in DNS KEY record format. See dnssec-keygen(8)'.format(self.keyfile))
 
     def _is_valid_v4addr(self, address):
         try:
@@ -90,31 +86,29 @@ class DDNSUpdater:
         name = n.relativize(origin)
         return origin, name
 
-    def _prep_ptr(self,fqdn, ip):
-        origin, name = self._parse_name(fqdn)
-        ptr_target = name + '.' + origin
-        ptr_origin, ptr_name = self._parse_name(dns.reversename.from_address(ip))
+    def _prep_ptr(self, ip):
+        reversename = dns.reversename.from_address(ip)
+        ptr_origin, ptr_name = self._parse_name(str(reversename))
         ptr_update = dns.update.Update(ptr_origin, keyring=self.keyring)
-        return ptr_update, ptr_target, ptr_name
+        return ptr_update, ptr_name
 
     def _add_ptr(self, fqdn, ip):
-        ptr_update, ptr_target, ptr_name = self._prep_ptr(fqdn, ip)
-        ptr_update.add(ptr_name, self.ttl, 'PTR', ptr_target)
+        ptr_update, ptr_name = self._prep_ptr(ip)
+        ptr_update.add(ptr_name, self.ttl, 'PTR', fqdn + ".")
         self._do_update(ptr_update)
 
     def _update_ptr(self, fqdn, ip):
-        ptr_update, ptr_target, ptr_name = self._prep_ptr(fqdn, ip)
-        ptr_update.replace(ptr_name, self.ttl, 'PTR', ptr_target)
+        ptr_update, ptr_name = self._prep_ptr(ip)
+        ptr_update.replace(ptr_name, self.ttl, 'PTR', fqdn + ".")
         self._do_update(ptr_update)
 
     def _del_ptr(self, fqdn, ip):
-        ptr_update, ptr_target, ptr_name = self._prep_ptr(fqdn, ip)
-        ptr_update.delete(ptr_name, self.ttl, 'PTR', ptr_target)
+        ptr_update, ptr_name = self._prep_ptr(ip)
+        ptr_update.delete(ptr_name)
         self._do_update(ptr_update)
 
     def add_a_record(self, hostname, ip, do_ptr=True):
         fqdn = self._get_fqdn(hostname)
-        log.debug('DDNS add record A, fqdn: {}'.format(fqdn))
         if not self._is_valid_v4addr(ip):
             return
         if not self._is_valid_name(fqdn):
@@ -123,7 +117,6 @@ class DDNSUpdater:
 
     def add_aaaa_record(self, hostname, ip, do_ptr=True):
         fqdn = self._get_fqdn(hostname)
-        log.debug('DDNS add record AAAA, fqdn: {}'.format(fqdn))
         if not self._is_valid_v6addr(ip):
             return
         if not self._is_valid_name(fqdn):
@@ -131,23 +124,25 @@ class DDNSUpdater:
         self._add_record("AAAA", fqdn, ip, do_ptr)
 
     def _add_record(self, qtype, fqdn, ip, do_ptr):
+        log.debug('DDNS add for record {}, fqdn: {}'.format(qtype, fqdn))
         origin, name = self._parse_name(fqdn)
-        update = dns.update.Update(origin, keyring=self.keyring, keyalgorithm=getattr(dns.tsig, self.algo))
+        update = dns.update.Update(origin, keyring=self.keyring)
         update.add(name, self.ttl, qtype, ip)
+        self._do_update(update)
         if do_ptr:
             self._add_ptr(fqdn, ip)
 
     def _update_record(self, qtype, fqdn, data, do_ptr):
         log.debug('DDNS update for record {}, fqdn: {}'.format(qtype, fqdn))
         origin, name = self._parse_name(fqdn)
-        update = dns.update.Update(origin, keyring=self.keyring, keyalgorithm=getattr(dns.tsig, self.algo))
+        update = dns.update.Update(origin, keyring=self.keyring)
         update.replace(name, self.ttl, qtype, data)
+        self._do_update(update)
         if do_ptr:
             self._update_ptr(fqdn, data)
 
     def delete_a_record(self, hostname, ip, do_ptr=True):
         fqdn = self._get_fqdn(hostname)
-        log.debug('DDNS add record A, fqdn: {}'.format(fqdn))
         if not self._is_valid_v4addr(ip):
             return
         if not self._is_valid_name(fqdn):
@@ -157,8 +152,9 @@ class DDNSUpdater:
     def _delete_record(self, qtype, fqdn, data, do_ptr):
         log.debug('DDNS delete for record {}, fqdn: {}'.format(qtype, fqdn))
         origin, name = self._parse_name(fqdn)
-        update = dns.update.Update(origin, keyring=self.keyring, keyalgorithm=getattr(dns.tsig, self.algo))
-        update.delete(name, qtype, data)
+        update = dns.update.Update(origin, keyring=self.keyring)
+        update.delete(name)
+        self._do_update(update)
         if do_ptr:
             self._del_ptr(fqdn, data)
 
@@ -171,4 +167,5 @@ class DDNSUpdater:
         except dns.tsig.PeerBadSignature:
             log.error('something is wrong with the signature of the key')
             return
-        log.debug('DDNS update resulted in: {}'.format(dns.rcode.to_text(response.rcode())))
+        if response.rcode() != dns.rcode.NOERROR:
+            log.error('DDNS update resulted in: {}'.format(dns.rcode.to_text(response.rcode())))

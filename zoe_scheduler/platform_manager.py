@@ -1,8 +1,9 @@
 import logging
 
 from common.application_description import ZoeApplication, ZoeApplicationProcess
-from common.exceptions import CannotCreateCluster
+from common.exceptions import CannotCreateCluster, DDNSUpdateFailed
 from common.zoe_storage_client import logs_archive_create, generate_storage_url
+from common.configuration import zoe_conf
 from zoe_scheduler.dnsupdate import DDNSUpdater
 from zoe_scheduler.platform_status import PlatformStatus
 from zoe_scheduler.state import AlchemySession
@@ -48,6 +49,7 @@ class PlatformManager:
         # This information is used to substitute templates in the environment variables
         subst_dict = {
             "cluster": execution.gen_environment_substitution(),
+            "execution_id": str(execution.id) + "." + zoe_conf().ddns_domain,
             "application_binary_url": generate_storage_url(execution.application_id, "apps")
         }
         for env_name, env_value in process_description.environment:
@@ -72,7 +74,10 @@ class PlatformManager:
                                    description=process_description)
         state.add(container)
         state.commit()
-        DDNSUpdater().add_a_record(container.readable_name, container.ip_address)
+        try:
+            DDNSUpdater().add_a_record(container.readable_name, container.ip_address)
+        except DDNSUpdateFailed as e:
+            log.error(e.value)
         return True
 
     def execution_terminate(self, execution: ExecutionState):
@@ -108,8 +113,18 @@ class PlatformManager:
         all_containers = state.query(ContainerState).all()
         for c in all_containers:
             if not self.is_container_alive(c):
-                if c.cluster.execution.status == "running" or c.cluster.execution.status == "cleaning up":
+                if c.cluster.execution is None:  # The execution has been deleted, cleanup and forget everything ever happened
+                    self.swarm.terminate_container(c.docker_id, delete=True)
+                    state.delete(c)
+                    try:
+                        DDNSUpdater().delete_a_record(c.readable_name, c.ip_address)
+                    except DDNSUpdateFailed as e:
+                        log.error(e.value)
+                elif c.cluster.execution.status == "running" or c.cluster.execution.status == "cleaning up":
                     self._container_died(state, c)
+
+        for e in state.query(ExecutionState).filter_by(status='cleaning up').all():
+            self._cleanup_execution(state, e)
 
         state.commit()
         state.close()
@@ -134,7 +149,10 @@ class PlatformManager:
                     logs.append((c.description.name, c.ip_address, l))
                 self.swarm.terminate_container(c.docker_id, delete=True)
                 state.delete(c)
-                DDNSUpdater().delete_a_record(c.readable_name, c.ip_address)
+                try:
+                    DDNSUpdater().delete_a_record(c.readable_name, c.ip_address)
+                except DDNSUpdateFailed as e:
+                    log.error(e.value)
             state.delete(cluster)
         execution.set_terminated()
         logs_archive_create(execution.id, logs)

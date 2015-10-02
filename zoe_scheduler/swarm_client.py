@@ -55,13 +55,18 @@ class SwarmClient:
         try:
             host_config = self.cli.create_host_config(network_mode="bridge",
                                                       binds=options.get_volume_binds(),
-                                                      mem_limit=options.get_memory_limit())
+                                                      mem_limit=options.get_memory_limit(),
+                                                      memswap_limit=options.get_memory_limit(),
+                                                      dns=[zoe_conf().ddns_server],
+                                                      dns_search=[zoe_conf().ddns_domain],
+                                                      restart_policy={'Name': 'always'})
             cont = self.cli.create_container(image=image,
                                              environment=options.get_environment(),
                                              network_disabled=False,
                                              host_config=host_config,
                                              detach=True,
                                              name=options.name,
+                                             hostname=options.name,
                                              volumes=options.get_volumes(),
                                              command=options.get_command())
             self.cli.start(container=cont.get('Id'))

@@ -16,6 +16,6 @@ class InvalidApplicationDescription(ZoeException):
         self.value = msg
 
 
-class MissingDataInPOST(ZoeException):
+class DDNSUpdateFailed(ZoeException):
     def __init__(self, msg):
         self.value = msg

@@ -23,7 +23,6 @@
             <td>{{ a.description.name }}</td>
             <td>{{ a.description.container_count() }}</td>
             <td><script>format_bytes({{ a.description.total_memory() }})</script></td>
-            <td><a href="{{ url_for('web.application_modify', app_id=a.id) }}">Modify</a></td>
             {% if a.description.requires_binary and not binaries[a.id] %}
             <td>Missing binary</td>
             {% else %}
