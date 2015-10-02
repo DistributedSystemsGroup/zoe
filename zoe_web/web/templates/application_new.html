@@ -12,8 +12,8 @@
                 <input type="text" autofocus autocomplete="on" required pattern="[a-z0-9_\-]+" name="app_name" id="app_name" placeholder="myapp"><br/>
 
                 <label for="app_type">Type:</label><br/>
-                <input id="radio_nb" type="radio" name="app_type" value="spark-notebook" checked>&nbsp;Spark Notebook<br/>
-                <input id="radio_inb" type="radio" name="app_type" value="ipython-notebook" disabled>&nbsp;iPython Notebook (coming soon)<br/>
+                <input id="radio_inb" type="radio" name="app_type" value="ipython-notebook" checked>&nbsp;Spark iPython Notebook<br/>
+                <input id="radio_nb" type="radio" name="app_type" value="spark-notebook">&nbsp;Spark Notebook<br/>
                 <input id="radio_sub" type="radio" name="app_type" value="spark-submit">&nbsp;Spark Application<br/>
                 <input id="radio_zk" type="radio" name="app_type" value="zookeeper" disabled>&nbsp;Zookeeper (coming soon)<br/>
             </section>
@@ -60,6 +60,15 @@
                     </section>
                 </div>
             </div>
+            <div class="branch" id="ipython-notebook">
+                <div class="submit step">
+                    <h3 class="step-header">Spark: iPython notebook settings</h3>
+                    <section>
+                        <label for="ipython_image">Spark iPython Notebook Docker image:</label>
+                        <input type="text" autofocus autocomplete="on" required pattern="[a-z0-9_\-=]+" name="ipython_image" id="ipython_image" size="40" value="/zoerepo/spark-ipython-notebook">
+                    </section>
+                </div>
+            </div>
             <div class="branch" id="spark-submit">
                 <div class="submit step">
                     <h3 class="step-header">Spark: application settings</h3>
@@ -103,7 +112,7 @@
         transitions: {
             'app_type': function( state, action ) {
                 var app_type = $("[name=app_type]:checked").val();
-                if (app_type == "spark-notebook" || app_type == "spark-submit") {
+                if (app_type == "spark-notebook" || app_type == "spark-submit" || app_type == "ipython-notebook") {
                     return "spark";
                 }
             },

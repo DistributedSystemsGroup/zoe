@@ -112,15 +112,17 @@ class PlatformManager:
         state = AlchemySession()
         all_containers = state.query(ContainerState).all()
         for c in all_containers:
+            if c.cluster.execution is None:  # The execution has been deleted, cleanup and forget anything ever happened
+                self.swarm.terminate_container(c.docker_id, delete=True)
+                state.delete(c)
+                try:
+                    DDNSUpdater().delete_a_record(c.readable_name, c.ip_address)
+                except DDNSUpdateFailed as e:
+                    log.error(e.value)
             if not self.is_container_alive(c):
-                if c.cluster.execution is None:  # The execution has been deleted, cleanup and forget everything ever happened
-                    self.swarm.terminate_container(c.docker_id, delete=True)
-                    state.delete(c)
-                    try:
-                        DDNSUpdater().delete_a_record(c.readable_name, c.ip_address)
-                    except DDNSUpdateFailed as e:
-                        log.error(e.value)
-                elif c.cluster.execution.status == "running" or c.cluster.execution.status == "cleaning up":
+                if c.cluster.execution is None:
+                    continue  # cleaned-up by the if above
+                if c.cluster.execution.status == "running" or c.cluster.execution.status == "cleaning up":
                     self._container_died(state, c)
 
         for e in state.query(ExecutionState).filter_by(status='cleaning up').all():

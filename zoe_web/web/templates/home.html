@@ -97,7 +97,7 @@
     <tbody>
         {% for e in past_executions %}
             <tr class="{{ loop.cycle('odd', 'even') }}">
-            <td>{{ e[0].name }}</td>
+            <td>{{ e[0].description.name }}</td>
             <td>{{ e[1].name }}</td>
             <td>{{ e[1].status }}</td>
             <td><script>format_timestamp({{ e[1].time_scheduled.timestamp() }})</script></td>

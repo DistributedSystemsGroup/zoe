@@ -8,7 +8,7 @@ import zoe_client.applications as ap
 import zoe_client.diagnostics as di
 import zoe_client.executions as ex
 import zoe_client.users as us
-from zoe_client.predefined_apps.spark import spark_notebook_app, spark_submit_app
+from zoe_client.predefined_apps.spark import spark_notebook_app, spark_submit_app, spark_ipython_notebook_app
 import common.zoe_storage_client as storage
 
 api_bp = Blueprint('api', __name__)
@@ -65,7 +65,7 @@ def application_new():
     if app_name is None:
         return jsonify(status='error', msg='missing app_name in POST')
     fcontents = None
-    if form_data['app_type'] == "spark-notebook" or form_data['app_type'] == "spark-submit":
+    if form_data['app_type'] == "spark-notebook" or form_data['app_type'] == "spark-submit" or form_data['app_type'] == "ipython-notebook":
         params['name'] = app_name
         keys = ["worker_count", 'master_mem_limit', 'worker_cores', 'worker_mem_limit', 'spark_options', 'master_image', 'worker_image']
         for key in keys:
@@ -102,6 +102,12 @@ def application_new():
             fcontents = file_data.stream.read()
 
             app_descr = spark_submit_app(**params)
+        elif form_data['app_type'] == "ipython-notebook":
+            notebook_image = _form_field(form_data, 'ipython_image')
+            if notebook_image is None:
+                return jsonify(status='error', msg='missing notebook_image in POST')
+            params['notebook_image'] = notebook_image
+            app_descr = spark_ipython_notebook_app(**params)
 
         else:
             log.error("unknown application type: {}".format(form_data['app_type']))
