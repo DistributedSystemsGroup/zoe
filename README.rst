@@ -11,7 +11,7 @@ principles are:
    network administration, so we put all effort possible to make Zoe
    easy to install and maintain
 -  use well-known technologies: we try hard not to reinvent the wheel,
-   we use Python, ZeroMQ, Docker and the Apache Web Server
+   we use Python, ZeroMQ, Docker and DNS
 -  a clear roadmap: our short and long-term objectives should always be
    clear and well defined
 -  openness: the source code is open: clone, modify, discuss, test and
