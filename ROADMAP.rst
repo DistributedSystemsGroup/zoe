@@ -24,3 +24,11 @@ Zoe currently supports Apache Spark, but we wish to extend the list of supported
 * Add support for Apache Storm
 * Add support for Data exploration and BI tools, such as Cloudera Impala
 * Add support for additional storage layers: Cloudera Kudu, OpenStack Swift or other ojbect stores
+
+Zoe schedulers
+--------------
+Focus on two-level scheduling: application scheduler and resource management.
+
+Zoe API
+-------
+Allow advanced users to build their own scripts locally, and isse Zoe commands through a public API.
