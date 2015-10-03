@@ -1,6 +1,10 @@
 Planned features for Zoe
 ========================
 
+In-browser terminal
+-------------------
+When playing on a notebook, it is often useful to have access to a user git account. We don't want necessarily to modify the Notebook web-app, so it would be very nice for a user to open a terminal on the Notebook container (or on the Master container, e.g., for Apache Spark) to pull / push commits to a notebook. Having a link along the list of active applications would do the job.
+
 Monitoring
 ----------
 Integrate a monitoring solution: Zoe has access to a lot of valuable data that should be recorded and used for feedback and study. The data that can be gathered is of two kinds:
