@@ -9,7 +9,7 @@ principles are:
    systems and resource constraints should be kept out of the way
 -  ease of administration: we have a strong background in systems and
    network administration, so we put all effort possible to make Zoe
-   ease to install and maintain
+   easy to install and maintain
 -  use well-known technologies: we try hard not to reinvent the wheel,
    we use Python, ZeroMQ, Docker and the Apache Web Server
 -  a clear roadmap: our short and long-term objectives should always be
