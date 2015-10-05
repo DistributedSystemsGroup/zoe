@@ -6,13 +6,29 @@ Zoe - Container-based Analytics as a Service
 
 Zoe uses `Docker Swarm <https://docs.docker.com/swarm/>`_ to run Analytics as a Service applications.
 
+Zoe is fast: it can create a fully-functional Spark cluster of 20 nodes in less than five seconds.
+
+Zoe is easy to use: just a few clicks on a web interface is all that is needed to configure and start a variety of data-intensive applications.
+
+Zoe is open: applications can be described by a JSON file, anything that can run in a Docker container can be run within Zoe (but we concentrate on data intensive software)
+
+Zoe is smart: not everyone has infinite resources like Amazon or Google, Zoe is built for small clouds, physical or virtual, and is built to maximize the use of available capacity.
+
 Zoe can use a Docker Swarm located anywhere, on Amazon or in your own private cloud, and does not need exclusive access to it, meaning
 your Swarm could also be running other services: Zoe will not interfere with them. Zoe is meant as a private service, adding data-analytics
-capabilities to existing, or new, Docker clusters, maximising the use of already provisioned capacity.
+capabilities to existing, or new, Docker clusters.
 
-Currently only the `Spark framework <http://spark.apache.org/>`_ is supported, but we are planning inclusion of other frameworks. Have a look at the :ref:`vision` and at the
-`roadmap <https://github.com/DistributedSystemsGroup/zoe/blob/master/README.md>`_ to see what we are currently planning and feel free to contact us through the
-GitHub issue tracker to pose questions or suggest ideas and new features.
+While the core components of Zoe are application-independent, the web interface currently supports the `Spark framework <http://spark.apache.org/>`_ with Scala or iPython notebooks.
+We are working on providing easy access to the following software suites:
+
+* Zookeeper
+* Hadoop (HDFS in particular)
+* Cassandra
+* Impala
+* More to come, suggestions welcome!
+
+Have a look at the :ref:`vision` and at the `roadmap <https://github.com/DistributedSystemsGroup/zoe/blob/master/ROADMAP.rst>`_ to see what we are currently planning
+and feel free to `contact us <venza@brownhat.org>`_ via email or through the GitHub issue tracker to pose questions or suggest ideas and new features.
 
 Contents:
 
@@ -20,12 +36,15 @@ Contents:
   :maxdepth: 2
 
   install
+  config_file
   architecture
   vision
   contributing
 
 Contacts
 ========
+
+`Zoe website <http://zoe-analytics.eu>`_
 
 Zoe is developed as part of the research activities of the `Distributed Systems Group <http://distsysgroup.wordpress.com>`_ at `Eurecom <http://www.eurecom.fr>`_, in
 Sophia Antipolis, France.
