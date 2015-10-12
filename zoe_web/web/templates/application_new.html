@@ -15,6 +15,7 @@
                 <input id="radio_inb" type="radio" name="app_type" value="ipython-notebook" checked>&nbsp;Spark iPython Notebook<br/>
                 <input id="radio_nb" type="radio" name="app_type" value="spark-notebook">&nbsp;Spark Notebook<br/>
                 <input id="radio_sub" type="radio" name="app_type" value="spark-submit">&nbsp;Spark Application<br/>
+                <input id="radio_sub" type="radio" name="app_type" value="hadoop-hdfs">&nbsp;Hadoop HDFS data layer<br/>
                 <input id="radio_zk" type="radio" name="app_type" value="zookeeper" disabled>&nbsp;Zookeeper (coming soon)<br/>
             </section>
         </div>
@@ -88,6 +89,22 @@
                 </div>
             </div>
         </div>
+        <div class="branch" id="hdfs">
+            <div class="submit step">
+                <h3 class="step-header">HDFS: settings</h3>
+                <section>
+                    <label for="dn_count">DataNode count:</label>
+                    <input type="number" min="1" step="1" value="3" required name="dn_count"><br/>
+                </section>
+                <section>
+                    <h4>Images</h4>
+                    <label for="namenode_image">Hadoop NameNode Docker image:</label>
+                    <input type="text" autofocus autocomplete="on" required pattern="[a-z0-9_\-=]+" name="namenode_image" id="namenode_image" size="40" value="/zoerepo/hadoop-namenode"><br/>
+                    <label for="datanode_image">Hadoop DataNode Docker image:</label>
+                    <input type="text" autofocus autocomplete="on" required pattern="[a-z0-9_\-=]+" name="datanode_image" id="datanode_image" size="40" value="/zoerepo/hadoop-datanode"><br/>
+                </section>
+            </div>
+        </div>
 
         <div class="navigation">
             <ul class="clearfix">
@@ -114,6 +131,8 @@
                 var app_type = $("[name=app_type]:checked").val();
                 if (app_type == "spark-notebook" || app_type == "spark-submit" || app_type == "ipython-notebook") {
                     return "spark";
+                } else if (app_type == "hadoop-hdfs") {
+                    return "hdfs";
                 }
             },
             'spark-settings': function(state, action) {

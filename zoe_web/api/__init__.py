@@ -9,6 +9,7 @@ import zoe_client.diagnostics as di
 import zoe_client.executions as ex
 import zoe_client.users as us
 from zoe_client.predefined_apps.spark import spark_notebook_app, spark_submit_app, spark_ipython_notebook_app
+from zoe_client.predefined_apps.hadoop import hdfs_app
 import common.zoe_storage_client as storage
 
 api_bp = Blueprint('api', __name__)
@@ -108,21 +109,26 @@ def application_new():
                 return jsonify(status='error', msg='missing notebook_image in POST')
             params['notebook_image'] = notebook_image
             app_descr = spark_ipython_notebook_app(**params)
-
         else:
-            log.error("unknown application type: {}".format(form_data['app_type']))
-            return jsonify(status="error", msg='unknown application type')
+            log.error('Undefined Spark application')
+            assert False
 
-        app = ap.application_new(user.id, app_descr)
-        if app_descr.requires_binary and fcontents is None:
-            log.warn('Creating application without binary file, but the application type needs one')
-        elif app_descr.requires_binary and fcontents is not None:
-            storage.put(app.id, "apps", fcontents)
-        else:
-            log.warn('A binary file was provided, but the application does not need one, discarding')
-
+    elif form_data['app_type'] == "hadoop-hdfs":
+        namenode_image = _form_field(form_data, 'namenode_image')
+        datanode_image = _form_field(form_data, 'datanode_image')
+        datanode_count = int(_form_field(form_data, 'dn_count'))
+        app_descr = hdfs_app(app_name, namenode_image, datanode_count, datanode_image)
     else:
+        log.error("unknown application type: {}".format(form_data['app_type']))
         return jsonify(status="error", msg='unknown application type')
+
+    app = ap.application_new(user.id, app_descr)
+    if app_descr.requires_binary and fcontents is None:
+        log.warn('Creating application without binary file, but the application type needs one')
+    elif app_descr.requires_binary and fcontents is not None:
+        storage.put(app.id, "apps", fcontents)
+    else:
+        log.warn('A binary file was provided, but the application does not need one, discarding')
 
     return jsonify(status="ok")
 
