@@ -46,7 +46,7 @@ class PlatformManager:
         opts.set_memory_limit(process_description.required_resources['memory'])
 
         # Generate a dictionary containing the current cluster status (before the new container is spawned)
-        # This information is used to substitute templates in the environment variables
+        # This information is used to substitute template strings in the environment variables
         subst_dict = {
             "cluster": execution.gen_environment_substitution(),
             "execution_id": str(execution.id) + "." + zoe_conf().ddns_domain,
