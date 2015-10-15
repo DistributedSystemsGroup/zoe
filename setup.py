@@ -67,7 +67,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['docker-py>=1.3.0',
+    install_requires=['docker-py>=1.5.0',
                       'Flask>=0.10.1',
                       'python-dateutil>=2.4.2',
                       'SQLAlchemy>=1.0.8',

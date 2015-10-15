@@ -1,9 +1,31 @@
+The zoe_client package
+======================
+
 .. module:: zoe_client
 
-The zoe_client module
-=====================
+Applications
+------------
 
-.. class:: zoe_client.ZoeClient
+.. automodule:: zoe_client.applications
+   :members:
 
-The ZoeClient class
--------------------
+
+Executions
+----------
+
+.. automodule:: zoe_client.executions
+   :members:
+
+
+Users
+-----
+
+.. automodule:: zoe_client.users
+   :members:
+
+
+Statistics and diagnostics
+--------------------------
+
+.. automodule:: zoe_client.diagnostics
+   :members:

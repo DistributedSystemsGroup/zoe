@@ -144,9 +144,10 @@ class ZoeIPCServer:
         self.state.add(execution)
         self.state.flush()
 
-        self.sched.incoming(execution)
         execution.set_scheduled()
         self.state.commit()
+        self.sched.incoming(execution)
+
         return self._reply_ok(execution=execution.to_dict())
 
     # Logs
