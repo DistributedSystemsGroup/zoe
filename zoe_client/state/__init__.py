@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from contextlib import contextmanager
+import logging
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -24,10 +25,12 @@ AlchemySession = sessionmaker()
 
 from zoe_client.state.user import UserState
 
+log = logging.getLogger(__name__)
+
 
 def init(db_url):
     global AlchemySession
-    engine = create_engine(db_url, echo=False)
+    engine = create_engine(db_url, echo=False, pool_recycle=3600)
     AlchemySession.configure(bind=engine)
     return engine
 
