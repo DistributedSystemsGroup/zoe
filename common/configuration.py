@@ -32,11 +32,6 @@ defaults = {
         'ddns_keyfile': '/path/to/rndc.key',
         'ddns_server': '127.0.0.1',
         'ddns_domain': 'swarm.example.com'
-    },
-    'zoe_storage': {
-        'storage_path': "/var/lib/zoe/history",
-        'http_listen_address': '127.0.0.1',
-        'http_listen_port': 4390,
     }
 }
 
@@ -116,18 +111,6 @@ class ZoeConfig(ConfigParser):
     @property
     def ipc_listen_address(self) -> str:
         return self.get('zoe_scheduler', 'ipc_listen_address')
-
-    @property
-    def storage_path(self) -> str:
-        return self.get('zoe_storage', 'storage_path')
-
-    @property
-    def http_listen_port(self) -> int:
-        return self.getint('zoe_storage', 'http_listen_port')
-
-    @property
-    def http_listen_address(self) -> str:
-        return self.get('zoe_storage', 'http_listen_address')
 
     @property
     def ddns_keyfile(self) -> str:

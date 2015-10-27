@@ -1,13 +1,11 @@
-docker-py
-Flask
---allow-external mysql-connector-python
-mysql-connector-python
-python-dateutil
+docker-py>=1.5.0
+Flask>=0.10.1
+python-dateutil>=2.4.2
 pytest
 pytest-cov
 requests
 Sphinx
-SQLAlchemy
-tornado
-pyzmq
+SQLAlchemy>=1.0.8
+tornado>=4.2.1
+pyzmq>=14.0.1
 dnspython3

@@ -1,10 +1,13 @@
 Installing Zoe
 ==============
 
+Zoe install procedure is migrating from PIP to Docker containers. The codebase is being split in several components, each will live in its own repository with a Dockerfile
+to build the container image.
+
 Requirements
 ------------
 
-* An SQL database to keep all the state
+* An SQL database to keep all the state (sqlite is used by default)
 * Docker Swarm
 * A DNS server for service discovery, with DDNS support
 
@@ -81,3 +84,12 @@ For developers, we recommend the following procedure:
 6. Start running applications! By default Zoe web listens on the 5000 port
 
 
+Zoe Object Storage
+^^^^^^^^^^^^^^^^^^
+
+Application binaries and execution logs are saved in a simple Object Storage server.
+
+* Clone it from git: https://github.com/DistributedSystemsGroup/zoe-object-storage
+* Use the Dockerfile to build a Docker image
+* Run it
+* Put the IP address of the container in Zoe's main configuration file (when the transition to Dockerfiles will be finished it will be possible to use linking instead)
