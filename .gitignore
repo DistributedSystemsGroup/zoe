@@ -58,5 +58,4 @@ docs/_build/
 # PyBuilder
 target/
 .idea/
-zoe.conf
-rndc.key
+
