@@ -12,7 +12,7 @@ Resources:
 
 -  Main website: http://zoe-analytics.eu
 -  Documentation: http://docs.zoe-analytics.eu
--  How to install: http://zoe-analytics.readthedocs.org/en/latest/install.html
+-  How to install: http://zoe-analytics.readthedocs.org/en/latest/install.html (refers to the 0.8.92 version)
 
 Zoe is a distributed application and each component is developed in a separate Git repository.
 
@@ -20,7 +20,7 @@ Zoe is a distributed application and each component is developed in a separate G
 -  Zoe scheduler: https://github.com/DistributedSystemsGroup/zoe-scheduler
 -  Zoe object storage: https://github.com/DistributedSystemsGroup/zoe-object-storage
 
-Zoe can use any Docker image, but we provide some for the preconfigured applications available in the web interface:
+Zoe can use any Docker image, but we provide some for the pre-configured applications available in the web interface:
 
 -  Docker images: https://github.com/DistributedSystemsGroup/zoe-docker-images
 
