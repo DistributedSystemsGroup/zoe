@@ -5,8 +5,10 @@ Zoe provides a simple way to provision data analytics applications using Docker 
 
 This is the main repository, it contains the documentation and a number of scripts, useful to install and develop Zoe.
 
-We are in the process of updating documentation and scripts. For now you can refer to the version tagged 0.8.92 in this repository,
-when all components where still together.
+We are in the process of doing a major refactoring of the entire codebase and the HEAD version is not usable at this time,
+but feel free to have a look and make suggestions. See below for links to the repositories of
+
+For now you can refer to the version tagged 0.8.92 in this repository, when all components where still together in one repository.
 
 Resources:
 
@@ -18,7 +20,6 @@ Zoe is a distributed application and each component is developed in a separate G
 
 -  Zoe clients: https://github.com/DistributedSystemsGroup/zoe-client
 -  Zoe scheduler: https://github.com/DistributedSystemsGroup/zoe-scheduler
--  Zoe object storage: https://github.com/DistributedSystemsGroup/zoe-object-storage
 
 Zoe can use any Docker image, but we provide some for the pre-configured applications available in the web interface:
 
