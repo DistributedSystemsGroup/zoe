@@ -30,7 +30,7 @@ echo "done"
 echo $MASTER_ID > state.zoe
 
 MASTER_IP=`docker -H $SWARM inspect --format '{{ .NetworkSettings.IPAddress }}' $MASTER_ID`
-echo "Spark master is at $MASTER_IP"
+echo "Spark master is at http://$MASTER_IP:8080"
 
 echo -n "Starting workers... "
 for w in `seq $WORKER_COUNT`; do
@@ -46,5 +46,5 @@ echo "done"
 echo $NB_ID >> state.zoe
 
 NB_IP=`docker -H $SWARM inspect --format '{{ .NetworkSettings.IPAddress }}' $NB_ID`
-echo "iPython notebook is available at $NB_IP"
+echo "iPython notebook is available at http://$NB_IP:8888"
 
