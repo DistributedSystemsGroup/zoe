@@ -10,6 +10,12 @@ if [ z"$DOCKER_VERSION" != z"Docker version 1.8.3, build f4bf5c7" ]; then
 	echo "Wrong Docker version, please use 1.8.3"
 fi
 
+if ! which pip > /dev/null; then
+	if ! dpkg -l | grep -q kazoo; then
+		echo "Please install python-kazoo"
+	fi
+fi
+
 if ! pip freeze | grep -q kazoo; then
 	echo "Please install python-kazoo"
 fi
