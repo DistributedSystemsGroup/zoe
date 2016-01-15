@@ -1,6 +1,8 @@
 #!/bin/bash
 
-source utils/base.sh
+pushd utils
+source base.sh
+popd
 
-docker -H $SWARM ps -a
+$DOCKER ps -a
 

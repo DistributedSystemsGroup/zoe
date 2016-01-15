@@ -1,10 +1,12 @@
 #!/bin/bash
 
-. utils/base.sh
+pushd ../utils
+. base.sh
+popd
 
 echo '<============================================================================>'
 for id in `cat state.zoe`; do
-	docker -H $SWARM logs $id
+	$DOCKER logs $id
 	echo '<============================================================================>'
 done
 

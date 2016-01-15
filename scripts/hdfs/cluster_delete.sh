@@ -1,12 +1,12 @@
 #!/bin/bash
 
-set -e
-
-. utils/base.sh
+pushd ../utils
+. base.sh
+popd
 
 for id in `cat state.zoe`; do
 	echo -n "Deleting container "
-	docker -H $SWARM rm -f $id
+	$DOCKER rm -f $id
 done
 
 rm state.zoe
