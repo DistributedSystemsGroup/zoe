@@ -1,6 +1,3 @@
-.. Zoe documentation master file, created by
-   sphinx-quickstart on Fri Sep 11 15:11:20 2015.
-
 Zoe - Container-based Analytics as a Service
 ============================================
 
@@ -18,17 +15,20 @@ Zoe can use a Docker Swarm located anywhere, on Amazon or in your own private cl
 your Swarm could also be running other services: Zoe will not interfere with them. Zoe is meant as a private service, adding data-analytics
 capabilities to existing, or new, Docker clusters.
 
-While the core components of Zoe are application-independent, the web interface currently supports the `Spark framework <http://spark.apache.org/>`_ with Scala or iPython notebooks.
-We are working on providing easy access to the following software suites:
+The core components of Zoe are application-independent and a user can submit application description for any kind of service combination. Since Zoe targets
+analytics services in particular, the client tools offer some pre-configured Zoe applications that can be used as starting examples.
 
+To better understand what we mean by "analytic service", here are a few examples:
+
+* Spark
 * Zookeeper
 * Hadoop (HDFS in particular)
 * Cassandra
 * Impala
-* More to come, suggestions welcome!
+* ... suggestions welcome!
 
-Have a look at the :ref:`vision` and at the `roadmap <https://github.com/DistributedSystemsGroup/zoe/blob/master/ROADMAP.rst>`_ to see what we are currently planning
-and feel free to `contact us <venza@brownhat.org>`_ via email or through the GitHub issue tracker to pose questions or suggest ideas and new features.
+Have a look at the :ref:`vision` and at the `roadmap <https://github.com/DistributedSystemsGroup/zoe/blob/master/ROADMAP.rst>`_ to see what we are currently
+planning and feel free to `contact us <venza@brownhat.org>`_ via email or through the GitHub issue tracker to pose questions or suggest ideas and new features.
 
 Contents:
 
