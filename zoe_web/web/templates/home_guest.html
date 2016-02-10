@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block custom_head %}
+{% if refresh > 0 %}
+<meta http-equiv="refresh" content="{{ refresh }}">
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<h2>Guest cluster access page</h2>
+
+{% if execution_urls|length == 0 %}
+<p>Your cluster is being created. This page will refresh automatically until the operation is completed.<br>
+When this message disappears your cluster will be ready to use.</p>
+{% endif %}
+
+<p>SOCKS proxy: you need to configure this proxy in your browser to be able to access the Spark and Notebook web interfaces.</p>
+<ul>
+    <li>Proxy URL: {{ user_gateway }}</li>
+</ul>
+
+<p>Execution status: <span>{{ execution_status }}</span></p>
+
+<ul>
+{% for url in execution_urls|sort(0) %}
+    <li><a href="{{ url[1] }}">{{ url[0] }}</a></li>
+{% endfor %}
+</ul>
+{% endblock %}
