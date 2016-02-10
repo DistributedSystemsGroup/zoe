@@ -3,9 +3,7 @@ python-dateutil>=2.4.2
 pytest
 pytest-cov
 requests
-SQLAlchemy>=1.0.8
-pyzmq>=14.0.1
-docker-py>=1.6.0
+docker-py==1.6.0
 tornado>=4.3
 kazoo
 passlib
