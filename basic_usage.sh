@@ -2,6 +2,10 @@
 
 set -e
 
+export ZOE_USER=admin
+export ZOE_PASS=changeme
+export ZOE_URL=http://localhost:4850
+
 echo "Get statistics"
 ./zoe.py stats
 echo "Get superuser"
