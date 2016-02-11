@@ -77,7 +77,8 @@ class PlatformManager:
         # This information is used to substitute template strings in the environment variables
         subst_dict = {
             "execution_id": str(execution.id),
-            "user_id": str(execution.owner.id)
+            "user_id": str(execution.owner.id),
+            'user_name': execution.owner.name
         }
         for env_name, env_value in process_description.environment:
             try:
