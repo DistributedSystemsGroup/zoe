@@ -27,6 +27,6 @@ from zoe_lib.version import ZOE_API_VERSION, ZOE_VERSION
 @web_bp.context_processor
 def inject_version():
     return {
-        'zoe_lib_version': ZOE_VERSION,
+        'zoe_version': ZOE_VERSION,
         'zoe_api_version': ZOE_API_VERSION,
     }
