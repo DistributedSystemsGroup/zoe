@@ -1,4 +1,6 @@
 Flask>=0.10.1
+Flask-RESTful
+Flask-WTF
 python-dateutil>=2.4.2
 pytest
 pytest-cov
