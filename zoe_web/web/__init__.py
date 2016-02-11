@@ -21,13 +21,12 @@ import zoe_web.web.start
 import zoe_web.web.status
 import zoe_web.web.applications
 
-from zoe_lib.version import ZOE_API_VERSION, ZOE_LIB_VERSION
+from zoe_lib.version import ZOE_API_VERSION, ZOE_VERSION
 
 
 @web_bp.context_processor
 def inject_version():
     return {
-        'zoe_lib_version': ZOE_LIB_VERSION,
+        'zoe_lib_version': ZOE_VERSION,
         'zoe_api_version': ZOE_API_VERSION,
-        'zoe_web_version': '0.3'
     }
