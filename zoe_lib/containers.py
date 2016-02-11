@@ -75,3 +75,14 @@ class ZoeContainerAPI(ZoeAPIBase):
             raise ZoeAPIException(data['message'])
         else:
             return data
+
+    def died(self, container_id: int):
+        """
+        Inform the scheduler that a container died. Used by the observer process.
+
+        :param container_id: Zoe ID of the container that died
+        :return:
+        """
+        data, status_code = self._rest_delete('/container/{}'.format(container_id))
+        if status_code != 204:
+            raise ZoeAPIException(data['message'])
