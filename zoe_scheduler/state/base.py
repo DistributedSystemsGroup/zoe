@@ -53,6 +53,9 @@ class BaseState:
         for a in attrs:
             d[a] = getattr(self, a)
 
+        if not checkpoint:
+            d['owner'] = self.owner.id
+
         return d
 
     def from_dict(self, d, checkpoint):
