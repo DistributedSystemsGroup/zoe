@@ -36,7 +36,7 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--private-registry', help='Docker private registry address (ex.: 10.0.0.1:5000)', default='10.0.0.1:5000')
         argparser.add_argument('--state-dir', help='Directory where state checkpoints are saved', default='/var/lib/zoe')
         argparser.add_argument('--listen-address', help='REST API listen address', default='0.0.0.0')
-        argparser.add_argument('--listen-port', help='REST API listen port', default='5000')
+        argparser.add_argument('--listen-port', help='REST API listen port', default='4850')
         argparser.add_argument('--zoeadmin-password', help='Password used to login as the master Zoe administrator', default='changeme')
 
         opts = argparser.parse_args()
