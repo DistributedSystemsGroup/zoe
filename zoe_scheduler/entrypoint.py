@@ -46,6 +46,7 @@ def main():
 
     logging.getLogger('kazoo').setLevel(logging.WARNING)
     logging.getLogger('requests').setLevel(logging.WARNING)
+    logging.getLogger('urllib3').setLevel(logging.WARNING)
     logging.getLogger('docker').setLevel(logging.INFO)
     logging.getLogger("tornado").setLevel(logging.DEBUG)
     logging.getLogger('passlib').setLevel(logging.INFO)
