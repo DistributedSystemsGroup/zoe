@@ -21,6 +21,7 @@ import time
 from zoe_lib.swarm_client import SwarmClient
 from zoe_observer.config import load_configuration, get_conf
 from zoe_observer.swarm_event_manager import container_died
+from zoe_observer.guest_inactivity import check_guests
 
 log = logging.getLogger("main")
 
@@ -45,10 +46,18 @@ def main():
     swarm = SwarmClient(args)
 
     while True:
-        zoe_containers = swarm.list('zoe')
-        for c in zoe_containers:
-            if 'Exited' in c['status']:
-                zoe_id = c['labels']['zoe.container_id']
-                container_died(zoe_id)
+        try:
+            zoe_containers = swarm.list('zoe')
+            for c in zoe_containers:
+                if 'Exited' in c['status']:
+                    zoe_id = c['labels']['zoe.container_id']
+                    container_died(zoe_id)
+
+            # check_guests(swarm)
+
+        except KeyboardInterrupt:
+            break
+        except Exception:
+            log.exception('Something bad happened')
 
         time.sleep(5)

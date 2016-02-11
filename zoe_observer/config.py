@@ -33,8 +33,7 @@ def load_configuration(test_conf=None):
                                    args_for_writing_out_config_file=["--write-config"])
         argparser.add_argument('--debug', action='store_true', help='Enable debug output')
         argparser.add_argument('--swarm', help='Swarm/Docker API endpoint (ex.: zk://zk1:2181,zk2:2181 or http://swarm:2380)', default='http://localhost:2375')
-        argparser.add_argument('--scheduler-address', help='Address of the scheduler\'s REST API', default='127.0.0.1')
-        argparser.add_argument('--scheduler-port', help='Port of the scheduler\'s REST API', default='5000')
+        argparser.add_argument('--scheduler-url', help='URL of the scheduler\'s REST API', default='http://127.0.0.1:4850')
         argparser.add_argument('--zoeadmin-password', help='Password used to login as the master Zoe administrator', default='changeme')
 
         opts = argparser.parse_args()
