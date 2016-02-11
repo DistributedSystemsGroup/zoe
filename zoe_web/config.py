@@ -31,8 +31,8 @@ def load_configuration():
                                args_for_setting_config_path=["--config"],
                                args_for_writing_out_config_file=["--write-config"])
     argparser.add_argument('--debug', action='store_true', help='Enable debug output')
-    argparser.add_argument('--listen_address', type=str, help='Address to listen to for incoming connections', default="0.0.0.0")
-    argparser.add_argument('--listen_port', type=int, help='Port to listen to for incoming connections', default=5001)
+    argparser.add_argument('--listen-address', type=str, help='Address to listen to for incoming connections', default="0.0.0.0")
+    argparser.add_argument('--listen-port', type=int, help='Port to listen to for incoming connections', default=5001)
     argparser.add_argument('--zoe-url', help='URL of the Zoe scheduler process', default='http://127.0.0.1:4850')
     argparser.add_argument('--zoe-admin-user', help='Admin-level user in Zoe', default='zoeadmin')
     argparser.add_argument('--zoe-admin-pass', help='Password for the admin-level user in Zoe', default='changeme')
