@@ -91,7 +91,8 @@ def spark_jupyter_notebook_proc(mem_limit: int, worker_mem_limit: int, image: st
         'environment': [
             ["SPARK_MASTER", "spark://spark-master-{execution_id}.zoe-usernet-{user_id}:7077"],
             ["SPARK_EXECUTOR_RAM", str(executor_ram)],
-            ["NB_USER", "{user_name}"]
+            ["NB_USER", "{user_name}"],
+            ["NAMENODE_HOST", "hdfs-namenode.hdfs"]
         ]
     }
     return proc
