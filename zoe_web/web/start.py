@@ -45,7 +45,7 @@ def home_guest(guest_identifier):
     if match is None:
         return redirect(url_for('web.index'))
 
-    query_api = ZoeQueryAPI(get_conf().zoe_url, get_conf().zoe_admin_user, get_conf().zoe_admin_pass)
+    query_api = ZoeQueryAPI(get_conf().zoe_url, guest_identifier, guest_identifier)
 
     template_vars = {
         'refresh': randint(2, 8),
