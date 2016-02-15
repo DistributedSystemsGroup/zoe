@@ -55,9 +55,9 @@ def main():
 
             check_guests(swarm)
 
+            time.sleep(5)
+
         except KeyboardInterrupt:
             break
         except Exception:
             log.exception('Something bad happened')
-
-        time.sleep(5)
