@@ -222,11 +222,11 @@ class SwarmClient:
         except docker.errors.APIError:
             log.exception('cannot remove network "{}"'.format(nid))
 
-    def network_list(self):
+    def network_list(self, search=''):
         all_nets = self.cli.networks()
         ret = []
         for net in all_nets:
-            if 'zoe-usernet-' in net['Name']:
+            if search in net['Name']:
                 n = {
                     'id': net['Id'],
                     'name': net['Name']

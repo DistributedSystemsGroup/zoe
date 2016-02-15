@@ -58,12 +58,12 @@ class PlatformManager:
 
     def _spawn_process(self, execution: execution_module.Execution, process_description: application_module.Process) -> bool:
         copts = ContainerOptions()
-        copts.name = process_description.name + "-{}".format(execution.id)
+        copts.name = get_conf().container_name_prefix + '-' + process_description.name + "-{}".format(execution.id)
         copts.set_memory_limit(process_description.required_resources['memory'])
-        copts.network_name = 'zoe-usernet-{}'.format(execution.owner.id)
+        copts.network_name = '{}-usernet-{}'.format(get_conf().container_name_prefix, execution.owner.id)
         container_id = self.state_manager.gen_id()
         copts.labels = {
-            'zoe': '',
+            'zoe.{}'.format(get_conf().container_name_prefix): '',
             'zoe.execution_id': str(execution.id),
             'zoe.container_id': str(container_id)
         }
@@ -78,7 +78,8 @@ class PlatformManager:
         subst_dict = {
             "execution_id": str(execution.id),
             "user_id": str(execution.owner.id),
-            'user_name': execution.owner.name
+            'user_name': execution.owner.name,
+            'name_prefix': get_conf().container_name_prefix
         }
         for env_name, env_value in process_description.environment:
             try:
@@ -135,10 +136,10 @@ class PlatformManager:
 
     def start_gateway_container(self, user):
         copts = ContainerOptions()
-        copts.name = 'gateway-{}'.format(user.id)
-        copts.network_name = 'zoe-usernet-{}'.format(user.id)
+        copts.name = '{}-gateway-{}'.format(get_conf().container_name_prefix, user.id)
+        copts.network_name = '{}-usernet-{}'.format(get_conf().container_name_prefix, user.id)
         copts.ports.append(1080)
-        copts.labels = ['zoe.gateway']
+        copts.labels = ['zoe.{}.gateway'.format(get_conf().container_name_prefix)]
         copts.restart = True
         if user.role == 'guest':
             image = get_conf().private_registry + '/zoerepo/guest-gateway'
@@ -158,7 +159,7 @@ class PlatformManager:
 
     def create_user_network(self, user):
         log.info('Creating a new network for user {}'.format(user.id))
-        net_name = 'zoe-usernet-{}'.format(user.id)
+        net_name = '{}-usernet-{}'.format(get_conf().container_name_prefix, user.id)
         net_id = self.swarm.network_create(net_name)
         user.network_id = net_id
 
@@ -193,8 +194,8 @@ class PlatformManager:
     def check_state_swarm_consistency(self):
         state_changed = False
         users = self.state_manager.get('user')
-        networks = self.swarm.network_list()
-        gateways = self.swarm.list(['zoe.gateway'])
+        networks = self.swarm.network_list('{}-usernet-'.format(get_conf().container_name_prefix))
+        gateways = self.swarm.list(['zoe.{}.gateway'.format(get_conf().container_name_prefix)])
 
         users_no_network = []
         users_no_gateway = []
@@ -203,25 +204,25 @@ class PlatformManager:
 
         for u in users:
             if u.network_id is None:
-                log.error('state inconsistency: user {} has no network')
+                log.error('state inconsistency: user {} has no network'.format(u.name))
                 users_no_network.append(u)
             elif u.network_id not in [x['id'] for x in networks]:
-                log.error('state inconsistency: user {} has an invalid network')
+                log.error('state inconsistency: user {} has an invalid network'.format(u.name))
                 u.network_id = None
                 users_no_network.append(u)
 
             if u.gateway_docker_id is None:
-                log.error('state inconsistency: user {} has no gateway')
+                log.error('state inconsistency: user {} has no gateway'.format(u.name))
                 users_no_gateway.append(u)
             elif u.gateway_docker_id not in [x['id'] for x in gateways]:
-                log.error('state inconsistency: user {} has an invalid gateway container ID')
+                log.error('state inconsistency: user {} has an invalid gateway container ID'.format(u.name))
                 u.gateway_docker_id = None
                 users_no_gateway.append(u)
 
         duplicate_check = set()
         for n in networks:
             try:
-                uid = int(n['name'][len('zoe-usernet-'):])
+                uid = int(n['name'][len('{}-usernet-'.format(get_conf().container_name_prefix)):])
             except ValueError:
                 log.error('network {} does not belong to Zoe, bug?'.format(n['name']))
                 networks_to_delete.append(n['id'])
@@ -244,7 +245,7 @@ class PlatformManager:
 
         for g in gateways:
             try:
-                uid = int(g['name'][len('gateway-'):])
+                uid = int(g['name'][len('{}-gateway-'.format(get_conf().container_name_prefix)):])
             except ValueError:
                 log.error('container {} does not belong to Zoe, bug?'.format(g['name']))
                 gateways_to_delete.append(g['id'])
@@ -278,7 +279,7 @@ class PlatformManager:
             self.start_gateway_container(u)
 
         # ### Check executions and container consistency
-        swarm_containers = self.swarm.list(only_label='zoe')
+        swarm_containers = self.swarm.list(only_label='zoe.{}'.format(get_conf().container_name_prefix))
         conts_state_to_delete = []
         for c_id, c in self.state_manager.containers.items():
             if c.docker_id not in [x['id'] for x in swarm_containers]:

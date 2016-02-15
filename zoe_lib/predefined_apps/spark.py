@@ -30,7 +30,7 @@ def spark_master_proc(mem_limit: int, image: str) -> dict:
             }
         ],
         'environment': [
-            ["SPARK_MASTER_IP", "spark-master-{execution_id}.zoe-usernet-{user_id}"]
+            ["SPARK_MASTER_IP", "{name_prefix}-spark-master-{execution_id}.{name_prefix}-usernet-{user_id}"],
         ]
     }
     return proc
@@ -57,8 +57,8 @@ def spark_worker_proc(count: int, mem_limit: int, cores: int, image: str) -> lis
             'environment': [
                 ["SPARK_WORKER_CORES", str(cores)],
                 ["SPARK_WORKER_RAM", str(worker_ram)],
-                ["SPARK_MASTER_IP", "spark-master-{execution_id}.zoe-usernet-{user_id}"],
-                ["SPARK_LOCAL_IP", "spark-worker-" + str(i) + "-{execution_id}.zoe-usernet-{user_id}"]
+                ["SPARK_MASTER_IP", "{name_prefix}-spark-master-{execution_id}.{name_prefix}-usernet-{user_id}"],
+                ["SPARK_LOCAL_IP", "{name_prefix}-spark-worker-" + str(i) + "-{execution_id}.{name_prefix}-usernet-{user_id}"]
             ]
         }
         ret.append(proc)
@@ -82,7 +82,7 @@ def spark_submit_proc(mem_limit: int, worker_mem_limit: int, image: str, command
             }
         ],
         'environment': [
-            ["SPARK_MASTER_IP", "spark-master-{execution_id}.zoe-usernet-{user_id}"],
+            ["SPARK_MASTER_IP", "{name_prefix}-spark-master-{execution_id}.{name_prefix}-usernet-{user_id}"],
             ["SPARK_OPTIONS", spark_options],
             ["SPARK_EXECUTOR_RAM", str(executor_ram)],
             ["APPLICATION_URL", "{application_binary}"]
@@ -140,8 +140,10 @@ def spark_jupyter_notebook_proc(mem_limit: int, worker_mem_limit: int, image: st
             }
         ],
         'environment': [
-            ["SPARK_MASTER", "spark://spark-master-{execution_id}.zoe-usernet-{user_id}:7077"],
-            ["SPARK_EXECUTOR_RAM", str(executor_ram)]
+            ["SPARK_MASTER", "spark://{name_prefix}-spark-master-{execution_id}.{name_prefix}-usernet-{user_id}:7077"],
+            ["SPARK_EXECUTOR_RAM", str(executor_ram)],
+            ["NB_USER", "{user_name}"],
+            ["NAMENODE_HOST", "hdfs-namenode.hdfs"]
         ]
     }
     return proc
