@@ -191,6 +191,10 @@ class StateManager:
         if what == 'execution':
             self.blobs.delete_blob('logs', str(obj_id))
 
+        if what == 'container':
+            c = self.containers[obj_id]
+            c.execution.containers.remove(c)
+
         if obj_id in collection:
             del collection[obj_id]
 
