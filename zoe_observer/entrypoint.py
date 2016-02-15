@@ -47,13 +47,13 @@ def main():
 
     while True:
         try:
-            zoe_containers = swarm.list('zoe')
+            zoe_containers = swarm.list('zoe.{}'.format(get_conf().container_name_prefix))
             for c in zoe_containers:
                 if 'Exited' in c['status']:
                     zoe_id = c['labels']['zoe.container_id']
                     container_died(zoe_id)
 
-            # check_guests(swarm)
+            check_guests(swarm)
 
         except KeyboardInterrupt:
             break
