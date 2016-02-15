@@ -16,6 +16,8 @@
 import time
 import logging
 
+import requests.exceptions
+
 try:
     from kazoo.client import KazooClient
 except ImportError:
@@ -131,6 +133,10 @@ class SwarmClient:
             if cont is not None:
                 self.cli.remove_container(container=cont.get('Id'), force=True)
             raise ZoeException(e.explanation.decode('utf-8'))
+        except requests.exceptions.ConnectionError:
+            if cont is not None:
+                self.cli.remove_container(container=cont.get('Id'), force=True)
+            raise ZoeException('Connection error while creating the container')
         info = self.inspect_container(cont.get('Id'))
         return info
 
