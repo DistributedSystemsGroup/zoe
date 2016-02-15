@@ -36,6 +36,7 @@ def check_guests(swarm):
                 if port['name'] == 'Spark application web interface':
                     if check_spark_job(swarm, c['docker_id'], my_exec_since_started):
                         log.info('Execution {} for user {} has been idle for too long, terminating...'.format(my_exec['name'], guest['name']))
+                        exec_api.terminate(my_exec['id'])
 
 
 def check_if_kill(idle_seconds):
