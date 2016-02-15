@@ -55,7 +55,7 @@ def main():
 
             check_guests(swarm)
 
-            time.sleep(5)
+            time.sleep(get_conf().loop_time)
 
         except KeyboardInterrupt:
             break
