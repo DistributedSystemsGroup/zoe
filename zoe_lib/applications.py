@@ -15,10 +15,6 @@
 
 """
 This module all application-related API calls for Zoe clients.
-
-Applications are tracked by client code, in the client database. The Zoe scheduler component
-will receive a valid application description and has no need to access or modify the
-application state.
 """
 
 import logging
@@ -30,6 +26,9 @@ log = logging.getLogger(__name__)
 
 
 class ZoeApplicationAPI(ZoeAPIBase):
+    """
+    The application API.
+    """
     def get(self, application_id: int) -> dict:
         """
         Return an Application object

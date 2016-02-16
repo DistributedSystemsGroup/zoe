@@ -8,10 +8,12 @@ Zoe components:
 * web client
 * command-line client
 
-Zoe is written in Python and uses the ``resource.txt`` file to list library dependencies.
+Zoe is written in Python and uses the ``requirements.txt`` file to list package dependencies.
 
 Requirements
 ------------
+
+Zoe is written in Python 3. Development happens on Python 3.4, but we test also for Python 3.5.
 
 * Docker Swarm
 
@@ -36,6 +38,9 @@ Docker 1.9/Swarm 1.0 multi-host networking is used in Zoe:
 
 * https://docs.docker.com/engine/userguide/networking/get-started-overlay/
 
+This means that you will also need a key-value store supported by Docker. We use Zookeeper, it is available in Debian and Ubuntu without the need for external package
+repositories and is very easy to set up.
+
 Images: Docker Hub Vs local Docker registry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -55,9 +60,9 @@ Zoe
 
 Currently this is the recommended procedure:
 
-1. Clone the zoe-scheduler repository
-2. Create new configuration files for the scheduler and the observer (:ref:`config_file`)
-3. Setup supervisor to manage Zoe processes: in the ``scripts/supervisor/`` directory you can find the configuration file for
+1. Clone the zoe repository
+2. Install Python package dependencies: ``pip3 install -r requirements.txt``
+3. Create new configuration files for the scheduler and the observer (:ref:`config_file`)
+4. Setup supervisor to manage Zoe processes: in the ``scripts/supervisor/`` directory you can find the configuration file for
    supervisor. You need to modify the paths to point to where you cloned Zoe and the user (Zoe does not need special privileges).
-4. Clone the zoe-client repository
 5. Start running applications using the command-line client! (the web interface will be coming soon)

@@ -14,10 +14,7 @@
 # limitations under the License.
 
 """
-This module contains all application execution-related API calls for Zoe clients.
-
-Executions are the domain of the Zoe Scheduler, so all calls in this module require
-IPC to the Zoe Scheduler.
+This module contains all execution-related API calls for Zoe clients.
 """
 
 import logging
@@ -30,6 +27,9 @@ log = logging.getLogger(__name__)
 
 
 class ZoeExecutionsAPI(ZoeAPIBase):
+    """
+    The execution API class.
+    """
     def terminate(self, execution_id: int) -> bool:
         """
         Terminates an execution.
@@ -90,17 +90,3 @@ class ZoeExecutionsAPI(ZoeAPIBase):
             raise ZoeAPIException(data['message'])
         else:
             return data['execution_id']
-
-
-# def execution_exposed_url(execution: Execution) -> str:
-#     """
-#     Get the first main endpoint for a given application execution formatted as a URL.
-#
-#     :param execution: the execution to use to build the URL
-#     :return: the endpoint URL
-#     """
-#     for c in execution.containers:
-#         assert isinstance(c, Container)
-#         port = c.description.exposed_endpoint()
-#         if port is not None:
-#             return port.get_url(c.ip_address)

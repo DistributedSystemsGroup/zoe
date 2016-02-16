@@ -1,14 +1,15 @@
 General design decisions
 ========================
 
-SQLAlchemy sessions
--------------------
+Zoe uses an internal state class hierarchy, with a checkpoint system for persistence and debug. This has been done because:
+* Zoe state is small
+* Relations between classes are simple
+* SQL adds a big requirement, with problems for redundancy and high availability
+* Checkpoints can be reverted to and examined for debug
 
-To manage sessions, SQLAlchemy provides a lot of flexibility, with the ``sessionmaker()`` and the ``scoped_session()`` functions.
+For now checkpoints are created each time the state changes.
 
-In Zoe we decided to have a number of "entry points", where a session can be created and closed. These entry points correspond to the thread loops:
-* The scheduler main loop
-* The tasks
-* The IPC server (for now it not multi-threaded, but each request generates a new session and closes it at the end)
+Authentication: HTTP basic auth is used, as it is the simplest reliable mechanism we could think of. It can be easily secured by adding SSL. Server-side ``passlib`` guarantees a reasonably safe storage of salted password hashes.
+There advantages and disadvantages to this choice, but for now we wnat to concentrate on different, more core-related features of Zoe.
 
-Sessions should never be created anywhere else, outside of these functions.
+Synchronous API. The Zoe Scheduler is not multi-thread, all requests to the API are served immediately. Again, this is done to keep the system simple and is by no means a decision set in stone.

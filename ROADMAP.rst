@@ -1,16 +1,12 @@
 Planned features for Zoe
 ========================
 
-In-browser terminal
--------------------
-When playing on a notebook, it is often useful to have access to a user git account. We don't want necessarily to modify the Notebook web-app, so it would be very nice for a user to open a terminal on the Notebook container (or on the Master container, e.g., for Apache Spark) to pull / push commits to a notebook. Having a link along the list of active applications would do the job.
-
 Monitoring
 ----------
 Integrate a monitoring solution: Zoe has access to a lot of valuable data that should be recorded and used for feedback and study. The data that can be gathered is of two kinds:
 
 1. Events (users starts an execution, cluster finishes, etc.)
-2. Statistics: time-series data gathered from `docker stats`, from the docker hosts (collectd? influxdb?)
+2. Statistics: time-series data gathered from `docker stats`, from the docker hosts
 
 Data should be visible by the users. The downside of using Grafana for visualization is that it does not handle well showing graphs from different time intervals, for example to compare the executions of two applications (e.g., Spark jobs).
 
@@ -23,17 +19,17 @@ For now we are thinking about HDFS, but Cassandra is also a possibility.
 
 Additional Analytics Applications
 ---------------------------------
-Zoe currently supports Apache Spark, but we wish to extend the list of supported Applications. Ultimately, Zoe applications should be designed by its users, so that Zoe must be general enough to accommodate a variety of them, with no need for architectural changes, additional code, or modifications to the user application.
+We need to keep testing the Zoe concept with more and more services. The following services are on top of the list, but there are many others out there.
 
-* Add support for Apache Flink
-* Add support for Apache Storm
-* Add support for Data exploration and BI tools, such as Cloudera Impala
-* Add support for additional storage layers: Cloudera Kudu, OpenStack Swift or other object stores
+* Apache Flink
+* Apache Storm
+* Data exploration and BI tools, such as Cloudera Impala
+* Cloudera Kudu, OpenStack Swift or other object stores
 
 Zoe schedulers
 --------------
 Focus on two-level scheduling: application scheduler and resource management.
 
-Zoe API
--------
-Allow advanced users to build their own scripts locally, and isse Zoe commands through a public API.
+Applications and application descriptions
+-----------------------------------------
+As far as possible, application description should not be written by hand. As part of Zoe we want to provide tools to build the descriptions (and the associated Docker images).

@@ -1,31 +1,45 @@
-The zoe_client package
-======================
+The zoe_lib package
+===================
 
-.. module:: zoe_client
+.. module:: zoe_lib
+
+Users
+-----
+
+.. automodule:: zoe_lib.users
+   :members:
+
 
 Applications
 ------------
 
-.. automodule:: zoe_client.applications
+.. automodule:: zoe_lib.applications
    :members:
 
 
 Executions
 ----------
 
-.. automodule:: zoe_client.executions
+.. automodule:: zoe_lib.executions
    :members:
 
 
-Users
------
+Containers
+----------
 
-.. automodule:: zoe_client.users
+.. automodule:: zoe_lib.containers
    :members:
 
 
-Statistics and diagnostics
---------------------------
+Exceptions
+----------
 
-.. automodule:: zoe_client.diagnostics
+.. automodule:: zoe_lib.exceptions
+   :members:
+
+
+Queries
+-------
+
+.. automodule:: zoe_lib.query
    :members:

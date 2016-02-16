@@ -16,13 +16,17 @@
 """
 This module contains all user-related API calls that a Zoe client can use.
 
-For now Zoe implements a bare minimum of user management. Users are distinguished by their email address.
+For now Zoe implements a bare minimum of user management.
 """
 from zoe_lib import ZoeAPIBase
 from zoe_lib.exceptions import ZoeAPIException
 
 
 class ZoeUserAPI(ZoeAPIBase):
+    """
+    The UserAPI class has methods for interacting with Zoe's user system.
+    """
+
     def exists(self, user_id: int) -> bool:
         """
         Checks if a given user_id exists.

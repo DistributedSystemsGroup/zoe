@@ -26,7 +26,17 @@ log = logging.getLogger(__name__)
 
 
 class ZoeQueryAPI(ZoeAPIBase):
+    """
+    The Query API class. This API can be used to query the state of Zoe.
+    """
     def query(self, topic, **kwargs):
+        """
+        Queries Zoe state.
+
+        :param topic:
+        :param kwargs:
+        :return:
+        """
         q = {
             'what': topic,
             'filters': kwargs

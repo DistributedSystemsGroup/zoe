@@ -7,9 +7,11 @@ Zoe is fast: it can create a fully-functional Spark cluster of 20 nodes in less 
 
 Zoe is easy to use: just a few clicks on a web interface is all that is needed to configure and start a variety of data-intensive applications.
 
-Zoe is open: applications can be described by a JSON file, anything that can run in a Docker container can be run within Zoe (but we concentrate on data intensive software)
+Zoe is open: applications can be described by a JSON file, anything that can run in a Docker container can be run within Zoe (but we concentrate on
+data intensive software)
 
-Zoe is smart: not everyone has infinite resources like Amazon or Google, Zoe is built for small clouds, physical or virtual, and is built to maximize the use of available capacity.
+Zoe is smart: not everyone has infinite resources like Amazon or Google, Zoe is built for small clouds, physical or virtual, and is built to maximize
+the use of available capacity.
 
 Zoe can use a Docker Swarm located anywhere, on Amazon or in your own private cloud, and does not need exclusive access to it, meaning
 your Swarm could also be running other services: Zoe will not interfere with them. Zoe is meant as a private service, adding data-analytics

@@ -1,5 +1,5 @@
 """
-This package contains all the Zoe client API.
+This package contains the Zoe library, with modules used by more than one of the Zoe components. This library can also be used to write new clients for Zoe.
 """
 import requests
 import requests.exceptions

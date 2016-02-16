@@ -25,6 +25,9 @@ log = logging.getLogger(__name__)
 
 
 class ZoeContainerAPI(ZoeAPIBase):
+    """
+    The container API class. Containers are read-only objects. The delete operation merely informs the scheduler that a container has died outside of its control.
+    """
     def get(self, container_id: int) -> dict:
         """
         Retrieve container state.
