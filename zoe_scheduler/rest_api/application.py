@@ -13,10 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import time
+
 from werkzeug.exceptions import BadRequest
 from flask_restful import Resource, request
 
 from zoe_lib.exceptions import ZoeException, ZoeRestAPIException
+from zoe_lib.metrics.influxdb import point, time_diff_ms
 from zoe_scheduler.state.manager import StateManager
 from zoe_scheduler.platform_manager import PlatformManager
 from zoe_scheduler.rest_api.utils import catch_exceptions
@@ -35,7 +38,8 @@ class ApplicationAPI(Resource):
         self.platform = kwargs['platform']
 
     @catch_exceptions
-    def get(self, application_id):
+    def get(self, application_id: int):
+        start = time.time()
         calling_user = authenticate(request, self.state)
 
         app = self.state.get_one('application', id=application_id)
@@ -43,10 +47,15 @@ class ApplicationAPI(Resource):
             raise ZoeRestAPIException('No such application', 404)
 
         is_authorized(calling_user, app, 'get')
-        return app.to_dict(checkpoint=False)
+        ret = app.to_dict(checkpoint=False)
+
+        end = time.time()
+        point('service_time', time_diff_ms(start, end), action='get', object='application', user=calling_user.name)
+        return ret
 
     @catch_exceptions
-    def delete(self, application_id):
+    def delete(self, application_id: int):
+        start = time.time()
         calling_user = authenticate(request, self.state)
 
         app = self.state.get_one('application', id=application_id)
@@ -65,6 +74,9 @@ class ApplicationAPI(Resource):
         self.state.delete('application', app.id)
 
         self.state.state_updated()
+
+        end = time.time()
+        point('service_time', time_diff_ms(start, end), action='delete', object='application', user=calling_user.name)
         return '', 204
 
 
@@ -79,6 +91,7 @@ class ApplicationCollectionAPI(Resource):
 
     @catch_exceptions
     def post(self):
+        start = time.time()
         calling_user = authenticate(request, self.state)
 
         try:
@@ -98,4 +111,7 @@ class ApplicationCollectionAPI(Resource):
         app.id = self.state.gen_id()
         self.state.new('application', app)
         self.state.state_updated()
+
+        end = time.time()
+        point('service_time', time_diff_ms(start, end), action='post', object='application', user=calling_user.name)
         return {'application_id': app.id}, 201

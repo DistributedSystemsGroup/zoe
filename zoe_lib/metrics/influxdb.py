@@ -28,15 +28,16 @@ def init(influxdb_dbname, influxdb_url):
     _influxdb_endpoint = influxdb_url + '/write?precision=ms&db=' + influxdb_dbname
 
 
-def _send_buffer(self):
-    payload = '\n'.join(self.buffer)
-    r = requests.post(self.influxdb_endpoint, data=payload)
-    if r.status_code != 204:
-        log.error('error writing metrics to influxdb')
-    self.buffer = []
+def _send_buffer():
+    if _influxdb_endpoint is not None:
+        payload = '\n'.join(_buffer)
+        r = requests.post(_influxdb_endpoint, data=payload)
+        if r.status_code != 204:
+            log.error('error writing metrics to influxdb')
+    _buffer.clear()
 
 
-def point(conf, measurement_name, value, **kwargs):
+def point(measurement_name: str, value: int, **kwargs):
     ts = time.time()
     point_str = measurement_name
     for k, v in kwargs.items():
@@ -46,4 +47,8 @@ def point(conf, measurement_name, value, **kwargs):
 
     _buffer.append(point_str)
     if len(_buffer) > 5:
-        _send_buffer(conf)
+        _send_buffer()
+
+
+def time_diff_ms(start: float, end: float) -> int:
+    return int((end - start) * 1000)
