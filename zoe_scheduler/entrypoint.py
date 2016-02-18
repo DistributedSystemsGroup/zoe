@@ -51,17 +51,21 @@ def main():
     logging.getLogger("tornado").setLevel(logging.DEBUG)
     logging.getLogger('passlib').setLevel(logging.INFO)
 
+    log.info("Initializing state")
     state_manager = StateManager(FSBlobs)
     state_manager.init()
 
+    log.info("Initializing platform manager")
     pm = PlatformManager(FIFOSchedulerPolicy)
     pm.state_manager = state_manager
 
 #    try:
+    log.info("Checking state consistency")
     pm.check_state_swarm_consistency()
 #    except:
 #        log.error('State is seriously corrupted, delete and restart')
 
+    log.info("Initializing API")
     app = api_init(state_manager, pm)
 
     log.info("Starting HTTP REST server...")
