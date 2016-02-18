@@ -55,13 +55,12 @@ class StateManager:
 
         if checkpoint is None:
             highest_epoch = self._find_latest_checkpoint()
-            if highest_epoch > 0:
+            if highest_epoch is not None:
                 checkpoint = highest_epoch
 
         if checkpoint is None:
             log.info('Starting with initial state, no checkpoints found')
         else:
-            log.info('Loading checkpoint with state epoch {}'.format(checkpoint))
             try:
                 self.load_checkpoint(checkpoint)
             except:
@@ -83,15 +82,15 @@ class StateManager:
 
     def _find_latest_checkpoint(self):
         ckps = self.blobs.list_blobs('checkpoint')
-        highest = 0
-        for ckp in ckps:
-            try:
-                ckp = int(ckp)
-            except ValueError:
-                continue
-            if ckp > highest:
-                highest = ckp
-        return highest
+        highest_ckp = None
+        highest_epoch = 0
+        for ckp_file in ckps:
+            blob = self.blobs.load_blob('checkpoint', str(ckp_file))
+            ckp = json.loads(blob.decode('utf-8'))
+            if ckp['state_manager']['state_epoch'] > highest_epoch:
+                highest_ckp = ckp_file
+                highest_epoch = ckp['state_manager']['state_epoch']
+        return highest_ckp
 
     def generate_checkpoint(self):
         checkpointed_state = {
@@ -104,7 +103,7 @@ class StateManager:
                 'state_epoch': self._state_epoch
             }
         }
-        ckp_name = str(self._state_epoch)
+        ckp_name = str(self._state_epoch % 10)
         ckp = json.dumps(checkpointed_state)
         blob = ckp.encode('utf-8')
         self.blobs.store_blob('checkpoint', ckp_name, blob)
@@ -115,6 +114,7 @@ class StateManager:
         state = json.loads(ckp)
         self._next_id = state['state_manager']['next_id']
         self._state_epoch = state['state_manager']['state_epoch']
+        log.info('Loading checkpoint with state epoch {}'.format(self._state_epoch))
         for u in state['users']:
             us = User(self)
             us.load_checkpoint(u)
