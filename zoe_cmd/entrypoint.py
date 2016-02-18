@@ -237,10 +237,10 @@ def process_arguments() -> Namespace:
     argparser_user_delete.add_argument('name', help="User name")
     argparser_user_delete.set_defaults(func=user_delete_cmd)
 
-    argparser_user_list = subparser.add_parser('user-list', help='Lists all users defined in the system')
+    argparser_user_list = subparser.add_parser('user-ls', help='Lists all users defined in the system')
     argparser_user_list.set_defaults(func=user_list_cmd)
 
-    argparser_pre_app_list = subparser.add_parser('pre-app-list', help='Lists the predefined application descriptions')
+    argparser_pre_app_list = subparser.add_parser('pre-app-ls', help='Lists the predefined application descriptions')
     argparser_pre_app_list.set_defaults(func=pre_app_list_cmd)
 
     argparser_pre_app_export = subparser.add_parser('pre-app-export', help='Export one of the predefined application descriptions in JSON (stdout)')
