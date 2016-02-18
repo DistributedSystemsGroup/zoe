@@ -22,6 +22,7 @@ from zoe_lib.containers import ZoeContainerAPI
 from zoe_lib.executions import ZoeExecutionsAPI
 from zoe_lib.predefined_apps.lab_spark import spark_jupyter_notebook_lab_app
 from zoe_lib.query import ZoeQueryAPI
+from zoe_lib.exceptions import ZoeAPIException
 
 from zoe_web.config import get_conf
 from zoe_web.web import web_bp
@@ -55,12 +56,16 @@ def home_guest(guest_identifier):
         'guest_identifier': guest_identifier
     }
 
-    user = query_api.query('user', name=guest_identifier)
+    try:
+        user = query_api.query('user', name=guest_identifier)
+    except ZoeAPIException:
+        return redirect(url_for('web.index'))
     if len(user) == 0:
         return redirect(url_for('web.index'))
     else:
         user = user[0]
         template_vars['user_gateway'] = user['gateway_urls'][0]
+        template_vars['gateway_ip'] = user['gateway_urls'][0].split('/')[2].split(':')[0]
         app_api = ZoeApplicationAPI(get_conf().zoe_url, guest_identifier, guest_identifier)
         exec_api = ZoeExecutionsAPI(get_conf().zoe_url, guest_identifier, guest_identifier)
         app = query_api.query('application', name='spark-jupyter-lab')
