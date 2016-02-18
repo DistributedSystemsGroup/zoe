@@ -37,7 +37,7 @@ def spark_master_proc(mem_limit: int, image: str) -> dict:
 
 
 def spark_worker_proc(count: int, mem_limit: int, cores: int, image: str) -> list:
-    worker_ram = mem_limit - (1024 ** 3)
+    worker_ram = mem_limit - (1024 ** 3) - (512 * 1025 ** 2)
     ret = []
     for i in range(count):
         proc = {
@@ -66,7 +66,8 @@ def spark_worker_proc(count: int, mem_limit: int, cores: int, image: str) -> lis
 
 
 def spark_jupyter_notebook_proc(mem_limit: int, worker_mem_limit: int, image: str) -> dict:
-    executor_ram = worker_mem_limit - (2 * 1024 ** 3)
+    executor_ram = worker_mem_limit - (1024 ** 3) - (512 * 1025 ** 2)
+    driver_ram = (2 * 1024 ** 3)
     proc = {
         'name': "spark-jupyter",
         'docker_image': image,
@@ -91,6 +92,7 @@ def spark_jupyter_notebook_proc(mem_limit: int, worker_mem_limit: int, image: st
         'environment': [
             ["SPARK_MASTER", "spark://{name_prefix}-spark-master-{execution_id}.{name_prefix}-usernet-{user_id}:7077"],
             ["SPARK_EXECUTOR_RAM", str(executor_ram)],
+            ["SPARK_DRIVER_RAM", str(driver_ram)],
             ["NB_USER", "{user_name}"],
             ["NAMENODE_HOST", "hdfs-namenode.hdfs"]
         ]
@@ -99,10 +101,11 @@ def spark_jupyter_notebook_proc(mem_limit: int, worker_mem_limit: int, image: st
 
 
 def spark_jupyter_notebook_lab_app(name='spark-jupyter-lab',
-                                   master_mem_limit=3 * (1024 ** 3),
-                                   worker_count=3,
-                                   worker_mem_limit=4 * (1024 ** 3),
-                                   worker_cores=4,
+                                   notebook_mem_limit=3 * (1024 ** 3),
+                                   master_mem_limit=512 * (1024 ** 2),
+                                   worker_count=2,
+                                   worker_mem_limit=3 * (1024 ** 3),
+                                   worker_cores=6,
                                    master_image='192.168.45.252:5000/zoerepo/spark-master',
                                    worker_image='192.168.45.252:5000/zoerepo/spark-worker',
                                    notebook_image='192.168.45.252:5000/zoerepo/spark-jupyter-notebook') -> dict:
@@ -114,7 +117,7 @@ def spark_jupyter_notebook_lab_app(name='spark-jupyter-lab',
         'requires_binary': False,
         'processes': [
             spark_master_proc(master_mem_limit, master_image),
-            spark_jupyter_notebook_proc(master_mem_limit, worker_mem_limit, notebook_image)
+            spark_jupyter_notebook_proc(notebook_mem_limit, worker_mem_limit, notebook_image)
         ] + spark_worker_proc(worker_count, worker_mem_limit, worker_cores, worker_image)
     }
     return app
