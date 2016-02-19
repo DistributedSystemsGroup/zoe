@@ -11,8 +11,6 @@ from zoe_observer.config import get_conf
 
 log = logging.getLogger(__name__)
 
-IDLE_TIME = 4 * 60 * 60  # 4h
-
 
 def check_guests(swarm):
     query_api = ZoeQueryAPI(get_conf().scheduler_url, 'zoeadmin', get_conf().zoeadmin_password)
@@ -24,20 +22,25 @@ def check_guests(swarm):
     for guest in guests:
         my_execs = [e for e in execs if e['owner'] == guest['id']]
         if len(my_execs) > 1:
-            log.warning('User {} is a guest and has more than one execution!')
+            log.warning('User {} is a guest and has more than one execution!'.format(guest['name']))
         elif len(my_execs) == 0:
             continue
         my_exec = my_execs[0]
         my_exec_since_started = datetime.datetime.now() - dateutil.parser.parse(my_exec['time_started'])
         my_exec_since_started = my_exec_since_started.total_seconds()
+        terminate = False
         for c in my_exec['containers']:
             c = cont_api.get(c)
             for port in c['ports']:
                 if port['name'] == 'Spark application web interface':
                     if check_spark_job(swarm, c['docker_id'], my_exec_since_started):
                         log.info('Execution {} for user {} has been idle for too long, terminating...'.format(my_exec['name'], guest['name']))
-                        exec_api.terminate(my_exec['id'])
+                        terminate = True
                         break
+                if terminate:
+                    break
+        if terminate:
+            exec_api.terminate(my_exec['id'])
 
 
 def check_if_kill(idle_seconds):
