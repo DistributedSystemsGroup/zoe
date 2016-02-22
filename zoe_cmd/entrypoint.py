@@ -139,9 +139,11 @@ def app_rm_cmd(args):
 
 def app_list_cmd(_):
     api_query = ZoeQueryAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
+    api_user = ZoeUserAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     data = api_query.query('application')
     for app in data:
-        print('{} (ID: {})'.format(app['name'], app['id']))
+        user = api_user.get(app['owner'])
+        print('{} (User: {}, ID: {})'.format(app['name'], user['name'], app['id']))
 
 
 def exec_list_cmd(_):
@@ -251,7 +253,7 @@ def process_arguments() -> Namespace:
     argparser_app_get.set_defaults(func=app_get_cmd)
 
     argparser_app_rm = subparser.add_parser('app-rm', help="Delete an application")
-    argparser_app_rm.add_argument('id', help="Application ID (will fail if there are running executions)")
+    argparser_app_rm.add_argument('app_id', help="Application ID (will fail if there are running executions)")
     argparser_app_rm.set_defaults(func=app_rm_cmd)
 
     argparser_app_list = subparser.add_parser('app-ls', help="List all applications defined by the calling user")
