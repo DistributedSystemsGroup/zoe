@@ -21,26 +21,24 @@ def check_guests(swarm):
     execs = exec_api.list()
     for guest in guests:
         my_execs = [e for e in execs if e['owner'] == guest['id']]
-        if len(my_execs) > 1:
-            log.warning('User {} is a guest and has more than one execution!'.format(guest['name']))
-        elif len(my_execs) == 0:
-            continue
-        my_exec = my_execs[0]
-        my_exec_since_started = datetime.datetime.now() - dateutil.parser.parse(my_exec['time_started'])
-        my_exec_since_started = my_exec_since_started.total_seconds()
-        terminate = False
-        for c in my_exec['containers']:
-            c = cont_api.get(c)
-            for port in c['ports']:
-                if port['name'] == 'Spark application web interface':
-                    if check_spark_job(swarm, c['docker_id'], my_exec_since_started):
-                        log.info('Execution {} for user {} has been idle for too long, terminating...'.format(my_exec['name'], guest['name']))
-                        terminate = True
+        for my_exec in my_execs:
+            if len(my_exec['containers']) == 0:
+                continue
+            my_exec_since_started = datetime.datetime.now() - dateutil.parser.parse(my_exec['time_started'])
+            my_exec_since_started = my_exec_since_started.total_seconds()
+            terminate = False
+            for c in my_exec['containers']:
+                c = cont_api.get(c)
+                for port in c['ports']:
+                    if port['name'] == 'Spark application web interface':
+                        if check_spark_job(swarm, c['docker_id'], my_exec_since_started):
+                            log.info('Execution {} for user {} has been idle for too long, terminating...'.format(my_exec['name'], guest['name']))
+                            terminate = True
+                            break
+                    if terminate:
                         break
-                if terminate:
-                    break
-        if terminate:
-            exec_api.terminate(my_exec['id'])
+            if terminate:
+                exec_api.terminate(my_exec['id'])
 
 
 def check_if_kill(idle_seconds):
