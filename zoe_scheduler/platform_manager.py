@@ -64,8 +64,13 @@ class PlatformManager:
         container_id = self.state_manager.gen_id()
         copts.labels = {
             'zoe.{}'.format(get_conf().container_name_prefix): '',
-            'zoe.execution_id': str(execution.id),
-            'zoe.container_id': str(container_id)
+            'zoe.execution.id': str(execution.id),
+            'zoe.execution.name': execution.name,
+            'zoe.container.id': str(container_id),
+            'zoe.container.name': process_description.name,
+            'zoe.owner': execution.owner.name,
+            'zoe.prefix': get_conf().container_name_prefix,
+            'zoe.type': 'app_process'
         }
         if process_description.monitor:
             copts.labels['zoe.monitor'] = ''
@@ -141,7 +146,12 @@ class PlatformManager:
         copts.name = '{}-gateway-{}'.format(get_conf().container_name_prefix, user.id)
         copts.network_name = '{}-usernet-{}'.format(get_conf().container_name_prefix, user.id)
         copts.ports.append(1080)
-        copts.labels = ['zoe.{}.gateway'.format(get_conf().container_name_prefix)]
+        copts.labels = {
+            'zoe.{}.gateway'.format(get_conf().container_name_prefix): '',
+            'zoe.owner': user.name,
+            'zoe.prefix': get_conf().container_name_prefix,
+            'zoe.type': 'gateway'
+        }
         copts.restart = True
         if user.role == 'guest':
             image = get_conf().private_registry + '/zoerepo/guest-gateway'
