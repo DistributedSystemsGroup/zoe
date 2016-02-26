@@ -16,7 +16,7 @@
 import re
 from random import randint
 
-from flask import render_template, redirect, url_for, request, flash
+from flask import render_template, request
 from zoe_lib.applications import ZoeApplicationAPI
 from zoe_lib.containers import ZoeContainerAPI
 from zoe_lib.executions import ZoeExecutionsAPI
@@ -26,27 +26,30 @@ from zoe_lib.exceptions import ZoeAPIException
 
 from zoe_web.config import get_conf
 from zoe_web.web import web_bp
-from zoe_web.web.forms import LoginWithGuestIDForm
+from zoe_web.web.auth import missing_auth
 
 guest_id_pattern = re.compile('^\w+$')
 
 
 @web_bp.route('/', methods=['GET', 'POST'])
 def index():
-    form = LoginWithGuestIDForm(request.form)
-    if request.method == 'POST' and form.validate():
-        flash('Valid identifier')
-        return redirect(url_for('web.home_guest', guest_identifier=form.guest_identifier.data))
-    return render_template('index.html', form=form)
+    return render_template('index.html')
 
 
-@web_bp.route('/guest/<guest_identifier>')
-def home_guest(guest_identifier):
+@web_bp.route('/guest')
+def home_guest():
+    auth = request.authorization
+    if not auth:
+        return missing_auth()
+
+    guest_identifier = auth.username
+    guest_password = auth.password
+
     match = guest_id_pattern.match(guest_identifier)
     if match is None:
-        return redirect(url_for('web.index'))
+        return missing_auth()
 
-    query_api = ZoeQueryAPI(get_conf().zoe_url, guest_identifier, guest_identifier)
+    query_api = ZoeQueryAPI(get_conf().zoe_url, guest_identifier, guest_password)
 
     template_vars = {
         'refresh': randint(2, 8),
@@ -59,15 +62,15 @@ def home_guest(guest_identifier):
     try:
         user = query_api.query('user', name=guest_identifier)
     except ZoeAPIException:
-        return redirect(url_for('web.index'))
+        return missing_auth()
     if len(user) == 0:
-        return redirect(url_for('web.index'))
+        return missing_auth()
     else:
         user = user[0]
         template_vars['user_gateway'] = user['gateway_urls'][0]
         template_vars['gateway_ip'] = user['gateway_urls'][0].split('/')[2].split(':')[0]
-        app_api = ZoeApplicationAPI(get_conf().zoe_url, guest_identifier, guest_identifier)
-        exec_api = ZoeExecutionsAPI(get_conf().zoe_url, guest_identifier, guest_identifier)
+        app_api = ZoeApplicationAPI(get_conf().zoe_url, guest_identifier, guest_password)
+        exec_api = ZoeExecutionsAPI(get_conf().zoe_url, guest_identifier, guest_password)
         app = query_api.query('application', name='spark-jupyter-lab')
         if len(app) == 0:
             app_descr = spark_jupyter_notebook_lab_app()
@@ -75,24 +78,24 @@ def home_guest(guest_identifier):
             return render_template('home_guest.html', **template_vars)
         else:
             app = app[0]
-            exec = query_api.query('execution', name='guest-lab-{}'.format(guest_identifier))
-            if len(exec) == 0:
+            execution = query_api.query('execution', name='guest-lab-{}'.format(guest_identifier))
+            if len(execution) == 0:
                 exec_api.execution_start('guest-lab-{}'.format(guest_identifier), app['name'])
                 template_vars['execution_status'] = 'submitted'
                 return render_template('home_guest.html', **template_vars)
             else:
-                exec = exec[0]
-                if exec['status'] == 'terminated':
+                execution = execution[0]
+                if execution['status'] == 'terminated':
                     app_api.delete(app['id'])
                     return render_template('home_guest.html', **template_vars)
-                elif exec['status'] != 'running':
-                    template_vars['execution_status'] = exec['status']
+                elif execution['status'] != 'running':
+                    template_vars['execution_status'] = execution['status']
                     return render_template('home_guest.html', **template_vars)
                 else:
                     template_vars['refresh'] = -1
-                    cont_api = ZoeContainerAPI(get_conf().zoe_url, guest_identifier, guest_identifier)
-                    template_vars['execution_status'] = exec['status']
-                    for c_id in exec['containers']:
+                    cont_api = ZoeContainerAPI(get_conf().zoe_url, guest_identifier, guest_password)
+                    template_vars['execution_status'] = execution['status']
+                    for c_id in execution['containers']:
                         c = cont_api.get(c_id)
                         ip = list(c['ip_address'].values())[0]  # FIXME how to decide which network is the right one?
                         for p in c['ports']:

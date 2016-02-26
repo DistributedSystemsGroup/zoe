@@ -2,12 +2,10 @@
 {% block title %}Start{% endblock %}
 {% block content %}
 
-{% from "_formhelpers.html" import render_field %}
-<form method="post" action="/">
-  <dl>
-    {{ render_field(form.guest_identifier) }}
-  </dl>
-  <p><input type="submit" value="Start">
-</form>
+<p>Welcome to Zoe</p>
+
+    <ul>
+    <li><a href="{{ url_for('web.home_guest') }}">Guest start page</a></li>
+    </ul>
 
 {% endblock %}
