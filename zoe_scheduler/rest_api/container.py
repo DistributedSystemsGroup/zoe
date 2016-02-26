@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import logging
+import time
 from flask_restful import Resource, request
 
 from zoe_lib.exceptions import ZoeRestAPIException
@@ -22,6 +23,7 @@ from zoe_scheduler.platform_manager import PlatformManager
 from zoe_scheduler.rest_api.utils import catch_exceptions
 from zoe_scheduler.rest_api.auth.authentication import authenticate
 from zoe_scheduler.rest_api.auth.authorization import is_authorized
+from zoe_scheduler.config import singletons
 
 log = logging.getLogger(__name__)
 
@@ -37,6 +39,7 @@ class ContainerAPI(Resource):
 
     @catch_exceptions
     def get(self, container_id):
+        start_time = time.time()
         calling_user = authenticate(request, self.state)
 
         c = self.state.get_one('container', id=container_id)
@@ -44,10 +47,12 @@ class ContainerAPI(Resource):
             raise ZoeRestAPIException('No such container', 404)
 
         is_authorized(calling_user, c, 'get')
+        singletons['metric'].metric_api_call(start_time, 'container', 'get', calling_user)
         return c.to_dict(checkpoint=False)
 
     @catch_exceptions
     def delete(self, container_id):
+        start_time = time.time()
         calling_user = authenticate(request, self.state)
 
         c = self.state.get_one('container', id=container_id)
@@ -60,10 +65,11 @@ class ContainerAPI(Resource):
             log.info("Monitor container died ({}), terminating execution {}".format(c.name, c.execution.name))
             self.platform.execution_terminate(c.execution, reason='finished')
             self.state.state_updated()
-            return '', 204
         else:
             # A non-fundamental container died, nothing we can do?
             # We leave everything in place, so when the execution terminates we will
             # gather the logs also of the containers that died
             log.warning("Container {} died by itself".format(c.name))
-            return '', 204
+
+        singletons['metric'].metric_api_call(start_time, 'container', 'get', calling_user)
+        return '', 204

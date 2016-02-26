@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import time
+
 from werkzeug.exceptions import BadRequest
 from flask_restful import Resource, request
 
@@ -23,6 +25,7 @@ from zoe_scheduler.platform_manager import PlatformManager
 from zoe_scheduler.rest_api.auth.authentication import authenticate
 from zoe_scheduler.rest_api.auth.authorization import is_authorized
 from zoe_scheduler.state.user import User
+from zoe_scheduler.config import singletons
 
 
 class UserAPI(Resource):
@@ -36,6 +39,7 @@ class UserAPI(Resource):
 
     @catch_exceptions
     def get(self, user_id):
+        start_time = time.time()
         calling_user = authenticate(request, self.state)
 
         u = self.state.get_one('user', id=user_id)
@@ -45,10 +49,12 @@ class UserAPI(Resource):
         is_authorized(calling_user, u, 'get')
 
         d = u.to_dict(checkpoint=False)
+        singletons['metric'].metric_api_call(start_time, 'user', 'get', calling_user)
         return d, 200
 
     @catch_exceptions
     def delete(self, user_id):
+        start_time = time.time()
         calling_user = authenticate(request, self.state)
 
         user = self.state.get_one('user', id=user_id)
@@ -67,6 +73,7 @@ class UserAPI(Resource):
         self.state.delete('user', user_id)
         self.state.state_updated()
 
+        singletons['metric'].metric_api_call(start_time, 'user', 'delete', calling_user)
         return '', 204
 
 
@@ -85,6 +92,7 @@ class UserCollectionAPI(Resource):
         Create a new user
         :return:
         """
+        start_time = time.time()
         calling_user = authenticate(request, self.state)
 
         try:
@@ -114,4 +122,5 @@ class UserCollectionAPI(Resource):
 
         self.state.state_updated()
 
+        singletons['metric'].metric_api_call(start_time, 'user', 'post', calling_user)
         return {"user_id": user.id}, 201

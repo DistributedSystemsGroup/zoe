@@ -19,7 +19,7 @@ from werkzeug.exceptions import BadRequest
 from flask_restful import Resource, request
 
 from zoe_lib.exceptions import ZoeException, ZoeRestAPIException
-from zoe_lib.metrics.influxdb import point, time_diff_ms
+from zoe_scheduler.config import singletons
 from zoe_scheduler.state.manager import StateManager
 from zoe_scheduler.platform_manager import PlatformManager
 from zoe_scheduler.rest_api.utils import catch_exceptions
@@ -49,8 +49,7 @@ class ApplicationAPI(Resource):
         is_authorized(calling_user, app, 'get')
         ret = app.to_dict(checkpoint=False)
 
-        end = time.time()
-        point('service_time', time_diff_ms(start, end), action='get', object='application', user=calling_user.name)
+        singletons['metric'].metric_api_call(start, 'application', 'get', calling_user)
         return ret
 
     @catch_exceptions
@@ -75,8 +74,7 @@ class ApplicationAPI(Resource):
 
         self.state.state_updated()
 
-        end = time.time()
-        point('service_time', time_diff_ms(start, end), action='delete', object='application', user=calling_user.name)
+        singletons['metric'].metric_api_call(start, 'application', 'delete', calling_user)
         return '', 204
 
 
@@ -112,6 +110,5 @@ class ApplicationCollectionAPI(Resource):
         self.state.new('application', app)
         self.state.state_updated()
 
-        end = time.time()
-        point('service_time', time_diff_ms(start, end), action='post', object='application', user=calling_user.name)
+        singletons['metric'].metric_api_call(start, 'application', 'post', calling_user)
         return {'application_id': app.id}, 201

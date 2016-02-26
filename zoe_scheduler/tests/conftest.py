@@ -29,6 +29,7 @@ class TestConf:
         self.state_dir = '/tmp/zoe'
         self.zoeadmin_password = 'test'
         self.passlib_rounds = 1
+        self.enable_influxdb = False
 
 
 @pytest.fixture(scope='session')

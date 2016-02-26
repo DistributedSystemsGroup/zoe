@@ -23,10 +23,11 @@ from tornado.ioloop import IOLoop
 
 from zoe_scheduler.platform_manager import PlatformManager
 from zoe_scheduler.scheduler_policies import FIFOSchedulerPolicy
-from zoe_scheduler.config import load_configuration, get_conf
+import zoe_scheduler.config as config
 from zoe_scheduler.rest_api import init as api_init
 from zoe_scheduler.state.manager import StateManager
 from zoe_scheduler.state.blobs.fs import FSBlobs
+from zoe_lib.metrics.influxdb import InfluxDBMetricSender
 
 log = logging.getLogger("main")
 
@@ -36,8 +37,8 @@ def main():
     The entrypoint for the zoe-scheduler script.
     :return: int
     """
-    load_configuration()
-    args = get_conf()
+    config.load_configuration()
+    args = config.get_conf()
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
 
@@ -68,6 +69,11 @@ def main():
     log.info("Initializing API")
     app = api_init(state_manager, pm)
 
+    if config.get_conf().influxdb_enable:
+        metrics_th = InfluxDBMetricSender(config.get_conf())
+        metrics_th.start()
+        config.singletons['metric'] = metrics_th
+
     log.info("Starting HTTP REST server...")
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
@@ -77,4 +83,7 @@ def main():
     try:
         ioloop.start()
     except KeyboardInterrupt:
+        if config.singletons['metric'] is not None:
+            config.singletons['metric'].quit()
+            config.singletons['metric'].join()
         print("CTRL-C detected, terminating")

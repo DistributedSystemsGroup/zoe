@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import time
 from werkzeug.exceptions import BadRequest
 from flask_restful import Resource, request
 
@@ -23,6 +24,7 @@ from zoe_scheduler.platform_manager import PlatformManager
 from zoe_scheduler.state.execution import Execution
 from zoe_scheduler.rest_api.auth.authentication import authenticate
 from zoe_scheduler.rest_api.auth.authorization import is_authorized, check_quota
+from zoe_scheduler.config import singletons
 
 
 class ExecutionAPI(Resource):
@@ -36,6 +38,7 @@ class ExecutionAPI(Resource):
 
     @catch_exceptions
     def get(self, execution_id):
+        start_time = time.time()
         calling_user = authenticate(request, self.state)
 
         e = self.state.get_one('execution', id=execution_id)
@@ -45,6 +48,7 @@ class ExecutionAPI(Resource):
         is_authorized(calling_user, e, 'get')
         ret = e.to_dict(checkpoint=False)
 
+        singletons['metric'].metric_api_call(start_time, 'execution', 'get', calling_user)
         return ret
 
     @catch_exceptions
@@ -55,6 +59,7 @@ class ExecutionAPI(Resource):
         :param execution_id: the execution to be deleted
         :return:
         """
+        start_time = time.time()
         calling_user = authenticate(request, self.state)
 
         e = self.state.get_one('execution', id=execution_id)
@@ -68,6 +73,7 @@ class ExecutionAPI(Resource):
 
         self.state.state_updated()
 
+        singletons['metric'].metric_api_call(start_time, 'execution', 'delete', calling_user)
         return '', 204
 
 
@@ -87,6 +93,7 @@ class ExecutionCollectionAPI(Resource):
 
         :return:
         """
+        start_time = time.time()
         calling_user = authenticate(request, self.state)
         execs = self.state.get('execution')
         ret = []
@@ -97,6 +104,7 @@ class ExecutionCollectionAPI(Resource):
                 continue
             else:
                 ret.append(e.to_dict(checkpoint=False))
+        singletons['metric'].metric_api_call(start_time, 'execution', 'list', calling_user)
         return ret
 
     @catch_exceptions
@@ -105,6 +113,7 @@ class ExecutionCollectionAPI(Resource):
         Starts an execution, given an application_id. Takes a JSON object like this: { "application_id": 4 }
         :return: the new execution_id
         """
+        start_time = time.time()
         calling_user = authenticate(request, self.state)
 
         try:
@@ -131,4 +140,5 @@ class ExecutionCollectionAPI(Resource):
 
         self.state.state_updated()
 
+        singletons['metric'].metric_api_call(start_time, 'execution', 'start', calling_user)
         return {'execution_id': execution.id}, 201

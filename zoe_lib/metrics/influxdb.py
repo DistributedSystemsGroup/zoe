@@ -16,39 +16,72 @@
 import time
 import requests
 import logging
+import threading
+import queue
 
 log = logging.getLogger(__name__)
 
-_buffer = []
-_influxdb_endpoint = None
 
+class InfluxDBMetricSender(threading.Thread):
+    def __init__(self, conf):
+        super().__init__(name='influxdb_sender')
 
-def init(influxdb_dbname, influxdb_url):
-    global _influxdb_endpoint
-    _influxdb_endpoint = influxdb_url + '/write?precision=ms&db=' + influxdb_dbname
+        self._buffer = []
+        self._deployment = conf.container_name_prefix
+        self._influxdb_endpoint = conf.influxdb_url + '/write?precision=ms&db=' + conf.influxdb_dbname
+        self._queue = queue.Queue()
 
+    def _send_buffer(self):
+        if self._influxdb_endpoint is not None and len(self._buffer) > 0:
+            payload = '\n'.join(self._buffer)
+            try:
+                r = requests.post(self._influxdb_endpoint, data=payload)
+            except:
+                log.exception('error writing metrics to influxdb, data thrown away')
+            else:
+                if r.status_code != 204:
+                    log.error('error writing metrics to influxdb, data thrown away')
+        self._buffer.clear()
 
-def _send_buffer():
-    if _influxdb_endpoint is not None:
-        payload = '\n'.join(_buffer)
-        r = requests.post(_influxdb_endpoint, data=payload)
-        if r.status_code != 204:
-            log.error('error writing metrics to influxdb')
-    _buffer.clear()
+    def quit(self):
+        self._queue.put('quit')
 
+    def point(self, measurement_name: str, value: int, **kwargs):
+        ts = time.time()
+        point_str = measurement_name
+        for k, v in kwargs.items():
+            point_str += "," + k + '=' + v
+        point_str += ',' + 'deployment' + '=' + self._deployment
+        point_str += " value=" + str(value)
+        point_str += " " + str(int(ts * 1000))
 
-def point(measurement_name: str, value: int, **kwargs):
-    ts = time.time()
-    point_str = measurement_name
-    for k, v in kwargs.items():
-        point_str += "," + k + '=' + v
-    point_str += " value=" + str(value)
-    point_str += " " + str(int(ts * 1000))
+        self._queue.put(point_str)
 
-    _buffer.append(point_str)
-    if len(_buffer) > 5:
-        _send_buffer()
+    def _time_diff_ms(self, start: float, end: float) -> int:
+        return (end - start) * 1000
 
+    def metric_api_call(self, time_start, api_name, action, calling_user):
+        time_end = time.time()
+        td = self._time_diff_ms(time_start, time_end)
+        self.point("api_latency", td, api_name=api_name, action=action, calling_user_name=calling_user.name)
 
-def time_diff_ms(start: float, end: float) -> int:
-    return int((end - start) * 1000)
+    def run(self):
+        log.info('starting influxdb metric sender thread')
+        while True:
+            try:
+                data = self._queue.get(timeout=1)
+            except queue.Empty:
+                if len(self._buffer) > 0:
+                    self._send_buffer()
+                continue
+
+            if data == 'quit':
+                log.info('influxdb thread got a quit command')
+                if len(self._buffer) > 0:
+                    self._send_buffer()
+                break
+
+            if data != 'quit':
+                self._buffer.append(data)
+                if len(self._buffer) > 6:
+                    self._send_buffer()

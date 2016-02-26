@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import time
+
 from werkzeug.exceptions import BadRequest
 from flask_restful import Resource, request
 
@@ -21,6 +23,7 @@ from zoe_scheduler.state.manager import StateManager
 from zoe_scheduler.platform_manager import PlatformManager
 from zoe_scheduler.rest_api.utils import catch_exceptions
 from zoe_scheduler.rest_api.auth.authentication import authenticate
+from zoe_scheduler.config import singletons
 
 
 class QueryAPI(Resource):
@@ -34,6 +37,7 @@ class QueryAPI(Resource):
 
     @catch_exceptions
     def post(self):
+        start_time = time.time()
         calling_user = authenticate(request, self.state)
 
         try:
@@ -58,23 +62,25 @@ class QueryAPI(Resource):
 
         if what == 'stats swarm':
             ret = self.platform.swarm_stats()
-            return {'stats': ret.to_dict()}
+            ret = {'stats': ret.to_dict()}
         elif what == 'stats scheduler':
             ret = self.platform.scheduler_stats()
-            return {'stats': ret.to_dict()}
+            ret = {'stats': ret.to_dict()}
         elif what == 'execution logs':
-            pass  # TODO
+            ret = None  # TODO
         elif what == 'container logs':
             c_list = self.state.get('container', **filters)
             logs = self._get_container_logs(c_list)
-            return logs
+            ret = logs
         elif what == 'container stats':
             c_list = self.state.get('container', **filters)
             stats = self._get_container_stats(c_list)
-            return [s.to_dict() for s in stats]
+            ret = [s.to_dict() for s in stats]
         else:
             ret = self.state.get(what, **filters)
-            return [o.to_dict(checkpoint=False) for o in ret]
+            ret = [o.to_dict(checkpoint=False) for o in ret]
+        singletons['metric'].metric_api_call(start_time, 'query', what, calling_user)
+        return ret
 
     def _get_container_logs(self, c_list):
         logs = []
