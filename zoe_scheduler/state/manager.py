@@ -92,7 +92,7 @@ class StateManager:
                 highest_epoch = ckp['state_manager']['state_epoch']
         return highest_ckp
 
-    def generate_checkpoint(self):
+    def _generate_checkpoint(self):
         checkpointed_state = {
             'users': [u.checkpoint() for u in self.users.values()],
             'applications': [a.checkpoint() for a in self.applications.values()],
@@ -103,6 +103,7 @@ class StateManager:
                 'state_epoch': self._state_epoch
             }
         }
+
         ckp_name = str(self._state_epoch % 10)
         ckp = json.dumps(checkpointed_state)
         blob = ckp.encode('utf-8')
@@ -135,7 +136,7 @@ class StateManager:
     def state_updated(self):
         self._state_epoch += 1
         log.debug('New state epoch, generating checkpoint')
-        self.generate_checkpoint()
+        self._generate_checkpoint()
 
     def gen_id(self) -> int:
         log.debug('Generating ID {}'.format(self._next_id))

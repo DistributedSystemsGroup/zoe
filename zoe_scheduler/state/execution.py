@@ -71,6 +71,9 @@ class Execution(BaseState):
         self.status = 'error'
         self.time_finished = datetime.now()
 
+    def is_active(self):
+        return self.status == 'scheduled' or self.status == 'running'
+
     def to_dict(self, checkpoint):
         d = super().to_dict(checkpoint)
         for attr in ['time_scheduled', 'time_started', 'time_finished']:
