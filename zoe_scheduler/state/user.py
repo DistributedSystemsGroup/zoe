@@ -16,8 +16,7 @@
 from passlib.context import CryptContext
 
 from zoe_scheduler.state.base import BaseState
-
-pwd_context = CryptContext(schemes=["sha512_crypt"], sha512_crypt__default_rounds=60000)
+from zoe_scheduler.config import get_conf
 
 
 class User(BaseState):
@@ -47,11 +46,13 @@ class User(BaseState):
         # Links to other objects
         self.applications = []
 
+        self.pwd_context = CryptContext(schemes=["sha512_crypt"], sha512_crypt__default_rounds=get_conf().passlib_rounds)
+
     def set_password(self, pw):
-        self.hashed_password = pwd_context.encrypt(pw)
+        self.hashed_password = self.pwd_context.encrypt(pw)
 
     def verify_password(self, pw):
-        return pwd_context.verify(pw, self.hashed_password)
+        return self.pwd_context.verify(pw, self.hashed_password)
 
     @property
     def owner(self):
