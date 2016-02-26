@@ -28,6 +28,7 @@ class TestConf:
         self.private_registry = '127.0.0.1:5000'
         self.state_dir = '/tmp/zoe'
         self.zoeadmin_password = 'test'
+        self.passlib_rounds = 1
 
 
 @pytest.fixture(scope='session')
