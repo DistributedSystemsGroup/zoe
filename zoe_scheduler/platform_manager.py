@@ -93,6 +93,9 @@ class PlatformManager:
                 raise ZoeException("cannot find variable to substitute in expression {}".format(env_value))
             copts.add_env_variable(env_name, env_value)
 
+        for path, mountpoint, readonly in process_description.volumes:
+            copts.add_volume_bind(path, mountpoint, readonly)
+
         # The same dictionary is used for templates in the command
         if process_description.command is not None:
             copts.set_command(process_description.command.format(**subst_dict))

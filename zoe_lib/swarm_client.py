@@ -290,7 +290,7 @@ class ContainerOptions:
 
     def add_volume_bind(self, path, mountpoint, readonly=False):
         self.volumes.append(mountpoint)
-        self.volume_binds.append(path + ":" + mountpoint + ":" + "ro" if readonly else "rw")
+        self.volume_binds.append(path + ":" + mountpoint + ":" + ("ro" if readonly else "rw"))
 
     def get_volumes(self):
         return self.volumes
