@@ -18,7 +18,6 @@ from flask import Flask
 from flask_restful import Api
 
 from zoe_scheduler.rest_api.user import UserAPI, UserCollectionAPI
-from zoe_scheduler.rest_api.application import ApplicationAPI, ApplicationCollectionAPI
 from zoe_scheduler.rest_api.execution import ExecutionAPI, ExecutionCollectionAPI
 from zoe_scheduler.rest_api.container import ContainerAPI
 from zoe_scheduler.rest_api.query import QueryAPI
@@ -38,8 +37,6 @@ def init(state, platform) -> Flask:
 
     api.add_resource(UserAPI, API_PATH + '/user/<int:user_id>', resource_class_kwargs=args)
     api.add_resource(UserCollectionAPI, API_PATH + '/user', resource_class_kwargs=args)
-    api.add_resource(ApplicationAPI, API_PATH + '/application/<int:application_id>', resource_class_kwargs=args)
-    api.add_resource(ApplicationCollectionAPI, API_PATH + '/application', resource_class_kwargs=args)
     api.add_resource(ExecutionAPI, API_PATH + '/execution/<int:execution_id>', resource_class_kwargs=args)
     api.add_resource(ExecutionCollectionAPI, API_PATH + '/execution', resource_class_kwargs=args)
     api.add_resource(ContainerAPI, API_PATH + '/container/<int:container_id>', resource_class_kwargs=args)

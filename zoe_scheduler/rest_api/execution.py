@@ -68,7 +68,7 @@ class ExecutionAPI(Resource):
 
         is_authorized(calling_user, e, 'delete')
 
-        if e.status == "running" or e.status == "scheduled":
+        if e.is_active():
             self.platform.execution_terminate(e, reason='terminated')
 
         self.state.state_updated()
@@ -110,7 +110,7 @@ class ExecutionCollectionAPI(Resource):
     @catch_exceptions
     def post(self):
         """
-        Starts an execution, given an application_id. Takes a JSON object like this: { "application_id": 4 }
+        Starts an execution, given an application description. Takes a JSON object.
         :return: the new execution_id
         """
         start_time = time.time()
@@ -122,13 +122,11 @@ class ExecutionCollectionAPI(Resource):
             raise ZoeRestAPIException('Error decoding JSON data')
 
         execution = Execution(self.state)
+        data['user_id'] = calling_user.id
         try:
             execution.from_dict(data, checkpoint=False)
         except ZoeException as e:
             raise ZoeRestAPIException(e.value)
-
-#        if not zoe_sched_singleton.validate(execution.application):
-#            return error('admission control refused this application description')
 
         is_authorized(calling_user, execution, 'create')
         check_quota(calling_user, self.state)

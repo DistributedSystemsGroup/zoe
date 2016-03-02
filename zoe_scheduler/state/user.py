@@ -44,7 +44,7 @@ class User(BaseState):
         self.network_id = None
 
         # Links to other objects
-        self.applications = []
+        self.executions = []
 
         self.pwd_context = CryptContext(schemes=["sha512_crypt"], sha512_crypt__default_rounds=get_conf().passlib_rounds)
 

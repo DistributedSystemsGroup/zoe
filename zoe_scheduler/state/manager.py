@@ -19,7 +19,6 @@ import json
 from zoe_lib.exceptions import ZoeException
 from zoe_scheduler.config import get_conf
 from zoe_scheduler.state.user import User
-from zoe_scheduler.state.application import Application
 from zoe_scheduler.state.execution import Execution
 from zoe_scheduler.state.container import Container
 from zoe_scheduler.state.blobs import BaseBlobs
@@ -34,7 +33,6 @@ class StateManager:
     :type blobs: BaseBlobs
     """
     def __init__(self, blob_class):
-        self.applications = {}
         self.users = {}
         self.executions = {}
         self.containers = {}
@@ -95,7 +93,6 @@ class StateManager:
     def _generate_checkpoint(self):
         checkpointed_state = {
             'users': [u.checkpoint() for u in self.users.values()],
-            'applications': [a.checkpoint() for a in self.applications.values()],
             'executions': [e.checkpoint() for e in self.executions.values()],
             'containers': [c.checkpoint() for c in self.containers.values()],
             'state_manager': {
@@ -120,10 +117,6 @@ class StateManager:
             us = User(self)
             us.load_checkpoint(u)
             self.users[us.id] = us
-        for a in state['applications']:
-            ap = Application(self)
-            ap.load_checkpoint(a)
-            self.applications[ap.id] = ap
         for e in state['executions']:
             ex = Execution(self)
             ex.load_checkpoint(e)
@@ -163,7 +156,7 @@ class StateManager:
     def get(self, what, **kwargs):
         """
         Query the state
-        :param what: one of user, application, execution, container
+        :param what: one of user, execution, container
         :return: all objects of type 'what' with fields matching all filters (AND)
         """
 
@@ -218,17 +211,7 @@ class StateManager:
         user = self.get_one('user', id=user_id)
         if user is None:
             return False
-        for app in user.applications:
-            ret = self.app_has_active_executions(app.id)
-            if ret:
-                return True
-        return False
-
-    def app_has_active_executions(self, app_id: int) -> bool:
-        app = self.get_one('application', id=app_id)
-        if app is None:
-            return False
-        for e in app.executions:
-                if e.status == "running" or e.status == "scheduled":
+        for e in user.executions:
+                if e.is_active():
                     return True
         return False

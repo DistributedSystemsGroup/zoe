@@ -68,21 +68,16 @@ class ZoeExecutionsAPI(ZoeAPIBase):
         else:
             return None
 
-    def execution_start(self, name: str, application_name: str) -> int:
+    def execution_start(self, name: str, application_description: dict) -> int:
         """
         Submit an application to the scheduler to start a new execution.
 
         :param name: user-provided name of the execution
-        :param application_name: the application to start
+        :param application_description: the application to start
         :return: the new Execution object, or None in case of error
         """
-        api_query = ZoeQueryAPI(self.url, self.user, self.password)
-        data = api_query.query('application', name=application_name)
-        if len(data) == 0:
-            raise ZoeAPIException('No such application')
-        app = data[0]
         execution = {
-            "application_id": app['id'],
+            "application": application_description,
             'name': name
         }
         data, status_code = self._rest_post('/execution', execution)

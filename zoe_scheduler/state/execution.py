@@ -19,8 +19,9 @@ from io import BytesIO
 
 import dateutil.parser
 
-from zoe_lib.exceptions import ZoeException
 from zoe_scheduler.state.base import BaseState
+from zoe_scheduler.state.application import Application
+from zoe_lib.exceptions import ZoeException
 
 
 def deserialize_datetime(isoformat):
@@ -32,8 +33,8 @@ def deserialize_datetime(isoformat):
 
 class Execution(BaseState):
 
-    api_in_attrs = ['name']
-    api_out_attrs = ['name', 'status', 'time_scheduled', 'time_started', 'time_finished']
+    api_in_attrs = ['name', 'application']
+    api_out_attrs = ['name', 'application', 'status', 'time_scheduled', 'time_started', 'time_finished']
 
     def __init__(self, state):
         super().__init__(state)
@@ -45,6 +46,7 @@ class Execution(BaseState):
         self.status = 'undefined'
 
         # Links to other objects
+        self.user = None
         self.application = None
         self.containers = []
 
@@ -81,10 +83,12 @@ class Execution(BaseState):
                 d[attr] = getattr(self, attr).isoformat()
             else:
                 d[attr] = None
-        d['application_id'] = self.application.id
+        d['application'] = self.application.to_dict()
 
         if not checkpoint:
             d['containers'] = [c.id for c in self.containers]
+        else:
+            d['user_id'] = self.user.id
 
         return d
 
@@ -97,11 +101,15 @@ class Execution(BaseState):
                 else:
                     setattr(self, attr, None)
 
-        app = self.state_manger.get_one('application', id=d['application_id'])
-        if app is None:
-            raise ZoeException('Deserialized Execution points to a non-existent application')
+        app = Application()
+        app.from_dict(d['application'])
         self.application = app
-        app.executions.append(self)
+
+        user = self.state_manger.get_one('user', id=d['user_id'])
+        if user is None:
+            raise ZoeException('Deserialized execution points to a non-existent user')
+        self.user = user
+        user.executions.append(self)
 
     def _logs_archive_create(self, logs: list):
         zipdata = BytesIO()
@@ -117,4 +125,4 @@ class Execution(BaseState):
 
     @property
     def owner(self):
-        return self.application.user
+        return self.user
