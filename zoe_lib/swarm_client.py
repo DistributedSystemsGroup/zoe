@@ -98,6 +98,10 @@ class SwarmClient:
             ns.memory_total = info["DriverStatus"][idx + node + idx2][1].split(' / ')[1]
             idx2 += 1
             ns.labels = info["DriverStatus"][idx + node + idx2][1:]
+            idx2 += 1
+            ns.error = info["DriverStatus"][idx + node + idx2][1]
+            idx2 += 1
+            ns.last_update = info["DriverStatus"][idx + node + idx2][1]
 
             pl_status.nodes.append(ns)
             idx += idx2
