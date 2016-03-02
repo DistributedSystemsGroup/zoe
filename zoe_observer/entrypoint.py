@@ -50,7 +50,7 @@ def main():
             zoe_containers = swarm.list('zoe.{}'.format(get_conf().container_name_prefix))
             for c in zoe_containers:
                 if 'Exited' in c['status']:
-                    zoe_id = c['labels']['zoe.container_id']
+                    zoe_id = c['labels']['zoe.container.id']
                     container_died(zoe_id)
 
             check_guests(swarm)
