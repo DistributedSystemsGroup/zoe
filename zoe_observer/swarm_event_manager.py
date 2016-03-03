@@ -8,8 +8,22 @@ log = logging.getLogger(__name__)
 
 def main_callback(event):
     log.debug(event)
-    if event['status'] == "die":
-        container_died(event['id'])
+    if event['Type'] != 'container':
+        return
+
+    try:
+        if event['Actor']['Attributes']['zoe.prefix'] != get_conf().container_name_prefix:
+            return
+    except KeyError:
+        return
+
+    if event['Action'] == "die":
+        try:
+            zoe_id = event['Actor']['Attributes']['zoe.container.id']
+            zoe_id = int(zoe_id)
+            container_died(zoe_id)
+        except KeyError:
+            return
 
 
 def container_died(zoe_id: int):
