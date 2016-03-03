@@ -13,36 +13,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os.path
 
-def copier_proc(source, dest) -> dict:
+
+def copier_proc(src_volume, src_path, dst_volume, dst_path) -> dict:
     proc = {
         'name': "copier",
         'docker_image': 'alpine',
         'monitor': True,
-        'required_resources': {"memory": 512 * 1024 * 1024},  # 512MB
+        'required_resources': {"memory": 128 * 1024 * 1024},  # 128MB
         'ports': [],
         'environment': [],
         'volumes': [],
         'command': ''
     }
-    if source['type'] == 'volume':
-        proc['volumes'].append([source['host_path'], '/mnt/source', True])
-    if dest['type'] == 'volume':
-        proc['volumes'].append([dest['host_path'], '/mnt/dest', False])
-
-    if source['type'] == 'volume' and dest['type'] == 'volume':
-        proc['command'] = 'cp -a /mnt/source/' + source['name'] + ' /mnt/dest' + dest['name']
+    proc['volumes'].append([src_volume['host_path'], src_volume['cont_path'], src_volume['readonly']])
+    proc['volumes'].append([dst_volume['host_path'], dst_volume['cont_path'], dst_volume['readonly']])
+    proc['command'] = 'cp -a ' + os.path.join(src_volume['cont_path'], src_path) + ' ' + os.path.join(dst_volume['cont_path'], dst_path)
 
     return proc
 
 empty = {
-    'type': 'volume',
     'host_path': 'CHANGEME',  # the path containing what to copy
-    'name': 'CHANGEME'  # the file or directory to copy from or to host_path
+    'cont_path': 'CHANGEME',  # the file or directory to copy from or to host_path
+    'readonly': False
 }
 
 
-def copier_app(source=empty, dest=empty) -> dict:
+def copier_app(src_volume=empty, src_path='', dst_volume=empty, dst_path='') -> dict:
     app = {
         'name': 'copier',
         'version': 1,
@@ -50,7 +48,7 @@ def copier_app(source=empty, dest=empty) -> dict:
         'priority': 512,
         'requires_binary': False,
         'processes': [
-            copier_proc(source, dest)
+            copier_proc(src_volume, src_path, dst_volume, dst_path)
         ]
     }
     return app
