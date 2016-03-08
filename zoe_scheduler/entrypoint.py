@@ -28,6 +28,7 @@ from zoe_scheduler.rest_api import init as api_init
 from zoe_scheduler.state.manager import StateManager
 from zoe_scheduler.state.blobs.fs import FSBlobs
 from zoe_lib.metrics.influxdb import InfluxDBMetricSender
+from zoe_scheduler.stats_manager import StatsManager
 
 log = logging.getLogger("main")
 
@@ -73,6 +74,10 @@ def main():
         metrics_th = InfluxDBMetricSender(config.get_conf())
         metrics_th.start()
         config.singletons['metric'] = metrics_th
+
+    stats_th = StatsManager()
+    stats_th.start()
+    config.singletons['stats_manager'] = stats_th
 
     log.info("Starting HTTP REST server...")
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024

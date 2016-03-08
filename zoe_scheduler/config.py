@@ -21,7 +21,8 @@ config_paths = [
 ]
 
 singletons = {
-    'metric': None
+    'metric': None,
+    'stats_manager': None
 }
 
 _conf = None
