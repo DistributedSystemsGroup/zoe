@@ -25,16 +25,15 @@ from argparse import ArgumentParser, Namespace, FileType, RawDescriptionHelpForm
 from pprint import pprint
 
 from zoe_cmd import utils
-from zoe_lib.applications import ZoeApplicationAPI
 from zoe_lib.containers import ZoeContainerAPI
 from zoe_lib.exceptions import ZoeAPIException
 from zoe_lib.executions import ZoeExecutionsAPI
-from zoe_lib.predefined_apps import hadoop, spark, lab_spark, test_sleep
+from zoe_lib.predefined_apps import hadoop, spark, lab_spark, test_sleep, copier
 from zoe_lib.query import ZoeQueryAPI
 from zoe_lib.users import ZoeUserAPI
 
 PREDEFINED_APPS = {}
-for mod in [hadoop, spark, lab_spark, test_sleep]:
+for mod in [hadoop, spark, lab_spark, test_sleep, copier]:
     for app_name, val in mod.__dict__.items():
         if callable(val) and "_app" in app_name:
             PREDEFINED_APPS[app_name[:-4]] = val
@@ -109,41 +108,14 @@ def pre_app_export_cmd(args):
         print()
 
 
-def app_new_cmd(args):
-    app_descr = json.load(args.jsonfile)
-    api = ZoeApplicationAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    try:
-        app_id = api.create(app_descr)
-    except ZoeAPIException as e:
-        print("Invalid application description: %s" % e.message)
-        return
-    app = api.get(app_id)
-    print("Application {} added with ID: {}".format(app['name'], app_id))
-
-
 def app_get_cmd(args):
     api_query = ZoeQueryAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    data = api_query.query('application', name=args.name)
+    data = api_query.query('execution', name=args.name)
     if len(data) == 0:
-        print("no such application")
+        print("no such execution")
     else:
-        for app in data:
-            pprint(app)
-
-
-def app_rm_cmd(args):
-    api_app = ZoeApplicationAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    print('Deleting app {}'.format(args.app_id))
-    api_app.delete(args.app_id)
-
-
-def app_list_cmd(_):
-    api_query = ZoeQueryAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    api_user = ZoeUserAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    data = api_query.query('application')
-    for app in data:
-        user = api_user.get(app['owner'])
-        print('{} (User: {}, ID: {})'.format(app['name'], user['name'], app['id']))
+        execution = data[0]
+        json.dump(execution['application'], sys.stdout, sort_keys=True, indent=4)
 
 
 def exec_list_cmd(_):
@@ -156,13 +128,13 @@ def exec_list_cmd(_):
 
 
 def exec_start_cmd(args):
+    app_descr = json.load(args.jsonfile)
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    ret = exec_api.execution_start(args.name, args.app_name)
+    ret = exec_api.execution_start(args.name, app_descr)
     print("Application scheduled successfully with ID {}, use the exec-get command to check its status".format(ret))
 
 
 def exec_get_cmd(args):
-    app_api = ZoeApplicationAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     cont_api = ZoeContainerAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     execution = exec_api.execution_get(args.id)
@@ -174,7 +146,7 @@ def exec_get_cmd(args):
         print('Time started: {}'.format(execution['time_started']))
         print('Time scheduled: {}'.format(execution['time_scheduled']))
         print('Time finished: {}'.format(execution['time_finished']))
-        app = app_api.get(execution['application_id'])
+        app = execution['application']
         print('Application name: {}'.format(app['name']))
         for c_id in execution['containers']:
             c = cont_api.get(c_id)
@@ -246,32 +218,21 @@ def process_arguments() -> Namespace:
     argparser_pre_app_export.add_argument('app_name', help='Predefined application name (use pre-app-list to see what is available')
     argparser_pre_app_export.set_defaults(func=pre_app_export_cmd)
 
-    argparser_app_new = subparser.add_parser('app-new', help="Upload a JSON application description")
-    argparser_app_new.add_argument('jsonfile', type=FileType("r"), help='Application description')
-    argparser_app_new.set_defaults(func=app_new_cmd)
-
-    argparser_app_get = subparser.add_parser('app-get', help="Retrieve an already defined application description")
-    argparser_app_get.add_argument('name', help='The name of the application')
-    argparser_app_get.set_defaults(func=app_get_cmd)
-
-    argparser_app_rm = subparser.add_parser('app-rm', help="Delete an application")
-    argparser_app_rm.add_argument('app_id', help="Application ID (will fail if there are running executions)")
-    argparser_app_rm.set_defaults(func=app_rm_cmd)
-
-    argparser_app_list = subparser.add_parser('app-ls', help="List all applications defined by the calling user")
-    argparser_app_list.set_defaults(func=app_list_cmd)
-
     argparser_exec_start = subparser.add_parser('start', help="Start a previously registered application")
-    argparser_exec_start.add_argument('app_name', help="Name of the application to start")
     argparser_exec_start.add_argument('name', help="Name of the execution")
+    argparser_exec_start.add_argument('jsonfile', type=FileType("r"), help='Application description')
     argparser_exec_start.set_defaults(func=exec_start_cmd)
+
+    argparser_app_list = subparser.add_parser('exec-ls', help="List all executions for the calling user")
+    argparser_app_list.set_defaults(func=exec_list_cmd)
 
     argparser_execution_get = subparser.add_parser('exec-get', help="Get execution status")
     argparser_execution_get.add_argument('id', type=int, help="Execution id")
     argparser_execution_get.set_defaults(func=exec_get_cmd)
 
-    argparser_app_list = subparser.add_parser('exec-ls', help="List all executions for the calling user")
-    argparser_app_list.set_defaults(func=exec_list_cmd)
+    argparser_app_get = subparser.add_parser('exec-app-get', help="Retrieve an already defined application description")
+    argparser_app_get.add_argument('name', help='The name of the application')
+    argparser_app_get.set_defaults(func=app_get_cmd)
 
     argparser_execution_kill = subparser.add_parser('terminate', help="Terminates an execution")
     argparser_execution_kill.add_argument('id', type=int, help="Execution id")

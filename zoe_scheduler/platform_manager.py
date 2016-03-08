@@ -18,7 +18,7 @@ import logging
 from zoe_lib.swarm_client import SwarmClient, ContainerOptions
 
 from zoe_lib.exceptions import ZoeException
-from zoe_scheduler.config import get_conf
+from zoe_scheduler.config import get_conf, singletons
 from zoe_scheduler.scheduler import ZoeScheduler
 from zoe_scheduler.state import execution as execution_module, application as application_module, container as container_module
 from zoe_scheduler.state.manager import StateManager
@@ -92,6 +92,9 @@ class PlatformManager:
             except KeyError:
                 raise ZoeException("cannot find variable to substitute in expression {}".format(env_value))
             copts.add_env_variable(env_name, env_value)
+
+        for path, mountpoint, readonly in process_description.volumes:
+            copts.add_volume_bind(path, mountpoint, readonly)
 
         # The same dictionary is used for templates in the command
         if process_description.command is not None:
@@ -197,8 +200,7 @@ class PlatformManager:
         return ret["running"]
 
     def swarm_stats(self) -> SwarmStats:
-        # TODO implement some caching
-        return self.swarm.info()
+        return singletons['stats_manager'].swarm_stats()
 
     def scheduler_stats(self) -> SchedulerStats:
         return self.scheduler.scheduler_policy.stats()

@@ -55,4 +55,4 @@ class Container(BaseState):
 
     @property
     def owner(self):
-        return self.execution.application.user
+        return self.execution.user

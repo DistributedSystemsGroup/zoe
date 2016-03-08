@@ -55,6 +55,20 @@ class BaseSchedulerPolicy:
         """
         raise NotImplementedError
 
+    def start_successful(self, execution: Execution) -> None:
+        """
+        Update the internal data structures to acknowledge the fact that an execution has been succesfully started.
+        :param execution: the execution that was successfully started
+        :return: None
+        """
+
+    def start_failed(self, execution: Execution) -> None:
+        """
+        The execution could not be started for a transient error and its startup should be retried again later.
+        :param execution: The execution that failed to start
+        :return: None
+        """
+
     def stats(self) -> SchedulerStats:
         """
         Gather statistics about the scheduler policy

@@ -14,19 +14,10 @@
 # limitations under the License.
 
 from zoe_lib.exceptions import InvalidApplicationDescription
-from zoe_scheduler.state.base import BaseState
 
 
-class Application(BaseState):
-
-    api_out_attrs = ['name', 'version', 'will_end', 'priority', 'requires_binary']
-    api_in_attrs = ['name', 'version', 'will_end', 'priority', 'requires_binary']
-
-    def __init__(self, state):
-        super().__init__(state)
-
-        self.user = None
-        self.executions = []
+class Application:
+    def __init__(self):
 
         self.name = ''
         self.version = 0
@@ -35,38 +26,41 @@ class Application(BaseState):
         self.requires_binary = False
         self.processes = []
 
-    def to_dict(self, checkpoint):
-        d = super().to_dict(checkpoint)
-        d['processes'] = []
+    def to_dict(self):
+        d = {
+            'name': self.name,
+            'version': self.version,
+            'will_end': self.will_end,
+            'priority': self.priority,
+            'requires_binary': self.requires_binary,
+            'processes': []
+        }
         for p in self.processes:
             d['processes'].append(p.to_dict())
 
-        if checkpoint:
-            d['user_id'] = self.user.id
         return d
 
-    def from_dict(self, data, checkpoint):
-        super().from_dict(data, checkpoint)
+    def from_dict(self, data):
 
         try:
-            self.version = int(self.version)
+            self.version = int(data['version'])
         except ValueError:
             raise InvalidApplicationDescription(msg="version field should be an int")
         except KeyError:
             raise InvalidApplicationDescription(msg="Missing required key: version")
 
         try:
-            self.will_end = bool(self.will_end)
+            self.will_end = bool(data['will_end'])
         except ValueError:
             raise InvalidApplicationDescription(msg="will_end field must be a boolean")
 
         try:
-            self.requires_binary = bool(self.requires_binary)
+            self.requires_binary = bool(data['requires_binary'])
         except ValueError:
             raise InvalidApplicationDescription(msg="requires_binary field must be a boolean")
 
         try:
-            self.priority = int(self.priority)
+            self.priority = int(data['priority'])
         except ValueError:
             raise InvalidApplicationDescription("priority field must be an int")
         if self.priority < 0 or self.priority > 1024:
@@ -85,16 +79,6 @@ class Application(BaseState):
         if not found_monitor:
             raise InvalidApplicationDescription("at least one process should have monitor set to True")
 
-        user = self.state_manger.get_one('user', id=data['user_id'])
-        if user is None:
-            raise InvalidApplicationDescription('Deserialized application points to a non-existent user')
-        self.user = user
-        user.applications.append(self)
-
-    @property
-    def owner(self):
-        return self.user
-
     def total_memory(self) -> int:
         memory = 0
         for p in self.processes:
@@ -103,10 +87,6 @@ class Application(BaseState):
 
     def container_count(self) -> int:
         return len(self.processes)
-
-    def add_execution(self, execution):
-        execution.application = self
-        self.executions.append(execution)
 
 
 class ProcessEndpoint:
@@ -161,6 +141,7 @@ class Process:
         self.ports = []  # A list of ProcessEndpoints
         self.required_resources = {}
         self.environment = []  # Environment variables to pass to Docker
+        self.volumes = []  # list of volumes to mount. Each volume is a three tuple: host path, container path, readonly boolean
         self.command = None  # Commandline to pass to the Docker container
 
     def to_dict(self):
@@ -171,7 +152,8 @@ class Process:
             'required_resources': self.required_resources,
             'environment': self.environment,
             'command': self.command,
-            'ports': []
+            'ports': [],
+            'volumes': []
         }
         for p in self.ports:
             d['ports'].append(p.to_dict())
@@ -226,3 +208,13 @@ class Process:
 
         if 'command' in data:
             self.command = data['command']
+
+        if 'volumes' in data:
+            if not hasattr(data['volumes'], '__iter__'):
+                raise InvalidApplicationDescription(msg='volumes should be an iterable')
+            self.volumes = data['volumes'].copy()
+            for v in self.volumes:
+                if len(v) != 3:
+                    raise InvalidApplicationDescription(msg='volume description should have three components')
+                if not isinstance(v[2], bool):
+                    raise InvalidApplicationDescription(msg='readonly volume item (third) must be a boolean: {}'.format(v[2]))

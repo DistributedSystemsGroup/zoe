@@ -61,7 +61,7 @@ class QueryAPI(Resource):
             filters['owner'] = calling_user
 
         if what == 'stats swarm':
-            ret = self.platform.swarm_stats()
+            ret = singletons['stats_manager'].swarm_stats
             ret = {'stats': ret.to_dict()}
         elif what == 'stats scheduler':
             ret = self.platform.scheduler_stats()
