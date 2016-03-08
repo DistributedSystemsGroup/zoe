@@ -16,8 +16,8 @@
 from zoe_scheduler.state.application import Application, Process, ProcessEndpoint
 
 
-def test_application(state_manager):
-    Application(state_manager)
+def test_application():
+    Application()
 
 
 def test_process():
