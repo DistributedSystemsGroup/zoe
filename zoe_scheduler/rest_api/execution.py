@@ -129,6 +129,14 @@ class ExecutionCollectionAPI(Resource):
             raise ZoeRestAPIException(e.value)
 
         is_authorized(calling_user, execution, 'create')
+
+        old_exec = self.state.get_one('execution', name=execution.name)
+        if old_exec is not None:
+            if old_exec.is_active():
+                raise ZoeRestAPIException('An execution with the same name is already running')
+            else:
+                self.state.delete('execution', old_exec.id)
+
         check_quota(calling_user, self.state)
 
         execution.id = self.state.gen_id()
