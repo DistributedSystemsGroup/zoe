@@ -16,6 +16,7 @@
 import logging
 import queue
 
+from zoe_lib.exceptions import ZoeException
 from zoe_scheduler.state.application import Application
 from zoe_scheduler.state.execution import Execution
 from zoe_scheduler.scheduler_policies.base import BaseSchedulerPolicy
@@ -77,4 +78,9 @@ class ZoeScheduler:
         if execution is None:
             return
         log.debug("Found a runnable execution!")
-        self.platform.execution_start(execution)
+        try:
+            self.platform.execution_start(execution)
+        except ZoeException:
+            self.scheduler_policy.start_failed(execution)
+        else:
+            self.scheduler_policy.start_successful(execution)

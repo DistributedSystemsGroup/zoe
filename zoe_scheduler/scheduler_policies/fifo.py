@@ -19,16 +19,17 @@ from zoe_scheduler.stats import SchedulerStats
 from zoe_scheduler.scheduler_policies.base import BaseSchedulerPolicy
 from zoe_scheduler.state.application import Application
 from zoe_scheduler.state.execution import Execution
+from zoe_scheduler.config import singletons
 
 
 class FIFOSchedulerPolicy(BaseSchedulerPolicy):
     def __init__(self, platform):
         super().__init__(platform)
         self.waiting_list = []
-        self.running_list = []
+        self.starting_list = []
 
     def admission_control(self, app: Application) -> bool:
-        swarm_stats = self.platform.swarm_stats()
+        swarm_stats = singletons['stats_manager'].swarm_stats
         if app.total_memory() < swarm_stats.memory_total:
             return True
         else:
@@ -38,22 +39,36 @@ class FIFOSchedulerPolicy(BaseSchedulerPolicy):
         self.waiting_list.append(execution)
 
     def execution_kill(self, execution):
-        for e in self.waiting_list:
-            if e == execution:
-                self.waiting_list.remove(e)
-                return
-        for e in self.running_list:
-            if e[0] == execution:
-                self.running_list.remove(e)
-                return
+        try:
+            self.waiting_list.remove(execution)
+        except ValueError:
+            pass
+
+        try:
+            self.starting_list.remove(execution)
+        except ValueError:
+            pass
 
     def runnable_get(self) -> Execution:
-        try:
-            execution = self.waiting_list.pop(0)
-        except IndexError:
+        if len(self.waiting_list) == 0:
             return None
 
-        return execution
+        mem_reserved = sum([node.memory_reserved for node in singletons['stats_manager'].swarm_stats.nodes])
+        mem_available = singletons['stats_manager'].swarm_stats.memory_total - mem_reserved
+        candidate = self.waiting_list[0]
+        if mem_available >= candidate.application.total_memory():
+            self.waiting_list.pop(0)
+            self.starting_list.append(candidate)
+            return candidate
+        else:
+            return None
+
+    def start_successful(self, execution: Execution) -> None:
+        self.starting_list.remove(execution)
+
+    def start_failed(self, execution: Execution) -> None:
+        self.starting_list.remove(execution)
+        self.waiting_list.append(execution)  # append or insert(0, ...) ?
 
     def stats(self):
         ret = SchedulerStats()
