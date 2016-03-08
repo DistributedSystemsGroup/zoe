@@ -23,6 +23,7 @@ from zoe_lib.swarm_client import SwarmClient
 from zoe_observer.config import load_configuration, get_conf
 from zoe_observer.swarm_event_manager import container_died, main_callback
 from zoe_observer.guest_inactivity import check_guests
+from zoe_lib.exceptions import ZoeAPIException
 
 log = logging.getLogger("main")
 
@@ -36,7 +37,11 @@ def guest_check_thread(args):
             for c in zoe_containers:
                 if 'Exited' in c['status']:
                     zoe_id = c['labels']['zoe.container.id']
-                    container_died(zoe_id)
+                    try:
+                        container_died(zoe_id)
+                    except ZoeAPIException:
+                        log.warning('Container ' + c['name'] + ' has died, but Zoe does not know anything about it, deleting')
+                        swarm.terminate_container(c['id'], delete=True)
 
             check_guests(swarm)
 
