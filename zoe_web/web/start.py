@@ -17,7 +17,6 @@ import re
 from random import randint
 
 from flask import render_template, request
-from zoe_lib.applications import ZoeApplicationAPI
 from zoe_lib.containers import ZoeContainerAPI
 from zoe_lib.executions import ZoeExecutionsAPI
 from zoe_lib.predefined_apps.lab_spark import spark_jupyter_notebook_lab_app
@@ -69,35 +68,25 @@ def home_guest():
         user = user[0]
         template_vars['user_gateway'] = user['gateway_urls'][0]
         template_vars['gateway_ip'] = user['gateway_urls'][0].split('/')[2].split(':')[0]
-        app_api = ZoeApplicationAPI(get_conf().zoe_url, guest_identifier, guest_password)
         exec_api = ZoeExecutionsAPI(get_conf().zoe_url, guest_identifier, guest_password)
-        app = query_api.query('application', name='spark-jupyter-lab')
-        if len(app) == 0:
-            app_descr = spark_jupyter_notebook_lab_app()
-            app_api.create(app_descr)
+        app_descr = spark_jupyter_notebook_lab_app()
+        execution = query_api.query('execution', name='guest-lab-{}'.format(guest_identifier))
+        if len(execution) == 0 or execution[0]['status'] == 'terminated':
+            exec_api.execution_start('guest-lab-{}'.format(guest_identifier), app_descr)
+            template_vars['execution_status'] = 'submitted'
             return render_template('home_guest.html', **template_vars)
         else:
-            app = app[0]
-            execution = query_api.query('execution', name='guest-lab-{}'.format(guest_identifier))
-            if len(execution) == 0:
-                exec_api.execution_start('guest-lab-{}'.format(guest_identifier), app['name'])
-                template_vars['execution_status'] = 'submitted'
+            execution = execution[0]
+            if execution['status'] != 'running':
+                template_vars['execution_status'] = execution['status']
                 return render_template('home_guest.html', **template_vars)
             else:
-                execution = execution[0]
-                if execution['status'] == 'terminated':
-                    app_api.delete(app['id'])
-                    return render_template('home_guest.html', **template_vars)
-                elif execution['status'] != 'running':
-                    template_vars['execution_status'] = execution['status']
-                    return render_template('home_guest.html', **template_vars)
-                else:
-                    template_vars['refresh'] = -1
-                    cont_api = ZoeContainerAPI(get_conf().zoe_url, guest_identifier, guest_password)
-                    template_vars['execution_status'] = execution['status']
-                    for c_id in execution['containers']:
-                        c = cont_api.get(c_id)
-                        ip = list(c['ip_address'].values())[0]  # FIXME how to decide which network is the right one?
-                        for p in c['ports']:
-                            template_vars['execution_urls'].append(('{}'.format(p['name']), '{}://{}:{}{}'.format(p['protocol'], ip, p['port_number'], p['path'])))
-                    return render_template('home_guest.html', **template_vars)
+                template_vars['refresh'] = -1
+                cont_api = ZoeContainerAPI(get_conf().zoe_url, guest_identifier, guest_password)
+                template_vars['execution_status'] = execution['status']
+                for c_id in execution['containers']:
+                    c = cont_api.get(c_id)
+                    ip = list(c['ip_address'].values())[0]  # FIXME how to decide which network is the right one?
+                    for p in c['ports']:
+                        template_vars['execution_urls'].append(('{}'.format(p['name']), '{}://{}:{}{}'.format(p['protocol'], ip, p['port_number'], p['path'])))
+                return render_template('home_guest.html', **template_vars)

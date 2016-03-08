@@ -17,7 +17,7 @@
     <p>To access your Jupyter Notebook and your Spark cluster, you need to open a browser with a socks proxy configured. To do that, use the following commands.</p>
 
     <p>On <b>Linux</b> copy and paste this command in a terminal window:</p>
-    <pre>google-chrome --proxy-server={{ user_gateway }} --user-data-dir=/tmp/chrome-zoe {{ request.url }}</pre>
+    <pre>google-chrome --proxy-server={{ user_gateway }} --user-data-dir=/tmp/chrome-zoe-$USER {{ request.url }}</pre>
 
     <p>On <b>Windows</b> copy and paste this command in a cmd window (Start & cmd):</p>
     <pre>cd +chrome install directory+
