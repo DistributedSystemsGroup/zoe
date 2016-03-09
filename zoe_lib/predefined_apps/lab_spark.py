@@ -31,6 +31,9 @@ def spark_master_proc(mem_limit: int, image: str) -> dict:
         ],
         'environment': [
             ["SPARK_MASTER_IP", "{name_prefix}-spark-master-{execution_id}.{name_prefix}-usernet-{user_id}"],
+        ],
+        'networks': [
+            'eeef9754c16790a29d5210c5d9ad8e66614ee8a6229b6dc6f779019d46cec792'
         ]
     }
     return proc
@@ -59,6 +62,9 @@ def spark_worker_proc(count: int, mem_limit: int, cores: int, image: str) -> lis
                 ["SPARK_WORKER_RAM", str(worker_ram)],
                 ["SPARK_MASTER_IP", "{name_prefix}-spark-master-{execution_id}.{name_prefix}-usernet-{user_id}"],
                 ["SPARK_LOCAL_IP", "{name_prefix}-spark-worker-" + str(i) + "-{execution_id}.{name_prefix}-usernet-{user_id}"]
+            ],
+            'networks': [
+                'eeef9754c16790a29d5210c5d9ad8e66614ee8a6229b6dc6f779019d46cec792'
             ]
         }
         ret.append(proc)
@@ -95,6 +101,9 @@ def spark_jupyter_notebook_proc(mem_limit: int, worker_mem_limit: int, image: st
             ["SPARK_DRIVER_RAM", str(driver_ram)],
             ["NB_USER", "{user_name}"],
             ["NAMENODE_HOST", "hdfs-namenode.hdfs"]
+        ],
+        'networks': [
+            'eeef9754c16790a29d5210c5d9ad8e66614ee8a6229b6dc6f779019d46cec792'
         ]
     }
     return proc
