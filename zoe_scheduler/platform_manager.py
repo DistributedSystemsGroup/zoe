@@ -46,7 +46,8 @@ class PlatformManager:
     def execution_start(self, execution: execution_module.Execution) -> bool:
         try:
             self._application_to_containers(execution)
-        except ZoeException:
+        except ZoeException as e:
+            log.warning('Error starting application: {}'.format(e.value))
             self.execution_terminate(execution, reason='error')
             raise
         execution.set_started()
@@ -58,7 +59,7 @@ class PlatformManager:
 
     def _spawn_process(self, execution: execution_module.Execution, process_description: application_module.Process) -> bool:
         copts = ContainerOptions()
-        copts.name = get_conf().container_name_prefix + '-' + process_description.name + "-{}".format(execution.id)
+        copts.name = get_conf().container_name_prefix + '-' + process_description.name + "-{}".format(execution.owner.name)
         copts.set_memory_limit(process_description.required_resources['memory'])
         copts.network_name = '{}-usernet-{}'.format(get_conf().container_name_prefix, execution.owner.id)
         container_id = self.state_manager.gen_id()
@@ -112,7 +113,8 @@ class PlatformManager:
         execution.containers.append(container)
         container.execution = execution
 
-        self.swarm.connect_to_network(container.docker_id, 'eeef9754c16790a29d5210c5d9ad8e66614ee8a6229b6dc6f779019d46cec792')
+        for net in process_description.networks:
+            self.swarm.connect_to_network(container.docker_id, net)
 
         self.state_manager.new('container', container)
         return True
@@ -138,6 +140,7 @@ class PlatformManager:
 
         if reason == 'error':
             execution.set_error()
+            return
         elif reason == 'finished':
             execution.set_finished()
         else:
