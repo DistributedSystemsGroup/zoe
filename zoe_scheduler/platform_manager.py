@@ -138,6 +138,7 @@ class PlatformManager:
 
         if reason == 'error':
             execution.set_error()
+            return
         elif reason == 'finished':
             execution.set_finished()
         else:
