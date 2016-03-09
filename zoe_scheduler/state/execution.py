@@ -115,7 +115,7 @@ class Execution(BaseState):
         zipdata = BytesIO()
         with zipfile.ZipFile(zipdata, "w", compression=zipfile.ZIP_DEFLATED) as logzip:
             for c in logs:
-                fname = c[0] + "-" + ".txt"
+                fname = c[0] + ".txt"
                 logzip.writestr(fname, c[1])
         return zipdata.getvalue()
 
