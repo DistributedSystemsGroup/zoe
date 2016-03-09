@@ -109,6 +109,10 @@ def _process_check(data):
             if not isinstance(v[2], bool):
                 raise InvalidApplicationDescription(msg='readonly volume item (third) must be a boolean: {}'.format(v[2]))
 
+    if 'networks' in data:
+        if not hasattr(data['networks'], '__iter__'):
+            raise InvalidApplicationDescription(msg='networks should be an iterable')
+
 
 def _port_check(data):
     required_keys = ['name', 'protocol', 'port_number', 'is_main_endpoint']

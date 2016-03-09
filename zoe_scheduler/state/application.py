@@ -142,6 +142,7 @@ class Process:
         self.required_resources = {}
         self.environment = []  # Environment variables to pass to Docker
         self.volumes = []  # list of volumes to mount. Each volume is a three tuple: host path, container path, readonly boolean
+        self.networks = []  # additional networks IDs this container should be connected to
         self.command = None  # Commandline to pass to the Docker container
 
     def to_dict(self):
@@ -153,7 +154,8 @@ class Process:
             'environment': self.environment,
             'command': self.command,
             'ports': [],
-            'volumes': []
+            'volumes': [],
+            'networks': []
         }
         for p in self.ports:
             d['ports'].append(p.to_dict())
@@ -218,3 +220,8 @@ class Process:
                     raise InvalidApplicationDescription(msg='volume description should have three components')
                 if not isinstance(v[2], bool):
                     raise InvalidApplicationDescription(msg='readonly volume item (third) must be a boolean: {}'.format(v[2]))
+
+        if 'networks' in data:
+            if not hasattr(data['networks'], '__iter__'):
+                raise InvalidApplicationDescription(msg='networks should be an iterable')
+            self.networks = data['networks'].copy()
