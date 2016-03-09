@@ -87,8 +87,9 @@ class SwarmClient:
             ns = SwarmNodeStats(info["DriverStatus"][idx + node][0])
             ns.docker_endpoint = info["DriverStatus"][idx + node][1]
             idx2 += 1
-            ns.status = info["DriverStatus"][idx + node + idx2][1]
-            idx2 += 1
+            if 'Status' in info["DriverStatus"][idx + node + idx2][0]:  # new docker version
+                ns.status = info["DriverStatus"][idx + node + idx2][1]
+                idx2 += 1
             ns.container_count = int(info["DriverStatus"][idx + node + idx2][1])
             idx2 += 1
             ns.cores_reserved = int(info["DriverStatus"][idx + node + idx2][1].split(' / ')[0])
