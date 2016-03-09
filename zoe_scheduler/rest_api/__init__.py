@@ -21,9 +21,10 @@ from zoe_scheduler.rest_api.user import UserAPI, UserCollectionAPI
 from zoe_scheduler.rest_api.execution import ExecutionAPI, ExecutionCollectionAPI
 from zoe_scheduler.rest_api.container import ContainerAPI
 from zoe_scheduler.rest_api.query import QueryAPI
+from zoe_scheduler.rest_api.info import InfoAPI
+from zoe_lib.version import ZOE_API_VERSION
 
-API_VERSION = '0.5'
-API_PATH = '/api/' + API_VERSION
+API_PATH = '/api/' + ZOE_API_VERSION
 
 
 def init(state, platform) -> Flask:
@@ -35,6 +36,7 @@ def init(state, platform) -> Flask:
         'platform': platform
     }
 
+    api.add_resource(InfoAPI, API_PATH + '/info', resource_class_kwargs=args)
     api.add_resource(UserAPI, API_PATH + '/user/<int:user_id>', resource_class_kwargs=args)
     api.add_resource(UserCollectionAPI, API_PATH + '/user', resource_class_kwargs=args)
     api.add_resource(ExecutionAPI, API_PATH + '/execution/<int:execution_id>', resource_class_kwargs=args)
