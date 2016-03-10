@@ -15,6 +15,9 @@
 
 import os
 import shutil
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class ZoeWorkspace:
@@ -28,11 +31,11 @@ class ZoeWorkspace:
         }
 
     def create(self):
-        print("Creating workspace {}".format(self._workspace_path))
+        log.debug("Creating workspace {}".format(self._workspace_path))
         os.makedirs(self._workspace_path, exist_ok=False)
 
     def destroy(self):
-        print("Destroying workspace {}".format(self._workspace_path))
+        log.debug("Destroying workspace {}".format(self._workspace_path))
         shutil.rmtree(self._workspace_path)
 
     def get_volume_definition(self):
@@ -40,7 +43,7 @@ class ZoeWorkspace:
 
     def put(self, src_filepath, dst_rel_filepath):
         dst_path = os.path.join(self._workspace_path, dst_rel_filepath)
-        print("Copying file {} to {}".format(src_filepath, dst_path))
+        log.debug("Copying file {} to {}".format(src_filepath, dst_path))
         shutil.copyfile(src_filepath, dst_path)
 
     def put_string(self, file_contents, dst_rel_filepath):

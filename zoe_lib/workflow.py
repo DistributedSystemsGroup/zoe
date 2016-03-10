@@ -34,6 +34,8 @@ class ZoeWorkFlow:
         zoe_info = info_api.info()
         self.hostname_prefix = zoe_info['name_prefix']
 
+        self.exec_counter = 0
+
     def generate_hostname(self, process_name: str) -> str:
         return self.hostname_prefix + '-' + process_name + '-' + self.identity['username']
 
@@ -42,6 +44,10 @@ class ZoeWorkFlow:
 
     def end_workflow(self):
         self.workspace.destroy()
+
+    def execution_start(self, app):
+        self.exec_counter += 1
+        return self.exec_api.execution_start(self.name + '{}'.format(self.exec_counter), app)
 
     def wait_termination(self, exec_id):
         execution = self.exec_api.execution_get(exec_id)
