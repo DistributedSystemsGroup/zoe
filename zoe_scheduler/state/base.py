@@ -54,7 +54,7 @@ class BaseState:
             d[a] = getattr(self, a)
 
         if not checkpoint:
-            d['owner'] = self.owner.id
+            d['owner'] = self.owner.name
 
         return d
 

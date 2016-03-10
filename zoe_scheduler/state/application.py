@@ -41,6 +41,10 @@ class Application:
         return d
 
     def from_dict(self, data):
+        try:
+            self.name = data['name']
+        except KeyError:
+            raise InvalidApplicationDescription(msg="Missing required key: name")
 
         try:
             self.version = int(data['version'])
