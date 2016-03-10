@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+
+    <div id="my_executions">
+    <h3>Executions</h3>
+    <table id="exec_list" class="app_list sortable">
+    <thead>
+    <tr>
+        <th>Execution name</th>
+        <th>Application name</th>
+        {% if is_admin %}
+        <th>User</th>
+        {% endif %}
+        <th>Status</th>
+        <th>Scheduled</th>
+        <th>Started</th>
+        <th>Finished</th>
+    </tr>
+    </thead>
+    <tbody>
+        {% for e in executions %}
+            <tr class="{{ loop.cycle('odd', 'even') }}">
+                <td>{{ e['name'] }}</td>
+                <td>{{ e['application']['name'] }}</td>
+                {% if is_admin %}
+                <td>{{ e['owner'] }}</td>
+                {% endif %}
+                <td>{{ e['status'] }}</td>
+                <td><script>format_timestamp("{{ e['time_scheduled'] }}")</script></td>
+                {% if e['time_started'] == None %}
+                <td>not yet</td>
+                {% else %}
+                <td><script>format_timestamp("{{ e['time_started'] }}")</script></td>
+                {% endif %}
+                {% if e['time_finished'] == None %}
+                <td>not yet</td>
+                {% else %}
+                <td><script>format_timestamp("{{ e['time_finished'] }}")</script></td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+    </div>
+
+{% endblock %}

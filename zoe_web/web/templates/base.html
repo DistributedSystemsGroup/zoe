@@ -34,7 +34,7 @@
         moment.locale(window.navigator.userLanguage || window.navigator.language);
 
         function format_timestamp(ts) {
-            document.write(moment(ts, "X").calendar())
+            document.write(moment(ts).calendar())
         }
 
         function format_bytes(bytes, decimals) {

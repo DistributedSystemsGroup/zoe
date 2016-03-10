@@ -90,3 +90,65 @@ def home_guest():
                     for p in c['ports']:
                         template_vars['execution_urls'].append(('{}'.format(p['name']), '{}://{}:{}{}'.format(p['protocol'], ip, p['port_number'], p['path'])))
                 return render_template('home_guest.html', **template_vars)
+
+
+@web_bp.route('/user')
+def home_user():
+    auth = request.authorization
+    if not auth:
+        return missing_auth()
+
+    guest_identifier = auth.username
+    guest_password = auth.password
+
+    query_api = ZoeQueryAPI(get_conf().zoe_url, guest_identifier, guest_password)
+
+    try:
+        user = query_api.query('user', name=guest_identifier)
+    except ZoeAPIException:
+        return missing_auth()
+    if len(user) == 0:
+        return missing_auth()
+    user = user[0]
+
+    if user['role'] != 'user':
+        return missing_auth()
+
+    executions = query_api.query('execution')
+    template_vars = {
+        'executions': executions,
+        'is_admin': False
+    }
+
+    return render_template('home_user.html', **template_vars)
+
+
+@web_bp.route('/admin')
+def home_admin():
+    auth = request.authorization
+    if not auth:
+        return missing_auth()
+
+    guest_identifier = auth.username
+    guest_password = auth.password
+
+    query_api = ZoeQueryAPI(get_conf().zoe_url, guest_identifier, guest_password)
+
+    try:
+        user = query_api.query('user', name=guest_identifier)
+    except ZoeAPIException:
+        return missing_auth()
+    if len(user) == 0:
+        return missing_auth()
+
+    user = user[0]
+    if user['role'] != 'admin':
+        return missing_auth()
+
+    executions = query_api.query('execution')
+    template_vars = {
+        'executions': executions,
+        'is_admin': True
+    }
+
+    return render_template('home_user.html', **template_vars)
