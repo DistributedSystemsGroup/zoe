@@ -120,11 +120,9 @@ def app_get_cmd(args):
 
 def exec_list_cmd(_):
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    api_user = ZoeUserAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     data = exec_api.list()
     for e in data:
-        user = api_user.get(e['owner'])
-        print('Execution {} (User: {}, ID: {}): {}'.format(e['name'], user['name'], e['id'], e['status']))
+        print('Execution {} (User: {}, ID: {}): {}'.format(e['name'], e['owner'], e['id'], e['status']))
 
 
 def exec_start_cmd(args):
