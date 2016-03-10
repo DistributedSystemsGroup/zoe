@@ -21,7 +21,6 @@ import logging
 
 from zoe_lib import ZoeAPIBase
 from zoe_lib.exceptions import ZoeAPIException
-from zoe_lib.query import ZoeQueryAPI
 
 log = logging.getLogger(__name__)
 
