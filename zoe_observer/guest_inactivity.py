@@ -20,7 +20,7 @@ def check_guests(swarm):
     guests = query_api.query('user', role='guest')
     execs = exec_api.list()
     for guest in guests:
-        my_execs = [e for e in execs if e['owner'] == guest['id']]
+        my_execs = [e for e in execs if e['owner'] == guest['name']]
         for my_exec in my_execs:
             if len(my_exec['containers']) == 0:
                 continue
