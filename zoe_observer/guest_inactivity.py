@@ -31,10 +31,13 @@ def check_guests(swarm):
                 c = cont_api.get(c)
                 for port in c['ports']:
                     if port['name'] == 'Spark application web interface':
-                        if check_spark_job(swarm, c['docker_id'], my_exec_since_started):
+                        idle_time = check_spark_job(swarm, c['docker_id'], my_exec_since_started)
+                        if check_if_kill(idle_time):
                             log.info('Execution {} for user {} has been idle for too long, terminating...'.format(my_exec['name'], guest['name']))
                             terminate = True
                             break
+                        else:
+                            log.debug('Execution {} for user {} has been idle for {} seconds'.format(my_exec['name'], guest['name'], idle_time))
                     if terminate:
                         break
             if terminate:
@@ -54,9 +57,9 @@ def check_spark_job(swarm, docker_id, time_started):
     try:
         output = json.loads(output.decode('utf-8'))
     except ValueError:
-        return check_if_kill(time_started)
+        return time_started
     if len(output) == 0:
-        return check_if_kill(time_started)
+        return time_started
 
     seconds_since_last_job = None
     for job in output:
@@ -68,6 +71,6 @@ def check_spark_job(swarm, docker_id, time_started):
             seconds_since_last_job = job_time_diff
 
     if seconds_since_last_job is None:
-        return check_if_kill(time_started)
+        return time_started
     else:
-        return check_if_kill(seconds_since_last_job.total_seconds())
+        return seconds_since_last_job.total_seconds()
