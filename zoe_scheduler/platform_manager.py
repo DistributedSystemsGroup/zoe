@@ -123,18 +123,18 @@ class PlatformManager:
         :param reason: termination reason
         :return:
         """
-        logs = []
+        # logs = []
         if len(execution.containers) > 0:
             containers = execution.containers.copy()
             for c in containers:
                 assert isinstance(c, container_module.Container)
-                l = self.log_get(c.id)
-                if l is not None:
-                    logs.append((c.name, l))
+                # l = self.log_get(c.id)
+                # if l is not None:
+                #     logs.append((c.name, l))
                 self.swarm.terminate_container(c.docker_id, delete=True)
                 self.state_manager.delete('container', c.id)
                 log.info('Container {} terminated'.format(c.name))
-            execution.store_logs(logs)
+            # execution.store_logs(logs)
 
         if reason == 'error':
             execution.set_error()
