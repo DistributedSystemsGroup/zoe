@@ -26,6 +26,7 @@ except ImportError:
 
 import docker
 import docker.errors
+import docker.utils
 
 from zoe_scheduler.stats import SwarmStats, SwarmNodeStats, ContainerStats
 from zoe_lib.exceptions import ZoeException
@@ -118,13 +119,19 @@ class SwarmClient:
         for port in options.ports:
             port_bindings[port] = None
 
+        if options.gelf_log_address != '':
+            log_config = docker.utils.LogConfig(type="gelf", config={'gelf-address': options.gelf_log_address, 'labels': ",".join(options.labels)})
+        else:
+            log_config = docker.utils.LogConfig(type="json-file")
+
         try:
             host_config = self.cli.create_host_config(network_mode=options.network_name,
                                                       binds=options.get_volume_binds(),
                                                       mem_limit=options.get_memory_limit(),
                                                       memswap_limit=options.get_memory_limit(),
                                                       restart_policy=options.restart_policy,
-                                                      port_bindings=port_bindings)
+                                                      port_bindings=port_bindings,
+                                                      log_config=log_config)
             cont = self.cli.create_container(image=image,
                                              environment=options.environment,
                                              network_disabled=False,
@@ -287,6 +294,7 @@ class ContainerOptions:
         self.network_name = 'bridge'
         self.restart = True
         self.labels = []
+        self.gelf_log_address = ''
 
     def add_env_variable(self, name, value):
         if value is not None:

@@ -48,6 +48,7 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--influxdb-url', help='URL of the InfluxDB service (ex. http://localhost:8086)', default='http://localhost:8086')
         argparser.add_argument('--influxdb-enable', action="store_true", help='Enable metric output toward influxDB')
         argparser.add_argument('--passlib-rounds', type=int, help='Number of hashing rounds for passwords', default=60000)
+        argparser.add_argument('--gelf-address', help='Enable Docker GELF log output to this destination (ex. udp://1.2.3.4:1234)', default='')
 
         opts = argparser.parse_args()
         if opts.debug:

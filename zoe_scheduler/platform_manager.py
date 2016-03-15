@@ -59,6 +59,7 @@ class PlatformManager:
 
     def _spawn_process(self, execution: execution_module.Execution, process_description: application_module.Process) -> bool:
         copts = ContainerOptions()
+        copts.gelf_log_address = get_conf().gelf_address
         copts.name = get_conf().container_name_prefix + '-' + process_description.name + "-{}".format(execution.owner.name)
         copts.set_memory_limit(process_description.required_resources['memory'])
         copts.network_name = '{}-usernet-{}'.format(get_conf().container_name_prefix, execution.owner.id)
