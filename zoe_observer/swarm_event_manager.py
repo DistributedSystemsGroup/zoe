@@ -13,7 +13,7 @@ def main_callback(event):
         return
 
     try:
-        if event['Actor']['Attributes']['zoe.prefix'] != get_conf().container_name_prefix:
+        if event['Actor']['Attributes']['zoe.prefix'] != get_conf().deployment_name:
             return
     except KeyError:
         return

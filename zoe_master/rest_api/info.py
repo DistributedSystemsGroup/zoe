@@ -43,7 +43,7 @@ class InfoAPI(Resource):
             'version': ZOE_VERSION,
             'api_version': ZOE_API_VERSION,
             'application_format_version': ZOE_APPLICATION_FORMAT_VERSION,
-            'name_prefix': get_conf().container_name_prefix
+            'deployment_name': get_conf().container_name_prefix
         }
 
         singletons['metric'].metric_api_call(start_time, 'info', '', calling_user)
