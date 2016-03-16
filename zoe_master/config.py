@@ -31,9 +31,9 @@ _conf = None
 def load_configuration(test_conf=None):
     global _conf
     if test_conf is None:
-        argparser = ArgumentParser(description="Zoe Scheduler - Container Analytics as a Service scheduling component",
+        argparser = ArgumentParser(description="Zoe Master - Container Analytics as a Service core component",
                                    default_config_files=config_paths,
-                                   auto_env_var_prefix="ZOE_SCHEDULER_",
+                                   auto_env_var_prefix="ZOE_MASTER_",
                                    args_for_setting_config_path=["--config"],
                                    args_for_writing_out_config_file=["--write-config"])
         argparser.add_argument('--debug', action='store_true', help='Enable debug output')
