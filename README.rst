@@ -13,6 +13,8 @@ Zoe can use any Docker image, but we provide some for the pre-configured applica
 
 -  Docker images: https://github.com/DistributedSystemsGroup/zoe-docker-images
 
+We currently do not provide a Dockerfile as we did in the past. This is only temporary and soon we will have autobuilt images for each Zoe component.
+
 Repository contents
 -------------------
 
@@ -21,6 +23,7 @@ Repository contents
 - `scripts`: Scripts used to test Zoe images outside of Zoe
 - `zoe_cmd`: Command-line client
 - `zoe_lib`: Client-side library, contains also some modules needed by the observer and the scheduler processes
+- `zoe_logger`: Optional Kafka producer for Docker container logs
 - `zoe_observer`: The Observer process that monitors Swarm and informs the scheduler of various events
 - `zoe_scheduler`: The core of Zoe, the server process that listens for client requests and creates the containers on Swarm
 - `zoe_web`: The web client interface

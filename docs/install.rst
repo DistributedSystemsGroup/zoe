@@ -3,12 +3,13 @@ Installing Zoe
 
 Zoe components:
 
-* scheduler
-* observer
+* Master
+* Observer
+* logger
 * web client
 * command-line client
 
-Zoe is written in Python and uses the ``requirements.txt`` file to list package dependencies.
+Zoe is written in Python and uses the ``requirements.txt`` file to list the package dependencies needed for all components of Zoe. Not all of them are needed in all cases, for example you need the ``kazoo`` library only if you use Zookeeper to manage Swarm high availability.
 
 Requirements
 ------------
@@ -20,6 +21,7 @@ Zoe is written in Python 3. Development happens on Python 3.4, but we test also 
 Optional:
 
 * A Docker registry containing Zoe images for faster container startup times
+* A logging pipeline able to receive GELF-formatted logs, or a Kafka broker
 
 Swarm/Docker
 ------------
@@ -48,7 +50,7 @@ The images used by Zoe are available on the Docker Hub:
 
 * https://hub.docker.com/r/zoerepo/
 
-Since the Docker Hub can be quite slow, we strongly suggest setting up a private registry. The ``build_images.sh`` script in the
+Since the Docker Hub can be slow, we strongly suggest setting up a private registry. The ``build_images.sh`` script in the
 `zoe-docker-images <https://github.com/DistributedSystemsGroup/zoe-docker-images>`_ repository can help you populate the registry
 bypassing the Hub.
 
