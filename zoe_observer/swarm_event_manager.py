@@ -29,7 +29,7 @@ def main_callback(event):
 
 def container_died(zoe_id: int):
     log.debug('A container died')
-    # tell the scheduler via the rest api
+    # tell the master via the rest api
     cont_api = ZoeContainerAPI(get_conf().scheduler_url, 'zoeadmin', get_conf().zoeadmin_password)
     try:
         cont_api.died(zoe_id)

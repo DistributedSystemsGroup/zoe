@@ -19,8 +19,8 @@ from io import BytesIO
 
 import dateutil.parser
 
-from zoe_scheduler.state.base import BaseState
-from zoe_scheduler.state.application import Application
+from zoe_master.state.base import BaseState
+from zoe_master.state.application import Application
 from zoe_lib.exceptions import ZoeException
 
 

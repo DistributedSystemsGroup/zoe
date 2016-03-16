@@ -1,4 +1,6 @@
-# Copyright (c) 2015, Daniele Venzano
+#!/usr/bin/python3
+
+# Copyright (c) 2016, Daniele Venzano
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,4 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from zoe_scheduler.scheduler_policies.fifo import FIFOSchedulerPolicy
+from zoe_master.entrypoint import main
+
+if __name__ == '__main__':
+    main()

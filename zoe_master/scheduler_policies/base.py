@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from zoe_scheduler.state.application import Application
-from zoe_scheduler.state.execution import Execution
-from zoe_scheduler.stats import SchedulerStats
+from zoe_master.state.application import Application
+from zoe_master.state.execution import Execution
+from zoe_master.stats import SchedulerStats
 
 
 class BaseSchedulerPolicy:

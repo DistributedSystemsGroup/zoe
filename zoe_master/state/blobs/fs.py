@@ -16,8 +16,8 @@
 import logging
 import os
 
-from zoe_scheduler.state.blobs import BaseBlobs
-from zoe_scheduler.config import get_conf
+from zoe_master.state.blobs import BaseBlobs
+from zoe_master.config import get_conf
 
 BLOB_PATH = 'blobs'
 

@@ -19,13 +19,13 @@ from werkzeug.exceptions import BadRequest
 from flask_restful import Resource, request
 
 from zoe_lib.exceptions import ZoeException, ZoeRestAPIException
-from zoe_scheduler.rest_api.utils import catch_exceptions
-from zoe_scheduler.state.manager import StateManager
-from zoe_scheduler.platform_manager import PlatformManager
-from zoe_scheduler.rest_api.auth.authentication import authenticate
-from zoe_scheduler.rest_api.auth.authorization import is_authorized
-from zoe_scheduler.state.user import User
-from zoe_scheduler.config import singletons
+from zoe_master.rest_api.utils import catch_exceptions
+from zoe_master.state.manager import StateManager
+from zoe_master.platform_manager import PlatformManager
+from zoe_master.rest_api.auth.authentication import authenticate
+from zoe_master.rest_api.auth.authorization import is_authorized
+from zoe_master.state.user import User
+from zoe_master.config import singletons
 
 
 class UserAPI(Resource):

@@ -17,11 +17,11 @@ import sys
 from flask import Flask
 from flask_restful import Api
 
-from zoe_scheduler.rest_api.user import UserAPI, UserCollectionAPI
-from zoe_scheduler.rest_api.execution import ExecutionAPI, ExecutionCollectionAPI
-from zoe_scheduler.rest_api.container import ContainerAPI
-from zoe_scheduler.rest_api.query import QueryAPI
-from zoe_scheduler.rest_api.info import InfoAPI
+from zoe_master.rest_api.user import UserAPI, UserCollectionAPI
+from zoe_master.rest_api.execution import ExecutionAPI, ExecutionCollectionAPI
+from zoe_master.rest_api.container import ContainerAPI
+from zoe_master.rest_api.query import QueryAPI
+from zoe_master.rest_api.info import InfoAPI
 from zoe_lib.version import ZOE_API_VERSION
 
 API_PATH = '/api/' + ZOE_API_VERSION

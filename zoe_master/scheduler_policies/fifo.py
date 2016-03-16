@@ -15,11 +15,11 @@
 
 import time
 
-from zoe_scheduler.stats import SchedulerStats
-from zoe_scheduler.scheduler_policies.base import BaseSchedulerPolicy
-from zoe_scheduler.state.application import Application
-from zoe_scheduler.state.execution import Execution
-from zoe_scheduler.config import singletons
+from zoe_master.stats import SchedulerStats
+from zoe_master.scheduler_policies.base import BaseSchedulerPolicy
+from zoe_master.state.application import Application
+from zoe_master.state.execution import Execution
+from zoe_master.config import singletons
 
 
 class FIFOSchedulerPolicy(BaseSchedulerPolicy):

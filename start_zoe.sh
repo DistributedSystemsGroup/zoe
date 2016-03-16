@@ -9,5 +9,5 @@ fi
 SWARM_ADDRESS="swarm:2380"
 
 
-sudo docker -H ${SWARM_ADDRESS} run -i -t --rm=true -e ZOE_SCHEDULER_SWARM=${SWARM_ADDRESS} zoerepo/zoe-scheduler
+sudo docker -H ${SWARM_ADDRESS} run -i -t --rm=true -e ZOE_MASTER_SWARM=${SWARM_ADDRESS} zoerepo/zoe-master
 sudo docker -H ${SWARM_ADDRESS} run -i -t --rm=true zoerepo/zoe-client ./zoe-web.py

@@ -18,7 +18,7 @@ import time
 import logging
 
 from zoe_lib.swarm_client import SwarmClient
-from zoe_scheduler.config import get_conf
+from zoe_master.config import get_conf
 
 log = logging.getLogger(__name__)
 

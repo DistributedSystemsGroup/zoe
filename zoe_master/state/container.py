@@ -14,8 +14,8 @@
 # limitations under the License.
 
 from zoe_lib.exceptions import ZoeException
-from zoe_scheduler.state.base import BaseState
-from zoe_scheduler.state.execution import Execution
+from zoe_master.state.base import BaseState
+from zoe_master.state.execution import Execution
 
 
 class Container(BaseState):

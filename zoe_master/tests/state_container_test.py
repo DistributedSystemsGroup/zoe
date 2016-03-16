@@ -13,16 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from zoe_scheduler.state.application import Application, Process, ProcessEndpoint
+from zoe_master.state.container import Container
 
 
-def test_application():
-    Application()
-
-
-def test_process():
-    Process()
-
-
-def test_process_endpoint():
-    ProcessEndpoint()
+def test_execution(state_manager):
+    Container(state_manager)

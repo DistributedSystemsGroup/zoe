@@ -16,9 +16,9 @@
 import pytest
 import json
 
-from zoe_scheduler.config import load_configuration, get_conf
-from zoe_scheduler.state.manager import StateManager
-from zoe_scheduler.state.blobs.fs import FSBlobs
+from zoe_master.config import load_configuration, get_conf
+from zoe_master.state.manager import StateManager
+from zoe_master.state.blobs.fs import FSBlobs
 
 
 class TestConf:
@@ -40,7 +40,7 @@ def configuration(request):
 
 @pytest.fixture(scope='session')
 def application_dict():
-    jsondata = open("zoe_scheduler/tests/resources/spark-wordcount-test.json", "r")
+    jsondata = open("zoe_master/tests/resources/spark-wordcount-test.json", "r")
     return json.load(jsondata)
 
 

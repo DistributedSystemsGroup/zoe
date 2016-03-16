@@ -19,7 +19,7 @@ import logging
 
 from jinja2 import Template
 
-from zoe_scheduler.state.execution import ExecutionState
+from zoe_master.state.execution import ExecutionState
 from common.configuration import zoe_conf
 
 log = logging.getLogger(__name__)

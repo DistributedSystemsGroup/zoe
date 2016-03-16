@@ -21,21 +21,21 @@ from tornado.wsgi import WSGIContainer
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 
-from zoe_scheduler.platform_manager import PlatformManager
-from zoe_scheduler.scheduler_policies import FIFOSchedulerPolicy
-import zoe_scheduler.config as config
-from zoe_scheduler.rest_api import init as api_init
-from zoe_scheduler.state.manager import StateManager
-from zoe_scheduler.state.blobs.fs import FSBlobs
+from zoe_master.platform_manager import PlatformManager
+from zoe_master.scheduler_policies import FIFOSchedulerPolicy
+import zoe_master.config as config
+from zoe_master.rest_api import init as api_init
+from zoe_master.state.manager import StateManager
+from zoe_master.state.blobs.fs import FSBlobs
 from zoe_lib.metrics.influxdb import InfluxDBMetricSender
-from zoe_scheduler.stats_manager import StatsManager
+from zoe_master.stats_manager import StatsManager
 
 log = logging.getLogger("main")
 
 
 def main():
     """
-    The entrypoint for the zoe-scheduler script.
+    The entrypoint for the zoe-master script.
     :return: int
     """
     config.load_configuration()

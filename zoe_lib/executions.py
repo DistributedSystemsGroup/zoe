@@ -58,7 +58,7 @@ class ZoeExecutionsAPI(ZoeAPIBase):
         """
         Retrieve the Execution object for an existing execution.
 
-        :param execution_id: the execution to load from the scheduler
+        :param execution_id: the execution to load from the master
         :return: the Execution object, or None
         """
         data, status_code = self._rest_get('/execution/' + str(execution_id))
@@ -69,7 +69,7 @@ class ZoeExecutionsAPI(ZoeAPIBase):
 
     def execution_start(self, name: str, application_description: dict) -> int:
         """
-        Submit an application to the scheduler to start a new execution.
+        Submit an application to the master to start a new execution.
 
         :param name: user-provided name of the execution
         :param application_description: the application to start

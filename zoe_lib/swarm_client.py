@@ -28,7 +28,7 @@ import docker
 import docker.errors
 import docker.utils
 
-from zoe_scheduler.stats import SwarmStats, SwarmNodeStats, ContainerStats
+from zoe_master.stats import SwarmStats, SwarmNodeStats, ContainerStats
 from zoe_lib.exceptions import ZoeException
 
 log = logging.getLogger(__name__)

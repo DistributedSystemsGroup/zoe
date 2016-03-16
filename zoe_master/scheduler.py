@@ -17,9 +17,9 @@ import logging
 import queue
 
 from zoe_lib.exceptions import ZoeException
-from zoe_scheduler.state.application import Application
-from zoe_scheduler.state.execution import Execution
-from zoe_scheduler.scheduler_policies.base import BaseSchedulerPolicy
+from zoe_master.state.application import Application
+from zoe_master.state.execution import Execution
+from zoe_master.scheduler_policies.base import BaseSchedulerPolicy
 
 log = logging.getLogger(__name__)
 
@@ -61,7 +61,7 @@ class ZoeScheduler:
 
     def execution_terminate(self, execution: Execution) -> None:
         """
-        Inform the scheduler that an execution has been terminated.
+        Inform the master that an execution has been terminated.
         :param execution: the terminated execution
         :return: None
         """
@@ -70,7 +70,7 @@ class ZoeScheduler:
 
     def _check_runnable(self):  # called periodically, does not use state
         """
-        This method is called by the main scheduler loop to check if there is an execution that can be run. In case there is
+        This method is called by the main master loop to check if there is an execution that can be run. In case there is
         it starts it.
         :return: None
         """

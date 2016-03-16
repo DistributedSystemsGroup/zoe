@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from zoe_scheduler.state.user import User
+from zoe_master.state.execution import Execution
 
 
 def test_execution(state_manager):
-    User(state_manager)
+    Execution(state_manager)

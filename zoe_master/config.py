@@ -16,8 +16,8 @@
 from zoe_lib.configargparse import ArgumentParser, Namespace
 
 config_paths = [
-    'zoe-scheduler.conf',
-    '/etc/zoe/zoe-scheduler.conf'
+    'zoe-master.conf',
+    '/etc/zoe/zoe-master.conf'
 ]
 
 singletons = {

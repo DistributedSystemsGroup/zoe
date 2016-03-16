@@ -17,11 +17,11 @@ import logging
 import json
 
 from zoe_lib.exceptions import ZoeException
-from zoe_scheduler.config import get_conf
-from zoe_scheduler.state.user import User
-from zoe_scheduler.state.execution import Execution
-from zoe_scheduler.state.container import Container
-from zoe_scheduler.state.blobs import BaseBlobs
+from zoe_master.config import get_conf
+from zoe_master.state.user import User
+from zoe_master.state.execution import Execution
+from zoe_master.state.container import Container
+from zoe_master.state.blobs import BaseBlobs
 
 log = logging.getLogger(__name__)
 

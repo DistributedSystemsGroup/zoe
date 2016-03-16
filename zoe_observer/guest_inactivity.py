@@ -13,9 +13,9 @@ log = logging.getLogger(__name__)
 
 
 def check_guests(swarm):
-    query_api = ZoeQueryAPI(get_conf().scheduler_url, 'zoeadmin', get_conf().zoeadmin_password)
-    exec_api = ZoeExecutionsAPI(get_conf().scheduler_url, 'zoeadmin', get_conf().zoeadmin_password)
-    cont_api = ZoeContainerAPI(get_conf().scheduler_url, 'zoeadmin', get_conf().zoeadmin_password)
+    query_api = ZoeQueryAPI(get_conf().master_url, 'zoeadmin', get_conf().zoeadmin_password)
+    exec_api = ZoeExecutionsAPI(get_conf().master_url, 'zoeadmin', get_conf().zoeadmin_password)
+    cont_api = ZoeContainerAPI(get_conf().master_url, 'zoeadmin', get_conf().zoeadmin_password)
 
     guests = query_api.query('user', role='guest')
     execs = exec_api.list()

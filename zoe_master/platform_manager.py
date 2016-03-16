@@ -18,12 +18,12 @@ import logging
 from zoe_lib.swarm_client import SwarmClient, ContainerOptions
 
 from zoe_lib.exceptions import ZoeException
-from zoe_scheduler.config import get_conf, singletons
-from zoe_scheduler.scheduler import ZoeScheduler
-from zoe_scheduler.state import execution as execution_module, application as application_module, container as container_module
-from zoe_scheduler.state.manager import StateManager
-from zoe_scheduler.stats import ContainerStats
-from zoe_scheduler.stats import SwarmStats, SchedulerStats
+from zoe_master.config import get_conf, singletons
+from zoe_master.scheduler import ZoeScheduler
+from zoe_master.state import execution as execution_module, application as application_module, container as container_module
+from zoe_master.state.manager import StateManager
+from zoe_master.stats import ContainerStats
+from zoe_master.stats import SwarmStats, SchedulerStats
 
 log = logging.getLogger(__name__)
 

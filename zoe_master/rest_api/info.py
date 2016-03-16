@@ -18,11 +18,11 @@ import time
 from flask_restful import Resource, request
 
 from zoe_lib.version import ZOE_API_VERSION, ZOE_APPLICATION_FORMAT_VERSION, ZOE_VERSION
-from zoe_scheduler.state.manager import StateManager
-from zoe_scheduler.platform_manager import PlatformManager
-from zoe_scheduler.rest_api.utils import catch_exceptions
-from zoe_scheduler.rest_api.auth.authentication import authenticate
-from zoe_scheduler.config import singletons, get_conf
+from zoe_master.state.manager import StateManager
+from zoe_master.platform_manager import PlatformManager
+from zoe_master.rest_api.utils import catch_exceptions
+from zoe_master.rest_api.auth.authentication import authenticate
+from zoe_master.config import singletons, get_conf
 
 
 class InfoAPI(Resource):
