@@ -27,7 +27,7 @@ class InfluxDBMetricSender(threading.Thread):
         super().__init__(name='influxdb_sender')
 
         self._buffer = []
-        self._deployment = conf.container_name_prefix
+        self._deployment = conf.deployment_name
         self._influxdb_endpoint = conf.influxdb_url + '/write?precision=ms&db=' + conf.influxdb_dbname
         self._queue = queue.Queue()
 

@@ -60,18 +60,18 @@ class PlatformManager:
     def _spawn_process(self, execution: execution_module.Execution, process_description: application_module.Process) -> bool:
         copts = ContainerOptions()
         copts.gelf_log_address = get_conf().gelf_address
-        copts.name = get_conf().container_name_prefix + '-' + process_description.name + "-{}".format(execution.owner.name)
+        copts.name = get_conf().deployment_name + '-' + process_description.name + "-{}".format(execution.owner.name)
         copts.set_memory_limit(process_description.required_resources['memory'])
-        copts.network_name = '{}-usernet-{}'.format(get_conf().container_name_prefix, execution.owner.id)
+        copts.network_name = '{}-usernet-{}'.format(get_conf().deployment_name, execution.owner.id)
         container_id = self.state_manager.gen_id()
         copts.labels = {
-            'zoe.{}'.format(get_conf().container_name_prefix): '',
+            'zoe.{}'.format(get_conf().deployment_name): '',
             'zoe.execution.id': str(execution.id),
             'zoe.execution.name': execution.name,
             'zoe.container.id': str(container_id),
             'zoe.container.name': process_description.name,
             'zoe.owner': execution.owner.name,
-            'zoe.prefix': get_conf().container_name_prefix,
+            'zoe.prefix': get_conf().deployment_name,
             'zoe.type': 'app_process'
         }
         if process_description.monitor:
@@ -86,7 +86,7 @@ class PlatformManager:
             "execution_id": str(execution.id),
             "user_id": str(execution.owner.id),
             'user_name': execution.owner.name,
-            'name_prefix': get_conf().container_name_prefix
+            'name_prefix': get_conf().deployment_name
         }
         for env_name, env_value in process_description.environment:
             try:
@@ -150,13 +150,13 @@ class PlatformManager:
 
     def start_gateway_container(self, user):
         copts = ContainerOptions()
-        copts.name = '{}-gateway-{}'.format(get_conf().container_name_prefix, user.id)
-        copts.network_name = '{}-usernet-{}'.format(get_conf().container_name_prefix, user.id)
+        copts.name = '{}-gateway-{}'.format(get_conf().deployment_name, user.id)
+        copts.network_name = '{}-usernet-{}'.format(get_conf().deployment_name, user.id)
         copts.ports.append(1080)
         copts.labels = {
-            'zoe.{}.gateway'.format(get_conf().container_name_prefix): '',
+            'zoe.{}.gateway'.format(get_conf().deployment_name): '',
             'zoe.owner': user.name,
-            'zoe.prefix': get_conf().container_name_prefix,
+            'zoe.prefix': get_conf().deployment_name,
             'zoe.type': 'gateway'
         }
         copts.restart = True
@@ -178,7 +178,7 @@ class PlatformManager:
 
     def create_user_network(self, user):
         log.info('Creating a new network for user {}'.format(user.id))
-        net_name = '{}-usernet-{}'.format(get_conf().container_name_prefix, user.id)
+        net_name = '{}-usernet-{}'.format(get_conf().deployment_name, user.id)
         net_id = self.swarm.network_create(net_name)
         user.network_id = net_id
 
@@ -212,8 +212,8 @@ class PlatformManager:
     def check_state_swarm_consistency(self):
         state_changed = False
         users = self.state_manager.get('user')
-        networks = self.swarm.network_list('{}-usernet-'.format(get_conf().container_name_prefix))
-        gateways = self.swarm.list(['zoe.{}.gateway'.format(get_conf().container_name_prefix)])
+        networks = self.swarm.network_list('{}-usernet-'.format(get_conf().deployment_name))
+        gateways = self.swarm.list(['zoe.{}.gateway'.format(get_conf().deployment_name)])
 
         users_no_network = []
         users_no_gateway = []
@@ -240,7 +240,7 @@ class PlatformManager:
         duplicate_check = set()
         for n in networks:
             try:
-                uid = int(n['name'][len('{}-usernet-'.format(get_conf().container_name_prefix)):])
+                uid = int(n['name'][len('{}-usernet-'.format(get_conf().deployment_name)):])
             except ValueError:
                 log.error('network {} does not belong to Zoe, bug?'.format(n['name']))
                 networks_to_delete.append(n['id'])
@@ -263,7 +263,7 @@ class PlatformManager:
 
         for g in gateways:
             try:
-                uid = int(g['name'][len('{}-gateway-'.format(get_conf().container_name_prefix)):])
+                uid = int(g['name'][len('{}-gateway-'.format(get_conf().deployment_name)):])
             except ValueError:
                 log.error('container {} does not belong to Zoe, bug?'.format(g['name']))
                 gateways_to_delete.append(g['id'])
@@ -297,7 +297,7 @@ class PlatformManager:
             self.start_gateway_container(u)
 
         # ### Check executions and container consistency
-        swarm_containers = self.swarm.list(only_label='zoe.{}'.format(get_conf().container_name_prefix))
+        swarm_containers = self.swarm.list(only_label='zoe.{}'.format(get_conf().deployment_name))
         conts_state_to_delete = []
         for c_id, c in self.state_manager.containers.items():
             if c.docker_id not in [x['id'] for x in swarm_containers]:
