@@ -31,16 +31,16 @@ class GELFUDPHandler(socketserver.DatagramRequestHandler):
         data = self.rfile.read()
         data = gzip.decompress(data)
         data = json.loads(data.decode('utf-8'))
-        cont_id = '.'.join([data['_zoe.prefix'], data['_zoe.container.name'], data['_zoe.execution.name'], data['_zoe.owner']])
+        cont_id = '.'.join([data['_zoe.container.name'], data['_zoe.execution.name'], data['_zoe.owner'], data['_zoe.prefix']])
         log_line = ' '.join([data['timestamp'], data['host'], cont_id, data['short_message']])
         self.server.kafka_producer.send(topic=cont_id, value=log_line)
         # log.debug(log_line)
 
 
 class ZoeLoggerUDPServer(socketserver.ThreadingUDPServer):
-    def __init__(self, server_address, RequestHandlerClass, kafka_producer):
+    def __init__(self, server_address, handler_class, kafka_producer):
         self.allow_reuse_address = True
-        super().__init__(server_address, RequestHandlerClass)
+        super().__init__(server_address, handler_class)
         self.kafka_producer = kafka_producer
 
 
