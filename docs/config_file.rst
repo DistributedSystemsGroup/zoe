@@ -36,7 +36,6 @@ zoe-observer.conf
 zoe-web.conf
 ------------
 * ``debug = <true|false>`` : enable or disable debug log output
-* ``zoeadmin-password = changeme`` : Password for the zoeadmin user
 * ``listen-address`` : address Zoe will use to listen for incoming connections to the web interface
 * ``listen-port`` : port Zoe will use to listen for incoming connections to the web interface
 * ``master-url = http://<address:port>`` : address of the Zoe Master REST API
