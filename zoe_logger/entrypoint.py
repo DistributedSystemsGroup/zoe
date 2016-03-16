@@ -34,7 +34,7 @@ class GELFUDPHandler(socketserver.DatagramRequestHandler):
         cont_id = '.'.join([data['_zoe.prefix'], data['_zoe.container.name'], data['_zoe.execution.name'], data['_zoe.owner']])
         log_line = ' '.join([data['timestamp'], data['host'], cont_id, data['short_message']])
         self.server.kafka_producer.send(topic=cont_id, value=log_line)
-        import pprint; pprint.pprint(data)
+        # log.debug(log_line)
 
 
 class ZoeLoggerUDPServer(socketserver.ThreadingUDPServer):
