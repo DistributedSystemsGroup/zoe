@@ -14,8 +14,8 @@
 # limitations under the License.
 
 
-def spark_master_proc(mem_limit: int, image: str) -> dict:
-    proc = {
+def spark_master_service(mem_limit: int, image: str) -> dict:
+    service = {
         'name': "spark-master",
         'docker_image': image,
         'monitor': False,
@@ -36,14 +36,14 @@ def spark_master_proc(mem_limit: int, image: str) -> dict:
             'eeef9754c16790a29d5210c5d9ad8e66614ee8a6229b6dc6f779019d46cec792'
         ]
     }
-    return proc
+    return service
 
 
-def spark_worker_proc(count: int, mem_limit: int, cores: int, image: str) -> list:
+def spark_worker_service(count: int, mem_limit: int, cores: int, image: str) -> list:
     worker_ram = mem_limit - (1024 ** 3) - (512 * 1025 ** 2)
     ret = []
     for i in range(count):
-        proc = {
+        service = {
             'name': "spark-worker-{}".format(i),
             'docker_image': image,
             'monitor': False,
@@ -67,14 +67,14 @@ def spark_worker_proc(count: int, mem_limit: int, cores: int, image: str) -> lis
                 'eeef9754c16790a29d5210c5d9ad8e66614ee8a6229b6dc6f779019d46cec792'
             ]
         }
-        ret.append(proc)
+        ret.append(service)
     return ret
 
 
-def spark_jupyter_notebook_proc(mem_limit: int, worker_mem_limit: int, image: str) -> dict:
+def spark_jupyter_notebook_service(mem_limit: int, worker_mem_limit: int, image: str) -> dict:
     executor_ram = worker_mem_limit - (1024 ** 3) - (512 * 1025 ** 2)
     driver_ram = (2 * 1024 ** 3)
-    proc = {
+    service = {
         'name': "spark-jupyter",
         'docker_image': image,
         'monitor': True,
@@ -106,7 +106,7 @@ def spark_jupyter_notebook_proc(mem_limit: int, worker_mem_limit: int, image: st
             'eeef9754c16790a29d5210c5d9ad8e66614ee8a6229b6dc6f779019d46cec792'
         ]
     }
-    return proc
+    return service
 
 
 def spark_jupyter_notebook_lab_app(name='spark-jupyter-lab',
@@ -124,9 +124,9 @@ def spark_jupyter_notebook_lab_app(name='spark-jupyter-lab',
         'will_end': False,
         'priority': 512,
         'requires_binary': False,
-        'processes': [
-            spark_master_proc(master_mem_limit, master_image),
-            spark_jupyter_notebook_proc(notebook_mem_limit, worker_mem_limit, notebook_image)
-        ] + spark_worker_proc(worker_count, worker_mem_limit, worker_cores, worker_image)
+        'services': [
+            spark_master_service(master_mem_limit, master_image),
+            spark_jupyter_notebook_service(notebook_mem_limit, worker_mem_limit, notebook_image)
+        ] + spark_worker_service(worker_count, worker_mem_limit, worker_cores, worker_image)
     }
     return app
