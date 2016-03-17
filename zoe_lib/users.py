@@ -27,17 +27,20 @@ class ZoeUserAPI(ZoeAPIBase):
     The UserAPI class has methods for interacting with Zoe's user system.
     """
 
-    def exists(self, user_id: int) -> bool:
+    def exists(self, user_id):
         """
         Checks if a given user_id exists.
 
         :param user_id: the user_id to check
         :return: True if the user_id exists, False otherwise
+
+        :type user_id: int
+        :rtype: bool
         """
         user, status_code = self._rest_get('/user/' + str(user_id))
         return status_code == 200
 
-    def create(self, name: str, password: str, role: str):
+    def create(self, name, password, role):
         """
         Creates a new user, given his email address.
 
@@ -45,6 +48,10 @@ class ZoeUserAPI(ZoeAPIBase):
         :param password: the user password
         :param role: the user role
         :return: the new user ID
+
+        :type name: str
+        :type password: str
+        :type role: str
         """
         data = {
             'name': name,
@@ -57,12 +64,14 @@ class ZoeUserAPI(ZoeAPIBase):
         else:
             raise ZoeAPIException(user_id['message'])
 
-    def get(self, user_id: int):
+    def get(self, user_id):
         """
         Get a user object given a user_id.
 
         :param user_id: the user_id to look for
         :return: the user dictionary, or None
+
+        :type user_id: int
         """
         user, status_code = self._rest_get('/user/' + str(user_id))
         if status_code == 200:
@@ -70,12 +79,14 @@ class ZoeUserAPI(ZoeAPIBase):
         else:
             return None
 
-    def delete(self, user_id: int):
+    def delete(self, user_id):
         """
         Delete a user given a user_id.
 
         :param user_id: the user_id to delete
         :return: None
+
+        :type user_id: int
         """
         data, status_code = self._rest_delete('/user/' + str(user_id))
         if status_code != 204:

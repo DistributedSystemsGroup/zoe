@@ -29,12 +29,15 @@ class ZoeExecutionsAPI(ZoeAPIBase):
     """
     The execution API class.
     """
-    def terminate(self, execution_id: int) -> bool:
+    def terminate(self, execution_id):
         """
         Terminates an execution.
 
         :param execution_id: the execution to delete
         :return: True is the operation was successful, False otherwise
+
+        :type execution_id: int
+        :rtype: bool
         """
         data, status_code = self._rest_delete('/execution/' + str(execution_id))
         if status_code == 204:
@@ -54,12 +57,15 @@ class ZoeExecutionsAPI(ZoeAPIBase):
         else:
             raise ZoeAPIException(data['message'])
 
-    def execution_get(self, execution_id: int) -> dict:
+    def execution_get(self, execution_id):
         """
         Retrieve the Execution object for an existing execution.
 
         :param execution_id: the execution to load from the scheduler
         :return: the Execution object, or None
+
+        :type execution_id: int
+        :rtype: dict
         """
         data, status_code = self._rest_get('/execution/' + str(execution_id))
         if status_code == 200:
@@ -67,13 +73,17 @@ class ZoeExecutionsAPI(ZoeAPIBase):
         else:
             return None
 
-    def execution_start(self, name: str, application_description: dict) -> int:
+    def execution_start(self, name, application_description):
         """
         Submit an application to the scheduler to start a new execution.
 
         :param name: user-provided name of the execution
         :param application_description: the application to start
         :return: the new Execution object, or None in case of error
+
+        :type name: str
+        :type application_description: dict
+        :rtype: int
         """
         execution = {
             "application": application_description,

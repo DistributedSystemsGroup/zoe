@@ -14,7 +14,11 @@ class ZoeAPIBase:
         self.user = user
         self.password = password
 
-    def _rest_get(self, path: str):
+    def _rest_get(self, path):
+        """
+        :type path: str
+        :rtype: (dict, int)
+        """
         url = self.url + '/api/' + ZOE_API_VERSION + path
         try:
             r = requests.get(url, auth=(self.user, self.password))
@@ -32,6 +36,10 @@ class ZoeAPIBase:
         return data, r.status_code
 
     def _rest_post(self, path, payload):
+        """
+        :type path: str
+        :rtype: (dict, int)
+        """
         url = self.url + '/api/' + ZOE_API_VERSION + path
         try:
             r = requests.post(url, auth=(self.user, self.password), json=payload)
@@ -49,6 +57,10 @@ class ZoeAPIBase:
         return data, r.status_code
 
     def _rest_delete(self, path):
+        """
+        :type path: str
+        :rtype: (dict, int)
+        """
         url = self.url + '/api/' + ZOE_API_VERSION + path
         try:
             r = requests.delete(url, auth=(self.user, self.password))

@@ -28,12 +28,15 @@ class ZoeContainerAPI(ZoeAPIBase):
     """
     The container API class. Containers are read-only objects. The delete operation merely informs the scheduler that a container has died outside of its control.
     """
-    def get(self, container_id: int) -> dict:
+    def get(self, container_id):
         """
         Retrieve container state.
 
         :param container_id: the container to query
         :return:
+
+        :type container_id: int
+        :rtype: dict
         """
         c, status_code = self._rest_get('/container/' + str(container_id))
         if status_code == 200:
@@ -43,12 +46,15 @@ class ZoeContainerAPI(ZoeAPIBase):
         else:
             raise ZoeAPIException('error retrieving container {}'.format(container_id))
 
-    def log(self, container_id: int) -> str:
+    def log(self, container_id):
         """
         Get the standard output/error of the processes running in the given container.
 
         :param container_id: the container to examine
         :return: a string containing the log
+
+        :type container_id: int
+        :rtype: str
         """
         q = {
             'what': 'container logs',
@@ -61,12 +67,15 @@ class ZoeContainerAPI(ZoeAPIBase):
         else:
             return data[0]
 
-    def stats(self, container_id: int) -> dict:
+    def stats(self, container_id):
         """
         Get low-level statistics about a container. These come directly from Docker.
 
         :param container_id: The container to examine
         :return: the statistics. The format of this dictionary is not set in stone and could change.
+
+        :type container_id: int
+        :rtype: dict
         """
         q = {
             'what': 'container stats',
@@ -79,12 +88,14 @@ class ZoeContainerAPI(ZoeAPIBase):
         else:
             return data
 
-    def died(self, container_id: int):
+    def died(self, container_id):
         """
         Inform the scheduler that a container died. Used by the observer process.
 
         :param container_id: Zoe ID of the container that died
         :return:
+
+        :type container_id: int
         """
         data, status_code = self._rest_delete('/container/{}'.format(container_id))
         if status_code != 204:
