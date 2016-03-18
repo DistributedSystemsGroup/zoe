@@ -108,7 +108,7 @@ def spark_submit_app(name='spark-submit',
         'will_end': False,
         'priority': 512,
         'requires_binary': True,
-        'processes': [
+        'services': [
             spark_master_service(master_mem_limit, master_image),
             spark_submit_service(master_mem_limit, worker_mem_limit, submit_image, commandline, spark_options)
         ] + spark_worker_service(worker_count, worker_mem_limit, worker_cores, worker_image)

@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from zoe_master.state.service import Container
+from zoe_master.state.service import Service
 
 
 def test_execution(state_manager):
-    Container(state_manager)
+    Service(state_manager)

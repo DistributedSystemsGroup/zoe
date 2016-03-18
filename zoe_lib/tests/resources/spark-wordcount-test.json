@@ -1,99 +1,179 @@
 {
-  "name": "Spark wordcount test",
-  "user_id": 0,
-  "version": 0,
-  "will_end": true,
-  "priority": 512,
-  "requires_binary": true,
-  "processes": [
-    {
-      "name": "spark-master",
-      "version": 0,
-      "docker_image": "/zoerepo/spark-master",
-      "monitor": false,
-      "required_resources": {
-        "memory": 2147483648
-      },
-      "ports": [
+    "name": "spark-jupyter",
+    "priority": 512,
+    "requires_binary": false,
+    "services": [
         {
-          "name": "Spark master web interface",
-          "protocol": "http",
-          "port_number": 8080,
-          "path": "/",
-          "is_main_endpoint": false
-        }
-      ]
-    },
-    {
-      "name": "spark-worker-1",
-      "version": 0,
-      "docker_image": "/zoerepo/spark-worker",
-      "monitor": false,
-      "required_resources": {
-        "memory": 4294967296
-      },
-      "ports": [
+            "docker_image": "192.168.45.252:5000/zoerepo/spark-master",
+            "environment": [
+                [
+                    "SPARK_MASTER_IP",
+                    "{name_prefix}-spark-master-{execution_id}.{name_prefix}-usernet-{user_id}"
+                ]
+            ],
+            "monitor": false,
+            "name": "spark-master",
+            "ports": [
+                {
+                    "is_main_endpoint": false,
+                    "name": "Spark master web interface",
+                    "path": "/",
+                    "port_number": 8080,
+                    "protocol": "http"
+                }
+            ],
+            "required_resources": {
+                "memory": 4294967296
+            }
+        },
         {
-          "name": "Spark worker web interface",
-          "protocol": "http",
-          "port_number": 8081,
-          "path": "/",
-          "is_main_endpoint": false
-        }
-      ],
-      "environment": [
-        ["SPARK_WORKER_CORES", "4"],
-        ["SPARK_WORKER_RAM", "4g"],
-        ["SPARK_MASTER_IP", "{cluster[spark-master][ip_address]}"]
-      ]
-    },
-    {
-      "name": "spark-worker-2",
-      "version": 0,
-      "docker_image": "/zoerepo/spark-worker",
-      "monitor": false,
-      "required_resources": {
-        "memory": 4294967296
-      },
-      "ports": [
+            "docker_image": "192.168.45.252:5000/zoerepo/spark-jupyter-notebook",
+            "environment": [
+                [
+                    "SPARK_MASTER",
+                    "spark://{name_prefix}-spark-master-{execution_id}.{name_prefix}-usernet-{user_id}:7077"
+                ],
+                [
+                    "SPARK_EXECUTOR_RAM",
+                    "6442450944"
+                ],
+                [
+                    "NB_USER",
+                    "{user_name}"
+                ],
+                [
+                    "NAMENODE_HOST",
+                    "hdfs-namenode.hdfs"
+                ]
+            ],
+            "monitor": true,
+            "name": "spark-jupyter",
+            "ports": [
+                {
+                    "is_main_endpoint": false,
+                    "name": "Spark application web interface",
+                    "path": "/",
+                    "port_number": 4040,
+                    "protocol": "http"
+                },
+                {
+                    "is_main_endpoint": true,
+                    "name": "Jupyter Notebook interface",
+                    "path": "/",
+                    "port_number": 8888,
+                    "protocol": "http"
+                }
+            ],
+            "required_resources": {
+                "memory": 4294967296
+            }
+        },
         {
-          "name": "Spark worker web interface",
-          "protocol": "http",
-          "port_number": 8081,
-          "path": "/",
-          "is_main_endpoint": false
-        }
-      ],
-      "environment": [
-        ["SPARK_WORKER_CORES", "4"],
-        ["SPARK_WORKER_RAM", "4g"],
-        ["SPARK_MASTER_IP", "{cluster[spark-master][ip_address]}"]
-      ]
-    },
-    {
-      "name": "spark-submit",
-      "version": 0,
-      "docker_image": "/zoerepo/spark-submit",
-      "monitor": true,
-      "required_resources": {
-        "memory": 4294967296
-      },
-      "ports": [
+            "docker_image": "192.168.45.252:5000/zoerepo/spark-worker",
+            "environment": [
+                [
+                    "SPARK_WORKER_CORES",
+                    "4"
+                ],
+                [
+                    "SPARK_WORKER_RAM",
+                    "7516192768"
+                ],
+                [
+                    "SPARK_MASTER_IP",
+                    "{name_prefix}-spark-master-{execution_id}.{name_prefix}-usernet-{user_id}"
+                ],
+                [
+                    "SPARK_LOCAL_IP",
+                    "{name_prefix}-spark-worker-0-{execution_id}.{name_prefix}-usernet-{user_id}"
+                ]
+            ],
+            "monitor": false,
+            "name": "spark-worker-0",
+            "ports": [
+                {
+                    "is_main_endpoint": false,
+                    "name": "Spark worker web interface",
+                    "path": "/",
+                    "port_number": 8081,
+                    "protocol": "http"
+                }
+            ],
+            "required_resources": {
+                "memory": 8589934592
+            }
+        },
         {
-          "name": "Spark application web interface",
-          "protocol": "http",
-          "port_number": 4040,
-          "path": "/",
-          "is_main_endpoint": true
+            "docker_image": "192.168.45.252:5000/zoerepo/spark-worker",
+            "environment": [
+                [
+                    "SPARK_WORKER_CORES",
+                    "4"
+                ],
+                [
+                    "SPARK_WORKER_RAM",
+                    "7516192768"
+                ],
+                [
+                    "SPARK_MASTER_IP",
+                    "{name_prefix}-spark-master-{execution_id}.{name_prefix}-usernet-{user_id}"
+                ],
+                [
+                    "SPARK_LOCAL_IP",
+                    "{name_prefix}-spark-worker-1-{execution_id}.{name_prefix}-usernet-{user_id}"
+                ]
+            ],
+            "monitor": false,
+            "name": "spark-worker-1",
+            "ports": [
+                {
+                    "is_main_endpoint": false,
+                    "name": "Spark worker web interface",
+                    "path": "/",
+                    "port_number": 8081,
+                    "protocol": "http"
+                }
+            ],
+            "required_resources": {
+                "memory": 8589934592
+            }
+        },
+        {
+            "docker_image": "192.168.45.252:5000/zoerepo/spark-worker",
+            "environment": [
+                [
+                    "SPARK_WORKER_CORES",
+                    "4"
+                ],
+                [
+                    "SPARK_WORKER_RAM",
+                    "7516192768"
+                ],
+                [
+                    "SPARK_MASTER_IP",
+                    "{name_prefix}-spark-master-{execution_id}.{name_prefix}-usernet-{user_id}"
+                ],
+                [
+                    "SPARK_LOCAL_IP",
+                    "{name_prefix}-spark-worker-2-{execution_id}.{name_prefix}-usernet-{user_id}"
+                ]
+            ],
+            "monitor": false,
+            "name": "spark-worker-2",
+            "ports": [
+                {
+                    "is_main_endpoint": false,
+                    "name": "Spark worker web interface",
+                    "path": "/",
+                    "port_number": 8081,
+                    "protocol": "http"
+                }
+            ],
+            "required_resources": {
+                "memory": 8589934592
+            }
         }
-      ],
-      "environment": [
-        ["SPARK_MASTER_IP", "{cluster[spark-master][ip_address]}"],
-        ["SPARK_OPTIONS", ""],
-        ["SPARK_EXECUTOR_RAM", "4g"],
-        ["APPLICATION_URL", "{application_binary_url}"]
-      ],
-      "command": "/opt/submit.sh wordcount.py hdfs://192.168.45.157/datasets/gutenberg_big_2x.txt hdfs://192.168.45.157/tmp/cntwdc1"
-    }
-  ]
+    ],
+    "version": 1,
+    "will_end": false
 }
