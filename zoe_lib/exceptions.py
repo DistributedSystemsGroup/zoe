@@ -25,7 +25,7 @@ class InvalidApplicationDescription(ZoeAPIException):
     An exception thrown while parsing an application description.
     """
     def __init__(self, msg):
-        self.message = msg
+        self.message = "Error: " + msg
 
 
 class ZoeRestAPIException(ZoeException):
