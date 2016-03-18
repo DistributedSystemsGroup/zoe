@@ -52,6 +52,9 @@ def app_validate(data):
     if priority < 0 or priority > 1024:
         raise InvalidApplicationDescription(msg="priority must be between 0 and 1024")
 
+    if 'services' not in data:
+        raise InvalidApplicationDescription(msg='the application should contain a list of services')
+
     for p in data['services']:
         _service_check(p)
 
