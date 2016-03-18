@@ -66,16 +66,6 @@ class QueryAPI(Resource):
         elif what == 'stats scheduler':
             ret = self.platform.scheduler_stats()
             ret = {'stats': ret.to_dict()}
-        elif what == 'execution logs':
-            ret = None  # TODO
-        elif what == 'container logs':
-            c_list = self.state.get('container', **filters)
-            logs = self._get_container_logs(c_list)
-            ret = logs
-        elif what == 'container stats':
-            c_list = self.state.get('container', **filters)
-            stats = self._get_container_stats(c_list)
-            ret = [s.to_dict() for s in stats]
         else:
             ret = self.state.get(what, **filters)
             ret = [o.to_dict(checkpoint=False) for o in ret]

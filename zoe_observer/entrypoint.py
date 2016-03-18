@@ -36,9 +36,9 @@ def guest_check_thread(args):
             zoe_containers = swarm.list('zoe.{}'.format(get_conf().deployment_name))
             for c in zoe_containers:
                 if 'Exited' in c['status']:
-                    zoe_id = c['labels']['zoe.container.id']
+                    zoe_name = c['labels']['zoe.service.name']
                     try:
-                        container_died(zoe_id)
+                        container_died(zoe_name)
                     except ZoeAPIException:
                         log.warning('Container ' + c['name'] + ' has died, but Zoe does not know anything about it, deleting')
                         swarm.terminate_container(c['id'], delete=True)

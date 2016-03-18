@@ -17,7 +17,7 @@ import re
 from random import randint
 
 from flask import render_template, request
-from zoe_lib.containers import ZoeContainerAPI
+from zoe_lib.services import ZoeServiceAPI
 from zoe_lib.executions import ZoeExecutionsAPI
 from zoe_lib.predefined_apps.lab_spark import spark_jupyter_notebook_lab_app
 from zoe_lib.query import ZoeQueryAPI
@@ -82,7 +82,7 @@ def home_guest():
                 return render_template('home_guest.html', **template_vars)
             else:
                 template_vars['refresh'] = -1
-                cont_api = ZoeContainerAPI(get_conf().zoe_url, guest_identifier, guest_password)
+                cont_api = ZoeServiceAPI(get_conf().zoe_url, guest_identifier, guest_password)
                 template_vars['execution_status'] = execution['status']
                 for c_id in execution['containers']:
                     c = cont_api.get(c_id)

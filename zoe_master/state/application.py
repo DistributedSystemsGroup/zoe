@@ -16,7 +16,7 @@
 from zoe_lib.exceptions import InvalidApplicationDescription
 
 
-class Application:
+class ApplicationDescription:
     def __init__(self):
 
         self.name = ''
@@ -24,7 +24,7 @@ class Application:
         self.will_end = True
         self.priority = 512
         self.requires_binary = False
-        self.processes = []
+        self.services = []
 
     def to_dict(self):
         d = {
@@ -33,10 +33,10 @@ class Application:
             'will_end': self.will_end,
             'priority': self.priority,
             'requires_binary': self.requires_binary,
-            'processes': []
+            'services': []
         }
-        for p in self.processes:
-            d['processes'].append(p.to_dict())
+        for p in self.services:
+            d['services'].append(p.to_dict())
 
         return d
 
@@ -70,30 +70,30 @@ class Application:
         if self.priority < 0 or self.priority > 1024:
             raise InvalidApplicationDescription("priority must be between 0 and 1024")
 
-        for p in data['processes']:
-            aux = Process()
+        for p in data['services']:
+            aux = ServiceDescription()
             aux.from_dict(p)
-            self.processes.append(aux)
+            self.services.append(aux)
 
         found_monitor = False
-        for p in self.processes:
+        for p in self.services:
             if p.monitor:
                 found_monitor = True
                 break
         if not found_monitor:
-            raise InvalidApplicationDescription("at least one process should have monitor set to True")
+            raise InvalidApplicationDescription("at least one service should have monitor set to True")
 
     def total_memory(self) -> int:
         memory = 0
-        for p in self.processes:
+        for p in self.services:
             memory += p.required_resources['memory']
         return memory
 
-    def container_count(self) -> int:
-        return len(self.processes)
+    def service_count(self) -> int:
+        return len(self.services)
 
 
-class ProcessEndpoint:
+class ServiceEndpointDescription:
     def __init__(self):
         self.name = ''
         self.protocol = ''
@@ -136,13 +136,13 @@ class ProcessEndpoint:
         return self.protocol + "://" + address + ":{}".format(self.port_number) + self.path
 
 
-class Process:
+class ServiceDescription:
     def __init__(self):
         self.name = ''
         self.version = 0
         self.docker_image = ''
-        self.monitor = False  # if this process dies, the whole application is considered as complete and the execution is terminated
-        self.ports = []  # A list of ProcessEndpoints
+        self.monitor = False  # if this service dies, the whole application is considered as complete and the execution is terminated
+        self.ports = []  # A list of ServiceEndpoints
         self.required_resources = {}
         self.environment = []  # Environment variables to pass to Docker
         self.volumes = []  # list of volumes to mount. Each volume is a three tuple: host path, container path, readonly boolean
@@ -183,7 +183,7 @@ class Process:
         if not hasattr(data['ports'], '__iter__'):
             raise InvalidApplicationDescription(msg='ports should be an iterable')
         for pp in data['ports']:
-            aux = ProcessEndpoint()
+            aux = ServiceEndpointDescription()
             aux.from_dict(pp)
             self.ports.append(aux)
 

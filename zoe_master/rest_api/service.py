@@ -28,7 +28,7 @@ from zoe_master.config import singletons
 log = logging.getLogger(__name__)
 
 
-class ContainerAPI(Resource):
+class ServiceAPI(Resource):
     """
     :type state: StateManager
     :type platform: PlatformManager
@@ -42,12 +42,12 @@ class ContainerAPI(Resource):
         start_time = time.time()
         calling_user = authenticate(request, self.state)
 
-        c = self.state.get_one('container', id=container_id)
+        c = self.state.get_one('service', id=container_id)
         if c is None:
-            raise ZoeRestAPIException('No such container', 404)
+            raise ZoeRestAPIException('No such service', 404)
 
         is_authorized(calling_user, c, 'get')
-        singletons['metric'].metric_api_call(start_time, 'container', 'get', calling_user)
+        singletons['metric'].metric_api_call(start_time, 'service', 'get', calling_user)
         return c.to_dict(checkpoint=False)
 
     @catch_exceptions
@@ -55,21 +55,21 @@ class ContainerAPI(Resource):
         start_time = time.time()
         calling_user = authenticate(request, self.state)
 
-        c = self.state.get_one('container', id=container_id)
+        c = self.state.get_one('service', id=container_id)
         if c is None:
-            raise ZoeRestAPIException('No such container', 404)
+            raise ZoeRestAPIException('No such service', 404)
 
         is_authorized(calling_user, c, 'delete')
 
         if c.is_monitor:
-            log.info("Monitor container died ({}), terminating execution {}".format(c.name, c.execution.name))
+            log.info("Monitor service died ({}), terminating execution {}".format(c.name, c.execution.name))
             self.platform.execution_terminate(c.execution, reason='finished')
             self.state.state_updated()
         else:
-            # A non-fundamental container died, nothing we can do?
+            # FIXME: A non-fundamental service died, nothing we can do?
             # We leave everything in place, so when the execution terminates we will
-            # gather the logs also of the containers that died
-            log.warning("Container {} died by itself".format(c.name))
+            # gather the logs also of the services that died
+            log.warning("Service {} died by itself".format(c.name))
 
-        singletons['metric'].metric_api_call(start_time, 'container', 'get', calling_user)
+        singletons['metric'].metric_api_call(start_time, 'service', 'get', calling_user)
         return '', 204

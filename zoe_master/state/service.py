@@ -18,7 +18,7 @@ from zoe_master.state.base import BaseState
 from zoe_master.state.execution import Execution
 
 
-class Container(BaseState):
+class Service(BaseState):
     """
     :type docker_id: str
     :type execution: Execution
@@ -49,9 +49,9 @@ class Container(BaseState):
 
         e = self.state_manger.get_one('execution', id=d['execution_id'])
         if e is None:
-            raise ZoeException('Deserialized Container points to a non-existent execution')
+            raise ZoeException('Deserialized Service points to a non-existent execution')
         self.execution = e
-        e.containers.append(self)
+        e.services.append(self)
 
     @property
     def owner(self):

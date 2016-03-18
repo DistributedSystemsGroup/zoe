@@ -15,12 +15,12 @@
 
 import logging
 
-from zoe_lib.swarm_client import SwarmClient, ContainerOptions
+from zoe_lib.swarm_client import SwarmClient, DockerContainerOptions
 
 from zoe_lib.exceptions import ZoeException
 from zoe_master.config import get_conf, singletons
 from zoe_master.scheduler import ZoeScheduler
-from zoe_master.state import execution as execution_module, application as application_module, container as container_module
+from zoe_master.state import execution as execution_module, application as application_module, service as service_module
 from zoe_master.state.manager import StateManager
 from zoe_master.stats import ContainerStats
 from zoe_master.stats import SwarmStats, SchedulerStats
@@ -54,31 +54,29 @@ class PlatformManager:
         self.state_manager.state_updated()
 
     def _application_to_containers(self, execution: execution_module.Execution):
-        for process in execution.application.processes:
-            self._spawn_process(execution, process)
+        for service in execution.application.services:
+            self._spawn_service(execution, service)
 
-    def _spawn_process(self, execution: execution_module.Execution, process_description: application_module.Process) -> bool:
-        copts = ContainerOptions()
+    def _spawn_service(self, execution: execution_module.Execution, service_description: application_module.ServiceDescription) -> bool:
+        copts = DockerContainerOptions()
         copts.gelf_log_address = get_conf().gelf_address
-        copts.name = get_conf().deployment_name + '-' + process_description.name + "-{}".format(execution.owner.name)
-        copts.set_memory_limit(process_description.required_resources['memory'])
+        copts.name = get_conf().deployment_name + '-' + service_description.name + "-{}".format(execution.owner.name)
+        copts.set_memory_limit(service_description.required_resources['memory'])
         copts.network_name = '{}-usernet-{}'.format(get_conf().deployment_name, execution.owner.id)
         container_id = self.state_manager.gen_id()
         copts.labels = {
             'zoe.{}'.format(get_conf().deployment_name): '',
-            'zoe.execution.id': str(execution.id),
             'zoe.execution.name': execution.name,
-            'zoe.container.id': str(container_id),
-            'zoe.container.name': process_description.name,
+            'zoe.service.name': service_description.name,
             'zoe.owner': execution.owner.name,
             'zoe.prefix': get_conf().deployment_name,
-            'zoe.type': 'app_process'
+            'zoe.type': 'app_service'
         }
-        if process_description.monitor:
+        if service_description.monitor:
             copts.labels['zoe.monitor'] = ''
         else:
             copts.labels['zoe.normal'] = ''
-        copts.restart = not process_description.monitor  # Monitor containers should not restart
+        copts.restart = not service_description.monitor  # Monitor containers should not restart
 
         # Generate a dictionary containing the current cluster status (before the new container is spawned)
         # This information is used to substitute template strings in the environment variables
@@ -88,36 +86,36 @@ class PlatformManager:
             'user_name': execution.owner.name,
             'name_prefix': get_conf().deployment_name
         }
-        for env_name, env_value in process_description.environment:
+        for env_name, env_value in service_description.environment:
             try:
                 env_value = env_value.format(**subst_dict)
             except KeyError:
                 raise ZoeException("cannot find variable to substitute in expression {}".format(env_value))
             copts.add_env_variable(env_name, env_value)
 
-        for path, mountpoint, readonly in process_description.volumes:
+        for path, mountpoint, readonly in service_description.volumes:
             copts.add_volume_bind(path, mountpoint, readonly)
 
         # The same dictionary is used for templates in the command
-        if process_description.command is not None:
-            copts.set_command(process_description.command.format(**subst_dict))
+        if service_description.command is not None:
+            copts.set_command(service_description.command.format(**subst_dict))
 
-        cont_info = self.swarm.spawn_container(process_description.docker_image, copts)
-        container = container_module.Container(self.state_manager)
-        container.docker_id = cont_info["docker_id"]
-        container.ip_address = cont_info["ip_address"]
-        container.name = copts.name
-        container.is_monitor = process_description.monitor
-        container.ports = [p.to_dict() for p in process_description.ports]
+        cont_info = self.swarm.spawn_container(service_description.docker_image, copts)
+        service = service_module.Service(self.state_manager)
+        service.docker_id = cont_info["docker_id"]
+        service.ip_address = cont_info["ip_address"]
+        service.name = copts.name
+        service.is_monitor = service_description.monitor
+        service.ports = [p.to_dict() for p in service_description.ports]
 
-        container.id = container_id
-        execution.containers.append(container)
-        container.execution = execution
+        service.id = container_id
+        execution.services.append(service)
+        service.execution = execution
 
-        for net in process_description.networks:
-            self.swarm.connect_to_network(container.docker_id, net)
+        for net in service_description.networks:
+            self.swarm.connect_to_network(service.docker_id, net)
 
-        self.state_manager.new('container', container)
+        self.state_manager.new('service', service)
         return True
 
     def execution_terminate(self, execution: execution_module.Execution, reason):
@@ -126,18 +124,13 @@ class PlatformManager:
         :param reason: termination reason
         :return:
         """
-        logs = []
-        if len(execution.containers) > 0:
-            containers = execution.containers.copy()
+        if len(execution.services) > 0:
+            containers = execution.services.copy()
             for c in containers:
-                assert isinstance(c, container_module.Container)
-                l = self.log_get(c.id)
-                if l is not None:
-                    logs.append((c.name, l))
+                assert isinstance(c, service_module.Service)
                 self.swarm.terminate_container(c.docker_id, delete=True)
-                self.state_manager.delete('container', c.id)
-                log.info('Container {} terminated'.format(c.name))
-            execution.store_logs(logs)
+                self.state_manager.delete('service', c.id)
+                log.info('Service {} terminated'.format(c.name))
 
         if reason == 'error':
             execution.set_error()
@@ -149,12 +142,12 @@ class PlatformManager:
         self.scheduler.execution_terminate(execution)
 
     def start_gateway_container(self, user):
-        copts = ContainerOptions()
+        copts = DockerContainerOptions()
         copts.name = '{}-gateway-{}'.format(get_conf().deployment_name, user.id)
         copts.network_name = '{}-usernet-{}'.format(get_conf().deployment_name, user.id)
         copts.ports.append(1080)
         copts.labels = {
-            'zoe.{}.gateway'.format(get_conf().deployment_name): '',
+            'zoe.{}'.format(get_conf().deployment_name): '',
             'zoe.owner': user.name,
             'zoe.prefix': get_conf().deployment_name,
             'zoe.type': 'gateway'
@@ -186,19 +179,8 @@ class PlatformManager:
         log.info('Removing network for user {}'.format(user.name))
         self.swarm.network_remove(user.network_id)
 
-    def log_get(self, container_id: int) -> str:
-        container = self.state_manager.get_one('container', id=container_id)
-        if container is None:
-            return ''
-        else:
-            return self.swarm.log_get(container.docker_id)
-
-    def container_stats(self, container_id: int) -> ContainerStats:
-        container = self.state_manager.get_one('container', id=container_id)
-        return self.swarm.stats(container.docker_id)
-
-    def is_container_alive(self, container: container_module.Container) -> bool:
-        ret = self.swarm.inspect_container(container.docker_id)
+    def is_service_alive(self, service: service_module.Service) -> bool:
+        ret = self.swarm.inspect_container(service.docker_id)
         if ret is None:
             return False
         return ret["running"]
@@ -299,12 +281,12 @@ class PlatformManager:
         # ### Check executions and container consistency
         swarm_containers = self.swarm.list(only_label='zoe.{}'.format(get_conf().deployment_name))
         conts_state_to_delete = []
-        for c_id, c in self.state_manager.containers.items():
+        for c_id, c in self.state_manager.services.items():
             if c.docker_id not in [x['id'] for x in swarm_containers]:
                 log.error('fixed: removing from state container {} that does not exist in Swarm'.format(c.name))
                 conts_state_to_delete.append(c_id)
         for c_id in conts_state_to_delete:
-            self.state_manager.delete('container', c_id)
+            self.state_manager.delete('service', c_id)
 
         if state_changed or len(users_no_gateway) > 0 or len(users_no_network) > 0:
             self.state_manager.state_updated()

@@ -34,7 +34,7 @@ class ZoeExecutionsAPI(ZoeAPIBase):
         Terminates an execution.
 
         :param execution_id: the execution to delete
-        :return: True is the operation was successful, False otherwise
+        :return: True if the operation was successful, False otherwise
         """
         data, status_code = self._rest_delete('/execution/' + str(execution_id))
         if status_code == 204:

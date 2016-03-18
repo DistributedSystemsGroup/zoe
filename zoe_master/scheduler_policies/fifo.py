@@ -17,7 +17,7 @@ import time
 
 from zoe_master.stats import SchedulerStats
 from zoe_master.scheduler_policies.base import BaseSchedulerPolicy
-from zoe_master.state.application import Application
+from zoe_master.state.application import ApplicationDescription
 from zoe_master.state.execution import Execution
 from zoe_master.config import singletons
 
@@ -28,7 +28,7 @@ class FIFOSchedulerPolicy(BaseSchedulerPolicy):
         self.waiting_list = []
         self.starting_list = []
 
-    def admission_control(self, app: Application) -> bool:
+    def admission_control(self, app: ApplicationDescription) -> bool:
         swarm_stats = singletons['stats_manager'].swarm_stats
         if app.total_memory() < swarm_stats.memory_total:
             return True

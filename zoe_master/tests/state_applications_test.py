@@ -13,16 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from zoe_master.state.application import Application, Process, ProcessEndpoint
+from zoe_master.state.application import ApplicationDescription, ServiceDescription, ServiceEndpointDescription
 
 
 def test_application():
-    Application()
+    ApplicationDescription()
 
 
 def test_process():
-    Process()
+    ServiceDescription()
 
 
 def test_process_endpoint():
-    ProcessEndpoint()
+    ServiceEndpointDescription()

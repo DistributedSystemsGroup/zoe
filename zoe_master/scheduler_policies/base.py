@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from zoe_master.state.application import Application
+from zoe_master.state.application import ApplicationDescription
 from zoe_master.state.execution import Execution
 from zoe_master.stats import SchedulerStats
 
@@ -22,7 +22,7 @@ class BaseSchedulerPolicy:
     def __init__(self, platform):
         self.platform = platform
 
-    def admission_control(self, app: Application) -> bool:
+    def admission_control(self, app: ApplicationDescription) -> bool:
         """
         Checks whether an execution requiring the specified resources can be run, now or at a later time. This method can be called
         from outside the scheduler thread, should not have any side effects nor change any state.

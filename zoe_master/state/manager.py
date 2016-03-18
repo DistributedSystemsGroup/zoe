@@ -20,7 +20,7 @@ from zoe_lib.exceptions import ZoeException
 from zoe_master.config import get_conf
 from zoe_master.state.user import User
 from zoe_master.state.execution import Execution
-from zoe_master.state.container import Container
+from zoe_master.state.service import Service
 from zoe_master.state.blobs import BaseBlobs
 
 log = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ class StateManager:
     def __init__(self, blob_class):
         self.users = {}
         self.executions = {}
-        self.containers = {}
+        self.services = {}
 
         self._next_id = 1  # 0 is always the zoeadmin user
 
@@ -94,7 +94,7 @@ class StateManager:
         checkpointed_state = {
             'users': [u.checkpoint() for u in self.users.values()],
             'executions': [e.checkpoint() for e in self.executions.values()],
-            'containers': [c.checkpoint() for c in self.containers.values()],
+            'services': [c.checkpoint() for c in self.services.values()],
             'state_manager': {
                 'next_id': self._next_id,
                 'state_epoch': self._state_epoch
@@ -121,10 +121,10 @@ class StateManager:
             ex = Execution(self)
             ex.load_checkpoint(e)
             self.executions[ex.id] = ex
-        for c in state['containers']:
-            co = Container(self)
+        for c in state['services']:
+            co = Service(self)
             co.load_checkpoint(c)
-            self.containers[co.id] = co
+            self.services[co.id] = co
 
     def state_updated(self):
         self._state_epoch += 1
@@ -156,7 +156,7 @@ class StateManager:
     def get(self, what, **kwargs):
         """
         Query the state
-        :param what: one of user, execution, container
+        :param what: one of user, execution, service
         :return: all objects of type 'what' with fields matching all filters (AND)
         """
 
@@ -185,9 +185,9 @@ class StateManager:
         if what == 'execution':
             self.blobs.delete_blob('logs', str(obj_id))
 
-        if what == 'container':
-            c = self.containers[obj_id]
-            c.execution.containers.remove(c)
+        if what == 'service':
+            c = self.services[obj_id]
+            c.execution.services.remove(c)
 
         if obj_id in collection:
             del collection[obj_id]

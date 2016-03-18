@@ -19,7 +19,7 @@ from flask_restful import Api
 
 from zoe_master.rest_api.user import UserAPI, UserCollectionAPI
 from zoe_master.rest_api.execution import ExecutionAPI, ExecutionCollectionAPI
-from zoe_master.rest_api.container import ContainerAPI
+from zoe_master.rest_api.service import ServiceAPI
 from zoe_master.rest_api.query import QueryAPI
 from zoe_master.rest_api.info import InfoAPI
 from zoe_lib.version import ZOE_API_VERSION
@@ -41,7 +41,7 @@ def init(state, platform) -> Flask:
     api.add_resource(UserCollectionAPI, API_PATH + '/user', resource_class_kwargs=args)
     api.add_resource(ExecutionAPI, API_PATH + '/execution/<int:execution_id>', resource_class_kwargs=args)
     api.add_resource(ExecutionCollectionAPI, API_PATH + '/execution', resource_class_kwargs=args)
-    api.add_resource(ContainerAPI, API_PATH + '/container/<int:container_id>', resource_class_kwargs=args)
+    api.add_resource(ServiceAPI, API_PATH + '/service/<int:container_id>', resource_class_kwargs=args)
     api.add_resource(QueryAPI, API_PATH + '/query', resource_class_kwargs=args)
 
     return app

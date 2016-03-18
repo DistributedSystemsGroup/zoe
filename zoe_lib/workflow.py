@@ -17,7 +17,7 @@ import time
 
 from zoe_lib.workspace import ZoeWorkspace
 from zoe_lib.executions import ZoeExecutionsAPI
-from zoe_lib.containers import ZoeContainerAPI
+from zoe_lib.services import ZoeServiceAPI
 from zoe_lib.info import ZoeInfoAPI
 
 
@@ -28,7 +28,7 @@ class ZoeWorkFlow:
         self.workspace = ZoeWorkspace(workspace_base_path, identity, name)
 
         self.exec_api = ZoeExecutionsAPI(self.identity['zoe_url'], self.identity['username'], self.identity['password'])
-        self.cont_api = ZoeContainerAPI(self.identity['zoe_url'], self.identity['username'], self.identity['password'])
+        self.cont_api = ZoeServiceAPI(self.identity['zoe_url'], self.identity['username'], self.identity['password'])
 
         info_api = ZoeInfoAPI(self.identity['zoe_url'], self.identity['username'], self.identity['password'])
         zoe_info = info_api.info()

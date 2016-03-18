@@ -52,11 +52,11 @@ def app_validate(data):
     if priority < 0 or priority > 1024:
         raise InvalidApplicationDescription(msg="priority must be between 0 and 1024")
 
-    for p in data['processes']:
-        _process_check(p)
+    for p in data['services']:
+        _service_check(p)
 
     found_monitor = False
-    for p in data['processes']:
+    for p in data['services']:
         if p['monitor']:
             found_monitor = True
             break
@@ -64,7 +64,7 @@ def app_validate(data):
         raise InvalidApplicationDescription(msg="at least one process should have monitor set to True")
 
 
-def _process_check(data):
+def _service_check(data):
     required_keys = ['name', 'docker_image', 'monitor', 'ports', 'required_resources']
     for k in required_keys:
         if k not in data:

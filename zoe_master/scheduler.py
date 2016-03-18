@@ -17,7 +17,7 @@ import logging
 import queue
 
 from zoe_lib.exceptions import ZoeException
-from zoe_master.state.application import Application
+from zoe_master.state.application import ApplicationDescription
 from zoe_master.state.execution import Execution
 from zoe_master.scheduler_policies.base import BaseSchedulerPolicy
 
@@ -42,7 +42,7 @@ class ZoeScheduler:
         """
         self.scheduler_policy = policy_class(self.platform.status)
 
-    def validate(self, app: Application) -> bool:
+    def validate(self, app: ApplicationDescription) -> bool:
         """
         It is used to validate an execution that is going to be started.
         :param app:

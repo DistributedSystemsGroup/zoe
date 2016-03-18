@@ -20,7 +20,7 @@ from io import BytesIO
 import dateutil.parser
 
 from zoe_master.state.base import BaseState
-from zoe_master.state.application import Application
+from zoe_master.state.application import ApplicationDescription
 from zoe_lib.exceptions import ZoeException
 
 
@@ -48,7 +48,7 @@ class Execution(BaseState):
         # Links to other objects
         self.user = None
         self.application = None
-        self.containers = []
+        self.services = []
 
     def set_scheduled(self):
         self.status = "scheduled"
@@ -86,7 +86,7 @@ class Execution(BaseState):
         d['application'] = self.application.to_dict()
 
         if not checkpoint:
-            d['containers'] = [c.id for c in self.containers]
+            d['services'] = [c.id for c in self.services]
         else:
             d['user_id'] = self.user.id
 
@@ -101,7 +101,7 @@ class Execution(BaseState):
                 else:
                     setattr(self, attr, None)
 
-        app = Application()
+        app = ApplicationDescription()
         app.from_dict(d['application'])
         self.application = app
 
@@ -110,18 +110,6 @@ class Execution(BaseState):
             raise ZoeException('Deserialized execution points to a non-existent user')
         self.user = user
         user.executions.append(self)
-
-    def _logs_archive_create(self, logs: list):
-        zipdata = BytesIO()
-        with zipfile.ZipFile(zipdata, "w", compression=zipfile.ZIP_DEFLATED) as logzip:
-            for c in logs:
-                fname = c[0] + ".txt"
-                logzip.writestr(fname, c[1])
-        return zipdata.getvalue()
-
-    def store_logs(self, logs):
-        zipdata = self._logs_archive_create(logs)
-        self.state_manger.blobs.store_blob('logs', str(self.id), zipdata)
 
     @property
     def owner(self):
