@@ -48,7 +48,7 @@ def home_guest():
     if match is None:
         return missing_auth()
 
-    query_api = ZoeQueryAPI(get_conf().zoe_url, guest_identifier, guest_password)
+    query_api = ZoeQueryAPI(get_conf().master_url, guest_identifier, guest_password)
 
     template_vars = {
         'refresh': randint(2, 8),
@@ -68,7 +68,7 @@ def home_guest():
         user = user[0]
         template_vars['user_gateway'] = user['gateway_urls'][0]
         template_vars['gateway_ip'] = user['gateway_urls'][0].split('/')[2].split(':')[0]
-        exec_api = ZoeExecutionsAPI(get_conf().zoe_url, guest_identifier, guest_password)
+        exec_api = ZoeExecutionsAPI(get_conf().master_url, guest_identifier, guest_password)
         app_descr = spark_jupyter_notebook_lab_app()
         execution = query_api.query('execution', name='guest-lab-{}'.format(guest_identifier))
         if len(execution) == 0 or execution[0]['status'] == 'terminated':
@@ -82,9 +82,9 @@ def home_guest():
                 return render_template('home_guest.html', **template_vars)
             else:
                 template_vars['refresh'] = -1
-                cont_api = ZoeServiceAPI(get_conf().zoe_url, guest_identifier, guest_password)
+                cont_api = ZoeServiceAPI(get_conf().master_url, guest_identifier, guest_password)
                 template_vars['execution_status'] = execution['status']
-                for c_id in execution['containers']:
+                for c_id in execution['services']:
                     c = cont_api.get(c_id)
                     ip = list(c['ip_address'].values())[0]  # FIXME how to decide which network is the right one?
                     for p in c['ports']:
@@ -101,7 +101,7 @@ def home_user():
     guest_identifier = auth.username
     guest_password = auth.password
 
-    query_api = ZoeQueryAPI(get_conf().zoe_url, guest_identifier, guest_password)
+    query_api = ZoeQueryAPI(get_conf().master_url, guest_identifier, guest_password)
 
     try:
         user = query_api.query('user', name=guest_identifier)
@@ -132,7 +132,7 @@ def home_admin():
     guest_identifier = auth.username
     guest_password = auth.password
 
-    query_api = ZoeQueryAPI(get_conf().zoe_url, guest_identifier, guest_password)
+    query_api = ZoeQueryAPI(get_conf().master_url, guest_identifier, guest_password)
 
     try:
         user = query_api.query('user', name=guest_identifier)

@@ -31,6 +31,7 @@ from zoe_lib.executions import ZoeExecutionsAPI
 from zoe_lib.predefined_apps import hadoop, spark, lab_spark, test_sleep, copier
 from zoe_lib.query import ZoeQueryAPI
 from zoe_lib.users import ZoeUserAPI
+from zoe_lib.applications import app_validate
 
 PREDEFINED_APPS = {}
 for mod in [hadoop, spark, lab_spark, test_sleep, copier]:
@@ -127,6 +128,7 @@ def exec_list_cmd(_):
 
 def exec_start_cmd(args):
     app_descr = json.load(args.jsonfile)
+    app_validate(app_descr)
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     ret = exec_api.execution_start(args.name, app_descr)
     print("Application scheduled successfully with ID {}, use the exec-get command to check its status".format(ret))
@@ -146,10 +148,10 @@ def exec_get_cmd(args):
         print('Time finished: {}'.format(execution['time_finished']))
         app = execution['application']
         print('Application name: {}'.format(app['name']))
-        for c_id in execution['containers']:
+        for c_id in execution['services']:
             c = cont_api.get(c_id)
             ip = list(c['ip_address'].values())[0]  # FIXME how to decide which network is the right one?
-            print('Container {} (ID: {})'.format(c['name'], c['id']))
+            print('Service {} (ID: {})'.format(c['name'], c['id']))
             for p in c['ports']:
                 print(' - {}: {}://{}:{}{}'.format(p['name'], p['protocol'], ip, p['port_number'], p['path']))
 
