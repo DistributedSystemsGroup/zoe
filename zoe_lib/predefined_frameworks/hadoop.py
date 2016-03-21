@@ -60,27 +60,3 @@ def hadoop_datanode_service(count, image):
         }
         ret.append(service)
     return ret
-
-
-def hdfs_app(name='hdfs',
-             namenode_image='192.168.45.252:5000/zoerepo/hadoop-namenode',
-             datanode_count=3,
-             datanode_image='192.168.45.252:5000/zoerepo/hadoop-datanode'):
-    """
-    :type name: str
-    :type namenode_image: str
-    :type datanode_count: int
-    :type datanode_image: str
-    :rtype: dict
-    """
-    app = {
-        'name': name,
-        'version': 1,
-        'will_end': False,
-        'priority': 512,
-        'requires_binary': False,
-        'services': [
-            hadoop_namenode_service(namenode_image),
-        ] + hadoop_datanode_service(datanode_count, datanode_image)
-    }
-    return app

@@ -13,47 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-def openmpi_worker_service(counter, workspace_volume, worker_memory):
-    """
-    :type counter: int
-    :type workspace_volume: dict
-    :type worker_memory: int
-    :rtype: dict
-    """
-    service = {
-        'name': "mpiworker{}".format(counter),
-        'docker_image': '192.168.45.252:5000/zoerepo/openmpi-worker',
-        'monitor': False,
-        'required_resources': {"memory": worker_memory},
-        'ports': [],
-        'environment': [],
-        'volumes': [],
-        'command': ''
-    }
-    service['volumes'].append([workspace_volume['host_path'], workspace_volume['cont_path'], workspace_volume['readonly']])
-    return service
-
-
-def openmpi_mpirun_service(workspace_volume, mpirun_commandline, worker_memory):
-    """
-    :type mpirun_commandline: str
-    :type workspace_volume: dict
-    :type worker_memory: int
-    :rtype: dict
-    """
-    service = {
-        'name': "mpirun",
-        'docker_image': '192.168.45.252:5000/zoerepo/openmpi-worker',
-        'monitor': True,
-        'required_resources': {"memory": worker_memory},
-        'ports': [],
-        'environment': [],
-        'volumes': [],
-        'command': mpirun_commandline
-    }
-    service['volumes'].append([workspace_volume['host_path'], workspace_volume['cont_path'], workspace_volume['readonly']])
-    return service
+import zoe_lib.predefined_frameworks.openmpi as openmpi_framework
 
 
 empty = {
@@ -81,8 +41,8 @@ def openmpi_app(name='openmpi-test', workspace_volume=empty, mpirun_commandline=
         'services': []
     }
     for i in range(worker_count):
-        proc = openmpi_worker_service(i, workspace_volume, worker_memory)
+        proc = openmpi_framework.openmpi_worker_service(i, workspace_volume, worker_memory)
         app['services'].append(proc)
-    proc = openmpi_mpirun_service(workspace_volume, mpirun_commandline, worker_memory)
+    proc = openmpi_framework.openmpi_mpirun_service(workspace_volume, mpirun_commandline, worker_memory)
     app['services'].append(proc)
     return app

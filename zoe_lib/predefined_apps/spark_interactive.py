@@ -13,48 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import zoe_lib.predefined_apps.spark as spark_framework
-
-
-def spark_jupyter_notebook_service(mem_limit, worker_mem_limit, image):
-    """
-    :type mem_limit: int
-    :type worker_mem_limit: int
-    :type image: str
-    :rtype: dict
-    """
-    executor_ram = worker_mem_limit - (1024 ** 3) - (512 * 1025 ** 2)
-    driver_ram = (2 * 1024 ** 3)
-    service = {
-        'name': "spark-jupyter",
-        'docker_image': image,
-        'monitor': True,
-        'required_resources': {"memory": mem_limit},
-        'ports': [
-            {
-                'name': "Spark application web interface",
-                'protocol': "http",
-                'port_number': 4040,
-                'path': "/",
-                'is_main_endpoint': False
-            },
-            {
-                'name': "Jupyter Notebook interface",
-                'protocol': "http",
-                'port_number': 8888,
-                'path': "/",
-                'is_main_endpoint': True
-            }
-        ],
-        'environment': [
-            ["SPARK_MASTER", "spark://spark-master-{execution_name}-{user_name}-{deployment_name}-zoe.{user_name}-{deployment_name}-zoe:7077"],
-            ["SPARK_EXECUTOR_RAM", str(executor_ram)],
-            ["SPARK_DRIVER_RAM", str(driver_ram)],
-            ["NB_USER", "{user_name}"]
-        ],
-        'networks': []
-    }
-    return service
+import zoe_lib.predefined_frameworks.jupyter_spark as jupyter_spark_framework
+import zoe_lib.predefined_frameworks.spark as spark_framework
 
 
 def spark_jupyter_notebook_app(name='spark-jupyter',
@@ -89,7 +49,7 @@ def spark_jupyter_notebook_app(name='spark-jupyter',
         'requires_binary': False,
         'services': [
             sp_master,
-            spark_jupyter_notebook_service(notebook_mem_limit, worker_mem_limit, notebook_image)
+            jupyter_spark_framework.spark_jupyter_notebook_service(notebook_mem_limit, worker_mem_limit, notebook_image)
         ] + sp_workers
     }
     return app

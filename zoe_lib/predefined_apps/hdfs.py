@@ -13,32 +13,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from zoe_lib.predefined_frameworks.utils import copier_service
+import zoe_lib.predefined_frameworks.hadoop as hadoop_framework
 
 
-empty = {
-    'host_path': 'CHANGEME',  # the path containing what to copy
-    'cont_path': 'CHANGEME',  # the file or directory to copy from or to host_path
-    'readonly': False
-}
-
-
-def copier_app(src_volume=empty, src_path='', dst_volume=empty, dst_path=''):
+def hdfs_app(name='hdfs',
+             namenode_image='192.168.45.252:5000/zoerepo/hadoop-namenode',
+             datanode_count=3,
+             datanode_image='192.168.45.252:5000/zoerepo/hadoop-datanode'):
     """
-    :type src_volume: dict
-    :type src_path: str
-    :type dst_volume: dict
-    :type dst_path: str
+    :type name: str
+    :type namenode_image: str
+    :type datanode_count: int
+    :type datanode_image: str
     :rtype: dict
     """
     app = {
-        'name': 'copier',
+        'name': name,
         'version': 1,
-        'will_end': True,
+        'will_end': False,
         'priority': 512,
         'requires_binary': False,
         'services': [
-            copier_service(src_volume, src_path, dst_volume, dst_path)
-        ]
+            hadoop_framework.hadoop_namenode_service(namenode_image),
+        ] + hadoop_framework.hadoop_datanode_service(datanode_count, datanode_image)
     }
     return app

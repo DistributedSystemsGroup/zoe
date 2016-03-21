@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import zoe_lib.predefined_apps.spark as spark_framework
-import zoe_lib.predefined_apps.jupyter_spark as jupyter_framework
+import zoe_lib.predefined_frameworks.jupyter_spark as jupyter_framework
+import zoe_lib.predefined_frameworks.spark as spark_framework
 
 
-def spark_jupyter_notebook_lab_app(name='spark-jupyter-lab',
+def spark_jupyter_notebook_lab_app(name='aml-lab',
                                    notebook_mem_limit=4 * (1024 ** 3),
                                    master_mem_limit=512 * (1024 ** 2),
                                    worker_count=2,

@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Daniele Venzano
+# Copyright (c) 2016, Daniele Venzano
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,22 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-def sleeper_service(sleep_duration):
-    """
-    :type sleep_duration: int
-    :rtype: dict
-    """
-    service = {
-        'name': "sleeper",
-        'docker_image': 'alpine',
-        'monitor': True,
-        'required_resources': {"memory": 1 * 1024 * 1024 * 1024},  # 1 GB
-        'ports': [],
-        'environment': [],
-        'command': 'sleep ' + str(sleep_duration)
-    }
-    return service
+from zoe_lib.predefined_frameworks.utils import sleeper_service
 
 
 def sleeper_app(name='sleeper', sleep_duration=5):
