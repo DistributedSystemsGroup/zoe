@@ -27,17 +27,17 @@ class ZoeUserAPI(ZoeAPIBase):
     The UserAPI class has methods for interacting with Zoe's user system.
     """
 
-    def exists(self, user_id):
+    def exists(self, user_name):
         """
-        Checks if a given user_id exists.
+        Checks if a given user exists.
 
-        :param user_id: the user_id to check
-        :return: True if the user_id exists, False otherwise
+        :param user_name: the user_name to check
+        :return: True if the user_name exists, False otherwise
 
-        :type user_id: int
+        :type user_name: str
         :rtype: bool
         """
-        user, status_code = self._rest_get('/user/' + str(user_id))
+        user, status_code = self._rest_get('/user/' + user_name)
         return status_code == 200
 
     def create(self, name, password, role):
@@ -64,30 +64,31 @@ class ZoeUserAPI(ZoeAPIBase):
         else:
             raise ZoeAPIException(user_id['message'])
 
-    def get(self, user_id):
+    def get(self, user_name):
         """
-        Get a user object given a user_id.
+        Get a user object given a user_name.
 
-        :param user_id: the user_id to look for
+        :param user_name: the user_name to retrieve
         :return: the user dictionary, or None
 
-        :type user_id: int
+        :type user_name: str
+        :rtype dict|None
         """
-        user, status_code = self._rest_get('/user/' + str(user_id))
+        user, status_code = self._rest_get('/user/' + user_name)
         if status_code == 200:
             return user
         else:
             return None
 
-    def delete(self, user_id):
+    def delete(self, user_name):
         """
-        Delete a user given a user_id.
+        Delete a user given a user_name.
 
-        :param user_id: the user_id to delete
+        :param user_name: the user_name to delete
         :return: None
 
-        :type user_id: int
+        :type user_name: str
         """
-        data, status_code = self._rest_delete('/user/' + str(user_id))
+        data, status_code = self._rest_delete('/user/' + str(user_name))
         if status_code != 204:
             raise ZoeAPIException(data['message'])

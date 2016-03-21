@@ -54,41 +54,33 @@ def user_new_cmd(args):
     if role not in ['admin', 'user', 'guest']:
         print("Role must be one of admin, user, guest)")
         return
-    user_id = api.create(name, password, role)
-    print("New user ID: {}".format(user_id))
+    try:
+        api.create(name, password, role)
+    except ZoeAPIException as e:
+        print('Error creating user: {}'.format(e))
 
 
 def user_get_cmd(args):
-    api = ZoeQueryAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    data = api.query('user', name=args.name)
-    if len(data) == 0:
+    api = ZoeUserAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
+    user = api.get(args.name)
+    if user is None:
         print('No such user')
     else:
-        user = data[0]
         print('User: {}'.format(user['name']))
-        print('User ID: {}'.format(user['id']))
         print('Role: {}'.format(user['role']))
         print('Gateway URLs: {}'.format(user['gateway_urls']))
 
 
 def user_delete_cmd(args):
     api_user = ZoeUserAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    api_query = ZoeQueryAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    data = api_query.query('user', name=args.name)
-    if len(data) == 0:
-        print('No such user')
-    else:
-        for user in data:
-            print('Deleting user {}'.format(user['name']))
-            api_user.delete(user['id'])
+    api_user.delete(args.name)
 
 
 def user_list_cmd(_):
     api_query = ZoeQueryAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     users = api_query.query('user')
     for user in users:
-        print('<- User {} ->'.format(user['id']))
-        print('User: {}'.format(user['name']))
+        print('<- User {} ->'.format(user['name']))
         print('Role: {}'.format(user['role']))
         print('Gateway URLs: {}'.format(user['gateway_urls']))
 

@@ -19,7 +19,7 @@ from werkzeug.exceptions import BadRequest
 from flask_restful import Resource, request
 
 from zoe_lib.exceptions import ZoeException, ZoeRestAPIException
-from zoe_master.rest_api.utils import catch_exceptions
+from zoe_master.rest_api.utils import catch_exceptions, user_has_active_executions
 from zoe_master.state.manager import StateManager
 from zoe_master.platform_manager import PlatformManager
 from zoe_master.rest_api.auth.authentication import authenticate
@@ -38,11 +38,11 @@ class UserAPI(Resource):
         self.platform = kwargs['platform']
 
     @catch_exceptions
-    def get(self, user_id):
+    def get(self, user_name):
         start_time = time.time()
         calling_user = authenticate(request, self.state)
 
-        u = self.state.get_one('user', id=user_id)
+        u = self.state.get_one('user', name=user_name)
         if u is None:
             raise ZoeRestAPIException('No such user', 404)
 
@@ -53,23 +53,23 @@ class UserAPI(Resource):
         return d, 200
 
     @catch_exceptions
-    def delete(self, user_id):
+    def delete(self, user_name):
         start_time = time.time()
         calling_user = authenticate(request, self.state)
 
-        user = self.state.get_one('user', id=user_id)
+        user = self.state.get_one('user', name=user_name)
         if user is None:
             raise ZoeRestAPIException('No such user', 404)
 
         is_authorized(calling_user, user, 'delete')
 
-        if self.state.user_has_active_executions(user_id):
+        if user_has_active_executions(user):
             raise ZoeRestAPIException('User has running executions, cannot delete')
 
         self.platform.kill_gateway_container(user)
         self.platform.remove_user_network(user)
 
-        self.state.delete('user', user_id)
+        self.state.delete('user', user.id)
         self.state.state_updated()
 
         singletons['metric'].metric_api_call(start_time, 'user', 'delete', calling_user)

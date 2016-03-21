@@ -206,12 +206,3 @@ class StateManager:
         collection[obj.id] = obj
 
         return
-
-    def user_has_active_executions(self, user_id: int) -> bool:
-        user = self.get_one('user', id=user_id)
-        if user is None:
-            return False
-        for e in user.executions:
-                if e.is_active():
-                    return True
-        return False

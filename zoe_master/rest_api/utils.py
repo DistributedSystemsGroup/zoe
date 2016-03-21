@@ -16,6 +16,7 @@
 import logging
 
 from zoe_lib.exceptions import ZoeRestAPIException
+from zoe_master.state.user import User
 
 log = logging.getLogger(__name__)
 
@@ -38,3 +39,10 @@ def catch_exceptions(func):
             return {'message': str(e)}, 500
 
     return func_wrapper
+
+
+def user_has_active_executions(user: User) -> bool:
+    for e in user.executions:
+            if e.is_active():
+                return True
+    return False

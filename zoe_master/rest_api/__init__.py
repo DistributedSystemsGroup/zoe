@@ -37,7 +37,7 @@ def init(state, platform) -> Flask:
     }
 
     api.add_resource(InfoAPI, API_PATH + '/info', resource_class_kwargs=args)
-    api.add_resource(UserAPI, API_PATH + '/user/<int:user_id>', resource_class_kwargs=args)
+    api.add_resource(UserAPI, API_PATH + '/user/<user_name>', resource_class_kwargs=args)
     api.add_resource(UserCollectionAPI, API_PATH + '/user', resource_class_kwargs=args)
     api.add_resource(ExecutionAPI, API_PATH + '/execution/<int:execution_id>', resource_class_kwargs=args)
     api.add_resource(ExecutionCollectionAPI, API_PATH + '/execution', resource_class_kwargs=args)
