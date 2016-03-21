@@ -110,10 +110,10 @@ def spark_jupyter_notebook_service(mem_limit: int, worker_mem_limit: int, image:
 
 
 def spark_jupyter_notebook_lab_app(name='spark-jupyter-lab',
-                                   notebook_mem_limit=3 * (1024 ** 3),
+                                   notebook_mem_limit=4 * (1024 ** 3),
                                    master_mem_limit=512 * (1024 ** 2),
                                    worker_count=2,
-                                   worker_mem_limit=7 * (1024 ** 3),
+                                   worker_mem_limit=12 * (1024 ** 3),
                                    worker_cores=6,
                                    master_image='192.168.45.252:5000/zoerepo/spark-master',
                                    worker_image='192.168.45.252:5000/zoerepo/spark-worker',
