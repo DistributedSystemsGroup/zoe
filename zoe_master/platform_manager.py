@@ -22,7 +22,6 @@ from zoe_master.config import get_conf, singletons
 from zoe_master.scheduler import ZoeScheduler
 from zoe_master.state import execution as execution_module, application as application_module, service as service_module
 from zoe_master.state.manager import StateManager
-from zoe_master.stats import ContainerStats
 from zoe_master.stats import SwarmStats, SchedulerStats
 
 log = logging.getLogger(__name__)
@@ -60,31 +59,29 @@ class PlatformManager:
     def _spawn_service(self, execution: execution_module.Execution, service_description: application_module.ServiceDescription) -> bool:
         copts = DockerContainerOptions()
         copts.gelf_log_address = get_conf().gelf_address
-        copts.name = get_conf().deployment_name + '-' + service_description.name + "-{}".format(execution.owner.name)
+        copts.name = service_description.name + "-" + execution.name + "-" + execution.owner.name + "-" + get_conf().deployment_name + "-zoe"
         copts.set_memory_limit(service_description.required_resources['memory'])
-        copts.network_name = '{}-usernet-{}'.format(get_conf().deployment_name, execution.owner.id)
+        copts.network_name = '{}-{}-zoe'.format(execution.owner.name, get_conf().deployment_name)
         container_id = self.state_manager.gen_id()
         copts.labels = {
-            'zoe.{}'.format(get_conf().deployment_name): '',
             'zoe.execution.name': execution.name,
             'zoe.service.name': service_description.name,
             'zoe.owner': execution.owner.name,
-            'zoe.prefix': get_conf().deployment_name,
+            'zoe.deployment_name': get_conf().deployment_name,
             'zoe.type': 'app_service'
         }
         if service_description.monitor:
-            copts.labels['zoe.monitor'] = ''
+            copts.labels['zoe.monitor'] = 'true'
         else:
-            copts.labels['zoe.normal'] = ''
+            copts.labels['zoe.monitor'] = 'false'
         copts.restart = not service_description.monitor  # Monitor containers should not restart
 
         # Generate a dictionary containing the current cluster status (before the new container is spawned)
         # This information is used to substitute template strings in the environment variables
         subst_dict = {
-            "execution_id": str(execution.id),
-            "user_id": str(execution.owner.id),
+            "execution_name": execution.name,
             'user_name': execution.owner.name,
-            'name_prefix': get_conf().deployment_name
+            'deployment_name': get_conf().deployment_name
         }
         for env_name, env_value in service_description.environment:
             try:
@@ -143,13 +140,12 @@ class PlatformManager:
 
     def start_gateway_container(self, user):
         copts = DockerContainerOptions()
-        copts.name = '{}-gateway-{}'.format(get_conf().deployment_name, user.id)
-        copts.network_name = '{}-usernet-{}'.format(get_conf().deployment_name, user.id)
+        copts.name = 'gateway-{}-{}-zoe'.format(user.name, get_conf().deployment_name)
+        copts.network_name = '{}-{}-zoe'.format(user.name, get_conf().deployment_name)
         copts.ports.append(1080)
         copts.labels = {
-            'zoe.{}'.format(get_conf().deployment_name): '',
             'zoe.owner': user.name,
-            'zoe.prefix': get_conf().deployment_name,
+            'zoe.deployment': get_conf().deployment_name,
             'zoe.type': 'gateway'
         }
         copts.restart = True
@@ -162,7 +158,6 @@ class PlatformManager:
             raise ZoeException('Cannot create user gateway container')
         user.gateway_docker_id = cont_info['docker_id']
         user.set_gateway_urls(cont_info)
-        self.swarm.connect_to_network(user.gateway_docker_id, 'eeef9754c16790a29d5210c5d9ad8e66614ee8a6229b6dc6f779019d46cec792')
 
     def kill_gateway_container(self, user):
         self.swarm.terminate_container(user.gateway_docker_id, delete=True)
@@ -171,7 +166,7 @@ class PlatformManager:
 
     def create_user_network(self, user):
         log.info('Creating a new network for user {}'.format(user.id))
-        net_name = '{}-usernet-{}'.format(get_conf().deployment_name, user.id)
+        net_name = '{}-{}-zoe'.format(user.name, get_conf().deployment_name)
         net_id = self.swarm.network_create(net_name)
         user.network_id = net_id
 
@@ -194,8 +189,8 @@ class PlatformManager:
     def check_state_swarm_consistency(self):
         state_changed = False
         users = self.state_manager.get('user')
-        networks = self.swarm.network_list('{}-usernet-'.format(get_conf().deployment_name))
-        gateways = self.swarm.list(['zoe.{}.gateway'.format(get_conf().deployment_name)])
+        networks = self.swarm.network_list('{}-zoe'.format(get_conf().deployment_name))
+        gateways = self.swarm.list({'zoe.type': 'gateway', 'zoe.deployment': get_conf().deployment_name})
 
         users_no_network = []
         users_no_gateway = []
@@ -222,17 +217,17 @@ class PlatformManager:
         duplicate_check = set()
         for n in networks:
             try:
-                uid = int(n['name'][len('{}-usernet-'.format(get_conf().deployment_name)):])
+                username = n['name'].split('-')[0]
             except ValueError:
                 log.error('network {} does not belong to Zoe, bug?'.format(n['name']))
                 networks_to_delete.append(n['id'])
                 continue
-            if uid in duplicate_check:
+            if username in duplicate_check:
                 log.warning('state inconsistency: found two networks for the same user')
                 networks_to_delete.append(n['id'])
                 continue
-            duplicate_check.add(uid)
-            user = self.state_manager.get_one('user', id=uid)
+            duplicate_check.add(username)
+            user = self.state_manager.get_one('user', name=username)
             if user is not None and user in users_no_network:
                 user.network_id = n['id']
                 users_no_network.remove(user)
@@ -240,17 +235,17 @@ class PlatformManager:
                 state_changed = True
                 continue
             elif user is None:
-                log.error('state inconsistency: found a network for user {} who no longer exists'.format(uid))
+                log.error('state inconsistency: found a network for user {} who no longer exists'.format(username))
                 networks_to_delete.append(n['id'])
 
         for g in gateways:
             try:
-                uid = int(g['name'][len('{}-gateway-'.format(get_conf().deployment_name)):])
+                username = g['name'].split('-')[1]
             except ValueError:
                 log.error('container {} does not belong to Zoe, bug?'.format(g['name']))
                 gateways_to_delete.append(g['id'])
                 continue
-            user = self.state_manager.get_one('user', id=uid)
+            user = self.state_manager.get_one('user', name=username)
             if user is not None and user in users_no_gateway:
                 user.gateway_docker_id = g['id']
                 users_no_gateway.remove(user)
@@ -260,7 +255,7 @@ class PlatformManager:
                 state_changed = True
                 continue
             elif user is None:
-                log.error('state inconsistency: found a gateway for user {} who no longer exists'.format(uid))
+                log.error('state inconsistency: found a gateway for user {} who no longer exists'.format(username))
                 gateways_to_delete.append(g['id'])
 
         # Fix all inconsistencies found
@@ -279,7 +274,7 @@ class PlatformManager:
             self.start_gateway_container(u)
 
         # ### Check executions and container consistency
-        swarm_containers = self.swarm.list(only_label='zoe.{}'.format(get_conf().deployment_name))
+        swarm_containers = self.swarm.list(only_label={'zoe.deployment': get_conf().deployment_name})
         conts_state_to_delete = []
         for c_id, c in self.state_manager.services.items():
             if c.docker_id not in [x['id'] for x in swarm_containers]:

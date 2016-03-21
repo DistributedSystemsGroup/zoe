@@ -250,23 +250,26 @@ class SwarmClient:
             log.exception('cannot disconnect service {} from network {}'.format(container_id, network_id))
 
     def list(self, only_label=None) -> list:
-        if only_label is None:
-            filters = {}
-        else:
-            filters = {
-                'label': only_label
-            }
-        ret = self.cli.containers(all=True, filters=filters)
+        ret = self.cli.containers(all=True)
         conts = []
         for c in ret:
-            aux = c['Names'][0].split('/')  # Swarm returns container names in the form /host/name
-            conts.append({
-                'id': c['Id'],
-                'host': aux[1],
-                'name': aux[2],
-                'labels': c['Labels'],
-                'status': c['Status']
-            })
+            match = True
+            for k, v in only_label.items():
+                if k not in c['Labels']:
+                    match = False
+                    break
+                if c['Labels'][k] != v:
+                    match = False
+                    break
+            if match:
+                aux = c['Names'][0].split('/')  # Swarm returns container names in the form /host/name
+                conts.append({
+                    'id': c['Id'],
+                    'host': aux[1],
+                    'name': aux[2],
+                    'labels': c['Labels'],
+                    'status': c['Status']
+                })
         return conts
 
 

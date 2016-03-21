@@ -63,9 +63,8 @@ class UserAPI(Resource):
 
         is_authorized(calling_user, user, 'delete')
 
-        apps = self.state.get('application', owner=user)
-        if len(apps) > 0:
-            raise ZoeRestAPIException('User has {} applications defined, cannot delete'.format(len(apps)))
+        if self.state.user_has_active_executions(user_id):
+            raise ZoeRestAPIException('User has running executions, cannot delete')
 
         self.platform.kill_gateway_container(user)
         self.platform.remove_user_network(user)

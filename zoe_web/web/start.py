@@ -70,9 +70,9 @@ def home_guest():
         template_vars['gateway_ip'] = user['gateway_urls'][0].split('/')[2].split(':')[0]
         exec_api = ZoeExecutionsAPI(get_conf().master_url, guest_identifier, guest_password)
         app_descr = spark_jupyter_notebook_lab_app()
-        execution = query_api.query('execution', name='guest-lab-{}'.format(guest_identifier))
+        execution = query_api.query('execution', name='aml-lab')
         if len(execution) == 0 or execution[0]['status'] == 'terminated' or execution[0]['status'] == 'finished':
-            exec_api.execution_start('guest-lab-{}'.format(guest_identifier), app_descr)
+            exec_api.execution_start('aml-lab', app_descr)
             template_vars['execution_status'] = 'submitted'
             return render_template('home_guest.html', **template_vars)
         else:

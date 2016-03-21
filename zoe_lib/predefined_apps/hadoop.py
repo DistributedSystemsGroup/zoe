@@ -20,7 +20,7 @@ def hadoop_namenode_service(image):
     :rtype: dict
     """
     service = {
-        'name': "hdfs-namenode",
+        'name': "namenode",
         'docker_image': image,
         'monitor': True,
         'required_resources': {"memory": 2 * 1024 * 1024 * 1024},  # 2 GB
@@ -34,7 +34,7 @@ def hadoop_namenode_service(image):
             }
         ],
         'environment': [
-            ["NAMENODE_HOST", "hdfs-namenode-{execution_id}"]
+            ["NAMENODE_HOST", "namenode-{execution_name}-{user_name}-{deployment_name}-zoe"]
         ]
     }
     return service
@@ -49,13 +49,13 @@ def hadoop_datanode_service(count, image):
     ret = []
     for i in range(count):
         service = {
-            'name': "hdfs-datanode-{}".format(i),
+            'name': "datanode{}".format(i),
             'docker_image': image,
             'monitor': False,
             'required_resources': {"memory": 1 * 1024 * 1024 * 1024},  # 1 GB
             'ports': [],
             'environment': [
-                ["NAMENODE_HOST", "hdfs-namenode-{execution_id}"]
+                ["NAMENODE_HOST", "namenode-{execution_name}-{user_name}-{deployment_name}-zoe"]
             ]
         }
         ret.append(service)

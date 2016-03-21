@@ -13,26 +13,26 @@ def main_callback(event):
         return
 
     try:
-        if event['Actor']['Attributes']['zoe.prefix'] != get_conf().deployment_name:
+        if event['Actor']['Attributes']['zoe.deployment_name'] != get_conf().deployment_name:
             return
     except KeyError:
         return
 
     if event['Action'] == "die":
         try:
-            zoe_id = event['Actor']['Attributes']['zoe.container.id']
-            zoe_id = int(zoe_id)
-            container_died(zoe_id)
+            service_name = event['Actor']['Attributes']['zoe.service.name']
+            execution_name = event['Actor']['Attributes']['zoe.execution.name']
+            container_died(service_name, execution_name)
         except KeyError:
             return
 
 
-def container_died(zoe_id: int):
+def container_died(service_name, execution_name):
     log.debug('A container died')
     # tell the master via the rest api
-    cont_api = ZoeServiceAPI(get_conf().scheduler_url, 'zoeadmin', get_conf().zoeadmin_password)
+    cont_api = ZoeServiceAPI(get_conf().master_url, 'zoeadmin', get_conf().zoeadmin_password)
     try:
-        cont_api.died(zoe_id)
+        cont_api.died(service_name, execution_name)
     except ZoeAPIException as e:
         if e.message != "No such service":
             log.exception('Error reporting a dead service')

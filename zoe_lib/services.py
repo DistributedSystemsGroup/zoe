@@ -43,13 +43,14 @@ class ZoeServiceAPI(ZoeAPIBase):
         else:
             raise ZoeAPIException('error retrieving service {}'.format(container_id))
 
-    def died(self, container_id: int):
+    def died(self, service_name, execution_name):
         """
         Inform the master that a service died. Used by the observer process.
 
-        :param container_id: Zoe ID of the service that died
+        :param service_name: name of the service that died
+        :param execution_name: name of the execution the service that died belongs to
         :return:
         """
-        data, status_code = self._rest_delete('/service/{}'.format(container_id))
+        data, status_code = self._rest_delete('/service/{}/{}'.format(execution_name, service_name))
         if status_code != 204:
             raise ZoeAPIException(data['message'])

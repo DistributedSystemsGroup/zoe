@@ -35,7 +35,7 @@ def spark_master_service(mem_limit, image):
             }
         ],
         'environment': [
-            ["SPARK_MASTER_IP", "{name_prefix}-spark-master-{execution_id}.{name_prefix}-usernet-{user_id}"],
+            ["SPARK_MASTER_IP", "spark-master-{execution_name}-{user_name}-{deployment_name}-zoe.{user_name}-{deployment_name}-zoe"],
         ],
         'networks': []
     }
@@ -60,7 +60,7 @@ def spark_worker_service(count, mem_limit, cores, image):
     ret = []
     for i in range(count):
         service = {
-            'name': "spark-worker-{}".format(i),
+            'name': "spark-worker{}".format(i),
             'docker_image': image,
             'monitor': False,
             'required_resources': {"memory": mem_limit},
@@ -76,8 +76,8 @@ def spark_worker_service(count, mem_limit, cores, image):
             'environment': [
                 ["SPARK_WORKER_CORES", str(cores)],
                 ["SPARK_WORKER_RAM", str(worker_ram)],
-                ["SPARK_MASTER_IP", "{name_prefix}-spark-master-{execution_id}.{name_prefix}-usernet-{user_id}"],
-                ["SPARK_LOCAL_IP", "{name_prefix}-spark-worker-" + str(i) + "-{execution_id}.{name_prefix}-usernet-{user_id}"]
+                ["SPARK_MASTER_IP", "spark-master-{execution_name}-{user_name}-{deployment_name}-zoe.{user_name}-{deployment_name}-zoe"],
+                ["SPARK_LOCAL_IP", "spark-worker" + str(i) + "-{execution_name}-{user_name}-{deployment_name}-zoe.{user_name}-{deployment_name}-zoe"]
             ],
             'networks': []
         }
@@ -110,7 +110,7 @@ def spark_submit_service(mem_limit, worker_mem_limit, image, command, spark_opti
             }
         ],
         'environment': [
-            ["SPARK_MASTER_IP", "{name_prefix}-spark-master-{execution_id}.{name_prefix}-usernet-{user_id}"],
+            ["SPARK_MASTER_IP", "spark-master-{execution_name}-{user_name}-{deployment_name}-zoe.{user_name}-{deployment_name}-zoe"],
             ["SPARK_OPTIONS", spark_options],
             ["SPARK_EXECUTOR_RAM", str(executor_ram)],
             ["APPLICATION_URL", "{application_binary}"]

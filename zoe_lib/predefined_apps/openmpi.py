@@ -22,7 +22,7 @@ def openmpi_worker_service(counter, workspace_volume, worker_memory):
     :rtype: dict
     """
     service = {
-        'name': "openmpi-worker-{}".format(counter),
+        'name': "mpiworker{}".format(counter),
         'docker_image': '192.168.45.252:5000/zoerepo/openmpi-worker',
         'monitor': False,
         'required_resources': {"memory": worker_memory},
@@ -43,7 +43,7 @@ def openmpi_mpirun_service(workspace_volume, mpirun_commandline, worker_memory):
     :rtype: dict
     """
     service = {
-        'name': "openmpi-mpirun",
+        'name': "mpirun",
         'docker_image': '192.168.45.252:5000/zoerepo/openmpi-worker',
         'monitor': True,
         'required_resources': {"memory": worker_memory},

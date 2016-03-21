@@ -47,12 +47,12 @@ def spark_jupyter_notebook_service(mem_limit, worker_mem_limit, image):
             }
         ],
         'environment': [
-            ["SPARK_MASTER", "spark://{name_prefix}-spark-master-{execution_id}.{name_prefix}-usernet-{user_id}:7077"],
+            ["SPARK_MASTER", "spark://spark-master-{execution_name}-{user_name}-{deployment_name}-zoe.{user_name}-{deployment_name}-zoe:7077"],
             ["SPARK_EXECUTOR_RAM", str(executor_ram)],
             ["SPARK_DRIVER_RAM", str(driver_ram)],
-            ["NB_USER", "{user_name}"],
-            ["NAMENODE_HOST", "hdfs-namenode.hdfs"]
+            ["NB_USER", "{user_name}"]
         ],
+        'networks': []
     }
     return service
 

@@ -22,12 +22,12 @@ def check_guests(swarm):
     for guest in guests:
         my_execs = [e for e in execs if e['owner'] == guest['name']]
         for my_exec in my_execs:
-            if len(my_exec['containers']) == 0:
+            if len(my_exec['services']) == 0:
                 continue
             my_exec_since_started = datetime.datetime.now() - dateutil.parser.parse(my_exec['time_started'])
             my_exec_since_started = my_exec_since_started.total_seconds()
             terminate = False
-            for c in my_exec['containers']:
+            for c in my_exec['services']:
                 c = cont_api.get(c)
                 for port in c['ports']:
                     if port['name'] == 'Spark application web interface':
