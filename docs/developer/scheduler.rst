@@ -1,8 +1,8 @@
 Scheduler classes
 =================
 
-.. autoclass:: zoe_scheduler.scheduler.ZoeScheduler
+.. autoclass:: zoe_master.scheduler.ZoeScheduler
    :members:
 
-.. autoclass:: zoe_scheduler.scheduler_policies.base.BaseSchedulerPolicy
+.. autoclass:: zoe_master.scheduler_policies.base.BaseSchedulerPolicy
    :members:

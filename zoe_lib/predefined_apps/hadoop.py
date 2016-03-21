@@ -14,8 +14,8 @@
 # limitations under the License.
 
 
-def hadoop_namenode_proc(image: str) -> dict:
-    proc = {
+def hadoop_namenode_service(image: str) -> dict:
+    service = {
         'name': "hdfs-namenode",
         'docker_image': image,
         'monitor': True,
@@ -33,13 +33,13 @@ def hadoop_namenode_proc(image: str) -> dict:
             ["NAMENODE_HOST", "hdfs-namenode-{execution_id}"]
         ]
     }
-    return proc
+    return service
 
 
-def hadoop_datanode_proc(count: int, image: str) -> list:
+def hadoop_datanode_service(count: int, image: str) -> list:
     ret = []
     for i in range(count):
-        proc = {
+        service = {
             'name': "hdfs-datanode-{}".format(i),
             'docker_image': image,
             'monitor': False,
@@ -49,7 +49,7 @@ def hadoop_datanode_proc(count: int, image: str) -> list:
                 ["NAMENODE_HOST", "hdfs-namenode-{execution_id}"]
             ]
         }
-        ret.append(proc)
+        ret.append(service)
     return ret
 
 
@@ -63,8 +63,8 @@ def hdfs_app(name='hdfs',
         'will_end': False,
         'priority': 512,
         'requires_binary': False,
-        'processes': [
-            hadoop_namenode_proc(namenode_image),
-        ] + hadoop_datanode_proc(datanode_count, datanode_image)
+        'services': [
+            hadoop_namenode_service(namenode_image),
+        ] + hadoop_datanode_service(datanode_count, datanode_image)
     }
     return app

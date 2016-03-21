@@ -24,8 +24,8 @@ from zoe_lib.exceptions import ZoeException
 log = logging.getLogger('ZoeAIO')
 
 
-def start_sched():
-    from zoe_scheduler.entrypoint import main
+def start_master():
+    from zoe_master.entrypoint import main
     main()
 
 
@@ -33,7 +33,7 @@ def start_observer():
     from zoe_observer.entrypoint import main
     main()
 
-sched = multiprocessing.Process(target=start_sched, name='scheduler')
+sched = multiprocessing.Process(target=start_master(), name='master')
 obs = multiprocessing.Process(target=start_observer, name='observer')
 
 sched.start()

@@ -13,3 +13,30 @@ Authentication: HTTP basic auth is used, as it is the simplest reliable mechanis
 There advantages and disadvantages to this choice, but for now we wnat to concentrate on different, more core-related features of Zoe.
 
 Synchronous API. The Zoe Scheduler is not multi-thread, all requests to the API are served immediately. Again, this is done to keep the system simple and is by no means a decision set in stone.
+
+Object naming
+-------------
+Every object in Zoe has a unique name. Zoe uses a dotted notation, with a hierarchical structure, left to right, from specific to generic, like the DNS system.
+
+These names are used throughout the API.
+
+A service (one service corresponds to one Docker container) is identified by this name:
+<service_name>.<execution_name>.<owner>.<deployment_name>
+
+An execution is identified by:
+<execution_name>.<owner>.<deployment_name>
+
+A user is:
+<owner>.<deployment_name>
+
+And a Zoe instance is:
+<deployment_name>
+
+Where:
+* service name: the name of the service as written in the application description
+* execution name: name of the execution as passed to the start API call
+* owner: user name of the owner of the execution
+* deployment name: configured deployment for this Zoe instance
+
+Docker hostnames
+^^^^^^^^^^^^^^^^

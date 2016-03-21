@@ -26,8 +26,9 @@ except ImportError:
 
 import docker
 import docker.errors
+import docker.utils
 
-from zoe_scheduler.stats import SwarmStats, SwarmNodeStats, ContainerStats
+from zoe_master.stats import SwarmStats, SwarmNodeStats, ContainerStats
 from zoe_lib.exceptions import ZoeException
 
 log = logging.getLogger(__name__)
@@ -87,8 +88,9 @@ class SwarmClient:
             ns = SwarmNodeStats(info["DriverStatus"][idx + node][0])
             ns.docker_endpoint = info["DriverStatus"][idx + node][1]
             idx2 += 1
-            ns.status = info["DriverStatus"][idx + node + idx2][1]
-            idx2 += 1
+            if 'Status' in info["DriverStatus"][idx + node + idx2][0]:  # new docker version
+                ns.status = info["DriverStatus"][idx + node + idx2][1]
+                idx2 += 1
             ns.container_count = int(info["DriverStatus"][idx + node + idx2][1])
             idx2 += 1
             ns.cores_reserved = int(info["DriverStatus"][idx + node + idx2][1].split(' / ')[0])
@@ -117,13 +119,19 @@ class SwarmClient:
         for port in options.ports:
             port_bindings[port] = None
 
+        if options.gelf_log_address != '':
+            log_config = docker.utils.LogConfig(type="gelf", config={'gelf-address': options.gelf_log_address, 'labels': ",".join(options.labels)})
+        else:
+            log_config = docker.utils.LogConfig(type="json-file")
+
         try:
             host_config = self.cli.create_host_config(network_mode=options.network_name,
                                                       binds=options.get_volume_binds(),
                                                       mem_limit=options.get_memory_limit(),
                                                       memswap_limit=options.get_memory_limit(),
                                                       restart_policy=options.restart_policy,
-                                                      port_bindings=port_bindings)
+                                                      port_bindings=port_bindings,
+                                                      log_config=log_config)
             cont = self.cli.create_container(image=image,
                                              environment=options.environment,
                                              network_disabled=False,
@@ -143,7 +151,7 @@ class SwarmClient:
         except requests.exceptions.ConnectionError:
             if cont is not None:
                 self.cli.remove_container(container=cont.get('Id'), force=True)
-            raise ZoeException('Connection error while creating the container')
+            raise ZoeException('Connection error while creating the service')
         info = self.inspect_container(cont.get('Id'))
         return info
 
@@ -195,24 +203,12 @@ class SwarmClient:
             try:
                 self.cli.remove_container(docker_id, force=True)
             except docker.errors.NotFound:
-                log.warning("cannot remove a non-existent container")
+                log.warning("cannot remove a non-existent service")
         else:
             try:
                 self.cli.kill(docker_id)
             except docker.errors.NotFound:
-                log.warning("cannot remove a non-existent container")
-
-    def log_get(self, docker_id) -> str:
-        try:
-            logdata = self.cli.logs(container=docker_id, stdout=True, stderr=True, stream=False, timestamps=False, tail="all")
-        except docker.errors.NotFound:
-            return None
-        return logdata.decode("utf-8")
-
-    def stats(self, docker_id) -> ContainerStats:
-        stats_stream = self.cli.stats(docker_id, decode=True)
-        for s in stats_stream:
-            return ContainerStats(s)
+                log.warning("cannot remove a non-existent service")
 
     def event_listener(self, callback):
         for event in self.cli.events(decode=True):
@@ -245,13 +241,13 @@ class SwarmClient:
         try:
             self.cli.connect_container_to_network(container_id, network_id)
         except docker.errors.APIError:
-            log.exception('cannot connect container {} to network {}'.format(container_id, network_id))
+            log.exception('cannot connect service {} to network {}'.format(container_id, network_id))
 
     def disconnect_from_network(self, container_id, network_id):
         try:
             self.cli.disconnect_container_from_network(container_id, network_id)
         except docker.errors.APIError:
-            log.exception('cannot disconnect container {} from network {}'.format(container_id, network_id))
+            log.exception('cannot disconnect service {} from network {}'.format(container_id, network_id))
 
     def list(self, only_label=None) -> list:
         if only_label is None:
@@ -274,7 +270,7 @@ class SwarmClient:
         return conts
 
 
-class ContainerOptions:
+class DockerContainerOptions:
     def __init__(self):
         self.env = {}
         self.volume_binds = []
@@ -286,6 +282,7 @@ class ContainerOptions:
         self.network_name = 'bridge'
         self.restart = True
         self.labels = []
+        self.gelf_log_address = ''
 
     def add_env_variable(self, name, value):
         if value is not None:

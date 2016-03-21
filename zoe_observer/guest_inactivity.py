@@ -6,16 +6,16 @@ import dateutil.parser
 
 from zoe_lib.query import ZoeQueryAPI
 from zoe_lib.executions import ZoeExecutionsAPI
-from zoe_lib.containers import ZoeContainerAPI
+from zoe_lib.services import ZoeServiceAPI
 from zoe_observer.config import get_conf
 
 log = logging.getLogger(__name__)
 
 
 def check_guests(swarm):
-    query_api = ZoeQueryAPI(get_conf().scheduler_url, 'zoeadmin', get_conf().zoeadmin_password)
-    exec_api = ZoeExecutionsAPI(get_conf().scheduler_url, 'zoeadmin', get_conf().zoeadmin_password)
-    cont_api = ZoeContainerAPI(get_conf().scheduler_url, 'zoeadmin', get_conf().zoeadmin_password)
+    query_api = ZoeQueryAPI(get_conf().master_url, 'zoeadmin', get_conf().zoeadmin_password)
+    exec_api = ZoeExecutionsAPI(get_conf().master_url, 'zoeadmin', get_conf().zoeadmin_password)
+    cont_api = ZoeServiceAPI(get_conf().master_url, 'zoeadmin', get_conf().zoeadmin_password)
 
     guests = query_api.query('user', role='guest')
     execs = exec_api.list()

@@ -16,8 +16,8 @@
 import os.path
 
 
-def copier_proc(src_volume, src_path, dst_volume, dst_path) -> dict:
-    proc = {
+def copier_service(src_volume, src_path, dst_volume, dst_path) -> dict:
+    service = {
         'name': "copier",
         'docker_image': 'alpine',
         'monitor': True,
@@ -27,11 +27,11 @@ def copier_proc(src_volume, src_path, dst_volume, dst_path) -> dict:
         'volumes': [],
         'command': ''
     }
-    proc['volumes'].append([src_volume['host_path'], src_volume['cont_path'], src_volume['readonly']])
-    proc['volumes'].append([dst_volume['host_path'], dst_volume['cont_path'], dst_volume['readonly']])
-    proc['command'] = 'cp -a ' + os.path.join(src_volume['cont_path'], src_path) + ' ' + os.path.join(dst_volume['cont_path'], dst_path)
+    service['volumes'].append([src_volume['host_path'], src_volume['cont_path'], src_volume['readonly']])
+    service['volumes'].append([dst_volume['host_path'], dst_volume['cont_path'], dst_volume['readonly']])
+    service['command'] = 'cp -a ' + os.path.join(src_volume['cont_path'], src_path) + ' ' + os.path.join(dst_volume['cont_path'], dst_path)
 
-    return proc
+    return service
 
 empty = {
     'host_path': 'CHANGEME',  # the path containing what to copy
@@ -47,8 +47,8 @@ def copier_app(src_volume=empty, src_path='', dst_volume=empty, dst_path='') -> 
         'will_end': True,
         'priority': 512,
         'requires_binary': False,
-        'processes': [
-            copier_proc(src_volume, src_path, dst_volume, dst_path)
+        'services': [
+            copier_service(src_volume, src_path, dst_volume, dst_path)
         ]
     }
     return app

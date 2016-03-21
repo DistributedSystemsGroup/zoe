@@ -1,7 +1,8 @@
 import logging
 
 from zoe_observer.config import get_conf
-from zoe_lib.containers import ZoeContainerAPI
+from zoe_lib.services import ZoeServiceAPI
+from zoe_lib.exceptions import ZoeAPIException
 
 log = logging.getLogger(__name__)
 
@@ -12,7 +13,7 @@ def main_callback(event):
         return
 
     try:
-        if event['Actor']['Attributes']['zoe.prefix'] != get_conf().container_name_prefix:
+        if event['Actor']['Attributes']['zoe.prefix'] != get_conf().deployment_name:
             return
     except KeyError:
         return
@@ -28,6 +29,10 @@ def main_callback(event):
 
 def container_died(zoe_id: int):
     log.debug('A container died')
-    # tell the scheduler via the rest api
-    cont_api = ZoeContainerAPI(get_conf().scheduler_url, 'zoeadmin', get_conf().zoeadmin_password)
-    cont_api.died(zoe_id)
+    # tell the master via the rest api
+    cont_api = ZoeServiceAPI(get_conf().scheduler_url, 'zoeadmin', get_conf().zoeadmin_password)
+    try:
+        cont_api.died(zoe_id)
+    except ZoeAPIException as e:
+        if e.message != "No such service":
+            log.exception('Error reporting a dead service')

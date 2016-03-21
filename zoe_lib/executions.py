@@ -34,7 +34,7 @@ class ZoeExecutionsAPI(ZoeAPIBase):
         Terminates an execution.
 
         :param execution_id: the execution to delete
-        :return: True is the operation was successful, False otherwise
+        :return: True if the operation was successful, False otherwise
 
         :type execution_id: int
         :rtype: bool
@@ -61,7 +61,7 @@ class ZoeExecutionsAPI(ZoeAPIBase):
         """
         Retrieve the Execution object for an existing execution.
 
-        :param execution_id: the execution to load from the scheduler
+        :param execution_id: the execution to load from the master
         :return: the Execution object, or None
 
         :type execution_id: int
@@ -75,7 +75,7 @@ class ZoeExecutionsAPI(ZoeAPIBase):
 
     def execution_start(self, name, application_description):
         """
-        Submit an application to the scheduler to start a new execution.
+        Submit an application to the master to start a new execution.
 
         :param name: user-provided name of the execution
         :param application_description: the application to start

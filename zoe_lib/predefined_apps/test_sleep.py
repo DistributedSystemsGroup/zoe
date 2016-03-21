@@ -14,8 +14,8 @@
 # limitations under the License.
 
 
-def sleeper_proc(sleep_duration) -> dict:
-    proc = {
+def sleeper_service(sleep_duration) -> dict:
+    service = {
         'name': "sleeper",
         'docker_image': 'alpine',
         'monitor': True,
@@ -24,7 +24,7 @@ def sleeper_proc(sleep_duration) -> dict:
         'environment': [],
         'command': 'sleep ' + str(sleep_duration)
     }
-    return proc
+    return service
 
 
 def sleeper_app(name='sleeper', sleep_duration=5) -> dict:
@@ -34,8 +34,8 @@ def sleeper_app(name='sleeper', sleep_duration=5) -> dict:
         'will_end': True,
         'priority': 512,
         'requires_binary': False,
-        'processes': [
-            sleeper_proc(sleep_duration)
+        'services': [
+            sleeper_service(sleep_duration)
         ]
     }
     return app

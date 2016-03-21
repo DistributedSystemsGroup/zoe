@@ -39,9 +39,22 @@ Contents:
 
   install
   config_file
+  logging
   architecture
   vision
   contributing
+
+
+A note on terminology
+---------------------
+
+We are spending a lot of effort to use consistent naming throughout the documentation, the software, the website and all the other resources associated with Zoe. Check the :ref:`architecture` document for the details, but here is a quick reference:
+
+ * Zoe Components: the Zoe processes, the Master, the Observer, the web interface, etc.
+ * Zoe Applications: a composition of Zoe Frameworks, is the highest-level entry in application descriptions that the use submits to Zoe
+ * Zoe Frameworks: a composition of Zoe Services, is used to describe re-usable pieces of Zoe Applications, like a Spark cluster
+ * Zoe Services: one to one with a Docker container, describes a single service/process tree running in an isolated container
+
 
 Contacts
 ========

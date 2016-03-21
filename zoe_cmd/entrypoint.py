@@ -25,12 +25,13 @@ from argparse import ArgumentParser, Namespace, FileType, RawDescriptionHelpForm
 from pprint import pprint
 
 from zoe_cmd import utils
-from zoe_lib.containers import ZoeContainerAPI
+from zoe_lib.services import ZoeServiceAPI
 from zoe_lib.exceptions import ZoeAPIException
 from zoe_lib.executions import ZoeExecutionsAPI
 from zoe_lib.predefined_apps import hadoop, spark, lab_spark, test_sleep, copier
 from zoe_lib.query import ZoeQueryAPI
 from zoe_lib.users import ZoeUserAPI
+from zoe_lib.applications import app_validate
 
 PREDEFINED_APPS = {}
 for mod in [hadoop, spark, lab_spark, test_sleep, copier]:
@@ -127,6 +128,7 @@ def exec_list_cmd(_):
 
 def exec_start_cmd(args):
     app_descr = json.load(args.jsonfile)
+    app_validate(app_descr)
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     ret = exec_api.execution_start(args.name, app_descr)
     print("Application scheduled successfully with ID {}, use the exec-get command to check its status".format(ret))
@@ -134,7 +136,7 @@ def exec_start_cmd(args):
 
 def exec_get_cmd(args):
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    cont_api = ZoeContainerAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
+    cont_api = ZoeServiceAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     execution = exec_api.execution_get(args.id)
     if execution is None:
         print('Execution not found')
@@ -146,10 +148,10 @@ def exec_get_cmd(args):
         print('Time finished: {}'.format(execution['time_finished']))
         app = execution['application']
         print('Application name: {}'.format(app['name']))
-        for c_id in execution['containers']:
+        for c_id in execution['services']:
             c = cont_api.get(c_id)
             ip = list(c['ip_address'].values())[0]  # FIXME how to decide which network is the right one?
-            print('Container {} (ID: {})'.format(c['name'], c['id']))
+            print('Service {} (ID: {})'.format(c['name'], c['id']))
             for p in c['ports']:
                 print(' - {}: {}://{}:{}{}'.format(p['name'], p['protocol'], ip, p['port_number'], p['path']))
 
@@ -157,24 +159,6 @@ def exec_get_cmd(args):
 def exec_kill_cmd(args):
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     exec_api.terminate(args.id)
-
-
-def log_get_cmd(args):
-    cont_api = ZoeContainerAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    log = cont_api.log(args.container_id)
-    if log is None:
-        print("Error: No log found for container ID {}".format(args.container_id))
-        return
-    try:
-        print(log)
-    except BrokenPipeError:
-        pass
-
-
-def container_stats_cmd(args):
-    cont_api = ZoeContainerAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    stats = cont_api.stats(args.container_id)
-    print(stats)
 
 
 ENV_HELP_TEXT = '''To use this tool you need also to define three environment variables:
@@ -235,14 +219,6 @@ def process_arguments() -> Namespace:
     argparser_execution_kill = subparser.add_parser('terminate', help="Terminates an execution")
     argparser_execution_kill.add_argument('id', type=int, help="Execution id")
     argparser_execution_kill.set_defaults(func=exec_kill_cmd)
-
-    argparser_log_get = subparser.add_parser('log-get', help="Retrieves the logs of a running container")
-    argparser_log_get.add_argument('container_id', type=int, help="Container id")
-    argparser_log_get.set_defaults(func=log_get_cmd)
-
-    argparser_container_stats = subparser.add_parser('container-stats', help="Retrieve statistics on a running container")
-    argparser_container_stats.add_argument('container_id', type=int, help="ID of the container")
-    argparser_container_stats.set_defaults(func=container_stats_cmd)
 
     return parser, parser.parse_args()
 
