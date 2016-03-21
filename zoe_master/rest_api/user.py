@@ -108,7 +108,7 @@ class UserCollectionAPI(Resource):
         is_authorized(calling_user, user, 'create')
 
         if len(self.state.get('user', name=user.name)) > 0:
-            raise ZoeRestAPIException('Email already registered')
+            raise ZoeRestAPIException('User name already registered')
 
         user.set_password(data['password'])
 
