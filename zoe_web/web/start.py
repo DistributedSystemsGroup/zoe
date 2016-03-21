@@ -22,6 +22,7 @@ from zoe_lib.executions import ZoeExecutionsAPI
 from zoe_lib.predefined_apps.eurecom_aml_lab import spark_jupyter_notebook_lab_app
 from zoe_lib.query import ZoeQueryAPI
 from zoe_lib.exceptions import ZoeAPIException
+from zoe_lib.zoe_api import ZoeClient
 
 from zoe_web.config import get_conf
 from zoe_web.web import web_bp
@@ -48,6 +49,7 @@ def home_guest():
     if match is None:
         return missing_auth()
 
+    api = ZoeClient(get_conf().master_url, guest_identifier, guest_password)
     query_api = ZoeQueryAPI(get_conf().master_url, guest_identifier, guest_password)
 
     template_vars = {
@@ -59,7 +61,7 @@ def home_guest():
     }
 
     try:
-        user = query_api.query('user', name=guest_identifier)
+        user = api.user_get(guest_identifier)
     except ZoeAPIException:
         return missing_auth()
     if len(user) == 0:

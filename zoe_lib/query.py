@@ -19,7 +19,7 @@ This module contains the Zoe Query API.
 
 import logging
 
-from zoe_lib import ZoeAPIBase
+from zoe_lib.api_base import ZoeAPIBase
 from zoe_lib.exceptions import ZoeAPIException
 
 log = logging.getLogger(__name__)

@@ -122,4 +122,4 @@ class UserCollectionAPI(Resource):
         self.state.state_updated()
 
         singletons['metric'].metric_api_call(start_time, 'user', 'post', calling_user)
-        return {"user_id": user.id}, 201
+        return {"user": user.to_dict(checkpoint=False)}, 201

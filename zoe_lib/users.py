@@ -18,7 +18,7 @@ This module contains all user-related API calls that a Zoe client can use.
 
 For now Zoe implements a bare minimum of user management.
 """
-from zoe_lib import ZoeAPIBase
+from zoe_lib.api_base import ZoeAPIBase
 from zoe_lib.exceptions import ZoeAPIException
 
 
@@ -26,54 +26,19 @@ class ZoeUserAPI(ZoeAPIBase):
     """
     The UserAPI class has methods for interacting with Zoe's user system.
     """
-
-    def exists(self, user_name):
-        """
-        Checks if a given user exists.
-
-        :param user_name: the user_name to check
-        :return: True if the user_name exists, False otherwise
-
-        :type user_name: str
-        :rtype: bool
-        """
-        user, status_code = self._rest_get('/user/' + user_name)
-        return status_code == 200
-
     def create(self, name, password, role):
-        """
-        Creates a new user, given his email address.
-
-        :param name: the user name address
-        :param password: the user password
-        :param role: the user role
-        :return: the new user ID
-
-        :type name: str
-        :type password: str
-        :type role: str
-        """
         data = {
             'name': name,
             'password': password,
             'role': role
         }
-        user_id, status_code = self._rest_post('/user', data)
+        user, status_code = self._rest_post('/user', data)
         if status_code == 201:
-            return user_id['user_id']
+            return user
         else:
-            raise ZoeAPIException(user_id['message'])
+            raise ZoeAPIException(user['message'])
 
     def get(self, user_name):
-        """
-        Get a user object given a user_name.
-
-        :param user_name: the user_name to retrieve
-        :return: the user dictionary, or None
-
-        :type user_name: str
-        :rtype dict|None
-        """
         user, status_code = self._rest_get('/user/' + user_name)
         if status_code == 200:
             return user
@@ -81,14 +46,6 @@ class ZoeUserAPI(ZoeAPIBase):
             return None
 
     def delete(self, user_name):
-        """
-        Delete a user given a user_name.
-
-        :param user_name: the user_name to delete
-        :return: None
-
-        :type user_name: str
-        """
         data, status_code = self._rest_delete('/user/' + str(user_name))
         if status_code != 204:
             raise ZoeAPIException(data['message'])
