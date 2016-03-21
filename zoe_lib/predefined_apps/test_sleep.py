@@ -14,7 +14,11 @@
 # limitations under the License.
 
 
-def sleeper_service(sleep_duration) -> dict:
+def sleeper_service(sleep_duration):
+    """
+    :type sleep_duration: int
+    :rtype: dict
+    """
     service = {
         'name': "sleeper",
         'docker_image': 'alpine',
@@ -27,7 +31,12 @@ def sleeper_service(sleep_duration) -> dict:
     return service
 
 
-def sleeper_app(name='sleeper', sleep_duration=5) -> dict:
+def sleeper_app(name='sleeper', sleep_duration=5):
+    """
+    :param name:
+    :param sleep_duration:
+    :rtype: dict
+    """
     app = {
         'name': name,
         'version': 1,

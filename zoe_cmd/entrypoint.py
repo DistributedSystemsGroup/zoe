@@ -28,13 +28,13 @@ from zoe_cmd import utils
 from zoe_lib.services import ZoeServiceAPI
 from zoe_lib.exceptions import ZoeAPIException
 from zoe_lib.executions import ZoeExecutionsAPI
-from zoe_lib.predefined_apps import hadoop, spark, lab_spark, test_sleep, copier
+from zoe_lib.predefined_apps import hadoop, spark, eurecom_aml_lab, test_sleep, copier
 from zoe_lib.query import ZoeQueryAPI
 from zoe_lib.users import ZoeUserAPI
 from zoe_lib.applications import app_validate
 
 PREDEFINED_APPS = {}
-for mod in [hadoop, spark, lab_spark, test_sleep, copier]:
+for mod in [hadoop, spark, eurecom_aml_lab, test_sleep, copier]:
     for app_name, val in mod.__dict__.items():
         if callable(val) and "_app" in app_name:
             PREDEFINED_APPS[app_name[:-4]] = val

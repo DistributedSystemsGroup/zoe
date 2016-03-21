@@ -14,7 +14,12 @@
 # limitations under the License.
 
 
-def spark_master_service(mem_limit: int, image: str) -> dict:
+def spark_master_service(mem_limit, image):
+    """
+    :type mem_limit: int
+    :type image: str
+    :rtype: dict
+    """
     service = {
         'name': "spark-master",
         'docker_image': image,
@@ -31,13 +36,27 @@ def spark_master_service(mem_limit: int, image: str) -> dict:
         ],
         'environment': [
             ["SPARK_MASTER_IP", "{name_prefix}-spark-master-{execution_id}.{name_prefix}-usernet-{user_id}"],
-        ]
+        ],
+        'networks': []
     }
     return service
 
 
-def spark_worker_service(count: int, mem_limit: int, cores: int, image: str) -> list:
-    worker_ram = mem_limit - (1024 ** 3)
+def spark_worker_service(count, mem_limit, cores, image):
+    """
+    :type count: int
+    :type mem_limit: int
+    :type cores: int
+    :type image: str
+    :rtype List(dict)
+
+    :param count: number of workers
+    :param mem_limit: hard memory limit for workers
+    :param cores: number of cores this worker should use
+    :param image: name of the Docker image
+    :return: a list of service entries
+    """
+    worker_ram = mem_limit - (1024 ** 3) - (512 * 1025 ** 2)
     ret = []
     for i in range(count):
         service = {
@@ -59,13 +78,22 @@ def spark_worker_service(count: int, mem_limit: int, cores: int, image: str) -> 
                 ["SPARK_WORKER_RAM", str(worker_ram)],
                 ["SPARK_MASTER_IP", "{name_prefix}-spark-master-{execution_id}.{name_prefix}-usernet-{user_id}"],
                 ["SPARK_LOCAL_IP", "{name_prefix}-spark-worker-" + str(i) + "-{execution_id}.{name_prefix}-usernet-{user_id}"]
-            ]
+            ],
+            'networks': []
         }
         ret.append(service)
     return ret
 
 
-def spark_submit_service(mem_limit: int, worker_mem_limit: int, image: str, command: str, spark_options: str):
+def spark_submit_service(mem_limit, worker_mem_limit, image, command, spark_options):
+    """
+    :type mem_limit: int
+    :type worker_mem_limit: int
+    :type image: str
+    :type command: str
+    :type spark_options: str
+    :rtype: dict
+    """
     executor_ram = worker_mem_limit - (2 * 1024 ** 3)
     service = {
         'name': "spark-submit",
@@ -101,7 +129,20 @@ def spark_submit_app(name='spark-submit',
                      worker_image='192.168.45.252:5000/zoerepo/spark-worker',
                      submit_image='192.168.45.252:5000/spark-submit',
                      commandline='wordcount.py hdfs://192.168.45.157/datasets/gutenberg_big_2x.txt hdfs://192.168.45.157/tmp/cntwdc1',
-                     spark_options='') -> dict:
+                     spark_options=''):
+    """
+    :type name: str
+    :type master_mem_limit: int
+    :type worker_count: int
+    :type worker_mem_limit: int
+    :type worker_cores: int
+    :type master_image: str
+    :type worker_image: str
+    :type submit_image: str
+    :type commandline: str
+    :type spark_options: str
+    :rtype: dict
+    """
     app = {
         'name': name,
         'version': 1,
@@ -111,61 +152,6 @@ def spark_submit_app(name='spark-submit',
         'services': [
             spark_master_service(master_mem_limit, master_image),
             spark_submit_service(master_mem_limit, worker_mem_limit, submit_image, commandline, spark_options)
-        ] + spark_worker_service(worker_count, worker_mem_limit, worker_cores, worker_image)
-    }
-    return app
-
-
-def spark_jupyter_notebook_service(mem_limit: int, worker_mem_limit: int, image: str) -> dict:
-    executor_ram = worker_mem_limit - (2 * 1024 ** 3)
-    service = {
-        'name': "spark-jupyter",
-        'docker_image': image,
-        'monitor': True,
-        'required_resources': {"memory": mem_limit},
-        'ports': [
-            {
-                'name': "Spark application web interface",
-                'protocol': "http",
-                'port_number': 4040,
-                'path': "/",
-                'is_main_endpoint': False
-            },
-            {
-                'name': "Jupyter Notebook interface",
-                'protocol': "http",
-                'port_number': 8888,
-                'path': "/",
-                'is_main_endpoint': True
-            }
-        ],
-        'environment': [
-            ["SPARK_MASTER", "spark://{name_prefix}-spark-master-{execution_id}.{name_prefix}-usernet-{user_id}:7077"],
-            ["SPARK_EXECUTOR_RAM", str(executor_ram)],
-            ["NB_USER", "{user_name}"],
-            ["NAMENODE_HOST", "hdfs-namenode.hdfs"]
-        ]
-    }
-    return service
-
-
-def spark_jupyter_notebook_app(name='spark-jupyter',
-                               master_mem_limit=4 * 1024 * 1024 * 1024,
-                               worker_count=3,
-                               worker_mem_limit=8 * 1024 * 1024 * 1024,
-                               worker_cores=4,
-                               master_image='192.168.45.252:5000/zoerepo/spark-master',
-                               worker_image='192.168.45.252:5000/zoerepo/spark-worker',
-                               notebook_image='192.168.45.252:5000/zoerepo/spark-jupyter-notebook') -> dict:
-    app = {
-        'name': name,
-        'version': 1,
-        'will_end': False,
-        'priority': 512,
-        'requires_binary': False,
-        'services': [
-            spark_master_service(master_mem_limit, master_image),
-            spark_jupyter_notebook_service(master_mem_limit, worker_mem_limit, notebook_image)
         ] + spark_worker_service(worker_count, worker_mem_limit, worker_cores, worker_image)
     }
     return app

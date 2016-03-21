@@ -14,7 +14,13 @@
 # limitations under the License.
 
 
-def openmpi_worker_service(counter, workspace_volume, worker_memory) -> dict:
+def openmpi_worker_service(counter, workspace_volume, worker_memory):
+    """
+    :type counter: int
+    :type workspace_volume: dict
+    :type worker_memory: int
+    :rtype: dict
+    """
     service = {
         'name': "openmpi-worker-{}".format(counter),
         'docker_image': '192.168.45.252:5000/zoerepo/openmpi-worker',
@@ -29,7 +35,13 @@ def openmpi_worker_service(counter, workspace_volume, worker_memory) -> dict:
     return service
 
 
-def openmpi_mpirun_service(workspace_volume, mpirun_commandline, worker_memory) -> dict:
+def openmpi_mpirun_service(workspace_volume, mpirun_commandline, worker_memory):
+    """
+    :type mpirun_commandline: str
+    :type workspace_volume: dict
+    :type worker_memory: int
+    :rtype: dict
+    """
     service = {
         'name': "openmpi-mpirun",
         'docker_image': '192.168.45.252:5000/zoerepo/openmpi-worker',
@@ -51,7 +63,15 @@ empty = {
 }
 
 
-def openmpi_app(name='openmpi-test', workspace_volume=empty, mpirun_commandline='', worker_count=4, worker_memory=(1024 ** 3)) -> dict:
+def openmpi_app(name='openmpi-test', workspace_volume=empty, mpirun_commandline='', worker_count=4, worker_memory=(1024 ** 3)):
+    """
+    :type name: str
+    :type workspace_volume: dict
+    :type mpirun_commandline: str
+    :type worker_count: int
+    :type worker_memory: int
+    :rtype: dict
+    """
     app = {
         'name': name,
         'version': 1,

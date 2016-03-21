@@ -16,7 +16,14 @@
 import os.path
 
 
-def copier_service(src_volume, src_path, dst_volume, dst_path) -> dict:
+def copier_service(src_volume, src_path, dst_volume, dst_path):
+    """
+    :type src_volume: dict
+    :type src_path: str
+    :type dst_volume: dict
+    :type dst_path: str
+    :rtype: dict
+    """
     service = {
         'name': "copier",
         'docker_image': 'alpine',
@@ -40,7 +47,14 @@ empty = {
 }
 
 
-def copier_app(src_volume=empty, src_path='', dst_volume=empty, dst_path='') -> dict:
+def copier_app(src_volume=empty, src_path='', dst_volume=empty, dst_path=''):
+    """
+    :type src_volume: dict
+    :type src_path: str
+    :type dst_volume: dict
+    :type dst_path: str
+    :rtype: dict
+    """
     app = {
         'name': 'copier',
         'version': 1,

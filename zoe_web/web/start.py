@@ -19,7 +19,7 @@ from random import randint
 from flask import render_template, request
 from zoe_lib.services import ZoeServiceAPI
 from zoe_lib.executions import ZoeExecutionsAPI
-from zoe_lib.predefined_apps.lab_spark import spark_jupyter_notebook_lab_app
+from zoe_lib.predefined_apps.eurecom_aml_lab import spark_jupyter_notebook_lab_app
 from zoe_lib.query import ZoeQueryAPI
 from zoe_lib.exceptions import ZoeAPIException
 

@@ -14,7 +14,11 @@
 # limitations under the License.
 
 
-def hadoop_namenode_service(image: str) -> dict:
+def hadoop_namenode_service(image):
+    """
+    :type image: str
+    :rtype: dict
+    """
     service = {
         'name': "hdfs-namenode",
         'docker_image': image,
@@ -36,7 +40,12 @@ def hadoop_namenode_service(image: str) -> dict:
     return service
 
 
-def hadoop_datanode_service(count: int, image: str) -> list:
+def hadoop_datanode_service(count, image):
+    """
+    :type count: int
+    :type image: str
+    :rtype: List(dict)
+    """
     ret = []
     for i in range(count):
         service = {
@@ -56,7 +65,14 @@ def hadoop_datanode_service(count: int, image: str) -> list:
 def hdfs_app(name='hdfs',
              namenode_image='192.168.45.252:5000/zoerepo/hadoop-namenode',
              datanode_count=3,
-             datanode_image='192.168.45.252:5000/zoerepo/hadoop-datanode') -> dict:
+             datanode_image='192.168.45.252:5000/zoerepo/hadoop-datanode'):
+    """
+    :type name: str
+    :type namenode_image: str
+    :type datanode_count: int
+    :type datanode_image: str
+    :rtype: dict
+    """
     app = {
         'name': name,
         'version': 1,
