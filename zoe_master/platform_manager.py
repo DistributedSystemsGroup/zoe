@@ -62,10 +62,12 @@ class PlatformManager:
         copts.name = service_description.name + "-" + execution.name + "-" + execution.owner.name + "-" + get_conf().deployment_name + "-zoe"
         copts.set_memory_limit(service_description.required_resources['memory'])
         copts.network_name = '{}-{}-zoe'.format(execution.owner.name, get_conf().deployment_name)
-        container_id = self.state_manager.gen_id()
+        service_id = self.state_manager.gen_id()
         copts.labels = {
             'zoe.execution.name': execution.name,
+            'zoe.execution.id': str(execution.id),
             'zoe.service.name': service_description.name,
+            'zoe.service.id': str(service_id),
             'zoe.owner': execution.owner.name,
             'zoe.deployment_name': get_conf().deployment_name,
             'zoe.type': 'app_service'
@@ -105,7 +107,7 @@ class PlatformManager:
         service.is_monitor = service_description.monitor
         service.ports = [p.to_dict() for p in service_description.ports]
 
-        service.id = container_id
+        service.id = service_id
         execution.services.append(service)
         service.execution = execution
 

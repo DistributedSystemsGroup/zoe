@@ -28,12 +28,15 @@ class ZoeServiceAPI(ZoeAPIBase):
     """
     The service API class. Services are read-only objects. The delete operation merely informs the master that a service has died outside of its control.
     """
-    def get(self, container_id: int) -> dict:
+    def get(self, container_id):
         """
         Retrieve service state.
 
         :param container_id: the service to query
         :return:
+
+        :type container_id: int
+        :rtype dict
         """
         c, status_code = self._rest_get('/service/' + str(container_id))
         if status_code == 200:
@@ -43,14 +46,16 @@ class ZoeServiceAPI(ZoeAPIBase):
         else:
             raise ZoeAPIException('error retrieving service {}'.format(container_id))
 
-    def died(self, service_name, execution_name):
+    def died(self, container_id):
         """
         Inform the master that a service died. Used by the observer process.
 
-        :param service_name: name of the service that died
-        :param execution_name: name of the execution the service that died belongs to
+        :param container_id: ID of the service that died
         :return:
+
+        :type container_id: int
+        :rtype: None
         """
-        data, status_code = self._rest_delete('/service/{}/{}'.format(execution_name, service_name))
+        data, status_code = self._rest_delete('/service/{}'.format(container_id))
         if status_code != 204:
             raise ZoeAPIException(data['message'])

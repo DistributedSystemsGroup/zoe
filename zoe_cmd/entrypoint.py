@@ -25,12 +25,12 @@ from argparse import ArgumentParser, Namespace, FileType, RawDescriptionHelpForm
 from pprint import pprint
 
 from zoe_cmd import utils
-from zoe_lib.zoe_api import ZoeClient
+from zoe_lib.users import ZoeUserAPI
 from zoe_lib.services import ZoeServiceAPI
 from zoe_lib.exceptions import ZoeAPIException
 from zoe_lib.executions import ZoeExecutionsAPI
 from zoe_lib.query import ZoeQueryAPI
-from zoe_lib.applications import app_validate
+from zoe_lib.applications import app_validate, predefined_app_generate, predefined_app_list
 
 
 def stats_cmd(_):
@@ -40,7 +40,7 @@ def stats_cmd(_):
 
 
 def user_new_cmd(args):
-    api = ZoeClient(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
+    api = ZoeUserAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     name = args.name
     password = args.password
     role = args.role
@@ -48,14 +48,14 @@ def user_new_cmd(args):
         print("Role must be one of admin, user, guest)")
         return
     try:
-        api.user_new(name, password, role)
+        api.create(name, password, role)
     except ZoeAPIException as e:
         print('Error creating user: {}'.format(e))
 
 
 def user_get_cmd(args):
-    api = ZoeClient(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    user = api.user_get(args.name)
+    api = ZoeUserAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
+    user = api.get(args.name)
     if user is None:
         print('No such user')
     else:
@@ -65,13 +65,13 @@ def user_get_cmd(args):
 
 
 def user_delete_cmd(args):
-    api = ZoeClient(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    api.user_delete(args.name)
+    api = ZoeUserAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
+    api.delete(args.name)
 
 
 def user_list_cmd(_):
-    api = ZoeClient(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    users = api.user_list()
+    api = ZoeQueryAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
+    users = api.query('user')
     for user in users:
         print('<- User {} ->'.format(user['name']))
         print('Role: {}'.format(user['role']))
@@ -79,15 +79,13 @@ def user_list_cmd(_):
 
 
 def pre_app_list_cmd(_):
-    api = ZoeClient(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    for a in api.predefined_app_list():
+    for a in predefined_app_list():
         print(a)
 
 
 def pre_app_export_cmd(args):
-    api = ZoeClient(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     try:
-        app = api.predefined_app_generate(args.app_name)
+        app = predefined_app_generate(args.app_name)
     except ZoeAPIException:
         print('Application not found')
     else:
