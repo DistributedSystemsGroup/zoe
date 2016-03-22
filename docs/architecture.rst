@@ -1,3 +1,5 @@
+.. _architecture:
+
 Architecture
 ============
 
@@ -5,10 +7,9 @@ The main Zoe Components are:
 
 * zoe master: the core component that performs application scheduling and talks to Swarm
 * zoe observer: listens to events from Swarm and looks for idle resources to free automatically
-* zoe-web: the web client interface
 * zoe: command-line client
 
-The command line client and the web interface are the user-facing components of Zoe, while the master and the observer are the back ends.
+The command line client is the main user-facing component of Zoe, while the master and the observer are the back ends.
 
 The Zoe master is the core component of Zoe and communicates with the clients by using a REST API. It manages users, applications and executions.
 Users submit *application descriptions* for execution. Inside the Master, a scheduler keeps track of available resources and execution requests, and applies a
@@ -26,3 +27,4 @@ These descriptions are strictly linked to the docker images used in the process 
 Please note that this documentation refers to the full Aoe Application description that is not yet fully implemented in actual code.
 
 You can use the ``zoe.py pre-app-list`` and ``zoe.py pre-app-export`` commands to export a JSON-formatted application description to use as a template.
+

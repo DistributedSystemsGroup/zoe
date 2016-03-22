@@ -36,7 +36,7 @@ class ZoeServiceAPI(ZoeAPIBase):
         :return:
 
         :type container_id: int
-        :rtype dict
+        :rtype: dict
         """
         c, status_code = self._rest_get('/service/' + str(container_id))
         if status_code == 200:

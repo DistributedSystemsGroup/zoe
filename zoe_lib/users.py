@@ -58,7 +58,7 @@ class ZoeUserAPI(ZoeAPIBase):
         :return: the user dictionary, or None
 
         :type user_name: str
-        :rtype dict|None
+        :rtype: dict|None
         """
         user, status_code = self._rest_get('/user/' + user_name)
         if status_code == 200:

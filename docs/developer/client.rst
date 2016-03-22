@@ -24,10 +24,10 @@ Executions
    :members:
 
 
-Containers
-----------
+Services
+--------
 
-.. automodule:: zoe_lib.containers
+.. automodule:: zoe_lib.services
    :members:
 
 

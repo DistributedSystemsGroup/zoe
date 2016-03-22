@@ -30,18 +30,29 @@ class InfluxDBMetricSender(threading.Thread):
         self._deployment = conf.deployment_name
         self._influxdb_endpoint = conf.influxdb_url + '/write?precision=ms&db=' + conf.influxdb_dbname
         self._queue = queue.Queue()
+        self.retries = 5
 
     def _send_buffer(self):
+        error = False
         if self._influxdb_endpoint is not None and len(self._buffer) > 0:
             payload = '\n'.join(self._buffer)
             try:
                 r = requests.post(self._influxdb_endpoint, data=payload)
             except:
-                log.exception('error writing metrics to influxdb, data thrown away')
+                log.exception('error writing metrics to influxdb, will retry {} times'.format(self.retries))
+                error = True
             else:
                 if r.status_code != 204:
-                    log.error('error writing metrics to influxdb, data thrown away')
-        self._buffer.clear()
+                    log.error('error writing metrics to influxdb, will retry {} times'.format(self.retries))
+                    error = True
+        if error:
+            if self.retries <= 0:
+                self.retries = 5
+                self._buffer.clear()
+            else:
+                self.retries -= 1
+        else:
+            self._buffer.clear()
 
     def quit(self):
         self._queue.put('quit')

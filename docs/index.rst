@@ -40,6 +40,7 @@ Contents:
   install
   config_file
   logging
+  monitoring
   architecture
   vision
   contributing

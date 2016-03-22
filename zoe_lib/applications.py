@@ -53,6 +53,14 @@ def predefined_app_generate(name):
 
 
 def app_validate(data):
+    """
+    Validates an application description, making sure all required fields are present and of the correct type.
+    This validation is also performed on the Zoe Master side.
+    If the description is not valid, an InvalidApplicationDescription exception is thrown.
+
+    :param data: a dictionary containing an application description
+    :return: None if the application description is correct
+    """
     required_keys = ['name', 'will_end', 'priority', 'requires_binary', 'version']
     for k in required_keys:
         if k not in data:

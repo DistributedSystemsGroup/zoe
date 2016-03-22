@@ -11,12 +11,14 @@ Zoe components:
 
 Zoe is written in Python and uses the ``requirements.txt`` file to list the package dependencies needed for all components of Zoe. Not all of them are needed in all cases, for example you need the ``kazoo`` library only if you use Zookeeper to manage Swarm high availability.
 
+Zoe is a young software project and we foresee it being used in places with wildly different requirements in terms of IT organization (what is below Zoe) and user interaction (what is above Zoe). For this reason we are aiming at providing a solid core of features and a number of basic external components that can be easily customized. For example, the Spark idle monitoring feature is useful only in certain environments and it is implemented as an external service, that can be customized of takes as an example to build something different.
+
 Requirements
 ------------
 
-Zoe is written in Python 3. Development happens on Python 3.4, but we test also for Python 3.5.
+Zoe is written in Python 3. Development happens on Python 3.4, but we test also for Python 3.5 on Travis-CI.
 
-* Docker Swarm
+To run Zoe you need Docker Swarm and a shared filesystem, mounted on all hosts part of the Swarm. Internally we use CEPH-FS, but NFS is also a valid solution.
 
 Optional:
 
