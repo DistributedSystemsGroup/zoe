@@ -56,10 +56,11 @@ def main():
     log.info("Initializing state")
     state_manager = StateManager(FSBlobs)
     state_manager.init()
+    config.singletons['state_manager'] = state_manager
 
     log.info("Initializing platform manager")
     pm = PlatformManager(FIFOSchedulerPolicy)
-    pm.state_manager = state_manager
+    config.singletons['platform_manager'] = pm
 
 #    try:
     log.info("Checking state consistency")

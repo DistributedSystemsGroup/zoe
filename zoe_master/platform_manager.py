@@ -20,7 +20,7 @@ from zoe_lib.swarm_client import SwarmClient, DockerContainerOptions
 from zoe_lib.exceptions import ZoeException
 from zoe_master.config import get_conf, singletons
 from zoe_master.scheduler import ZoeScheduler
-from zoe_master.state import execution as execution_module, application as application_module, service as service_module
+from zoe_master.state import execution as execution_module, application as application_module, service as service_module, user as user_module
 from zoe_master.state.manager import StateManager
 from zoe_master.stats import SwarmStats, SchedulerStats
 
@@ -36,7 +36,14 @@ class PlatformManager:
     def __init__(self, sched_policy_class):
         self.swarm = SwarmClient(get_conf())
         self.scheduler = ZoeScheduler(self, sched_policy_class)
-        self.state_manager = None
+        self.state_manager = singletons['state_manager']
+
+    def execution_prepare(self, name: str, user: user_module.User, application_description: application_module.ApplicationDescription):
+        ex = execution_module.Execution(self.state_manager)
+        ex.user = user
+        ex.name = name
+        ex.application = application_description
+        return ex
 
     def execution_submit(self, execution: execution_module.Execution):
         execution.id = self.state_manager.gen_id()
