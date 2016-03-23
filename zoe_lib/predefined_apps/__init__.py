@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from zoe_lib.predefined_apps.copier import copier_app
-from zoe_lib.predefined_frameworks.jupyter_spark import spark_jupyter_notebook_app
+from zoe_lib.predefined_apps.spark_interactive import spark_jupyter_notebook_app
 from zoe_lib.predefined_apps.eurecom_aml_lab import spark_jupyter_notebook_lab_app
 from zoe_lib.predefined_apps.hdfs import hdfs_app
 from zoe_lib.predefined_apps.openmpi import openmpi_app
