@@ -26,6 +26,7 @@ from zoe_master.rest_api.auth.authentication import authenticate
 from zoe_master.rest_api.auth.authorization import is_authorized
 from zoe_master.state.user import User
 from zoe_master.config import singletons
+import zoe_master.workspace.base
 
 
 class UserAPI(Resource):
@@ -65,6 +66,10 @@ class UserAPI(Resource):
 
         if user_has_active_executions(user):
             raise ZoeRestAPIException('User has running executions, cannot delete')
+
+        for wks in singletons['workspace_managers']:
+            assert isinstance(wks, zoe_master.workspace.base.ZoeWorkspaceBase)
+            wks.destroy(user)
 
         self.platform.kill_gateway_container(user)
         self.platform.remove_user_network(user)
@@ -118,6 +123,10 @@ class UserCollectionAPI(Resource):
         self.platform.create_user_network(user)
 
         self.platform.start_gateway_container(user)
+
+        for wks in singletons['workspace_managers']:
+            assert isinstance(wks, zoe_master.workspace.base.ZoeWorkspaceBase)
+            wks.create(user)
 
         self.state.state_updated()
 

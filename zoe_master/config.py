@@ -24,7 +24,8 @@ singletons = {
     'metric': None,
     'stats_manager': None,
     'state_manager': None,
-    'platform_manager': None
+    'platform_manager': None,
+    'workspace_managers': [],
 }
 
 _conf = None

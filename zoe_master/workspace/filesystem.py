@@ -16,17 +16,17 @@
 import os.path
 import shutil
 
-from zoe_master.workspace import ZoeWorkspaceBase
-from zoe_master.config import get_conf
+import zoe_master.workspace.base
+import zoe_master.config as config
 
 
-class ZoeFSWorkspace(ZoeWorkspaceBase):
+class ZoeFSWorkspace(zoe_master.workspace.base.ZoeWorkspaceBase):
     def __init__(self):
-        self.base_path = get_conf().workspace_base_path
+        self.base_path = os.path.join(config.get_conf().workspace_base_path, config.get_conf().deployment_name)
 
     def create(self, user):
         path = os.path.join(self.base_path, user.name)
-        os.makedirs(path, exist_ok=False)
+        os.makedirs(path, exist_ok=True)
 
     def destroy(self, user):
         path = os.path.join(self.base_path, user.name)

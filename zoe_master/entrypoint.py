@@ -29,6 +29,8 @@ from zoe_master.state.manager import StateManager
 from zoe_master.state.blobs.fs import FSBlobs
 from zoe_lib.metrics.influxdb import InfluxDBMetricSender
 from zoe_master.stats_manager import StatsManager
+from zoe_master.workspace.filesystem import ZoeFSWorkspace
+from zoe_master.workspace.hdfs import ZoeHDFSWorkspace
 
 log = logging.getLogger("main")
 
@@ -61,6 +63,13 @@ def main():
     log.info("Initializing platform manager")
     pm = PlatformManager(FIFOSchedulerPolicy)
     config.singletons['platform_manager'] = pm
+
+    log.info("Initializing workspace managers")
+    fswk = ZoeFSWorkspace()
+    config.singletons['workspace_managers'] = [fswk]
+    if config.get_conf().enable_hdfs_workspace:
+        hdfswk = ZoeHDFSWorkspace()
+        config.singletons['workspace_managers'].append(hdfswk)
 
 #    try:
     log.info("Checking state consistency")
