@@ -45,6 +45,7 @@ def spark_jupyter_notebook_lab_app(name='aml-lab',
         w['networks'].append('eeef9754c16790a29d5210c5d9ad8e66614ee8a6229b6dc6f779019d46cec792')
     jupyter = jupyter_framework.spark_jupyter_notebook_service(notebook_mem_limit, worker_mem_limit, notebook_image)
     jupyter['networks'].append('eeef9754c16790a29d5210c5d9ad8e66614ee8a6229b6dc6f779019d46cec792')
+    jupyter['environment'].append(['NAMENODE_HOST', 'hdfs-namenode.hdfs'])
 
     app = {
         'name': name,
