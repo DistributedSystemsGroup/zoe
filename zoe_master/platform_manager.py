@@ -38,9 +38,14 @@ class PlatformManager:
         self.scheduler = ZoeScheduler(self, sched_policy_class)
         self.state_manager = None
 
-    def execution_submitted(self, execution: execution_module.Execution):
+    def execution_submit(self, execution: execution_module.Execution):
+        execution.id = self.state_manager.gen_id()
+        self.state_manager.new('execution', execution)
+
         execution.set_scheduled()
         self.scheduler.incoming(execution)
+
+        self.state_manager.state_updated()
 
     def execution_start(self, execution: execution_module.Execution) -> bool:
         try:

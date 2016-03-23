@@ -139,12 +139,7 @@ class ExecutionCollectionAPI(Resource):
 
         check_quota(calling_user, self.state)
 
-        execution.id = self.state.gen_id()
-        self.state.new('execution', execution)
-
-        self.platform.execution_submitted(execution)
-
-        self.state.state_updated()
+        self.platform.execution_submit(execution)
 
         singletons['metric'].metric_api_call(start_time, 'execution', 'start', calling_user)
         return {'execution_id': execution.id}, 201
