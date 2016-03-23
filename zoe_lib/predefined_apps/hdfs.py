@@ -38,3 +38,29 @@ def hdfs_app(name='hdfs',
         ] + hadoop_framework.hadoop_datanode_service(datanode_count, datanode_image)
     }
     return app
+
+
+def hdfs_client_app(name='hdfs-client',
+                    image='192.168.45.252:5000/zoerepo/hadoop-client',
+                    namenode='hdfs-namenode.hdfs',
+                    user='root',
+                    command='hdfs dfs -ls /'):
+    """
+    :type name: str
+    :type image: str
+    :type user: str
+    :type namenode: str
+    :type command: str
+    :rtype: dict
+    """
+    app = {
+        'name': name,
+        'version': 1,
+        'will_end': True,
+        'priority': 512,
+        'requires_binary': False,
+        'services': [
+            hadoop_framework.hadoop_client_service(image, namenode, user, command)
+        ]
+    }
+    return app

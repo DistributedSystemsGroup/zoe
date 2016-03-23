@@ -34,7 +34,7 @@ def hadoop_namenode_service(image):
             }
         ],
         'environment': [
-            ["NAMENODE_HOST", "namenode-{execution_name}-{user_name}-{deployment_name}-zoe"]
+            ["NAMENODE_HOST", "namenode-{execution_name}-{user_name}-{deployment_name}-zoe:8020"]
         ]
     }
     return service
@@ -55,8 +55,31 @@ def hadoop_datanode_service(count, image):
             'required_resources': {"memory": 1 * 1024 * 1024 * 1024},  # 1 GB
             'ports': [],
             'environment': [
-                ["NAMENODE_HOST", "namenode-{execution_name}-{user_name}-{deployment_name}-zoe"]
+                ["NAMENODE_HOST", "namenode-{execution_name}-{user_name}-{deployment_name}-zoe:8020"]
             ]
         }
         ret.append(service)
     return ret
+
+
+def hadoop_client_service(image, namenode_address, user, command):
+    """
+    :type command: str
+    :type namenode_address: str
+    :type user: str
+    :type image: str
+    :rtype: List(dict)
+    """
+    service = {
+        'name': "hadoop-client",
+        'docker_image': image,
+        'monitor': False,
+        'required_resources': {"memory": 1 * 1024 * 1024 * 1024},  # 1 GB
+        'ports': [],
+        'environment': [
+            ["NAMENODE_HOST", namenode_address],
+            ["HDFS_USER", user]
+        ],
+        'command': command
+    }
+    return service
