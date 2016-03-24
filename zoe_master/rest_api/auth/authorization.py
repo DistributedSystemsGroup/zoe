@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from zoe_lib.exceptions import ZoeRestAPIException
+import zoe_master.rest_api.utils
 
 
 def authorization_error():
@@ -35,7 +36,7 @@ QUOTA_MAX_MEM_GUESTS = 16 * (2**30)
 QUOTA_MAX_PROCS_GUESTS = 5
 
 
-def check_quota(user, state):
-    if user.role == "guest" and state.user_has_active_executions(user.id):
+def check_quota(user):
+    if user.role == "guest" and zoe_master.rest_api.utils.user_has_active_executions(user):
             raise ZoeRestAPIException('Quota exceeded', 402)
     return True
