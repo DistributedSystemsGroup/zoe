@@ -31,9 +31,9 @@ class GELFUDPHandler(socketserver.DatagramRequestHandler):
         data = self.rfile.read()
         data = gzip.decompress(data)
         data = json.loads(data.decode('utf-8'))
-        service_id = '.'.join([data['_zoe.service.name'], data['_zoe.execution.name'], data['_zoe.owner'], data['_zoe.prefix']])
-        log_line = ' '.join([data['timestamp'], data['host'], service_id, data['short_message']])
-        self.server.kafka_producer.send(topic=service_id, value=log_line)
+        service_id = '.'.join([data['_zoe.service.name'], data['_zoe.execution.name'], data['_zoe.owner'], data['_zoe.deployment_name']])
+        log_line = ' '.join([str(data['timestamp']), data['host'], service_id, data['short_message']])
+        self.server.kafka_producer.send(topic=service_id, value=log_line.encode('utf-8'))
         # log.debug(log_line)
 
 
@@ -54,7 +54,7 @@ def udp_listener(kafka_producer):
 
 
 def setup_kafka():
-    return kafka.KafkaProducer(bootstrap_servers=get_conf().kafka_broker, key_serializer=bytes, value_serializer=bytes)
+    return kafka.KafkaProducer(bootstrap_servers=get_conf().kafka_broker)
 
 
 def main():
