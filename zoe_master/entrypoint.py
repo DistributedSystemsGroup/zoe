@@ -28,6 +28,7 @@ from zoe_master.rest_api import init as api_init
 from zoe_master.state.manager import StateManager
 from zoe_master.state.blobs.fs import FSBlobs
 from zoe_lib.metrics.influxdb import InfluxDBMetricSender
+from zoe_lib.metrics.base import BaseMetricSender
 from zoe_master.stats_manager import StatsManager
 from zoe_master.workspace.filesystem import ZoeFSWorkspace
 from zoe_master.workspace.hdfs import ZoeHDFSWorkspace
@@ -84,6 +85,9 @@ def main():
     if config.get_conf().influxdb_enable:
         metrics_th = InfluxDBMetricSender(config.get_conf())
         metrics_th.start()
+        config.singletons['metric'] = metrics_th
+    else:
+        metrics_th = BaseMetricSender('metrics-logger', config.get_conf())
         config.singletons['metric'] = metrics_th
 
     stats_th = StatsManager()
