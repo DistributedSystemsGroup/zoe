@@ -26,5 +26,11 @@ class ZoeWorkspaceBase:
     def get_path(self, user: zoe_master.state.user.User) -> str:
         raise NotImplementedError
 
+    def exists(self, user: zoe_master.state.user.User) -> bool:
+        raise NotImplementedError
+
     def can_be_attached(self) -> bool:
+        raise NotImplementedError
+
+    def get_mountpoint(self) -> str:
         raise NotImplementedError

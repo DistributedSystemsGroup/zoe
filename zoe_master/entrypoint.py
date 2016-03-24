@@ -73,6 +73,7 @@ def main():
 
 #    try:
     log.info("Checking state consistency")
+    pm.check_workspaces()
     pm.check_state_swarm_consistency()
 #    except:
 #        log.error('State is seriously corrupted, delete and restart')

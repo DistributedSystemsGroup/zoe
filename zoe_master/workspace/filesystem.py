@@ -32,8 +32,14 @@ class ZoeFSWorkspace(zoe_master.workspace.base.ZoeWorkspaceBase):
         path = os.path.join(self.base_path, user.name)
         shutil.rmtree(path)
 
+    def exists(self, user):
+        return os.path.exists(os.path.join(self.base_path, user.name))
+
     def get_path(self, user):
         return os.path.join(self.base_path, user.name)
 
     def can_be_attached(self):
         return True
+
+    def get_mountpoint(self):
+        return '/mnt/workspace'

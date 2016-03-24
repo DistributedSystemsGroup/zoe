@@ -49,8 +49,14 @@ class ZoeHDFSWorkspace(zoe_master.workspace.base.ZoeWorkspaceBase):
         ex = pm.execution_prepare('hdfs-mkdir', user, app)
         pm.execution_submit(ex)
 
+    def exists(self, user):
+        return True  # FIXME
+
     def get_path(self, user: zoe_master.state.user.User) -> str:
         return "hdfs://" + self.namenode + self.base_path + "/" + user.name
 
     def can_be_attached(self) -> bool:
         return False
+
+    def get_mountpoint(self) -> str:
+        return ''
