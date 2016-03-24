@@ -130,7 +130,7 @@ class ExecutionCollectionAPI(Resource):
 
         is_authorized(calling_user, execution, 'create')
 
-        old_exec = self.state.get_one('execution', name=execution.name)
+        old_exec = self.state.get_one('execution', name=execution.name, owner=calling_user)
         if old_exec is not None:
             if old_exec.is_active():
                 raise ZoeRestAPIException('An execution with the same name is already running')
