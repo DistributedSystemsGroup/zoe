@@ -16,20 +16,19 @@
 import time
 import requests
 import logging
-import threading
 import queue
+
+import zoe_lib.metrics.base
 
 log = logging.getLogger(__name__)
 
 
-class InfluxDBMetricSender(threading.Thread):
+class InfluxDBMetricSender(zoe_lib.metrics.base.BaseMetricSender):
     def __init__(self, conf):
-        super().__init__(name='influxdb_sender')
+        super().__init__('influxdb_sender', conf)
 
         self._buffer = []
-        self._deployment = conf.deployment_name
         self._influxdb_endpoint = conf.influxdb_url + '/write?precision=ms&db=' + conf.influxdb_dbname
-        self._queue = queue.Queue()
         self.retries = 5
 
     def _send_buffer(self):
@@ -67,9 +66,6 @@ class InfluxDBMetricSender(threading.Thread):
         point_str += " " + str(int(ts * 1000))
 
         self._queue.put(point_str)
-
-    def _time_diff_ms(self, start: float, end: float) -> int:
-        return (end - start) * 1000
 
     def metric_api_call(self, time_start, api_name, action, calling_user):
         time_end = time.time()
