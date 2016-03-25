@@ -276,7 +276,7 @@ class PlatformManager:
             self.start_gateway_container(u)
 
         # ### Check executions and container consistency
-        swarm_containers = self.swarm.list(only_label={'zoe.deployment': get_conf().deployment_name})
+        swarm_containers = self.swarm.list(only_label={'zoe.deployment_name': get_conf().deployment_name})
         conts_state_to_delete = []
         for c_id, c in self.state_manager.services.items():
             if c.docker_id not in [x['id'] for x in swarm_containers]:
