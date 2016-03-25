@@ -85,13 +85,12 @@ def spark_worker_service(count, mem_limit, cores, image):
     return ret
 
 
-def spark_submit_service(mem_limit, worker_mem_limit, image, command, spark_options):
+def spark_submit_service(mem_limit, worker_mem_limit, image, command):
     """
     :type mem_limit: int
     :type worker_mem_limit: int
     :type image: str
     :type command: str
-    :type spark_options: str
     :rtype: dict
     """
     executor_ram = worker_mem_limit - (2 * 1024 ** 3)
@@ -111,9 +110,7 @@ def spark_submit_service(mem_limit, worker_mem_limit, image, command, spark_opti
         ],
         'environment': [
             ["SPARK_MASTER_IP", "spark-master-{execution_name}-{user_name}-{deployment_name}-zoe.{user_name}-{deployment_name}-zoe"],
-            ["SPARK_OPTIONS", spark_options],
-            ["SPARK_EXECUTOR_RAM", str(executor_ram)],
-            ["APPLICATION_URL", "{application_binary}"]
+            ["SPARK_EXECUTOR_RAM", str(executor_ram)]
         ],
         'command': command
     }
