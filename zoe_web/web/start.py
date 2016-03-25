@@ -64,10 +64,9 @@ def home_guest():
         user = user_api.get(guest_identifier)
     except ZoeAPIException:
         return missing_auth()
-    if len(user) == 0:
+    if user is None:
         return missing_auth()
     else:
-        user = user[0]
         template_vars['user_gateway'] = user['gateway_urls'][0]
         template_vars['gateway_ip'] = user['gateway_urls'][0].split('/')[2].split(':')[0]
         exec_api = ZoeExecutionsAPI(get_conf().master_url, guest_identifier, guest_password)

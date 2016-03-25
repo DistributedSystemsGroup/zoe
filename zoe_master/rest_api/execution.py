@@ -137,7 +137,7 @@ class ExecutionCollectionAPI(Resource):
             else:
                 self.state.delete('execution', old_exec.id)
 
-        check_quota(calling_user, self.state)
+        check_quota(calling_user)
 
         self.platform.execution_submit(execution)
 
