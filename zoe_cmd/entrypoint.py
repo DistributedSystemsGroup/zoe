@@ -184,7 +184,7 @@ def process_arguments() -> Namespace:
     argparser_pre_app_export.add_argument('app_name', help='Predefined application name (use pre-app-list to see what is available')
     argparser_pre_app_export.set_defaults(func=pre_app_export_cmd)
 
-    argparser_exec_start = subparser.add_parser('start', help="Start a previously registered application")
+    argparser_exec_start = subparser.add_parser('start', help="Start an application")
     argparser_exec_start.add_argument('name', help="Name of the execution")
     argparser_exec_start.add_argument('jsonfile', type=FileType("r"), help='Application description')
     argparser_exec_start.set_defaults(func=exec_start_cmd)
