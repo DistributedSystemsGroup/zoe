@@ -46,5 +46,5 @@ class InfoAPI(Resource):
             'deployment_name': get_conf().deployment_name
         }
 
-        singletons['metric'].metric_api_call(start_time, 'info', '', calling_user)
+        singletons['metric'].metric_api_call(start_time, 'info', 'get', calling_user)
         return ret
