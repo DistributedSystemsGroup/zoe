@@ -35,7 +35,7 @@ from zoe_lib.applications import app_validate, predefined_app_generate, predefin
 
 def stats_cmd(_):
     api = ZoeQueryAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    stats = api.query('stats swarm')
+    stats = api.query('stats_swarm')
     pprint(stats)
 
 
