@@ -41,7 +41,8 @@ def load_configuration(test_conf=None):
                                    args_for_writing_out_config_file=["--write-config"])
         argparser.add_argument('--debug', action='store_true', help='Enable debug output')
         argparser.add_argument('--swarm', help='Swarm/Docker API endpoint (ex.: zk://zk1:2181,zk2:2181 or http://swarm:2380)', default='http://localhost:2375')
-        argparser.add_argument('--private-registry', help='Docker private registry address (ex.: 10.0.0.1:5000)', default='10.0.0.1:5000')
+        argparser.add_argument('--guest-gateway-image-name', help='Docker image for guests gateway container (ex.: zoerepo/guest-gateway)', default='zoerepo/guest-gateway')
+        argparser.add_argument('--user-gateway-image-name', help='Docker image for users gateway container (ex.: zoerepo/guest-gateway)', default='zoerepo/guest-gateway')
         argparser.add_argument('--state-dir', help='Directory where state checkpoints are saved', default='/var/lib/zoe')
         argparser.add_argument('--listen-address', help='REST API listen address', default='0.0.0.0')
         argparser.add_argument('--listen-port', help='REST API listen port', default='4850')
@@ -52,7 +53,7 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--influxdb-enable', action="store_true", help='Enable metric output toward influxDB')
         argparser.add_argument('--passlib-rounds', type=int, help='Number of hashing rounds for passwords', default=60000)
         argparser.add_argument('--gelf-address', help='Enable Docker GELF log output to this destination (ex. udp://1.2.3.4:1234)', default='')
-        argparser.add_argument('--workspace-base-path', help='Path where user workspaces will be created by Zoe. Must be visible at this path on all Swarm hosts.', default='/mnt/nfs/zoe-workspaces')
+        argparser.add_argument('--workspace-base-path', help='Path where user workspaces will be created by Zoe. Must be visible at this path on all Swarm hosts.', default='/mnt/zoe-workspaces')
         argparser.add_argument('--enable-hdfs-workspace', help='Enable support for creating workspaces in HDFS', action='store_true')
         argparser.add_argument('--hdfs-namenode', help='IP:port of the NameNode to use for workspace management', default='127.0.0.1:8020')
         argparser.add_argument('--hdfs-network', help='If HDFS is in a Docker network, provide here the network ID', default='')
@@ -60,6 +61,7 @@ def load_configuration(test_conf=None):
         opts = argparser.parse_args()
         if opts.debug:
             argparser.print_values()
+
         _conf = opts
     else:
         _conf = test_conf

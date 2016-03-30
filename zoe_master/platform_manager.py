@@ -173,9 +173,9 @@ class PlatformManager:
         }
         copts.restart = True
         if user.role == 'guest':
-            image = get_conf().private_registry + '/zoerepo/guest-gateway'
+            image = get_conf().guest_gateway_image_name
         else:
-            image = get_conf().private_registry + '/zoerepo/guest-gateway'  # TODO: create an image with ssh
+            image = get_conf().user_gateway_image_name
         cont_info = self.swarm.spawn_container(image, copts)
         if cont_info is None:
             raise ZoeException('Cannot create user gateway container')

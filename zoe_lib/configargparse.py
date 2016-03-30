@@ -505,8 +505,8 @@ class ArgumentParser(argparse.ArgumentParser):
         return keys
 
     def _open_config_files(self, command_line_args):
-        """Tries to parse config file path(s) from within command_line_args. 
-        Returns a list of opened config files, including files specified on the 
+        """Tries to parse config file path(s) from within command_line_args.
+        Returns a list of opened config files, including files specified on the
         commandline as well as any default_config_files specified in the
         constructor that are present on disk.
 
@@ -538,14 +538,14 @@ class ArgumentParser(argparse.ArgumentParser):
             arg_parser._add_action(action)
 
             # make parser not exit on error by replacing its error method.
-            # Otherwise it sys.exits(..) if, for example, config file 
+            # Otherwise it sys.exits(..) if, for example, config file
             # is_required=True and user doesn't provide it.
             def error_method(self, message):
                 pass
 
             arg_parser.error = types.MethodType(error_method, arg_parser)
 
-            # check whether the user provided a value 
+            # check whether the user provided a value
             parsed_arg = arg_parser.parse_known_args(args=command_line_args)
             if not parsed_arg:
                 continue
@@ -589,7 +589,7 @@ class ArgumentParser(argparse.ArgumentParser):
 
         return r.getvalue()
 
-    def print_values(self, file=sys.stdout):
+    def print_values(self, file=sys.stderr):
         """Prints the format_values() string (to sys.stdout or another file)."""
         file.write(self.format_values())
 
