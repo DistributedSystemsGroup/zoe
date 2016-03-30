@@ -8,7 +8,6 @@ log = logging.getLogger(__name__)
 
 
 def main_callback(event):
-    log.debug(event)
     if event['Type'] != 'container':
         return
 
@@ -17,6 +16,8 @@ def main_callback(event):
             return
     except KeyError:
         return
+
+    log.debug(event)
 
     if event['Action'] == "die":
         try:
