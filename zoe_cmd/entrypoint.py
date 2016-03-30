@@ -127,6 +127,8 @@ def exec_get_cmd(args):
     else:
         print('Execution {} (ID: {})'.format(execution['name'], execution['id']))
         print('Status: {}'.format(execution['status']))
+        if execution['error'] is not None:
+            print('Last error: {}'.format(execution['error']))
         print('Time started: {}'.format(execution['time_started']))
         print('Time scheduled: {}'.format(execution['time_scheduled']))
         print('Time finished: {}'.format(execution['time_finished']))
