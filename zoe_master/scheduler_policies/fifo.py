@@ -73,5 +73,8 @@ class FIFOSchedulerPolicy(BaseSchedulerPolicy):
     def stats(self):
         ret = SchedulerStats()
         ret.count_waiting = len(self.waiting_list)
+        ret.waiting_list = []
+        for e in self.waiting_list:
+            ret.waiting_list.append(e.name)
         ret.timestamp = time.time()
         return ret

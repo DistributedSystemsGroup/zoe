@@ -69,6 +69,7 @@ class SchedulerStats(Stats):
     def __init__(self):
         super().__init__()
         self.count_waiting = 0
+        self.waiting_list = []
 
 
 class ContainerStats(Stats):
