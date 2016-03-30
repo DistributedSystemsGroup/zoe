@@ -34,7 +34,7 @@ def deserialize_datetime(isoformat):
 class Execution(BaseState):
 
     api_in_attrs = ['name', 'application']
-    api_out_attrs = ['name', 'application', 'status', 'time_scheduled', 'time_started', 'time_finished']
+    api_out_attrs = ['name', 'application', 'status', 'time_scheduled', 'time_started', 'time_finished', 'error']
 
     def __init__(self, state):
         super().__init__(state)
@@ -44,6 +44,7 @@ class Execution(BaseState):
         self.time_started = None
         self.time_finished = None
         self.status = 'undefined'
+        self.error = None
 
         # Links to other objects
         self.user = None

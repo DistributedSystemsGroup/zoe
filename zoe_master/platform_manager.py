@@ -60,7 +60,7 @@ class PlatformManager:
             self._application_to_containers(execution)
         except ZoeException as e:
             log.warning('Error starting application: {}'.format(e.value))
-            self.execution_terminate(execution, reason='error')
+            self.execution_terminate(execution, reason='error', message=e.value)
             raise
         execution.set_started()
         self.state_manager.state_updated()
@@ -135,7 +135,7 @@ class PlatformManager:
         self.state_manager.new('service', service)
         return True
 
-    def execution_terminate(self, execution: execution_module.Execution, reason):
+    def execution_terminate(self, execution: execution_module.Execution, reason, message=None):
         """
         :param execution: The execution to be terminated
         :param reason: termination reason
@@ -150,7 +150,10 @@ class PlatformManager:
                 log.info('Service {} terminated'.format(c.name))
 
         if reason == 'error':
-            execution.set_error()
+            if message is not None:
+                execution.error = message
+            else:
+                execution.error = 'error'
             return
         elif reason == 'finished':
             execution.set_finished()
