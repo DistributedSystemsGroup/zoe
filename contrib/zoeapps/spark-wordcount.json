@@ -1,0 +1,171 @@
+{
+    "name": "spark-submit",
+    "priority": 512,
+    "requires_binary": true,
+    "services": [
+        {
+            "docker_image": "192.168.45.252:5000/zoerepo/spark-master",
+            "environment": [
+                [
+                    "SPARK_MASTER_IP",
+                    "spark-master-{execution_name}-{user_name}-{deployment_name}-zoe.{user_name}-{deployment_name}-zoe"
+                ]
+            ],
+            "monitor": false,
+            "name": "spark-master",
+            "networks": ["eeef9754c16790a29d5210c5d9ad8e66614ee8a6229b6dc6f779019d46cec792"],
+            "ports": [
+                {
+                    "is_main_endpoint": false,
+                    "name": "Spark master web interface",
+                    "path": "/",
+                    "port_number": 8080,
+                    "protocol": "http"
+                }
+            ],
+            "required_resources": {
+                "memory": 4294967296
+            }
+        },
+        {
+            "command": "--class fr.eurecom.dsg.WordCount wc.jar WC-GBig hdfs://hdfs-namenode.hdfs/datasets/gutenberg/gutenberg_small.txt hdfs://hdfs-namenode.hdfs/tmp/cntwdc1",
+            "docker_image": "192.168.45.252:5000/zoerepo/spark-submit",
+            "environment": [
+                [
+                    "SPARK_MASTER_IP",
+                    "spark-master-{execution_name}-{user_name}-{deployment_name}-zoe.{user_name}-{deployment_name}-zoe"
+                ],
+                [
+                    "SPARK_EXECUTOR_RAM",
+                    "6442450944"
+                ],
+                ["WS_DIR", "wordcount"]
+            ],
+            "monitor": true,
+            "name": "spark-submit",
+            "networks": ["eeef9754c16790a29d5210c5d9ad8e66614ee8a6229b6dc6f779019d46cec792"],
+            "ports": [
+                {
+                    "is_main_endpoint": false,
+                    "name": "Spark application web interface",
+                    "path": "/",
+                    "port_number": 4040,
+                    "protocol": "http"
+                }
+            ],
+            "required_resources": {
+                "memory": 4294967296
+            }
+        },
+        {
+            "docker_image": "192.168.45.252:5000/zoerepo/spark-worker",
+            "environment": [
+                [
+                    "SPARK_WORKER_CORES",
+                    "4"
+                ],
+                [
+                    "SPARK_WORKER_RAM",
+                    "6978272768"
+                ],
+                [
+                    "SPARK_MASTER_IP",
+                    "spark-master-{execution_name}-{user_name}-{deployment_name}-zoe.{user_name}-{deployment_name}-zoe"
+                ],
+                [
+                    "SPARK_LOCAL_IP",
+                    "spark-worker0-{execution_name}-{user_name}-{deployment_name}-zoe.{user_name}-{deployment_name}-zoe"
+                ]
+            ],
+            "monitor": false,
+            "name": "spark-worker0",
+            "networks": ["eeef9754c16790a29d5210c5d9ad8e66614ee8a6229b6dc6f779019d46cec792"],
+            "ports": [
+                {
+                    "is_main_endpoint": false,
+                    "name": "Spark worker web interface",
+                    "path": "/",
+                    "port_number": 8081,
+                    "protocol": "http"
+                }
+            ],
+            "required_resources": {
+                "memory": 8589934592
+            }
+        },
+        {
+            "docker_image": "192.168.45.252:5000/zoerepo/spark-worker",
+            "environment": [
+                [
+                    "SPARK_WORKER_CORES",
+                    "4"
+                ],
+                [
+                    "SPARK_WORKER_RAM",
+                    "6978272768"
+                ],
+                [
+                    "SPARK_MASTER_IP",
+                    "spark-master-{execution_name}-{user_name}-{deployment_name}-zoe.{user_name}-{deployment_name}-zoe"
+                ],
+                [
+                    "SPARK_LOCAL_IP",
+                    "spark-worker1-{execution_name}-{user_name}-{deployment_name}-zoe.{user_name}-{deployment_name}-zoe"
+                ]
+            ],
+            "monitor": false,
+            "name": "spark-worker1",
+            "networks": ["eeef9754c16790a29d5210c5d9ad8e66614ee8a6229b6dc6f779019d46cec792"],
+            "ports": [
+                {
+                    "is_main_endpoint": false,
+                    "name": "Spark worker web interface",
+                    "path": "/",
+                    "port_number": 8081,
+                    "protocol": "http"
+                }
+            ],
+            "required_resources": {
+                "memory": 8589934592
+            }
+        },
+        {
+            "docker_image": "192.168.45.252:5000/zoerepo/spark-worker",
+            "environment": [
+                [
+                    "SPARK_WORKER_CORES",
+                    "4"
+                ],
+                [
+                    "SPARK_WORKER_RAM",
+                    "6978272768"
+                ],
+                [
+                    "SPARK_MASTER_IP",
+                    "spark-master-{execution_name}-{user_name}-{deployment_name}-zoe.{user_name}-{deployment_name}-zoe"
+                ],
+                [
+                    "SPARK_LOCAL_IP",
+                    "spark-worker2-{execution_name}-{user_name}-{deployment_name}-zoe.{user_name}-{deployment_name}-zoe"
+                ]
+            ],
+            "monitor": false,
+            "name": "spark-worker2",
+            "networks": ["eeef9754c16790a29d5210c5d9ad8e66614ee8a6229b6dc6f779019d46cec792"],
+            "ports": [
+                {
+                    "is_main_endpoint": false,
+                    "name": "Spark worker web interface",
+                    "path": "/",
+                    "port_number": 8081,
+                    "protocol": "http"
+                }
+            ],
+            "required_resources": {
+                "memory": 8589934592
+            }
+        }
+    ],
+    "version": 1,
+    "will_end": false
+}
