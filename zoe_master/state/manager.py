@@ -63,6 +63,11 @@ class StateManager:
                 self.load_checkpoint(checkpoint)
             except:
                 log.exception('Corrupted state checkpoint ({}), starting with empty state'.format(checkpoint))
+                self.users = {}
+                self.executions = {}
+                self.services = {}
+                self._next_id = 1
+                self._state_epoch = 1
 
         if self.get_one('user', id=0) is None:
             log.warn('No Zoe admin user found, creating a new one. This is normal the first time Zoe is run.')
