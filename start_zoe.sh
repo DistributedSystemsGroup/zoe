@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "The images for this script are not yet available on the Docker Hub"
+exit 1
+
 if [ ! `which tmux` ]; then
 	echo "This script uses the tmux terminal multiplexer, but it is not available in PATH"
 	exit 1
