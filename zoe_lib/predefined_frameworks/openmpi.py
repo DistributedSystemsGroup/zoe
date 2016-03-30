@@ -14,10 +14,9 @@
 # limitations under the License.
 
 
-def openmpi_worker_service(counter, workspace_volume, worker_memory):
+def openmpi_worker_service(counter, worker_memory):
     """
     :type counter: int
-    :type workspace_volume: dict
     :type worker_memory: int
     :rtype: dict
     """
@@ -31,14 +30,12 @@ def openmpi_worker_service(counter, workspace_volume, worker_memory):
         'volumes': [],
         'command': ''
     }
-    service['volumes'].append([workspace_volume['host_path'], workspace_volume['cont_path'], workspace_volume['readonly']])
     return service
 
 
-def openmpi_mpirun_service(workspace_volume, mpirun_commandline, worker_memory):
+def openmpi_mpirun_service(mpirun_commandline, worker_memory):
     """
     :type mpirun_commandline: str
-    :type workspace_volume: dict
     :type worker_memory: int
     :rtype: dict
     """
@@ -52,12 +49,4 @@ def openmpi_mpirun_service(workspace_volume, mpirun_commandline, worker_memory):
         'volumes': [],
         'command': mpirun_commandline
     }
-    service['volumes'].append([workspace_volume['host_path'], workspace_volume['cont_path'], workspace_volume['readonly']])
     return service
-
-
-empty = {
-    'host_path': 'CHANGEME',  # the path containing what to copy
-    'cont_path': 'CHANGEME',  # the file or directory to copy from or to host_path
-    'readonly': False
-}

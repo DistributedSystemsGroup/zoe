@@ -16,17 +16,9 @@
 import zoe_lib.predefined_frameworks.openmpi as openmpi_framework
 
 
-empty = {
-    'host_path': 'CHANGEME',  # the path containing what to copy
-    'cont_path': 'CHANGEME',  # the file or directory to copy from or to host_path
-    'readonly': False
-}
-
-
-def openmpi_app(name='openmpi-test', workspace_volume=empty, mpirun_commandline='', worker_count=4, worker_memory=(1024 ** 3)):
+def openmpi_app(name='openmpi-test', mpirun_commandline='', worker_count=4, worker_memory=(1024 ** 3)):
     """
     :type name: str
-    :type workspace_volume: dict
     :type mpirun_commandline: str
     :type worker_count: int
     :type worker_memory: int
@@ -41,8 +33,8 @@ def openmpi_app(name='openmpi-test', workspace_volume=empty, mpirun_commandline=
         'services': []
     }
     for i in range(worker_count):
-        proc = openmpi_framework.openmpi_worker_service(i, workspace_volume, worker_memory)
+        proc = openmpi_framework.openmpi_worker_service(i, worker_memory)
         app['services'].append(proc)
-    proc = openmpi_framework.openmpi_mpirun_service(workspace_volume, mpirun_commandline, worker_memory)
+    proc = openmpi_framework.openmpi_mpirun_service(mpirun_commandline, worker_memory)
     app['services'].append(proc)
     return app
