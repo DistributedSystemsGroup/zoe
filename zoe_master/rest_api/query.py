@@ -60,10 +60,10 @@ class QueryAPI(Resource):
         if not calling_user.can_see_non_owner_objects():
             filters['owner'] = calling_user
 
-        if what == 'stats swarm':
+        if what == 'stats_swarm':
             ret = singletons['stats_manager'].swarm_stats
             ret = {'stats': ret.to_dict()}
-        elif what == 'stats scheduler':
+        elif what == 'stats_scheduler':
             ret = self.platform.scheduler_stats()
             ret = {'stats': ret.to_dict()}
         else:
