@@ -16,7 +16,7 @@ def prepare_mpirun(wf):
     mpihosts += '\n'
     wf.workspace.put_string(mpihosts, 'mpihosts')
     cmdline = 'mpirun -np {} --hostfile mpihosts ./MPI_Hello'.format(count)
-    zoe_app = openmpi.openmpi_app(name='mpi-hello-world', workspace_volume=wf.workspace.get_volume_definition(), mpirun_commandline=cmdline, worker_count=count)
+    zoe_app = openmpi.openmpi_app(name='mpi-hello-world', mpirun_commandline=cmdline, worker_count=count)
     return zoe_app
 
 
