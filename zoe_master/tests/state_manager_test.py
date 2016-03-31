@@ -13,16 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from zoe_master.state.application import ApplicationDescription, ServiceDescription, ServiceEndpointDescription
+from zoe_master.state.user import User
 
 
-def test_application():
-    ApplicationDescription()
-
-
-def test_process():
-    ServiceDescription()
-
-
-def test_process_endpoint():
-    ServiceEndpointDescription()
+def test_manager(state_manager):
+    user = User(state_manager)
+    user_id = state_manager.gen_id()
+    user.id = user_id
+    state_manager.new('user', user)
+    assert state_manager.users[user_id] == user
+    guser = state_manager.get_one('user', id=user_id)
+    assert guser == user
+    state_manager.delete('user', user_id)

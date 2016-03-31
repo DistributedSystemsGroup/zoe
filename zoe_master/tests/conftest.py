@@ -37,12 +37,6 @@ def configuration(request):
     return get_conf()
 
 
-@pytest.fixture(scope='session')
-def application_dict():
-    jsondata = open("zoe_master/tests/resources/spark-wordcount-test.json", "r")
-    return json.load(jsondata)
-
-
 @pytest.fixture(scope='function')
 def state_manager(configuration):
     return StateManager(FSBlobs)
