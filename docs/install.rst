@@ -5,13 +5,24 @@ Zoe components:
 
 * Master
 * Observer
-* logger
+* logger (optional)
 * web client
 * command-line client
 
 Zoe is written in Python and uses the ``requirements.txt`` file to list the package dependencies needed for all components of Zoe. Not all of them are needed in all cases, for example you need the ``kazoo`` library only if you use Zookeeper to manage Swarm high availability.
 
 Zoe is a young software project and we foresee it being used in places with wildly different requirements in terms of IT organization (what is below Zoe) and user interaction (what is above Zoe). For this reason we are aiming at providing a solid core of features and a number of basic external components that can be easily customized. For example, the Spark idle monitoring feature is useful only in certain environments and it is implemented as an external service, that can be customized of takes as an example to build something different.
+
+There is an experimental configuration file for Docker Compose, if you want to try it. It will run Zoe and its components inside Docker containers. It needs to be customized with the address of your Swarm master, the port mappings and the location of a shared filesystem.
+
+Overview
+--------
+
+The applications run by Zoe, usually, expose a number of interfaces (web, rest and others) to the user. Docker Swarm does not provide an easy way to manage this situation, the prt can be statically allocated, by the public IP address is chosen arbitrarily by Swarm and there is no discovery mechanism (DNS) exposed to the outside of Swarm.
+
+To work around this problem Zoe creates a gateway container for each user. The image used for this gateway container is configurable. The default one, downloaded from the Docker hub contains an ssh-based SOCKS proxy that the user must configure in his/her browser to be able to access the services run by Zoe executions.
+
+Zoe requires a shared filesystem, visible from all Docker hosts. Some Zoe Applications (for example spark submit, MPI) require user-provided binaries to run. Zoe creates and maintains for each user a workspace directory on this shared filesystem. The user can access the directory from outside Zoe and put the files required for his/her application. We are evaluating whether to integrate into the Zoe web client some kind of web interface for accessing the workspace directory.
 
 Requirements
 ------------
