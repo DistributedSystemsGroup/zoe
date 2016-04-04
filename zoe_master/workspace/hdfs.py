@@ -14,13 +14,36 @@
 # limitations under the License.
 
 import os.path
+import json
 
 import zoe_master.platform_manager
 import zoe_master.workspace.base
 import zoe_master.config as config
-import zoe_lib.predefined_apps.hdfs as hdfs_apps
 import zoe_master.state.user
 import zoe_master.state.application
+
+
+HDFS_CLIENT_APP = '''
+{
+    "name": "hdfs-client",
+    "priority": 512,
+    "requires_binary": false,
+    "services": [
+        {
+            "command": "hdfs dfs -ls /",
+            "docker_image": "192.168.45.252:5000/zoerepo/hadoop-client",
+            "environment": [],
+            "monitor": false,
+            "name": "hadoop-client",
+            "ports": [],
+            "required_resources": {
+                "memory": 1073741824
+            }
+        }
+    ],
+    "version": 1,
+    "will_end": true
+}'''
 
 
 class ZoeHDFSWorkspace(zoe_master.workspace.base.ZoeWorkspaceBase):
@@ -31,7 +54,11 @@ class ZoeHDFSWorkspace(zoe_master.workspace.base.ZoeWorkspaceBase):
 
     def create(self, user: zoe_master.state.user.User) -> None:
         path = os.path.join(self.base_path, user.name)
-        hdfs_client = hdfs_apps.hdfs_client_app(name='hdfs-mkdir', namenode=self.namenode, user=user.name, command='./mkdir.sh {}'.format(path))
+        hdfs_client = json.loads(HDFS_CLIENT_APP)
+        hdfs_client['name'] = 'hdfs-mkdir'
+        hdfs_client['services'][0]['environment'].append(["NAMENODE_HOST", "hdfs-namenode.hdfs"])
+        hdfs_client['services'][0]['environment'].append(["HDFS_USER", user.name])
+        hdfs_client['services'][0]['command'] = './mkdir.sh {}'.format(path)
         app = zoe_master.state.application.ApplicationDescription()
         app.from_dict(hdfs_client)
         pm = config.singletons['platform_manager']
@@ -41,7 +68,11 @@ class ZoeHDFSWorkspace(zoe_master.workspace.base.ZoeWorkspaceBase):
 
     def destroy(self, user: zoe_master.state.user.User) -> None:
         path = os.path.join(self.base_path, user.name)
-        hdfs_client = hdfs_apps.hdfs_client_app(name='hdfs-rmdir', namenode=self.namenode, user=user.name, command='hdfs dfs -rm -R -skipTrash {}'.format(path))
+        hdfs_client = json.loads(HDFS_CLIENT_APP)
+        hdfs_client['name'] = 'hdfs-mkdir'
+        hdfs_client['services'][0]['environment'].append(["NAMENODE_HOST", "hdfs-namenode.hdfs"])
+        hdfs_client['services'][0]['environment'].append(["HDFS_USER", user.name])
+        hdfs_client['services'][0]['command'] = 'hdfs dfs -rm -R -skipTrash {}'.format(path)
         app = zoe_master.state.application.ApplicationDescription()
         app.from_dict(hdfs_client)
         pm = config.singletons['platform_manager']

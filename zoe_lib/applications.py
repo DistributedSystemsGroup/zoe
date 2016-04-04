@@ -19,37 +19,9 @@ This module contains code to validate application descriptions.
 
 import logging
 
-from zoe_lib.exceptions import InvalidApplicationDescription, ZoeAPIException
-from zoe_lib.predefined_apps import PREDEFINED_APPS
+from zoe_lib.exceptions import InvalidApplicationDescription
 
 log = logging.getLogger(__name__)
-
-
-def predefined_app_list():
-    """
-    Returns a list of predefined application available
-
-    :return: a list of application names
-    """
-    name_list = []
-    for gen_app in PREDEFINED_APPS:
-        app = gen_app()
-        name_list.append(app['name'])
-    return name_list
-
-
-def predefined_app_generate(name):
-    """
-    Returns the predefined application corresponding to the name given as argument
-
-    :param name: the name of the application to generate
-    :return: an application dictionary
-    """
-    for gen_app in PREDEFINED_APPS:
-        app = gen_app()
-        if app['name'] == name:
-            return app
-    raise ZoeAPIException('No such predefined application')
 
 
 def app_validate(data):

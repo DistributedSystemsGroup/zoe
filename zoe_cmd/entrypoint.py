@@ -27,10 +27,10 @@ from pprint import pprint
 from zoe_cmd import utils
 from zoe_lib.users import ZoeUserAPI
 from zoe_lib.services import ZoeServiceAPI
-from zoe_lib.exceptions import ZoeAPIException
+from zoe_lib.exceptions import ZoeAPIException, InvalidApplicationDescription
 from zoe_lib.executions import ZoeExecutionsAPI
 from zoe_lib.query import ZoeQueryAPI
-from zoe_lib.applications import app_validate, predefined_app_generate, predefined_app_list
+from zoe_lib.applications import app_validate
 
 
 def stats_cmd(_):
@@ -78,19 +78,14 @@ def user_list_cmd(_):
         print('Gateway URLs: {}'.format(user['gateway_urls']))
 
 
-def pre_app_list_cmd(_):
-    for a in predefined_app_list():
-        print(a)
-
-
-def pre_app_export_cmd(args):
+def app_validate_cmd(args):
+    app_descr = json.load(args.jsonfile)
     try:
-        app = predefined_app_generate(args.app_name)
-    except ZoeAPIException:
-        print('Application not found')
+        app_validate(app_descr)
+    except InvalidApplicationDescription as e:
+        print(e)
     else:
-        json.dump(app, sys.stdout, sort_keys=True, indent=4)
-        print()
+        print("Static validation OK")
 
 
 def app_get_cmd(args):
@@ -179,12 +174,9 @@ def process_arguments() -> Namespace:
     argparser_user_list = subparser.add_parser('user-ls', help='Lists all users defined in the system')
     argparser_user_list.set_defaults(func=user_list_cmd)
 
-    argparser_pre_app_list = subparser.add_parser('pre-app-ls', help='Lists the predefined application descriptions')
-    argparser_pre_app_list.set_defaults(func=pre_app_list_cmd)
-
-    argparser_pre_app_export = subparser.add_parser('pre-app-export', help='Export one of the predefined application descriptions in JSON (stdout)')
-    argparser_pre_app_export.add_argument('app_name', help='Predefined application name (use pre-app-list to see what is available')
-    argparser_pre_app_export.set_defaults(func=pre_app_export_cmd)
+    argparser_app_validate = subparser.add_parser('app-validate', help='Validate an application description')
+    argparser_app_validate.add_argument('jsonfile', type=FileType("r"), help='Application description')
+    argparser_app_validate.set_defaults(func=app_validate_cmd)
 
     argparser_exec_start = subparser.add_parser('start', help="Start an application")
     argparser_exec_start.add_argument('name', help="Name of the execution")

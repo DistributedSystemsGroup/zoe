@@ -15,11 +15,11 @@
 
 import re
 from random import randint
+import json
 
 from flask import render_template, request
 from zoe_lib.services import ZoeServiceAPI
 from zoe_lib.executions import ZoeExecutionsAPI
-from zoe_lib.predefined_apps.eurecom_aml_lab import spark_jupyter_notebook_lab_app
 from zoe_lib.query import ZoeQueryAPI
 from zoe_lib.users import ZoeUserAPI
 from zoe_lib.exceptions import ZoeAPIException
@@ -70,7 +70,7 @@ def home_guest():
         template_vars['user_gateway'] = user['gateway_urls'][0]
         template_vars['gateway_ip'] = user['gateway_urls'][0].split('/')[2].split(':')[0]
         exec_api = ZoeExecutionsAPI(get_conf().master_url, guest_identifier, guest_password)
-        app_descr = spark_jupyter_notebook_lab_app()
+        app_descr = json.load(open('contrib/zoeapps/eurecom_aml_lab.json', 'r'))
         execution = query_api.query('execution', name='aml-lab')
         if len(execution) == 0 or execution[0]['status'] == 'terminated' or execution[0]['status'] == 'finished':
             exec_api.execution_start('aml-lab', app_descr)

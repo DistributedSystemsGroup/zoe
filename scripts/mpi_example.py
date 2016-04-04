@@ -1,11 +1,53 @@
 #!/usr/bin/python3
 
 import os
+import json
 
-from zoe_lib.predefined_apps import openmpi
 from zoe_lib.workflow import ZoeWorkFlow
 
 WORKSPACE_BASE_PATH = '/mnt/cephfs/zoe-workspaces'
+
+
+ZOE_WORKER_JSON = '''
+        {
+            "command": "",
+            "docker_image": "192.168.45.252:5000/zoerepo/openmpi-worker",
+            "environment": [],
+            "monitor": false,
+            "name": "mpiworker",
+            "ports": [],
+            "required_resources": {
+                "memory": 1073741824
+            },
+            "volumes": []
+        }
+'''
+
+ZOE_MPIRUN_JSON = '''
+        {
+            "command": "mpirun <options>",
+            "docker_image": "192.168.45.252:5000/zoerepo/openmpi-worker",
+            "environment": [],
+            "monitor": true,
+            "name": "mpirun",
+            "ports": [],
+            "required_resources": {
+                "memory": 1073741824
+            },
+            "volumes": []
+        }
+'''
+
+ZOE_APP_BASE_JSON = '''
+{
+    "name": "openmpi-hello",
+    "priority": 512,
+    "requires_binary": true,
+    "services": [],
+    "version": 1,
+    "will_end": true
+}
+'''
 
 
 def prepare_mpirun(wf):
@@ -16,7 +58,15 @@ def prepare_mpirun(wf):
     mpihosts += '\n'
     wf.workspace.put_string(mpihosts, 'mpihosts')
     cmdline = 'mpirun -np {} --hostfile mpihosts ./MPI_Hello'.format(count)
-    zoe_app = openmpi.openmpi_app(name='mpi-hello-world', mpirun_commandline=cmdline, worker_count=count)
+    zoe_app = json.loads(ZOE_APP_BASE_JSON)
+    zoe_app['name'] = 'mpi-hello-world'
+    mpirun_service = json.loads(ZOE_MPIRUN_JSON)
+    mpirun_service['command'] = cmdline
+    for wc in range(count):
+        mpiworker = json.loads(ZOE_WORKER_JSON)
+        mpiworker['name'] = 'mpiworker{}'.format(wc)
+        zoe_app['services'].append(mpiworker)
+    zoe_app['services'].append(mpirun_service)
     return zoe_app
 
 
