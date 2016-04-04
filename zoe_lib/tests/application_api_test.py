@@ -14,15 +14,8 @@
 # limitations under the License.
 
 from zoe_lib.applications import app_validate
-from zoe_lib.applications import predefined_app_list, predefined_app_generate
 
 
-def test_from_dict():
-    app = predefined_app_generate('spark-submit')
-    assert isinstance(app, dict)
-    app_validate(app)
-
-
-def test_predefined():
-    app_list = predefined_app_list()
-    assert isinstance(app_list, list)
+def test_from_dict(application_dict):
+    assert isinstance(application_dict, dict)
+    app_validate(application_dict)
