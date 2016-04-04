@@ -59,15 +59,9 @@ repositories and is very easy to set up.
 Images: Docker Hub Vs local Docker registry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The images used by Zoe are available on the Docker Hub:
+The Zoe master will run a gateway container for each user. The image for this container is available on the `Docker Hub <https://hub.docker.com/r/zoerepo/>`_ and is generated from the Dockerfile in the ``gateway-image`` directory of the main Zoe repository.
 
-* https://hub.docker.com/r/zoerepo/
-
-Since the Docker Hub can be slow, we strongly suggest setting up a private registry. The ``build_images.sh`` script in the
-`zoe-docker-images <https://github.com/DistributedSystemsGroup/zoe-docker-images>`_ repository can help you populate the registry
-bypassing the Hub.
-
-The images are quite standard and can be used also without Zoe. Examples on how to do that, are available in the ``scripts/`` directory.
+Since the Docker Hub can be slow, we strongly suggest setting up a private registry, containing also the Zoe Service images. Have a look at the `zoe-applications <https://github.com/DistributedSystemsGroup/zoe-applications>`_ repository for examples of Zoe Applications and Services.
 
 
 Zoe

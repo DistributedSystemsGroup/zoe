@@ -29,6 +29,8 @@ To better understand what we mean by "analytic service", here are a few examples
 * Impala
 * ... suggestions welcome!
 
+A number of predefined applications available for testing and customization is available in the `zoe-applications <https://github.com/DistributedSystemsGroup/zoe-applications>`_ repository.
+
 Have a look at the :ref:`vision` and at the `roadmap <https://github.com/DistributedSystemsGroup/zoe/blob/master/ROADMAP.rst>`_ to see what we are currently
 planning and feel free to `contact us <venza@brownhat.org>`_ via email or through the GitHub issue tracker to pose questions or suggest ideas and new features.
 
