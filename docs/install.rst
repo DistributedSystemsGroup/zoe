@@ -63,7 +63,6 @@ The Zoe master will run a gateway container for each user. The image for this co
 
 Since the Docker Hub can be slow, we strongly suggest setting up a private registry, containing also the Zoe Service images. Have a look at the `zoe-applications <https://github.com/DistributedSystemsGroup/zoe-applications>`_ repository for examples of Zoe Applications and Services.
 
-
 Zoe
 ---
 
@@ -72,6 +71,12 @@ Currently this is the recommended procedure:
 1. Clone the zoe repository
 2. Install Python package dependencies: ``pip3 install -r requirements.txt``
 3. Create new configuration files for the master and the observer (:ref:`config_file`)
-4. Setup supervisor to manage Zoe processes: in the ``scripts/supervisor/`` directory you can find the configuration file for
+4. Build the gateway container image from the sources in the ``gateway-image`` directory and push it to your internal registry (OPTIONAL)
+5. Setup supervisor to manage Zoe processes: in the ``scripts/supervisor/`` directory you can find the configuration file for
    supervisor. You need to modify the paths to point to where you cloned Zoe and the user (Zoe does not need special privileges).
-5. Start running applications using the command-line client! (the web interface will be coming soon)
+6. Start running applications using the command-line client! (the web interface will be coming soon)
+
+Docker compose - demo install
+-----------------------------
+
+In the repository there is also a ``docker-compose.yml`` file that can be used to start a simple Zoe deployment for testing and demonstration purposes. By modifying the compose configuration file and adding volumes with customized configuration files it is possible to run more complex Zoe configurations.

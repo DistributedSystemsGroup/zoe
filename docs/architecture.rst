@@ -22,9 +22,8 @@ Application descriptions
 Application descriptions are at the core of Zoe. They are likely to evolve in time to include more information that needs to be passed to the scheduler.
 Currently they are composed of a set of generic attributes that apply to the whole Zoe Application and a list of Zoe Frameworks. Each Framework is composed by Zoe Services, that describe actual Docker containers. The composition of Frameworks and Services is described by a dependency tree.
 
-These descriptions are strictly linked to the docker images used in the process descriptions, as they specify environment variables and commands to be executed. We successfully used third party images, demonstrating the generality of zoe's approach.
+These descriptions are strictly linked to the docker images used in the process descriptions, as they specify environment variables and commands to be executed. We successfully used third party images, demonstrating the generality of Zoe's approach.
 
-Please note that this documentation refers to the full Aoe Application description that is not yet fully implemented in actual code.
+Please note that this documentation refers to the full Zoe Application description that is not yet fully implemented in actual code.
 
-You can use the ``zoe.py pre-app-list`` and ``zoe.py pre-app-export`` commands to export a JSON-formatted application description to use as a template.
-
+You can have a look to example applications by going to the `zoe-applications <https://github.com/DistributedSystemsGroup/zoe-applications>`_ repository.
