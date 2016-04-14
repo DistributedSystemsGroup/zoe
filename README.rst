@@ -11,6 +11,12 @@ Resources:
 
 Zoe applications can be easily created by users, we provide several examples in the `zoe-applications https://github.com/DistributedSystemsGroup/zoe-applications`_ repository to get you started.
 
+Other Zoe resources:
+
+- Zoe applications: https://github.com/DistributedSystemsGroup/zoe-applications
+- Zoe logger: https://github.com/DistributedSystemsGroup/zoe-logger
+
+
 Repository contents
 -------------------
 
@@ -19,7 +25,6 @@ Repository contents
 - `scripts`: Scripts used to test Zoe images outside of Zoe
 - `zoe_cmd`: Command-line client
 - `zoe_lib`: Client-side library, contains also some modules needed by the observer and the master processes
-- `zoe_logger`: Optional Kafka producer for Docker container logs
 - `zoe_observer`: The Observer process that monitors Swarm and informs the master of various events
 - `zoe_master`: The core of Zoe, the server process that listens for client requests and creates the containers on Swarm
 - `zoe_web`: The web client interface

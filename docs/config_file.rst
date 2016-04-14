@@ -43,11 +43,3 @@ zoe-web.conf
 * ``listen-address`` : address Zoe will use to listen for incoming connections to the web interface
 * ``listen-port`` : port Zoe will use to listen for incoming connections to the web interface
 * ``master-url = http://<address:port>`` : address of the Zoe Master REST API
-
-
-zoe-logger.conf
----------------
-This component is optional.
-
-* ``debug = <true|false>`` : enable or disable debug log output
-* ``kafka-broker = 1.2.3.4:9092``: Address of the Kafka broker to send logs to

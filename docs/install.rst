@@ -5,7 +5,7 @@ Zoe components:
 
 * Master
 * Observer
-* logger (optional)
+* logger (optional, see https://github.com/DistributedSystemsGroup/zoe-logger)
 * web client
 * command-line client
 
