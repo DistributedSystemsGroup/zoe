@@ -26,6 +26,7 @@ from zoe_observer.guest_inactivity import check_guests
 from zoe_lib.exceptions import ZoeAPIException
 
 log = logging.getLogger("main")
+LOG_FORMAT = '%(asctime)-15s %(levelname)s %(name)s (%(threadName)s): %(message)s'
 
 
 def guest_check_thread(args):
@@ -68,10 +69,9 @@ def main():
     load_configuration()
     args = get_conf()
     if args.debug:
-        logging.basicConfig(level=logging.DEBUG)
-
+        logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
     else:
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
     logging.getLogger('kazoo').setLevel(logging.WARNING)
     logging.getLogger('requests').setLevel(logging.WARNING)

@@ -23,6 +23,7 @@ from zoe_web import app
 from zoe_web.config import load_configuration, get_conf
 
 log = logging.getLogger("zoe_web")
+LOG_FORMAT = '%(asctime)-15s %(levelname)s %(name)s (%(threadName)s): %(message)s'
 
 
 def zoe_web_main() -> int:
@@ -33,9 +34,9 @@ def zoe_web_main() -> int:
     load_configuration()
     args = get_conf()
     if args.debug:
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
     else:
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("tornado").setLevel(logging.DEBUG)
 

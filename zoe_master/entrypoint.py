@@ -34,6 +34,7 @@ from zoe_master.workspace.filesystem import ZoeFSWorkspace
 from zoe_master.workspace.hdfs import ZoeHDFSWorkspace
 
 log = logging.getLogger("main")
+LOG_FORMAT = '%(asctime)-15s %(levelname)s %(name)s (%(threadName)s): %(message)s'
 
 
 def main():
@@ -44,10 +45,10 @@ def main():
     config.load_configuration()
     args = config.get_conf()
     if args.debug:
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
 
     else:
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
     logging.getLogger('kazoo').setLevel(logging.WARNING)
     logging.getLogger('requests').setLevel(logging.WARNING)
