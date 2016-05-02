@@ -104,6 +104,8 @@ class SwarmClient:
             ns.error = info["DriverStatus"][idx + node + idx2][1]
             idx2 += 1
             ns.last_update = info["DriverStatus"][idx + node + idx2][1]
+            idx2 += 1
+            ns.server_version = info["DriverStatus"][idx + node + idx2][1]
 
             ns.memory_reserved = humanfriendly.parse_size(ns.memory_reserved)
             ns.memory_total = humanfriendly.parse_size(ns.memory_total)
