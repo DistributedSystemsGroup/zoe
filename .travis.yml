@@ -6,4 +6,4 @@ install:
   - pip install -r requirements.txt
 before_script:
 script:
-  - PYTHONPATH=. py.test --cov=zoe_cmd --cov=zoe_lib --cov=zoe_web --cov=zoe_master --cov=zoe_observer --cov=zoe_logger
+  - PYTHONPATH=. py.test --cov=zoe_cmd --cov=zoe_lib --cov=zoe_master --cov=zoe_observer --cov=zoe_web
