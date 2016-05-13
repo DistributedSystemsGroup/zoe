@@ -8,7 +8,6 @@
     <thead>
     <tr>
         <th>Execution name</th>
-        <th>Application name</th>
         {% if is_admin %}
         <th>User</th>
         {% endif %}
@@ -16,13 +15,13 @@
         <th>Scheduled</th>
         <th>Started</th>
         <th>Finished</th>
+        <th>Actions</th>
     </tr>
     </thead>
     <tbody>
         {% for e in executions %}
             <tr class="{{ loop.cycle('odd', 'even') }}">
                 <td><a href="/executions/inspect/{{ e['id'] }}">{{ e['name'] }}</a></td>
-                <td>{{ e['application']['name'] }}</td>
                 {% if is_admin %}
                 <td>{{ e['owner'] }}</td>
                 {% endif %}
@@ -37,6 +36,11 @@
                 <td>not yet</td>
                 {% else %}
                 <td><script>format_timestamp("{{ e['time_finished'] }}")</script></td>
+                {% endif %}
+                {% if e['status'] == "running" or e['status'] == "scheduled" %}
+                    <td><a href="/executions/terminate/{{ e['id'] }}">Terminate</a></td>
+                {% else %}
+                    <td><a href="/executions/restart/{{ e['id'] }}">Restart</a></td>
                 {% endif %}
             </tr>
         {% endfor %}

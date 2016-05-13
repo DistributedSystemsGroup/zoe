@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flask import render_template, request
+from flask import render_template, request, redirect, url_for
 
 from zoe_lib.services import ZoeServiceAPI
 from zoe_lib.executions import ZoeExecutionsAPI
@@ -43,19 +43,36 @@ def execution_start(app_id):
     return render_template('execution_new.html', **template_vars)
 
 
-@web_bp.route('/executions/terminate/<exec_id>')
-def execution_terminate(exec_id):
-    user = us.user_get(session['user_id'])
-    if user is None:
-        return redirect(url_for('web.index'))
-    execution = ex.execution_get(exec_id)
+@web_bp.route('/executions/restart/<int:execution_id>')
+def execution_restart(execution_id):
+    auth = request.authorization
+    if not auth:
+        return missing_auth()
 
-    template_vars = {
-        "user_id": user.id,
-        "email": user.email,
-        'execution': execution
-    }
-    return render_template('execution_terminate.html', **template_vars)
+    guest_identifier = auth.username
+    guest_password = auth.password
+
+    exec_api = ZoeExecutionsAPI(get_conf().master_url, guest_identifier, guest_password)
+    e = exec_api.execution_get(execution_id)
+    new_id = exec_api.execution_start(e['name'], e['application'])
+
+    return redirect(url_for('web.execution_inspect', execution_id=new_id))
+
+
+@web_bp.route('/executions/terminate/<int:execution_id>')
+def execution_terminate(execution_id):
+    auth = request.authorization
+    if not auth:
+        return missing_auth()
+
+    guest_identifier = auth.username
+    guest_password = auth.password
+
+    exec_api = ZoeExecutionsAPI(get_conf().master_url, guest_identifier, guest_password)
+    e = exec_api.execution_get(execution_id)
+    exec_api.terminate(execution_id)
+
+    return redirect(url_for('web.home_user'))
 
 
 @web_bp.route('/executions/inspect/<int:execution_id>')
