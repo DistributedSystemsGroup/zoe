@@ -112,44 +112,13 @@ def home_user():
         return missing_auth()
     user = user[0]
 
-    if user['role'] != 'user':
+    if user['role'] == 'guest':
         return missing_auth()
 
     executions = query_api.query('execution')
     template_vars = {
         'executions': executions,
-        'is_admin': False
-    }
-
-    return render_template('home_user.html', **template_vars)
-
-
-@web_bp.route('/admin')
-def home_admin():
-    auth = request.authorization
-    if not auth:
-        return missing_auth()
-
-    guest_identifier = auth.username
-    guest_password = auth.password
-
-    query_api = ZoeQueryAPI(get_conf().master_url, guest_identifier, guest_password)
-
-    try:
-        user = query_api.query('user', name=guest_identifier)
-    except ZoeAPIException:
-        return missing_auth()
-    if len(user) == 0:
-        return missing_auth()
-
-    user = user[0]
-    if user['role'] != 'admin':
-        return missing_auth()
-
-    executions = query_api.query('execution')
-    template_vars = {
-        'executions': executions,
-        'is_admin': True
+        'is_admin': user['role'] == 'admin'
     }
 
     return render_template('home_user.html', **template_vars)
