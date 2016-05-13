@@ -13,30 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import zoe_lib.applications as ap
-import zoe_lib.executions as ex
-import zoe_lib.users as us
-from flask import render_template, url_for, redirect, session, abort
+from flask import render_template, request
 
+from zoe_lib.services import ZoeServiceAPI
+from zoe_lib.executions import ZoeExecutionsAPI
+from zoe_lib.query import ZoeQueryAPI
+from zoe_lib.users import ZoeUserAPI
+from zoe_lib.exceptions import ZoeAPIException
+
+from zoe_web.config import get_conf
 from zoe_web.web import web_bp
-
-
-@web_bp.route('/apps/new')
-def application_new():
-    user = us.user_get(session['user_id'])
-    if user is None:
-        return redirect(url_for('web.index'))
-
-    template_vars = {
-        "user_id": user.id,
-        "email": user.email,
-    }
-    return render_template('application_new.html', **template_vars)
-
-
-@web_bp.route('/app/modify/<app_id>')
-def application_modify(app_id):
-    return redirect(url_for('web.index'))
+from zoe_web.web.auth import missing_auth
 
 
 @web_bp.route('/executions/start/<app_id>')
@@ -71,31 +58,29 @@ def execution_terminate(exec_id):
     return render_template('execution_terminate.html', **template_vars)
 
 
-@web_bp.route('/apps/delete/<app_id>')
-def application_delete(app_id):
-    user = us.user_get(session['user_id'])
-    if user is None:
-        return redirect(url_for('web.index'))
-    application = ap.application_get(app_id)
-
-    template_vars = {
-        "user_id": user.id,
-        "email": user.email,
-        'app': application
-    }
-    return render_template('application_delete.html', **template_vars)
-
-
-@web_bp.route('/executions/inspect/<execution_id>')
+@web_bp.route('/executions/inspect/<int:execution_id>')
 def execution_inspect(execution_id):
-    user = us.user_get(session['user_id'])
-    if user is None:
-        return redirect(url_for('web.index'))
-    execution = ex.execution_get(execution_id)
+    auth = request.authorization
+    if not auth:
+        return missing_auth()
+
+    guest_identifier = auth.username
+    guest_password = auth.password
+
+    exec_api = ZoeExecutionsAPI(get_conf().master_url, guest_identifier, guest_password)
+    cont_api = ZoeServiceAPI(get_conf().master_url, guest_identifier, guest_password)
+
+    e = exec_api.execution_get(execution_id)
+
+    services = []
+    for sid in e['services']:
+        services.append(cont_api.get(sid))
+
+    for s in services:
+        s['ip'] = list(s['ip_address'].values())[0]
 
     template_vars = {
-        "user_id": user.id,
-        "email": user.email,
-        'execution': execution
+        "e": e,
+        "services": services
     }
     return render_template('execution_inspect.html', **template_vars)

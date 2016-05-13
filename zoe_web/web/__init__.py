@@ -19,7 +19,7 @@ web_bp = Blueprint('web', __name__, template_folder='templates', static_folder='
 
 import zoe_web.web.start
 import zoe_web.web.status
-import zoe_web.web.applications
+import zoe_web.web.executions
 
 from zoe_lib.version import ZOE_API_VERSION, ZOE_VERSION
 

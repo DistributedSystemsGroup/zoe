@@ -21,7 +21,7 @@
     <tbody>
         {% for e in executions %}
             <tr class="{{ loop.cycle('odd', 'even') }}">
-                <td>{{ e['name'] }}</td>
+                <td><a href="/executions/inspect/{{ e['id'] }}">{{ e['name'] }}</a></td>
                 <td>{{ e['application']['name'] }}</td>
                 {% if is_admin %}
                 <td>{{ e['owner'] }}</td>
