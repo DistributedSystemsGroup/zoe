@@ -13,34 +13,60 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+import re
+
 from flask import render_template, request, redirect, url_for
 
 from zoe_lib.services import ZoeServiceAPI
 from zoe_lib.executions import ZoeExecutionsAPI
-from zoe_lib.query import ZoeQueryAPI
-from zoe_lib.users import ZoeUserAPI
-from zoe_lib.exceptions import ZoeAPIException
+import zoe_lib.exceptions
+import zoe_lib.applications
 
 from zoe_web.config import get_conf
 from zoe_web.web import web_bp
 from zoe_web.web.auth import missing_auth
 
 
-@web_bp.route('/executions/start/<app_id>')
-def execution_start(app_id):
-    user = us.user_get(session["user_id"])
-    if user is None:
-        return redirect(url_for('web.index'))
-    application = ap.application_get(app_id)
-    if application is None:
-        return abort(404)
+def error_page(error_message, status):
+    return render_template('error.html', error=error_message), status
 
-    template_vars = {
-        "user_id": user.id,
-        "email": user.email,
-        'app': application
-    }
-    return render_template('execution_new.html', **template_vars)
+
+@web_bp.route('/executions/new')
+def execution_define():
+    auth = request.authorization
+    if not auth:
+        return missing_auth()
+
+    return render_template('execution_new.html')
+
+
+@web_bp.route('/executions/start', methods=['POST'])
+def execution_start():
+    auth = request.authorization
+    if not auth:
+        return missing_auth()
+
+    guest_identifier = auth.username
+    guest_password = auth.password
+
+    app_descr_json = request.files['file'].read()
+    app_descr = json.loads(app_descr_json.decode('utf-8'))
+    try:
+        zoe_lib.applications.app_validate(app_descr)
+    except zoe_lib.exceptions.InvalidApplicationDescription as e:
+        return error_page(e.message, 400)
+
+    exec_name = request.form['exec_name']
+    if 3 > len(exec_name) > 128:
+        return error_page("Execution name must be between 4 and 128 characters long", 400)
+    if not re.match(r'^[a-zA-Z0-9\-]+$', exec_name):
+        return error_page("Execution name can contain only letters, numbers and dashes. '{}' is not valid.".format(exec_name))
+
+    exec_api = ZoeExecutionsAPI(get_conf().master_url, guest_identifier, guest_password)
+    new_id = exec_api.execution_start(exec_name, app_descr)
+
+    return redirect(url_for('web.execution_inspect', execution_id=new_id))
 
 
 @web_bp.route('/executions/restart/<int:execution_id>')

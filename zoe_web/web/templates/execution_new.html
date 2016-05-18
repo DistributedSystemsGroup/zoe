@@ -1,40 +1,12 @@
-{% extends "base.html" %}
-{% block title %}{{ app.description.name }} startup{% endblock %}
+{% extends "base_user.html" %}
+{% block title %}New execution definition{% endblock %}
 {% block content %}
 
-<h1>New {{ app.description.name }} execution</h1>
-
-    <p id="starting">Starting execution...</p>
-    <p id="scheduled" style="display: none">Your execution request has been schduled and will be served as soon as possible.
-    You can monitor application status from the <a href="{{ url_for("web.home") }}">home page</a>.</p>
-    <p id="schedule_error" style="display: none">Your execution request has been denied. The system is not currently able to satisfy the
-        application resource requirements.</p>
-    <p id="communication_error" style="display: none">Error: there is a communication problem with the Zoe web server. Is the network
-        still available?.</p>
-
-    <script type="application/javascript">
-    function completeHandler(e) {
-        if (e.status == "ok") {
-            $("#starting").hide();
-            $("#scheduled").show();
-        } else {
-            $("#starting").hide();
-            $("#schedule_error").show();
-        }
-        return false;
-    }
-
-    function errorHandler() {
-        $("#starting").hide();
-        $("#communication_error").show();
-    }
-
-    function start() {
-        $.getJSON("{{ url_for("api.execution_start", app_id=app.id) }}")
-                .done(completeHandler)
-                .error(errorHandler);
-    }
-    start();
-    </script>
+<h1>New execution</h1>
+    <form method="post" action="{{ url_for('web.execution_start') }}" enctype="multipart/form-data">
+    <label>Execution name: <input type="text" name="exec_name"></label><br>
+    <label>Application description: <input type="file" name="file"></label><br>
+    <input type="submit" value="Start!">
+    </form>
 
 {% endblock %}

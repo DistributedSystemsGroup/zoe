@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base_user.html" %}
 {% block title %}Inspect execution {{ e['name'] }}{% endblock %}
 {% block content %}
 <h2>Detailed information for execution {{ e['name'] }}</h2>
@@ -24,6 +24,9 @@
 {% endif %}
 
 <div id="container_list">
+{% if services|length > 0 %}
+<p>Services:</p>
+{% endif %}
 <ul>
 {% for s in services %}
     <li class="container_name" id="{{ s['id'] }}">{{ s['name'] }}</li>

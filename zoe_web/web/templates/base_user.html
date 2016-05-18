@@ -1,5 +1,5 @@
 {% extends "base.html" %}
 {% block footer %}
-    <p>Back to the <a href="{{ url_for('web.home') }}">user home page</a></p>
+    <p><a href="{{ url_for("web.home_user") }}">Home</a></p>
     {{ super() }}
 {% endblock %}
