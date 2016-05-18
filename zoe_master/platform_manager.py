@@ -105,6 +105,10 @@ class PlatformManager:
                 raise ZoeException("cannot find variable to substitute in expression {}".format(env_value))
             copts.add_env_variable(env_name, env_value)
 
+        for p in service_description.ports:
+            if p.expose:
+                copts.ports.append(p.port_number)  # FIXME UDP ports?
+
         for path, mountpoint, readonly in service_description.volumes:
             copts.add_volume_bind(path, mountpoint, readonly)
 

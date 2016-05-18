@@ -100,6 +100,7 @@ class ServiceEndpointDescription:
         self.port_number = 0
         self.path = ''
         self.is_main_endpoint = False
+        self.expose = False
 
     def to_dict(self):
         d = {
@@ -107,7 +108,8 @@ class ServiceEndpointDescription:
             'protocol': self.protocol,
             'port_number': self.port_number,
             'path': self.path,
-            'is_main_endpoint': self.is_main_endpoint
+            'is_main_endpoint': self.is_main_endpoint,
+            'expose': self.expose
         }
         return d
 
@@ -131,6 +133,9 @@ class ServiceEndpointDescription:
 
         if 'path' in data:
             self.path = data['path']
+
+        if 'expose' in data:
+            self.expose = data['expose']
 
     def get_url(self, address):
         return self.protocol + "://" + address + ":{}".format(self.port_number) + self.path
