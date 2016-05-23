@@ -98,7 +98,8 @@ class PlatformManager:
         subst_dict = {
             "execution_name": execution.name,
             'user_name': execution.owner.name,
-            'deployment_name': get_conf().deployment_name
+            'deployment_name': get_conf().deployment_name,
+            'index': counter
         }
         for env_name, env_value in service_description.environment:
             try:
