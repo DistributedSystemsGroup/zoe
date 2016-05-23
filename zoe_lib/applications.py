@@ -20,6 +20,7 @@ This module contains code to validate application descriptions.
 import logging
 
 from zoe_lib.exceptions import InvalidApplicationDescription
+import zoe_lib.version
 
 log = logging.getLogger(__name__)
 
@@ -39,7 +40,9 @@ def app_validate(data):
             raise InvalidApplicationDescription(msg="Missing required key: %s" % k)
 
     try:
-        int(data["version"])
+        ver = int(data["version"])
+        if ver != zoe_lib.version.ZOE_APPLICATION_FORMAT_VERSION:
+            raise InvalidApplicationDescription(msg="This version of Zoe supports only Application descriptions version {}".format(zoe_lib.version.ZOE_APPLICATION_FORMAT_VERSION))
     except ValueError:
         raise InvalidApplicationDescription(msg="version field should be an int")
 
