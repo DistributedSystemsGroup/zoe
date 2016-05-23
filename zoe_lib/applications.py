@@ -79,7 +79,7 @@ def app_validate(data):
 
 
 def _service_check(data):
-    required_keys = ['name', 'docker_image', 'monitor', 'ports', 'required_resources', 'total_count', 'essential_count', 'start_order']
+    required_keys = ['name', 'docker_image', 'monitor', 'ports', 'required_resources', 'total_count', 'essential_count', 'startup_order']
     for k in required_keys:
         if k not in data:
             raise InvalidApplicationDescription(msg="Missing required key: %s" % k)
@@ -100,7 +100,7 @@ def _service_check(data):
         raise InvalidApplicationDescription(msg="essential_count field should be an int")
 
     try:
-        int(data['start_order'])
+        int(data['startup_order'])
     except ValueError:
         raise InvalidApplicationDescription(msg="start_order field should be an int")
 

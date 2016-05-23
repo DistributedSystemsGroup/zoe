@@ -24,7 +24,10 @@
             ],
             "required_resources": {
                 "memory": 4294967296
-            }
+            },
+            "total_count": 1,
+            "essential_count": 1,
+            "startup_order": 0
         },
         {
             "docker_image": "192.168.45.252:5000/zoerepo/spark-jupyter-notebook",
@@ -66,7 +69,10 @@
             ],
             "required_resources": {
                 "memory": 4294967296
-            }
+            },
+            "total_count": 1,
+            "essential_count": 1,
+            "startup_order": 2
         },
         {
             "docker_image": "192.168.45.252:5000/zoerepo/spark-worker",
@@ -101,79 +107,12 @@
             ],
             "required_resources": {
                 "memory": 8589934592
-            }
-        },
-        {
-            "docker_image": "192.168.45.252:5000/zoerepo/spark-worker",
-            "environment": [
-                [
-                    "SPARK_WORKER_CORES",
-                    "4"
-                ],
-                [
-                    "SPARK_WORKER_RAM",
-                    "7516192768"
-                ],
-                [
-                    "SPARK_MASTER_IP",
-                    "{name_prefix}-spark-master-{execution_id}.{name_prefix}-usernet-{user_id}"
-                ],
-                [
-                    "SPARK_LOCAL_IP",
-                    "{name_prefix}-spark-worker-1-{execution_id}.{name_prefix}-usernet-{user_id}"
-                ]
-            ],
-            "monitor": false,
-            "name": "spark-worker-1",
-            "ports": [
-                {
-                    "is_main_endpoint": false,
-                    "name": "Spark worker web interface",
-                    "path": "/",
-                    "port_number": 8081,
-                    "protocol": "http"
-                }
-            ],
-            "required_resources": {
-                "memory": 8589934592
-            }
-        },
-        {
-            "docker_image": "192.168.45.252:5000/zoerepo/spark-worker",
-            "environment": [
-                [
-                    "SPARK_WORKER_CORES",
-                    "4"
-                ],
-                [
-                    "SPARK_WORKER_RAM",
-                    "7516192768"
-                ],
-                [
-                    "SPARK_MASTER_IP",
-                    "{name_prefix}-spark-master-{execution_id}.{name_prefix}-usernet-{user_id}"
-                ],
-                [
-                    "SPARK_LOCAL_IP",
-                    "{name_prefix}-spark-worker-2-{execution_id}.{name_prefix}-usernet-{user_id}"
-                ]
-            ],
-            "monitor": false,
-            "name": "spark-worker-2",
-            "ports": [
-                {
-                    "is_main_endpoint": false,
-                    "name": "Spark worker web interface",
-                    "path": "/",
-                    "port_number": 8081,
-                    "protocol": "http"
-                }
-            ],
-            "required_resources": {
-                "memory": 8589934592
-            }
+            },
+            "total_count": 3,
+            "essential_count": 1,
+            "startup_order": 1
         }
     ],
-    "version": 1,
+    "version": 2,
     "will_end": false
 }
