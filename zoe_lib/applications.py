@@ -42,7 +42,7 @@ def app_validate(data):
     try:
         ver = int(data["version"])
         if ver != zoe_lib.version.ZOE_APPLICATION_FORMAT_VERSION:
-            raise InvalidApplicationDescription(msg="This version of Zoe supports only Application descriptions version {}".format(zoe_lib.version.ZOE_APPLICATION_FORMAT_VERSION))
+            raise InvalidApplicationDescription(msg="This version of Zoe supports only version {} for application descriptions".format(zoe_lib.version.ZOE_APPLICATION_FORMAT_VERSION))
     except ValueError:
         raise InvalidApplicationDescription(msg="version field should be an int")
 
@@ -79,7 +79,7 @@ def app_validate(data):
 
 
 def _service_check(data):
-    required_keys = ['name', 'docker_image', 'monitor', 'ports', 'required_resources']
+    required_keys = ['name', 'docker_image', 'monitor', 'ports', 'required_resources', 'total_count', 'essential_count', 'start_order']
     for k in required_keys:
         if k not in data:
             raise InvalidApplicationDescription(msg="Missing required key: %s" % k)
@@ -88,6 +88,21 @@ def _service_check(data):
         bool(data['monitor'])
     except ValueError:
         raise InvalidApplicationDescription(msg="monitor field should be a boolean")
+
+    try:
+        int(data['total_count'])
+    except ValueError:
+        raise InvalidApplicationDescription(msg="total_count field should be an int")
+
+    try:
+        int(data['essential_count'])
+    except ValueError:
+        raise InvalidApplicationDescription(msg="essential_count field should be an int")
+
+    try:
+        int(data['start_order'])
+    except ValueError:
+        raise InvalidApplicationDescription(msg="start_order field should be an int")
 
     if not hasattr(data['ports'], '__iter__'):
         raise InvalidApplicationDescription(msg='ports should be a list')

@@ -156,6 +156,9 @@ class ServiceDescription:
         self.volumes = []  # list of volumes to mount. Each volume is a three tuple: host path, container path, readonly boolean
         self.networks = []  # additional networks IDs this container should be connected to
         self.command = None  # Commandline to pass to the Docker container
+        self.total_count = 1  # Total number of services of this type
+        self.essential_count = 1  # Number of services (out of the total_count) that are needed for the execution to start (the rest is elastic)
+        self.startup_order = 0  # Relative index between services to start them in the right order
 
     def to_dict(self):
         d = {
@@ -167,7 +170,10 @@ class ServiceDescription:
             'command': self.command,
             'ports': [],
             'volumes': [],
-            'networks': []
+            'networks': [],
+            'total_count': self.total_count,
+            'essential_count': self.essential_count,
+            'startup_order': self.startup_order
         }
         for p in self.ports:
             d['ports'].append(p.to_dict())
@@ -185,6 +191,21 @@ class ServiceDescription:
             self.monitor = bool(self.monitor)
         except ValueError:
             raise InvalidApplicationDescription(msg="monitor field should be a boolean")
+
+        try:
+            self.total_count = int(data['total_count'])
+        except ValueError:
+            raise InvalidApplicationDescription(msg="total_count field should be an int")
+
+        try:
+            self.essential_count = int(data['essential_count'])
+        except ValueError:
+            raise InvalidApplicationDescription(msg="essential_count field should be an int")
+
+        try:
+            self.startup_order = int(data['start_order'])
+        except ValueError:
+            raise InvalidApplicationDescription(msg="start_order field should be an int")
 
         if 'ports' not in data:
             raise InvalidApplicationDescription(msg="Missing required key: ports")
