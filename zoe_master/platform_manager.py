@@ -66,20 +66,22 @@ class PlatformManager:
         self.state_manager.state_updated()
 
     def _application_to_containers(self, execution: execution_module.Execution):
-        for service in execution.application.services:
-            self._spawn_service(execution, service)
+        ordered_service_list = sorted(execution.application.services, key=lambda x: x.startup_order)
+        for service in ordered_service_list:
+            for counter in range(service.total_count):
+                self._spawn_service(execution, service, counter)
 
-    def _spawn_service(self, execution: execution_module.Execution, service_description: application_module.ServiceDescription) -> bool:
+    def _spawn_service(self, execution: execution_module.Execution, service_description: application_module.ServiceDescription, counter) -> bool:
         copts = DockerContainerOptions()
         copts.gelf_log_address = get_conf().gelf_address
-        copts.name = service_description.name + "-" + execution.name + "-" + execution.owner.name + "-" + get_conf().deployment_name + "-zoe"
+        copts.name = service_description.name + "-" + str(counter) + "-" + execution.name + "-" + execution.owner.name + "-" + get_conf().deployment_name + "-zoe"
         copts.set_memory_limit(service_description.required_resources['memory'])
         copts.network_name = '{}-{}-zoe'.format(execution.owner.name, get_conf().deployment_name)
         service_id = self.state_manager.gen_id()
         copts.labels = {
             'zoe.execution.name': execution.name,
             'zoe.execution.id': str(execution.id),
-            'zoe.service.name': service_description.name,
+            'zoe.service.name': service_description.name + "-" + str(counter),
             'zoe.service.id': str(service_id),
             'zoe.owner': execution.owner.name,
             'zoe.deployment_name': get_conf().deployment_name,
