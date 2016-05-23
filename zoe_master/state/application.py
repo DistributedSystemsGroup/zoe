@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from zoe_lib.exceptions import InvalidApplicationDescription
+import zoe_lib.version
 
 
 class ApplicationDescription:
@@ -48,6 +49,8 @@ class ApplicationDescription:
 
         try:
             self.version = int(data['version'])
+            if self.version != zoe_lib.version.ZOE_APPLICATION_FORMAT_VERSION:
+                raise InvalidApplicationDescription(msg="This version of Zoe supports only version {} for application descriptions".format(zoe_lib.version.ZOE_APPLICATION_FORMAT_VERSION))
         except ValueError:
             raise InvalidApplicationDescription(msg="version field should be an int")
         except KeyError:
