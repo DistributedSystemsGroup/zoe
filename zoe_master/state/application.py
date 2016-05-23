@@ -180,7 +180,7 @@ class ServiceDescription:
         return d
 
     def from_dict(self, data):
-        required_keys = ['name', 'docker_image', 'monitor']
+        required_keys = ['name', 'docker_image', 'monitor', 'total_count', 'essential_count', 'startup_order']
         for k in required_keys:
             try:
                 setattr(self, k, data[k])
@@ -194,18 +194,22 @@ class ServiceDescription:
 
         try:
             self.total_count = int(data['total_count'])
+            if self.total_count < 1:
+                raise InvalidApplicationDescription(msg="total_count must be bigger than zero")
         except ValueError:
             raise InvalidApplicationDescription(msg="total_count field should be an int")
 
         try:
             self.essential_count = int(data['essential_count'])
+            if self.essential_count < 0 or self.essential_count > self.total_count:
+                raise InvalidApplicationDescription(msg="essential_count must be between zero and total_count")
         except ValueError:
             raise InvalidApplicationDescription(msg="essential_count field should be an int")
 
         try:
-            self.startup_order = int(data['start_order'])
+            self.startup_order = int(data['startup_order'])
         except ValueError:
-            raise InvalidApplicationDescription(msg="start_order field should be an int")
+            raise InvalidApplicationDescription(msg="startup_order field should be an int")
 
         if 'ports' not in data:
             raise InvalidApplicationDescription(msg="Missing required key: ports")
