@@ -118,7 +118,8 @@ def home_user():
     executions = query_api.query('execution')
     template_vars = {
         'executions': executions,
-        'is_admin': user['role'] == 'admin'
+        'is_admin': user['role'] == 'admin',
+        'user_gateway': user['gateway_urls'][0]
     }
 
     return render_template('home_user.html', **template_vars)
