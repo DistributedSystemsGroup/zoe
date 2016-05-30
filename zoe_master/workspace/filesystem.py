@@ -15,9 +15,12 @@
 
 import os.path
 import shutil
+import logging
 
 import zoe_master.workspace.base
 import zoe_master.config as config
+
+log = logging.getLogger(__name__)
 
 
 class ZoeFSWorkspace(zoe_master.workspace.base.ZoeWorkspaceBase):
@@ -30,7 +33,10 @@ class ZoeFSWorkspace(zoe_master.workspace.base.ZoeWorkspaceBase):
 
     def destroy(self, user):
         path = os.path.join(self.base_path, user.name)
-        shutil.rmtree(path)
+        try:
+            shutil.rmtree(path)
+        except OSError:
+            log.warning("Cannot remove workspace directory %s" % path)
 
     def exists(self, user):
         return os.path.exists(os.path.join(self.base_path, user.name))
