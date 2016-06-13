@@ -29,11 +29,13 @@ class FIFOSchedulerPolicy(BaseSchedulerPolicy):
         self.starting_list = []
 
     def admission_control(self, app: ApplicationDescription) -> bool:
-        swarm_stats = singletons['stats_manager'].swarm_stats
-        if app.total_memory() < swarm_stats.memory_total:
-            return True
-        else:
-            return False
+        return True
+#  TODO broken Docker API
+#        swarm_stats = singletons['stats_manager'].swarm_stats
+#        if app.total_memory() < swarm_stats.memory_total:
+#            return True
+#        else:
+#            return False
 
     def execution_submission(self, execution: Execution):
         self.waiting_list.append(execution)

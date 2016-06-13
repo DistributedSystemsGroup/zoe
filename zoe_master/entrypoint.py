@@ -92,7 +92,7 @@ def main():
         config.singletons['metric'] = metrics_th
 
     stats_th = StatsManager()
-    stats_th.start()
+#    stats_th.start()  # TODO Broken Docker API
     config.singletons['stats_manager'] = stats_th
 
     log.info("Starting HTTP REST server...")
