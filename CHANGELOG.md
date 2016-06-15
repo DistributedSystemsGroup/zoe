@@ -5,6 +5,7 @@
 * Check application description version during validation.
 * Bump application description version to 2 since we are going to make some major changes in the format
 * Add fields `total_count`, `essential_count` and `startup_order` to service descriptions.
+* Comment code related to the parsing of cluster statistics from Swarm. The data returned by API changes too often and parsing it consistently is too complex. A bug is open on the Swarm issue tracker.
 
 ## Version 0.9.6
 
