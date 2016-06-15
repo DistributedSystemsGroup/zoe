@@ -55,15 +55,15 @@ class FIFOSchedulerPolicy(BaseSchedulerPolicy):
         if len(self.waiting_list) == 0:
             return None
 
-        mem_reserved = sum([node.memory_reserved for node in singletons['stats_manager'].swarm_stats.nodes])
-        mem_available = singletons['stats_manager'].swarm_stats.memory_total - mem_reserved
+#        mem_reserved = sum([node.memory_reserved for node in singletons['stats_manager'].swarm_stats.nodes])
+#        mem_available = singletons['stats_manager'].swarm_stats.memory_total - mem_reserved
         candidate = self.waiting_list[0]
-        if mem_available >= candidate.application.total_memory():
-            self.waiting_list.pop(0)
-            self.starting_list.append(candidate)
-            return candidate
-        else:
-            return None
+#        if mem_available >= candidate.application.total_memory():
+        self.waiting_list.pop(0)
+        self.starting_list.append(candidate)
+        return candidate
+#        else:
+#            return None
 
     def start_successful(self, execution: Execution) -> None:
         self.starting_list.remove(execution)
