@@ -76,7 +76,7 @@ class PlatformManager:
         copts.gelf_log_address = get_conf().gelf_address
         copts.name = service_description.name + "-" + str(counter) + "-" + execution.name + "-" + execution.owner.name + "-" + get_conf().deployment_name + "-zoe"
         copts.set_memory_limit(service_description.required_resources['memory'])
-        copts.network_name = '{}-{}-zoe'.format(execution.owner.name, get_conf().deployment_name)
+        copts.network_name = get_conf().overlay_network_name
         service_id = self.state_manager.gen_id()
         copts.labels = {
             'zoe.execution.name': execution.name,
@@ -168,42 +168,6 @@ class PlatformManager:
             execution.set_terminated()
         self.scheduler.execution_terminate(execution)
 
-    def start_gateway_container(self, user):
-        copts = DockerContainerOptions()
-        copts.name = 'gateway-{}-{}-zoe'.format(user.name, get_conf().deployment_name)
-        copts.network_name = '{}-{}-zoe'.format(user.name, get_conf().deployment_name)
-        copts.ports.append(1080)
-        copts.labels = {
-            'zoe.owner': user.name,
-            'zoe.deployment': get_conf().deployment_name,
-            'zoe.type': 'gateway'
-        }
-        copts.restart = True
-        if user.role == 'guest':
-            image = get_conf().guest_gateway_image_name
-        else:
-            image = get_conf().user_gateway_image_name
-        cont_info = self.swarm.spawn_container(image, copts)
-        if cont_info is None:
-            raise ZoeException('Cannot create user gateway container')
-        user.gateway_docker_id = cont_info['docker_id']
-        user.set_gateway_urls(cont_info)
-
-    def kill_gateway_container(self, user):
-        self.swarm.terminate_container(user.gateway_docker_id, delete=True)
-        user.gateway_docker_id = None
-        user.gateway_urls = []
-
-    def create_user_network(self, user):
-        log.info('Creating a new network for user {}'.format(user.id))
-        net_name = '{}-{}-zoe'.format(user.name, get_conf().deployment_name)
-        net_id = self.swarm.network_create(net_name)
-        user.network_id = net_id
-
-    def remove_user_network(self, user):
-        log.info('Removing network for user {}'.format(user.name))
-        self.swarm.network_remove(user.network_id)
-
     def is_service_alive(self, service: service_module.Service) -> bool:
         ret = self.swarm.inspect_container(service.docker_id)
         if ret is None:
@@ -227,90 +191,6 @@ class PlatformManager:
 
     def check_state_swarm_consistency(self):
         state_changed = False
-        users = self.state_manager.get('user')
-        networks = self.swarm.network_list('{}-zoe'.format(get_conf().deployment_name))
-        gateways = self.swarm.list({'zoe.type': 'gateway', 'zoe.deployment': get_conf().deployment_name})
-
-        users_no_network = []
-        users_no_gateway = []
-        networks_to_delete = []
-        gateways_to_delete = []
-
-        for u in users:
-            if u.network_id is None:
-                log.error('state inconsistency: user {} has no network'.format(u.name))
-                users_no_network.append(u)
-            elif u.network_id not in [x['id'] for x in networks]:
-                log.error('state inconsistency: user {} has an invalid network'.format(u.name))
-                u.network_id = None
-                users_no_network.append(u)
-
-            if u.gateway_docker_id is None:
-                log.error('state inconsistency: user {} has no gateway'.format(u.name))
-                users_no_gateway.append(u)
-            elif u.gateway_docker_id not in [x['id'] for x in gateways]:
-                log.error('state inconsistency: user {} has an invalid gateway container ID'.format(u.name))
-                u.gateway_docker_id = None
-                users_no_gateway.append(u)
-
-        duplicate_check = set()
-        for n in networks:
-            try:
-                username = n['name'].split('-')[0]
-            except ValueError:
-                log.error('network {} does not belong to Zoe, bug?'.format(n['name']))
-                networks_to_delete.append(n['id'])
-                continue
-            if username in duplicate_check:
-                log.warning('state inconsistency: found two networks for the same user')
-                networks_to_delete.append(n['id'])
-                continue
-            duplicate_check.add(username)
-            user = self.state_manager.get_one('user', name=username)
-            if user is not None and user in users_no_network:
-                user.network_id = n['id']
-                users_no_network.remove(user)
-                log.error('fixed: user {} linked to network {}'.format(user.name, n['name']))
-                state_changed = True
-                continue
-            elif user is None:
-                log.error('state inconsistency: found a network for user {} who no longer exists'.format(username))
-                networks_to_delete.append(n['id'])
-
-        for g in gateways:
-            try:
-                username = g['name'].split('-')[1]
-            except ValueError:
-                log.error('container {} does not belong to Zoe, bug?'.format(g['name']))
-                gateways_to_delete.append(g['id'])
-                continue
-            user = self.state_manager.get_one('user', name=username)
-            if user is not None and user in users_no_gateway:
-                user.gateway_docker_id = g['id']
-                users_no_gateway.remove(user)
-                cont_info = self.swarm.inspect_container(g['id'])
-                user.set_gateway_urls(cont_info)
-                log.error('fixed: user {} linked to gateway {}'.format(user.name, g['name']))
-                state_changed = True
-                continue
-            elif user is None:
-                log.error('state inconsistency: found a gateway for user {} who no longer exists'.format(username))
-                gateways_to_delete.append(g['id'])
-
-        # Fix all inconsistencies found
-        for g in gateways_to_delete:
-            log.error('fixed: terminating orphan gateway container {}'.format(g[:8]))
-            self.swarm.terminate_container(g, delete=True)
-        for n in networks_to_delete:
-            log.error('fixed: terminating orphan network {}'.format(n[:8]))
-            self.swarm.network_remove(n)
-
-        for u in users_no_network:
-            log.error('fixed: creating network for user {}'.format(u.name))
-            self.create_user_network(u)
-        for u in users_no_gateway:
-            log.error('fixed: creating gateway for user {}'.format(u.name))
-            self.start_gateway_container(u)
 
         # ### Check executions and container consistency
         swarm_containers = self.swarm.list(only_label={'zoe.deployment_name': get_conf().deployment_name})
@@ -321,6 +201,7 @@ class PlatformManager:
                 conts_state_to_delete.append(c_id)
         for c_id in conts_state_to_delete:
             self.state_manager.delete('service', c_id)
+            state_changed = True
 
-        if state_changed or len(users_no_gateway) > 0 or len(users_no_network) > 0:
+        if state_changed:
             self.state_manager.state_updated()

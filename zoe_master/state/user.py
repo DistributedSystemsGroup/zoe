@@ -24,14 +24,11 @@ class User(BaseState):
     :type name: str
     :type hashed_password: str
     :type role: list
-    :type gateway_docker_id: str
-    :type gateway_urls: list
-    :type network_id: str
     """
 
     api_in_attrs = ['name', 'role']
-    api_out_attrs = ['name', 'role', 'gateway_urls']
-    private_attrs = ['hashed_password', 'gateway_docker_id', 'network_id']
+    api_out_attrs = ['name', 'role']
+    private_attrs = ['hashed_password']
 
     def __init__(self, state):
         super().__init__(state)
@@ -39,9 +36,6 @@ class User(BaseState):
         self.name = ''
         self.hashed_password = ''
         self.role = ''
-        self.gateway_docker_id = None
-        self.gateway_urls = []
-        self.network_id = None
 
         # Links to other objects
         self.executions = []
@@ -60,7 +54,3 @@ class User(BaseState):
 
     def can_see_non_owner_objects(self):
         return self.role == 'admin'
-
-    def set_gateway_urls(self, cont_info):
-        socks_url = 'socks://' + cont_info['ports']['1080/tcp'][0] + ':' + cont_info['ports']['1080/tcp'][1]
-        self.gateway_urls = [socks_url]

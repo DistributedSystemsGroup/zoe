@@ -67,13 +67,6 @@ class UserAPI(Resource):
         if user_has_active_executions(user):
             raise ZoeRestAPIException('User has running executions, cannot delete')
 
-        for wks in singletons['workspace_managers']:
-            assert isinstance(wks, zoe_master.workspace.base.ZoeWorkspaceBase)
-            wks.destroy(user)
-
-        self.platform.kill_gateway_container(user)
-        self.platform.remove_user_network(user)
-
         self.state.delete('user', user.id)
         self.state.state_updated()
 
@@ -119,10 +112,6 @@ class UserCollectionAPI(Resource):
 
         user.id = self.state.gen_id()
         self.state.new('user', user)
-
-        self.platform.create_user_network(user)
-
-        self.platform.start_gateway_container(user)
 
         for wks in singletons['workspace_managers']:
             assert isinstance(wks, zoe_master.workspace.base.ZoeWorkspaceBase)

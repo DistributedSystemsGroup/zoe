@@ -41,8 +41,6 @@ def load_configuration(test_conf=None):
                                    args_for_writing_out_config_file=["--write-config"])
         argparser.add_argument('--debug', action='store_true', help='Enable debug output')
         argparser.add_argument('--swarm', help='Swarm/Docker API endpoint (ex.: zk://zk1:2181,zk2:2181 or http://swarm:2380)', default='http://localhost:2375')
-        argparser.add_argument('--guest-gateway-image-name', help='Docker image for guests gateway container (ex.: zoerepo/guest-gateway)', default='zoerepo/guest-gateway')
-        argparser.add_argument('--user-gateway-image-name', help='Docker image for users gateway container (ex.: zoerepo/guest-gateway)', default='zoerepo/guest-gateway')
         argparser.add_argument('--state-dir', help='Directory where state checkpoints are saved', default='/var/lib/zoe')
         argparser.add_argument('--listen-address', help='REST API listen address', default='0.0.0.0')
         argparser.add_argument('--listen-port', help='REST API listen port', default='4850')
