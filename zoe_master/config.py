@@ -54,9 +54,7 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--passlib-rounds', type=int, help='Number of hashing rounds for passwords', default=60000)
         argparser.add_argument('--gelf-address', help='Enable Docker GELF log output to this destination (ex. udp://1.2.3.4:1234)', default='')
         argparser.add_argument('--workspace-base-path', help='Path where user workspaces will be created by Zoe. Must be visible at this path on all Swarm hosts.', default='/mnt/zoe-workspaces')
-        argparser.add_argument('--enable-hdfs-workspace', help='Enable support for creating workspaces in HDFS', action='store_true')
-        argparser.add_argument('--hdfs-namenode', help='IP:port of the NameNode to use for workspace management', default='127.0.0.1:8020')
-        argparser.add_argument('--hdfs-network', help='If HDFS is in a Docker network, provide here the network ID', default='')
+        argparser.add_argument('--overlay-network-name', help='Name of the Swarm overlay network Zoe should use', default='zoe')
 
         opts = argparser.parse_args()
         if opts.debug:

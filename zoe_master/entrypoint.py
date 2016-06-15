@@ -31,7 +31,6 @@ from zoe_lib.metrics.influxdb import InfluxDBMetricSender
 from zoe_lib.metrics.base import BaseMetricSender
 from zoe_master.stats_manager import StatsManager
 from zoe_master.workspace.filesystem import ZoeFSWorkspace
-from zoe_master.workspace.hdfs import ZoeHDFSWorkspace
 
 log = logging.getLogger("main")
 LOG_FORMAT = '%(asctime)-15s %(levelname)s %(name)s (%(threadName)s): %(message)s'
@@ -69,9 +68,6 @@ def main():
     log.info("Initializing workspace managers")
     fswk = ZoeFSWorkspace()
     config.singletons['workspace_managers'] = [fswk]
-    if config.get_conf().enable_hdfs_workspace:
-        hdfswk = ZoeHDFSWorkspace()
-        config.singletons['workspace_managers'].append(hdfswk)
 
 #    try:
     log.info("Checking state consistency")
