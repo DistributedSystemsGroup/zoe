@@ -17,14 +17,10 @@
 
 import logging
 
-from tornado.wsgi import WSGIContainer
-from tornado.httpserver import HTTPServer
-from tornado.ioloop import IOLoop
-
 from zoe_master.platform_manager import PlatformManager
 from zoe_master.scheduler_policies import FIFOSchedulerPolicy
 import zoe_master.config as config
-from zoe_master.rest_api import init as api_init
+from zoe_master.master_api import APIManager
 from zoe_master.state.manager import StateManager
 from zoe_master.state.blobs.fs import FSBlobs
 from zoe_lib.metrics.influxdb import InfluxDBMetricSender
@@ -49,7 +45,6 @@ def main():
     else:
         logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
-    logging.getLogger('kazoo').setLevel(logging.WARNING)
     logging.getLogger('requests').setLevel(logging.WARNING)
     logging.getLogger('urllib3').setLevel(logging.WARNING)
     logging.getLogger('docker').setLevel(logging.INFO)
@@ -76,9 +71,6 @@ def main():
 #    except:
 #        log.error('State is seriously corrupted, delete and restart')
 
-    log.info("Initializing API")
-    app = api_init(state_manager, pm)
-
     if config.get_conf().influxdb_enable:
         metrics_th = InfluxDBMetricSender(config.get_conf())
         metrics_th.start()
@@ -91,16 +83,6 @@ def main():
 #    stats_th.start()  # TODO Broken Docker API
     config.singletons['stats_manager'] = stats_th
 
-    log.info("Starting HTTP REST server...")
-    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-
-    http_server = HTTPServer(WSGIContainer(app))
-    http_server.listen(args.listen_port, args.listen_address)  # Initialized like this it is single-threaded/single-process
-    ioloop = IOLoop.instance()
-    try:
-        ioloop.start()
-    except KeyboardInterrupt:
-        if config.singletons['metric'] is not None:
-            config.singletons['metric'].quit()
-            config.singletons['metric'].join()
-        print("CTRL-C detected, terminating")
+    log.info("Starting ZMQ API server...")
+    config.singletons['api_server'] = APIManager()
+    config.singletons['api_server'].loop()
