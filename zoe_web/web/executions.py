@@ -14,106 +14,65 @@
 # limitations under the License.
 
 import json
-import re
 
 from flask import render_template, request, redirect, url_for
 
-from zoe_lib.services import ZoeServiceAPI
-from zoe_lib.executions import ZoeExecutionsAPI
-import zoe_lib.exceptions
-import zoe_lib.applications
-
-from zoe_web.config import get_conf
-from zoe_web.web import web_bp
-from zoe_web.web.auth import missing_auth
+from zoe_web.web.utils import get_auth, catch_exceptions
+import zoe_web.config as config
+import zoe_web.api_endpoint
+import zoe_web.exceptions
 
 
-def error_page(error_message, status):
-    return render_template('error.html', error=error_message), status
-
-
-@web_bp.route('/executions/new')
+@catch_exceptions
 def execution_define():
-    auth = request.authorization
-    if not auth:
-        return missing_auth()
+    get_auth(request)
 
     return render_template('execution_new.html')
 
 
-@web_bp.route('/executions/start', methods=['POST'])
+@catch_exceptions
 def execution_start():
-    auth = request.authorization
-    if not auth:
-        return missing_auth()
+    uid, role = get_auth(request)
+    assert isinstance(config.api_endpoint, zoe_web.api_endpoint.APIEndpoint)
 
-    guest_identifier = auth.username
-    guest_password = auth.password
-
-    app_descr_json = request.files['file'].read()
-    app_descr = json.loads(app_descr_json.decode('utf-8'))
-    try:
-        zoe_lib.applications.app_validate(app_descr)
-    except zoe_lib.exceptions.InvalidApplicationDescription as e:
-        return error_page(e.message, 400)
-
+    app_descr_json = request.files['file'].read().decode('utf-8')
+    app_descr = json.loads(app_descr_json)
     exec_name = request.form['exec_name']
-    if 3 > len(exec_name) > 128:
-        return error_page("Execution name must be between 4 and 128 characters long", 400)
-    if not re.match(r'^[a-zA-Z0-9\-]+$', exec_name):
-        return error_page("Execution name can contain only letters, numbers and dashes. '{}' is not valid.".format(exec_name))
 
-    exec_api = ZoeExecutionsAPI(get_conf().master_url, guest_identifier, guest_password)
-    new_id = exec_api.execution_start(exec_name, app_descr)
+    new_id = config.api_endpoint.execution_start(uid, role, exec_name, app_descr)
 
     return redirect(url_for('web.execution_inspect', execution_id=new_id))
 
 
-@web_bp.route('/executions/restart/<int:execution_id>')
+@catch_exceptions
 def execution_restart(execution_id):
-    auth = request.authorization
-    if not auth:
-        return missing_auth()
+    uid, role = get_auth(request)
+    assert isinstance(config.api_endpoint, zoe_web.api_endpoint.APIEndpoint)
 
-    guest_identifier = auth.username
-    guest_password = auth.password
-
-    exec_api = ZoeExecutionsAPI(get_conf().master_url, guest_identifier, guest_password)
-    e = exec_api.execution_get(execution_id)
-    new_id = exec_api.execution_start(e['name'], e['application'])
+    e = config.api_endpoint.execution_by_id(uid, role, execution_id)
+    new_id = config.api_endpoint.execution_start(uid, role, e.name, e.description)
 
     return redirect(url_for('web.execution_inspect', execution_id=new_id))
 
 
-@web_bp.route('/executions/terminate/<int:execution_id>')
+@catch_exceptions
 def execution_terminate(execution_id):
-    auth = request.authorization
-    if not auth:
-        return missing_auth()
+    uid, role = get_auth(request)
+    assert isinstance(config.api_endpoint, zoe_web.api_endpoint.APIEndpoint)
 
-    guest_identifier = auth.username
-    guest_password = auth.password
-
-    exec_api = ZoeExecutionsAPI(get_conf().master_url, guest_identifier, guest_password)
-    e = exec_api.execution_get(execution_id)
-    exec_api.terminate(execution_id)
+    success, message = config.api_endpoint.execution_terminate(uid, role, execution_id)
+    if not success:
+        raise zoe_web.exceptions.ZoeException(message)
 
     return redirect(url_for('web.home_user'))
 
 
-@web_bp.route('/executions/inspect/<int:execution_id>')
+@catch_exceptions
 def execution_inspect(execution_id):
-    auth = request.authorization
-    if not auth:
-        return missing_auth()
+    uid, role = get_auth(request)
+    assert isinstance(config.api_endpoint, zoe_web.api_endpoint.APIEndpoint)
 
-    guest_identifier = auth.username
-    guest_password = auth.password
-
-    exec_api = ZoeExecutionsAPI(get_conf().master_url, guest_identifier, guest_password)
-    cont_api = ZoeServiceAPI(get_conf().master_url, guest_identifier, guest_password)
-
-    e = exec_api.execution_get(execution_id)
+    e = config.api_endpoint.execution_by_id(uid, role, execution_id)
 
     services = []
     for sid in e['services']:

@@ -14,16 +14,29 @@
 # limitations under the License.
 
 from flask import Blueprint
-
-web_bp = Blueprint('web', __name__, template_folder='templates', static_folder='static')
-
 import zoe_web.web.start
 import zoe_web.web.executions
 
 from zoe_lib.version import ZOE_API_VERSION, ZOE_VERSION
 
 
-@web_bp.context_processor
+def web_init() -> Blueprint:
+    web_bp = Blueprint('web', __name__, template_folder='templates', static_folder='static')
+
+    web_bp.context_processor(inject_version)
+
+    web_bp.add_url_rule('/', 'index', zoe_web.web.start.index)
+    web_bp.add_url_rule('/user', 'home_user', zoe_web.web.start.home_user)
+
+    web_bp.add_url_rule('/executions/new', 'execution_define', zoe_web.web.executions.execution_define)
+    web_bp.add_url_rule('/executions/start', 'execution_start', zoe_web.web.executions.execution_start, methods=['POST'])
+    web_bp.add_url_rule('/executions/restart/<int:execution_id>', 'execution_restart', zoe_web.web.executions.execution_restart)
+    web_bp.add_url_rule('/executions/terminate/<int:execution_id>', 'execution_terminate', zoe_web.web.executions.execution_terminate)
+    web_bp.add_url_rule('/executions/inspect/<int:execution_id>', 'execution_inspect', zoe_web.web.executions.execution_inspect)
+
+    return web_bp
+
+
 def inject_version():
     return {
         'zoe_version': ZOE_VERSION,
