@@ -4,6 +4,9 @@
 
 * This version is the start of a new series of releases moving toward a new architecture
 * Only one overlay network (created by the sysadmin) will be used by all Zoe executions. We provide Dockerfiles for SOCKS and SSHd containers that can be used to give users access inside the Zoe overlay network. These containers will no longer be managed by Zoe.
+* Move the REST API in the web process and add a ZeroMQ-based API between the web and the master.
+* Move all user management in the web process.
+* Use Postgresql to store the state
 
 ## Version 0.9.7
 
