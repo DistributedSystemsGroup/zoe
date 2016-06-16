@@ -1,0 +1,93 @@
+# Copyright (c) 2016, Daniele Venzano
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import re
+
+from flask_restful import Resource, request
+from werkzeug.exceptions import BadRequest
+
+import zoe_lib.exceptions
+import zoe_lib.applications
+import zoe_lib.sql_manager
+
+from zoe_web.rest_api.utils import catch_exceptions, get_auth
+import zoe_web.exceptions
+import zoe_web.config as config
+import zoe_web.api_endpoint
+
+
+class ExecutionAPI(Resource):
+    @catch_exceptions
+    def get(self, execution_id):
+        uid, role = get_auth(request)
+
+        assert isinstance(config.api_endpoint, zoe_web.api_endpoint.APIEndpoint)
+        e = config.api_endpoint.execution_by_id(uid, role, execution_id)
+
+        return e.serialize()
+
+    @catch_exceptions
+    def delete(self, execution_id: int):
+        """
+        This method is called when a user wants to stop an execution. To actually delete the execution,
+        the user has to delete the 'parent' application.
+        :param execution_id: the execution to be deleted
+        :return:
+        """
+        uid, role = get_auth(request)
+
+        assert isinstance(config.api_endpoint, zoe_web.api_endpoint.APIEndpoint)
+        success, message = config.api_endpoint.execution_terminate(uid, role, execution_id)
+        if not success:
+            raise zoe_web.exceptions.ZoeRestAPIException(message, 400)
+
+        return '', 204
+
+
+class ExecutionCollectionAPI(Resource):
+    @catch_exceptions
+    def get(self):
+        """
+        Returns a list of all active executions.
+
+        :return:
+        """
+        uid, role = get_auth(request)
+
+        assert isinstance(config.api_endpoint, zoe_web.api_endpoint.APIEndpoint)
+        execs = config.api_endpoint.execution_list(uid, role)
+        return [e.serialize() for e in execs]
+
+    @catch_exceptions
+    def post(self):
+        """
+        Starts an execution, given an application description. Takes a JSON object.
+        :return: the new execution_id
+        """
+        uid, role = get_auth(request)
+
+        assert isinstance(config.api_endpoint, zoe_web.api_endpoint.APIEndpoint)
+
+        try:
+            data = request.get_json()
+        except BadRequest:
+            raise zoe_web.exceptions.ZoeRestAPIException('Error decoding JSON data')
+
+        application_description = data['application']
+        exec_name = data['name']
+
+        new_id = config.api_endpoint.execution_start(uid, role, exec_name, application_description)
+
+        return {'execution_id': new_id}, 201

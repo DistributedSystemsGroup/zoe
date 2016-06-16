@@ -15,8 +15,8 @@
 
 import logging
 
-from zoe_lib.exceptions import ZoeRestAPIException
-from zoe_master.state.user import User
+from zoe_web.exceptions import ZoeRestAPIException, ZoeNotFoundException, ZoeAuthException, ZoeException
+from zoe_web.auth.ldap import LDAPAuthenticator
 
 log = logging.getLogger(__name__)
 
@@ -32,8 +32,14 @@ def catch_exceptions(func):
             return func(*args, **kwargs)
         except ZoeRestAPIException as e:
             if e.status_code != 401:
-                log.exception(e.value)
-            return {'message': e.value}, e.status_code, e.headers
+                log.exception(e.message)
+            return {'message': e.message}, e.status_code, e.headers
+        except ZoeNotFoundException as e:
+            return {'message': e.message}, 404
+        except ZoeAuthException as e:
+            return {'message': e.message}, 401
+        except ZoeException as e:
+            return {'message': e.message}, 400
         except Exception as e:
             log.exception(str(e))
             return {'message': str(e)}, 500
@@ -41,8 +47,14 @@ def catch_exceptions(func):
     return func_wrapper
 
 
-def user_has_active_executions(user: User) -> bool:
-    for e in user.executions:
-            if e.is_active():
-                return True
-    return False
+def get_auth(request):
+    auth = request.authorization
+    if not auth:
+        raise ZoeRestAPIException('missing or wrong authentication information', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+    authenticator = LDAPAuthenticator()
+    uid, role = authenticator.auth(auth.username, auth.password)
+    if uid is None:
+        raise ZoeRestAPIException('missing or wrong authentication information', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+    return uid, role

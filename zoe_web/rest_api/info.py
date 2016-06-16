@@ -13,32 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import time
-
-from flask_restful import Resource, request
+from flask_restful import Resource
 
 from zoe_lib.version import ZOE_API_VERSION, ZOE_APPLICATION_FORMAT_VERSION, ZOE_VERSION
-from zoe_master.state.manager import StateManager
-from zoe_master.platform_manager import PlatformManager
-from zoe_master.rest_api.utils import catch_exceptions
-from zoe_master.rest_api.auth.authentication import authenticate
-from zoe_master.config import singletons, get_conf
+from zoe_master.config import get_conf
+from zoe_web.rest_api.utils import catch_exceptions
 
 
 class InfoAPI(Resource):
-    """
-    :type state: StateManager
-    :type platform: PlatformManager
-    """
-    def __init__(self, **kwargs):
-        self.state = kwargs['state']
-        self.platform = kwargs['platform']
-
     @catch_exceptions
     def get(self):
-        start_time = time.time()
-        calling_user = authenticate(request, self.state)
-
         ret = {
             'version': ZOE_VERSION,
             'api_version': ZOE_API_VERSION,
@@ -46,5 +30,4 @@ class InfoAPI(Resource):
             'deployment_name': get_conf().deployment_name
         }
 
-        singletons['metric'].metric_api_call(start_time, 'info', 'get', calling_user)
         return ret

@@ -15,28 +15,17 @@
 
 import logging
 import time
+
 from flask_restful import Resource, request
 
 from zoe_lib.exceptions import ZoeRestAPIException
-from zoe_master.state.manager import StateManager
-from zoe_master.platform_manager import PlatformManager
-from zoe_master.rest_api.utils import catch_exceptions
-from zoe_master.rest_api.auth.authentication import authenticate
-from zoe_master.rest_api.auth.authorization import is_authorized
-from zoe_master.config import singletons
+from zoe_web.config import singletons
+from zoe_web.rest_api.utils import catch_exceptions
 
 log = logging.getLogger(__name__)
 
 
 class ServiceAPI(Resource):
-    """
-    :type state: StateManager
-    :type platform: PlatformManager
-    """
-    def __init__(self, **kwargs):
-        self.state = kwargs['state']
-        self.platform = kwargs['platform']
-
     @catch_exceptions
     def get(self, container_id):
         start_time = time.time()
