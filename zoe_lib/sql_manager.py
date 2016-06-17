@@ -17,6 +17,7 @@ import datetime
 
 import psycopg2
 import psycopg2.extras
+psycopg2.extensions.register_adapter(dict, psycopg2.extras.Json)
 
 
 class SQLManager:
