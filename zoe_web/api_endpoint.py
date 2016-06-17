@@ -62,7 +62,7 @@ class APIEndpoint:
         new_id = self.sql.execution_new(exec_name, uid, application_description)
         success, message = self.master.execution_start(new_id)
         if not success:
-            raise zoe_web.exceptions.ZoeException(message)
+            raise zoe_web.exceptions.ZoeException('The Zoe master is unavailable, execution will be submitted automatically when the master is back up.')
         return new_id
 
     def execution_terminate(self, uid, role, exec_id):

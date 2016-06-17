@@ -22,26 +22,26 @@
     <tbody>
         {% for e in executions %}
             <tr class="{{ loop.cycle('odd', 'even') }}">
-                <td><a href="/executions/inspect/{{ e['id'] }}">{{ e['name'] }}</a></td>
+                <td><a href="/executions/inspect/{{ e.id }}">{{ e.name }}</a></td>
                 {% if is_admin %}
-                <td>{{ e['owner'] }}</td>
+                <td>{{ e.user_id }}</td>
                 {% endif %}
-                <td>{{ e['status'] }}</td>
-                <td><script>format_timestamp("{{ e['time_scheduled'] }}")</script></td>
-                {% if e['time_started'] == None %}
+                <td>{{ e.status }}</td>
+                <td><script>format_timestamp("{{ e.time_submit }}")</script></td>
+                {% if e.time_start == None %}
                 <td>not yet</td>
                 {% else %}
-                <td><script>format_timestamp("{{ e['time_started'] }}")</script></td>
+                <td><script>format_timestamp("{{ e.time_start }}")</script></td>
                 {% endif %}
-                {% if e['time_finished'] == None %}
+                {% if e.time_end == None %}
                 <td>not yet</td>
                 {% else %}
-                <td><script>format_timestamp("{{ e['time_finished'] }}")</script></td>
+                <td><script>format_timestamp("{{ e.time_end }}")</script></td>
                 {% endif %}
-                {% if e['status'] == "running" or e['status'] == "scheduled" %}
-                    <td><a href="/executions/terminate/{{ e['id'] }}">Terminate</a></td>
+                {% if e.status == "running" or e.status == "submitted" %}
+                    <td><a href="/executions/terminate/{{ e.id }}">Terminate</a></td>
                 {% else %}
-                    <td><a href="/executions/restart/{{ e['id'] }}">Restart</a></td>
+                    <td><a href="/executions/restart/{{ e.id }}">Restart</a></td>
                 {% endif %}
             </tr>
         {% endfor %}
@@ -49,5 +49,4 @@
     </table>
     </div>
 
-    <h5>Gateway url: <code>{{ user_gateway }}</code></h5>
 {% endblock %}

@@ -51,7 +51,7 @@ class QueryAPI(Resource):
         elif what == 'execution':
             if role != 'admin':
                 filters['user_id'] = uid
-            execs = config.api_endpoint.execution_list(uid, role, filters)
+            execs = config.api_endpoint.execution_list(uid, role, **filters)
             return [x.serialize() for x in execs]
         else:
             raise ZoeRestAPIException('unknown query {}'.format(what))

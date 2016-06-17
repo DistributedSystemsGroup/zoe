@@ -66,8 +66,8 @@ class APIManager:
                 log.warning('Timeout waiting for master reply')
                 self._disconnect()
                 if retries_left == 0:
-                    log.error('Master is unreachable, abandoning request')
-                    return False, 'Master is unreachable, abandoning request'
+                    log.error('Master is unreachable, abandoning API request')
+                    return False, 'Master is unreachable, abandoning API request'
                 log.warning('Reconnecting and retrying request...')
                 self._connect()
 
