@@ -17,6 +17,12 @@ Other Zoe resources:
 - Zoe logger: https://github.com/DistributedSystemsGroup/zoe-logger
 
 
+A note on the master branch
+---------------------------
+We are currently redesigning Zoe with a new architecture, so the master branch is unstable and changes very rapidly.
+The latest stable version is maintained under the 0.9.7-stable branch. All the documentation currently refers to this stable version, unless otherwise noted.
+
+
 Repository contents
 -------------------
 

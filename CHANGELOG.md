@@ -7,6 +7,7 @@
 * Move the REST API in the web process and add a ZeroMQ-based API between the web and the master.
 * Move all user management in the web process.
 * Use Postgresql to store the state
+* Rename the zoe-web component in zoe-api to better describe its new role
 
 ## Version 0.9.7
 
