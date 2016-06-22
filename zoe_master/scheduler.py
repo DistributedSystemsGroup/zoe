@@ -14,73 +14,95 @@
 # limitations under the License.
 
 import logging
-import queue
+import threading
 
-from zoe_lib.exceptions import ZoeException
-from zoe_master.state.application import ApplicationDescription
-from zoe_master.state.execution import Execution
-from zoe_master.scheduler_policies.base import BaseSchedulerPolicy
+from zoe_lib.sql_manager import Execution
+
+from zoe_master.exceptions import ZoeStartExecutionFatalException, ZoeStartExecutionRetryException
+from zoe_master.zapp_to_docker import execution_to_containers, terminate_execution
 
 log = logging.getLogger(__name__)
 
 
 class ZoeScheduler:
-    """
-    :type platform: PlatformManager
-    :type scheduler_policy: BaseSchedulerPolicy
-    """
-    def __init__(self, platform_manager, policy_class):
-        self.platform = platform_manager
-        self.event_queue = queue.Queue()
-        self.scheduler_policy = policy_class(self.platform)
+    def __init__(self):
+        self.fifo_queue = []
+        self.trigger_semaphore = threading.Semaphore(0)
+        self.async_threads = []
+        self.loop_quit = False
+        self.loop_th = threading.Thread(target=self.loop_start_th, name='scheduler')
+        self.loop_th.start()
 
-    def set_policy(self, policy_class):
-        """
-        This method is called during initialization, it instantiates the policy class that will be used for scheduling executions.
-        :param policy_class: The policy class the will be used for scheduling
-        :return: None
-        """
-        self.scheduler_policy = policy_class(self.platform.status)
-
-    def validate(self, app: ApplicationDescription) -> bool:
-        """
-        It is used to validate an execution that is going to be started.
-        :param app:
-        :return: True if the execution is possible on this Zoe deployment, False otherwise
-        """
-        return self.scheduler_policy.admission_control(app)
+    def trigger(self):
+        self.trigger_semaphore.release()
 
     def incoming(self, execution: Execution):
         """
-        This method passes the execution request to the scheduling policy.
-        :param execution: The execution request
+        This method adds the execution to the end of the FIFO queue.
+        :param execution: The execution
         :return:
         """
-        self.scheduler_policy.execution_submission(execution)
-        self._check_runnable()  # Check if an execution can be started
+        self.fifo_queue.append(execution)
+        self.trigger()
 
-    def execution_terminate(self, execution: Execution) -> None:
+    def terminate(self, execution: Execution) -> None:
         """
-        Inform the master that an execution has been terminated.
+        Inform the master that an execution has been terminated. This can be done asynchronously.
         :param execution: the terminated execution
         :return: None
         """
-        self.scheduler_policy.execution_kill(execution)
-        self._check_runnable()  # Check if an execution can be started
+        def async_termination():
+            terminate_execution(execution)
+            self.trigger()
 
-    def _check_runnable(self):  # called periodically, does not use state
-        """
-        This method is called by the main master loop to check if there is an execution that can be run. In case there is
-        it starts it.
-        :return: None
-        """
-        execution = self.scheduler_policy.runnable_get()
-        if execution is None:
-            return
-        log.debug("Found a runnable execution!")
-        try:
-            self.platform.execution_start(execution)
-        except ZoeException:
-            self.scheduler_policy.start_failed(execution)
-        else:
-            self.scheduler_policy.start_successful(execution)
+        self.fifo_queue.remove(execution)
+        th = threading.Thread(target=async_termination, name='termination_{}'.format(execution.id))
+        th.start()
+        self.async_threads.append(th)
+
+    def loop_start_th(self):
+        while True:
+            ret = self.trigger_semaphore.acquire()
+            if not ret:  # Semaphore timeout, do some thread cleanup
+                counter = len(self.async_threads)
+                while counter > 0:
+                    if len(self.async_threads) == 0:
+                        break
+                    th = self.async_threads.pop(0)
+                    th.join(0.1)
+                    if th.isAlive():  # join failed
+                        self.async_threads.append(th)
+                    counter -= 1
+                continue
+            if self.loop_quit:
+                break
+
+            log.debug("Scheduler start loop has been triggered")
+            if len(self.fifo_queue) == 0:
+                continue
+
+            e = self.fifo_queue[0]
+            assert isinstance(e, Execution)
+            e.set_starting()
+            self.fifo_queue.pop(0)  # remove the execution form the queue
+
+            try:
+                execution_to_containers(e)
+            except ZoeStartExecutionRetryException as ex:
+                log.warning('Temporary failure starting execution {}: {}'.format(e.id, ex.message))
+                e.set_error_message(ex.message)
+                terminate_execution(e)
+                e.set_scheduled()
+                self.fifo_queue.append(e)
+            except ZoeStartExecutionFatalException as ex:
+                log.error('Fatal error trying to start execution {}: {}'.format(e.id, ex.message))
+                e.set_error_message(ex.message)
+                terminate_execution(e)
+                e.set_error()
+            else:
+                e.set_running()
+
+    def quit(self):
+        self.loop_quit = True
+        self.trigger()
+        self.loop_th.join()
