@@ -17,6 +17,7 @@
 This module contains the entrypoint for the commandline Zoe client
 """
 
+import datetime
 import json
 import logging
 import os
@@ -25,57 +26,11 @@ from argparse import ArgumentParser, Namespace, FileType, RawDescriptionHelpForm
 from pprint import pprint
 
 from zoe_cmd import utils
-from zoe_lib.users import ZoeUserAPI
 from zoe_lib.services import ZoeServiceAPI
 from zoe_lib.exceptions import ZoeAPIException, InvalidApplicationDescription
 from zoe_lib.executions import ZoeExecutionsAPI
 from zoe_lib.query import ZoeQueryAPI
 from zoe_lib.applications import app_validate
-
-
-def stats_cmd(_):
-    api = ZoeQueryAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    stats = api.query('stats_swarm')
-    pprint(stats)
-
-
-def user_new_cmd(args):
-    api = ZoeUserAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    name = args.name
-    password = args.password
-    role = args.role
-    if role not in ['admin', 'user', 'guest']:
-        print("Role must be one of admin, user, guest)")
-        return
-    try:
-        api.create(name, password, role)
-    except ZoeAPIException as e:
-        print('Error creating user: {}'.format(e))
-
-
-def user_get_cmd(args):
-    api = ZoeUserAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    user = api.get(args.name)
-    if user is None:
-        print('No such user')
-    else:
-        print('User: {}'.format(user['name']))
-        print('Role: {}'.format(user['role']))
-        print('Gateway URLs: {}'.format(user['gateway_urls']))
-
-
-def user_delete_cmd(args):
-    api = ZoeUserAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    api.delete(args.name)
-
-
-def user_list_cmd(_):
-    api = ZoeQueryAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    users = api.query('user')
-    for user in users:
-        print('<- User {} ->'.format(user['name']))
-        print('Role: {}'.format(user['role']))
-        print('Gateway URLs: {}'.format(user['gateway_urls']))
 
 
 def app_validate_cmd(args):
@@ -95,14 +50,14 @@ def app_get_cmd(args):
         print("no such execution")
     else:
         execution = data[0]
-        json.dump(execution['application'], sys.stdout, sort_keys=True, indent=4)
+        json.dump(execution['description'], sys.stdout, sort_keys=True, indent=4)
 
 
 def exec_list_cmd(_):
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     data = exec_api.list()
     for e in data:
-        print('Execution {} (User: {}, ID: {}): {}'.format(e['name'], e['owner'], e['id'], e['status']))
+        print('Execution {} (User: {}, ID: {}): {}'.format(e['name'], e['user_id'], e['id'], e['status']))
 
 
 def exec_start_cmd(args):
@@ -122,12 +77,21 @@ def exec_get_cmd(args):
     else:
         print('Execution {} (ID: {})'.format(execution['name'], execution['id']))
         print('Status: {}'.format(execution['status']))
-        if execution['error'] is not None:
+        if execution['status'] == 'error':
             print('Last error: {}'.format(execution['error']))
-        print('Time started: {}'.format(execution['time_started']))
-        print('Time scheduled: {}'.format(execution['time_scheduled']))
-        print('Time finished: {}'.format(execution['time_finished']))
-        app = execution['application']
+        print('Time submit: {}'.format(datetime.datetime.fromtimestamp(execution['time_submit'])))
+
+        if execution['time_start'] is None:
+            print('Time start: {}'.format('not yet'))
+        else:
+            print('Time start: {}'.format(datetime.datetime.fromtimestamp(execution['time_start'])))
+
+        if execution['time_end'] is None:
+            print('Time end: {}'.format('not yet'))
+        else:
+            print('Time end: {}'.format(datetime.datetime.fromtimestamp(execution['time_end'])))
+
+        app = execution['description']
         print('Application name: {}'.format(app['name']))
         for c_id in execution['services']:
             c = cont_api.get(c_id)
@@ -153,26 +117,6 @@ def process_arguments() -> Namespace:
     parser.add_argument('--debug', action='store_true', help='Enable debug output')
 
     subparser = parser.add_subparsers()
-
-    argparser_stats = subparser.add_parser('stats', help="Show the platform statistics")
-    argparser_stats.set_defaults(func=stats_cmd)
-
-    argparser_user_new = subparser.add_parser('user-new', help="Create a new user")
-    argparser_user_new.add_argument('--name', help="User name")
-    argparser_user_new.add_argument('--password', help="Password")
-    argparser_user_new.add_argument('--role', help="Role (one of admin, user, guest)")
-    argparser_user_new.set_defaults(func=user_new_cmd)
-
-    argparser_user_get = subparser.add_parser('user-get', help="Retrieve information about a user")
-    argparser_user_get.add_argument('name', help="User name")
-    argparser_user_get.set_defaults(func=user_get_cmd)
-
-    argparser_user_delete = subparser.add_parser('user-rm', help="Removes a user from the system")
-    argparser_user_delete.add_argument('name', help="User name")
-    argparser_user_delete.set_defaults(func=user_delete_cmd)
-
-    argparser_user_list = subparser.add_parser('user-ls', help='Lists all users defined in the system')
-    argparser_user_list.set_defaults(func=user_list_cmd)
 
     argparser_app_validate = subparser.add_parser('app-validate', help='Validate an application description')
     argparser_app_validate.add_argument('jsonfile', type=FileType("r"), help='Application description')
