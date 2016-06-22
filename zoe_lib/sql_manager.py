@@ -17,6 +17,9 @@ import datetime
 
 import psycopg2
 import psycopg2.extras
+
+from zoe_master.config import get_conf
+
 psycopg2.extensions.register_adapter(dict, psycopg2.extras.Json)
 
 
@@ -75,19 +78,62 @@ class SQLManager:
             value_list.append(v)
         set_q = ", ".join(arg_list)
         value_list.append(exec_id)
-        q_base = 'UPDATE execution SET' + set_q + ' WHERE id=%s'
+        q_base = 'UPDATE execution SET ' + set_q + ' WHERE id=%s'
         query = cur.mogrify(q_base, value_list)
         cur.execute(query)
         self.conn.commit()
 
     def execution_new(self, name, user_id, description):
         cur = self._cursor()
-        status = 'submitted'
+        status = Execution.SUBMIT_STATUS
         time_submit = datetime.datetime.now()
         query = cur.mogrify('INSERT INTO execution (id, name, user_id, description, status, time_submit) VALUES (DEFAULT, %s,%s,%s,%s,%s) RETURNING id', (name, user_id, description, status, time_submit))
         cur.execute(query)
         self.conn.commit()
-        return cur.fetchone()
+        return cur.fetchone()[0]
+
+    def service_list(self, only_one=False, **kwargs):
+        cur = self._cursor()
+        q_base = 'SELECT * FROM service'
+        if len(kwargs) > 0:
+            q = q_base + " WHERE "
+            filter_list = []
+            args_list = []
+            for k, v in kwargs.items():
+                filter_list.append('{} = %s'.format(k))
+                args_list.append(v)
+            q += ', '.join(filter_list)
+            query = cur.mogrify(q, args_list)
+        else:
+            query = cur.mogrify(q_base)
+
+        cur.execute(query)
+        if only_one:
+            return Service(cur.fetchone(), self)
+        else:
+            return [Service(x, self) for x in cur]
+
+    def service_update(self, service_id, **kwargs):
+        cur = self._cursor()
+        arg_list = []
+        value_list = []
+        for k, v in kwargs.items():
+            arg_list.append('{} = %s'.format(k))
+            value_list.append(v)
+        set_q = ", ".join(arg_list)
+        value_list.append(service_id)
+        q_base = 'UPDATE service SET' + set_q + ' WHERE id=%s'
+        query = cur.mogrify(q_base, value_list)
+        cur.execute(query)
+        self.conn.commit()
+
+    def service_new(self, execution_id, name, service_group, description):
+        cur = self._cursor()
+        status = 'created'
+        query = cur.mogrify('INSERT INTO service (id, status, error_message, execution_id, name, service_group, description) VALUES (DEFAULT, %s,NULL,%s,%s,%s,%s) RETURNING id', (status, execution_id, name, service_group, description))
+        cur.execute(query)
+        self.conn.commit()
+        return cur.fetchone()[0]
 
 
 class Base:
@@ -111,6 +157,15 @@ class Execution(Base):
     :type time_start: datetime.datetime
     :type time_end: datetime.datetime
     """
+
+    SUBMIT_STATUS = "submitted"
+    SCHEDULED_STATUS = "scheduled"
+    STARTING_STATUS = "starting"
+    ERROR_STATUS = "error"
+    RUNNING_STATUS = "running"
+    CLEANING_UP_STATUS = "cleaning up"
+    TERMINATED_STATUS = "terminated"
+
     def __init__(self, d, sql_manager):
         super().__init__(d, sql_manager)
 
@@ -133,8 +188,10 @@ class Execution(Base):
         else:
             self.time_submit = datetime.datetime.fromtimestamp(d['time_start'])
 
-        self.status = d['status']
+        self._status = d['status']
         self.error_message = d['error_message']
+
+        self.service_list = None
 
     def serialize(self):
         return {
@@ -145,38 +202,95 @@ class Execution(Base):
             'time_submit': self.time_submit.timestamp(),
             'time_start': None if self.time_start is None else self.time_start.timestamp(),
             'time_end': None if self.time_end is None else self.time_end.timestamp(),
-            'status': self.status,
+            'status': self._status,
             'error_message': self.error_message
         }
 
     def set_scheduled(self):
-        self.status = "scheduled"
-        self.sql_manager.execution_update(self.id, status=self.status)
+        self._status = self.SCHEDULED_STATUS
+        self.sql_manager.execution_update(self.id, status=self._status)
 
-    def set_started(self):
-        self.status = "running"
+    def set_starting(self):
+        self._status = self.STARTING_STATUS
+        self.sql_manager.execution_update(self.id, status=self._status)
+
+    def set_running(self):
+        self._status = self.RUNNING_STATUS
         self.time_start = datetime.datetime.now()
-        self.sql_manager.execution_update(self.id, status=self.status, time_start=self.time_start)
+        self.sql_manager.execution_update(self.id, status=self._status, time_start=self.time_start)
 
     def set_finished(self):
-        self.status = "finished"
+        self._status = "finished"
         self.time_end = datetime.datetime.now()
-        self.sql_manager.execution_update(self.id, status=self.status, time_end=self.time_end)
+        self.sql_manager.execution_update(self.id, status=self._status, time_end=self.time_end)
 
     def set_cleaning_up(self):
-        self.status = "cleaning up"
-        self.sql_manager.execution_update(self.id, status=self.status)
+        self._status = self.CLEANING_UP_STATUS
+        self.sql_manager.execution_update(self.id, status=self._status)
 
     def set_terminated(self):
-        self.status = "terminated"
+        self._status = self.TERMINATED_STATUS
         self.time_end = datetime.datetime.now()
-        self.sql_manager.execution_update(self.id, status=self.status, time_end=self.time_end)
+        self.sql_manager.execution_update(self.id, status=self._status, time_end=self.time_end)
 
-    def set_error(self, message):
-        self.status = 'error'
-        self.error_message = message
+    def set_error(self):
+        self._status = self.ERROR_STATUS
         self.time_end = datetime.datetime.now()
-        self.sql_manager.execution_update(self.id, status=self.status, time_end=self.time_end, error_message=self.error_message)
+        self.sql_manager.execution_update(self.id, status=self._status, time_end=self.time_end)
+
+    def set_error_message(self, message):
+        self.error_message = message
+        self.sql_manager.execution_update(self.id, error_message=self.error_message)
 
     def is_active(self):
-        return self.status == 'scheduled' or self.status == 'running'
+        return self._status == 'scheduled' or self._status == 'running'
+
+    @property
+    def services(self):
+        return self.sql_manager.service_list(execution_id=self.id)
+
+
+class Service(Base):
+
+    TERMINATING_STATUS = "terminating"
+    INACTIVE_STATUS = "inactive"
+    ACTIVE_STATUS = "active"
+    STARTING_STATUS = "starting"
+
+    def __init__(self, d, sql_manager):
+        super().__init__(d, sql_manager)
+
+        self.name = d['name']
+        self.status = d['status']
+        self.error_message = d['error_message']
+        self.execution_id = d['execution_id']
+        self.description = d['description']
+        self.service_group = d['service_group']
+        self.docker_id = d['docker_id']
+
+    def serialize(self):
+        return {
+            'name': self.name,
+            'status': self.status,
+            'error_message': self.error_message,
+            'execution_id': self.execution_id,
+            'description': self.description,
+            'service_group': self.service_group,
+            'docker_id': self.docker_id
+        }
+
+    @property
+    def dns_name(self):
+        return "{}-{}-{}".format(self.name, self.execution_id, get_conf().deployment_name)
+
+    def set_terminating(self):
+        self.sql_manager.service_update(self.id, status=self.TERMINATING_STATUS)
+
+    def set_inactive(self):
+        self.sql_manager.service_update(self.id, status=self.INACTIVE_STATUS, docker_id=None)
+
+    def set_starting(self):
+        self.sql_manager.service_update(self.id, status=self.STARTING_STATUS)
+
+    def set_active(self, docker_id):
+        self.sql_manager.service_update(self.id, status=self.ACTIVE_STATUS, docker_id=docker_id)
