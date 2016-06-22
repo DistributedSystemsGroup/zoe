@@ -146,22 +146,20 @@ class SwarmClient:
                                              ports=options.ports,
                                              labels=options.labels)
             self.cli.start(container=cont.get('Id'))
-        except docker.errors.APIError as e:
+        except Exception as e:
             if cont is not None:
                 self.cli.remove_container(container=cont.get('Id'), force=True)
-            raise ZoeException(e.explanation.decode('utf-8'))
-        except requests.exceptions.ConnectionError:
-            if cont is not None:
-                self.cli.remove_container(container=cont.get('Id'), force=True)
-            raise ZoeException('Connection error while creating the service')
+            raise ZoeException(str(e))
+
         info = self.inspect_container(cont.get('Id'))
         return info
 
     def inspect_container(self, docker_id) -> dict:
         try:
             docker_info = self.cli.inspect_container(container=docker_id)
-        except docker.errors.APIError:
-            return None
+        except Exception as e:
+            raise ZoeException(str(e))
+
         info = {
             "docker_id": docker_id,
             "ip_address": {}
@@ -242,14 +240,14 @@ class SwarmClient:
     def connect_to_network(self, container_id, network_id):
         try:
             self.cli.connect_container_to_network(container_id, network_id)
-        except docker.errors.APIError:
-            log.exception('cannot connect service {} to network {}'.format(container_id, network_id))
+        except Exception as e:
+            log.exception(str(e))
 
     def disconnect_from_network(self, container_id, network_id):
         try:
             self.cli.disconnect_container_from_network(container_id, network_id)
-        except docker.errors.APIError:
-            log.exception('cannot disconnect service {} from network {}'.format(container_id, network_id))
+        except Exception as e:
+            log.exception(str(e))
 
     def list(self, only_label=None) -> list:
         ret = self.cli.containers(all=True)
