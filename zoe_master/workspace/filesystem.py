@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import os.path
-import shutil
 import logging
 
 import zoe_master.workspace.base
@@ -27,22 +26,11 @@ class ZoeFSWorkspace(zoe_master.workspace.base.ZoeWorkspaceBase):
     def __init__(self):
         self.base_path = os.path.join(config.get_conf().workspace_base_path, config.get_conf().deployment_name)
 
-    def create(self, user):
-        path = os.path.join(self.base_path, user.name)
-        os.makedirs(path, exist_ok=True)
+    def exists(self, user_id):
+        return os.path.exists(os.path.join(self.base_path, user_id))
 
-    def destroy(self, user):
-        path = os.path.join(self.base_path, user.name)
-        try:
-            shutil.rmtree(path)
-        except OSError:
-            log.warning("Cannot remove workspace directory %s" % path)
-
-    def exists(self, user):
-        return os.path.exists(os.path.join(self.base_path, user.name))
-
-    def get_path(self, user):
-        return os.path.join(self.base_path, user.name)
+    def get_path(self, user_id):
+        return os.path.join(self.base_path, user_id)
 
     def can_be_attached(self):
         return True

@@ -13,20 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import zoe_master.state.user
-
-
 class ZoeWorkspaceBase:
-    def create(self, user: zoe_master.state.user.User):
+    def get_path(self, user_id) -> str:
         raise NotImplementedError
 
-    def destroy(self, user: zoe_master.state.user.User):
-        raise NotImplementedError
-
-    def get_path(self, user: zoe_master.state.user.User) -> str:
-        raise NotImplementedError
-
-    def exists(self, user: zoe_master.state.user.User) -> bool:
+    def exists(self, user_id) -> bool:
         raise NotImplementedError
 
     def can_be_attached(self) -> bool:
