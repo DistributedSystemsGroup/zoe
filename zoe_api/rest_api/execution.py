@@ -22,10 +22,10 @@ import zoe_lib.exceptions
 import zoe_lib.applications
 import zoe_lib.sql_manager
 
-from zoe_web.rest_api.utils import catch_exceptions, get_auth
-import zoe_web.exceptions
-import zoe_web.config as config
-import zoe_web.api_endpoint
+from zoe_api.rest_api.utils import catch_exceptions, get_auth
+import zoe_api.exceptions
+import zoe_api.config as config
+import zoe_api.api_endpoint
 
 
 class ExecutionAPI(Resource):
@@ -33,7 +33,7 @@ class ExecutionAPI(Resource):
     def get(self, execution_id):
         uid, role = get_auth(request)
 
-        assert isinstance(config.api_endpoint, zoe_web.api_endpoint.APIEndpoint)
+        assert isinstance(config.api_endpoint, zoe_api.api_endpoint.APIEndpoint)
         e = config.api_endpoint.execution_by_id(uid, role, execution_id)
 
         return e.serialize()
@@ -48,10 +48,10 @@ class ExecutionAPI(Resource):
         """
         uid, role = get_auth(request)
 
-        assert isinstance(config.api_endpoint, zoe_web.api_endpoint.APIEndpoint)
+        assert isinstance(config.api_endpoint, zoe_api.api_endpoint.APIEndpoint)
         success, message = config.api_endpoint.execution_terminate(uid, role, execution_id)
         if not success:
-            raise zoe_web.exceptions.ZoeRestAPIException(message, 400)
+            raise zoe_api.exceptions.ZoeRestAPIException(message, 400)
 
         return '', 204
 
@@ -66,7 +66,7 @@ class ExecutionCollectionAPI(Resource):
         """
         uid, role = get_auth(request)
 
-        assert isinstance(config.api_endpoint, zoe_web.api_endpoint.APIEndpoint)
+        assert isinstance(config.api_endpoint, zoe_api.api_endpoint.APIEndpoint)
         execs = config.api_endpoint.execution_list(uid, role)
         return [e.serialize() for e in execs]
 
@@ -78,12 +78,12 @@ class ExecutionCollectionAPI(Resource):
         """
         uid, role = get_auth(request)
 
-        assert isinstance(config.api_endpoint, zoe_web.api_endpoint.APIEndpoint)
+        assert isinstance(config.api_endpoint, zoe_api.api_endpoint.APIEndpoint)
 
         try:
             data = request.get_json()
         except BadRequest:
-            raise zoe_web.exceptions.ZoeRestAPIException('Error decoding JSON data')
+            raise zoe_api.exceptions.ZoeRestAPIException('Error decoding JSON data')
 
         application_description = data['application']
         exec_name = data['name']

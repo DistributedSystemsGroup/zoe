@@ -15,10 +15,8 @@
 
 import logging
 
-from flask import Response, render_template
-
-from zoe_web.auth.ldap import LDAPAuthenticator
-import zoe_web.exceptions
+from zoe_api.exceptions import ZoeRestAPIException, ZoeNotFoundException, ZoeAuthException, ZoeException
+from zoe_api.auth.ldap import LDAPAuthenticator
 
 log = logging.getLogger(__name__)
 
@@ -32,12 +30,16 @@ def catch_exceptions(func):
     def func_wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except zoe_web.exceptions.ZoeAuthException:
-            return missing_auth()
-        except zoe_web.exceptions.ZoeNotFoundException as e:
-            return error_page(e.message, 404)
-        except zoe_web.exceptions.ZoeException as e:
-            return error_page(e, 400)
+        except ZoeRestAPIException as e:
+            if e.status_code != 401:
+                log.exception(e.message)
+            return {'message': e.message}, e.status_code, e.headers
+        except ZoeNotFoundException as e:
+            return {'message': e.message}, 404
+        except ZoeAuthException as e:
+            return {'message': e.message}, 401
+        except ZoeException as e:
+            return {'message': e.message}, 400
         except Exception as e:
             log.exception(str(e))
             return {'message': str(e)}, 500
@@ -45,25 +47,14 @@ def catch_exceptions(func):
     return func_wrapper
 
 
-def missing_auth():
-    """Sends a 401 response that enables basic auth"""
-    return Response('Could not verify your access level for that URL.\nYou have to login with proper credentials',
-                    401,
-                    {'WWW-Authenticate': 'Basic realm="Login Required"'})
-
-
 def get_auth(request):
     auth = request.authorization
     if not auth:
-        raise zoe_web.exceptions.ZoeAuthException
+        raise ZoeRestAPIException('missing or wrong authentication information', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
     authenticator = LDAPAuthenticator()
     uid, role = authenticator.auth(auth.username, auth.password)
     if uid is None:
-        raise zoe_web.exceptions.ZoeAuthException
+        raise ZoeRestAPIException('missing or wrong authentication information', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
     return uid, role
-
-
-def error_page(error_message, status):
-    return render_template('error.html', error=error_message), status

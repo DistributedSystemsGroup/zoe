@@ -16,13 +16,13 @@ import logging
 
 import ldap
 
-import zoe_web.auth.base
-from zoe_web.config import get_conf
+import zoe_api.auth.base
+from zoe_api.config import get_conf
 
 log = logging.getLogger(__name__)
 
 
-class LDAPAuthenticator(zoe_web.auth.base.BaseAuthenticator):
+class LDAPAuthenticator(zoe_api.auth.base.BaseAuthenticator):
     def __init__(self):
         self.connection = ldap.initialize(get_conf().ldap_server_uri)
         self.base_dn = get_conf().ldap_base_dn
@@ -31,13 +31,13 @@ class LDAPAuthenticator(zoe_web.auth.base.BaseAuthenticator):
 
     def auth(self, username, password):
         search_filter = "uid=" + username
-        uid_number = None
+        uid = None
         role = 'guest'
         try:
             self.connection.bind_s(self.bind_user, self.bind_password)
             result = self.connection.search_s(self.base_dn, ldap.SCOPE_SUBTREE, search_filter)
             user_dict = result[0][1]
-            uid_number = int(user_dict['uidNumber'][0])
+            uid = username
             gid_numbers = [int(x) for x in user_dict['gidNumber']]
             if get_conf().ldap_admin_gid in gid_numbers:
                 role = 'admin'
@@ -52,4 +52,4 @@ class LDAPAuthenticator(zoe_web.auth.base.BaseAuthenticator):
             log.exception("LDAP exception")
         finally:
             self.connection.unbind_s()
-        return uid_number, role
+        return uid, role

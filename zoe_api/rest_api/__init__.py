@@ -17,12 +17,12 @@ import sys
 
 from flask import Blueprint
 from flask_restful import Api
-from zoe_web.rest_api.execution import ExecutionAPI, ExecutionCollectionAPI
-from zoe_web.rest_api.info import InfoAPI
-from zoe_web.rest_api.service import ServiceAPI
+from zoe_api.rest_api.execution import ExecutionAPI, ExecutionCollectionAPI
+from zoe_api.rest_api.info import InfoAPI
+from zoe_api.rest_api.service import ServiceAPI
 
 from zoe_lib.version import ZOE_API_VERSION
-from zoe_web.rest_api.query import QueryAPI
+from zoe_api.rest_api.query import QueryAPI
 
 API_PATH = '/api/' + ZOE_API_VERSION
 

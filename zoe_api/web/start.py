@@ -20,9 +20,9 @@ import json
 from flask import render_template, request
 from zoe_lib.services import ZoeServiceAPI
 
-import zoe_web.config as config
-import zoe_web.api_endpoint
-from zoe_web.web.utils import get_auth, catch_exceptions
+import zoe_api.config as config
+import zoe_api.api_endpoint
+from zoe_api.web.utils import get_auth, catch_exceptions
 
 guest_id_pattern = re.compile('^\w+$')
 
@@ -35,7 +35,7 @@ def index():
 @catch_exceptions
 def home_user():
     uid, role = get_auth(request)
-    assert isinstance(config.api_endpoint, zoe_web.api_endpoint.APIEndpoint)
+    assert isinstance(config.api_endpoint, zoe_api.api_endpoint.APIEndpoint)
 
     if role == 'user' or role == 'admin':
         executions = config.api_endpoint.execution_list(uid, role)

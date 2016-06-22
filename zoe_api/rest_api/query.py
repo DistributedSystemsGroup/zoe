@@ -16,17 +16,17 @@
 from flask_restful import Resource, request
 from werkzeug.exceptions import BadRequest
 
-from zoe_web.exceptions import ZoeRestAPIException
-import zoe_web.config as config
-import zoe_web.api_endpoint
-from zoe_web.rest_api.utils import catch_exceptions, get_auth
+from zoe_api.exceptions import ZoeRestAPIException
+import zoe_api.config as config
+import zoe_api.api_endpoint
+from zoe_api.rest_api.utils import catch_exceptions, get_auth
 
 
 class QueryAPI(Resource):
     @catch_exceptions
     def post(self):
         uid, role = get_auth(request)
-        assert isinstance(config.api_endpoint, zoe_web.api_endpoint.APIEndpoint)
+        assert isinstance(config.api_endpoint, zoe_api.api_endpoint.APIEndpoint)
 
         try:
             data = request.get_json()

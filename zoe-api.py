@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from zoe_web.entrypoint import zoe_web_main
+from zoe_api.entrypoint import zoe_web_main
 
 if __name__ == "__main__":
     zoe_web_main()

@@ -17,14 +17,14 @@ import logging
 
 import zmq
 
-import zoe_web.config as config
+import zoe_api.config as config
 
 log = logging.getLogger(__name__)
 
 
 class APIManager:
     REQUEST_TIMEOUT = 2500
-    REQUEST_RETRIES = 3
+    REQUEST_RETRIES = 1
 
     def __init__(self):
         self.context = zmq.Context(1)
@@ -82,5 +82,12 @@ class APIManager:
         msg = {
             'command': 'execution_terminate',
             'exec_id': exec_id
+        }
+        return self._request_reply(msg)
+
+    def service_inspect(self, service_id):
+        msg = {
+            'command': 'service_inspect',
+            'service_id': service_id
         }
         return self._request_reply(msg)

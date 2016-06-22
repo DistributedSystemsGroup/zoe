@@ -18,9 +18,8 @@ import time
 
 from flask_restful import Resource, request
 
-from zoe_lib.exceptions import ZoeRestAPIException
-from zoe_web.config import singletons
-from zoe_web.rest_api.utils import catch_exceptions
+from zoe_api.exceptions import ZoeRestAPIException
+from zoe_api.rest_api.utils import catch_exceptions
 
 log = logging.getLogger(__name__)
 

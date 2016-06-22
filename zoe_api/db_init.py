@@ -17,7 +17,7 @@ import psycopg2
 import psycopg2.extras
 
 import zoe_lib.exceptions
-from zoe_web.config import get_conf
+from zoe_api.config import get_conf
 
 SQL_SCHEMA_VERSION = 0  # ---> Increment this value every time the schema changes !!! <---
 
@@ -50,7 +50,7 @@ def create_tables(cur):
     cur.execute('''CREATE TABLE execution (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL,
-        user_id INTEGER,
+        user_id TEXT NOT NULL,
         description JSON NOT NULL,
         status TEXT NOT NULL,
         execution_manager_id TEXT NULL,
@@ -61,10 +61,13 @@ def create_tables(cur):
         )''')
     cur.execute('''CREATE TABLE service (
         id SERIAL PRIMARY KEY,
+        execution_id INT REFERENCES execution,
+        name TEXT NOT NULL ,
         status TEXT NOT NULL,
-        stage TEXT,
-        error TEXT NULL,
-        execution_manager_id TEXT
+        error_message TEXT NULL DEFAULT NULL,
+        description JSON NOT NULL,
+        service_group TEXT NOT NULL,
+        docker_id TEXT NULL DEFAULT NULL
         )''')
 
 

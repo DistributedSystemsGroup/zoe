@@ -18,15 +18,15 @@ import logging
 from flask import Flask
 from tornado.wsgi import WSGIContainer
 from tornado.httpserver import HTTPServer
-from tornado.ioloop import IOLoop
+from tornado.ioloop import IOLoop, PeriodicCallback
 
-import zoe_web.config as config
-import zoe_web.db_init
-import zoe_web.api_endpoint
-import zoe_web.rest_api
-import zoe_web.web
+import zoe_api.config as config
+import zoe_api.db_init
+import zoe_api.api_endpoint
+import zoe_api.rest_api
+import zoe_api.web
 
-log = logging.getLogger("zoe_web")
+log = logging.getLogger("zoe_api")
 LOG_FORMAT = '%(asctime)-15s %(levelname)s %(name)s (%(threadName)s): %(message)s'
 
 
@@ -48,16 +48,20 @@ def zoe_web_main() -> int:
     app = Flask(__name__, static_url_path='/does-not-exist')
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-    app.register_blueprint(zoe_web.rest_api.api_init())
-    app.register_blueprint(zoe_web.web.web_init())
+    app.register_blueprint(zoe_api.rest_api.api_init())
+    app.register_blueprint(zoe_api.web.web_init())
 
-    zoe_web.db_init.init()
+    zoe_api.db_init.init()
 
-    config.api_endpoint = zoe_web.api_endpoint.APIEndpoint()
+    config.api_endpoint = zoe_api.api_endpoint.APIEndpoint()
 
     http_server = HTTPServer(WSGIContainer(app))
     http_server.listen(args.listen_port, args.listen_address)
     ioloop = IOLoop.instance()
+
+    retry_cb = PeriodicCallback(config.api_endpoint.retry_submit_error_executions, 30000)
+    retry_cb.start()
+
     try:
         ioloop.start()
     except KeyboardInterrupt:

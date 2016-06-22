@@ -18,8 +18,8 @@ from zoe_lib.configargparse import ArgumentParser, Namespace
 api_endpoint = None  # singleton
 
 config_paths = [
-    'zoe-web.conf',
-    '/etc/zoe/zoe-web.conf'
+    'zoe-api.conf',
+    '/etc/zoe/zoe-api.conf'
 ]
 
 _conf = None

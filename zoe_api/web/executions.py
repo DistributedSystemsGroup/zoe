@@ -17,10 +17,10 @@ import json
 
 from flask import render_template, request, redirect, url_for
 
-from zoe_web.web.utils import get_auth, catch_exceptions
-import zoe_web.config as config
-import zoe_web.api_endpoint
-import zoe_web.exceptions
+from zoe_api.web.utils import get_auth, catch_exceptions
+import zoe_api.config as config
+import zoe_api.api_endpoint
+import zoe_api.exceptions
 
 
 @catch_exceptions
@@ -33,7 +33,7 @@ def execution_define():
 @catch_exceptions
 def execution_start():
     uid, role = get_auth(request)
-    assert isinstance(config.api_endpoint, zoe_web.api_endpoint.APIEndpoint)
+    assert isinstance(config.api_endpoint, zoe_api.api_endpoint.APIEndpoint)
 
     app_descr_json = request.files['file'].read().decode('utf-8')
     app_descr = json.loads(app_descr_json)
@@ -47,7 +47,7 @@ def execution_start():
 @catch_exceptions
 def execution_restart(execution_id):
     uid, role = get_auth(request)
-    assert isinstance(config.api_endpoint, zoe_web.api_endpoint.APIEndpoint)
+    assert isinstance(config.api_endpoint, zoe_api.api_endpoint.APIEndpoint)
 
     e = config.api_endpoint.execution_by_id(uid, role, execution_id)
     new_id = config.api_endpoint.execution_start(uid, role, e.name, e.description)
@@ -58,11 +58,11 @@ def execution_restart(execution_id):
 @catch_exceptions
 def execution_terminate(execution_id):
     uid, role = get_auth(request)
-    assert isinstance(config.api_endpoint, zoe_web.api_endpoint.APIEndpoint)
+    assert isinstance(config.api_endpoint, zoe_api.api_endpoint.APIEndpoint)
 
     success, message = config.api_endpoint.execution_terminate(uid, role, execution_id)
     if not success:
-        raise zoe_web.exceptions.ZoeException(message)
+        raise zoe_api.exceptions.ZoeException(message)
 
     return redirect(url_for('web.home_user'))
 
@@ -70,19 +70,18 @@ def execution_terminate(execution_id):
 @catch_exceptions
 def execution_inspect(execution_id):
     uid, role = get_auth(request)
-    assert isinstance(config.api_endpoint, zoe_web.api_endpoint.APIEndpoint)
+    assert isinstance(config.api_endpoint, zoe_api.api_endpoint.APIEndpoint)
 
     e = config.api_endpoint.execution_by_id(uid, role, execution_id)
 
-    services = []
-    for sid in e['services']:
-        services.append(cont_api.get(sid))
-
-    for s in services:
-        s['ip'] = list(s['ip_address'].values())[0]
+    services_info = {}
+    if e.service_list is not None:
+        for s in e.service_list:
+            services_info[s.id] = config.api_endpoint.service_inspect(s)
 
     template_vars = {
         "e": e,
-        "services": services
+        "services": e.service_list,
+        "services_info": services_info
     }
     return render_template('execution_inspect.html', **template_vars)
