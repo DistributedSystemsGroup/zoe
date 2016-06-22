@@ -20,12 +20,15 @@ config_paths = [
     '/etc/zoe/zoe-master.conf'
 ]
 
+# Singletons
+scheduler = None
 singletons = {
     'metric': None,
     'stats_manager': None,
-    'state_manager': None,
     'platform_manager': None,
     'workspace_managers': [],
+    'api_manager': None,
+    'sql_manager': None
 }
 
 _conf = None
@@ -42,17 +45,21 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--debug', action='store_true', help='Enable debug output')
         argparser.add_argument('--swarm', help='Swarm/Docker API endpoint (ex.: zk://zk1:2181,zk2:2181 or http://swarm:2380)', default='http://localhost:2375')
         argparser.add_argument('--state-dir', help='Directory where state checkpoints are saved', default='/var/lib/zoe')
-        argparser.add_argument('--listen-address', help='REST API listen address', default='0.0.0.0')
-        argparser.add_argument('--listen-port', help='REST API listen port', default='4850')
+        argparser.add_argument('--api-listen-uri', help='ZMQ API listen address', default='tcp://*:4850')
         argparser.add_argument('--zoeadmin-password', help='Password used to login as the master Zoe administrator', default='changeme')
         argparser.add_argument('--deployment-name', help='name of this Zoe deployment', default='prod')
         argparser.add_argument('--influxdb-dbname', help='Name of the InfluxDB database to use for storing metrics', default='zoe')
         argparser.add_argument('--influxdb-url', help='URL of the InfluxDB service (ex. http://localhost:8086)', default='http://localhost:8086')
         argparser.add_argument('--influxdb-enable', action="store_true", help='Enable metric output toward influxDB')
-        argparser.add_argument('--passlib-rounds', type=int, help='Number of hashing rounds for passwords', default=60000)
         argparser.add_argument('--gelf-address', help='Enable Docker GELF log output to this destination (ex. udp://1.2.3.4:1234)', default='')
         argparser.add_argument('--workspace-base-path', help='Path where user workspaces will be created by Zoe. Must be visible at this path on all Swarm hosts.', default='/mnt/zoe-workspaces')
         argparser.add_argument('--overlay-network-name', help='Name of the Swarm overlay network Zoe should use', default='zoe')
+
+        argparser.add_argument('--dbname', help='DB name', default='zoe')
+        argparser.add_argument('--dbuser', help='DB user', default='zoe')
+        argparser.add_argument('--dbpass', help='DB password', default='zoe')
+        argparser.add_argument('--dbhost', help='DB hostname', default='localhost')
+        argparser.add_argument('--dbport', type=int, help='DB port', default=5432)
 
         opts = argparser.parse_args()
         if opts.debug:
