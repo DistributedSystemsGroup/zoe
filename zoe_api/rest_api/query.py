@@ -17,16 +17,17 @@ from flask_restful import Resource, request
 from werkzeug.exceptions import BadRequest
 
 from zoe_api.exceptions import ZoeRestAPIException
-import zoe_api.config as config
 import zoe_api.api_endpoint
 from zoe_api.rest_api.utils import catch_exceptions, get_auth
 
 
 class QueryAPI(Resource):
+    def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint):
+        self.api_endpoint = api_endpoint
+
     @catch_exceptions
     def post(self):
         uid, role = get_auth(request)
-        assert isinstance(config.api_endpoint, zoe_api.api_endpoint.APIEndpoint)
 
         try:
             data = request.get_json()
@@ -51,7 +52,7 @@ class QueryAPI(Resource):
         elif what == 'execution':
             if role != 'admin':
                 filters['user_id'] = uid
-            execs = config.api_endpoint.execution_list(uid, role, **filters)
+            execs = self.api_endpoint.execution_list(uid, role, **filters)
             return [x.serialize() for x in execs]
         else:
             raise ZoeRestAPIException('unknown query {}'.format(what))

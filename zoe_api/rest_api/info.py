@@ -18,9 +18,13 @@ from flask_restful import Resource
 from zoe_lib.version import ZOE_API_VERSION, ZOE_APPLICATION_FORMAT_VERSION, ZOE_VERSION
 from zoe_master.config import get_conf
 from zoe_api.rest_api.utils import catch_exceptions
+import zoe_api.api_endpoint
 
 
 class InfoAPI(Resource):
+    def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint):
+        self.api_endpoint = api_endpoint
+
     @catch_exceptions
     def get(self):
         ret = {

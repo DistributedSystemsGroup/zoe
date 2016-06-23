@@ -48,18 +48,19 @@ def zoe_web_main() -> int:
     app = Flask(__name__, static_url_path='/does-not-exist')
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-    app.register_blueprint(zoe_api.rest_api.api_init())
-    app.register_blueprint(zoe_api.web.web_init())
-
     zoe_api.db_init.init()
 
-    config.api_endpoint = zoe_api.api_endpoint.APIEndpoint()
+    api_endpoint = zoe_api.api_endpoint.APIEndpoint()
+    config.api_endpoint = api_endpoint
+
+    app.register_blueprint(zoe_api.rest_api.api_init(api_endpoint))
+    app.register_blueprint(zoe_api.web.web_init())
 
     http_server = HTTPServer(WSGIContainer(app))
     http_server.listen(args.listen_port, args.listen_address)
     ioloop = IOLoop.instance()
 
-    retry_cb = PeriodicCallback(config.api_endpoint.retry_submit_error_executions, 30000)
+    retry_cb = PeriodicCallback(api_endpoint.retry_submit_error_executions, 30000)
     retry_cb.start()
 
     try:

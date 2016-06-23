@@ -27,15 +27,15 @@ from zoe_api.rest_api.query import QueryAPI
 API_PATH = '/api/' + ZOE_API_VERSION
 
 
-def api_init() -> Blueprint:
+def api_init(api_endpoint) -> Blueprint:
     api_bp = Blueprint('api', __name__)
     api = Api(api_bp, catch_all_404s=True)
 
-    api.add_resource(InfoAPI, API_PATH + '/info')
-    api.add_resource(ExecutionAPI, API_PATH + '/execution/<int:execution_id>')
-    api.add_resource(ExecutionCollectionAPI, API_PATH + '/execution')
-    api.add_resource(ServiceAPI, API_PATH + '/service/<int:container_id>')
-    api.add_resource(QueryAPI, API_PATH + '/query')
+    api.add_resource(InfoAPI, API_PATH + '/info', resource_class_kwargs={'api_endpoint': api_endpoint})
+    api.add_resource(ExecutionAPI, API_PATH + '/execution/<int:execution_id>', resource_class_kwargs={'api_endpoint': api_endpoint})
+    api.add_resource(ExecutionCollectionAPI, API_PATH + '/execution', resource_class_kwargs={'api_endpoint': api_endpoint})
+    api.add_resource(ServiceAPI, API_PATH + '/service/<int:container_id>', resource_class_kwargs={'api_endpoint': api_endpoint})
+    api.add_resource(QueryAPI, API_PATH + '/query', resource_class_kwargs={'api_endpoint': api_endpoint})
 
     return api_bp
 
