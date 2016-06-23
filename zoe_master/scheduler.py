@@ -55,10 +55,19 @@ class ZoeScheduler:
             terminate_execution(execution)
             self.trigger()
 
-        self.fifo_queue.remove(execution)
+        try:
+            self.fifo_queue.remove(execution)
+        except ValueError:
+            pass
         th = threading.Thread(target=async_termination, name='termination_{}'.format(execution.id))
         th.start()
         self.async_threads.append(th)
+
+    def remove_execution(self, execution: Execution):
+        try:
+            self.fifo_queue.remove(execution)
+        except ValueError:
+            pass
 
     def loop_start_th(self):
         while True:
