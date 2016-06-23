@@ -16,7 +16,7 @@
 import psycopg2
 import psycopg2.extras
 
-import zoe_lib.exceptions
+import zoe_api.exceptions
 from zoe_api.config import get_conf
 
 SQL_SCHEMA_VERSION = 0  # ---> Increment this value every time the schema changes !!! <---
@@ -43,7 +43,7 @@ def check_schema_version(cur, deployment_name):
         if row[0] == SQL_SCHEMA_VERSION:
             return True
         else:
-            raise zoe_lib.exceptions.ZoeException('SQL database schema version mismatch: need {}, found {}'.format(SQL_SCHEMA_VERSION, row[0]))
+            raise zoe_api.exceptions.ZoeException('SQL database schema version mismatch: need {}, found {}'.format(SQL_SCHEMA_VERSION, row[0]))
 
 
 def create_tables(cur):
@@ -61,12 +61,12 @@ def create_tables(cur):
         )''')
     cur.execute('''CREATE TABLE service (
         id SERIAL PRIMARY KEY,
-        execution_id INT REFERENCES execution,
-        name TEXT NOT NULL ,
         status TEXT NOT NULL,
         error_message TEXT NULL DEFAULT NULL,
         description JSON NOT NULL,
+        execution_id INT REFERENCES execution,
         service_group TEXT NOT NULL,
+        name TEXT NOT NULL ,
         docker_id TEXT NULL DEFAULT NULL
         )''')
 
