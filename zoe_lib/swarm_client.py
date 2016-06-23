@@ -61,7 +61,7 @@ class SwarmClient:
             manager = url
         else:
             raise ZoeException('Unsupported URL scheme for Swarm')
-        log.info('Connecting to Swarm at {}'.format(manager))
+        log.debug('Connecting to Swarm at {}'.format(manager))
         self.cli = docker.Client(base_url=manager)
 
     def info(self) -> SwarmStats:
