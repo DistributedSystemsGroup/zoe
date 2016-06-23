@@ -34,10 +34,10 @@ class BaseMetricSender(threading.Thread):
     def _time_diff_ms(self, start: float, end: float) -> int:
         return (end - start) * 1000
 
-    def metric_api_call(self, time_start, api_name, action, calling_user):
+    def metric_api_call(self, time_start, action):
         time_end = time.time()
         td = self._time_diff_ms(time_start, time_end)
-        log.debug("api latency: {} {} user {} took {} ms".format(api_name, action, calling_user.name, td))
+        log.debug("api latency: {} took {} ms".format(action, td))
 
     def run(self):
         pass

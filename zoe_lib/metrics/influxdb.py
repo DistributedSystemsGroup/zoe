@@ -67,10 +67,10 @@ class InfluxDBMetricSender(zoe_lib.metrics.base.BaseMetricSender):
 
         self._queue.put(point_str)
 
-    def metric_api_call(self, time_start, api_name, action, calling_user):
+    def metric_api_call(self, time_start, action):
         time_end = time.time()
         td = self._time_diff_ms(time_start, time_end)
-        self.point("api_latency", td, api_name=api_name, action=action, calling_user_name=calling_user.name)
+        self.point("api_latency", td, api_call=action)
 
     def run(self):
         log.info('starting influxdb metric sender thread')
