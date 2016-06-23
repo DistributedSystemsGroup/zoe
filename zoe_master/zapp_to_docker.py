@@ -25,7 +25,7 @@ log = logging.getLogger(__name__)
 
 
 def execution_to_containers(execution: Execution):
-    ordered_service_list = sorted(execution.service_list, key=lambda x: x.description['startup_order'])
+    ordered_service_list = sorted(execution.services, key=lambda x: x.description['startup_order'])
 
     env_subst_dict = {
         "execution_name": execution.name,

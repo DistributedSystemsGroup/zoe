@@ -35,7 +35,7 @@ class APIEndpoint:
         self.master = zoe_api.master_api.APIManager()
         self.sql = zoe_lib.sql_manager.SQLManager(get_conf())
 
-    def execution_by_id(self, uid, role, execution_id):
+    def execution_by_id(self, uid, role, execution_id) -> zoe_lib.sql_manager.Execution:
         e = self.sql.execution_list(id=execution_id, only_one=True)
         if e is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
@@ -78,8 +78,39 @@ class APIEndpoint:
         else:
             raise zoe_api.exceptions.ZoeException('Execution is not running')
 
-    def service_inspect(self, service):
-        return self.master.service_inspect(service.id)
+    def execution_delete(self, uid, role, exec_id):
+        e = self.sql.execution_list(id=exec_id, only_one=True)
+        if e is None:
+            raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
+
+        if e.user_id != uid and role != 'admin':
+            raise zoe_api.exceptions.ZoeAuthException()
+
+        if e.is_active():
+            raise zoe_api.exceptions.ZoeException('Cannot delete a running execution, terminate it first')
+        else:
+            status, message = self.master.execution_delete(exec_id)
+            if status:
+                self.sql.execution_delete(exec_id)
+                return True, ''
+            else:
+                raise zoe_api.exceptions.ZoeException(message)
+
+    def service_by_id(self, uid, role, service_id) -> zoe_lib.sql_manager.Service:
+        s = self.sql.service_list(id=service_id, only_one=True)
+        if s is None:
+            raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
+        if s.user_id != uid and role != 'admin':
+            raise zoe_api.exceptions.ZoeAuthException()
+        return s
+
+    def service_inspect(self, uid, role, service):
+        ret, data = self.master.service_inspect(service.id)
+        if not ret:
+            raise zoe_api.exceptions.ZoeException(data)
+
+        if service.user_id != uid and role != 'admin':
+            raise zoe_api.exceptions.ZoeAuthException()
 
     def retry_submit_error_executions(self):
         waiting_execs = self.sql.execution_list(status=zoe_lib.sql_manager.Execution.SUBMIT_STATUS)

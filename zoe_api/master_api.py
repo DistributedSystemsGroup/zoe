@@ -58,7 +58,7 @@ class APIManager:
             if socks.get(self.zmq_s) == zmq.POLLIN:  # We have a reply
                 reply = self.zmq_s.recv_json()
                 if reply['result'] == 'ok':
-                    return True, ''
+                    return True, '' if 'data' not in reply else reply['data']
                 else:
                     return False, reply['message']
             else:  # Timeout
@@ -81,6 +81,13 @@ class APIManager:
     def execution_terminate(self, exec_id):
         msg = {
             'command': 'execution_terminate',
+            'exec_id': exec_id
+        }
+        return self._request_reply(msg)
+
+    def execution_delete(self, exec_id):
+        msg = {
+            'command': 'execution_delete',
             'exec_id': exec_id
         }
         return self._request_reply(msg)
