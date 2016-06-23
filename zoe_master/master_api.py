@@ -18,7 +18,7 @@ import time
 
 import zmq
 
-from zoe_lib.exceptions import ZoeException
+from zoe_master.exceptions import ZoeException
 import zoe_lib.sql_manager
 from zoe_lib.swarm_client import SwarmClient
 
@@ -72,7 +72,13 @@ class APIManager:
                 else:
                     execution.set_cleaning_up()
                     self._reply_ok()
-                    zoe_master.execution_manager.execution_terminate(exec_id)
+                    zoe_master.execution_manager.execution_terminate(execution)
+            elif message['command'] == 'execution_delete':
+                exec_id = message['exec_id']
+                execution = config.singletons['sql_manager'].execution_list(id=exec_id, only_one=True)
+                if execution is not None:
+                    zoe_master.execution_manager.execution_delete(execution)
+                self._reply_ok()
             elif message['command'] == 'service_inspect':
                 service_id = message['service_id']
                 service = config.singletons['sql_manager'].service_list(id=service_id, only_one=True)
