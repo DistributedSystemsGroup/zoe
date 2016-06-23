@@ -14,50 +14,23 @@
 # limitations under the License.
 
 import logging
-import time
 
 from flask_restful import Resource, request
 
-from zoe_api.exceptions import ZoeRestAPIException
-from zoe_api.rest_api.utils import catch_exceptions
+from zoe_api.rest_api.utils import catch_exceptions, get_auth
+import zoe_api.api_endpoint
 
 log = logging.getLogger(__name__)
 
 
 class ServiceAPI(Resource):
-    @catch_exceptions
-    def get(self, container_id):
-        start_time = time.time()
-        calling_user = authenticate(request, self.state)
-
-        c = self.state.get_one('service', id=container_id)
-        if c is None:
-            raise ZoeRestAPIException('No such service', 404)
-
-        is_authorized(calling_user, c, 'get')
-        singletons['metric'].metric_api_call(start_time, 'service', 'get', calling_user)
-        return c.to_dict(checkpoint=False)
+    def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint):
+        self.api_endpoint = api_endpoint
 
     @catch_exceptions
-    def delete(self, container_id):
-        start_time = time.time()
-        calling_user = authenticate(request, self.state)
+    def get(self, service_id):
+        uid, role = get_auth(request)
 
-        c = self.state.get_one('service', id=container_id)
-        if c is None:
-            raise ZoeRestAPIException('No such service', 404)
+        s = self.api_endpoint.service_by_id(uid, role, service_id)
 
-        is_authorized(calling_user, c, 'delete')
-
-        if c.is_monitor:
-            log.info("Monitor service died ({}), terminating execution {}".format(c.name, c.execution.name))
-            self.platform.execution_terminate(c.execution, reason='finished')
-            self.state.state_updated()
-        else:
-            # FIXME: A non-fundamental service died, nothing we can do?
-            # We leave everything in place, so when the execution terminates we will
-            # gather the logs also of the services that died
-            log.warning("Service {} died by itself".format(c.name))
-
-        singletons['metric'].metric_api_call(start_time, 'service', 'get', calling_user)
-        return '', 204
+        return s.serialize()
