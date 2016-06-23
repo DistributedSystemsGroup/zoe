@@ -50,7 +50,6 @@ def main():
     logging.getLogger('urllib3').setLevel(logging.WARNING)
     logging.getLogger('docker').setLevel(logging.INFO)
     logging.getLogger("tornado").setLevel(logging.DEBUG)
-    logging.getLogger('passlib').setLevel(logging.INFO)
 
     log.info("Initializing DB manager")
     config.singletons['sql_manager'] = SQLManager(args)
