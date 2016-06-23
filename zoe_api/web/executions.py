@@ -68,6 +68,18 @@ def execution_terminate(execution_id):
 
 
 @catch_exceptions
+def execution_delete(execution_id):
+    uid, role = get_auth(request)
+    assert isinstance(config.api_endpoint, zoe_api.api_endpoint.APIEndpoint)
+
+    success, message = config.api_endpoint.execution_delete(uid, role, execution_id)
+    if not success:
+        raise zoe_api.exceptions.ZoeException(message)
+
+    return redirect(url_for('web.home_user'))
+
+
+@catch_exceptions
 def execution_inspect(execution_id):
     uid, role = get_auth(request)
     assert isinstance(config.api_endpoint, zoe_api.api_endpoint.APIEndpoint)
@@ -77,7 +89,7 @@ def execution_inspect(execution_id):
     services_info = {}
     if e.service_list is not None:
         for s in e.service_list:
-            services_info[s.id] = config.api_endpoint.service_inspect(s)
+            services_info[s.id] = config.api_endpoint.service_inspect(uid, role, s)
 
     template_vars = {
         "e": e,
