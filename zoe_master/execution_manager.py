@@ -28,7 +28,6 @@ def _digest_application_description(execution: Execution):
         for counter in range(service_descr['total_count']):
             name = "{}{}".format(service_descr['name'], counter)
             config.singletons['sql_manager'].service_new(execution.id, name, service_descr['name'], service_descr)
-    execution.service_list = config.singletons['sql_manager'].service_list(execution_id=execution.id)
 
 
 def execution_submit(execution: Execution):
@@ -44,6 +43,15 @@ def execution_terminate(execution: Execution):
 
 def restart_resubmit_scheduler():
     assert isinstance(config.scheduler, ZoeScheduler)
-    sched_execs = config.singletons['sql_manager'].execution_list(state=Execution.SCHEDULED_STATUS)
+    sched_execs = config.singletons['sql_manager'].execution_list(status=Execution.SCHEDULED_STATUS)
     for e in sched_execs:
         config.scheduler.incoming(e)
+
+    clean_up_execs = config.singletons['sql_manager'].execution_list(status=Execution.CLEANING_UP_STATUS)
+    for e in clean_up_execs:
+        config.scheduler.terminate(e)
+
+
+def execution_delete(execution: Execution):
+    assert isinstance(config.scheduler, ZoeScheduler)
+    config.scheduler.remove_execution(execution)
