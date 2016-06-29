@@ -1,43 +1,13 @@
 General design decisions
 ========================
 
-Zoe uses an internal state class hierarchy, with a checkpoint system for persistence and debug. This has been done because:
-* Zoe state is small
-* Relations between classes are simple
-* SQL adds a big requirement, with problems for redundancy and high availability
-* Checkpoints can be reverted to and examined for debug
+In this architecture we overturned our previous decision of keeping state internal, with periodic checkpointing.
+State is kept in Postgres and shared among the different Zoe components. For a distributed system an external database simplifies enormously many common situation, with transactions and strong guarantees of consistency.
 
-For now checkpoints are created each time the state changes.
+User management is left out of Zoe as much as possible. User authentication backends provide just a minimum of information for Zoe: a user ID and a role. Zoe does not manage creation, deletion, passwords, etc.
 
-Authentication: HTTP basic auth is used, as it is the simplest reliable mechanism we could think of. It can be easily secured by adding SSL. Server-side ``passlib`` guarantees a reasonably safe storage of salted password hashes.
-There advantages and disadvantages to this choice, but for now we wnat to concentrate on different, more core-related features of Zoe.
-
-Synchronous API. The Zoe Scheduler is not multi-thread, all requests to the API are served immediately. Again, this is done to keep the system simple and is by no means a decision set in stone.
+Zoe is distributed and uses threads to keep the APIs responsive at all times.
 
 Object naming
 -------------
-Every object in Zoe has a unique name. Zoe uses a notation with a hierarchical structure, left to right, from specific to generic, like the DNS system.
-
-These names are used throughout the API.
-
-A service (one service corresponds to one Docker container) is identified by this name:
-<service_name>-<execution_name>-<owner>-<deployment_name>
-
-An execution is identified by:
-<execution_name>-<owner>-<deployment_name>
-
-A user is:
-<owner>-<deployment_name>
-
-And a Zoe instance is:
-<deployment_name>
-
-Where:
-* service name: the name of the service as written in the application description
-* execution name: name of the execution as passed to the start API call
-* owner: user name of the owner of the execution
-* deployment name: configured deployment for this Zoe instance
-
-Docker hostnames
-^^^^^^^^^^^^^^^^
-The names described above are used to generate the names and host names in Docker. User networks are also named in the same way. This, among other things, has advantages when using Swarm commands, because it is easy to distinguish Zoe containers, and for monitoring solutions that take data directly from Swarm, preserving all labels and container names. With Telegraf, InfluxDB and Grafana it is possible to build Zoe dashboards that show resource utilization per-user or per-execution.
+Database IDs are used to identify executions and services. Container names within Docker Swarm must be unique, we decided to produce names that give some information to the administrator who looks at the output of ``docker ps`` instead of using opaque UUIDs. In addition, these same names are exposed by standard monitoring tools.

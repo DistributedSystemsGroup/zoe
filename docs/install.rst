@@ -4,32 +4,33 @@ Installing Zoe
 Zoe components:
 
 * Master
-* Observer
-* logger (optional, see https://github.com/DistributedSystemsGroup/zoe-logger)
-* web client
+* API
 * command-line client
+* Service monitor (not yet implemented)
 
 Zoe is written in Python and uses the ``requirements.txt`` file to list the package dependencies needed for all components of Zoe. Not all of them are needed in all cases, for example you need the ``kazoo`` library only if you use Zookeeper to manage Swarm high availability.
 
-Zoe is a young software project and we foresee it being used in places with wildly different requirements in terms of IT organization (what is below Zoe) and user interaction (what is above Zoe). For this reason we are aiming at providing a solid core of features and a number of basic external components that can be easily customized. For example, the Spark idle monitoring feature is useful only in certain environments and it is implemented as an external service, that can be customized of takes as an example to build something different.
+Zoe is a young software project and we foresee it being used in places with wildly different requirements in terms of IT organization (what is below Zoe) and user interaction (what is above Zoe). For this reason we are aiming at providing a solid core of features and a number of basic external components that can be easily customized. For example, user management is delegated as much as possible to external services. For now we support LDAP, but other authentication methods can be easily implemented.
 
 There is an experimental configuration file for Docker Compose, if you want to try it. It will run Zoe and its components inside Docker containers. It needs to be customized with the address of your Swarm master, the port mappings and the location of a shared filesystem.
 
 Overview
 --------
 
-The applications run by Zoe, usually, expose a number of interfaces (web, rest and others) to the user. Docker Swarm does not provide an easy way to manage this situation, the prt can be statically allocated, by the public IP address is chosen arbitrarily by Swarm and there is no discovery mechanism (DNS) exposed to the outside of Swarm.
+ZApps, usually, expose a number of interfaces (web, REST and others) to the user. Docker Swarm does not provide an easy way to manage this situation: the port can be statically allocated, but the IP address is chosen arbitrarily by Swarm and there is no discovery mechanism (DNS) exposed to the outside of Swarm.
 
-To work around this problem Zoe creates a gateway container for each user. The image used for this gateway container is configurable. The default one, downloaded from the Docker hub contains an ssh-based SOCKS proxy that the user must configure in his/her browser to be able to access the services run by Zoe executions.
+There is no good, automated, way to solve this problem. Each Swarm deployment is different: some use public addresses, other use overlay networks.
+In out deployment we use a standard Swarm configuration, with private and closed overlay networks. We create one network for use by Zoe and spawn two containers attached to it: one is a SOCKS proxy and the other is an SSH gateway. Thanks to LDAP users can use the SSH gateway to create tunnels and copy files from/to their workspace.
+This gateway containers are maintained outside of Zoe, at this Github repository: https://github.com/DistributedSystemsGroup/gateway-containers
 
-Zoe requires a shared filesystem, visible from all Docker hosts. Some Zoe Applications (for example spark submit, MPI) require user-provided binaries to run. Zoe creates and maintains for each user a workspace directory on this shared filesystem. The user can access the directory from outside Zoe and put the files required for his/her application. We are evaluating whether to integrate into the Zoe web client some kind of web interface for accessing the workspace directory.
+Zoe requires a shared filesystem, visible from all Docker hosts. Each user has a workspace directory visible from all its running ZApps. The workspace is used to save Jupyter notebooks, copy data from/to HDFS, provide binaries to MPI and Spark applications.
 
 Requirements
 ------------
 
-Zoe is written in Python 3. Development happens on Python 3.4, but we test also for Python 3.5 on Travis-CI.
-
-To run Zoe you need Docker Swarm and a shared filesystem, mounted on all hosts part of the Swarm. Internally we use CEPH-FS, but NFS is also a valid solution.
+* Python 3. Development happens on Python 3.4, but we test also for Python 3.5 on Travis-CI.
+* Docker Swarm (we have not yet tested the new distributed swarm-in-docker available in Docker 1.12)
+* A shared filesystem, mounted on all hosts part of the Swarm. Internally we use CEPH-FS, but NFS is also a valid solution.
 
 Optional:
 
@@ -44,37 +45,31 @@ Install Docker and the Swarm container:
 * https://docs.docker.com/installation/ubuntulinux/
 * https://docs.docker.com/swarm/install-manual/
 
-For testing you can use a Swarm with a single Docker instance located on the same host/VM.
-
 Network configuration
 ^^^^^^^^^^^^^^^^^^^^^
 
-Docker 1.9/Swarm 1.0 multi-host networking is used in Zoe:
+Docker 1.9/Swarm 1.0 multi-host networking can be used in Zoe:
 
 * https://docs.docker.com/engine/userguide/networking/get-started-overlay/
 
-This means that you will also need a key-value store supported by Docker. We use Zookeeper, it is available in Debian and Ubuntu without the need for external package
-repositories and is very easy to set up.
+This means that you will also need a key-value store supported by Docker. We use Zookeeper, it is available in Debian and Ubuntu without the need for external package repositories and is very easy to set up.
 
 Images: Docker Hub Vs local Docker registry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The Zoe master will run a gateway container for each user. The image for this container is available on the `Docker Hub <https://hub.docker.com/r/zoerepo/>`_ and is generated from the Dockerfile in the ``gateway-image`` directory of the main Zoe repository.
-
-Since the Docker Hub can be slow, we strongly suggest setting up a private registry, containing also the Zoe Service images. Have a look at the `zoe-applications <https://github.com/DistributedSystemsGroup/zoe-applications>`_ repository for examples of Zoe Applications and Services.
+A few sample ZApps have their images available on the Docker Hub. We strongly suggest setting up a private registry, containing your customized Zoe Service images. Have a look at the `zoe-applications <https://github.com/DistributedSystemsGroup/zoe-applications>`_ repository for examples of Zoe Applications and Services that can be customized, built and loaded on the Hub or on a local registry.
 
 Zoe
 ---
 
-Currently this is the recommended procedure:
+Currently this is the recommended procedure, once the initial Swarm setup has been done:
 
 1. Clone the zoe repository
 2. Install Python package dependencies: ``pip3 install -r requirements.txt``
-3. Create new configuration files for the master and the observer (:ref:`config_file`)
-4. Build the gateway container image from the sources in the ``gateway-image`` directory and push it to your internal registry (OPTIONAL)
-5. Setup supervisor to manage Zoe processes: in the ``scripts/supervisor/`` directory you can find the configuration file for
+3. Create new configuration files for the master and the api processes (:ref:`config_file`)
+4. Setup supervisor to manage Zoe processes: in the ``scripts/supervisor/`` directory you can find the configuration file for
    supervisor. You need to modify the paths to point to where you cloned Zoe and the user (Zoe does not need special privileges).
-6. Start running applications using the command-line client! (the web interface will be coming soon)
+6. Start running ZApps!
 
 Docker compose - demo install
 -----------------------------

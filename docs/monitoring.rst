@@ -18,6 +18,4 @@ service_time
 Time in milliseconds taken to service a request. The tags associated with the request will add more details:
 
 * action: get, post, delete, ...
-* object: user, execution, service, ...
-* user: user name of the authenticated user that performed the request
-
+* user_id: user identifier of the authenticated user that performed the request
