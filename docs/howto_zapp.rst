@@ -3,14 +3,15 @@
 How to build a ZApp
 ===================
 
-This guide will help you build a Zoe Application description starting from the building blocks available in the `Zoe Applications repository <https://github.com/DistributedSystemsGroup/zoe-applications>`_. First we will cover some general concepts and we will take an example application, a Spark cluster with a Jupyter notebook and build it starting from the available Zoe frameworks.
+This tutorial will help you build a Zoe Application description starting from the building blocks available in the `Zoe Applications repository <https://github.com/DistributedSystemsGroup/zoe-applications>`_. First we will cover some general concepts and then we will make an example application, a Spark cluster with a Jupyter notebook.
 
-To build a ZApp you need:
+To understand this tutorial you need:
+
 * basic programming experience in Python
 * a basic understanding of the analytic framework you want to use
-* The Zoe Spark and Jupyter images loaded in a Docker Registry (optional, better startup performance)
+* The Zoe Spark and Jupyter images loaded in a Docker Registry (optional, gives better startup performance)
 
-In this tutorial we will not cover how to build Zoe Frameworks and services. Building them requires in-depth knowledge of Dockerfiles and shell scripting that we cannot include in a short entry-level tutorial such as this one.
+Here we will not cover how to build Zoe Frameworks and Services. Building them requires in-depth knowledge of Dockerfiles and shell scripting that we cannot include in a short entry-level tutorial such as this one.
 
 General concepts
 ----------------
@@ -19,9 +20,9 @@ ZApps are JSON files.
 
 While writing a ZApp by hand is always an option, it is not the easiest or safest one. Instead almost every programming language provides primitives to read and write JSON files very easily.
 
-In this guide we are going to use Python because it a very easy language to understand and because the library of Zoe Frameworks and Services that we publish is written in Python. This Python code is run offline, outside of Zoe, to produce the ZApp JSON file. It is this JSON file that is submitted to Zoe for execution.
+In this guide we are going to use Python because it is a very easy language to understand and because the library of Zoe Frameworks and Services that we publish is written in Python. This Python code is run offline, outside of Zoe, to produce the ZApp JSON file. It is this JSON file that is submitted to Zoe for execution.
 
-We are planning graphical tools and a packaging system for ZApps, so stay tuned for updates! In the `Zoe Applications repository <https://github.com/DistributedSystemsGroup/zoe-applications>`_ there is already a very simple web interface that our users access to customize ready-made applications.
+We are planning graphical tools and a packaging system for ZApps, so stay tuned for updates! In the `Zoe Applications repository <https://github.com/DistributedSystemsGroup/zoe-applications>`_ there is already a very simple web interface we use internally for our users.
 
 .. image:: figures/zapp_structure.png
 
@@ -46,12 +47,16 @@ The repository contains::
     applications/ : some pre-made scripts to build ZApps
     frameworks/ : the frameworks we will use to build our own ZApp
     scripts/ : utility scripts
-    web/ : a web application to customize some applications for end-users
+    web/ : a web application to customize pre-made ZApps
     zoe-app-builder.py : the startup script for the web application
 
-To create a new ZApp, create a subdirectory in `applications/`, let's call it `tutorial_zapp`.
+To create a new ZApp, create a subdirectory in `applications/`, let's call it `tutorial_zapp`. Inside open a new file in your favourite text editor, called `spark_jupyter.py`::
 
-Inside open a new file in your favourite text editor, called `spark_jupyter.py`.
+    $ cd applications/
+    $ mkdir tutorial_zapp
+    $ cd tutorial_zapp
+    $ touch __init__.py  # This way out ZApp can be imported by the app builder
+    $ vi spark_jupyter.py
 
 Step 2 - imports
 ^^^^^^^^^^^^^^^^
@@ -65,7 +70,7 @@ Then we need to import the frameworks we need::
     import frameworks.spark.spark as spark_framework
     import frameworks.spark.spark_jupyter as spark_jupyter
 
-These Python modules contain functions that return pre-filled dictionaries, feel free to have a look.
+These Python modules contain functions that return pre-filled dictionaries, feel free to have a look at their code.
 
 Basically we are selecting some building blocks to compose out application:
 
@@ -79,7 +84,7 @@ Finally we need to import the function that will fill in a generic ZApp template
 Step 3 - options
 ^^^^^^^^^^^^^^^^
 
-Set an application name. It's used mainly for the user interface::
+Set an application name. It is used mainly for the user interface::
 
     APP_NAME = 'spark-jupyter'
 
@@ -91,7 +96,7 @@ Otherwise you can use the images on the Docker Hub::
 
     DOCKER_REGISTRY = ''
 
-Set some more options, so that they can be easily changed later::
+Set more options, so that they can be easily changed later::
 
     options = [
         ('master_mem_limit', 512 * (1024**2), 'Spark Master memory limit (bytes)'),
@@ -104,7 +109,7 @@ Set some more options, so that they can be easily changed later::
         ('notebook_image', DOCKER_REGISTRY + zoerepo/spark-jupyter-notebook', 'Jupyter notebook image'),
     ]
 
-Options are listed in this way (a list of tuples) to ease integration in the app builder web interface. Let's examine each option:
+Options are listed in this way (a list of tuples) to ease integration in the app builder web interface. Let's examine each one:
 
 * master_mem_limit: reserve 512MB of RAM for the Spark Master
 * worker_mem_limit: reserve 12GB of RAM for each Spark Worker
@@ -113,7 +118,7 @@ Options are listed in this way (a list of tuples) to ease integration in the app
 * worker_count: we want a total of 2 Spark workers
 * {master,worker,notebook}_image: Docker image names for the services, prefixed with the registry address configured above
 
-The option names here match the name of the arguments of the function we are going to define next.
+The option names here match the arguments names of the function we are going to define next.
 
 Step 4 - the ZApp
 ^^^^^^^^^^^^^^^^^
@@ -130,9 +135,9 @@ Here we define the main function that generates the ZApp dictionary::
         ]
         return applications.app_base.fill_app_template(APP_NAME, False, services)
 
- The function gen_app takes as arguments the options defined in the previous step. It uses these arguments for calling the framework functions and fill a list of services. Finally, with the call to `fill_app_template` we are populating a generic template with our options and services.
+The function `gen_app()` takes as arguments the options defined in the previous step. It uses these arguments for calling the framework functions and fill a list of services. Finally, with the call to `fill_app_template()` we are populating a generic template with our options and services.
 
-Each framework package defines functions that fill in a template. These functions are actually quite simple, but they hide the structure of the Zoe application description format to simplify the creation of ZApps.
+Each framework package defines functions that fill in a template. These functions are actually quite simple, but they hide the structure of the Zoe application description format to simplify the creation of ZApps. They are also hiding the complexities of running Spark in Docker containers: network details and configuration options are already defined and setup correctly.
 
 As can be seen in some of the sample applications (have a look at the `eurecom_aml_lab` one, for example) the service descriptions returned by the template functions can be further customized to add environment variables, docker networks, volumes, etc.
 
@@ -151,11 +156,11 @@ To make the script executable we need a bit of boilerplate code::
 
 This code does not need to change, it takes the option list, transforms it into function arguments, calls `gen_app()` defined above, serializes the output dictionary in human-friendly JSON and dumps it on the standard output.
 
-Now you can save and close the file `spark_jupyter.py` with this code in it. To execute it do::
+Now you can save and close the file `spark_jupyter.py`. To execute it do::
 
     $ PYTHONPATH=../.. python ./spark_jupyter.py | tee my_first_zapp.json
 
-Now you can have a look at the full description. The ZApp is available for execution in the `my_first_zapp.json`.
+The full description is printed on the screen and saved into a file. The ZApp is available for execution in `my_first_zapp.json`.
 
 Concluding remarks
 ^^^^^^^^^^^^^^^^^^
@@ -166,9 +171,9 @@ The building blocks, the Frameworks and the Service templates, together with the
 
 With Zoe and ZApps we want to have many different levels of abstraction, to leave the flexibility in the hands of our users. From top to bottom, increasing the degrees of flexibility and complexity we have:
 
-1. the web application builder: very high level, for end users. They can customized a limited number of predefined applications
+1. the web application builder: very high level, for end users. They can customize a limited number of predefined applications
 2. the Python application descriptions: covered in this tutorial, they can be used to create new applications starting from predefined building blocks
-3. the Python service and framework descriptions: they let you create new frameworks and services, together with Docker images
+3. the Python service and framework descriptions: can be used as a starting point to create new frameworks and services, together with Docker images
 4. JSON descriptions: create a compatible JSON description from scratch using your own tools and languages for maximum flexibility
 
-We have a lot of great ideas on how to evolve the ZApp concept, but we are sure you have many more! Any feedback or comment is always welcome, to `contact us directly <daniele.venzano@eurecom.fr>`_ or through the `GitHub issue tracker <https://github.com/issues>`_.
+We have a lot of great ideas on how to evolve the ZApp concept, but we are sure you have many more! Any feedback or comment is always welcome, `contact us directly <daniele.venzano@eurecom.fr>`_ or through the `GitHub issue tracker <https://github.com/issues>`_.
