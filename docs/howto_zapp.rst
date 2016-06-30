@@ -176,4 +176,4 @@ With Zoe and ZApps we want to have many different levels of abstraction, to leav
 3. the Python service and framework descriptions: can be used as a starting point to create new frameworks and services, together with Docker images
 4. JSON descriptions: create a compatible JSON description from scratch using your own tools and languages for maximum flexibility
 
-We have a lot of great ideas on how to evolve the ZApp concept, but we are sure you have many more! Any feedback or comment is always welcome, `contact us directly <daniele.venzano@eurecom.fr>`_ or through the `GitHub issue tracker <https://github.com/issues>`_.
+We have a lot of great ideas on how to evolve the ZApp concept, but we are sure you have many more! Any feedback or comment is always welcome, `contact us directly <daniele.venzano@eurecom.fr>`_ or through the `GitHub issue tracker <https://github.com/DistributedSystemsGroup/zoe/issues>`_.
