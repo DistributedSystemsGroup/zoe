@@ -1,3 +1,5 @@
+.. _logging:
+
 Container logs
 ==============
 

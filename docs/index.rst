@@ -26,7 +26,7 @@ To better understand what we mean by "analytic service", here are a few examples
 
 A number of predefined applications for testing and customization can be found at the `zoe-applications <https://github.com/DistributedSystemsGroup/zoe-applications>`_ repository.
 
-Have a look at the :ref:`vision` and at the :ref:`roadmap` to see what we are currently planning and feel free to `contact us <daniele.venzano@eurecom.fr>`_ via email or through the GitHub issue tracker to pose questions or suggest ideas and new features.
+Have a look at the :ref:`vision` and at the :ref:`roadmap` to see what we are currently planning and feel free to `contact us <daniele.venzano@eurecom.fr>`_ via email or through the `GitHub issue tracker <https://github.com/issues>`_ to pose questions or suggest ideas and new features.
 
 Contents:
 
@@ -38,6 +38,7 @@ Contents:
   logging
   monitoring
   architecture
+  howto_zapp
   vision
   roadmap
   contributing
