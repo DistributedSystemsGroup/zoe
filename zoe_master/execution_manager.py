@@ -51,6 +51,11 @@ def restart_resubmit_scheduler():
     for e in clean_up_execs:
         config.scheduler.terminate(e)
 
+    starting_execs = config.singletons['sql_manager'].execution_list(status=Execution.STARTING_STATUS)
+    for e in starting_execs:
+        config.scheduler.terminate(e)
+        config.scheduler.incoming(e)
+
 
 def execution_delete(execution: Execution):
     assert isinstance(config.scheduler, ZoeScheduler)
