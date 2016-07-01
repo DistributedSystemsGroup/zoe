@@ -78,15 +78,6 @@ class APIManager:
                 if execution is not None:
                     zoe_master.execution_manager.execution_delete(execution)
                 self._reply_ok()
-            elif message['command'] == 'service_inspect':
-                service_id = message['service_id']
-                service = config.singletons['sql_manager'].service_list(id=service_id, only_one=True)
-                if service is None:
-                    self._reply_error('no such service')
-                else:
-                    swarm = SwarmClient(config.get_conf())
-                    info = swarm.inspect_container(service.docker_id)
-                    self._reply_ok(info)
             else:
                 log.error('Unknown command: {}'.format(message['command']))
                 self._reply_error('unknown command')

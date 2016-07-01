@@ -100,17 +100,10 @@ class APIEndpoint:
         s = self.sql.service_list(id=service_id, only_one=True)
         if s is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
-        if s.user_id != uid and role != 'admin':
+        s_exec = self.sql.execution_list(only_one=True, id=s.execution_id)
+        if s_exec.user_id != uid and role != 'admin':
             raise zoe_api.exceptions.ZoeAuthException()
         return s
-
-    def service_inspect(self, uid, role, service):
-        ret, data = self.master.service_inspect(service.id)
-        if not ret:
-            raise zoe_api.exceptions.ZoeException(data)
-
-        if service.user_id != uid and role != 'admin':
-            raise zoe_api.exceptions.ZoeAuthException()
 
     def retry_submit_error_executions(self):
         waiting_execs = self.sql.execution_list(status=zoe_lib.sql_manager.Execution.SUBMIT_STATUS)
