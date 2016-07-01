@@ -44,12 +44,11 @@ def app_validate_cmd(args):
 
 
 def app_get_cmd(args):
-    api_query = ZoeQueryAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    data = api_query.query('execution', name=args.name)
-    if len(data) == 0:
+    exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
+    execution = exec_api.execution_get(args.id)
+    if execution is None:
         print("no such execution")
     else:
-        execution = data[0]
         json.dump(execution['description'], sys.stdout, sort_keys=True, indent=4)
 
 
@@ -135,7 +134,7 @@ def process_arguments() -> Namespace:
     argparser_execution_get.set_defaults(func=exec_get_cmd)
 
     argparser_app_get = subparser.add_parser('exec-app-get', help="Retrieve an already defined application description")
-    argparser_app_get.add_argument('name', help='The name of the application')
+    argparser_app_get.add_argument('id', help='The ID of the application')
     argparser_app_get.set_defaults(func=app_get_cmd)
 
     argparser_execution_kill = subparser.add_parser('terminate', help="Terminates an execution")
