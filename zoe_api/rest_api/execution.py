@@ -36,14 +36,31 @@ class ExecutionAPI(Resource):
     @catch_exceptions
     def delete(self, execution_id: int):
         """
-        This method is called when a user wants to stop an execution. To actually delete the execution,
-        the user has to delete the 'parent' application.
-        :param execution_id: the execution to be deleted
+        :param execution_id: the execution to be terminated
         :return:
         """
         uid, role = get_auth(request)
 
         success, message = self.api_endpoint.execution_terminate(uid, role, execution_id)
+        if not success:
+            raise zoe_api.exceptions.ZoeRestAPIException(message, 400)
+
+        return '', 204
+
+
+class ExecutionDeleteAPI(Resource):
+    def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint):
+        self.api_endpoint = api_endpoint
+
+    @catch_exceptions
+    def delete(self, execution_id: int):
+        """
+        :param execution_id: the execution to be deleted
+        :return:
+        """
+        uid, role = get_auth(request)
+
+        success, message = self.api_endpoint.execution_delete(uid, role, execution_id)
         if not success:
             raise zoe_api.exceptions.ZoeRestAPIException(message, 400)
 

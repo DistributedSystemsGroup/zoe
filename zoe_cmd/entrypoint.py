@@ -44,7 +44,7 @@ def app_validate_cmd(args):
 
 def app_get_cmd(args):
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    execution = exec_api.execution_get(args.id)
+    execution = exec_api.get(args.id)
     if execution is None:
         print("no such execution")
     else:
@@ -62,14 +62,14 @@ def exec_start_cmd(args):
     app_descr = json.load(args.jsonfile)
     app_validate(app_descr)
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    ret = exec_api.execution_start(args.name, app_descr)
+    ret = exec_api.start(args.name, app_descr)
     print("Application scheduled successfully with ID {}, use the exec-get command to check its status".format(ret))
 
 
 def exec_get_cmd(args):
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     cont_api = ZoeServiceAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    execution = exec_api.execution_get(args.id)
+    execution = exec_api.get(args.id)
     if execution is None:
         print('Execution not found')
     else:
@@ -102,6 +102,11 @@ def exec_get_cmd(args):
 def exec_kill_cmd(args):
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     exec_api.terminate(args.id)
+
+
+def exec_rm_cmd(args):
+    exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
+    exec_api.delete(args.id)
 
 
 ENV_HELP_TEXT = '''To use this tool you need also to define three environment variables:
@@ -139,6 +144,10 @@ def process_arguments() -> Namespace:
     argparser_execution_kill = subparser.add_parser('terminate', help="Terminates an execution")
     argparser_execution_kill.add_argument('id', type=int, help="Execution id")
     argparser_execution_kill.set_defaults(func=exec_kill_cmd)
+
+    argparser_execution_kill = subparser.add_parser('exec-rm', help="Deletes an execution")
+    argparser_execution_kill.add_argument('id', type=int, help="Execution id")
+    argparser_execution_kill.set_defaults(func=exec_rm_cmd)
 
     return parser, parser.parse_args()
 

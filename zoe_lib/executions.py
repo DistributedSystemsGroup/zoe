@@ -33,13 +33,29 @@ class ZoeExecutionsAPI(ZoeAPIBase):
         """
         Terminates an execution.
 
-        :param execution_id: the execution to delete
+        :param execution_id: the execution to terminate
         :return: True if the operation was successful, False otherwise
 
         :type execution_id: int
         :rtype: bool
         """
         data, status_code = self._rest_delete('/execution/' + str(execution_id))
+        if status_code == 204:
+            return
+        else:
+            raise ZoeAPIException(data['message'])
+
+    def delete(self, execution_id):
+        """
+        Deletes an execution.
+
+        :param execution_id: the execution to delete
+        :return: True if the operation was successful, False otherwise
+
+        :type execution_id: int
+        :rtype: bool
+        """
+        data, status_code = self._rest_delete('/execution/delete/' + str(execution_id))
         if status_code == 204:
             return
         else:
@@ -57,7 +73,7 @@ class ZoeExecutionsAPI(ZoeAPIBase):
         else:
             raise ZoeAPIException(data['message'])
 
-    def execution_get(self, execution_id):
+    def get(self, execution_id):
         """
         Retrieve the Execution object for an existing execution.
 
@@ -73,7 +89,7 @@ class ZoeExecutionsAPI(ZoeAPIBase):
         else:
             return None
 
-    def execution_start(self, name, application_description):
+    def start(self, name, application_description):
         """
         Submit an application to the master to start a new execution.
 

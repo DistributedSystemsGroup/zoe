@@ -87,14 +87,14 @@ class APIEndpoint:
             raise zoe_api.exceptions.ZoeAuthException()
 
         if e.is_active():
-            raise zoe_api.exceptions.ZoeException('Cannot delete a running execution, terminate it first')
+            self.execution_terminate(uid, role, exec_id)
+
+        status, message = self.master.execution_delete(exec_id)
+        if status:
+            self.sql.execution_delete(exec_id)
+            return True, ''
         else:
-            status, message = self.master.execution_delete(exec_id)
-            if status:
-                self.sql.execution_delete(exec_id)
-                return True, ''
-            else:
-                raise zoe_api.exceptions.ZoeException(message)
+            raise zoe_api.exceptions.ZoeException(message)
 
     def service_by_id(self, uid, role, service_id) -> zoe_lib.sql_manager.Service:
         s = self.sql.service_list(id=service_id, only_one=True)

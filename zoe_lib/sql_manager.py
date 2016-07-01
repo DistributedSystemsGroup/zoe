@@ -258,7 +258,11 @@ class Execution(Base):
         self.sql_manager.execution_update(self.id, error_message=self.error_message)
 
     def is_active(self):
-        return self._status == 'scheduled' or self._status == 'running'
+        """
+        Returns True if the execution is in the scheduler
+        :return:
+        """
+        return self._status == self.SCHEDULED_STATUS or self._status == self.RUNNING_STATUS or self._status == self.STARTING_STATUS or self._status == self.CLEANING_UP_STATUS
 
     @property
     def status(self):
