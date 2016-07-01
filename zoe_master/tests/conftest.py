@@ -14,11 +14,10 @@
 # limitations under the License.
 
 import pytest
-import json
-
-from zoe_master.config import load_configuration, get_conf
-from zoe_master.state.manager import StateManager
 from zoe_master.state.blobs.fs import FSBlobs
+from zoe_master.state.manager import StateManager
+
+from zoe_lib.config import load_configuration, get_conf
 
 
 class TestConf:

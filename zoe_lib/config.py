@@ -13,7 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+
 from zoe_lib.configargparse import ArgumentParser, Namespace
+
+logging.getLogger('kazoo').setLevel(logging.WARNING)
+logging.getLogger('requests').setLevel(logging.WARNING)
+logging.getLogger('urllib3').setLevel(logging.WARNING)
+logging.getLogger('docker').setLevel(logging.INFO)
 
 config_paths = [
     'zoe.conf',

@@ -15,11 +15,11 @@
 
 import logging
 
-from zoe_lib.sql_manager import Execution, Service
-from zoe_master.exceptions import ZoeStartExecutionRetryException, ZoeStartExecutionFatalException, ZoeException
-from zoe_master.config import get_conf, singletons
-from zoe_lib.swarm_client import DockerContainerOptions, SwarmClient
 import zoe_master.workspace.base
+from zoe_lib.config import get_conf, singletons
+from zoe_lib.sql_manager import Execution, Service
+from zoe_lib.swarm_client import DockerContainerOptions, SwarmClient
+from zoe_master.exceptions import ZoeStartExecutionRetryException, ZoeStartExecutionFatalException, ZoeException
 
 log = logging.getLogger(__name__)
 

@@ -18,12 +18,11 @@ import time
 
 import zmq
 
-from zoe_master.exceptions import ZoeException
+import zoe_lib.config as config
 import zoe_lib.sql_manager
-from zoe_lib.swarm_client import SwarmClient
-
-import zoe_master.config as config
 import zoe_master.execution_manager
+from zoe_lib.swarm_client import SwarmClient
+from zoe_master.exceptions import ZoeException
 
 log = logging.getLogger(__name__)
 

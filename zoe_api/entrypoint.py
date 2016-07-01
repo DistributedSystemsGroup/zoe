@@ -20,7 +20,7 @@ from tornado.wsgi import WSGIContainer
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop, PeriodicCallback
 
-import zoe_api.config as config
+import zoe_lib.config as config
 import zoe_api.db_init
 import zoe_api.api_endpoint
 import zoe_api.rest_api

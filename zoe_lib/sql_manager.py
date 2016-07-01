@@ -18,7 +18,8 @@ import datetime
 import psycopg2
 import psycopg2.extras
 
-from zoe_master.config import get_conf
+from zoe_lib.config import get_conf
+from zoe_lib.swarm_client import SwarmClient
 
 psycopg2.extensions.register_adapter(dict, psycopg2.extras.Json)
 

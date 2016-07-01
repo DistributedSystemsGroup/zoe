@@ -17,7 +17,7 @@ import logging
 import ldap
 
 import zoe_api.auth.base
-from zoe_api.config import get_conf
+from zoe_lib.config import get_conf
 
 log = logging.getLogger(__name__)
 

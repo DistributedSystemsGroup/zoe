@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os.path
 import logging
+import os.path
 
+import zoe_lib.config as config
 import zoe_master.workspace.base
-import zoe_master.config as config
 
 log = logging.getLogger(__name__)
 

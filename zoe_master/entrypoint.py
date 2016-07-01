@@ -17,9 +17,9 @@
 
 import logging
 
-from zoe_master.scheduler import ZoeScheduler
-import zoe_master.config as config
+import zoe_lib.config as config
 from zoe_master.master_api import APIManager
+from zoe_master.scheduler import ZoeScheduler
 # from zoe_master.stats_manager import StatsManager
 from zoe_master.workspace.filesystem import ZoeFSWorkspace
 from zoe_master.execution_manager import restart_resubmit_scheduler

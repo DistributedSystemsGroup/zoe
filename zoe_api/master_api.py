@@ -17,7 +17,7 @@ import logging
 
 import zmq
 
-import zoe_api.config as config
+import zoe_lib.config as config
 
 log = logging.getLogger(__name__)
 

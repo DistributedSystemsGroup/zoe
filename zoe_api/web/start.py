@@ -17,10 +17,8 @@ import re
 from random import randint
 import json
 
-from flask import render_template, request
-from zoe_lib.services import ZoeServiceAPI
+from flask import render_template, request, g
 
-import zoe_api.config as config
 import zoe_api.api_endpoint
 from zoe_api.web.utils import get_auth, catch_exceptions
 

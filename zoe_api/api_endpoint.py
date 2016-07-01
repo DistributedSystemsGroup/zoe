@@ -16,7 +16,7 @@
 import logging
 import re
 
-from zoe_api.config import get_conf
+from zoe_lib.config import get_conf
 import zoe_api.master_api
 import zoe_lib.sql_manager
 import zoe_lib.applications

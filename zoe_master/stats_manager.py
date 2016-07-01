@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import threading
 import time
-import logging
 
+from zoe_lib.config import get_conf
 from zoe_lib.swarm_client import SwarmClient
-from zoe_master.config import get_conf
 
 log = logging.getLogger(__name__)
 

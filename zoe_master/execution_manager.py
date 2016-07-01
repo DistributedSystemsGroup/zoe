@@ -15,9 +15,8 @@
 
 import logging
 
+import zoe_lib.config as config
 from zoe_lib.sql_manager import Execution
-
-import zoe_master.config as config
 from zoe_master.scheduler import ZoeScheduler
 
 log = logging.getLogger(__name__)

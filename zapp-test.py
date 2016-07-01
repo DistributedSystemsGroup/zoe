@@ -21,19 +21,18 @@ import logging
 import time
 
 import zoe_lib.applications
-from zoe_lib.sql_manager import Execution, Service
+import zoe_lib.config as config
 from zoe_lib.configargparse import ArgumentParser, FileType
-
-import zoe_master.config as config
-from zoe_master.zapp_to_docker import execution_to_containers, terminate_execution
+from zoe_lib.sql_manager import Execution, Service
 from zoe_master.execution_manager import _digest_application_description
+from zoe_master.zapp_to_docker import execution_to_containers, terminate_execution
 
 log = logging.getLogger("main")
 LOG_FORMAT = '%(asctime)-15s %(levelname)s %(name)s (%(threadName)s): %(message)s'
 
 config_paths = [
-    'zoe-master.conf',
-    '/etc/zoe/zoe-master.conf'
+    'zoe.conf',
+    '/etc/zoe/zoe.conf'
 ]
 
 
