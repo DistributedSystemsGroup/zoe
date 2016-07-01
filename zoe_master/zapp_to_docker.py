@@ -72,10 +72,6 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
             raise ZoeStartExecutionFatalException("unknown variable in expression {}".format(env_value))
         copts.add_env_variable(env_name, env_value)
 
-    for p in service.description['ports']:
-        if p['expose']:
-            copts.ports.append(p['port_number'])  # FIXME UDP ports?
-
     if 'volumes' in service.description:
         for path, mount_point, readonly in service.description['volumes']:
             copts.add_volume_bind(path, mount_point, readonly)
