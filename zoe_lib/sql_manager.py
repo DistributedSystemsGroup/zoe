@@ -216,7 +216,8 @@ class Execution(Base):
             'time_start': None if self.time_start is None else self.time_start.timestamp(),
             'time_end': None if self.time_end is None else self.time_end.timestamp(),
             'status': self._status,
-            'error_message': self.error_message
+            'error_message': self.error_message,
+            'services': [s.id for s in self.services]
         }
 
     def __eq__(self, other):
@@ -294,13 +295,15 @@ class Service(Base):
 
     def serialize(self):
         return {
+            'id': self.id,
             'name': self.name,
             'status': self.status,
             'error_message': self.error_message,
             'execution_id': self.execution_id,
             'description': self.description,
             'service_group': self.service_group,
-            'docker_id': self.docker_id
+            'docker_id': self.docker_id,
+            'ip_address': self.ip_address
         }
 
     def __eq__(self, other):
@@ -321,3 +324,11 @@ class Service(Base):
 
     def set_active(self, docker_id):
         self.sql_manager.service_update(self.id, status=self.ACTIVE_STATUS, docker_id=docker_id)
+
+    @property
+    def ip_address(self):
+        if self.status != self.ACTIVE_STATUS:
+            return {}
+        swarm = SwarmClient(get_conf())
+        s_info = swarm.inspect_container(self.docker_id)
+        return s_info['ip_address'][get_conf().overlay_network_name]

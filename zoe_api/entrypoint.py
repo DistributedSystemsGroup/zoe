@@ -41,8 +41,6 @@ def zoe_web_main() -> int:
         logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
     else:
         logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
-    logging.getLogger("requests").setLevel(logging.WARNING)
-    logging.getLogger("tornado").setLevel(logging.DEBUG)
 
     log.info("Starting HTTP server...")
     app = Flask(__name__, static_url_path='/does-not-exist')
@@ -51,10 +49,9 @@ def zoe_web_main() -> int:
     zoe_api.db_init.init()
 
     api_endpoint = zoe_api.api_endpoint.APIEndpoint()
-    config.api_endpoint = api_endpoint
 
     app.register_blueprint(zoe_api.rest_api.api_init(api_endpoint))
-    app.register_blueprint(zoe_api.web.web_init())
+    app.register_blueprint(zoe_api.web.web_init(api_endpoint))
 
     http_server = HTTPServer(WSGIContainer(app))
     http_server.listen(args.listen_port, args.listen_address)

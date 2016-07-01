@@ -9,12 +9,12 @@
     <li>Status: {{ e.status }}</li>
     <li>Time submitted: <script>format_timestamp("{{ e.time_submit }}")</script></li>
     {% if e.time_start == None %}
-    <li>Not yet</li>
+    <li>Time started: not yet</li>
     {% else %}
     <li>Time started: <script>format_timestamp("{{ e.time_start }}")</script></li>
     {% endif %}
     {% if e.time_end == None %}
-    <li>Not yet</li>
+    <li>Time finished: not yet</li>
     {% else %}
     <li>Time finished: <script>format_timestamp("{{ e.time_end }}")</script></li>
     {%  endif %}
@@ -28,11 +28,11 @@
 <p>Services:</p>
 {% endif %}
 <ul>
-{% for s in services %}
+{% for s in services_info %}
     <li class="container_name" id="{{ s['id'] }}">{{ s['name'] }}</li>
     <ul>
-    {% for p in s['ports'] %}
-        <li><a href="{{ p['protocol'] }}://{{ s['ip'] }}:{{ p['port_number'] }}{{ p['path'] }}">{{ p['name'] }}</a></li>
+    {% for p in s['description']['ports'] %}
+        <li><a href="{{ p['protocol'] }}://{{ s['ip_address'] }}:{{ p['port_number'] }}{{ p['path'] }}">{{ p['name'] }}</a></li>
     {% endfor %}
     </ul>
 {% endfor %}

@@ -45,12 +45,6 @@ def main():
     else:
         logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
-    logging.getLogger('kazoo').setLevel(logging.WARNING)
-    logging.getLogger('requests').setLevel(logging.WARNING)
-    logging.getLogger('urllib3').setLevel(logging.WARNING)
-    logging.getLogger('docker').setLevel(logging.INFO)
-    logging.getLogger("tornado").setLevel(logging.DEBUG)
-
     log.info("Initializing DB manager")
     config.singletons['sql_manager'] = SQLManager(args)
 

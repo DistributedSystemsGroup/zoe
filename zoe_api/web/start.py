@@ -33,10 +33,11 @@ def index():
 @catch_exceptions
 def home_user():
     uid, role = get_auth(request)
-    assert isinstance(config.api_endpoint, zoe_api.api_endpoint.APIEndpoint)
+    api_endpoint = g.api_endpoint
+    assert isinstance(api_endpoint, zoe_api.api_endpoint.APIEndpoint)
 
     if role == 'user' or role == 'admin':
-        executions = config.api_endpoint.execution_list(uid, role)
+        executions = api_endpoint.execution_list(uid, role)
 
         template_vars = {
             'executions': executions,
@@ -51,9 +52,9 @@ def home_user():
         }
 
         app_descr = json.load(open('contrib/zoeapps/eurecom_aml_lab.json', 'r'))
-        execution = config.api_endpoint.execution_list(uid, role, name='aml-lab')
+        execution = api_endpoint.execution_list(uid, role, name='aml-lab')
         if len(execution) == 0 or execution[0]['status'] == 'terminated' or execution[0]['status'] == 'finished':
-            config.api_endpoint.execution_start(uid, role, 'aml-lab', app_descr)
+            api_endpoint.execution_start(uid, role, 'aml-lab', app_descr)
             template_vars['execution_status'] = 'submitted'
             return render_template('home_guest.html', **template_vars)
         else:
@@ -63,7 +64,6 @@ def home_user():
                 return render_template('home_guest.html', **template_vars)
             else:
                 template_vars['refresh'] = -1
-                cont_api = ZoeServiceAPI(get_conf().master_url, guest_identifier, guest_password)
                 template_vars['execution_status'] = execution['status']
                 for c_id in execution['services']:
                     c = cont_api.get(c_id)

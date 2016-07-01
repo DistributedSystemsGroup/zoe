@@ -13,14 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flask import Blueprint
+from flask import Blueprint, g
 import zoe_api.web.start
 import zoe_api.web.executions
 
 from zoe_lib.version import ZOE_API_VERSION, ZOE_VERSION
 
 
-def web_init() -> Blueprint:
+def web_init(api_endpoint) -> Blueprint:
+    def before_request():
+        g.api_endpoint = api_endpoint
+
     web_bp = Blueprint('web', __name__, template_folder='templates', static_folder='static')
 
     web_bp.context_processor(inject_version)
@@ -34,7 +37,11 @@ def web_init() -> Blueprint:
     web_bp.add_url_rule('/executions/terminate/<int:execution_id>', 'execution_terminate', zoe_api.web.executions.execution_terminate)
     web_bp.add_url_rule('/executions/inspect/<int:execution_id>', 'execution_inspect', zoe_api.web.executions.execution_inspect)
 
+    web_bp.before_request(before_request)
+
     return web_bp
+
+
 
 
 def inject_version():

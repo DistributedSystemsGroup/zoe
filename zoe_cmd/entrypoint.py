@@ -93,9 +93,9 @@ def exec_get_cmd(args):
         print('Application name: {}'.format(app['name']))
         for c_id in execution['services']:
             c = cont_api.get(c_id)
-            ip = list(c['ip_address'].values())[0]  # FIXME how to decide which network is the right one?
-            print('Service {} (ID: {})'.format(c['name'], c['id']))
-            for p in c['ports']:
+            ip = c['ip_address']
+            print('Service {} (ID: {}, {})'.format(c['name'], c['id'], c['status']))
+            for p in c['description']['ports']:
                 print(' - {}: {}://{}:{}{}'.format(p['name'], p['protocol'], ip, p['port_number'], p['path']))
 
 
