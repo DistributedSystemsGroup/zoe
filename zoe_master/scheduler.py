@@ -108,6 +108,11 @@ class ZoeScheduler:
                 e.set_error_message(ex.message)
                 terminate_execution(e)
                 e.set_error()
+            except Exception as ex:
+                log.exception('BUG, this error should have been caught earlier')
+                e.set_error_message(str(ex))
+                terminate_execution(e)
+                e.set_error()
             else:
                 e.set_running()
 
