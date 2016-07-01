@@ -29,7 +29,6 @@ from zoe_cmd import utils
 from zoe_lib.services import ZoeServiceAPI
 from zoe_lib.exceptions import ZoeAPIException, InvalidApplicationDescription
 from zoe_lib.executions import ZoeExecutionsAPI
-from zoe_lib.query import ZoeQueryAPI
 from zoe_lib.applications import app_validate
 
 
