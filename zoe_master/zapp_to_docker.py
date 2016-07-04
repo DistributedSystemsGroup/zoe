@@ -13,18 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Translates a ZApp description into Docker containers."""
+
 import logging
 
 import zoe_master.workspace.base
+from zoe_master.exceptions import ZoeStartExecutionRetryException, ZoeStartExecutionFatalException, ZoeException
+
 from zoe_lib.config import get_conf, singletons
 from zoe_lib.sql_manager import Execution, Service
 from zoe_lib.swarm_client import DockerContainerOptions, SwarmClient
-from zoe_master.exceptions import ZoeStartExecutionRetryException, ZoeStartExecutionFatalException, ZoeException
 
 log = logging.getLogger(__name__)
 
 
-def execution_to_containers(execution: Execution):
+def execution_to_containers(execution: Execution) -> None:
+    """Translate an execution object into containers.
+
+    If an error occurs some containers may have been created and needs to be cleaned-up.
+    In case of error exceptions are raised.
+    """
     ordered_service_list = sorted(execution.services, key=lambda x: x.description['startup_order'])
 
     env_subst_dict = {
@@ -108,13 +116,14 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
 
 
 def terminate_execution(execution: Execution) -> None:
+    """Terminate an execution, making sure no containers are left in Swarm."""
     execution.set_cleaning_up()
     swarm = SwarmClient(get_conf())
-    for s in execution.services:
-        assert isinstance(s, Service)
-        if s.docker_id is not None:
-            s.set_terminating()
-            swarm.terminate_container(s.docker_id, delete=True)
-            s.set_inactive()
-            log.debug('Service {} terminated'.format(s.name))
+    for service in execution.services:
+        assert isinstance(service, Service)
+        if service.docker_id is not None:
+            service.set_terminating()
+            swarm.terminate_container(service.docker_id, delete=True)
+            service.set_inactive()
+            log.debug('Service {} terminated'.format(service.name))
     execution.set_terminated()
