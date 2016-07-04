@@ -16,4 +16,4 @@ Zoe also provides a Zoe Logger process, in case you prefer to use Kafka in your 
 
 The logger process is very small and simple, you can modify it to suit your needs and convert logs in any format to any destination you prefer. It lives in its own repository, here: https://github.com/DistributedSystemsGroup/zoe-logger
 
-If you are interested in sending container output to Kafka, please make your voice heard at `this Docker issue https://github.com/docker/docker/issues/21271`_ for a more production-friendly Docker-Kafka integration.
+If you are interested in sending container output to Kafka, please make your voice heard at `this Docker issue <https://github.com/docker/docker/issues/21271>`_ for a more production-friendly Docker-Kafka integration.

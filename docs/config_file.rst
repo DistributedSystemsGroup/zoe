@@ -7,13 +7,13 @@ Zoe can be configured by files, environment variables or commandline options. Th
 
 Also the directive ``--write-config <filename>`` is available: it will generate a configuration file with all options set to the default values.
 
-Zoe config files have a simple format of ``<option name> = <value>``. Dash characters can be use for comments.
-Each Zoe component has its own configuration directives, as described in the following sections:
+The Zoe config file have a simple format of ``<option name> = <value>``. Dash characters can be use for comments.
+All Zoe processes use one single configuration file, called zoe.conf. It is searched in the current working directory and in ``/etc/zoe/``.
 
-Please note that Zoe uses the database to retain shared state, so the master and the api processes must be configured with the same database.
+zoe.conf
+--------
+Common options:
 
-zoe-master.conf
----------------
 * ``debug = <true|false>`` : enable or disable debug log output
 * ``swarm = zk://zk1:2181,zk2:2181,zk3:2181`` : connection string to the Swarm API endpoint. Can be expressed by a plain http URL or as a zookeeper node list in case Swarm is configured for HA.
 * ``api-listen-uri = tcp://*:4850`` : ZeroMQ server connection string, used for the master listening endpoint
@@ -25,19 +25,19 @@ zoe-master.conf
 * ``workspace-base-path = /mnt/zoe-workspaces`` : Base directory where user workspaces will be created. This directory should reside on a shared filesystem visible by all Docker hosts.
 * ``overlay-network-name = zoe`` : name of the pre-configured Docker overlay network Zoe should use
 
+Database options:
+
 * ``dbname = zoe`` : DB name
-* ``dbuser = zoe` : DB user
+* ``dbuser = zoe`` : DB user
 * ``dbpass = zoe`` : DB password
 * ``dbhost = localhost`` : DB hostname
 * ``dbport = 5432`` : DB port
 
-zoe-api.conf
-------------
-* ``debug = <true|false>`` : enable or disable debug log output
+API options:
+
 * ``listen-address`` : address Zoe will use to listen for incoming connections to the web interface
 * ``listen-port`` : port Zoe will use to listen for incoming connections to the web interface
 * ``master-url = tcp://127.0.0.1:4850`` : address of the Zoe Master ZeroMQ API
-* ``deployment-name = devel`` : name of this Zoe deployment. Can be used to have multiple Zoe deployments using the same Swarm (devel and prod, for example)
 
 * ``ldap-server-uri = ldap://localhost`` : LDAP server to use for user authentication
 * ``ldap-base-dn = ou=something,dc=any,dc=local`` : LDAP base DN for users
@@ -46,9 +46,3 @@ zoe-api.conf
 * ``ldap-admin-gid = 5000`` : LDAP group ID for admins
 * ``ldap-user-gid = 5001`` : LDAP group ID for users
 * ``ldap-guest-gid = 5002`` : LDAP group ID for guests
-
-* ``dbname = zoe`` : DB name
-* ``dbuser = zoe` : DB user
-* ``dbpass = zoe`` : DB password
-* ``dbhost = localhost`` : DB hostname
-* ``dbport = 5432`` : DB port

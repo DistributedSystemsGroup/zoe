@@ -73,7 +73,7 @@ Currently this is the recommended procedure, once the initial Swarm setup has be
 3. Create new configuration files for the master and the api processes (:ref:`config_file`)
 4. Setup supervisor to manage Zoe processes: in the ``scripts/supervisor/`` directory you can find the configuration file for
    supervisor. You need to modify the paths to point to where you cloned Zoe and the user (Zoe does not need special privileges).
-6. Start running ZApps!
+5. Start running ZApps!
 
 Docker compose - demo install
 -----------------------------
