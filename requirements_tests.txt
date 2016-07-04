@@ -1,0 +1,3 @@
+prospector[with_vulture]
+doc8
+sphinx
