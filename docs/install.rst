@@ -21,11 +21,13 @@ Overview
 
 ZApps, usually, expose a number of interfaces (web, REST and others) to the user. Docker Swarm does not provide an easy way to manage this situation: the port can be statically allocated, but the IP address is chosen arbitrarily by Swarm and there is no discovery mechanism (DNS) exposed to the outside of Swarm.
 
-There is no good, automated, way to solve this problem. Each Swarm deployment is different: some use public addresses, other use overlay networks.
-In out deployment we use a standard Swarm configuration, with private and closed overlay networks. We create one network for use by Zoe and spawn two containers attached to it: one is a SOCKS proxy and the other is an SSH gateway. Thanks to LDAP users can use the SSH gateway to create tunnels and copy files from/to their workspace.
-This gateway containers are maintained outside of Zoe, at this Github repository: https://github.com/DistributedSystemsGroup/gateway-containers
+In the interest of keeping dependencies few and easy to manage, we do not rely on external plugins for networking of volumes.
+With the functionality that is built-in into Docker and Swarm there is no good, automated, way to solve the problem of accessing services running inside an overlay network from outside. We decided to leave the network configuration entirely in the hands of who is in charge of doing the deployment: Zoe expects a Docker network name and will connect all containers on that network. How that network is configured is outside Zoe's competence area.
 
-Zoe requires a shared filesystem, visible from all Docker hosts. Each user has a workspace directory visible from all its running ZApps. The workspace is used to save Jupyter notebooks, copy data from/to HDFS, provide binaries to MPI and Spark applications.
+As an example of a simple, robust configuration, we use a standard Swarm configuration, with private and closed overlay networks. We create one overlay network for use by Zoe and spawn two containers attached to it: one is a SOCKS proxy and the other is an SSH gateway. Thanks to LDAP users can use the SSH gateway to create tunnels and copy files from/to their workspace.
+These gateway containers are maintained outside of Zoe, at this Github repository: https://github.com/DistributedSystemsGroup/gateway-containers
+
+Zoe requires a shared filesystem, visible from all Docker hosts. Each user has a workspace directory visible from all its running ZApps. The workspace is used to save Jupyter notebooks, copy data from/to HDFS, provide binaries to MPI and Spark applications. Again, there are several plugins for Docker that offer a variety of volume backends: we have chosen the simplest deployment option, by using a shared filesystem mounted on all the hosts to provide workspaces.
 
 Requirements
 ------------
