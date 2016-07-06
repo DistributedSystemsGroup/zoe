@@ -39,6 +39,7 @@ def web_init(api_endpoint) -> Blueprint:
     web_bp.add_url_rule('/executions/start', 'execution_start', zoe_api.web.executions.execution_start, methods=['POST'])
     web_bp.add_url_rule('/executions/restart/<int:execution_id>', 'execution_restart', zoe_api.web.executions.execution_restart)
     web_bp.add_url_rule('/executions/terminate/<int:execution_id>', 'execution_terminate', zoe_api.web.executions.execution_terminate)
+    web_bp.add_url_rule('/executions/delete/<int:execution_id>', 'execution_delete', zoe_api.web.executions.execution_delete)
     web_bp.add_url_rule('/executions/inspect/<int:execution_id>', 'execution_inspect', zoe_api.web.executions.execution_inspect)
 
     web_bp.before_request(before_request)
