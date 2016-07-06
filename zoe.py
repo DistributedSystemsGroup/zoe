@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Command line client entry point."""
+
 from zoe_cmd.entrypoint import zoe
 
 if __name__ == "__main__":

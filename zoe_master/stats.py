@@ -13,18 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""This module contains classes for statistics on various entities in the Zoe master."""
+
+import time
+
 
 class Stats:
-    def __init__(self):
-        self.timestamp = None
+    """Base statistics class.
 
-    def to_dict(self) -> dict:
-        ret = {}
-        ret.update(vars(self))
-        return ret
+    Every Stats object must have a timestamp that records when the stats it contains where recorded.
+    """
+    def __init__(self):
+        self.timestamp = time.time()
 
 
 class SwarmNodeStats(Stats):
+    """Stats related to a single Swarm node."""
     def __init__(self, name):
         super().__init__()
         self.name = name
@@ -38,6 +42,7 @@ class SwarmNodeStats(Stats):
 
 
 class SwarmStats(Stats):
+    """Stats related to the whole Swarm cluster."""
     def __init__(self):
         super().__init__()
         self.container_count = 0
@@ -49,23 +54,9 @@ class SwarmStats(Stats):
         self.status = 'Unknown'
         self.nodes = []
 
-    def to_dict(self) -> dict:
-        ret = {
-            'container_count': self.container_count,
-            'image_count': self.image_count,
-            'memory_total': self.memory_total,
-            'cores_total': self.cores_total,
-            'placement_strategy': self.placement_strategy,
-            'active_filters': self.active_filters,
-            'nodes': []
-        }
-        for node in self.nodes:
-            ret['nodes'].append(node.to_dict())
-
-        return ret
-
 
 class SchedulerStats(Stats):
+    """Stats related to the scheduler."""
     def __init__(self):
         super().__init__()
         self.count_waiting = 0

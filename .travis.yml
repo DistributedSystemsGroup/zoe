@@ -3,9 +3,8 @@ python:
   - "3.4"
   - "3.5"
 install:
-  - pip install -r requirements.txt
-  - pip install pylint
+  - pip install -r requirements_tests.txt
 before_script:
 script:
-  - prospector
+  - pylint *.py zoe_*
   - doc8 docs/

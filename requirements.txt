@@ -5,4 +5,3 @@ docker-py==1.7.2
 tornado>=4.3
 kazoo
 humanfriendly
-kafka-python

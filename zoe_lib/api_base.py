@@ -14,15 +14,15 @@ from zoe_lib.exceptions import ZoeAPIException
 log = logging.getLogger(__name__)
 
 
-def retry(ExceptionToCheck, tries=4, delay=3, backoff=2):
+def retry(exception_to_check, tries=4, delay=3, backoff=2):
     """Retry calling the decorated function using an exponential backoff.
 
     http://www.saltycrane.com/blog/2009/11/trying-out-retry-decorator-python/
     original from: http://wiki.python.org/moin/PythonDecoratorLibrary#Retry
 
-    :param ExceptionToCheck: the exception to check. may be a tuple of
+    :param exception_to_check: the exception to check. may be a tuple of
         exceptions to check
-    :type ExceptionToCheck: Exception or tuple
+    :type exception_to_check: Exception or tuple
     :param tries: number of times to try (not retry) before giving up
     :type tries: int
     :param delay: initial delay between retries in seconds
@@ -31,20 +31,22 @@ def retry(ExceptionToCheck, tries=4, delay=3, backoff=2):
         each retry
     :type backoff: int
     """
-    def deco_retry(f):
-        @wraps(f)
+    def deco_retry(func):
+        """Decorator to wrap calls that need to be retried."""
+        @wraps(func)
         def f_retry(*args, **kwargs):
+            """The actual decorator."""
             mtries, mdelay = tries, delay
             while mtries > 1:
                 try:
-                    return f(*args, **kwargs)
-                except ExceptionToCheck as e:
+                    return func(*args, **kwargs)
+                except exception_to_check as e:
                     msg = "%s, Retrying in %d seconds..." % (str(e), mdelay)
                     log.warning(msg)
                     time.sleep(mdelay)
                     mtries -= 1
                     mdelay *= backoff
-            return f(*args, **kwargs)
+            return func(*args, **kwargs)
 
         return f_retry  # true decorator
 
@@ -52,6 +54,7 @@ def retry(ExceptionToCheck, tries=4, delay=3, backoff=2):
 
 
 class ZoeAPIBase:
+    """Base class for the Zoe Client API."""
     def __init__(self, url, user, password):
         self.url = url
         self.user = user
@@ -65,7 +68,7 @@ class ZoeAPIBase:
         """
         url = self.url + '/api/' + ZOE_API_VERSION + path
         try:
-            r = requests.get(url, auth=(self.user, self.password))
+            req = requests.get(url, auth=(self.user, self.password))
         except requests.exceptions.Timeout:
             raise ZoeAPIException('HTTP connection timeout')
         except requests.exceptions.HTTPError:
@@ -74,10 +77,10 @@ class ZoeAPIBase:
             raise ZoeAPIException('Connection error: {}'.format(e))
 
         try:
-            data = r.json()
+            data = req.json()
         except ValueError:
             data = None
-        return data, r.status_code
+        return data, req.status_code
 
     @retry(ZoeAPIException)
     def _rest_post(self, path, payload):
@@ -87,7 +90,7 @@ class ZoeAPIBase:
         """
         url = self.url + '/api/' + ZOE_API_VERSION + path
         try:
-            r = requests.post(url, auth=(self.user, self.password), json=payload)
+            req = requests.post(url, auth=(self.user, self.password), json=payload)
         except requests.exceptions.Timeout:
             raise ZoeAPIException('HTTP connection timeout')
         except requests.exceptions.HTTPError:
@@ -96,10 +99,10 @@ class ZoeAPIBase:
             raise ZoeAPIException('Connection error: {}'.format(e))
 
         try:
-            data = r.json()
+            data = req.json()
         except ValueError:
             data = None
-        return data, r.status_code
+        return data, req.status_code
 
     @retry(ZoeAPIException)
     def _rest_delete(self, path):
@@ -109,7 +112,7 @@ class ZoeAPIBase:
         """
         url = self.url + '/api/' + ZOE_API_VERSION + path
         try:
-            r = requests.delete(url, auth=(self.user, self.password))
+            req = requests.delete(url, auth=(self.user, self.password))
         except requests.exceptions.Timeout:
             raise ZoeAPIException('HTTP connection timeout')
         except requests.exceptions.HTTPError:
@@ -118,7 +121,7 @@ class ZoeAPIBase:
             raise ZoeAPIException('Connection error: {}'.format(e))
 
         try:
-            data = r.json()
+            data = req.json()
         except ValueError:
             data = None
-        return data, r.status_code
+        return data, req.status_code

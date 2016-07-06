@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Functions needed by the Zoe web interface."""
+
 import logging
 
 from flask import Response, render_template
@@ -30,6 +32,7 @@ def catch_exceptions(func):
     :return:
     """
     def func_wrapper(*args, **kwargs):
+        """The actual decorator."""
         try:
             return func(*args, **kwargs)
         except zoe_api.exceptions.ZoeAuthException:
@@ -53,6 +56,8 @@ def missing_auth():
 
 
 def get_auth(request):
+    """Try to authenticate a request."""
+
     auth = request.authorization
     if not auth:
         raise zoe_api.exceptions.ZoeAuthException
@@ -66,4 +71,5 @@ def get_auth(request):
 
 
 def error_page(error_message, status):
+    """Generate an error page."""
     return render_template('error.html', error=error_message), status

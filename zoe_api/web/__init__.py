@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Flask initialization for the web interface."""
+
 from flask import Blueprint, g
 import zoe_api.web.start
 import zoe_api.web.executions
@@ -21,7 +23,9 @@ from zoe_lib.version import ZOE_API_VERSION, ZOE_VERSION
 
 
 def web_init(api_endpoint) -> Blueprint:
+    """Flask init for the web interface."""
     def before_request():
+        """Use the Flask global to hold the api endpoint reference."""
         g.api_endpoint = api_endpoint
 
     web_bp = Blueprint('web', __name__, template_folder='templates', static_folder='static')
@@ -42,9 +46,8 @@ def web_init(api_endpoint) -> Blueprint:
     return web_bp
 
 
-
-
 def inject_version():
+    """Inject some template variables in all templates."""
     return {
         'zoe_version': ZOE_VERSION,
         'zoe_api_version': ZOE_API_VERSION,

@@ -13,49 +13,50 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Layer in front of the scheduler to perform """
+
 import logging
 
-import zoe_lib.config as config
-from zoe_lib.sql_manager import Execution
+from zoe_lib.sql_manager import Execution, SQLManager
 from zoe_master.scheduler import ZoeScheduler
 
 log = logging.getLogger(__name__)
 
 
-def _digest_application_description(execution: Execution):
+def _digest_application_description(state: SQLManager, execution: Execution):
     for service_descr in execution.description['services']:
         for counter in range(service_descr['total_count']):
             name = "{}{}".format(service_descr['name'], counter)
-            config.singletons['sql_manager'].service_new(execution.id, name, service_descr['name'], service_descr)
+            state.service_new(execution.id, name, service_descr['name'], service_descr)
 
 
-def execution_submit(execution: Execution):
-    assert isinstance(config.scheduler, ZoeScheduler)
-    _digest_application_description(execution)
-    config.scheduler.incoming(execution)
+def execution_submit(state: SQLManager, scheduler: ZoeScheduler, execution: Execution):
+    """Submit a new execution to the scheduler."""
+    _digest_application_description(state, execution)
+    scheduler.incoming(execution)
 
 
-def execution_terminate(execution: Execution):
-    assert isinstance(config.scheduler, ZoeScheduler)
-    config.scheduler.terminate(execution)
+def execution_terminate(scheduler: ZoeScheduler, execution: Execution):
+    """Remove an execution form the scheduler."""
+    scheduler.terminate(execution)
 
 
-def restart_resubmit_scheduler():
-    assert isinstance(config.scheduler, ZoeScheduler)
-    sched_execs = config.singletons['sql_manager'].execution_list(status=Execution.SCHEDULED_STATUS)
+def restart_resubmit_scheduler(state: SQLManager, scheduler: ZoeScheduler):
+    """Restart work after a restart of the process."""
+    sched_execs = state.execution_list(status=Execution.SCHEDULED_STATUS)
     for e in sched_execs:
-        config.scheduler.incoming(e)
+        scheduler.incoming(e)
 
-    clean_up_execs = config.singletons['sql_manager'].execution_list(status=Execution.CLEANING_UP_STATUS)
+    clean_up_execs = state.execution_list(status=Execution.CLEANING_UP_STATUS)
     for e in clean_up_execs:
-        config.scheduler.terminate(e)
+        scheduler.terminate(e)
 
-    starting_execs = config.singletons['sql_manager'].execution_list(status=Execution.STARTING_STATUS)
+    starting_execs = state.execution_list(status=Execution.STARTING_STATUS)
     for e in starting_execs:
-        config.scheduler.terminate(e)
-        config.scheduler.incoming(e)
+        scheduler.terminate(e)
+        scheduler.incoming(e)
 
 
-def execution_delete(execution: Execution):
-    assert isinstance(config.scheduler, ZoeScheduler)
-    config.scheduler.remove_execution(execution)
+def execution_delete(scheduler: ZoeScheduler, execution: Execution):
+    """Remove an execution from the scheduler, must only be called if the execution is NOT running."""
+    scheduler.remove_execution(execution)

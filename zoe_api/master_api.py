@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""The client side of the ZeroMQ API."""
+
 import logging
 
 import zmq
@@ -23,6 +25,7 @@ log = logging.getLogger(__name__)
 
 
 class APIManager:
+    """Main class for the API."""
     REQUEST_TIMEOUT = 2500
     REQUEST_RETRIES = 1
 
@@ -72,6 +75,7 @@ class APIManager:
                 self._connect()
 
     def execution_start(self, exec_id):
+        """Start an execution."""
         msg = {
             'command': 'execution_start',
             'exec_id': exec_id
@@ -79,6 +83,7 @@ class APIManager:
         return self._request_reply(msg)
 
     def execution_terminate(self, exec_id):
+        """Terminate an execution."""
         msg = {
             'command': 'execution_terminate',
             'exec_id': exec_id
@@ -86,15 +91,9 @@ class APIManager:
         return self._request_reply(msg)
 
     def execution_delete(self, exec_id):
+        """Delete an execution."""
         msg = {
             'command': 'execution_delete',
             'exec_id': exec_id
-        }
-        return self._request_reply(msg)
-
-    def service_inspect(self, service_id):
-        msg = {
-            'command': 'service_inspect',
-            'service_id': service_id
         }
         return self._request_reply(msg)

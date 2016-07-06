@@ -13,12 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Exceptions that can be raised by the Zoe Master"""
+
 
 class ZoeException(Exception):
     """
     A generic exception.
     """
     def __init__(self, message='Something happened'):
+        super().__init__()
         self.message = message
 
     def __str__(self):
@@ -26,8 +29,10 @@ class ZoeException(Exception):
 
 
 class ZoeStartExecutionRetryException(ZoeException):
+    """Execution emitted in case the Execution failed to start for a transient error."""
     pass
 
 
 class ZoeStartExecutionFatalException(ZoeException):
+    """Execution emitted in case the Execution failed to start for a fatal error."""
     pass

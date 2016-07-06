@@ -17,10 +17,10 @@
 
 import logging
 
-import zoe_master.workspace.base
+from zoe_master.workspace.filesystem import ZoeFSWorkspace
 from zoe_master.exceptions import ZoeStartExecutionRetryException, ZoeStartExecutionFatalException, ZoeException
 
-from zoe_lib.config import get_conf, singletons
+from zoe_lib.config import get_conf
 from zoe_lib.sql_manager import Execution, Service
 from zoe_lib.swarm_client import DockerContainerOptions, SwarmClient
 
@@ -50,6 +50,18 @@ def execution_to_containers(execution: Execution) -> None:
         _spawn_service(execution, service, env_subst_dict)
 
 
+def _gen_environment(service, env_subst_dict, copts):
+    """ Generate a dictionary containing the current cluster status (before the new container is spawned)
+
+    This information is used to substitute template strings in the environment variables."""
+    for env_name, env_value in service.description['environment']:
+        try:
+            env_value = env_value.format(**env_subst_dict)
+        except KeyError:
+            raise ZoeStartExecutionFatalException("unknown variable in expression {}".format(env_value))
+        copts.add_env_variable(env_name, env_value)
+
+
 def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict):
     copts = DockerContainerOptions()
     copts.gelf_log_address = get_conf().gelf_address
@@ -71,23 +83,15 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
         copts.labels['zoe.monitor'] = 'false'
     copts.restart = not service.description['monitor']  # Monitor containers should not restart
 
-    # Generate a dictionary containing the current cluster status (before the new container is spawned)
-    # This information is used to substitute template strings in the environment variables
-    for env_name, env_value in service.description['environment']:
-        try:
-            env_value = env_value.format(**env_subst_dict)
-        except KeyError:
-            raise ZoeStartExecutionFatalException("unknown variable in expression {}".format(env_value))
-        copts.add_env_variable(env_name, env_value)
+    _gen_environment(service, env_subst_dict, copts)
 
     if 'volumes' in service.description:
         for path, mount_point, readonly in service.description['volumes']:
             copts.add_volume_bind(path, mount_point, readonly)
 
-    for wks in singletons['workspace_managers']:
-        assert isinstance(wks, zoe_master.workspace.base.ZoeWorkspaceBase)
-        if wks.can_be_attached():
-            copts.add_volume_bind(wks.get_path(execution.user_id), wks.get_mountpoint(), False)
+    fswk = ZoeFSWorkspace()
+    if fswk.can_be_attached():
+        copts.add_volume_bind(fswk.get_path(execution.user_id), fswk.get_mountpoint(), False)
 
     # The same dictionary is used for templates in the command
     if 'command' in service.description:

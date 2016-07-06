@@ -13,14 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""The real API, exposed as web pages or REST API."""
+
 import logging
 import re
 
 from zoe_lib.config import get_conf
-import zoe_api.master_api
 import zoe_lib.sql_manager
 import zoe_lib.applications
 import zoe_lib.exceptions
+
+import zoe_api.master_api
 import zoe_api.exceptions
 
 log = logging.getLogger(__name__)
@@ -28,6 +31,8 @@ log = logging.getLogger(__name__)
 
 class APIEndpoint:
     """
+    The APIEndpoint class.
+
     :type master: zoe_api.master_api.APIManager
     :type sql: zoe_lib.sql_manager.SQLManager
     """
@@ -36,6 +41,7 @@ class APIEndpoint:
         self.sql = zoe_lib.sql_manager.SQLManager(get_conf())
 
     def execution_by_id(self, uid, role, execution_id) -> zoe_lib.sql_manager.Execution:
+        """Lookup an execution by its ID."""
         e = self.sql.execution_list(id=execution_id, only_one=True)
         if e is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
@@ -44,11 +50,13 @@ class APIEndpoint:
         return e
 
     def execution_list(self, uid, role, **filters):
+        """Generate a optionally filtered list of executions."""
         execs = self.sql.execution_list(**filters)
         ret = [e for e in execs if e.user_id == uid or role == 'admin']
         return ret
 
-    def execution_start(self, uid, role, exec_name, application_description):
+    def execution_start(self, uid, role_, exec_name, application_description):
+        """Start an execution."""
         try:
             zoe_lib.applications.app_validate(application_description)
         except zoe_lib.exceptions.InvalidApplicationDescription as e:
@@ -62,10 +70,11 @@ class APIEndpoint:
         new_id = self.sql.execution_new(exec_name, uid, application_description)
         success, message = self.master.execution_start(new_id)
         if not success:
-            raise zoe_api.exceptions.ZoeException('The Zoe master is unavailable, execution will be submitted automatically when the master is back up.')
+            raise zoe_api.exceptions.ZoeException('The Zoe master is unavailable, execution will be submitted automatically when the master is back up ({}).'.format(message))
         return new_id
 
     def execution_terminate(self, uid, role, exec_id):
+        """Terminate an execution."""
         e = self.sql.execution_list(id=exec_id, only_one=True)
         if e is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
@@ -79,6 +88,7 @@ class APIEndpoint:
             raise zoe_api.exceptions.ZoeException('Execution is not running')
 
     def execution_delete(self, uid, role, exec_id):
+        """Delete an execution."""
         e = self.sql.execution_list(id=exec_id, only_one=True)
         if e is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
@@ -97,19 +107,21 @@ class APIEndpoint:
             raise zoe_api.exceptions.ZoeException(message)
 
     def service_by_id(self, uid, role, service_id) -> zoe_lib.sql_manager.Service:
-        s = self.sql.service_list(id=service_id, only_one=True)
-        if s is None:
+        """Lookup a service by its ID."""
+        service = self.sql.service_list(id=service_id, only_one=True)
+        if service is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
-        s_exec = self.sql.execution_list(only_one=True, id=s.execution_id)
+        s_exec = self.sql.execution_list(only_one=True, id=service.execution_id)
         if s_exec.user_id != uid and role != 'admin':
             raise zoe_api.exceptions.ZoeAuthException()
-        return s
+        return service
 
     def retry_submit_error_executions(self):
+        """Resubmit any execution forgotten by the master."""
         waiting_execs = self.sql.execution_list(status=zoe_lib.sql_manager.Execution.SUBMIT_STATUS)
         if waiting_execs is None or len(waiting_execs) == 0:
             return
-        e = waiting_execs.pop(0)
+        e = waiting_execs[0]
         success, message = self.master.execution_start(e.id)
         if not success:
-            log.warning('Zoe Master unavailable, execution {} still waiting'.format(e.id))
+            log.warning('Zoe Master unavailable ({}), execution {} still waiting'.format(message, e.id))

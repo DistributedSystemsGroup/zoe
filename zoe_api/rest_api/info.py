@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""The Info API endpoint."""
+
 from flask_restful import Resource
 
 import zoe_api.api_endpoint
@@ -22,11 +24,13 @@ from zoe_lib.version import ZOE_API_VERSION, ZOE_APPLICATION_FORMAT_VERSION, ZOE
 
 
 class InfoAPI(Resource):
+    """The Info API endpoint."""
     def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint):
         self.api_endpoint = api_endpoint
 
     @catch_exceptions
     def get(self):
+        """HTTP GET method."""
         ret = {
             'version': ZOE_VERSION,
             'api_version': ZOE_API_VERSION,

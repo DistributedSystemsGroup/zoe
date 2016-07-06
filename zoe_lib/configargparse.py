@@ -1,3 +1,4 @@
+# pylint: skip-file
 # Taken from https://github.com/bw2/ConfigArgParse
 
 import argparse
@@ -15,46 +16,8 @@ ACTION_TYPES_THAT_DONT_NEED_A_VALUE = {argparse._StoreTrueAction,
                                        argparse._StoreFalseAction, argparse._CountAction,
                                        argparse._StoreConstAction, argparse._AppendConstAction}
 
-
 # global ArgumentParser instances
 _parsers = {}
-
-
-def initArgumentParser(name=None, **kwargs):
-    """Creates a global ArgumentParser instance with the given name,
-    passing any args other than "name" to the ArgumentParser constructor.
-    This instance can then be retrieved using getArgumentParser(..)
-    """
-
-    if name is None:
-        name = "default"
-
-    if name in _parsers:
-        raise ValueError("kwargs besides 'name' can only be passed in the first time. '%s' ArgumentParser already exists: %s" % (name, _parsers[name]))
-
-    kwargs.setdefault('formatter_class', argparse.ArgumentDefaultsHelpFormatter)
-    kwargs.setdefault('conflict_handler', 'resolve')
-    _parsers[name] = ArgumentParser(**kwargs)
-
-
-def getArgumentParser(name=None, **kwargs):
-    """Returns the global ArgumentParser instance with the given name. The 1st
-    time this function is called, a new ArgumentParser instance will be created
-    for the given name, and any args other than "name" will be passed on to the
-    ArgumentParser constructor.
-    """
-    if name is None:
-        name = "default"
-
-    if len(kwargs) > 0 or name not in _parsers:
-        initArgumentParser(name, **kwargs)
-
-    return _parsers[name]
-
-
-class ArgumentDefaultsRawHelpFormatter(argparse.ArgumentDefaultsHelpFormatter, argparse.RawTextHelpFormatter, argparse.RawDescriptionHelpFormatter):
-    """HelpFormatter that adds default values AND doesn't do line-wrapping"""
-    pass
 
 
 # used while parsing args to keep track of where they came from
@@ -169,8 +132,7 @@ class ArgumentParser(argparse.ArgumentParser):
 
         # parse the additional args
         self._default_config_files = default_config_files
-        self._ignore_unknown_config_file_keys = ignore_unknown_config_file_keys \
-                                                or allow_unknown_config_file_keys
+        self._ignore_unknown_config_file_keys = ignore_unknown_config_file_keys or allow_unknown_config_file_keys
         if args_for_setting_config_path:
             self.add_argument(*args_for_setting_config_path, dest="config_file",
                               required=config_arg_is_required, help=config_arg_help_message,
@@ -182,6 +144,8 @@ class ArgumentParser(argparse.ArgumentParser):
                               metavar="CONFIG_OUTPUT_PATH",
                               help=write_out_config_file_arg_help_message,
                               is_write_out_config_file_arg=True)
+
+        self._source_to_settings = None
 
     def parse_args(self, args=None, namespace=None,
                    config_file_contents=None, env_vars=os.environ):
@@ -232,18 +196,14 @@ class ArgumentParser(argparse.ArgumentParser):
         if self._auto_env_var_prefix is not None:
             for a in self._actions:
                 config_file_keys = self.get_possible_config_keys(a)
-                if config_file_keys and not (a.env_var or a.is_positional_arg
-                                             or a.is_config_file_arg or a.is_write_out_config_file_arg):
-                    stripped_config_file_key = config_file_keys[0].strip(
-                        self.prefix_chars)
-                    a.env_var = (self._auto_env_var_prefix +
-                                 stripped_config_file_key).upper()
+                if config_file_keys and not (a.env_var or a.is_positional_arg or a.is_config_file_arg or a.is_write_out_config_file_arg):
+                    stripped_config_file_key = config_file_keys[0].strip(self.prefix_chars)
+                    a.env_var = (self._auto_env_var_prefix + stripped_config_file_key).upper()
 
         # add env var settings to the commandline that aren't there already
         env_var_args = []
         actions_with_env_var_values = [a for a in self._actions
-                                       if not a.is_positional_arg and a.env_var and a.env_var in env_vars
-                                       and not already_on_command_line(args, a.option_strings)]
+                                       if not a.is_positional_arg and a.env_var and a.env_var in env_vars and not already_on_command_line(args, a.option_strings)]
         for action in actions_with_env_var_values:
             key = action.env_var
             value = env_vars[key]
@@ -256,7 +216,6 @@ class ArgumentParser(argparse.ArgumentParser):
             self._source_to_settings[_ENV_VAR_SOURCE_KEY] = OrderedDict(
                 [(a.env_var, (a, env_vars[a.env_var]))
                  for a in actions_with_env_var_values])
-
 
         # prepare for reading config file(s)
         known_config_keys = {config_key: action for action in self._actions
@@ -287,8 +246,7 @@ class ArgumentParser(argparse.ArgumentParser):
                         args, action.option_strings)
                 else:
                     action = None
-                    discard_this_key = self._ignore_unknown_config_file_keys or \
-                                       already_on_command_line(
+                    discard_this_key = self._ignore_unknown_config_file_keys or already_on_command_line(
                                            args,
                                            self.get_command_line_key_for_unknown_config_file_setting(key))
 
@@ -302,17 +260,12 @@ class ArgumentParser(argparse.ArgumentParser):
 
             args += config_args
 
-
         # save default settings for use by print_values()
         default_settings = OrderedDict()
         for action in self._actions:
             cares_about_default_value = (not action.is_positional_arg or
                                          action.nargs in [OPTIONAL, ZERO_OR_MORE])
-            if (already_on_command_line(args, action.option_strings) or
-                    not cares_about_default_value or
-                        action.default is None or
-                        action.default == SUPPRESS or
-                        type(action) in ACTION_TYPES_THAT_DONT_NEED_A_VALUE):
+            if already_on_command_line(args, action.option_strings) or not cares_about_default_value or action.default is None or action.default == SUPPRESS or type(action) in ACTION_TYPES_THAT_DONT_NEED_A_VALUE:
                 continue
             else:
                 if action.option_strings:
@@ -339,8 +292,8 @@ class ArgumentParser(argparse.ArgumentParser):
                 if output_file_path:
                     # validate the output file path
                     try:
-                        with open(output_file_path, "w") as output_file:
-                            output_file_paths.append(output_file_path)
+                        open(output_file_path, "w")
+                        output_file_paths.append(output_file_path)
                     except IOError as e:
                         raise ValueError("Couldn't open %s for writing: %s" % (
                             output_file_path, e))
@@ -376,8 +329,7 @@ class ArgumentParser(argparse.ArgumentParser):
                 settings[key] = "true"
                 continue
 
-            key_value_match = re.match("^" + key + value1 + comment + "$", line) or \
-                              re.match("^" + key + value2 + comment + "$", line)
+            key_value_match = re.match("^" + key + value1 + comment + "$", line) or re.match("^" + key + value2 + comment + "$", line)
             if key_value_match:
                 key = key_value_match.group("key")
                 value = key_value_match.group("value")
@@ -405,7 +357,6 @@ class ArgumentParser(argparse.ArgumentParser):
         converting them back to a string representing config file contents.
 
         Args:
-            source_to_settings: the dictionary created within parse_known_args()
             parsed_namespace: namespace object created within parse_known_args()
         Returns:
             contents of config file as a string
@@ -541,6 +492,7 @@ class ArgumentParser(argparse.ArgumentParser):
             # Otherwise it sys.exits(..) if, for example, config file
             # is_required=True and user doesn't provide it.
             def error_method(self, message):
+                """Empty error method."""
                 pass
 
             arg_parser.error = types.MethodType(error_method, arg_parser)
@@ -594,6 +546,7 @@ class ArgumentParser(argparse.ArgumentParser):
         file.write(self.format_values())
 
     def format_help(self):
+        """Formats the help message."""
         msg = ""
         added_config_file_help = False
         added_env_var_help = False
@@ -700,12 +653,12 @@ def add_argument(self, *args, **kwargs):
 
     if action.is_positional_arg and env_var:
         raise ValueError("env_var can't be set for a positional arg.")
-    if action.is_config_file_arg and type(action) != argparse._StoreAction:
+    if action.is_config_file_arg and isinstance(action, argparse._StoreAction):
         raise ValueError("arg with is_config_file_arg=True must have "
                          "action='store'")
     if action.is_write_out_config_file_arg:
         error_prefix = "arg with is_write_out_config_file_arg=True "
-        if type(action) != argparse._StoreAction:
+        if isinstance(action, argparse._StoreAction):
             raise ValueError(error_prefix + "must have action='store'")
         if is_config_file_arg:
             raise ValueError(error_prefix + "can't also have "
@@ -726,7 +679,6 @@ def already_on_command_line(existing_args, potential_command_line_args):
 argparse._ActionsContainer.original_add_argument_method = argparse._ActionsContainer.add_argument
 argparse._ActionsContainer.add_argument = add_argument
 
-
 # add all public classes and constants from argparse module's namespace to this
 # module's namespace so that the 2 modules are truly interchangeable
 HelpFormatter = argparse.HelpFormatter
@@ -743,20 +695,3 @@ OPTIONAL = argparse.OPTIONAL
 REMAINDER = argparse.REMAINDER
 SUPPRESS = argparse.SUPPRESS
 ZERO_OR_MORE = argparse.ZERO_OR_MORE
-
-# create shorter aliases for the key methods and class names
-getArgParser = getArgumentParser
-getParser = getArgumentParser
-
-ArgParser = ArgumentParser
-Parser = ArgumentParser
-
-argparse._ActionsContainer.add_arg = argparse._ActionsContainer.add_argument
-argparse._ActionsContainer.add = argparse._ActionsContainer.add_argument
-
-ArgumentParser.parse = ArgumentParser.parse_args
-ArgumentParser.parse_known = ArgumentParser.parse_known_args
-
-RawFormatter = RawDescriptionHelpFormatter
-DefaultsFormatter = ArgumentDefaultsHelpFormatter
-DefaultsRawFormatter = ArgumentDefaultsRawHelpFormatter

@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Interface to PostgresQL for Zoe state."""
+
 import datetime
 
 import psycopg2
@@ -25,6 +27,7 @@ psycopg2.extensions.register_adapter(dict, psycopg2.extras.Json)
 
 
 class SQLManager:
+    """The SQLManager class, should be used as a singleton."""
     def __init__(self, conf):
         self.user = conf.dbuser
         self.password = conf.dbpass
@@ -50,15 +53,23 @@ class SQLManager:
         return cur
 
     def execution_list(self, only_one=False, **kwargs):
+        """
+        Return a list of executions.
+
+        :param only_one: only one result is expected
+        :type only_one: bool
+        :param kwargs: filter executions based on their fields/columns
+        :return: one or more executions
+        """
         cur = self._cursor()
         q_base = 'SELECT * FROM execution'
         if len(kwargs) > 0:
             q = q_base + " WHERE "
             filter_list = []
             args_list = []
-            for k, v in kwargs.items():
-                filter_list.append('{} = %s'.format(k))
-                args_list.append(v)
+            for key, value in kwargs.items():
+                filter_list.append('{} = %s'.format(key))
+                args_list.append(value)
             q += ', '.join(filter_list)
             query = cur.mogrify(q, args_list)
         else:
@@ -74,12 +85,13 @@ class SQLManager:
             return [Execution(x, self) for x in cur]
 
     def execution_update(self, exec_id, **kwargs):
+        """Update the state of an execution."""
         cur = self._cursor()
         arg_list = []
         value_list = []
-        for k, v in kwargs.items():
-            arg_list.append('{} = %s'.format(k))
-            value_list.append(v)
+        for key, value in kwargs.items():
+            arg_list.append('{} = %s'.format(key))
+            value_list.append(value)
         set_q = ", ".join(arg_list)
         value_list.append(exec_id)
         q_base = 'UPDATE execution SET ' + set_q + ' WHERE id=%s'
@@ -88,6 +100,7 @@ class SQLManager:
         self.conn.commit()
 
     def execution_new(self, name, user_id, description):
+        """Create a new execution in the state."""
         cur = self._cursor()
         status = Execution.SUBMIT_STATUS
         time_submit = datetime.datetime.now()
@@ -97,6 +110,7 @@ class SQLManager:
         return cur.fetchone()[0]
 
     def execution_delete(self, execution_id):
+        """Delete an execution and its services from the state."""
         cur = self._cursor()
         query = "DELETE FROM service WHERE execution_id = %s"
         cur.execute(query, (execution_id,))
@@ -105,15 +119,23 @@ class SQLManager:
         self.conn.commit()
 
     def service_list(self, only_one=False, **kwargs):
+        """
+        Return a list of services.
+
+        :param only_one: only one result is expected
+        :type only_one: bool
+        :param kwargs: filter services based on their fields/columns
+        :return: one or more services
+        """
         cur = self._cursor()
         q_base = 'SELECT * FROM service'
         if len(kwargs) > 0:
             q = q_base + " WHERE "
             filter_list = []
             args_list = []
-            for k, v in kwargs.items():
-                filter_list.append('{} = %s'.format(k))
-                args_list.append(v)
+            for key, value in kwargs.items():
+                filter_list.append('{} = %s'.format(key))
+                args_list.append(value)
             q += ', '.join(filter_list)
             query = cur.mogrify(q, args_list)
         else:
@@ -129,12 +151,13 @@ class SQLManager:
             return [Service(x, self) for x in cur]
 
     def service_update(self, service_id, **kwargs):
+        """Update the state of an existing service."""
         cur = self._cursor()
         arg_list = []
         value_list = []
-        for k, v in kwargs.items():
-            arg_list.append('{} = %s'.format(k))
-            value_list.append(v)
+        for key, value in kwargs.items():
+            arg_list.append('{} = %s'.format(key))
+            value_list.append(value)
         set_q = ", ".join(arg_list)
         value_list.append(service_id)
         q_base = 'UPDATE service SET ' + set_q + ' WHERE id=%s'
@@ -143,6 +166,7 @@ class SQLManager:
         self.conn.commit()
 
     def service_new(self, execution_id, name, service_group, description):
+        """Adds a new service to the state."""
         cur = self._cursor()
         status = 'created'
         query = cur.mogrify('INSERT INTO service (id, status, error_message, execution_id, name, service_group, description) VALUES (DEFAULT, %s,NULL,%s,%s,%s,%s) RETURNING id', (status, execution_id, name, service_group, description))
@@ -163,11 +187,14 @@ class Base:
         self.id = d['id']
 
     def serialize(self):
+        """Generates a dictionary that can be serialized in JSON."""
         raise NotImplementedError
 
 
 class Execution(Base):
     """
+    A Zoe execution.
+
     :type time_submit: datetime.datetime
     :type time_start: datetime.datetime
     :type time_end: datetime.datetime
@@ -207,6 +234,7 @@ class Execution(Base):
         self.error_message = d['error_message']
 
     def serialize(self):
+        """Generates a dictionary that can be serialized in JSON."""
         return {
             'id': self.id,
             'user_id': self.user_id,
@@ -224,38 +252,40 @@ class Execution(Base):
         return self.id == other.id
 
     def set_scheduled(self):
+        """The execution has been added to the scheduler queues."""
         self._status = self.SCHEDULED_STATUS
         self.sql_manager.execution_update(self.id, status=self._status)
 
     def set_starting(self):
+        """The services of the execution are being created in Swarm."""
         self._status = self.STARTING_STATUS
         self.sql_manager.execution_update(self.id, status=self._status)
 
     def set_running(self):
+        """The execution is running and producing useful work."""
         self._status = self.RUNNING_STATUS
         self.time_start = datetime.datetime.now()
         self.sql_manager.execution_update(self.id, status=self._status, time_start=self.time_start)
 
-    def set_finished(self):
-        self._status = "finished"
-        self.time_end = datetime.datetime.now()
-        self.sql_manager.execution_update(self.id, status=self._status, time_end=self.time_end)
-
     def set_cleaning_up(self):
+        """The services of the execution are being terminated."""
         self._status = self.CLEANING_UP_STATUS
         self.sql_manager.execution_update(self.id, status=self._status)
 
     def set_terminated(self):
+        """The execution is not running."""
         self._status = self.TERMINATED_STATUS
         self.time_end = datetime.datetime.now()
         self.sql_manager.execution_update(self.id, status=self._status, time_end=self.time_end)
 
     def set_error(self):
+        """The scheduler encountered an error starting or running the execution."""
         self._status = self.ERROR_STATUS
         self.time_end = datetime.datetime.now()
         self.sql_manager.execution_update(self.id, status=self._status, time_end=self.time_end)
 
     def set_error_message(self, message):
+        """Contains an error message in case the status is 'error'."""
         self.error_message = message
         self.sql_manager.execution_update(self.id, error_message=self.error_message)
 
@@ -268,14 +298,17 @@ class Execution(Base):
 
     @property
     def status(self):
+        """Getter for the execution status."""
         return self._status
 
     @property
     def services(self):
+        """Getter for this execution service list."""
         return self.sql_manager.service_list(execution_id=self.id)
 
 
 class Service(Base):
+    """A Zoe Service."""
 
     TERMINATING_STATUS = "terminating"
     INACTIVE_STATUS = "inactive"
@@ -294,6 +327,7 @@ class Service(Base):
         self.docker_id = d['docker_id']
 
     def serialize(self):
+        """Generates a dictionary that can be serialized in JSON."""
         return {
             'id': self.id,
             'name': self.name,
@@ -311,22 +345,28 @@ class Service(Base):
 
     @property
     def dns_name(self):
+        """Getter for the DNS name of this service as it will be registered in Docker's DNS."""
         return "{}-{}-{}".format(self.name, self.execution_id, get_conf().deployment_name)
 
     def set_terminating(self):
+        """The service is being killed."""
         self.sql_manager.service_update(self.id, status=self.TERMINATING_STATUS)
 
     def set_inactive(self):
+        """The service is not running."""
         self.sql_manager.service_update(self.id, status=self.INACTIVE_STATUS, docker_id=None)
 
     def set_starting(self):
+        """The service is being created by Docker."""
         self.sql_manager.service_update(self.id, status=self.STARTING_STATUS)
 
     def set_active(self, docker_id):
+        """The service is running and has a valid docker_id."""
         self.sql_manager.service_update(self.id, status=self.ACTIVE_STATUS, docker_id=docker_id)
 
     @property
     def ip_address(self):
+        """Getter for the service IP address, queries Swarm as the IP address changes outside our control."""
         if self.status != self.ACTIVE_STATUS:
             return {}
         swarm = SwarmClient(get_conf())

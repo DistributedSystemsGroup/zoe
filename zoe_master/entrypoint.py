@@ -15,17 +15,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Zoe Master main entrypoint."""
+
 import logging
 
-import zoe_lib.config as config
 from zoe_master.master_api import APIManager
 from zoe_master.scheduler import ZoeScheduler
-# from zoe_master.stats_manager import StatsManager
-from zoe_master.workspace.filesystem import ZoeFSWorkspace
 from zoe_master.execution_manager import restart_resubmit_scheduler
 
+import zoe_lib.config as config
 from zoe_lib.metrics.influxdb import InfluxDBMetricSender
-from zoe_lib.metrics.base import BaseMetricSender
+from zoe_lib.metrics.logging import LogMetricSender
 from zoe_lib.sql_manager import SQLManager
 
 log = logging.getLogger("main")
@@ -45,39 +45,29 @@ def main():
     else:
         logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
-    log.info("Initializing DB manager")
-    config.singletons['sql_manager'] = SQLManager(args)
-
-    log.info("Initializing workspace managers")
-    fswk = ZoeFSWorkspace()
-    config.singletons['workspace_managers'] = [fswk]
-
     if config.get_conf().influxdb_enable:
-        metrics_th = InfluxDBMetricSender(config.get_conf())
-        metrics_th.start()
-        config.singletons['metric'] = metrics_th
+        metrics = InfluxDBMetricSender(config.get_conf().deployment_name, config.get_conf().influxdb_url, config.get_conf().influxdb_dbname)
     else:
-        metrics_th = BaseMetricSender('metrics-logger', config.get_conf())
-        config.singletons['metric'] = metrics_th
+        metrics = LogMetricSender(config.get_conf().deployment_name)
 
-#    stats_th = StatsManager()
-#    stats_th.start()  # TODO Broken Docker API
-#    config.singletons['stats_manager'] = stats_th
+    log.info("Initializing DB manager")
+    state = SQLManager(args)
 
     log.info("Initializing scheduler")
-    config.scheduler = ZoeScheduler()
+    scheduler = ZoeScheduler()
 
-    restart_resubmit_scheduler()
+    restart_resubmit_scheduler(state, scheduler)
 
     log.info("Starting ZMQ API server...")
-    config.singletons['api_server'] = APIManager()
+    api_server = APIManager(metrics, scheduler, state)
 
     try:
-        config.singletons['api_server'].loop()
+        api_server.loop()
     except KeyboardInterrupt:
         pass
     except Exception:
         log.exception('fatal error')
     finally:
-        config.scheduler.quit()
-        config.singletons['api_server'].quit()
+        scheduler.quit()
+        api_server.quit()
+        metrics.quit()

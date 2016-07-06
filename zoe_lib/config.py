@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Configuration parsing."""
+
 import logging
 
 from zoe_lib.configargparse import ArgumentParser, Namespace
@@ -22,30 +24,25 @@ logging.getLogger('requests').setLevel(logging.WARNING)
 logging.getLogger('urllib3').setLevel(logging.WARNING)
 logging.getLogger('docker').setLevel(logging.INFO)
 
-config_paths = [
+_CONFIG_PATHS = [
     'zoe.conf',
     '/etc/zoe/zoe.conf'
 ]
 
-# Singletons
-scheduler = None
-singletons = {
-    'metric': None,
-    'stats_manager': None,
-    'platform_manager': None,
-    'workspace_managers': [],
-    'api_manager': None,
-    'sql_manager': None
-}
+_CONF = None
 
-_conf = None
+
+def get_conf() -> Namespace:
+    """Returns the conf singleton."""
+    return _CONF
 
 
 def load_configuration(test_conf=None):
-    global _conf
+    """Parses command line arguments."""
+    global _CONF
     if test_conf is None:
         argparser = ArgumentParser(description="Zoe - Container Analytics as a Service",
-                                   default_config_files=config_paths,
+                                   default_config_files=_CONFIG_PATHS,
                                    auto_env_var_prefix="ZOE_",
                                    args_for_setting_config_path=["--config"],
                                    args_for_writing_out_config_file=["--write-config"])
@@ -87,10 +84,6 @@ def load_configuration(test_conf=None):
         if opts.debug:
             argparser.print_values()
 
-        _conf = opts
+        _CONF = opts
     else:
-        _conf = test_conf
-
-
-def get_conf() -> Namespace:
-    return _conf
+        _CONF = test_conf

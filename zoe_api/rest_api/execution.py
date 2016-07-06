@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""The Execution API endpoints."""
+
 from flask_restful import Resource, request
 from werkzeug.exceptions import BadRequest
 
@@ -22,11 +24,14 @@ import zoe_api.api_endpoint
 
 
 class ExecutionAPI(Resource):
+    """The Execution API endpoint."""
+
     def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint):
         self.api_endpoint = api_endpoint
 
     @catch_exceptions
     def get(self, execution_id):
+        """GET a single execution by its ID."""
         uid, role = get_auth(request)
 
         e = self.api_endpoint.execution_by_id(uid, role, execution_id)
@@ -36,6 +41,8 @@ class ExecutionAPI(Resource):
     @catch_exceptions
     def delete(self, execution_id: int):
         """
+        Terminate an execution.
+
         :param execution_id: the execution to be terminated
         :return:
         """
@@ -49,12 +56,16 @@ class ExecutionAPI(Resource):
 
 
 class ExecutionDeleteAPI(Resource):
+    """The ExecutionDelete API endpoints."""
+
     def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint):
         self.api_endpoint = api_endpoint
 
     @catch_exceptions
     def delete(self, execution_id: int):
         """
+        Delete an execution.
+
         :param execution_id: the execution to be deleted
         :return:
         """
@@ -68,6 +79,8 @@ class ExecutionDeleteAPI(Resource):
 
 
 class ExecutionCollectionAPI(Resource):
+    """The Execution Collection API endpoints."""
+
     def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint):
         self.api_endpoint = api_endpoint
 

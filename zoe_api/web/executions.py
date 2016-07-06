@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Web pages and functions related to executions."""
+
 import json
 
 from flask import render_template, request, redirect, url_for, g
@@ -24,6 +26,7 @@ import zoe_api.exceptions
 
 @catch_exceptions
 def execution_define():
+    """Define a new execution."""
     get_auth(request)
 
     return render_template('execution_new.html')
@@ -31,6 +34,7 @@ def execution_define():
 
 @catch_exceptions
 def execution_start():
+    """Start an execution."""
     uid, role = get_auth(request)
     api_endpoint = g.api_endpoint
     assert isinstance(api_endpoint, zoe_api.api_endpoint.APIEndpoint)
@@ -46,6 +50,7 @@ def execution_start():
 
 @catch_exceptions
 def execution_restart(execution_id):
+    """Restart an already defined (and not running) execution."""
     uid, role = get_auth(request)
     api_endpoint = g.api_endpoint
     assert isinstance(api_endpoint, zoe_api.api_endpoint.APIEndpoint)
@@ -58,6 +63,7 @@ def execution_restart(execution_id):
 
 @catch_exceptions
 def execution_terminate(execution_id):
+    """Terminate an execution."""
     uid, role = get_auth(request)
     api_endpoint = g.api_endpoint
     assert isinstance(api_endpoint, zoe_api.api_endpoint.APIEndpoint)
@@ -71,6 +77,7 @@ def execution_terminate(execution_id):
 
 @catch_exceptions
 def execution_delete(execution_id):
+    """Delete an execution."""
     uid, role = get_auth(request)
     api_endpoint = g.api_endpoint
     assert isinstance(api_endpoint, zoe_api.api_endpoint.APIEndpoint)
@@ -84,6 +91,7 @@ def execution_delete(execution_id):
 
 @catch_exceptions
 def execution_inspect(execution_id):
+    """Gather details about an execution."""
     uid, role = get_auth(request)
     api_endpoint = g.api_endpoint
     assert isinstance(api_endpoint, zoe_api.api_endpoint.APIEndpoint)
@@ -91,8 +99,8 @@ def execution_inspect(execution_id):
     e = api_endpoint.execution_by_id(uid, role, execution_id)
 
     services_info = []
-    for s in e.services:
-        services_info.append(api_endpoint.service_by_id(uid, role, s.id))
+    for service in e.services:
+        services_info.append(api_endpoint.service_by_id(uid, role, service.id))
 
     template_vars = {
         "e": e,

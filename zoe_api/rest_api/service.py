@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""The Service API endpoint."""
+
 import logging
 
 from flask_restful import Resource, request
@@ -24,13 +26,15 @@ log = logging.getLogger(__name__)
 
 
 class ServiceAPI(Resource):
-    def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint):
+    """The Service API endpoint."""
+    def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint) -> None:
         self.api_endpoint = api_endpoint
 
     @catch_exceptions
-    def get(self, service_id):
+    def get(self, service_id) -> dict:
+        """HTTP GET method."""
         uid, role = get_auth(request)
 
-        s = self.api_endpoint.service_by_id(uid, role, service_id)
+        service = self.api_endpoint.service_by_id(uid, role, service_id)
 
-        return s.serialize()
+        return service.serialize()

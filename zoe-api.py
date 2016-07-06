@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""API component entry point."""
+
 from zoe_api.entrypoint import zoe_web_main
 
 if __name__ == "__main__":

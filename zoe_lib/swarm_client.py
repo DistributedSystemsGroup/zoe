@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Daniele Venzano
+# Copyright (c) 2016, Daniele Venzano
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,11 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Interface to the low-level Docker API."""
+
 import time
 import logging
 
 import humanfriendly
-import requests.exceptions
 
 try:
     from kazoo.client import KazooClient
@@ -42,14 +43,15 @@ def zookeeper_swarm(zk_server_list: str, path='/docker'):
     :return: Swarm master connection string
     """
     path += '/docker/swarm/leader'
-    zk = KazooClient(hosts=zk_server_list)
-    zk.start()
-    master, stat = zk.get(path)
-    zk.stop()
+    zk_client = KazooClient(hosts=zk_server_list)
+    zk_client.start()
+    master, stat_ = zk_client.get(path)
+    zk_client.stop()
     return master
 
 
 class SwarmClient:
+    """The Swarm client class that wraps the Docker API."""
     def __init__(self, opts):
         self.opts = opts
         url = opts.swarm
@@ -65,6 +67,7 @@ class SwarmClient:
         self.cli = docker.Client(base_url=manager)
 
     def info(self) -> SwarmStats:
+        """Retrieve Swarm statistics. The Docker API returns a mess difficult to parse."""
         info = self.cli.info()
         pl_status = SwarmStats()
         pl_status.container_count = info["Containers"]
@@ -85,37 +88,38 @@ class SwarmClient:
         idx = 4
         for node in range(node_count):
             idx2 = 0
-            ns = SwarmNodeStats(info["DriverStatus"][idx + node][0])
-            ns.docker_endpoint = info["DriverStatus"][idx + node][1]
+            node_stats = SwarmNodeStats(info["DriverStatus"][idx + node][0])
+            node_stats.docker_endpoint = info["DriverStatus"][idx + node][1]
             idx2 += 1
             if 'Status' in info["DriverStatus"][idx + node + idx2][0]:  # new docker version
-                ns.status = info["DriverStatus"][idx + node + idx2][1]
+                node_stats.status = info["DriverStatus"][idx + node + idx2][1]
                 idx2 += 1
-            ns.container_count = int(info["DriverStatus"][idx + node + idx2][1])
+            node_stats.container_count = int(info["DriverStatus"][idx + node + idx2][1])
             idx2 += 1
-            ns.cores_reserved = int(info["DriverStatus"][idx + node + idx2][1].split(' / ')[0])
-            ns.cores_total = int(info["DriverStatus"][idx + node + idx2][1].split(' / ')[1])
+            node_stats.cores_reserved = int(info["DriverStatus"][idx + node + idx2][1].split(' / ')[0])
+            node_stats.cores_total = int(info["DriverStatus"][idx + node + idx2][1].split(' / ')[1])
             idx2 += 1
-            ns.memory_reserved = info["DriverStatus"][idx + node + idx2][1].split(' / ')[0]
-            ns.memory_total = info["DriverStatus"][idx + node + idx2][1].split(' / ')[1]
+            node_stats.memory_reserved = info["DriverStatus"][idx + node + idx2][1].split(' / ')[0]
+            node_stats.memory_total = info["DriverStatus"][idx + node + idx2][1].split(' / ')[1]
             idx2 += 1
-            ns.labels = info["DriverStatus"][idx + node + idx2][1:]
+            node_stats.labels = info["DriverStatus"][idx + node + idx2][1:]
             idx2 += 1
-            ns.error = info["DriverStatus"][idx + node + idx2][1]
+            node_stats.error = info["DriverStatus"][idx + node + idx2][1]
             idx2 += 1
-            ns.last_update = info["DriverStatus"][idx + node + idx2][1]
+            node_stats.last_update = info["DriverStatus"][idx + node + idx2][1]
             idx2 += 1
-            ns.server_version = info["DriverStatus"][idx + node + idx2][1]
+            node_stats.server_version = info["DriverStatus"][idx + node + idx2][1]
 
-            ns.memory_reserved = humanfriendly.parse_size(ns.memory_reserved)
-            ns.memory_total = humanfriendly.parse_size(ns.memory_total)
+            node_stats.memory_reserved = humanfriendly.parse_size(node_stats.memory_reserved)
+            node_stats.memory_total = humanfriendly.parse_size(node_stats.memory_total)
 
-            pl_status.nodes.append(ns)
+            pl_status.nodes.append(node_stats)
             idx += idx2
         pl_status.timestamp = time.time()
         return pl_status
 
     def spawn_container(self, image, options) -> dict:
+        """Create and start a new container."""
         cont = None
         port_bindings = {}
         for port in options.ports:
@@ -155,6 +159,7 @@ class SwarmClient:
         return info
 
     def inspect_container(self, docker_id) -> dict:
+        """Retrieve information about a running container."""
         try:
             docker_info = self.cli.inspect_container(container=docker_id)
         except Exception as e:
@@ -199,6 +204,15 @@ class SwarmClient:
         return info
 
     def terminate_container(self, docker_id, delete=False):
+        """
+        Terminate a container.
+
+        :param docker_id: The container to terminate
+        :type docker_id: str
+        :param delete: If True, also delete the container files
+        :type delete: bool
+        :return: None
+        """
         if delete:
             try:
                 self.cli.remove_container(docker_id, force=True)
@@ -211,69 +225,57 @@ class SwarmClient:
                 log.warning("cannot remove a non-existent service")
 
     def event_listener(self, callback):
+        """An infinite loop that listens for events from Swarm."""
         for event in self.cli.events(decode=True):
             if not callback(event):
                 break
 
-    def network_create(self, name: str) -> str:
-        ret = self.cli.create_network(name, driver='overlay')
-        return ret['Id']
-
-    def network_remove(self, nid):
-        try:
-            self.cli.remove_network(nid)
-        except docker.errors.APIError:
-            log.exception('cannot remove network "{}"'.format(nid))
-
-    def network_list(self, search=''):
-        all_nets = self.cli.networks()
-        ret = []
-        for net in all_nets:
-            if search in net['Name']:
-                n = {
-                    'id': net['Id'],
-                    'name': net['Name']
-                }
-                ret.append(n)
-        return ret
-
     def connect_to_network(self, container_id, network_id):
+        """Connect a container to a network."""
         try:
             self.cli.connect_container_to_network(container_id, network_id)
         except Exception as e:
             log.exception(str(e))
 
     def disconnect_from_network(self, container_id, network_id):
+        """Disconnects a container from a network."""
         try:
             self.cli.disconnect_container_from_network(container_id, network_id)
         except Exception as e:
             log.exception(str(e))
 
     def list(self, only_label=None) -> list:
+        """
+        List running or defined containers.
+
+        :param only_label: filter containers with only a certain label
+        :return: a list of containers
+        """
         ret = self.cli.containers(all=True)
         conts = []
-        for c in ret:
+        for cont_info in ret:
             match = True
-            for k, v in only_label.items():
-                if k not in c['Labels']:
+            for key, value in only_label.items():
+                if key not in cont_info['Labels']:
                     match = False
                     break
-                if c['Labels'][k] != v:
+                if cont_info['Labels'][key] != value:
                     match = False
                     break
             if match:
-                aux = c['Names'][0].split('/')  # Swarm returns container names in the form /host/name
+                aux = cont_info['Names'][0].split('/')  # Swarm returns container names in the form /host/name
                 conts.append({
-                    'id': c['Id'],
+                    'id': cont_info['Id'],
                     'host': aux[1],
                     'name': aux[2],
-                    'labels': c['Labels'],
-                    'status': c['Status']
+                    'labels': cont_info['Labels'],
+                    'status': cont_info['Status']
                 })
         return conts
 
 
 class DockerContainerOptions:
+    """Wrapper for the Docker container options."""
     def __init__(self):
         self.env = {}
         self.volume_binds = []
@@ -288,37 +290,47 @@ class DockerContainerOptions:
         self.gelf_log_address = ''
 
     def add_env_variable(self, name, value):
+        """Adds an environment variable to the container definition."""
         if value is not None:
             self.env[name] = value
 
     @property
     def environment(self):
+        """Access the environment variables."""
         return self.env
 
     def add_volume_bind(self, path, mountpoint, readonly=False):
+        """Add a volume to the container."""
         self.volumes.append(mountpoint)
         self.volume_binds.append(path + ":" + mountpoint + ":" + ("ro" if readonly else "rw"))
 
     def get_volumes(self):
+        """Get the volumes in Docker format."""
         return self.volumes
 
     def get_volume_binds(self):
+        """Get the volumes in another Docker format."""
         return self.volume_binds
 
     def set_command(self, cmd):
+        """Setter for the command to run in the container."""
         self.command = cmd
 
     def get_command(self):
+        """Getter for the command to run in the container."""
         return self.command
 
     def set_memory_limit(self, limit):
+        """Setter for the memory limit of the container."""
         self.memory_limit = limit
 
     def get_memory_limit(self):
+        """Getter for the memory limit of the container."""
         return self.memory_limit
 
     @property
     def restart_policy(self):
+        """Getter for the restart policy of the container."""
         if self.restart:
             return {'Name': 'always'}
         else:

@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Bypass the Zoe scheduler to run a ZApp and leave the logs inside Docker, used for debugging ZApps."""
+
 import datetime
 import json
 import logging
@@ -30,23 +32,25 @@ from zoe_master.zapp_to_docker import execution_to_containers, terminate_executi
 log = logging.getLogger("main")
 LOG_FORMAT = '%(asctime)-15s %(levelname)s %(name)s (%(threadName)s): %(message)s'
 
-config_paths = [
+CONFIG_PATHS = [
     'zoe.conf',
     '/etc/zoe/zoe.conf'
 ]
 
 
 class FakeSQLManager:
+    """A fake in-memory state class."""
     def __init__(self):
         self.executions = []
         self.services = []
         self._last_id = 0
 
     def execution_list(self, only_one=False, **kwargs):
+        """Execution list."""
         ret_list = []
         for e in self.executions:
-            for k, v in kwargs.items():
-                if getattr(e, k) == v:
+            for key, value in kwargs.items():
+                if getattr(e, key) == value:
                     ret_list.append(e)
         if only_one:
             return ret_list[0]
@@ -54,16 +58,18 @@ class FakeSQLManager:
             return ret_list
 
     def execution_update(self, exec_id, **kwargs):
+        """Execution update."""
         for e in self.executions:
             if e.id == exec_id:
-                for k, v in kwargs.items():
-                    if k == "status":
+                for key, value in kwargs.items():
+                    if key == "status":
                         continue
-                    print(k, v)
-                    setattr(e, k, v)
+                    print(key, value)
+                    setattr(e, key, value)
                 break
 
     def execution_new(self, name, user_id, description):
+        """New execution."""
         e_dict = {
             'id': self._last_id,
             'name': name,
@@ -81,13 +87,15 @@ class FakeSQLManager:
         return self._last_id - 1
 
     def execution_delete(self, execution_id):
+        """Delete execution."""
         raise NotImplementedError
 
     def service_list(self, only_one=False, **kwargs):
+        """Service list."""
         ret_list = []
         for e in self.services:
-            for k, v in kwargs.items():
-                if getattr(e, k) == v:
+            for key, value in kwargs.items():
+                if getattr(e, key) == value:
                     ret_list.append(e)
         if only_one:
             return ret_list[0]
@@ -95,13 +103,15 @@ class FakeSQLManager:
             return ret_list
 
     def service_update(self, service_id, **kwargs):
+        """Service update."""
         for e in self.services:
             if e.id == service_id:
-                for k, v in kwargs.items():
-                    setattr(e, k, v)
+                for key, value in kwargs.items():
+                    setattr(e, key, value)
                 break
 
     def service_new(self, execution_id, name, service_group, description):
+        """Service new."""
         s_dict = {
             'id': self._last_id,
             'name': name,
@@ -112,16 +122,17 @@ class FakeSQLManager:
             'service_group': service_group,
             'error_message': None
         }
-        s = Service(s_dict, self)
-        self.services.append(s)
+        service = Service(s_dict, self)
+        self.services.append(service)
         self._last_id += 1
         return self._last_id - 1
 
 
 def load_configuration(test_conf=None):
+    """Load configuration from the command line."""
     if test_conf is None:
         argparser = ArgumentParser(description="Zoe application tester - Container Analytics as a Service core component",
-                                   default_config_files=config_paths,
+                                   default_config_files=CONFIG_PATHS,
                                    auto_env_var_prefix="ZOE_MASTER_",
                                    args_for_setting_config_path=["--config"],
                                    args_for_writing_out_config_file=["--write-config"])
@@ -156,6 +167,7 @@ def load_configuration(test_conf=None):
 
 
 def main():
+    """The main entrypoint function."""
     conf = load_configuration()
     config.load_configuration(conf)
     args = config.get_conf()
@@ -171,7 +183,6 @@ def main():
     logging.getLogger("tornado").setLevel(logging.DEBUG)
 
     state = FakeSQLManager()
-    config.singletons['sql_manager'] = state
 
     zapp_description = json.load(args.jsonfile)
 
@@ -180,7 +191,7 @@ def main():
 
     exec_id = state.execution_new('test', 'fake_user', zapp_description)
     e = state.execution_list(only_one=True, id=exec_id)
-    _digest_application_description(e)
+    _digest_application_description(state, e)
 
     print('Zapp digested, starting containers...')
     execution_to_containers(e)

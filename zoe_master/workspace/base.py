@@ -13,15 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Base implementation for Zoe workspaces."""
+
+
 class ZoeWorkspaceBase:
+    """Workspace base class."""
     def get_path(self, user_id) -> str:
+        """Check if the workspace for user_id exists."""
         raise NotImplementedError
 
     def exists(self, user_id) -> bool:
+        """Get the volume path of the workspace."""
         raise NotImplementedError
 
     def can_be_attached(self) -> bool:
+        """Check if this workspace can be mounted as a Docker volume"""
         raise NotImplementedError
 
     def get_mountpoint(self) -> str:
+        """Get the volume mount point."""
         raise NotImplementedError

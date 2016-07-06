@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Utility functions needed by the Zoe REST API."""
+
 import logging
 
 from zoe_api.exceptions import ZoeRestAPIException, ZoeNotFoundException, ZoeAuthException, ZoeException
@@ -28,6 +30,7 @@ def catch_exceptions(func):
     :return:
     """
     def func_wrapper(*args, **kwargs):
+        """The actual decorator."""
         try:
             return func(*args, **kwargs)
         except ZoeRestAPIException as e:
@@ -48,6 +51,7 @@ def catch_exceptions(func):
 
 
 def get_auth(request):
+    """Try to authenticate a request."""
     auth = request.authorization
     if not auth:
         raise ZoeRestAPIException('missing or wrong authentication information', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})

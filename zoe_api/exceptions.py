@@ -13,12 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Exceptions used by the API component."""
+
 
 class ZoeException(Exception):
     """
     A generic exception.
     """
     def __init__(self, message='Something happened'):
+        super().__init__()
         self.message = message
 
     def __str__(self):
@@ -26,10 +29,12 @@ class ZoeException(Exception):
 
 
 class ZoeAuthException(ZoeException):
+    """An authentication error."""
     pass
 
 
 class ZoeNotFoundException(ZoeException):
+    """Th euser is looking for an object that does not exist."""
     pass
 
 

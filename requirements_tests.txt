@@ -1,3 +1,5 @@
-prospector[with_vulture]
+pylint
+vulture
 doc8
 sphinx
+mypy-lang

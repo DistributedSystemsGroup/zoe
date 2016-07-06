@@ -13,7 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Base authenticator class."""
+
 
 class BaseAuthenticator:
+    """Base authenticator class."""
+
     def auth(self, username, password):
+        """The methods that needs to be overridden by implementations."""
         raise NotImplementedError

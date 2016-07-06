@@ -66,12 +66,12 @@ def app_validate(data):
     if 'services' not in data:
         raise InvalidApplicationDescription(msg='the application should contain a list of services')
 
-    for p in data['services']:
-        _service_check(p)
+    for service in data['services']:
+        _service_check(service)
 
     found_monitor = False
-    for p in data['services']:
-        if p['monitor']:
+    for service in data['services']:
+        if service['monitor']:
             found_monitor = True
             break
     if not found_monitor:
@@ -106,8 +106,8 @@ def _service_check(data):
 
     if not hasattr(data['ports'], '__iter__'):
         raise InvalidApplicationDescription(msg='ports should be a list')
-    for pp in data['ports']:
-        _port_check(pp)
+    for service_port in data['ports']:
+        _port_check(service_port)
 
     if not isinstance(data['required_resources'], dict):
         raise InvalidApplicationDescription(msg="required_resources should be a dictionary")
@@ -132,11 +132,11 @@ def _service_check(data):
     if 'volumes' in data:
         if not hasattr(data['volumes'], '__iter__'):
             raise InvalidApplicationDescription(msg='volumes should be an iterable')
-        for v in data['volumes']:
-            if len(v) != 3:
+        for volume in data['volumes']:
+            if len(volume) != 3:
                 raise InvalidApplicationDescription(msg='volume description should have three components')
-            if not isinstance(v[2], bool):
-                raise InvalidApplicationDescription(msg='readonly volume item (third) must be a boolean: {}'.format(v[2]))
+            if not isinstance(volume[2], bool):
+                raise InvalidApplicationDescription(msg='readonly volume item (third) must be a boolean: {}'.format(volume[2]))
 
     if 'networks' in data:
         if not hasattr(data['networks'], '__iter__'):

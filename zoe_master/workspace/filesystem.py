@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Filesystem implementation for Zoe workspaces."""
+
 import logging
 import os.path
 
@@ -23,17 +25,22 @@ log = logging.getLogger(__name__)
 
 
 class ZoeFSWorkspace(zoe_master.workspace.base.ZoeWorkspaceBase):
+    """Filesystem workspace class."""
     def __init__(self):
         self.base_path = os.path.join(config.get_conf().workspace_base_path, config.get_conf().deployment_name)
 
     def exists(self, user_id):
+        """Check if the workspace for user_id exists."""
         return os.path.exists(os.path.join(self.base_path, user_id))
 
     def get_path(self, user_id):
+        """Get the volume path of the workspace."""
         return os.path.join(self.base_path, user_id)
 
     def can_be_attached(self):
+        """Check if this workspace can be mounted as a Docker volume"""
         return True
 
     def get_mountpoint(self):
+        """Get the volume mount point."""
         return '/mnt/workspace'

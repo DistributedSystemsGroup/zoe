@@ -13,21 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""RESTful Flask API definition."""
+
 import sys
+import pkgutil
 
 from flask import Blueprint
 from flask_restful import Api
+
 from zoe_api.rest_api.execution import ExecutionAPI, ExecutionCollectionAPI, ExecutionDeleteAPI
 from zoe_api.rest_api.info import InfoAPI
 from zoe_api.rest_api.service import ServiceAPI
 
 from zoe_lib.version import ZOE_API_VERSION
-from zoe_api.rest_api.query import QueryAPI
 
 API_PATH = '/api/' + ZOE_API_VERSION
 
 
 def api_init(api_endpoint) -> Blueprint:
+    """Initialize the API"""
     api_bp = Blueprint('api', __name__)
     api = Api(api_bp, catch_all_404s=True)
 
@@ -36,19 +40,17 @@ def api_init(api_endpoint) -> Blueprint:
     api.add_resource(ExecutionDeleteAPI, API_PATH + '/execution/delete/<int:execution_id>', resource_class_kwargs={'api_endpoint': api_endpoint})
     api.add_resource(ExecutionCollectionAPI, API_PATH + '/execution', resource_class_kwargs={'api_endpoint': api_endpoint})
     api.add_resource(ServiceAPI, API_PATH + '/service/<int:service_id>', resource_class_kwargs={'api_endpoint': api_endpoint})
-    api.add_resource(QueryAPI, API_PATH + '/query', resource_class_kwargs={'api_endpoint': api_endpoint})
 
     return api_bp
 
 # Work around a Python 3.4.0 bug that affects Flask
 if sys.version_info == (3, 4, 0, 'final', 0):
-    import pkgutil
-    orig_get_loader = pkgutil.get_loader
-
+    ORIG_LOADER = pkgutil.get_loader
 
     def get_loader(name):
+        """Wrap the original loader to catch a buggy exception."""
         try:
-            return orig_get_loader(name)
+            return ORIG_LOADER(name)
         except AttributeError:
             pass
 

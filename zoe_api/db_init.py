@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Database initialization."""
+
 import psycopg2
 import psycopg2.extras
 
@@ -23,16 +25,19 @@ SQL_SCHEMA_VERSION = 0  # ---> Increment this value every time the schema change
 
 
 def version_table(cur):
+    """Create the version table."""
     cur.execute("CREATE TABLE IF NOT EXISTS public.versions (deployment text, version integer)")
 
 
 def schema(cur, deployment_name):
+    """Create the schema for the configured deployment name."""
     cur.execute("SELECT EXISTS(SELECT 1 FROM pg_catalog.pg_namespace WHERE nspname = %s)", (deployment_name,))
     if not cur.fetchone()[0]:
         cur.execute('CREATE SCHEMA %s', (deployment_name,))
 
 
 def check_schema_version(cur, deployment_name):
+    """Check if the schema version matches this source code version."""
     cur.execute("SELECT version FROM public.versions WHERE deployment = %s", (deployment_name,))
     row = cur.fetchone()
     if row is None:
@@ -47,6 +52,7 @@ def check_schema_version(cur, deployment_name):
 
 
 def create_tables(cur):
+    """Create the Zoe database tables."""
     cur.execute('''CREATE TABLE execution (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL,
@@ -72,6 +78,7 @@ def create_tables(cur):
 
 
 def init():
+    """DB init entrypoint."""
     dsn = 'dbname=' + get_conf().dbname + \
         ' user=' + get_conf().dbuser + \
         ' password=' + get_conf().dbpass + \

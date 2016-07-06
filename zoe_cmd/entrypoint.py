@@ -23,16 +23,27 @@ import logging
 import os
 import sys
 from argparse import ArgumentParser, Namespace, FileType, RawDescriptionHelpFormatter
-from pprint import pprint
 
 from zoe_cmd import utils
+from zoe_lib.info import ZoeInfoAPI
 from zoe_lib.services import ZoeServiceAPI
 from zoe_lib.exceptions import ZoeAPIException, InvalidApplicationDescription
 from zoe_lib.executions import ZoeExecutionsAPI
 from zoe_lib.applications import app_validate
 
 
+def info_cmd(args_):
+    """Queries the info endpoint."""
+    info_api = ZoeInfoAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
+    info = info_api.info()
+    print("Zoe version: ", info['version'])
+    print("Zoe API version: ", info['api_version'])
+    print("ZApp format version: ", info['application_format_version'])
+    print("Deployment name: ", info['deployment_name'])
+
+
 def app_validate_cmd(args):
+    """Validate an application description."""
     app_descr = json.load(args.jsonfile)
     try:
         app_validate(app_descr)
@@ -43,6 +54,7 @@ def app_validate_cmd(args):
 
 
 def app_get_cmd(args):
+    """Extract an application description from an execution."""
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     execution = exec_api.get(args.id)
     if execution is None:
@@ -51,7 +63,8 @@ def app_get_cmd(args):
         json.dump(execution['description'], sys.stdout, sort_keys=True, indent=4)
 
 
-def exec_list_cmd(_):
+def exec_list_cmd(args_):
+    """List executions"""
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     data = exec_api.list()
     for e in data:
@@ -59,6 +72,7 @@ def exec_list_cmd(_):
 
 
 def exec_start_cmd(args):
+    """Submit an execution."""
     app_descr = json.load(args.jsonfile)
     app_validate(app_descr)
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
@@ -67,6 +81,7 @@ def exec_start_cmd(args):
 
 
 def exec_get_cmd(args):
+    """Gather information about an execution."""
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     cont_api = ZoeServiceAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     execution = exec_api.get(args.id)
@@ -92,19 +107,21 @@ def exec_get_cmd(args):
         app = execution['description']
         print('Application name: {}'.format(app['name']))
         for c_id in execution['services']:
-            c = cont_api.get(c_id)
-            ip = c['ip_address']
-            print('Service {} (ID: {}, {})'.format(c['name'], c['id'], c['status']))
-            for p in c['description']['ports']:
-                print(' - {}: {}://{}:{}{}'.format(p['name'], p['protocol'], ip, p['port_number'], p['path']))
+            service = cont_api.get(c_id)
+            ip = service['ip_address']
+            print('Service {} (ID: {}, {})'.format(service['name'], service['id'], service['status']))
+            for port in service['description']['ports']:
+                print(' - {}: {}://{}:{}{}'.format(port['name'], port['protocol'], ip, port['port_number'], port['path']))
 
 
 def exec_kill_cmd(args):
+    """Kill an execution."""
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     exec_api.terminate(args.id)
 
 
 def exec_rm_cmd(args):
+    """Delete an execution and kill it if necessary."""
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     exec_api.delete(args.id)
 
@@ -116,10 +133,14 @@ ZOE_PASS: the password used for authentication'''
 
 
 def process_arguments() -> Namespace:
+    """Parse command line arguments."""
     parser = ArgumentParser(description="Zoe command-line client", epilog=ENV_HELP_TEXT, formatter_class=RawDescriptionHelpFormatter)
     parser.add_argument('--debug', action='store_true', help='Enable debug output')
 
     subparser = parser.add_subparsers()
+
+    argparser_info = subparser.add_parser('info', help="Queries the API for supported versions")
+    argparser_info.set_defaults(func=info_cmd)
 
     argparser_app_validate = subparser.add_parser('app-validate', help='Validate an application description')
     argparser_app_validate.add_argument('jsonfile', type=FileType("r"), help='Application description')
@@ -153,6 +174,7 @@ def process_arguments() -> Namespace:
 
 
 def zoe():
+    """Main entrypoint."""
     parser, args = process_arguments()
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)

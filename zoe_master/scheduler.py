@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Daniele Venzano
+# Copyright (c) 2016, Daniele Venzano
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""The Scheduler."""
+
 import logging
 import threading
 
@@ -25,6 +27,7 @@ log = logging.getLogger(__name__)
 
 
 class ZoeScheduler:
+    """The Scheduler class."""
     def __init__(self):
         self.fifo_queue = []
         self.trigger_semaphore = threading.Semaphore(0)
@@ -34,11 +37,12 @@ class ZoeScheduler:
         self.loop_th.start()
 
     def trigger(self):
+        """Trigger a scheduler run."""
         self.trigger_semaphore.release()
 
     def incoming(self, execution: Execution):
         """
-        This method adds the execution to the end of the FIFO queue.
+        This method adds the execution to the end of the FIFO queue and triggers the scheduler.
         :param execution: The execution
         :return:
         """
@@ -52,6 +56,7 @@ class ZoeScheduler:
         :return: None
         """
         def async_termination():
+            """Actual termination run in a thread."""
             terminate_execution(execution)
             self.trigger()
 
@@ -64,12 +69,14 @@ class ZoeScheduler:
         self.async_threads.append(th)
 
     def remove_execution(self, execution: Execution):
+        """Removes the execution form the queue."""
         try:
             self.fifo_queue.remove(execution)
         except ValueError:
             pass
 
     def loop_start_th(self):
+        """The Scheduler thread loop."""
         while True:
             ret = self.trigger_semaphore.acquire()
             if not ret:  # Semaphore timeout, do some thread cleanup
@@ -117,6 +124,7 @@ class ZoeScheduler:
                 e.set_running()
 
     def quit(self):
+        """Stop the scheduler thread."""
         self.loop_quit = True
         self.trigger()
         self.loop_th.join()

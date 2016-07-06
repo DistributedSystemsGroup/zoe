@@ -12,6 +12,9 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+"""LDAP authentication module."""
+
 import logging
 
 import ldap
@@ -23,6 +26,7 @@ log = logging.getLogger(__name__)
 
 
 class LDAPAuthenticator(zoe_api.auth.base.BaseAuthenticator):
+    """A simple LDAP authenticator."""
     def __init__(self):
         self.connection = ldap.initialize(get_conf().ldap_server_uri)
         self.base_dn = get_conf().ldap_base_dn
@@ -30,6 +34,7 @@ class LDAPAuthenticator(zoe_api.auth.base.BaseAuthenticator):
         self.bind_password = get_conf().ldap_bind_password
 
     def auth(self, username, password):
+        """Authenticate the user or raise an exception."""
         search_filter = "uid=" + username
         uid = None
         role = 'guest'
@@ -46,7 +51,7 @@ class LDAPAuthenticator(zoe_api.auth.base.BaseAuthenticator):
             elif get_conf().ldap_guest_gid in gid_numbers:
                 role = 'guest'
             else:
-                log.warn('User {} has an unknown group ID ({}), using guest role'.format(username, result[0][1]['gidNumber']))
+                log.warning('User {} has an unknown group ID ({}), using guest role'.format(username, result[0][1]['gidNumber']))
                 role = 'guest'
         except ldap.LDAPError:
             log.exception("LDAP exception")

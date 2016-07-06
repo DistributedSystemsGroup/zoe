@@ -13,27 +13,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Master side of the ZeroMQ based API."""
+
 import logging
 import time
 
 import zmq
 
 import zoe_lib.config as config
-import zoe_lib.sql_manager
+from zoe_lib.metrics.base import BaseMetricSender
+from zoe_lib.sql_manager import SQLManager
+
 import zoe_master.execution_manager
-from zoe_lib.swarm_client import SwarmClient
 from zoe_master.exceptions import ZoeException
+from zoe_master.scheduler import ZoeScheduler
 
 log = logging.getLogger(__name__)
 
 
 class APIManager:
-    def __init__(self):
+    """The API Manager."""
+    def __init__(self, metrics: BaseMetricSender, scheduler: ZoeScheduler, state: SQLManager):
         self.context = zmq.Context()
         self.zmq_s = self.context.socket(zmq.REP)
         self.listen_uri = config.get_conf().api_listen_uri
         self.zmq_s.bind(self.listen_uri)
         self.debug_has_replied = False
+        self.metrics = metrics
+        self.scheduler = scheduler
+        self.state = state
 
     def _reply_error(self, message):
         self.zmq_s.send_json({'result': 'error', 'message': message})
@@ -49,34 +57,34 @@ class APIManager:
         self.debug_has_replied = True
 
     def loop(self):
-        assert isinstance(config.singletons['sql_manager'], zoe_lib.sql_manager.SQLManager)
+        """The API loop."""
         while True:
             message = self.zmq_s.recv_json()
             self.debug_has_replied = False
             start_time = time.time()
             if message['command'] == 'execution_start':
                 exec_id = message['exec_id']
-                execution = config.singletons['sql_manager'].execution_list(id=exec_id, only_one=True)
+                execution = self.state.execution_list(id=exec_id, only_one=True)
                 if execution is None:
                     self._reply_error('Execution ID {} not found'.format(message['exec_id']))
                 else:
                     execution.set_scheduled()
                     self._reply_ok()
-                    zoe_master.execution_manager.execution_submit(execution)
+                    zoe_master.execution_manager.execution_submit(self.state, self.scheduler, execution)
             elif message['command'] == 'execution_terminate':
                 exec_id = message['exec_id']
-                execution = config.singletons['sql_manager'].execution_list(id=exec_id, only_one=True)
+                execution = self.state.execution_list(id=exec_id, only_one=True)
                 if execution is None:
                     self._reply_error('Execution ID {} not found'.format(message['exec_id']))
                 else:
                     execution.set_cleaning_up()
                     self._reply_ok()
-                    zoe_master.execution_manager.execution_terminate(execution)
+                    zoe_master.execution_manager.execution_terminate(self.scheduler, execution)
             elif message['command'] == 'execution_delete':
                 exec_id = message['exec_id']
-                execution = config.singletons['sql_manager'].execution_list(id=exec_id, only_one=True)
+                execution = self.state.execution_list(id=exec_id, only_one=True)
                 if execution is not None:
-                    zoe_master.execution_manager.execution_delete(execution)
+                    zoe_master.execution_manager.execution_delete(self.scheduler, execution)
                 self._reply_ok()
             else:
                 log.error('Unknown command: {}'.format(message['command']))
@@ -86,8 +94,9 @@ class APIManager:
                 self._reply_error('bug')
                 raise ZoeException('BUG: command {} does not fill a reply')
 
-            config.singletons['metric'].metric_api_call(start_time, message['command'])
+            self.metrics.metric_api_call(start_time, message['command'])
 
     def quit(self):
+        """Cleanly close the ZMQ resources."""
         self.zmq_s.close()
         self.context.term()
