@@ -13,10 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""InfluxDB implementation of the metrics system."""
+
 import time
-import requests
 import logging
-import queue
+
+import requests
 
 import zoe_lib.metrics.base
 
@@ -24,71 +26,47 @@ log = logging.getLogger(__name__)
 
 
 class InfluxDBMetricSender(zoe_lib.metrics.base.BaseMetricSender):
-    def __init__(self, conf):
-        super().__init__('influxdb_sender', conf)
+    """Sends metrics to InfluxDB."""
 
-        self._buffer = []
-        self._influxdb_endpoint = conf.influxdb_url + '/write?precision=ms&db=' + conf.influxdb_dbname
-        self.retries = 5
+    RETRIES = 5
+
+    def __init__(self, deployment_name, influxdb_url, influxdb_dbname):
+        super().__init__(deployment_name)
+        self._influxdb_endpoint = influxdb_url + '/write?precision=ms&db=' + influxdb_dbname
+        self._retries = self.RETRIES
+        self._start()
 
     def _send_buffer(self):
         error = False
         if self._influxdb_endpoint is not None and len(self._buffer) > 0:
             payload = '\n'.join(self._buffer)
             try:
-                r = requests.post(self._influxdb_endpoint, data=payload)
-            except:
-                log.exception('error writing metrics to influxdb, will retry {} times'.format(self.retries))
+                req = requests.post(self._influxdb_endpoint, data=payload)
+            except Exception:
+                log.exception('error writing metrics to influxdb, will retry {} times'.format(self._retries))
                 error = True
             else:
-                if r.status_code != 204:
-                    log.error('error writing metrics to influxdb, will retry {} times'.format(self.retries))
+                if req.status_code != 204:
+                    log.error('error writing metrics to influxdb, will retry {} times'.format(self._retries))
                     error = True
         if error:
-            if self.retries <= 0:
-                self.retries = 5
+            if self._retries <= 0:
+                self._retries = self.RETRIES
                 self._buffer.clear()
             else:
-                self.retries -= 1
+                self._retries -= 1
         else:
             self._buffer.clear()
 
-    def quit(self):
-        self._queue.put('quit')
+    def metric_api_call(self, time_start, action):
+        """Compute and emit the run time of an API call."""
+        time_end = time.time()
+        diff = zoe_lib.metrics.base.time_diff_ms(time_start, time_end)
 
-    def point(self, measurement_name: str, value: int, **kwargs):
-        ts = time.time()
-        point_str = measurement_name
-        for k, v in kwargs.items():
-            point_str += "," + k + '=' + v
-        point_str += ',' + 'deployment' + '=' + self._deployment
-        point_str += " value=" + str(value)
-        point_str += " " + str(int(ts * 1000))
+        point_str = "api_latency"
+        point_str += ",api_call=" + action
+        point_str += ',' + 'deployment' + '=' + self.deployment_name
+        point_str += " value=" + str(diff)
+        point_str += " " + str(int(time_end * 1000))
 
         self._queue.put(point_str)
-
-    def metric_api_call(self, time_start, action):
-        time_end = time.time()
-        td = self._time_diff_ms(time_start, time_end)
-        self.point("api_latency", td, api_call=action)
-
-    def run(self):
-        log.info('starting influxdb metric sender thread')
-        while True:
-            try:
-                data = self._queue.get(timeout=1)
-            except queue.Empty:
-                if len(self._buffer) > 0:
-                    self._send_buffer()
-                continue
-
-            if data == 'quit':
-                log.info('influxdb thread got a quit command')
-                if len(self._buffer) > 0:
-                    self._send_buffer()
-                break
-
-            if data != 'quit':
-                self._buffer.append(data)
-                if len(self._buffer) > 6:
-                    self._send_buffer()
