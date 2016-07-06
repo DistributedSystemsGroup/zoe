@@ -25,7 +25,7 @@ from zoe_lib.version import ZOE_API_VERSION, ZOE_APPLICATION_FORMAT_VERSION, ZOE
 
 class InfoAPI(Resource):
     """The Info API endpoint."""
-    def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint):
+    def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint) -> None:
         self.api_endpoint = api_endpoint
 
     @catch_exceptions

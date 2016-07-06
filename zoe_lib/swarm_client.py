@@ -15,8 +15,10 @@
 
 """Interface to the low-level Docker API."""
 
+from argparse import Namespace
 import time
 import logging
+from typing import Iterable, Callable, Dict, Any
 
 import humanfriendly
 
@@ -35,7 +37,70 @@ from zoe_lib.exceptions import ZoeException
 log = logging.getLogger(__name__)
 
 
-def zookeeper_swarm(zk_server_list: str, path='/docker'):
+class DockerContainerOptions:
+    """Wrapper for the Docker container options."""
+    def __init__(self):
+        self.env = {}
+        self.volume_binds = []
+        self.volumes = []
+        self.command = ""
+        self.memory_limit = '2g'
+        self.name = ''
+        self.ports = []
+        self.network_name = 'bridge'
+        self.restart = True
+        self.labels = []
+        self.gelf_log_address = ''
+
+    def add_env_variable(self, name: str, value: str) -> None:
+        """Adds an environment variable to the container definition."""
+        if value is not None:
+            self.env[name] = value
+
+    @property
+    def environment(self) -> Dict[str, str]:
+        """Access the environment variables."""
+        return self.env
+
+    def add_volume_bind(self, path: str, mountpoint: str, readonly=False) -> None:
+        """Add a volume to the container."""
+        self.volumes.append(mountpoint)
+        self.volume_binds.append(path + ":" + mountpoint + ":" + ("ro" if readonly else "rw"))
+
+    def get_volumes(self) -> Iterable[str]:
+        """Get the volumes in Docker format."""
+        return self.volumes
+
+    def get_volume_binds(self) -> Iterable[str]:
+        """Get the volumes in another Docker format."""
+        return self.volume_binds
+
+    def set_command(self, cmd) -> str:
+        """Setter for the command to run in the container."""
+        self.command = cmd
+
+    def get_command(self) -> str:
+        """Getter for the command to run in the container."""
+        return self.command
+
+    def set_memory_limit(self, limit: int):
+        """Setter for the memory limit of the container."""
+        self.memory_limit = limit
+
+    def get_memory_limit(self) -> int:
+        """Getter for the memory limit of the container."""
+        return self.memory_limit
+
+    @property
+    def restart_policy(self) -> Dict[str, str]:
+        """Getter for the restart policy of the container."""
+        if self.restart:
+            return {'Name': 'always'}
+        else:
+            return {}
+
+
+def zookeeper_swarm(zk_server_list: str, path='/docker') -> str:
     """
     Given a Zookeeper server list, find the currently active Swarm master.
     :param zk_server_list: Zookeeper server list
@@ -47,18 +112,17 @@ def zookeeper_swarm(zk_server_list: str, path='/docker'):
     zk_client.start()
     master, stat_ = zk_client.get(path)
     zk_client.stop()
-    return master
+    return master.decode('utf-8')
 
 
 class SwarmClient:
     """The Swarm client class that wraps the Docker API."""
-    def __init__(self, opts):
+    def __init__(self, opts: Namespace) -> None:
         self.opts = opts
         url = opts.swarm
         if 'zk://' in url:
             url = url[len('zk://'):]
             manager = zookeeper_swarm(url)
-            manager = manager.decode('utf-8')
         elif 'http://' or 'https://' in url:
             manager = url
         else:
@@ -118,10 +182,10 @@ class SwarmClient:
         pl_status.timestamp = time.time()
         return pl_status
 
-    def spawn_container(self, image, options) -> dict:
+    def spawn_container(self, image: str, options: DockerContainerOptions) -> Dict[str, Any]:
         """Create and start a new container."""
         cont = None
-        port_bindings = {}
+        port_bindings = {}  # type: Dict[str, Any]
         for port in options.ports:
             port_bindings[port] = None
 
@@ -158,7 +222,7 @@ class SwarmClient:
         info = self.inspect_container(cont.get('Id'))
         return info
 
-    def inspect_container(self, docker_id) -> dict:
+    def inspect_container(self, docker_id: str) -> Dict[str, Any]:
         """Retrieve information about a running container."""
         try:
             docker_info = self.cli.inspect_container(container=docker_id)
@@ -168,7 +232,7 @@ class SwarmClient:
         info = {
             "docker_id": docker_id,
             "ip_address": {}
-        }
+        }  # type: Dict[str, Any]
         for net in docker_info["NetworkSettings"]["Networks"]:
             info["ip_address"][net] = docker_info["NetworkSettings"]["Networks"][net]['IPAddress']
 
@@ -203,7 +267,7 @@ class SwarmClient:
                 info['ports'][port] = None
         return info
 
-    def terminate_container(self, docker_id, delete=False):
+    def terminate_container(self, docker_id: str, delete=False) -> None:
         """
         Terminate a container.
 
@@ -224,27 +288,27 @@ class SwarmClient:
             except docker.errors.NotFound:
                 log.warning("cannot remove a non-existent service")
 
-    def event_listener(self, callback):
+    def event_listener(self, callback: Callable[[str], bool]) -> None:
         """An infinite loop that listens for events from Swarm."""
         for event in self.cli.events(decode=True):
             if not callback(event):
                 break
 
-    def connect_to_network(self, container_id, network_id):
+    def connect_to_network(self, container_id: str, network_id: str) -> None:
         """Connect a container to a network."""
         try:
             self.cli.connect_container_to_network(container_id, network_id)
         except Exception as e:
             log.exception(str(e))
 
-    def disconnect_from_network(self, container_id, network_id):
+    def disconnect_from_network(self, container_id: str, network_id: str) -> None:
         """Disconnects a container from a network."""
         try:
             self.cli.disconnect_container_from_network(container_id, network_id)
         except Exception as e:
             log.exception(str(e))
 
-    def list(self, only_label=None) -> list:
+    def list(self, only_label=None) -> Iterable[dict]:
         """
         List running or defined containers.
 
@@ -272,66 +336,3 @@ class SwarmClient:
                     'status': cont_info['Status']
                 })
         return conts
-
-
-class DockerContainerOptions:
-    """Wrapper for the Docker container options."""
-    def __init__(self):
-        self.env = {}
-        self.volume_binds = []
-        self.volumes = []
-        self.command = ""
-        self.memory_limit = '2g'
-        self.name = ''
-        self.ports = []
-        self.network_name = 'bridge'
-        self.restart = True
-        self.labels = []
-        self.gelf_log_address = ''
-
-    def add_env_variable(self, name, value):
-        """Adds an environment variable to the container definition."""
-        if value is not None:
-            self.env[name] = value
-
-    @property
-    def environment(self):
-        """Access the environment variables."""
-        return self.env
-
-    def add_volume_bind(self, path, mountpoint, readonly=False):
-        """Add a volume to the container."""
-        self.volumes.append(mountpoint)
-        self.volume_binds.append(path + ":" + mountpoint + ":" + ("ro" if readonly else "rw"))
-
-    def get_volumes(self):
-        """Get the volumes in Docker format."""
-        return self.volumes
-
-    def get_volume_binds(self):
-        """Get the volumes in another Docker format."""
-        return self.volume_binds
-
-    def set_command(self, cmd):
-        """Setter for the command to run in the container."""
-        self.command = cmd
-
-    def get_command(self):
-        """Getter for the command to run in the container."""
-        return self.command
-
-    def set_memory_limit(self, limit):
-        """Setter for the memory limit of the container."""
-        self.memory_limit = limit
-
-    def get_memory_limit(self):
-        """Getter for the memory limit of the container."""
-        return self.memory_limit
-
-    @property
-    def restart_policy(self):
-        """Getter for the restart policy of the container."""
-        if self.restart:
-            return {'Name': 'always'}
-        else:
-            return {}

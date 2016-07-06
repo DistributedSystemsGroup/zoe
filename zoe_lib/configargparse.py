@@ -16,9 +16,6 @@ ACTION_TYPES_THAT_DONT_NEED_A_VALUE = {argparse._StoreTrueAction,
                                        argparse._StoreFalseAction, argparse._CountAction,
                                        argparse._StoreConstAction, argparse._AppendConstAction}
 
-# global ArgumentParser instances
-_parsers = {}
-
 
 # used while parsing args to keep track of where they came from
 _COMMAND_LINE_SOURCE_KEY = "command_line"
@@ -676,8 +673,8 @@ def already_on_command_line(existing_args, potential_command_line_args):
 
 
 # wrap ArgumentParser's add_argument(..) method with the one above
-argparse._ActionsContainer.original_add_argument_method = argparse._ActionsContainer.add_argument
-argparse._ActionsContainer.add_argument = add_argument
+argparse._ActionsContainer.original_add_argument_method = argparse._ActionsContainer.add_argument  # type: ignore
+argparse._ActionsContainer.add_argument = add_argument  # type:ignore
 
 # add all public classes and constants from argparse module's namespace to this
 # module's namespace so that the 2 modules are truly interchangeable

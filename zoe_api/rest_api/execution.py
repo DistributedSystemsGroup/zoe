@@ -26,7 +26,7 @@ import zoe_api.api_endpoint
 class ExecutionAPI(Resource):
     """The Execution API endpoint."""
 
-    def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint):
+    def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint) -> None:
         self.api_endpoint = api_endpoint
 
     @catch_exceptions
@@ -58,7 +58,7 @@ class ExecutionAPI(Resource):
 class ExecutionDeleteAPI(Resource):
     """The ExecutionDelete API endpoints."""
 
-    def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint):
+    def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint) -> None:
         self.api_endpoint = api_endpoint
 
     @catch_exceptions
@@ -81,7 +81,7 @@ class ExecutionDeleteAPI(Resource):
 class ExecutionCollectionAPI(Resource):
     """The Execution Collection API endpoints."""
 
-    def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint):
+    def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint) -> None:
         self.api_endpoint = api_endpoint
 
     @catch_exceptions

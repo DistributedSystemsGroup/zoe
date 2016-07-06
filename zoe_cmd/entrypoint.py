@@ -23,6 +23,7 @@ import logging
 import os
 import sys
 from argparse import ArgumentParser, Namespace, FileType, RawDescriptionHelpFormatter
+from typing import Tuple
 
 from zoe_cmd import utils
 from zoe_lib.info import ZoeInfoAPI
@@ -132,7 +133,7 @@ ZOE_USER: the username used for authentication
 ZOE_PASS: the password used for authentication'''
 
 
-def process_arguments() -> Namespace:
+def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     """Parse command line arguments."""
     parser = ArgumentParser(description="Zoe command-line client", epilog=ENV_HELP_TEXT, formatter_class=RawDescriptionHelpFormatter)
     parser.add_argument('--debug', action='store_true', help='Enable debug output')

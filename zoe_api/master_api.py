@@ -16,6 +16,7 @@
 """The client side of the ZeroMQ API."""
 
 import logging
+from typing import Dict, Any, Tuple
 
 import zmq
 
@@ -23,17 +24,19 @@ import zoe_lib.config as config
 
 log = logging.getLogger(__name__)
 
+APIReturnType = Tuple[bool, str]
+
 
 class APIManager:
     """Main class for the API."""
-    REQUEST_TIMEOUT = 2500
-    REQUEST_RETRIES = 1
+    REQUEST_TIMEOUT = 2500  # type: int
+    REQUEST_RETRIES = 1  # type: int
 
     def __init__(self):
         self.context = zmq.Context(1)
         self.zmq_s = None
         self.poll = zmq.Poller()
-        self.master_uri = config.get_conf().master_url
+        self.master_uri = config.get_conf().master_url  # type: str
         self._connect()
 
     def _connect(self):
@@ -49,7 +52,7 @@ class APIManager:
         self.poll.unregister(self.zmq_s)
         self.zmq_s = None
 
-    def _request_reply(self, message):
+    def _request_reply(self, message: Dict[str, Any]) -> APIReturnType:
         """
         Implements the Lazy Pirate Pattern for a reliable client communication.
         """
@@ -74,7 +77,7 @@ class APIManager:
                 log.warning('Reconnecting and retrying request...')
                 self._connect()
 
-    def execution_start(self, exec_id):
+    def execution_start(self, exec_id: int) -> APIReturnType:
         """Start an execution."""
         msg = {
             'command': 'execution_start',
@@ -82,7 +85,7 @@ class APIManager:
         }
         return self._request_reply(msg)
 
-    def execution_terminate(self, exec_id):
+    def execution_terminate(self, exec_id: int) -> APIReturnType:
         """Terminate an execution."""
         msg = {
             'command': 'execution_terminate',
@@ -90,7 +93,7 @@ class APIManager:
         }
         return self._request_reply(msg)
 
-    def execution_delete(self, exec_id):
+    def execution_delete(self, exec_id) -> APIReturnType:
         """Delete an execution."""
         msg = {
             'command': 'execution_delete',

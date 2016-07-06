@@ -33,7 +33,7 @@ log = logging.getLogger(__name__)
 
 class APIManager:
     """The API Manager."""
-    def __init__(self, metrics: BaseMetricSender, scheduler: ZoeScheduler, state: SQLManager):
+    def __init__(self, metrics: BaseMetricSender, scheduler: ZoeScheduler, state: SQLManager) -> None:
         self.context = zmq.Context()
         self.zmq_s = self.context.socket(zmq.REP)
         self.listen_uri = config.get_conf().api_listen_uri
@@ -43,7 +43,7 @@ class APIManager:
         self.scheduler = scheduler
         self.state = state
 
-    def _reply_error(self, message):
+    def _reply_error(self, message: str) -> None:
         self.zmq_s.send_json({'result': 'error', 'message': message})
         self.debug_has_replied = True
 
@@ -96,7 +96,7 @@ class APIManager:
 
             self.metrics.metric_api_call(start_time, message['command'])
 
-    def quit(self):
+    def quit(self) -> None:
         """Cleanly close the ZMQ resources."""
         self.zmq_s.close()
         self.context.term()

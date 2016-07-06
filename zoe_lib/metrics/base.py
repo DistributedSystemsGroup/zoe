@@ -25,7 +25,7 @@ log = logging.getLogger(__name__)
 
 def time_diff_ms(start: float, end: float) -> int:
     """Return a time difference in milliseconds."""
-    return (end - start) * 1000
+    return int((end - start) * 1000)
 
 
 class BaseMetricSender:

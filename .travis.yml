@@ -7,4 +7,5 @@ install:
 before_script:
 script:
   - pylint *.py zoe_*
+  - mypy -s *.py zoe_*
   - doc8 docs/
