@@ -19,7 +19,10 @@ import logging
 
 from flask import Response, render_template
 
+from zoe_lib.config import get_conf
+
 from zoe_api.auth.ldap import LDAPAuthenticator
+from zoe_api.auth.file import PlainTextAuthenticator
 import zoe_api.exceptions
 
 log = logging.getLogger(__name__)
@@ -62,7 +65,12 @@ def get_auth(request):
     if not auth:
         raise zoe_api.exceptions.ZoeAuthException
 
-    authenticator = LDAPAuthenticator()
+    if get_conf().auth_type == 'text':
+        authenticator = PlainTextAuthenticator()
+    elif get_conf().auth_type == 'ldap':
+        authenticator = LDAPAuthenticator()
+    else:
+        raise zoe_api.exceptions.ZoeException('Configuration error, unknown authentication method: {}'.format(get_conf().auth_type))
     uid, role = authenticator.auth(auth.username, auth.password)
     if uid is None:
         raise zoe_api.exceptions.ZoeAuthException

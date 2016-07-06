@@ -60,3 +60,4 @@ target/
 .idea/
 state.zoe
 /zoe*.conf
+zoepass.csv
