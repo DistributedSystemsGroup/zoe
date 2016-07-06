@@ -20,6 +20,8 @@ import logging
 import ldap
 
 import zoe_api.auth.base
+import zoe_api.exceptions
+
 from zoe_lib.config import get_conf
 
 log = logging.getLogger(__name__)
@@ -30,17 +32,18 @@ class LDAPAuthenticator(zoe_api.auth.base.BaseAuthenticator):
     def __init__(self):
         self.connection = ldap.initialize(get_conf().ldap_server_uri)
         self.base_dn = get_conf().ldap_base_dn
-        self.bind_user = get_conf().ldap_bind_user
-        self.bind_password = get_conf().ldap_bind_password
 
     def auth(self, username, password):
         """Authenticate the user or raise an exception."""
         search_filter = "uid=" + username
         uid = None
         role = 'guest'
+        bind_user = 'uid=' + username + "," + self.base_dn
         try:
-            self.connection.bind_s(self.bind_user, self.bind_password)
+            self.connection.bind_s(bind_user, password)
             result = self.connection.search_s(self.base_dn, ldap.SCOPE_SUBTREE, search_filter)
+            if len(result) == 0:
+                raise zoe_api.exceptions.ZoeAuthException('Unknown user or wrong password.')
             user_dict = result[0][1]
             uid = username
             gid_numbers = [int(x) for x in user_dict['gidNumber']]
@@ -53,8 +56,12 @@ class LDAPAuthenticator(zoe_api.auth.base.BaseAuthenticator):
             else:
                 log.warning('User {} has an unknown group ID ({}), using guest role'.format(username, result[0][1]['gidNumber']))
                 role = 'guest'
-        except ldap.LDAPError:
-            log.exception("LDAP exception")
+        except ldap.LDAPError as ex:
+            if ex.args[0]['desc'] == 'Invalid credentials':
+                raise zoe_api.exceptions.ZoeAuthException('Unknown user or wrong password.')
+            else:
+                log.exception("LDAP exception")
+                zoe_api.exceptions.ZoeAuthException('LDAP error.')
         finally:
             self.connection.unbind_s()
         return uid, role

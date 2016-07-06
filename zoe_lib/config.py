@@ -74,8 +74,6 @@ def load_configuration(test_conf=None):
 
         argparser.add_argument('--ldap-server-uri', help='LDAP server to use for authentication', default='ldap://localhost')
         argparser.add_argument('--ldap-base-dn', help='LDAP base DN for users', default='ou=something,dc=any,dc=local')
-        argparser.add_argument('--ldap-bind-user', help='LDAP user to bind as for user lookup', default='cn=guest,dc=bigfoot,dc=eurecom,dc=fr')
-        argparser.add_argument('--ldap-bind-password', help='LDAP user password', default='notsosecret')
         argparser.add_argument('--ldap-admin-gid', type=int, help='LDAP group ID for admins', default=5000)
         argparser.add_argument('--ldap-user-gid', type=int, help='LDAP group ID for users', default=5001)
         argparser.add_argument('--ldap-guest-gid', type=int, help='LDAP group ID for guests', default=5002)
