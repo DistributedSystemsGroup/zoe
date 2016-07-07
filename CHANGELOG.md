@@ -8,6 +8,7 @@
 * Move all user management in the web process.
 * Use Postgresql to store the state
 * Rename the zoe-web component in zoe-api to better describe its new role
+* User authentication can be performed by a CSV text file or via LDAP
 
 ## Version 0.9.7
 
