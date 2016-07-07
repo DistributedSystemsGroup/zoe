@@ -8,7 +8,7 @@ services:
       - zoe
   zoe-api:
     image: zoerepo/zoe
-    command: python3 zoe-api.py --debug --swarm ${SWARM_URL} --deployment-name compose --master-url tcp://zoe-master:4850 --dbuser postgres --dbpass '' --dbhost postgres --dbname postgres
+    command: python3 zoe-api.py --debug --swarm ${SWARM_URL} --deployment-name compose --master-url tcp://zoe-master:4850 --dbuser postgres --dbhost postgres --dbname postgres
     ports:
       - "8080:5001"
     depends_on:
@@ -20,9 +20,9 @@ services:
     volumes:
       - /etc/zoe:/etc/zoe
       - /opt/zoe-workspaces:/mnt/zoe-workspaces
-    command: python3 zoe-master.py --debug --swarm ${SWARM_URL} --deployment-name compose --dbuser postgres --dbpass '' --dbhost postgres --dbname postgres
+    command: python3 zoe-master.py --debug --swarm ${SWARM_URL} --deployment-name compose --dbuser postgres --dbhost postgres --dbname postgres
     depends_on:
       - zoe-api
 networks:
   zoe:
-    driver: overlay
+    driver: bridge

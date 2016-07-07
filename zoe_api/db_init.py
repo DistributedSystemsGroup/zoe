@@ -33,7 +33,7 @@ def schema(cur, deployment_name):
     """Create the schema for the configured deployment name."""
     cur.execute("SELECT EXISTS(SELECT 1 FROM pg_catalog.pg_namespace WHERE nspname = %s)", (deployment_name,))
     if not cur.fetchone()[0]:
-        cur.execute('CREATE SCHEMA %s', (deployment_name,))
+        cur.execute('CREATE SCHEMA {}'.format(deployment_name))
 
 
 def check_schema_version(cur, deployment_name):

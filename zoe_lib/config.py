@@ -54,7 +54,7 @@ def load_configuration(test_conf=None):
 
         argparser.add_argument('--dbname', help='DB name', default='zoe')
         argparser.add_argument('--dbuser', help='DB user', default='zoe')
-        argparser.add_argument('--dbpass', help='DB password', default='zoe')
+        argparser.add_argument('--dbpass', help='DB password', default='')
         argparser.add_argument('--dbhost', help='DB hostname', default='localhost')
         argparser.add_argument('--dbport', type=int, help='DB port', default=5432)
 
