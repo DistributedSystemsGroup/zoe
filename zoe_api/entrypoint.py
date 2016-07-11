@@ -27,6 +27,7 @@ import zoe_api.db_init
 import zoe_api.api_endpoint
 import zoe_api.rest_api
 import zoe_api.web
+import zoe_api.auth.ldap
 
 log = logging.getLogger("zoe_api")
 LOG_FORMAT = '%(asctime)-15s %(levelname)s %(name)s (%(threadName)s): %(message)s'
@@ -43,6 +44,10 @@ def zoe_web_main() -> int:
         logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
     else:
         logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
+
+    if config.get_conf().auth_type == 'ldap' and not zoe_api.auth.ldap.LDAP_AVAILABLE:
+        log.error("LDAP authentication requested, but 'pyldap' module not installed.")
+        return 1
 
     log.info("Starting HTTP server...")
     app = Flask(__name__, static_url_path='/does-not-exist')
@@ -66,3 +71,5 @@ def zoe_web_main() -> int:
         ioloop.start()
     except KeyboardInterrupt:
         print("CTRL-C detected, terminating")
+
+    return 0

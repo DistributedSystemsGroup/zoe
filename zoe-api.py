@@ -17,7 +17,10 @@
 
 """API component entry point."""
 
+import sys
+
 from zoe_api.entrypoint import zoe_web_main
 
 if __name__ == "__main__":
-    zoe_web_main()
+    ret_val = zoe_web_main()
+    sys.exit(ret_val)

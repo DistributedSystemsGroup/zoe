@@ -17,7 +17,13 @@
 
 import logging
 
-import ldap
+try:
+    import ldap
+except ImportError:
+    ldap = None
+    LDAP_AVAILABLE = False
+else:
+    LDAP_AVAILABLE = True
 
 import zoe_api.auth.base
 import zoe_api.exceptions
