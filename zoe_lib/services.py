@@ -45,4 +45,3 @@ class ZoeServiceAPI(ZoeAPIBase):
             raise ZoeAPIException('service "{}" not found'.format(container_id))
         else:
             raise ZoeAPIException('error retrieving service {}'.format(container_id))
-
