@@ -1,5 +1,9 @@
 # Zoe Changelog
 
+## Version 0.10.1
+
+* Service discovery API endpoint: simple, read-only, unauthenticated access to a list DNS names of services. Needed for frameworks that need a list of hosts for configuration, can be used by scripts in the images.
+
 ## Version 0.10.0
 
 * This version is the start of a new series of releases moving toward a new architecture

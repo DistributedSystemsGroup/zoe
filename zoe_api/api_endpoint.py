@@ -116,6 +116,12 @@ class APIEndpoint:
             raise zoe_api.exceptions.ZoeAuthException()
         return service
 
+    def service_list(self, uid, role, **filters):
+        """Generate a optionally filtered list of services."""
+        services = self.sql.service_list(**filters)
+        ret = [s for s in services if s.user_id == uid or role == 'admin']
+        return ret
+
     def retry_submit_error_executions(self):
         """Resubmit any execution forgotten by the master."""
         waiting_execs = self.sql.execution_list(status=zoe_lib.sql_manager.Execution.SUBMIT_STATUS)
