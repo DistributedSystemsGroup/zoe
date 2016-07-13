@@ -70,7 +70,7 @@ class SQLManager:
             for key, value in kwargs.items():
                 filter_list.append('{} = %s'.format(key))
                 args_list.append(value)
-            q += ', '.join(filter_list)
+            q += ' AND '.join(filter_list)
             query = cur.mogrify(q, args_list)
         else:
             query = cur.mogrify(q_base)
@@ -136,7 +136,7 @@ class SQLManager:
             for key, value in kwargs.items():
                 filter_list.append('{} = %s'.format(key))
                 args_list.append(value)
-            q += ', '.join(filter_list)
+            q += ' AND '.join(filter_list)
             query = cur.mogrify(q, args_list)
         else:
             query = cur.mogrify(q_base)
