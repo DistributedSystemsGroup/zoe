@@ -142,6 +142,10 @@ def _service_check(data):
         if not hasattr(data['networks'], '__iter__'):
             raise InvalidApplicationDescription(msg='networks should be an iterable')
 
+    if 'constraints' in data:
+        if not hasattr(data['constraints'], '__iter__'):
+            raise InvalidApplicationDescription(msg='networks should be an iterable')
+
 
 def _port_check(data):
     required_keys = ['name', 'protocol', 'port_number', 'is_main_endpoint']

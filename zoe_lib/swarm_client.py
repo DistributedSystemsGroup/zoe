@@ -18,7 +18,7 @@
 from argparse import Namespace
 import time
 import logging
-from typing import Iterable, Callable, Dict, Any
+from typing import Iterable, Callable, Dict, Any, Union
 
 import humanfriendly
 
@@ -32,7 +32,7 @@ import docker.errors
 import docker.utils
 
 from zoe_master.stats import SwarmStats, SwarmNodeStats
-from zoe_lib.exceptions import ZoeException
+from zoe_lib.exceptions import ZoeLibException
 
 log = logging.getLogger(__name__)
 
@@ -51,14 +51,18 @@ class DockerContainerOptions:
         self.restart = True
         self.labels = []
         self.gelf_log_address = ''
+        self.constraints = []
 
-    def add_env_variable(self, name: str, value: str) -> None:
-        """Adds an environment variable to the container definition."""
-        if value is not None:
-            self.env[name] = value
+    def add_constraint(self, constraint):
+        """Add a placement constraint (use docker syntax)."""
+        self.constraints.append(constraint)
+
+    def add_env_variable(self, name: str, value: Union[str, None]) -> None:
+        """Add an environment variable to the container definition."""
+        self.env[name] = value
 
     @property
-    def environment(self) -> Dict[str, str]:
+    def environment(self) -> Dict[str, Union[str, None]]:
         """Access the environment variables."""
         return self.env
 
@@ -126,7 +130,7 @@ class SwarmClient:
         elif 'http://' or 'https://' in url:
             manager = url
         else:
-            raise ZoeException('Unsupported URL scheme for Swarm')
+            raise ZoeLibException('Unsupported URL scheme for Swarm')
         log.debug('Connecting to Swarm at {}'.format(manager))
         self.cli = docker.Client(base_url=manager)
 
@@ -189,6 +193,9 @@ class SwarmClient:
         for port in options.ports:
             port_bindings[port] = None
 
+        for constraint in options.constraints:
+            options.add_env_variable(constraint, None)
+
         if options.gelf_log_address != '':
             log_config = docker.utils.LogConfig(type="gelf", config={'gelf-address': options.gelf_log_address, 'labels': ",".join(options.labels)})
         else:
@@ -217,7 +224,7 @@ class SwarmClient:
         except Exception as e:
             if cont is not None:
                 self.cli.remove_container(container=cont.get('Id'), force=True)
-            raise ZoeException(str(e))
+            raise ZoeLibException(str(e))
 
         info = self.inspect_container(cont.get('Id'))
         return info
@@ -227,7 +234,7 @@ class SwarmClient:
         try:
             docker_info = self.cli.inspect_container(container=docker_id)
         except Exception as e:
-            raise ZoeException(str(e))
+            raise ZoeLibException(str(e))
 
         info = {
             "docker_id": docker_id,

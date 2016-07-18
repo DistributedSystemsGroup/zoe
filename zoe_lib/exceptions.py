@@ -16,7 +16,7 @@
 """Exceptions that can be raised throughout the Zoe codebase."""
 
 
-class ZoeException(Exception):
+class ZoeLibException(Exception):
     """
     A generic exception.
     """

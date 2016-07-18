@@ -21,6 +21,7 @@ from zoe_master.workspace.filesystem import ZoeFSWorkspace
 from zoe_master.exceptions import ZoeStartExecutionRetryException, ZoeStartExecutionFatalException, ZoeException
 
 from zoe_lib.config import get_conf
+from zoe_lib.exceptions import ZoeLibException
 from zoe_lib.sql_manager import Execution, Service
 from zoe_lib.swarm_client import DockerContainerOptions, SwarmClient
 
@@ -89,6 +90,10 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
         for path, mount_point, readonly in service.description['volumes']:
             copts.add_volume_bind(path, mount_point, readonly)
 
+    if 'constraints' in service.description:
+        for constraint in service.description['constraints']:
+            copts.add_constraint(constraint)
+
     fswk = ZoeFSWorkspace()
     if fswk.can_be_attached():
         copts.add_volume_bind(fswk.get_path(execution.user_id), fswk.get_mountpoint(), False)
@@ -105,6 +110,8 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
     try:
         cont_info = swarm.spawn_container(service.description['docker_image'], copts)
     except ZoeException as e:
+        raise ZoeStartExecutionRetryException(str(e))
+    except ZoeLibException as e:
         raise ZoeStartExecutionRetryException(str(e))
 
     service.set_active(cont_info["docker_id"])
