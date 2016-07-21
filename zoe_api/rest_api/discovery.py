@@ -29,7 +29,10 @@ class DiscoveryAPI(Resource):
     @catch_exceptions
     def get(self, execution_id: int, service_group: str):
         """HTTP GET method."""
-        services = self.api_endpoint.service_list(0, 'admin', service_group=service_group, execution_id=execution_id)
+        if service_group != 'all':
+            services = self.api_endpoint.service_list(0, 'admin', service_group=service_group, execution_id=execution_id)
+        else:
+            services = self.api_endpoint.service_list(0, 'admin', execution_id=execution_id)
         ret = {
             'service_type': service_group,
             'execution_id': execution_id,
