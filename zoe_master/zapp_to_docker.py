@@ -37,6 +37,7 @@ def execution_to_containers(execution: Execution) -> None:
     ordered_service_list = sorted(execution.services, key=lambda x: x.description['startup_order'])
 
     env_subst_dict = {
+        'execution_id': execution.id,
         "execution_name": execution.name,
         'user_name': execution.user_id,
         'deployment_name': get_conf().deployment_name,
