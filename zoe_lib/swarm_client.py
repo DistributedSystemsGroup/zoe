@@ -241,7 +241,10 @@ class SwarmClient:
             "ip_address": {}
         }  # type: Dict[str, Any]
         for net in docker_info["NetworkSettings"]["Networks"]:
-            info["ip_address"][net] = docker_info["NetworkSettings"]["Networks"][net]['IPAddress']
+            if len(docker_info["NetworkSettings"]["Networks"][net]['IPAddress']) > 0:
+                info["ip_address"][net] = docker_info["NetworkSettings"]["Networks"][net]['IPAddress']
+            else:
+                info["ip_address"][net] = None
 
         if docker_info["State"]["Running"]:
             info["state"] = "running"
@@ -263,7 +266,7 @@ class SwarmClient:
             info["running"] = False
 
         info['ports'] = {}
-        if docker_info['NetworkSettings'] is not None:
+        if docker_info['NetworkSettings']['Ports'] is not None:
             for port in docker_info['NetworkSettings']['Ports']:
                 if docker_info['NetworkSettings']['Ports'][port] is not None:
                     mapping = (

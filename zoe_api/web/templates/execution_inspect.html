@@ -32,7 +32,11 @@
     <li class="container_name" id="{{ s['id'] }}">{{ s['name'] }}</li>
     <ul>
     {% for p in s['description']['ports'] %}
+        {% if s['ip_address'] == None %}
+        <li>Inactive</li>
+        {%  else %}
         <li><a href="{{ p['protocol'] }}://{{ s['ip_address'] }}:{{ p['port_number'] }}{{ p['path'] }}">{{ p['name'] }}</a></li>
+        {% endif %}
     {% endfor %}
     </ul>
 {% endfor %}
