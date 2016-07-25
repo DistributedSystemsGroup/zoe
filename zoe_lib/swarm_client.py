@@ -263,15 +263,16 @@ class SwarmClient:
             info["running"] = False
 
         info['ports'] = {}
-        for port in docker_info['NetworkSettings']['Ports']:
-            if docker_info['NetworkSettings']['Ports'][port] is not None:
-                mapping = (
-                    docker_info['NetworkSettings']['Ports'][port][0]['HostIp'],
-                    docker_info['NetworkSettings']['Ports'][port][0]['HostPort']
-                )
-                info['ports'][port] = mapping
-            else:
-                info['ports'][port] = None
+        if docker_info['NetworkSettings'] is not None:
+            for port in docker_info['NetworkSettings']['Ports']:
+                if docker_info['NetworkSettings']['Ports'][port] is not None:
+                    mapping = (
+                        docker_info['NetworkSettings']['Ports'][port][0]['HostIp'],
+                        docker_info['NetworkSettings']['Ports'][port][0]['HostPort']
+                    )
+                    info['ports'][port] = mapping
+                else:
+                    info['ports'][port] = None
         return info
 
     def terminate_container(self, docker_id: str, delete=False) -> None:
