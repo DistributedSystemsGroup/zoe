@@ -92,7 +92,7 @@ def exec_get_cmd(args):
         print('Execution {} (ID: {})'.format(execution['name'], execution['id']))
         print('Status: {}'.format(execution['status']))
         if execution['status'] == 'error':
-            print('Last error: {}'.format(execution['error']))
+            print('Last error: {}'.format(execution['error_message']))
         print('Time submit: {}'.format(datetime.datetime.fromtimestamp(execution['time_submit'])))
 
         if execution['time_start'] is None:
