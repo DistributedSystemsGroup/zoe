@@ -15,18 +15,19 @@
 
 """The Info API endpoint."""
 
-from flask_restful import Resource
+from tornado.web import RequestHandler
 
-import zoe_api.api_endpoint
 from zoe_api.rest_api.utils import catch_exceptions
 from zoe_lib.config import get_conf
 from zoe_lib.version import ZOE_API_VERSION, ZOE_APPLICATION_FORMAT_VERSION, ZOE_VERSION
 
 
-class InfoAPI(Resource):
+class InfoAPI(RequestHandler):
     """The Info API endpoint."""
-    def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint) -> None:
-        self.api_endpoint = api_endpoint
+
+    def initialize(self, **kwargs):
+        """Initializes the request handler."""
+        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
     @catch_exceptions
     def get(self):
@@ -38,4 +39,4 @@ class InfoAPI(Resource):
             'deployment_name': get_conf().deployment_name
         }
 
-        return ret
+        self.write(ret)

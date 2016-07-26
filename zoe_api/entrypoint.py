@@ -16,11 +16,11 @@
 """Zoe API entrypoint module."""
 
 import logging
+import os
 
-from flask import Flask
-from tornado.wsgi import WSGIContainer
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop, PeriodicCallback
+from tornado.web import Application
 
 import zoe_lib.config as config
 import zoe_api.db_init
@@ -49,26 +49,26 @@ def zoe_web_main() -> int:
         log.error("LDAP authentication requested, but 'pyldap' module not installed.")
         return 1
 
-    log.info("Starting HTTP server...")
-    app = Flask(__name__, static_url_path='/does-not-exist')
-    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-
     zoe_api.db_init.init()
 
     api_endpoint = zoe_api.api_endpoint.APIEndpoint()
 
-    app.register_blueprint(zoe_api.rest_api.api_init(api_endpoint))
-    app.register_blueprint(zoe_api.web.web_init(api_endpoint))
+    app_settings = {
+        'static_path': os.path.join(os.path.dirname(__file__), "web", "static"),
+        'debug': args.debug
+    }
+    app = Application(zoe_api.web.web_init(api_endpoint) + zoe_api.rest_api.api_init(api_endpoint), **app_settings)
 
-    http_server = HTTPServer(WSGIContainer(app))
-    http_server.listen(args.listen_port, args.listen_address)
-    ioloop = IOLoop.instance()
+    log.info("Starting HTTP server...")
+    http_server = HTTPServer(app)
+    http_server.bind(args.listen_port, args.listen_address)
+    http_server.start(num_processes=1)
 
     retry_cb = PeriodicCallback(api_endpoint.retry_submit_error_executions, 30000)
     retry_cb.start()
 
     try:
-        ioloop.start()
+        IOLoop.current().start()
     except KeyboardInterrupt:
         print("CTRL-C detected, terminating")
 

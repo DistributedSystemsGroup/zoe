@@ -68,7 +68,7 @@ def exec_list_cmd(args_):
     """List executions"""
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     data = exec_api.list()
-    for e in data:
+    for e in data.values():
         print('Execution {} (User: {}, ID: {}): {}'.format(e['name'], e['user_id'], e['id'], e['status']))
 
 
@@ -131,7 +131,10 @@ def logs_cmd(args):
     """Retrieves and streams the logs of a service."""
     service_api = ZoeServiceAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     for line in service_api.get_logs(args.service_id):
-        print(line)
+        if args.timestamps:
+            print(line[0], line[1])
+        else:
+            print(line[1])
 
 
 ENV_HELP_TEXT = '''To use this tool you need also to define three environment variables:
@@ -180,6 +183,7 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
 
     argparser_logs = subparser.add_parser('logs', help="Streams the service logs")
     argparser_logs.add_argument('service_id', type=int, help="Service id")
+    argparser_logs.add_argument('-t', '--timestamps', action='store_true', help="Prefix timestamps for each line")
     argparser_logs.set_defaults(func=logs_cmd)
 
     return parser, parser.parse_args()

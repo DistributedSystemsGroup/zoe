@@ -17,46 +17,66 @@
 
 import logging
 
-from flask_restful import Resource, request
-from flask import Response
+from tornado.web import RequestHandler
+import tornado.gen
 
 from zoe_api.rest_api.utils import catch_exceptions, get_auth
-import zoe_api.api_endpoint
+from zoe_api.api_endpoint import APIEndpoint
 
 log = logging.getLogger(__name__)
 
 
-class ServiceAPI(Resource):
+class ServiceAPI(RequestHandler):
     """The Service API endpoint."""
-    def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint) -> None:
-        self.api_endpoint = api_endpoint
+
+    def initialize(self, **kwargs):
+        """Initializes the request handler."""
+        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
     @catch_exceptions
     def get(self, service_id) -> dict:
         """HTTP GET method."""
-        uid, role = get_auth(request)
+        uid, role = get_auth(self)
 
         service = self.api_endpoint.service_by_id(uid, role, service_id)
 
-        return service.serialize()
+        self.write(service.serialize())
 
 
-class ServiceLogsAPI(Resource):
+class ServiceLogsAPI(RequestHandler):
     """The Service logs API endpoint."""
-    def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint) -> None:
-        self.api_endpoint = api_endpoint
+
+    def initialize(self, **kwargs):
+        """Initializes the request handler."""
+        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
+        self.connection_closed = False
+
+    def on_connection_close(self):
+        """Tornado callback for clients closing the connection."""
+        self.connection_closed = True
 
     @catch_exceptions
+    @tornado.gen.engine
     def get(self, service_id) -> dict:
         """HTTP GET method."""
-        uid, role = get_auth(request)
+
+        def cb(callback):
+            if self.connection_closed:
+                tmp_line = None
+            else:
+                tmp_line = next(log_gen)
+            callback(tmp_line)
+
+        uid, role = get_auth(self)
 
         log_gen = self.api_endpoint.service_logs(uid, role, service_id, stream=True)
 
-        def flask_stream():
-            """Helper function to stream log data."""
-            for log_line in log_gen:
-                print(log_line)
-                yield log_line.decode('utf-8')
+        while True:
+            log_line = yield tornado.gen.Task(cb)
+            if log_line is None:
+                break
+            else:
+                self.write(log_line)
+                yield self.flush()
 
-        return Response(flask_stream(), mimetype='text/plain')
+        self.finish()

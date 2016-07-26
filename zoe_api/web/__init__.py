@@ -15,36 +15,39 @@
 
 """Flask initialization for the web interface."""
 
-from flask import Blueprint, g
+from typing import List
+
+import tornado.web
+
 import zoe_api.web.start
 import zoe_api.web.executions
 
 from zoe_lib.version import ZOE_API_VERSION, ZOE_VERSION
 
 
-def web_init(api_endpoint) -> Blueprint:
+def web_init(api_endpoint) -> List[tornado.web.URLSpec]:
     """Flask init for the web interface."""
-    def before_request():
-        """Use the Flask global to hold the api endpoint reference."""
-        g.api_endpoint = api_endpoint
+#    def before_request():
+#        """Use the Flask global to hold the api endpoint reference."""
+#        g.api_endpoint = api_endpoint
 
-    web_bp = Blueprint('web', __name__, template_folder='templates', static_folder='static')
+#    web_bp = Blueprint('web', __name__, template_folder='templates', static_folder='static')
+    route_args = {
+        'api_endpoint': api_endpoint
+    }
+    web_routes = [
+        tornado.web.url(r'/', zoe_api.web.start.index, route_args, name='root'),
+        tornado.web.url(r'/user', zoe_api.web.start.home_user, route_args, name='home_user'),
 
-    web_bp.context_processor(inject_version)
+        tornado.web.url(r'/executions/new', zoe_api.web.executions.execution_define, route_args, name='execution_new'),
+        tornado.web.url(r'/executions/start', zoe_api.web.executions.execution_start, route_args, name='execution_start'),
+        tornado.web.url(r'/executions/restart/([0-9]+)', zoe_api.web.executions.execution_restart, route_args, name='execution_restart'),
+        tornado.web.url(r'/executions/terminate/([0-9]+)', zoe_api.web.executions.execution_terminate, route_args, name='execution_terminate'),
+        tornado.web.url(r'/executions/delete/([0-9]+)', zoe_api.web.executions.execution_delete, route_args, name='execution_delete'),
+        tornado.web.url(r'/executions/inspect/([0-9]+)', zoe_api.web.executions.execution_inspect, route_args, name='execution_inspect')
+    ]
 
-    web_bp.add_url_rule('/', 'index', zoe_api.web.start.index)
-    web_bp.add_url_rule('/user', 'home_user', zoe_api.web.start.home_user)
-
-    web_bp.add_url_rule('/executions/new', 'execution_define', zoe_api.web.executions.execution_define)
-    web_bp.add_url_rule('/executions/start', 'execution_start', zoe_api.web.executions.execution_start, methods=['POST'])
-    web_bp.add_url_rule('/executions/restart/<int:execution_id>', 'execution_restart', zoe_api.web.executions.execution_restart)
-    web_bp.add_url_rule('/executions/terminate/<int:execution_id>', 'execution_terminate', zoe_api.web.executions.execution_terminate)
-    web_bp.add_url_rule('/executions/delete/<int:execution_id>', 'execution_delete', zoe_api.web.executions.execution_delete)
-    web_bp.add_url_rule('/executions/inspect/<int:execution_id>', 'execution_inspect', zoe_api.web.executions.execution_inspect)
-
-    web_bp.before_request(before_request)
-
-    return web_bp
+    return web_routes
 
 
 def inject_version():

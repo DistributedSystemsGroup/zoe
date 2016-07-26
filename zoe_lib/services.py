@@ -16,6 +16,7 @@
 """
 This module contains all service-related API calls that a Zoe client can use.
 """
+import json
 import logging
 
 from zoe_lib.api_base import ZoeAPIBase
@@ -56,6 +57,7 @@ class ZoeServiceAPI(ZoeAPIBase):
         response, status_code = self._rest_get_stream('/service/logs/' + str(container_id))
         if status_code == 200:
             for line in response.iter_lines():
+                line = line.decode('utf-8').split(' ', 1)
                 yield line
         elif status_code == 404:
             raise ZoeAPIException('service "{}" not found'.format(container_id))

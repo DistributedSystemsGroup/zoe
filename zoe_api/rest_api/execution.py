@@ -15,28 +15,29 @@
 
 """The Execution API endpoints."""
 
-from flask_restful import Resource, request
-from werkzeug.exceptions import BadRequest
+from tornado.web import RequestHandler
+import tornado.escape
 
 from zoe_api.rest_api.utils import catch_exceptions, get_auth
 import zoe_api.exceptions
-import zoe_api.api_endpoint
+from zoe_api.api_endpoint import APIEndpoint
 
 
-class ExecutionAPI(Resource):
+class ExecutionAPI(RequestHandler):
     """The Execution API endpoint."""
 
-    def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint) -> None:
-        self.api_endpoint = api_endpoint
+    def initialize(self, **kwargs):
+        """Initializes the request handler."""
+        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
     @catch_exceptions
     def get(self, execution_id):
         """GET a single execution by its ID."""
-        uid, role = get_auth(request)
+        uid, role = get_auth(self)
 
         e = self.api_endpoint.execution_by_id(uid, role, execution_id)
 
-        return e.serialize()
+        self.write(e.serialize())
 
     @catch_exceptions
     def delete(self, execution_id: int):
@@ -46,20 +47,21 @@ class ExecutionAPI(Resource):
         :param execution_id: the execution to be terminated
         :return:
         """
-        uid, role = get_auth(request)
+        uid, role = get_auth(self)
 
         success, message = self.api_endpoint.execution_terminate(uid, role, execution_id)
         if not success:
             raise zoe_api.exceptions.ZoeRestAPIException(message, 400)
 
-        return '', 204
+        self.set_status(204)
 
 
-class ExecutionDeleteAPI(Resource):
+class ExecutionDeleteAPI(RequestHandler):
     """The ExecutionDelete API endpoints."""
 
-    def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint) -> None:
-        self.api_endpoint = api_endpoint
+    def initialize(self, **kwargs):
+        """Initializes the request handler."""
+        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
     @catch_exceptions
     def delete(self, execution_id: int):
@@ -69,20 +71,21 @@ class ExecutionDeleteAPI(Resource):
         :param execution_id: the execution to be deleted
         :return:
         """
-        uid, role = get_auth(request)
+        uid, role = get_auth(self)
 
         success, message = self.api_endpoint.execution_delete(uid, role, execution_id)
         if not success:
             raise zoe_api.exceptions.ZoeRestAPIException(message, 400)
 
-        return '', 204
+        self.set_status(204)
 
 
-class ExecutionCollectionAPI(Resource):
+class ExecutionCollectionAPI(RequestHandler):
     """The Execution Collection API endpoints."""
 
-    def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint) -> None:
-        self.api_endpoint = api_endpoint
+    def initialize(self, **kwargs):
+        """Initializes the request handler."""
+        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
     @catch_exceptions
     def get(self):
@@ -91,10 +94,10 @@ class ExecutionCollectionAPI(Resource):
 
         :return:
         """
-        uid, role = get_auth(request)
+        uid, role = get_auth(self)
 
         execs = self.api_endpoint.execution_list(uid, role)
-        return [e.serialize() for e in execs]
+        self.write(dict([(e.id, e.serialize()) for e in execs]))
 
     @catch_exceptions
     def post(self):
@@ -102,11 +105,11 @@ class ExecutionCollectionAPI(Resource):
         Starts an execution, given an application description. Takes a JSON object.
         :return: the new execution_id
         """
-        uid, role = get_auth(request)
+        uid, role = get_auth(self)
 
         try:
-            data = request.get_json()
-        except BadRequest:
+            data = tornado.escape.json_decode(self.request.body)
+        except ValueError:
             raise zoe_api.exceptions.ZoeRestAPIException('Error decoding JSON data')
 
         application_description = data['application']
@@ -114,4 +117,5 @@ class ExecutionCollectionAPI(Resource):
 
         new_id = self.api_endpoint.execution_start(uid, role, exec_name, application_description)
 
-        return {'execution_id': new_id}, 201
+        self.set_status(201)
+        self.write({'execution_id': new_id})

@@ -15,11 +15,9 @@
 
 """RESTful Flask API definition."""
 
-import sys
-import pkgutil
+from typing import List
 
-from flask import Blueprint
-from flask_restful import Api
+import tornado.web
 
 from zoe_api.rest_api.execution import ExecutionAPI, ExecutionCollectionAPI, ExecutionDeleteAPI
 from zoe_api.rest_api.info import InfoAPI
@@ -31,31 +29,23 @@ from zoe_lib.version import ZOE_API_VERSION
 API_PATH = '/api/' + ZOE_API_VERSION
 
 
-def api_init(api_endpoint) -> Blueprint:
+def api_init(api_endpoint) -> List[tornado.web.URLSpec]:
     """Initialize the API"""
-    api_bp = Blueprint('api', __name__)
-    api = Api(api_bp, catch_all_404s=True)
+    route_args = {
+        'api_endpoint': api_endpoint
+    }
 
-    api.add_resource(InfoAPI, API_PATH + '/info', resource_class_kwargs={'api_endpoint': api_endpoint})
-    api.add_resource(ExecutionAPI, API_PATH + '/execution/<int:execution_id>', resource_class_kwargs={'api_endpoint': api_endpoint})
-    api.add_resource(ExecutionDeleteAPI, API_PATH + '/execution/delete/<int:execution_id>', resource_class_kwargs={'api_endpoint': api_endpoint})
-    api.add_resource(ExecutionCollectionAPI, API_PATH + '/execution', resource_class_kwargs={'api_endpoint': api_endpoint})
-    api.add_resource(ServiceAPI, API_PATH + '/service/<int:service_id>', resource_class_kwargs={'api_endpoint': api_endpoint})
-    api.add_resource(ServiceLogsAPI, API_PATH + '/service/logs/<int:service_id>', resource_class_kwargs={'api_endpoint': api_endpoint})
+    api_routes = [
+        tornado.web.url(API_PATH + r'/info', InfoAPI, route_args),
 
-    api.add_resource(DiscoveryAPI, API_PATH + '/discovery/by_group/<int:execution_id>/<service_group>', resource_class_kwargs={'api_endpoint': api_endpoint})
+        tornado.web.url(API_PATH + r'/execution/([0-9]+)', ExecutionAPI, route_args),
+        tornado.web.url(API_PATH + r'/execution/delete/([0-9]+)', ExecutionDeleteAPI, route_args),
+        tornado.web.url(API_PATH + r'/execution', ExecutionCollectionAPI, route_args),
 
-    return api_bp
+        tornado.web.url(API_PATH + r'/service/([0-9]+)', ServiceAPI, route_args),
+        tornado.web.url(API_PATH + r'/service/logs/([0-9]+)', ServiceLogsAPI, route_args),
 
-# Work around a Python 3.4.0 bug that affects Flask
-if sys.version_info == (3, 4, 0, 'final', 0):
-    ORIG_LOADER = pkgutil.get_loader
+        tornado.web.url(API_PATH + r'/discovery/by_group/([0-9]+)/([a-z0-9A-Z\-]+)', DiscoveryAPI, route_args)
+    ]
 
-    def get_loader(name):
-        """Wrap the original loader to catch a buggy exception."""
-        try:
-            return ORIG_LOADER(name)
-        except AttributeError:
-            pass
-
-    pkgutil.get_loader = get_loader
+    return api_routes

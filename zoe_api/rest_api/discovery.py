@@ -15,20 +15,23 @@
 
 """The Discovery API endpoint."""
 
-from flask_restful import Resource
+from tornado.web import RequestHandler
 
-import zoe_api.api_endpoint
+from zoe_api.api_endpoint import APIEndpoint
 from zoe_api.rest_api.utils import catch_exceptions
 
 
-class DiscoveryAPI(Resource):
+class DiscoveryAPI(RequestHandler):
     """The Discovery API endpoint."""
-    def __init__(self, api_endpoint: zoe_api.api_endpoint.APIEndpoint) -> None:
-        self.api_endpoint = api_endpoint
+
+    def initialize(self, **kwargs):
+        """Initializes the request handler."""
+        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
     @catch_exceptions
     def get(self, execution_id: int, service_group: str):
         """HTTP GET method."""
+        self.api_endpoint.execution_by_id(0, 'admin', execution_id)
         if service_group != 'all':
             services = self.api_endpoint.service_list(0, 'admin', service_group=service_group, execution_id=execution_id)
         else:
@@ -39,4 +42,4 @@ class DiscoveryAPI(Resource):
             'dns_names': [s.dns_name for s in services]
         }
 
-        return ret
+        self.write(ret)

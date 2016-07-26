@@ -15,6 +15,7 @@
 
 """Utility functions needed by the Zoe REST API."""
 
+import base64
 import logging
 
 from zoe_api.exceptions import ZoeRestAPIException, ZoeNotFoundException, ZoeAuthException, ZoeException
@@ -31,33 +32,44 @@ def catch_exceptions(func):
     """
     def func_wrapper(*args, **kwargs):
         """The actual decorator."""
+        self = args[0]
         try:
             return func(*args, **kwargs)
         except ZoeRestAPIException as e:
             if e.status_code != 401:
                 log.exception(e.message)
-            return {'message': e.message}, e.status_code, e.headers
+            self.set_status(e.status_code)
+            for key, value in e.headers.items():
+                self.set_header(key, value)
+            self.write({'message': e.message})
         except ZoeNotFoundException as e:
-            return {'message': e.message}, 404
+            self.set_status(404)
+            self.write({'message': e.message})
         except ZoeAuthException as e:
-            return {'message': e.message}, 401
+            self.set_status(401)
+            self.write({'message': e.message})
         except ZoeException as e:
-            return {'message': e.message}, 400
+            self.set_status(400)
+            self.write({'message': e.message})
         except Exception as e:
+            self.set_status(500)
             log.exception(str(e))
-            return {'message': str(e)}, 500
+            self.write({'message': str(e)})
 
     return func_wrapper
 
 
 def get_auth(request):
     """Try to authenticate a request."""
-    auth = request.authorization
-    if not auth:
+    auth_header = request.request.headers.get('Authorization')
+    if auth_header is None or not auth_header.startswith('Basic '):
         raise ZoeRestAPIException('missing or wrong authentication information', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
+    auth_decoded = base64.decodebytes(bytes(auth_header[6:], 'ascii')).decode('utf-8')
+    username, password = auth_decoded.split(':', 2)
+
     authenticator = LDAPAuthenticator()
-    uid, role = authenticator.auth(auth.username, auth.password)
+    uid, role = authenticator.auth(username, password)
     if uid is None:
         raise ZoeRestAPIException('missing or wrong authentication information', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
