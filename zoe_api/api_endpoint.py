@@ -22,6 +22,7 @@ from zoe_lib.config import get_conf
 import zoe_lib.sql_manager
 import zoe_lib.applications
 import zoe_lib.exceptions
+from zoe_lib.swarm_client import SwarmClient
 
 import zoe_api.master_api
 import zoe_api.exceptions
@@ -111,8 +112,7 @@ class APIEndpoint:
         service = self.sql.service_list(id=service_id, only_one=True)
         if service is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
-        s_exec = self.sql.execution_list(only_one=True, id=service.execution_id)
-        if s_exec.user_id != uid and role != 'admin':
+        if service.user_id != uid and role != 'admin':
             raise zoe_api.exceptions.ZoeAuthException()
         return service
 
@@ -121,6 +121,18 @@ class APIEndpoint:
         services = self.sql.service_list(**filters)
         ret = [s for s in services if s.user_id == uid or role == 'admin']
         return ret
+
+    def service_logs(self, uid, role, service_id, stream=True):
+        """Retrieve the logs for the given service."""
+        service = self.sql.service_list(id=service_id, only_one=True)
+        if service is None:
+            raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
+        if service.user_id != uid and role != 'admin':
+            raise zoe_api.exceptions.ZoeAuthException()
+        if service.docker_id is None:
+            raise zoe_api.exceptions.ZoeNotFoundException('Container is not running')
+        swarm = SwarmClient(get_conf())
+        return swarm.logs(service.docker_id, stream)
 
     def retry_submit_error_executions(self):
         """Resubmit any execution forgotten by the master."""

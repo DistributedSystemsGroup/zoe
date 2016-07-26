@@ -23,7 +23,7 @@ from flask_restful import Api
 
 from zoe_api.rest_api.execution import ExecutionAPI, ExecutionCollectionAPI, ExecutionDeleteAPI
 from zoe_api.rest_api.info import InfoAPI
-from zoe_api.rest_api.service import ServiceAPI
+from zoe_api.rest_api.service import ServiceAPI, ServiceLogsAPI
 from zoe_api.rest_api.discovery import DiscoveryAPI
 
 from zoe_lib.version import ZOE_API_VERSION
@@ -41,6 +41,7 @@ def api_init(api_endpoint) -> Blueprint:
     api.add_resource(ExecutionDeleteAPI, API_PATH + '/execution/delete/<int:execution_id>', resource_class_kwargs={'api_endpoint': api_endpoint})
     api.add_resource(ExecutionCollectionAPI, API_PATH + '/execution', resource_class_kwargs={'api_endpoint': api_endpoint})
     api.add_resource(ServiceAPI, API_PATH + '/service/<int:service_id>', resource_class_kwargs={'api_endpoint': api_endpoint})
+    api.add_resource(ServiceLogsAPI, API_PATH + '/service/logs/<int:service_id>', resource_class_kwargs={'api_endpoint': api_endpoint})
 
     api.add_resource(DiscoveryAPI, API_PATH + '/discovery/by_group/<int:execution_id>/<service_group>', resource_class_kwargs={'api_endpoint': api_endpoint})
 

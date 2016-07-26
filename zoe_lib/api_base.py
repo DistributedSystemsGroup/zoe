@@ -61,6 +61,24 @@ class ZoeAPIBase:
         self.password = password
 
     @retry(ZoeAPIException)
+    def _rest_get_stream(self, path):
+        """
+        :type path: str
+        :rtype: (dict, int)
+        """
+        url = self.url + '/api/' + ZOE_API_VERSION + path
+        try:
+            req = requests.get(url, auth=(self.user, self.password), stream=True)
+        except requests.exceptions.Timeout:
+            raise ZoeAPIException('HTTP connection timeout')
+        except requests.exceptions.HTTPError:
+            raise ZoeAPIException('Invalid HTTP response')
+        except requests.exceptions.ConnectionError as e:
+            raise ZoeAPIException('Connection error: {}'.format(e))
+
+        return req, req.status_code
+
+    @retry(ZoeAPIException)
     def _rest_get(self, path):
         """
         :type path: str

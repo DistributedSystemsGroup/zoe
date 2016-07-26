@@ -127,6 +127,13 @@ def exec_rm_cmd(args):
     exec_api.delete(args.id)
 
 
+def logs_cmd(args):
+    """Retrieves and streams the logs of a service."""
+    service_api = ZoeServiceAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
+    for line in service_api.get_logs(args.service_id):
+        print(line)
+
+
 ENV_HELP_TEXT = '''To use this tool you need also to define three environment variables:
 ZOE_URL: point to the URL of the Zoe Scheduler (ex.: http://localhost:5000/
 ZOE_USER: the username used for authentication
@@ -170,6 +177,10 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     argparser_execution_kill = subparser.add_parser('exec-rm', help="Deletes an execution")
     argparser_execution_kill.add_argument('id', type=int, help="Execution id")
     argparser_execution_kill.set_defaults(func=exec_rm_cmd)
+
+    argparser_logs = subparser.add_parser('logs', help="Streams the service logs")
+    argparser_logs.add_argument('service_id', type=int, help="Service id")
+    argparser_logs.set_defaults(func=logs_cmd)
 
     return parser, parser.parse_args()
 
