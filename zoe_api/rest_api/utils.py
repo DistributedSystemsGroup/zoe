@@ -18,8 +18,15 @@
 import base64
 import logging
 
+import tornado.web
+
+from zoe_lib.config import get_conf
+
 from zoe_api.exceptions import ZoeRestAPIException, ZoeNotFoundException, ZoeAuthException, ZoeException
 from zoe_api.auth.ldap import LDAPAuthenticator
+from zoe_api.auth.file import PlainTextAuthenticator
+from zoe_api.auth.base import BaseAuthenticator
+
 
 log = logging.getLogger(__name__)
 
@@ -59,16 +66,21 @@ def catch_exceptions(func):
     return func_wrapper
 
 
-def get_auth(request):
+def get_auth(handler: tornado.web.RequestHandler):
     """Try to authenticate a request."""
-    auth_header = request.request.headers.get('Authorization')
+    auth_header = handler.request.headers.get('Authorization')
     if auth_header is None or not auth_header.startswith('Basic '):
         raise ZoeRestAPIException('missing or wrong authentication information', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
     auth_decoded = base64.decodebytes(bytes(auth_header[6:], 'ascii')).decode('utf-8')
     username, password = auth_decoded.split(':', 2)
 
-    authenticator = LDAPAuthenticator()
+    if get_conf().auth_type == 'text':
+        authenticator = PlainTextAuthenticator()  # type: BaseAuthenticator
+    elif get_conf().auth_type == 'ldap':
+        authenticator = LDAPAuthenticator()
+    else:
+        raise ZoeException('Configuration error, unknown authentication method: {}'.format(get_conf().auth_type))
     uid, role = authenticator.auth(username, password)
     if uid is None:
         raise ZoeRestAPIException('missing or wrong authentication information', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})

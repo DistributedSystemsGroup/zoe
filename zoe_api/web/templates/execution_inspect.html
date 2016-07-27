@@ -24,13 +24,14 @@
 {% endif %}
 
 <div id="container_list">
-{% if services|length > 0 %}
-<p>Services:</p>
+{% if services_info|length > 0 %}
+<h3>Services:</h3>
 {% endif %}
 <ul>
 {% for s in services_info %}
     <li class="container_name" id="{{ s['id'] }}">{{ s['name'] }}</li>
     <ul>
+    <li>Status: {{ s['status'] }}</li>
     {% for p in s['description']['ports'] %}
         {% if s['ip_address'] == None %}
         <li>Inactive</li>

@@ -21,7 +21,7 @@ from tornado.web import RequestHandler
 import tornado.gen
 
 from zoe_api.rest_api.utils import catch_exceptions, get_auth
-from zoe_api.api_endpoint import APIEndpoint
+from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 
 log = logging.getLogger(__name__)
 
@@ -42,6 +42,10 @@ class ServiceAPI(RequestHandler):
 
         self.write(service.serialize())
 
+    def data_received(self, chunk):
+        """Not implemented as we do not use stream uploads"""
+        pass
+
 
 class ServiceLogsAPI(RequestHandler):
     """The Service logs API endpoint."""
@@ -57,10 +61,11 @@ class ServiceLogsAPI(RequestHandler):
 
     @catch_exceptions
     @tornado.gen.engine
-    def get(self, service_id) -> dict:
+    def get(self, service_id):
         """HTTP GET method."""
 
-        def cb(callback):
+        def new_log_line_cb(callback):
+            """Task callback"""
             if self.connection_closed:
                 tmp_line = None
             else:
@@ -72,7 +77,7 @@ class ServiceLogsAPI(RequestHandler):
         log_gen = self.api_endpoint.service_logs(uid, role, service_id, stream=True)
 
         while True:
-            log_line = yield tornado.gen.Task(cb)
+            log_line = yield tornado.gen.Task(new_log_line_cb)
             if log_line is None:
                 break
             else:
@@ -80,3 +85,7 @@ class ServiceLogsAPI(RequestHandler):
                 yield self.flush()
 
         self.finish()
+
+    def data_received(self, chunk):
+        """Not implemented as we do not use stream uploads"""
+        pass

@@ -36,15 +36,15 @@ def web_init(api_endpoint) -> List[tornado.web.URLSpec]:
         'api_endpoint': api_endpoint
     }
     web_routes = [
-        tornado.web.url(r'/', zoe_api.web.start.index, route_args, name='root'),
-        tornado.web.url(r'/user', zoe_api.web.start.home_user, route_args, name='home_user'),
+        tornado.web.url(r'/', zoe_api.web.start.RootWeb, route_args, name='root'),
+        tornado.web.url(r'/user', zoe_api.web.start.HomeWeb, route_args, name='home_user'),
 
-        tornado.web.url(r'/executions/new', zoe_api.web.executions.execution_define, route_args, name='execution_new'),
-        tornado.web.url(r'/executions/start', zoe_api.web.executions.execution_start, route_args, name='execution_start'),
-        tornado.web.url(r'/executions/restart/([0-9]+)', zoe_api.web.executions.execution_restart, route_args, name='execution_restart'),
-        tornado.web.url(r'/executions/terminate/([0-9]+)', zoe_api.web.executions.execution_terminate, route_args, name='execution_terminate'),
-        tornado.web.url(r'/executions/delete/([0-9]+)', zoe_api.web.executions.execution_delete, route_args, name='execution_delete'),
-        tornado.web.url(r'/executions/inspect/([0-9]+)', zoe_api.web.executions.execution_inspect, route_args, name='execution_inspect')
+        tornado.web.url(r'/executions/new', zoe_api.web.executions.ExecutionDefineWeb, route_args, name='execution_define'),
+        tornado.web.url(r'/executions/start', zoe_api.web.executions.ExecutionStartWeb, route_args, name='execution_start'),
+        tornado.web.url(r'/executions/restart/([0-9]+)', zoe_api.web.executions.ExecutionRestartWeb, route_args, name='execution_restart'),
+        tornado.web.url(r'/executions/terminate/([0-9]+)', zoe_api.web.executions.ExecutionTerminateWeb, route_args, name='execution_terminate'),
+        tornado.web.url(r'/executions/delete/([0-9]+)', zoe_api.web.executions.ExecutionDeleteWeb, route_args, name='execution_delete'),
+        tornado.web.url(r'/executions/inspect/([0-9]+)', zoe_api.web.executions.ExecutionInspectWeb, route_args, name='execution_inspect')
     ]
 
     return web_routes

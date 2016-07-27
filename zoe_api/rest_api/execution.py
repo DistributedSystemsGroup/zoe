@@ -20,7 +20,7 @@ import tornado.escape
 
 from zoe_api.rest_api.utils import catch_exceptions, get_auth
 import zoe_api.exceptions
-from zoe_api.api_endpoint import APIEndpoint
+from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 
 
 class ExecutionAPI(RequestHandler):
@@ -55,6 +55,10 @@ class ExecutionAPI(RequestHandler):
 
         self.set_status(204)
 
+    def data_received(self, chunk):
+        """Not implemented as we do not use stream uploads"""
+        pass
+
 
 class ExecutionDeleteAPI(RequestHandler):
     """The ExecutionDelete API endpoints."""
@@ -78,6 +82,10 @@ class ExecutionDeleteAPI(RequestHandler):
             raise zoe_api.exceptions.ZoeRestAPIException(message, 400)
 
         self.set_status(204)
+
+    def data_received(self, chunk):
+        """Not implemented as we do not use stream uploads"""
+        pass
 
 
 class ExecutionCollectionAPI(RequestHandler):
@@ -119,3 +127,7 @@ class ExecutionCollectionAPI(RequestHandler):
 
         self.set_status(201)
         self.write({'execution_id': new_id})
+
+    def data_received(self, chunk):
+        """Not implemented as we do not use stream uploads"""
+        pass

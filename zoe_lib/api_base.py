@@ -64,7 +64,7 @@ class ZoeAPIBase:
     def _rest_get_stream(self, path):
         """
         :type path: str
-        :rtype: (dict, int)
+        :rtype: Tuple[requests.Response, int]
         """
         url = self.url + '/api/' + ZOE_API_VERSION + path
         try:

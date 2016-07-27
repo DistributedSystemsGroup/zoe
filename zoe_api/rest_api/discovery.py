@@ -17,7 +17,7 @@
 
 from tornado.web import RequestHandler
 
-from zoe_api.api_endpoint import APIEndpoint
+from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 from zoe_api.rest_api.utils import catch_exceptions
 
 
@@ -43,3 +43,7 @@ class DiscoveryAPI(RequestHandler):
         }
 
         self.write(ret)
+
+    def data_received(self, chunk):
+        """Not implemented as we do not use stream uploads"""
+        pass

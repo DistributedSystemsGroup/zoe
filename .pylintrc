@@ -47,7 +47,7 @@ confidence=
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use"--disable=all --enable=classes
 # --disable=W"
-disable=line-too-long,logging-format-interpolation,too-few-public-methods,too-many-instance-attributes,fixme,too-many-branches,file-ignored,global-statement,redefined-variable-type,no-self-use,too-many-statements
+disable=line-too-long,logging-format-interpolation,too-few-public-methods,too-many-instance-attributes,fixme,too-many-branches,file-ignored,global-statement,redefined-variable-type,no-self-use,too-many-statements,locally-disabled,arguments-differ
 
 
 [REPORTS]
@@ -309,7 +309,7 @@ int-import-graph=
 [CLASSES]
 
 # List of method names used to declare (i.e. assign) instance attributes.
-defining-attr-methods=__init__
+defining-attr-methods=__init__,initialize
 
 # List of valid names for the first argument in a class method.
 valid-classmethod-first-arg=cls

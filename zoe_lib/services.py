@@ -16,7 +16,6 @@
 """
 This module contains all service-related API calls that a Zoe client can use.
 """
-import json
 import logging
 
 from zoe_lib.api_base import ZoeAPIBase

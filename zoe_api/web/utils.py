@@ -15,15 +15,16 @@
 
 """Functions needed by the Zoe web interface."""
 
+import base64
 import logging
-
-from flask import Response, render_template
 
 from zoe_lib.config import get_conf
 
+from zoe_api.auth.base import BaseAuthenticator
 from zoe_api.auth.ldap import LDAPAuthenticator
 from zoe_api.auth.file import PlainTextAuthenticator
 import zoe_api.exceptions
+from zoe_api.web.custom_request_handler import ZoeRequestHandler
 
 log = logging.getLogger(__name__)
 
@@ -36,14 +37,15 @@ def catch_exceptions(func):
     """
     def func_wrapper(*args, **kwargs):
         """The actual decorator."""
+        self = args[0]
         try:
             return func(*args, **kwargs)
         except zoe_api.exceptions.ZoeAuthException:
-            return missing_auth()
+            return missing_auth(self)
         except zoe_api.exceptions.ZoeNotFoundException as e:
-            return error_page(e.message, 404)
+            return error_page(self, str(e), 404)
         except zoe_api.exceptions.ZoeException as e:
-            return error_page(e, 400)
+            return error_page(self, str(e), 400)
         except Exception as e:
             log.exception(str(e))
             return {'message': str(e)}, 500
@@ -51,33 +53,37 @@ def catch_exceptions(func):
     return func_wrapper
 
 
-def missing_auth():
+def missing_auth(handler: ZoeRequestHandler):
     """Sends a 401 response that enables basic auth"""
-    return Response('Could not verify your access level for that URL.\nYou have to login with proper credentials',
-                    401,
-                    {'WWW-Authenticate': 'Basic realm="Login Required"'})
+    handler.set_status(401, 'Could not verify your access level for that URL.\nYou have to login with proper credentials')
+    handler.set_header('WWW-Authenticate', 'Basic realm="Login Required"')
+    handler.finish()
 
 
-def get_auth(request):
+def get_auth(handler: ZoeRequestHandler):
     """Try to authenticate a request."""
 
-    auth = request.authorization
-    if not auth:
+    auth_header = handler.request.headers.get('Authorization')
+    if auth_header is None or not auth_header.startswith('Basic '):
         raise zoe_api.exceptions.ZoeAuthException
 
+    auth_decoded = base64.decodebytes(bytes(auth_header[6:], 'ascii')).decode('utf-8')
+    username, password = auth_decoded.split(':', 2)
+
     if get_conf().auth_type == 'text':
-        authenticator = PlainTextAuthenticator()
+        authenticator = PlainTextAuthenticator()  # type: BaseAuthenticator
     elif get_conf().auth_type == 'ldap':
         authenticator = LDAPAuthenticator()
     else:
         raise zoe_api.exceptions.ZoeException('Configuration error, unknown authentication method: {}'.format(get_conf().auth_type))
-    uid, role = authenticator.auth(auth.username, auth.password)
+    uid, role = authenticator.auth(username, password)
     if uid is None:
         raise zoe_api.exceptions.ZoeAuthException
 
     return uid, role
 
 
-def error_page(error_message, status):
+def error_page(handler: ZoeRequestHandler, error_message: str, status: int):
     """Generate an error page."""
-    return render_template('error.html', error=error_message), status
+    handler.set_status(status)
+    handler.render('error.html', error=error_message)

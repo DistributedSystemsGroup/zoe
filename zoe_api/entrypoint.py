@@ -28,6 +28,7 @@ import zoe_api.api_endpoint
 import zoe_api.rest_api
 import zoe_api.web
 import zoe_api.auth.ldap
+from zoe_api.web.custom_request_handler import JinjaApp
 
 log = logging.getLogger("zoe_api")
 LOG_FORMAT = '%(asctime)-15s %(levelname)s %(name)s (%(threadName)s): %(message)s'
@@ -55,9 +56,11 @@ def zoe_web_main() -> int:
 
     app_settings = {
         'static_path': os.path.join(os.path.dirname(__file__), "web", "static"),
+        'template_path': os.path.join(os.path.dirname(__file__), "web", "templates"),
         'debug': args.debug
     }
     app = Application(zoe_api.web.web_init(api_endpoint) + zoe_api.rest_api.api_init(api_endpoint), **app_settings)
+    JinjaApp.init_app(app)
 
     log.info("Starting HTTP server...")
     http_server = HTTPServer(app)

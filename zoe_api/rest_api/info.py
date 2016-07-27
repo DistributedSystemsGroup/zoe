@@ -18,6 +18,8 @@
 from tornado.web import RequestHandler
 
 from zoe_api.rest_api.utils import catch_exceptions
+from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
+
 from zoe_lib.config import get_conf
 from zoe_lib.version import ZOE_API_VERSION, ZOE_APPLICATION_FORMAT_VERSION, ZOE_VERSION
 
@@ -40,3 +42,7 @@ class InfoAPI(RequestHandler):
         }
 
         self.write(ret)
+
+    def data_received(self, chunk):
+        """Not implemented as we do not use stream uploads"""
+        pass

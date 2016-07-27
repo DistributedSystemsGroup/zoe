@@ -4,10 +4,11 @@
 
     <div id="my_executions">
     <h3>Executions</h3>
-    <p><a href="{{ url_for('web.execution_define') }}">New execution</a></p>
+    <p><a href="{{ reverse_url('execution_define') }}">New execution</a></p>
     <table id="exec_list" class="app_list sortable">
     <thead>
     <tr>
+        <th>ID</th>
         <th>Execution name</th>
         {% if is_admin %}
         <th>User</th>
@@ -22,6 +23,7 @@
     <tbody>
         {% for e in executions %}
             <tr class="{{ loop.cycle('odd', 'even') }}">
+                <td>{{ e.id }}</td>
                 <td><a href="/executions/inspect/{{ e.id }}">{{ e.name }}</a></td>
                 {% if is_admin %}
                 <td>{{ e.user_id }}</td>
