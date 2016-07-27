@@ -55,7 +55,7 @@ def catch_exceptions(func):
 
 def missing_auth(handler: ZoeRequestHandler):
     """Sends a 401 response that enables basic auth"""
-    handler.set_status(401, 'Could not verify your access level for that URL.\nYou have to login with proper credentials')
+    handler.set_status(401, 'Could not verify your access level for that URL. You have to login with proper credentials.')
     handler.set_header('WWW-Authenticate', 'Basic realm="Login Required"')
     handler.finish()
 

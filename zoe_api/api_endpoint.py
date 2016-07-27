@@ -126,7 +126,7 @@ class APIEndpoint:
         """Retrieve the logs for the given service."""
         service = self.sql.service_list(id=service_id, only_one=True)
         if service is None:
-            raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
+            raise zoe_api.exceptions.ZoeNotFoundException('No such service')
         if service.user_id != uid and role != 'admin':
             raise zoe_api.exceptions.ZoeAuthException()
         if service.docker_id is None:
