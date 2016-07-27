@@ -130,12 +130,14 @@ def exec_rm_cmd(args):
 def logs_cmd(args):
     """Retrieves and streams the logs of a service."""
     service_api = ZoeServiceAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    for line in service_api.get_logs(args.service_id):
-        if args.timestamps:
-            print(line[0], line[1])
-        else:
-            print(line[1])
-
+    try:
+        for line in service_api.get_logs(args.service_id):
+            if args.timestamps:
+                print(line[0], line[1])
+            else:
+                print(line[1])
+    except KeyboardInterrupt:
+        print('CTRL-C detected, exiting...')
 
 ENV_HELP_TEXT = '''To use this tool you need also to define three environment variables:
 ZOE_URL: point to the URL of the Zoe Scheduler (ex.: http://localhost:5000/
