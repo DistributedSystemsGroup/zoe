@@ -19,6 +19,7 @@ import logging
 
 from tornado.web import RequestHandler
 import tornado.gen
+import tornado.iostream
 
 from zoe_api.rest_api.utils import catch_exceptions, get_auth
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
@@ -60,29 +61,25 @@ class ServiceLogsAPI(RequestHandler):
         self.connection_closed = True
 
     @catch_exceptions
-    @tornado.gen.engine
+    @tornado.gen.coroutine
     def get(self, service_id):
         """HTTP GET method."""
-
-        def new_log_line_cb(callback):
-            """Task callback"""
-            if self.connection_closed:
-                tmp_line = None
-            else:
-                tmp_line = next(log_gen)
-            callback(tmp_line)
 
         uid, role = get_auth(self)
 
         log_gen = self.api_endpoint.service_logs(uid, role, service_id, stream=True)
 
         while True:
-            log_line = yield tornado.gen.Task(new_log_line_cb)
-            if log_line is None:
-                break
-            else:
-                self.write(log_line)
+            log_line = next(log_gen)
+            yield tornado.gen.moment
+            self.write(log_line)
+            try:
                 yield self.flush()
+            except tornado.iostream.StreamClosedError:
+                break
+
+            if self.connection_closed:
+                break
 
         self.finish()
 
