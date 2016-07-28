@@ -28,7 +28,7 @@ log = logging.getLogger(__name__)
 class ZoeMonitor(threading.Thread):
     """The monitor."""
 
-    def __init__(self, state: SQLManager):
+    def __init__(self, state: SQLManager) -> None:
         super().__init__()
         self.setName('monitor')
         self.stop = False

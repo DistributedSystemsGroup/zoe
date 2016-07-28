@@ -27,7 +27,7 @@ from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 
 log = logging.getLogger(__name__)
 
-thread_pool = ThreadPoolExecutor(20)
+THREAD_POOL = ThreadPoolExecutor(20)
 
 
 class ServiceAPI(RequestHandler):
@@ -74,7 +74,7 @@ class ServiceLogsAPI(RequestHandler):
 
         while True:
             try:
-                log_line = yield thread_pool.submit(next, log_gen)
+                log_line = yield THREAD_POOL.submit(next, log_gen)
             except StopIteration:
                 break
 
