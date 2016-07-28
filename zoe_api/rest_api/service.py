@@ -15,6 +15,7 @@
 
 """The Service API endpoint."""
 
+from concurrent.futures import ThreadPoolExecutor
 import logging
 
 from tornado.web import RequestHandler
@@ -25,6 +26,8 @@ from zoe_api.rest_api.utils import catch_exceptions, get_auth
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 
 log = logging.getLogger(__name__)
+
+thread_pool = ThreadPoolExecutor(2)
 
 
 class ServiceAPI(RequestHandler):
@@ -59,6 +62,7 @@ class ServiceLogsAPI(RequestHandler):
     def on_connection_close(self):
         """Tornado callback for clients closing the connection."""
         self.connection_closed = True
+        log.debug('Streaming connection closed')
 
     @catch_exceptions
     @tornado.gen.coroutine
@@ -70,8 +74,10 @@ class ServiceLogsAPI(RequestHandler):
         log_gen = self.api_endpoint.service_logs(uid, role, service_id, stream=True)
 
         while True:
-            log_line = next(log_gen)
-            yield tornado.gen.moment
+            log_line = yield thread_pool.submit(next, log_gen)
+            if log_line is None:
+                log.debug('Docker logs returned a None')
+                break
             self.write(log_line)
             try:
                 yield self.flush()
@@ -81,6 +87,7 @@ class ServiceLogsAPI(RequestHandler):
             if self.connection_closed:
                 break
 
+        log.debug('Finishing log stream for service {}'.format(service_id))
         self.finish()
 
     def data_received(self, chunk):
