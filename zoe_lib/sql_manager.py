@@ -16,12 +16,15 @@
 """Interface to PostgresQL for Zoe state."""
 
 import datetime
+import logging
 
 import psycopg2
 import psycopg2.extras
 
 from zoe_lib.config import get_conf
 from zoe_lib.swarm_client import SwarmClient
+
+log = logging.getLogger(__name__)
 
 psycopg2.extensions.register_adapter(dict, psycopg2.extras.Json)
 
@@ -315,6 +318,12 @@ class Service(Base):
     ACTIVE_STATUS = "active"
     STARTING_STATUS = "starting"
 
+    DOCKER_UNDEFINED_STATUS = 'undefined'
+    DOCKER_CREATE_STATUS = 'create'
+    DOCKER_START_STATUS = 'start'
+    DOCKER_DIE_STATUS = 'die'
+    DOCKER_DESTROY_STATUS = 'destroy'
+
     def __init__(self, d, sql_manager):
         super().__init__(d, sql_manager)
 
@@ -325,6 +334,7 @@ class Service(Base):
         self.description = d['description']
         self.service_group = d['service_group']
         self.docker_id = d['docker_id']
+        self.docker_status = d['docker_status']
 
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""
@@ -337,7 +347,8 @@ class Service(Base):
             'description': self.description,
             'service_group': self.service_group,
             'docker_id': self.docker_id,
-            'ip_address': self.ip_address
+            'ip_address': self.ip_address,
+            'docker_status': self.docker_status
         }
 
     def __eq__(self, other):
@@ -363,6 +374,22 @@ class Service(Base):
     def set_active(self, docker_id):
         """The service is running and has a valid docker_id."""
         self.sql_manager.service_update(self.id, status=self.ACTIVE_STATUS, docker_id=docker_id)
+
+    def set_docker_status(self, new_status):
+        """Docker has emitted an event related to this service."""
+        if new_status == 'create':
+            new_status = self.DOCKER_CREATE_STATUS
+        elif new_status == 'start':
+            new_status = self.DOCKER_START_STATUS
+        elif new_status == 'die':
+            new_status = self.DOCKER_DIE_STATUS
+        elif new_status == 'destroy':
+            new_status = self.DOCKER_DESTROY_STATUS
+        else:
+            log.error('Unknown docker status: {}'.format(new_status))
+            return
+
+        self.sql_manager.service_update(self.id, docker_status=new_status)
 
     @property
     def ip_address(self):

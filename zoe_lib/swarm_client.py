@@ -31,6 +31,8 @@ import docker
 import docker.errors
 import docker.utils
 
+import requests.packages
+
 from zoe_master.stats import SwarmStats, SwarmNodeStats
 from zoe_lib.exceptions import ZoeLibException
 
@@ -301,8 +303,22 @@ class SwarmClient:
 
     def event_listener(self, callback: Callable[[str], bool]) -> None:
         """An infinite loop that listens for events from Swarm."""
-        for event in self.cli.events(decode=True):
-            if not callback(event):
+        event_gen = self.cli.events(decode=True)
+        while True:
+            try:
+                event = next(event_gen)
+            except requests.packages.urllib3.exceptions.ProtocolError:
+                log.warning('Docker closed event connection, retrying...')
+                event_gen = self.cli.events(decode=True)
+                continue
+
+            try:
+                res = callback(event)
+            except Exception:
+                log.exception('Uncaught exception in swarm event callback')
+                log.warning('event was: {}'.format(event))
+                continue
+            if not res:
                 break
 
     def connect_to_network(self, container_id: str, network_id: str) -> None:

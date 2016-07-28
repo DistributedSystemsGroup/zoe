@@ -22,6 +22,7 @@ import logging
 from zoe_master.master_api import APIManager
 from zoe_master.scheduler import ZoeScheduler
 from zoe_master.execution_manager import restart_resubmit_scheduler
+from zoe_master.monitor import ZoeMonitor
 
 import zoe_lib.config as config
 from zoe_lib.metrics.influxdb import InfluxDBMetricSender
@@ -56,6 +57,8 @@ def main():
     log.info("Initializing scheduler")
     scheduler = ZoeScheduler()
 
+    monitor = ZoeMonitor(state)
+
     restart_resubmit_scheduler(state, scheduler)
 
     log.info("Starting ZMQ API server...")
@@ -69,5 +72,6 @@ def main():
         log.exception('fatal error')
     finally:
         scheduler.quit()
+        monitor.quit()
         api_server.quit()
         metrics.quit()
