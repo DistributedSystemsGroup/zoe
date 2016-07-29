@@ -26,6 +26,7 @@ import zoe_lib.applications
 import zoe_lib.config as config
 from zoe_lib.configargparse import ArgumentParser, FileType
 from zoe_lib.sql_manager import Execution, Service
+from zoe_lib.swarm_client import SwarmClient
 from zoe_master.execution_manager import _digest_application_description
 from zoe_master.zapp_to_docker import execution_to_containers, terminate_execution
 
@@ -120,7 +121,8 @@ class FakeSQLManager:
             'execution_id': execution_id,
             'docker_id': None,
             'service_group': service_group,
-            'error_message': None
+            'error_message': None,
+            'docker_status': Service.DOCKER_UNDEFINED_STATUS
         }
         service = Service(s_dict, self)
         self.services.append(service)
@@ -177,6 +179,7 @@ def load_configuration():
 
     opts.gelf_address = ''  # For debugging we want to easily look at logs with 'docker logs'
     opts.influxdb_enable = False  # don't send metrics for these test runs
+    opts.deployment_name = 'zapp-test'
 
     if opts.debug:
         argparser.print_values()
@@ -214,8 +217,16 @@ def main():
     print('Zapp digested, starting containers...')
     execution_to_containers(e)
 
+    print('Giving the containers a few seconds to start...')
+    time.sleep(5)
+
+    swarm = SwarmClient(args)
     for service in e.services:
         print("Service {}, docker ID: {}".format(service.name, service.docker_id))
+        logs = swarm.logs(service.docker_id, False)
+        logs = logs.decode('utf-8').split('\n')
+        for log_line in logs[-10:]:
+            print(log_line)
 
     print("Execution as been started, press CTRL-C to terminate it")
     try:
