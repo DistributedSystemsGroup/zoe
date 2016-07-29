@@ -69,13 +69,13 @@ class ZoeMonitor(threading.Thread):
         if 'exec' in event['Action']:
             pass
         elif 'create' in event['Action']:
-            service.set_docker_status('create')
+            service.set_docker_status(service.DOCKER_CREATE_STATUS)
         elif 'start' in event['Action']:
-            service.set_docker_status('start')
+            service.set_docker_status(service.DOCKER_START_STATUS)
         elif 'die' in event['Action']:
-            service.set_docker_status('die')
+            service.set_docker_status(service.DOCKER_DIE_STATUS)
         elif 'destroy' in event['Action']:
-            service.set_docker_status('destroy')
+            service.set_docker_status(service.DOCKER_DESTROY_STATUS)
         else:
             log.debug('Unmanaged container action: {}'.format(event['Action']))
 

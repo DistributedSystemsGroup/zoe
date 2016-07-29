@@ -31,14 +31,13 @@
 {% for s in services_info %}
     <li class="container_name" id="{{ s['id'] }}">{{ s['name'] }}</li>
     <ul>
-    <li>Status: {{ s['status'] }}</li>
-    {% for p in s['description']['ports'] %}
-        {% if s['ip_address'] == None %}
-        <li>Inactive</li>
-        {%  else %}
-        <li><a href="{{ p['protocol'] }}://{{ s['ip_address'] }}:{{ p['port_number'] }}{{ p['path'] }}">{{ p['name'] }}</a></li>
-        {% endif %}
-    {% endfor %}
+    <li>Zoe status: {{ s['status'] }}</li>
+    <li>Docker status: {{ s['docker_status'] }}</li>
+    {% if s['docker_status'] == 'started' %}
+        {% for p in s['description']['ports'] %}
+            <li><a href="{{ p['protocol'] }}://{{ s['ip_address'] }}:{{ p['port_number'] }}{{ p['path'] }}">{{ p['name'] }}</a></li>
+        {% endfor %}
+    {% endif %}
     </ul>
 {% endfor %}
 </ul>

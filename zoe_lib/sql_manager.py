@@ -319,10 +319,10 @@ class Service(Base):
     STARTING_STATUS = "starting"
 
     DOCKER_UNDEFINED_STATUS = 'undefined'
-    DOCKER_CREATE_STATUS = 'create'
-    DOCKER_START_STATUS = 'start'
-    DOCKER_DIE_STATUS = 'die'
-    DOCKER_DESTROY_STATUS = 'destroy'
+    DOCKER_CREATE_STATUS = 'created'
+    DOCKER_START_STATUS = 'started'
+    DOCKER_DIE_STATUS = 'dead'
+    DOCKER_DESTROY_STATUS = 'destroyed'
 
     def __init__(self, d, sql_manager):
         super().__init__(d, sql_manager)
@@ -377,24 +377,13 @@ class Service(Base):
 
     def set_docker_status(self, new_status):
         """Docker has emitted an event related to this service."""
-        if new_status == 'create':
-            new_status = self.DOCKER_CREATE_STATUS
-        elif new_status == 'start':
-            new_status = self.DOCKER_START_STATUS
-        elif new_status == 'die':
-            new_status = self.DOCKER_DIE_STATUS
-        elif new_status == 'destroy':
-            new_status = self.DOCKER_DESTROY_STATUS
-        else:
-            log.error('Unknown docker status: {}'.format(new_status))
-            return
-
         self.sql_manager.service_update(self.id, docker_status=new_status)
+        log.debug("service {}, status updated to {}".format(self.id, new_status))
 
     @property
     def ip_address(self):
         """Getter for the service IP address, queries Swarm as the IP address changes outside our control."""
-        if self.status != self.ACTIVE_STATUS:
+        if self.docker_status != self.DOCKER_START_STATUS:
             return {}
         swarm = SwarmClient(get_conf())
         s_info = swarm.inspect_container(self.docker_id)

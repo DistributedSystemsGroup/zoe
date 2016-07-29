@@ -109,10 +109,13 @@ def exec_get_cmd(args):
         print('Application name: {}'.format(app['name']))
         for c_id in execution['services']:
             service = cont_api.get(c_id)
-            ip = service['ip_address']
-            print('Service {} (ID: {}, {})'.format(service['name'], service['id'], service['status']))
-            for port in service['description']['ports']:
-                print(' - {}: {}://{}:{}{}'.format(port['name'], port['protocol'], ip, port['port_number'], port['path']))
+            print('Service {} (ID: {})'.format(service['name'], service['id']))
+            print(' - zoe status: {}'.format(service['status']))
+            print(' - docker status: {}'.format(service['docker_status']))
+            if service['docker_status'] == 'started':
+                ip = service['ip_address']
+                for port in service['description']['ports']:
+                    print(' - {}: {}://{}:{}{}'.format(port['name'], port['protocol'], ip, port['port_number'], port['path']))
 
 
 def exec_kill_cmd(args):
