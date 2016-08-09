@@ -46,8 +46,6 @@ def catch_exceptions(func):
             if e.status_code != 401:
                 log.exception(e.message)
             self.set_status(e.status_code)
-            for key, value in e.headers.items():
-                self.set_header(key, value)
             self.write({'message': e.message})
         except ZoeNotFoundException as e:
             self.set_status(404)
