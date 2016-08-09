@@ -51,7 +51,11 @@ class SQLManager:
         self.conn = psycopg2.connect(dsn)
 
     def _cursor(self):
-        cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        try:
+            cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        except psycopg2.InterfaceError:
+            self._connect()
+            cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute('SET search_path TO {},public'.format(self.schema))
         return cur
 
