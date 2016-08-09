@@ -17,6 +17,7 @@
 
 import logging
 import threading
+import time
 
 from zoe_lib.swarm_client import SwarmClient
 from zoe_lib.config import get_conf
@@ -39,8 +40,14 @@ class ZoeMonitor(threading.Thread):
 
     def run(self):
         """The thread loop."""
+        log.info("Monitor thread started")
         swarm = SwarmClient(get_conf())
-        swarm.event_listener(lambda x: self._event_cb(x))
+        while True:
+            try:
+                swarm.event_listener(lambda x: self._event_cb(x))
+            except:
+                log.exception('Exception in monitor thread')
+            time.sleep(1)  # Usually we got disconnected, so wait a bit before retrying
 
     def _event_cb(self, event: dict) -> bool:
         if event['Type'] == 'container':
