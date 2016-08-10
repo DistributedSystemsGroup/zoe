@@ -69,6 +69,8 @@ def zoe_web_main() -> int:
 
     retry_cb = PeriodicCallback(api_endpoint.retry_submit_error_executions, 30000)
     retry_cb.start()
+    retry_cb = PeriodicCallback(api_endpoint.cleanup_dead_executions, 60000)
+    retry_cb.start()
 
     try:
         IOLoop.current().start()

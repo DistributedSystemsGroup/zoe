@@ -44,6 +44,7 @@ class APIEndpoint:
     def execution_by_id(self, uid, role, execution_id) -> zoe_lib.sql_manager.Execution:
         """Lookup an execution by its ID."""
         e = self.sql.execution_list(id=execution_id, only_one=True)
+        assert isinstance(e, zoe_lib.sql_manager.Execution)
         if e is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
         if e.user_id != uid and role != 'admin':
@@ -77,6 +78,7 @@ class APIEndpoint:
     def execution_terminate(self, uid, role, exec_id):
         """Terminate an execution."""
         e = self.sql.execution_list(id=exec_id, only_one=True)
+        assert isinstance(e, zoe_lib.sql_manager.Execution)
         if e is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
 
@@ -91,6 +93,7 @@ class APIEndpoint:
     def execution_delete(self, uid, role, exec_id):
         """Delete an execution."""
         e = self.sql.execution_list(id=exec_id, only_one=True)
+        assert isinstance(e, zoe_lib.sql_manager.Execution)
         if e is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
 
@@ -143,3 +146,16 @@ class APIEndpoint:
         success, message = self.master.execution_start(e.id)
         if not success:
             log.warning('Zoe Master unavailable ({}), execution {} still waiting'.format(message, e.id))
+
+    def cleanup_dead_executions(self):
+        """Terminates all executions with dead "monitor" services."""
+        log.debug('Starting dead execution cleanup task')
+        all_execs = self.sql.execution_list()
+        for execution in all_execs:
+            if execution.status == execution.RUNNING_STATUS:
+                for service in execution.services:
+                    if service.description['monitor'] and service.docker_status == service.DOCKER_DIE_STATUS:
+                        log.info("Service {} of execution {} died, terminating execution".format(service.name, execution.id))
+                        self.master.execution_terminate(execution.id)
+                        break
+        log.debug('Cleanup task finished')
