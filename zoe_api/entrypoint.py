@@ -31,7 +31,7 @@ import zoe_api.auth.ldap
 from zoe_api.web.custom_request_handler import JinjaApp
 
 log = logging.getLogger("zoe_api")
-LOG_FORMAT = '%(asctime)-15s %(levelname)s %(name)s (%(threadName)s): %(message)s'
+LOG_FORMAT = '%(asctime)-15s %(levelname)s %(threadName)s->%(name)s: %(message)s'
 
 
 def zoe_web_main() -> int:

@@ -30,7 +30,7 @@ from zoe_lib.metrics.logging import LogMetricSender
 from zoe_lib.sql_manager import SQLManager
 
 log = logging.getLogger("main")
-LOG_FORMAT = '%(asctime)-15s %(levelname)s %(name)s (%(threadName)s): %(message)s'
+LOG_FORMAT = '%(asctime)-15s %(levelname)s %(threadName)s->%(name)s: %(message)s'
 
 
 def main():
