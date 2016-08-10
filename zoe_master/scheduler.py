@@ -128,3 +128,11 @@ class ZoeScheduler:
         self.loop_quit = True
         self.trigger()
         self.loop_th.join()
+
+    def stats(self):
+        """Scheduler statistics."""
+        return {
+            'queue_length': len(self.fifo_queue),
+            'termination_threads_count': len(self.async_threads)
+        }
+

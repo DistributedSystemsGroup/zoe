@@ -137,6 +137,12 @@ class APIEndpoint:
         swarm = SwarmClient(get_conf())
         return swarm.logs(service.docker_id, stream)
 
+    def statistics_scheduler(self, uid_, role_):
+        """Retrieve statistics about the scheduler."""
+        success, message = self.master.scheduler_statistics()
+        if success:
+            return message
+
     def retry_submit_error_executions(self):
         """Resubmit any execution forgotten by the master."""
         waiting_execs = self.sql.execution_list(status=zoe_lib.sql_manager.Execution.SUBMIT_STATUS)

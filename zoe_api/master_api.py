@@ -100,3 +100,10 @@ class APIManager:
             'exec_id': exec_id
         }
         return self._request_reply(msg)
+
+    def scheduler_statistics(self) -> APIReturnType:
+        """Query scheduler statistics."""
+        msg = {
+            'command': 'scheduler_stats'
+        }
+        return self._request_reply(msg)

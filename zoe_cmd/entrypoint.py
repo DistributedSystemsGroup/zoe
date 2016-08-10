@@ -28,6 +28,7 @@ from typing import Tuple
 from zoe_cmd import utils
 from zoe_lib.info import ZoeInfoAPI
 from zoe_lib.services import ZoeServiceAPI
+from zoe_lib.statistics import ZoeStatisticsAPI
 from zoe_lib.exceptions import ZoeAPIException, InvalidApplicationDescription
 from zoe_lib.executions import ZoeExecutionsAPI
 from zoe_lib.applications import app_validate
@@ -142,6 +143,14 @@ def logs_cmd(args):
     except KeyboardInterrupt:
         print('CTRL-C detected, exiting...')
 
+
+def stats_cmd(args_):
+    """Prints statistics on Zoe internals."""
+    stats_api = ZoeStatisticsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
+    sched = stats_api.scheduler()
+    print('Scheduler queue length: {}'.format(sched['queue_length']))
+    print('Termination threads count: {}'.format(sched['termination_threads_count']))
+
 ENV_HELP_TEXT = '''To use this tool you need also to define three environment variables:
 ZOE_URL: point to the URL of the Zoe Scheduler (ex.: http://localhost:5000/
 ZOE_USER: the username used for authentication
@@ -190,6 +199,9 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     argparser_logs.add_argument('service_id', type=int, help="Service id")
     argparser_logs.add_argument('-t', '--timestamps', action='store_true', help="Prefix timestamps for each line")
     argparser_logs.set_defaults(func=logs_cmd)
+
+    argparser_stats = subparser.add_parser('stats', help="Prints all available statistics")
+    argparser_stats.set_defaults(func=stats_cmd)
 
     return parser, parser.parse_args()
 

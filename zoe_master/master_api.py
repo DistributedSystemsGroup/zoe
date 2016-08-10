@@ -86,6 +86,9 @@ class APIManager:
                 if execution is not None:
                     zoe_master.execution_manager.execution_delete(self.scheduler, execution)
                 self._reply_ok()
+            elif message['command'] == 'scheduler_stats':
+                data = self.scheduler.stats()
+                self._reply_ok(data=data)
             else:
                 log.error('Unknown command: {}'.format(message['command']))
                 self._reply_error('unknown command')
