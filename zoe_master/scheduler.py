@@ -78,7 +78,7 @@ class ZoeScheduler:
     def loop_start_th(self):
         """The Scheduler thread loop."""
         while True:
-            ret = self.trigger_semaphore.acquire()
+            ret = self.trigger_semaphore.acquire(timeout=1)
             if not ret:  # Semaphore timeout, do some thread cleanup
                 counter = len(self.async_threads)
                 while counter > 0:
@@ -87,6 +87,7 @@ class ZoeScheduler:
                     th = self.async_threads.pop(0)
                     th.join(0.1)
                     if th.isAlive():  # join failed
+                        log.debug('Thread {} join failed'.format(th.name))
                         self.async_threads.append(th)
                     counter -= 1
                 continue
