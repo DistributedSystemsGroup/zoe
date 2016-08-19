@@ -80,7 +80,7 @@ def delete_finished():
     for e_id in execs:
         e = exec_api.get(e_id)
         if e['name'] == 'boinc-loader' and e['status'] == 'terminated':
-            print('Execution {} has finished, deleting...')
+            print('Execution {} has finished, deleting...'.format(e_id))
             exec_api.delete(e['id'])
 
 
@@ -123,8 +123,7 @@ def keep_some_running(zapp):
         if zapps_to_start > 0:
             for i in range(zapps_to_start):
                 queue_length = check_queue_length()
-    #             zapp_id = submit_zapp(zapp)
-                zapp_id = 'fake'
+                zapp_id = submit_zapp(zapp)
                 print("ZApp submitted with ID {}, queue length {}, {} zapps to go".format(zapp_id, queue_length, zapps_to_start))
         try:
             print('Sleeping')
