@@ -90,7 +90,7 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
 
     for p in service.description['ports']:
         if p['expose']:
-            copts.ports.append(p.port_number)  # FIXME UDP ports?
+            copts.ports.append(p['port_number'])  # FIXME UDP ports?
 
     if 'volumes' in service.description:
         for path, mount_point, readonly in service.description['volumes']:
