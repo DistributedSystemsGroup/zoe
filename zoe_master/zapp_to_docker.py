@@ -61,7 +61,7 @@ def _gen_environment(service, env_subst_dict, copts):
         try:
             env_value = env_value.format(**env_subst_dict)
         except KeyError:
-            raise ZoeStartExecutionFatalException("unknown variable in expression {}".format(env_value))
+            raise ZoeStartExecutionFatalException("unknown variable in expression '{}', known variables are: {}".format(env_value, list(env_subst_dict.keys())))
         copts.add_env_variable(env_name, env_value)
 
 
