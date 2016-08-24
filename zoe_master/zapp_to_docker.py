@@ -1,4 +1,5 @@
 # Copyright (c) 2016, Daniele Venzano
+# Copyright (c) 2016, Daniele Venzano
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -86,6 +87,10 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
     copts.restart = not service.description['monitor']  # Monitor containers should not restart
 
     _gen_environment(service, env_subst_dict, copts)
+
+    for p in service.description['ports']:
+        if p['expose']:
+            copts.ports.append(p.port_number)  # FIXME UDP ports?
 
     if 'volumes' in service.description:
         for path, mount_point, readonly in service.description['volumes']:
