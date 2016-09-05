@@ -18,7 +18,7 @@ from zoe_lib.executions import ZoeExecutionsAPI
 
 TARGET_QUEUE_LENGTH = 10
 NUMBER_OF_HOSTS = 10
-ZAPP_PER_HOST = 4
+ZAPP_PER_HOST = 8
 TOTAL_JOBS = NUMBER_OF_HOSTS * ZAPP_PER_HOST
 # TOTAL_JOBS = 1000
 MAX_TO_START_PER_LOOP = 10
@@ -59,14 +59,14 @@ def submit_zapp(zapp):
     return ret
 
 
-def count_jobs():
+def count_jobs(all=False):
     """Count how many zapps have already been submitted."""
     exec_api = ZoeExecutionsAPI(zoe_url(), zoe_user(), zoe_pass())
     execs = exec_api.list()
     count = 0
     for e_id in execs:
         e = exec_api.get(e_id)
-        if e['name'] != 'boinc-loader':
+        if not all and e['name'] != 'boinc-loader':
             continue
         if e['status'] != 'terminated':
             count += 1
@@ -79,7 +79,7 @@ def delete_finished():
     execs = exec_api.list()
     for e_id in execs:
         e = exec_api.get(e_id)
-        if e['name'] == 'boinc-loader' and e['status'] == 'terminated':
+        if e is not None and e['name'] == 'boinc-loader' and e['status'] == 'terminated':
             print('Execution {} has finished, deleting...'.format(e_id))
             exec_api.delete(e['id'])
 
@@ -118,8 +118,9 @@ def start_continuous(zapp, log):
 
 def keep_some_running(zapp):
     while True:
-        zapps_to_start = TOTAL_JOBS - count_jobs()
-        print('I need to start {} zapps'.format(zapps_to_start))
+        running_zapps = count_jobs(all=True)
+        zapps_to_start = TOTAL_JOBS - running_zapps
+        print('I need to start {} zapps ({} running)'.format(zapps_to_start, running_zapps))
         if zapps_to_start > 0:
             for i in range(zapps_to_start):
                 queue_length = check_queue_length()
