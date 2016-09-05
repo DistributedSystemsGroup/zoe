@@ -23,6 +23,7 @@ from zoe_master.master_api import APIManager
 from zoe_master.scheduler import ZoeScheduler
 from zoe_master.execution_manager import restart_resubmit_scheduler
 from zoe_master.monitor import ZoeMonitor
+from zoe_master.consistency import ZoeSwarmChecker
 
 import zoe_lib.config as config
 from zoe_lib.metrics.influxdb import InfluxDBMetricSender
@@ -58,6 +59,7 @@ def main():
     scheduler = ZoeScheduler()
 
     monitor = ZoeMonitor(state)
+    checker = ZoeSwarmChecker(state)
 
     restart_resubmit_scheduler(state, scheduler)
 
@@ -73,5 +75,6 @@ def main():
     finally:
         scheduler.quit()
         monitor.quit()
+        checker.quit()
         api_server.quit()
         metrics.quit()
