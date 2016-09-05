@@ -47,7 +47,7 @@ class ZoeMonitor(threading.Thread):
                 swarm.event_listener(lambda x: self._event_cb(x))
             except:
                 log.exception('Exception in monitor thread')
-            time.sleep(1)  # Usually we got disconnected, so wait a bit before retrying
+            time.sleep(1)  # wait a bit before retrying the connection
 
     def _event_cb(self, event: dict) -> bool:
         if event['Type'] == 'container':
