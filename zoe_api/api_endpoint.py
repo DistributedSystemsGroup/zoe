@@ -162,7 +162,7 @@ class APIEndpoint:
         for execution in all_execs:
             if execution.status == execution.RUNNING_STATUS:
                 for service in execution.services:
-                    if service.description['monitor'] and service.docker_status == service.DOCKER_DIE_STATUS:
+                    if service.description['monitor'] and service.docker_status == service.DOCKER_DIE_STATUS or service.docker_status == service.DOCKER_DESTROY_STATUS:
                         log.info("Service {} of execution {} died, terminating execution".format(service.name, execution.id))
                         self.master.execution_terminate(execution.id)
                         break
