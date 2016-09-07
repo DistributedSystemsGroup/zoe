@@ -39,6 +39,7 @@ Contents:
   monitoring
   architecture
   howto_zapp
+  rest-api
   vision
   roadmap
   contributing

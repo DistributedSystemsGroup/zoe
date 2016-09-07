@@ -45,7 +45,6 @@ class ExecutionAPI(RequestHandler):
         Terminate an execution.
 
         :param execution_id: the execution to be terminated
-        :return:
         """
         uid, role = get_auth(self)
 
@@ -73,7 +72,6 @@ class ExecutionDeleteAPI(RequestHandler):
         Delete an execution.
 
         :param execution_id: the execution to be deleted
-        :return:
         """
         uid, role = get_auth(self)
 
@@ -111,6 +109,7 @@ class ExecutionCollectionAPI(RequestHandler):
     def post(self):
         """
         Starts an execution, given an application description. Takes a JSON object.
+
         :return: the new execution_id
         """
         uid, role = get_auth(self)

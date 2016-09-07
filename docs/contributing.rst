@@ -17,5 +17,8 @@ API documentation
   :maxdepth: 2
 
   developer/introduction
-  developer/client
+  developer/rest-api
+  developer/auth.rst
+  developer/api-endpoint
+  developer/master-api
   developer/scheduler

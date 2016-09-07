@@ -17,6 +17,7 @@
 
 import base64
 import logging
+import functools
 
 import tornado.web
 
@@ -37,6 +38,7 @@ def catch_exceptions(func):
     :param func:
     :return:
     """
+    @functools.wraps(func)
     def func_wrapper(*args, **kwargs):
         """The actual decorator."""
         self = args[0]
