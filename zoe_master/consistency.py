@@ -50,7 +50,7 @@ class ZoeSwarmChecker(threading.Thread):
 
             for service in service_list:
                 assert isinstance(service, Service)
-                if service.status != service.DOCKER_START_STATUS:
+                if service.docker_status == service.DOCKER_DESTROY_STATUS or service.docker_status == service.DOCKER_DIE_STATUS:
                     continue
                 found = False
                 for container in container_list:
@@ -67,40 +67,3 @@ class ZoeSwarmChecker(threading.Thread):
     def quit(self):
         """Stops the thread."""
         self.stop = True
-
-
-SAMPLE_EVENT = {
-    'node': {
-        'Name': 'bf18',
-        'Id': 'VPCL:E5GW:WON3:2DPV:WFO7:EVNO:ZAKS:V2PA:PGKU:RSM7:AAR3:EAV7',
-        'Addr': '192.168.47.18:2375',
-        'Ip': '192.168.47.18'
-    },
-    'timeNano': 1469622892143470822,
-    'Actor': {
-        'ID': 'e4d3e639c1ec2107262f19cf6e57406cf83e376ef4f131461c3f256d0ce64e13',
-        'Attributes': {
-            'node.ip': '192.168.47.18',
-            'image': 'docker-registry:5000/zoerepo/spark-submit',
-            'node.name': 'bf18',
-            'node.addr': '192.168.47.18:2375',
-            'zoe.service.name': 'spark-submit0',
-            'name': 'spark-submit0-60-prod',
-            'zoe.owner': 'milanesio',
-            'zoe.deployment_name': 'prod',
-            'com.docker.swarm.id': 'de7515d8839c461523e8326c552b45da0f9bd0f9af4f68d4d5a55429533405d4',
-            'zoe.execution.id': '60',
-            'zoe.monitor': 'true',
-            'zoe.execution.name': 'testebob',
-            'node.id': 'VPCL:E5GW:WON3:2DPV:WFO7:EVNO:ZAKS:V2PA:PGKU:RSM7:AAR3:EAV7',
-            'zoe.service.id': '233',
-            'zoe.type': 'app_service'
-        }
-    },
-    'status': 'start',
-    'Action': 'start',
-    'id': 'e4d3e639c1ec2107262f19cf6e57406cf83e376ef4f131461c3f256d0ce64e13',
-    'time': 1469622892,
-    'Type': 'container',
-    'from': 'docker-registry:5000/zoerepo/spark-submit node:bf18'
-}

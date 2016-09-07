@@ -360,7 +360,7 @@ class SwarmClient:
                     'host': aux[1],
                     'name': aux[2],
                     'labels': cont_info['Labels'],
-                    'status': cont_info['Status']
+                    'status': cont_info['State']
                 })
         return conts
 
