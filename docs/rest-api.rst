@@ -7,6 +7,14 @@ Zoe can be used from the command line or the web interface. For more complex tas
 
 The API is provided by the zoe-api processes, on the same port of the web interface (5001 by default). Every URL of the API contains, after the hostname and port, the path ``/api/<api version>/``. This document describes API version 0.6.
 
+In case the request causes an error, an appropriate HTTP status code is returned. The reply will also contain a JSON document in this format::
+
+    {
+        "message": "missing or wrong authentication information"
+    }
+
+With an error message detailing the kind of error that happened.
+
 Info endpoint
 -------------
 
@@ -34,14 +42,32 @@ Where:
 Execution endpoint
 ------------------
 
-r'/execution/([0-9]+)', ExecutionAPI, route_args),
-tornado.web.url(API_PATH + r'/execution/delete/([0-9]+)', ExecutionDeleteAPI, route_args),
-tornado.web.url(API_PATH + r'/execution', ExecutionCollectionAPI, route_args),
+This endpoint requires authentication. It reports information about ZApp executions.
+
+Request::
+
+    curl -u 'username:password' http://bf5:8080/api/0.6/execution/([0-9]+)
+
+Request::
+
+    curl -u 'username:password' http://bf5:8080/api/0.6/execution/delete/([0-9]+)
+
+Request::
+
+    curl -u 'username:password' http://bf5:8080/api/0.6/execution
 
 Service endpoint
 ----------------
-tornado.web.url(API_PATH + r'/service/([0-9]+)', ServiceAPI, route_args),
-tornado.web.url(API_PATH + r'/service/logs/([0-9]+)', ServiceLogsAPI, route_args),
+
+This endpoint requires authentication. It reports information about single services.
+
+Request::
+
+    curl -u 'username:password' http://bf5:8080/api/0.6/service/([0-9]+)
+
+Request::
+
+    curl -u 'username:password' http://bf5:8080/api/0.6/service/logs/([0-9]+)
 
 Discovery endpoint
 ------------------
