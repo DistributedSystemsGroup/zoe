@@ -22,7 +22,7 @@ Info endpoint
 
 This endpoint does not need authentication. It returns general, static, information about the Zoe software. It is meant for checking that the client is able to talk correctly to the API server::
 
-    curl http://bf5:8080/api/0.6/info | json_pp
+    curl http://bf5:8080/api/0.6/info
 
 
 Will return a JSON document, like this::
@@ -149,9 +149,29 @@ Start execution
 
 Request (POST)::
 
-    curl -X POST -u 'username:password' http://bf5:8080/api/0.6/execution
+    curl -X POST -u 'username:password' --data-urlencode @filename http://bf5:8080/api/0.6/execution
 
+Needs a JSON document passed as the request body::
 
+    {
+        "application": <zapp json>,
+        'name': "experiment #33"
+    }
+
+Where:
+
+* ``application`` is the full ZApp JSON document, the application description
+* ``name`` is the name of the execution provided by the user
+
+Will return a JSON document like this::
+
+    {
+        "execution_id": 23441
+    }
+
+Where:
+
+* ``execution_id`` is the ID of the new execution just created.
 
 Service endpoint
 ----------------
@@ -165,12 +185,49 @@ Request::
 
     curl -u 'username:password' http://bf5:8080/api/0.6/service/<service_id>
 
+Will return a JSON document like this::
+
+    {
+       "status" : "active",
+       "service_group" : "boinc-client",
+       "docker_status" : "started",
+       "ip_address" : "10.0.0.94",
+       "execution_id" : 25158,
+       "name" : "boinc-client0",
+       "docker_id" : "d0042c69b54e90327d9287e099304b6c25921d81f639803494ea744445d58430",
+       "error_message" : null,
+       "id" : 26774,
+       "description" : {
+          "required_resources" : {
+             "memory" : 536870912
+          },
+    [...]
+          "name" : "boinc-client",
+          "volumes" : []
+       }
+    }
+
+Where:
+
+* ``status`` is the service status from Zoe point of view. It can be one of "terminating", "inactive", "active" or "starting"
+* ``service_group`` is the name for the service provided in the ZApp description. When the ZApp is unpacked to create the actual containers a single service definition will spawn one or more services with this name in common
+* ``docker_status`` is the container status from the point of view of Docker. Zoe tries her best to keep this value in sync, but the value here can be out of sync by several minutes. It can be one of 'undefined', 'created', 'started', 'dead' or 'destroyed'
+* ``ip_address`` is the IP address of the container
+* ``execution_id`` is the execution ID this service belongs to
+* ``name`` is the name for this service instance, generated from ``service_group``
+* ``docker_id`` is the Docker ID string
+* ``error_message`` is currently unused
+* ``id`` is the ID of this service, should match the one given in the URL
+* ``description`` is the service description extracted from the ZApp
+
 Service standard output and error
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Request::
 
     curl -u 'username:password' http://bf5:8080/api/0.6/service/logs/<service_id>
+
+Will stream the service instance output, starting from the time the service started. It will close the connection when the service exits.
 
 Discovery endpoint
 ------------------
@@ -179,7 +236,7 @@ This endpoint does not need authentication. It returns a list of services that m
 
 Request::
 
-    curl http://bf5:8080/api/0.6/discovery/by_group/<execution_id>/<service_type> | json_pp
+    curl http://bf5:8080/api/0.6/discovery/by_group/<execution_id>/<service_type>
 
 Where:
 
@@ -211,7 +268,7 @@ Scheduler
 ^^^^^^^^^
 Request::
 
-    curl http://bf5:8080/api/0.6/statistics/scheduler | json_pp
+    curl http://bf5:8080/api/0.6/statistics/scheduler
 
 Will return a JSON document, like this::
 
