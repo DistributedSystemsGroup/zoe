@@ -15,6 +15,8 @@ In case the request causes an error, an appropriate HTTP status code is returned
 
 With an error message detailing the kind of error that happened.
 
+Some endpoints require credentials for authentication. For now the API uses straightforward HTTP Basic authentication. In case credentials are missing or wrong a 401 status code will be returned.
+
 Info endpoint
 -------------
 
@@ -42,32 +44,133 @@ Where:
 Execution endpoint
 ------------------
 
-This endpoint requires authentication. It reports information about ZApp executions.
+All the endpoints listed in this section require authentication.
 
-Request::
+Execution details
+^^^^^^^^^^^^^^^^^
 
-    curl -u 'username:password' http://bf5:8080/api/0.6/execution/([0-9]+)
+Request (GET)::
 
-Request::
+    curl -u 'username:password' http://bf5:8080/api/0.6/execution/<execution_id>
 
-    curl -u 'username:password' http://bf5:8080/api/0.6/execution/delete/([0-9]+)
+Where:
 
-Request::
+* ``execution_id`` is the ID of the execution we want to inspect
+
+Will return a JSON document like this::
+
+    {
+       "status" : "running",
+       "description" : {
+          "version" : 2,
+          "will_end" : false,
+    [...]
+       },
+       "error_message" : null,
+       "time_start" : 1473337160.16264,
+       "id" : 25158,
+       "user_id" : "venzano",
+       "time_end" : null,
+       "name" : "boinc-loader",
+       "services" : [
+          26774
+       ],
+       "time_submit" : 1473337122.99315
+    }
+
+Where:
+
+* ``status`` is the execution status. It can be on of "submitted", "scheduled", "starting", "error", "running", "cleaning up", "terminated"
+* ``description`` is the full ZApp description as submitted by the user
+* ``error_message`` contains the error message in case ``status`` is equal to error
+* ``time_submit`` is the time the execution was submitted to Zoe
+* ``time_start`` is the time the execution started, after it was queued in the scheduler
+* ``time_end`` is the time the execution finished or was terminated by the user
+* ``id`` is the ID of the execution
+* ``user_id`` is the identifier of the user who submitted the ZApp for execution
+* ``name`` is the name of the execution
+* ``services`` is a list of service IDs that can be used to inspect single services
+
+Terminate execution
+^^^^^^^^^^^^^^^^^^^
+This endpoint terminates a running execution.
+
+Request (DELETE)::
+
+    curl -X DELETE -u 'username:password' http://bf5:8080/api/0.6/execution/<execution_id>
+
+If the request is successful an empty response with status code 200 will be returned.
+
+Delete execution
+^^^^^^^^^^^^^^^^
+This endpoint deletes an execution from the database, terminating it if it is running.
+
+Request (DELETE)::
+
+    curl -u 'username:password' http://bf5:8080/api/0.6/execution/delete/<execution_id>
+
+If the request is successful an empty response with status code 200 will be returned.
+
+List all executions
+^^^^^^^^^^^^^^^^^^^
+
+This endpoint will list all executions belonging to the calling user. If the user has an administrator role, executions for all users will be returned.
+
+Request (GET)::
 
     curl -u 'username:password' http://bf5:8080/api/0.6/execution
+
+Will return a JSON document like this::
+
+    {
+       "25152" : {
+          "time_submit" : 1473337122.87461,
+          "id" : 25152,
+    [...]
+          "status" : "running",
+          "time_start" : 1473337156.8096,
+          "services" : [
+             26768
+          ],
+          "time_end" : null,
+          "name" : "boinc-loader",
+          "error_message" : null
+       },
+       "25086" : {
+          "time_start" : 1473337123.30892,
+          "status" : "running",
+          "user_id" : "venzano",
+    [..]
+
+It is a map with the execution IDs as keys and the full execution details as values.
+
+Start execution
+^^^^^^^^^^^^^^^
+
+Request (POST)::
+
+    curl -X POST -u 'username:password' http://bf5:8080/api/0.6/execution
+
+
 
 Service endpoint
 ----------------
 
-This endpoint requires authentication. It reports information about single services.
+All the endpoints listed in this section require authentication.
+
+Service details
+^^^^^^^^^^^^^^^
 
 Request::
 
-    curl -u 'username:password' http://bf5:8080/api/0.6/service/([0-9]+)
+    curl -u 'username:password' http://bf5:8080/api/0.6/service/<service_id>
+
+Service standard output and error
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Request::
 
-    curl -u 'username:password' http://bf5:8080/api/0.6/service/logs/([0-9]+)
+    curl -u 'username:password' http://bf5:8080/api/0.6/service/logs/<service_id>
 
 Discovery endpoint
 ------------------
