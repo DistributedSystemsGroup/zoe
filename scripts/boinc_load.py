@@ -66,6 +66,8 @@ def count_jobs(all=False):
     count = 0
     for e_id in execs:
         e = exec_api.get(e_id)
+        if e is None:
+            continue
         if not all and e['name'] != 'boinc-loader':
             continue
         if e['status'] != 'terminated':
@@ -79,7 +81,9 @@ def delete_finished():
     execs = exec_api.list()
     for e_id in execs:
         e = exec_api.get(e_id)
-        if e is not None and e['name'] == 'boinc-loader' and e['status'] == 'terminated':
+        if e is None:
+            continue
+        if e['name'] == 'boinc-loader' and e['status'] == 'terminated':
             print('Execution {} has finished, deleting...'.format(e_id))
             exec_api.delete(e['id'])
 
