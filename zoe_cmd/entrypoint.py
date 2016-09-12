@@ -22,6 +22,7 @@ import json
 import logging
 import os
 import sys
+import time
 from argparse import ArgumentParser, Namespace, FileType, RawDescriptionHelpFormatter
 from typing import Tuple
 
@@ -32,6 +33,20 @@ from zoe_lib.statistics import ZoeStatisticsAPI
 from zoe_lib.exceptions import ZoeAPIException, InvalidApplicationDescription
 from zoe_lib.executions import ZoeExecutionsAPI
 from zoe_lib.applications import app_validate
+
+
+def _log_stream_stdout(service_id, timestamps):
+    service_api = ZoeServiceAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
+    try:
+        for line in service_api.get_logs(service_id):
+            if timestamps:
+                print(line[0], line[1])
+            else:
+                print(line[1])
+    except KeyboardInterrupt:
+        print('CTRL-C detected, exiting...')
+        return 'interrupt'
+    return 'stream_end'
 
 
 def info_cmd(args_):
@@ -78,8 +93,37 @@ def exec_start_cmd(args):
     app_descr = json.load(args.jsonfile)
     app_validate(app_descr)
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    ret = exec_api.start(args.name, app_descr)
-    print("Application scheduled successfully with ID {}, use the exec-get command to check its status".format(ret))
+    exec_id = exec_api.start(args.name, app_descr)
+    if not args.synchronous:
+        print("Application scheduled successfully with ID {}, use the exec-get command to check its status".format(exec_id))
+    else:
+        print("Application scheduled successfully with ID {}, waiting for status change".format(exec_id))
+        old_status = 'submitted'
+        while True:
+            execution = exec_api.get(exec_id)
+            current_status = execution['status']
+            if old_status != current_status:
+                print('Execution is now {}'.format(current_status))
+                old_status = current_status
+            if current_status == 'running':
+                break
+            time.sleep(1)
+        monitor_service_id = None
+        service_api = ZoeServiceAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
+        for service_id in execution['services']:
+            service = service_api.get(service_id)
+            if service['description']['monitor']:
+                monitor_service_id = service['id']
+                break
+
+        why_stop = _log_stream_stdout(monitor_service_id, False)
+        print('>------ end of streaming -------<\n')
+        if why_stop == 'stream_end':
+            print('Execution finished')
+            exit(0)
+        elif why_stop == 'interrupt':
+            print('Do not worry, your execution ({}) is still running.'.format(exec_id))
+            exit(1)
 
 
 def exec_get_cmd(args):
@@ -133,15 +177,7 @@ def exec_rm_cmd(args):
 
 def logs_cmd(args):
     """Retrieves and streams the logs of a service."""
-    service_api = ZoeServiceAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    try:
-        for line in service_api.get_logs(args.service_id):
-            if args.timestamps:
-                print(line[0], line[1])
-            else:
-                print(line[1])
-    except KeyboardInterrupt:
-        print('CTRL-C detected, exiting...')
+    _log_stream_stdout(args.service_id, args.timestamps)
 
 
 def stats_cmd(args_):
@@ -172,6 +208,7 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     argparser_app_validate.set_defaults(func=app_validate_cmd)
 
     argparser_exec_start = subparser.add_parser('start', help="Start an application")
+    argparser_exec_start.add_argument('-s', '--synchronous', action='store_true', help="Do not detach, wait for execution to finish, print main service log")
     argparser_exec_start.add_argument('name', help="Name of the execution")
     argparser_exec_start.add_argument('jsonfile', type=FileType("r"), help='Application description')
     argparser_exec_start.set_defaults(func=exec_start_cmd)
