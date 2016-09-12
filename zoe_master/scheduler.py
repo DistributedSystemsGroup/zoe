@@ -136,4 +136,3 @@ class ZoeScheduler:
             'queue_length': len(self.fifo_queue),
             'termination_threads_count': len(self.async_threads)
         }
-

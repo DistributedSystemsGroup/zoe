@@ -88,9 +88,9 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
 
     _gen_environment(service, env_subst_dict, copts)
 
-    for p in service.description['ports']:
-        if 'expose' in p and p['expose']:
-            copts.ports.append(p['port_number'])  # FIXME UDP ports?
+    for port in service.description['ports']:
+        if 'expose' in port and port['expose']:
+            copts.ports.append(port['port_number'])  # FIXME UDP ports?
 
     if 'volumes' in service.description:
         for path, mount_point, readonly in service.description['volumes']:

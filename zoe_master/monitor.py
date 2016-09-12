@@ -45,7 +45,7 @@ class ZoeMonitor(threading.Thread):
         while True:
             try:
                 swarm.event_listener(lambda x: self._event_cb(x))
-            except:
+            except Exception:
                 log.exception('Exception in monitor thread')
             time.sleep(1)  # wait a bit before retrying the connection
 
