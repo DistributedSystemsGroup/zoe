@@ -27,7 +27,7 @@ log = logging.getLogger(__name__)
 class ZoeFSWorkspace(zoe_master.workspace.base.ZoeWorkspaceBase):
     """Filesystem workspace class."""
     def __init__(self):
-        self.base_path = os.path.join(config.get_conf().workspace_base_path, config.get_conf().deployment_name)
+        self.base_path = os.path.join(config.get_conf().workspace_base_path, config.get_conf().workspace_deployment_path)
 
     def exists(self, user_id):
         """Check if the workspace for user_id exists."""
