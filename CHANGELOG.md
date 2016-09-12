@@ -3,6 +3,8 @@
 ## Version 0.10.1
 
 * Service discovery API endpoint: simple, read-only, unauthenticated access to a list DNS names of services. Needed for frameworks that need a list of hosts for configuration, can be used by scripts in the images.
+* Add `start -s` option to the Zoe commandline client to have it wait for execution termination and stream the log meanwhile.
+* Add the `workspace-deployment-path` option in the configuration file. It should be used when the workspace path should be build not with the deployment name, but with something else.
 
 ## Version 0.10.0
 
