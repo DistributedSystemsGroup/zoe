@@ -116,8 +116,9 @@ def exec_start_cmd(args):
                 monitor_service_id = service['id']
                 break
 
+        print('\n>------ start of log streaming -------<\n')
         why_stop = _log_stream_stdout(monitor_service_id, False)
-        print('>------ end of streaming -------<\n')
+        print('\n>------ end of log streaming -------<\n')
         if why_stop == 'stream_end':
             print('Execution finished')
             exit(0)
