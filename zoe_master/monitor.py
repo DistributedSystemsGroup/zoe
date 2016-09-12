@@ -58,7 +58,7 @@ class ZoeMonitor(threading.Thread):
             pass
         else:
             log.debug('Unmanaged event type: {}'.format(event['Type']))
-            log.debug(event)
+            log.debug(str(event))
 
         if self.stop:
             return False

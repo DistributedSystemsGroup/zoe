@@ -5,8 +5,8 @@ python:
 install:
   - pip install -r requirements.txt
   - pip install -r requirements_tests.txt
-before_script:
 script:
   - pylint *.py zoe_*
-  - mypy -s *.py zoe_*
   - doc8 docs/
+after_script:
+  - mypy -s *.py zoe_*
