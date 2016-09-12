@@ -103,6 +103,7 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
     fswk = ZoeFSWorkspace()
     if fswk.can_be_attached():
         copts.add_volume_bind(fswk.get_path(execution.user_id), fswk.get_mountpoint(), False)
+        copts.add_env_variable('ZOE_WORKSPACE', fswk.get_mountpoint())
 
     # The same dictionary is used for templates in the command
     if 'command' in service.description:
