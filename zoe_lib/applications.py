@@ -18,6 +18,7 @@ This module contains code to validate application descriptions.
 """
 
 import logging
+import re
 
 from zoe_lib.exceptions import InvalidApplicationDescription
 import zoe_lib.version
@@ -83,6 +84,9 @@ def _service_check(data):
     for k in required_keys:
         if k not in data:
             raise InvalidApplicationDescription(msg="Missing required key: %s" % k)
+
+    if not re.match(r'^[a-zA-Z0-9\-]+$', data['name']):
+        raise InvalidApplicationDescription("Service name can contain only letters, numbers and dashes. '{}' is not valid.".format(data['name']))
 
     try:
         bool(data['monitor'])
