@@ -22,7 +22,7 @@ from zoe_master.workspace.filesystem import ZoeFSWorkspace
 from zoe_master.exceptions import ZoeStartExecutionRetryException, ZoeStartExecutionFatalException, ZoeException
 
 from zoe_lib.config import get_conf
-from zoe_lib.exceptions import ZoeLibException
+from zoe_lib.exceptions import ZoeLibException, ZoeNotEnoughResourcesException
 from zoe_lib.sql_manager import Execution, Service
 from zoe_lib.swarm_client import DockerContainerOptions, SwarmClient
 
@@ -61,7 +61,9 @@ def _gen_environment(service, env_subst_dict, copts):
         try:
             env_value = env_value.format(**env_subst_dict)
         except KeyError:
-            raise ZoeStartExecutionFatalException("unknown variable in expression '{}', known variables are: {}".format(env_value, list(env_subst_dict.keys())))
+            error_msg = "Unknown variable in environment expression '{}', known variables are: {}".format(env_value, list(env_subst_dict.keys()))
+            service.set_error(error_msg)
+            raise ZoeStartExecutionFatalException("Service {} has wrong environment expression")
         copts.add_env_variable(env_name, env_value)
 
 
@@ -116,10 +118,11 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
 
     try:
         cont_info = swarm.spawn_container(service.description['docker_image'], copts)
-    except ZoeException as e:
-        raise ZoeStartExecutionRetryException(str(e))
-    except ZoeLibException as e:
-        raise ZoeStartExecutionRetryException(str(e))
+    except ZoeNotEnoughResourcesException:
+        service.set_error('Not enough free resources to satisfy reservation request')
+        raise ZoeStartExecutionRetryException('Not enough free resources to satisfy reservation request for service {}'.format(service.name))
+    except (ZoeException, ZoeLibException) as e:
+        raise ZoeStartExecutionFatalException(str(e))
 
     service.set_active(cont_info["docker_id"])
 
@@ -128,7 +131,8 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
             try:
                 swarm.connect_to_network(service.docker_id, net)
             except ZoeException as e:
-                raise ZoeStartExecutionFatalException(str(e))
+                service.set_error(str(e))
+                raise ZoeStartExecutionFatalException("Failed to attach network {} to service {}".format(net, service.name))
 
     return
 

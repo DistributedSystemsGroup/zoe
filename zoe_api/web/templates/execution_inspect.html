@@ -33,6 +33,9 @@
     <ul>
     <li>Zoe status: {{ s['status'] }}</li>
     <li>Docker status: {{ s['docker_status'] }}</li>
+    {% if s['error_message'] is not none %}
+        <li>Error: {{ s['error_message'] }}</li>
+    {% endif %}
     {% if s['docker_status'] == 'started' %}
         {% for p in s['description']['ports'] %}
             <li><a href="{{ p['protocol'] }}://{{ s['ip_address'] }}:{{ p['port_number'] }}{{ p['path'] }}">{{ p['name'] }}</a></li>

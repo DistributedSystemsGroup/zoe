@@ -46,3 +46,8 @@ class InvalidApplicationDescription(ZoeAPIException):
     """
     def __init__(self, msg):
         super().__init__("Error: " + msg)
+
+
+class ZoeNotEnoughResourcesException(ZoeLibException):
+    """Service failed to start due to not enough available resources."""
+    pass

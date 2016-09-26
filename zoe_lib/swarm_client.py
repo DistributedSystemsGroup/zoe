@@ -34,7 +34,7 @@ import docker.utils
 import requests.packages
 
 from zoe_master.stats import SwarmStats, SwarmNodeStats
-from zoe_lib.exceptions import ZoeLibException
+from zoe_lib.exceptions import ZoeLibException, ZoeNotEnoughResourcesException
 
 log = logging.getLogger(__name__)
 
@@ -223,6 +223,13 @@ class SwarmClient:
                                              ports=options.ports,
                                              labels=options.labels)
             self.cli.start(container=cont.get('Id'))
+        except docker.errors.APIError as e:
+            if cont is not None:
+                self.cli.remove_container(container=cont.get('Id'), force=True)
+            if e.explanation == b'no resources available to schedule container':
+                raise ZoeNotEnoughResourcesException(message=e.explanation.decode('utf-8'))
+            else:
+                raise ZoeLibException(message=e.explanation.decode('utf-8'))
         except Exception as e:
             if cont is not None:
                 self.cli.remove_container(container=cont.get('Id'), force=True)

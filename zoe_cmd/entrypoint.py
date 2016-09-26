@@ -158,6 +158,8 @@ def exec_get_cmd(args):
             print('Service {} (ID: {})'.format(service['name'], service['id']))
             print(' - zoe status: {}'.format(service['status']))
             print(' - docker status: {}'.format(service['docker_status']))
+            if service['error_message'] is not None:
+                print(' - error: {}'.format(service['error_message']))
             if service['docker_status'] == 'started':
                 ip = service['ip_address']
                 for port in service['description']['ports']:
