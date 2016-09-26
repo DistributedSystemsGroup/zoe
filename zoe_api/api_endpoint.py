@@ -44,9 +44,9 @@ class APIEndpoint:
     def execution_by_id(self, uid, role, execution_id) -> zoe_lib.sql_manager.Execution:
         """Lookup an execution by its ID."""
         e = self.sql.execution_list(id=execution_id, only_one=True)
-        assert isinstance(e, zoe_lib.sql_manager.Execution)
         if e is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
+        assert isinstance(e, zoe_lib.sql_manager.Execution)
         if e.user_id != uid and role != 'admin':
             raise zoe_api.exceptions.ZoeAuthException()
         return e
