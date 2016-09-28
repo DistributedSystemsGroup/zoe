@@ -181,6 +181,62 @@ class SQLManager:
         self.conn.commit()
         return cur.fetchone()[0]
 
+    def compute_node_list(self, only_one=False, **kwargs):
+        """
+        Return a list of compute nodes.
+
+        :param only_one: only one result is expected
+        :type only_one: bool
+        :param kwargs: filter compute nodes based on their fields/columns
+        :return: one or more compute nodes
+        """
+        cur = self._cursor()
+        q_base = 'SELECT * FROM platform'
+        if len(kwargs) > 0:
+            q = q_base + " WHERE "
+            filter_list = []
+            args_list = []
+            for key, value in kwargs.items():
+                filter_list.append('{} = %s'.format(key))
+                args_list.append(value)
+            q += ' AND '.join(filter_list)
+            query = cur.mogrify(q, args_list)
+        else:
+            query = cur.mogrify(q_base)
+
+        cur.execute(query)
+        if only_one:
+            row = cur.fetchone()
+            if row is None:
+                return None
+            return ComputeNode(row, self)
+        else:
+            return [ComputeNode(x, self) for x in cur]
+
+    def compute_node_update(self, node_id, **kwargs):
+        """Update the state of an existing compute node."""
+        cur = self._cursor()
+        arg_list = []
+        value_list = []
+        for key, value in kwargs.items():
+            arg_list.append('{} = %s'.format(key))
+            value_list.append(value)
+        set_q = ", ".join(arg_list)
+        value_list.append(node_id)
+        q_base = 'UPDATE platform SET ' + set_q + ' WHERE id=%s'
+        query = cur.mogrify(q_base, value_list)
+        cur.execute(query)
+        self.conn.commit()
+
+    def compute_node_new(self, node_id, free_cores, free_memory, labels):
+        """Adds a new compute node to the state."""
+        cur = self._cursor()
+        status = ComputeNode.UP_STATUS
+        query = cur.mogrify('INSERT INTO platform (id, status, free_cores, reserved_cores, free_memory, reserved_memory, labels) VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id', (node_id, status, free_cores, 0, free_memory, 0, labels))
+        cur.execute(query)
+        self.conn.commit()
+        return cur.fetchone()[0]
+
 
 class Base:
     """
@@ -196,6 +252,9 @@ class Base:
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""
         raise NotImplementedError
+
+    def __eq__(self, other):
+        return self.id == other.id
 
 
 class Execution(Base):
@@ -254,9 +313,6 @@ class Execution(Base):
             'error_message': self.error_message,
             'services': [s.id for s in self.services]
         }
-
-    def __eq__(self, other):
-        return self.id == other.id
 
     def set_scheduled(self):
         """The execution has been added to the scheduler queues."""
@@ -356,9 +412,6 @@ class Service(Base):
             'docker_status': self.docker_status
         }
 
-    def __eq__(self, other):
-        return self.id == other.id
-
     @property
     def dns_name(self):
         """Getter for the DNS name of this service as it will be registered in Docker's DNS."""
@@ -404,3 +457,31 @@ class Service(Base):
         """Getter for the user_id, that is actually taken form the parent execution."""
         execution = self.sql_manager.execution_list(only_one=True, id=self.execution_id)
         return execution.user_id
+
+
+class ComputeNode(Base):
+    """A Swarm node."""
+    UP_STATUS = "up"
+    DOWN_STATUS = "down"
+
+    def __init__(self, d, sql_manager):
+        super().__init__(d, sql_manager)
+
+        self.status = d['status']
+        self.free_cores = d['free_cores']
+        self.reserved_cores = d['reserved_cores']
+        self.free_memory = d['free_memory']
+        self.reserved_memory = d['reserved_memory']
+        self.labels = d['labels']
+
+    def serialize(self):
+        """Generates a dictionary that can be serialized in JSON."""
+        return {
+            'id': self.id,
+            'status': self.status,
+            'free_cores': self.free_cores,
+            'reserved_cores': self.reserved_cores,
+            'free_memory': self.free_memory,
+            'reserved_memory': self.reserved_memory,
+            'labels': self.labels
+        }

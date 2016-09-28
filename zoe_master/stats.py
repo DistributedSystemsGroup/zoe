@@ -40,7 +40,6 @@ class SwarmNodeStats(Stats):
         self.memory_reserved = 0
         self.labels = {}
         self.status = None
-        self.error = ''
         self.last_update = None
         self.server_version = None
 

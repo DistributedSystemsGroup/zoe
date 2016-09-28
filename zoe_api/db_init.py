@@ -21,7 +21,7 @@ import psycopg2.extras
 import zoe_api.exceptions
 from zoe_lib.config import get_conf
 
-SQL_SCHEMA_VERSION = 1  # ---> Increment this value every time the schema changes !!! <---
+SQL_SCHEMA_VERSION = 2  # ---> Increment this value every time the schema changes !!! <---
 
 
 def version_table(cur):
@@ -75,6 +75,15 @@ def create_tables(cur):
         name TEXT NOT NULL,
         docker_id TEXT NULL DEFAULT NULL,
         docker_status TEXT NOT NULL DEFAULT 'undefined'
+        )''')
+    cur.execute('''CREATE TABLE platform (
+        id TEXT PRIMARY KEY,
+        status TEXT NOT NULL,
+        free_cores INT NOT NULL,
+        reserved_cores INT NOT NULL,
+        free_memory INT NOT NULL,
+        reserved_memory INT NOT NULL,
+        labels TEXT[]
         )''')
 
 
