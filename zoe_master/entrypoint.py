@@ -21,6 +21,7 @@ import logging
 
 from zoe_master.master_api import APIManager
 from zoe_master.scheduler import ZoeScheduler
+from zoe_master.size_scheduler import ZoeSizeBasedScheduler
 from zoe_master.execution_manager import restart_resubmit_scheduler
 from zoe_master.monitor import ZoeMonitor
 from zoe_master.consistency import ZoeSwarmChecker
@@ -56,7 +57,10 @@ def main():
     state = SQLManager(args)
 
     log.info("Initializing scheduler")
-    scheduler = ZoeScheduler()
+    if False:
+        scheduler = ZoeScheduler()
+    else:
+        scheduler = ZoeSizeBasedScheduler(state)
 
     monitor = ZoeMonitor(state)
     checker = ZoeSwarmChecker(state)
