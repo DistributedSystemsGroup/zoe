@@ -68,7 +68,7 @@ def count_jobs(all=False):
         e = exec_api.get(e_id)
         if e is None:
             continue
-        if not all and e['name'] != 'boinc-loader':
+        elif not all and e['name'] != 'boinc-loader':
             continue
         if e['status'] != 'terminated':
             count += 1
