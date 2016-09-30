@@ -58,5 +58,5 @@ def restart_resubmit_scheduler(state: SQLManager, scheduler: ZoeScheduler):
 
 
 def execution_delete(scheduler: ZoeScheduler, execution: Execution):
-    """Remove an execution from the scheduler, must only be called if the execution is NOT running."""
-    scheduler.remove_execution(execution)
+    """Remove an execution from the scheduler."""
+    scheduler.terminate(execution)

@@ -68,13 +68,6 @@ class ZoeScheduler:
         th.start()
         self.async_threads.append(th)
 
-    def remove_execution(self, execution: Execution):
-        """Removes the execution form the queue."""
-        try:
-            self.fifo_queue.remove(execution)
-        except ValueError:
-            pass
-
     def loop_start_th(self):
         """The Scheduler thread loop."""
         while True:
