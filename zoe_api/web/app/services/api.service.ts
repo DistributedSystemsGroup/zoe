@@ -17,7 +17,7 @@ export class ApiService {
 
     private realEndpoint = true
 
-    private baseUrl = 'http://213.95.228.184/zoe/api/0.6'
+    private baseUrl = '/api/0.6'
 //    private baseUrl = 'http://213.95.228.184/zoe/api/0.6'
     private softwareInfoEndpoint = '/info'
     private executionEndpoint = '/execution'
