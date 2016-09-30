@@ -228,11 +228,11 @@ class SQLManager:
         cur.execute(query)
         self.conn.commit()
 
-    def compute_node_new(self, node_id, free_cores, free_memory, labels):
+    def compute_node_new(self, node_id, free_cores, free_memory, container_count, labels):
         """Adds a new compute node to the state."""
         cur = self._cursor()
         status = ComputeNode.UP_STATUS
-        query = cur.mogrify('INSERT INTO platform (id, status, free_cores, reserved_cores, free_memory, reserved_memory, labels) VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id', (node_id, status, free_cores, 0, free_memory, 0, labels))
+        query = cur.mogrify('INSERT INTO platform (id, status, free_cores, reserved_cores, free_memory, reserved_memory, labels, container_count) VALUES (%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id', (node_id, status, free_cores, 0, free_memory, 0, labels, container_count))
         cur.execute(query)
         self.conn.commit()
         return cur.fetchone()[0]
@@ -359,6 +359,10 @@ class Execution(Base):
         """
         return self._status == self.SCHEDULED_STATUS or self._status == self.RUNNING_STATUS or self._status == self.STARTING_STATUS or self._status == self.CLEANING_UP_STATUS
 
+    def is_running(self):
+        """Returns True is the execution has at least the essential services running."""
+        return self._status == self.RUNNING_STATUS
+
     @property
     def status(self):
         """Getter for the execution status."""
@@ -473,6 +477,7 @@ class ComputeNode(Base):
         self.free_memory = d['free_memory']
         self.reserved_memory = d['reserved_memory']
         self.labels = d['labels']
+        self.container_count = d['container_count']
 
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""
@@ -483,5 +488,6 @@ class ComputeNode(Base):
             'reserved_cores': self.reserved_cores,
             'free_memory': self.free_memory,
             'reserved_memory': self.reserved_memory,
-            'labels': self.labels
+            'labels': self.labels,
+            'container_count': self.container_count
         }
