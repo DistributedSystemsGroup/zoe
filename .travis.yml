@@ -1,0 +1,12 @@
+language: python
+python:
+  - "3.4"
+  - "3.5"
+install:
+  - pip install -r requirements.txt
+  - pip install -r requirements_tests.txt
+script:
+  - pylint *.py zoe_*
+  - doc8 docs/
+after_script:
+  - mypy -s *.py zoe_*

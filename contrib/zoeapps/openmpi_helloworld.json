@@ -1,0 +1,69 @@
+{
+    "name": "openmpi-helloworld",
+    "priority": 512,
+    "requires_binary": true,
+    "services": [
+        {
+            "command": "",
+            "docker_image": "192.168.45.252:5000/zoerepo/openmpi-worker",
+            "environment": [],
+            "monitor": false,
+            "name": "mpiworker0",
+            "ports": [],
+            "required_resources": {
+                "memory": 1073741824
+            },
+            "volumes": []
+        },
+        {
+            "command": "",
+            "docker_image": "192.168.45.252:5000/zoerepo/openmpi-worker",
+            "environment": [],
+            "monitor": false,
+            "name": "mpiworker1",
+            "ports": [],
+            "required_resources": {
+                "memory": 1073741824
+            },
+            "volumes": []
+        },
+        {
+            "command": "",
+            "docker_image": "192.168.45.252:5000/zoerepo/openmpi-worker",
+            "environment": [],
+            "monitor": false,
+            "name": "mpiworker2",
+            "ports": [],
+            "required_resources": {
+                "memory": 1073741824
+            },
+            "volumes": []
+        },
+        {
+            "command": "",
+            "docker_image": "192.168.45.252:5000/zoerepo/openmpi-worker",
+            "environment": [],
+            "monitor": false,
+            "name": "mpiworker3",
+            "ports": [],
+            "required_resources": {
+                "memory": 1073741824
+            },
+            "volumes": []
+        },
+        {
+            "command": "mpirun -np 4 --hostfile ./mpi-helloworld/mpihosts ./mpi-helloworld/MPI_Hello",
+            "docker_image": "192.168.45.252:5000/zoerepo/openmpi-worker",
+            "environment": [],
+            "monitor": true,
+            "name": "mpirun",
+            "ports": [],
+            "required_resources": {
+                "memory": 1073741824
+            },
+            "volumes": []
+        }
+    ],
+    "version": 1,
+    "will_end": true
+}
