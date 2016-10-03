@@ -18,14 +18,15 @@
 import logging
 import threading
 import time
+from typing import List
 
 from zoe_lib.sql_manager import Execution, ComputeNode
 from zoe_lib.swarm_client import SwarmClient
 from zoe_lib.config import get_conf
-from zoe_lib.sql_manager import SQLManager
+from zoe_lib.sql_manager import SQLManager, Service
 
 from zoe_master.exceptions import ZoeStartExecutionFatalException, ZoeStartExecutionRetryException
-from zoe_master.zapp_to_docker import execution_to_containers, terminate_execution
+from zoe_master.zapp_to_docker import service_list_to_containers, terminate_execution
 from zoe_master.stats import SwarmNodeStats
 
 log = logging.getLogger(__name__)
@@ -62,8 +63,8 @@ class SizeBasedJob:
             if elastic_count > 0:
                 elastic_services_counts[service_type['name']] = elastic_count
 
-        self.essential_services = []
-        self.elastic_services = []
+        self.essential_services = []  # type: List[Service]
+        self.elastic_services = []  # type: List[Service]
         for s in self.execution.services:
             if s.service_type in essential_services_counts:
                 self.essential_services.append(s)
@@ -78,10 +79,71 @@ class SizeBasedJob:
             else:
                 log.error('service {} is not elastic, nor essential, something is wrong'.format(s.name))
 
+        self.essentials_started = False
+
     @property
     def is_running(self):
         """Wraps the execution method with the same name"""
         return self.execution.is_running()
+
+    def start_essential(self, simulated_placement: SimulatedPlatform):
+        """Start the essential services for this execution"""
+        allocations = simulated_placement.get_service_allocation()
+
+        self.execution.set_starting()
+
+        try:
+            service_list_to_containers(self.execution, self.essential_services, allocations)
+        except ZoeStartExecutionRetryException as ex:
+            log.warning('Temporary failure starting execution {}: {}'.format(self.execution.id, ex.message))
+            self.execution.set_error_message(ex.message)
+            terminate_execution(self.execution)
+            self.execution.set_scheduled()
+            return "requeue"
+        except ZoeStartExecutionFatalException as ex:
+            log.error('Fatal error trying to start execution {}: {}'.format(self.execution.id, ex.message))
+            self.execution.set_error_message(ex.message)
+            terminate_execution(self.execution)
+            self.execution.set_error()
+            return "fatal"
+        except Exception as ex:
+            log.exception('BUG, this error should have been caught earlier')
+            self.execution.set_error_message(str(ex))
+            terminate_execution(self.execution)
+            self.execution.set_error()
+            return "fatal"
+        else:
+            self.execution.set_running()
+            self.essentials_started = True
+            return "ok"
+
+
+    def start_elastic(self, simulated_placement):
+        """Start the runnable elastic services"""
+        allocations = simulated_placement.get_service_allocation()
+
+        elastic_to_start = [s for s in self.elastic_services if s.status == Service.RUNNABLE_STATUS]
+
+        for service in elastic_to_start:
+            try:
+                service_list_to_containers(self.execution, [service], allocations)
+            except ZoeStartExecutionRetryException as ex:
+                log.warning('Temporary failure starting elastic service {}: {}'.format(service.name, ex.message))
+                service.set_inactive()
+            except ZoeStartExecutionFatalException as ex:
+                log.error('Fatal error trying to start elastic service {}: {}'.format(service.name, ex.message))
+                service.set_error(ex.message)
+            except Exception as ex:
+                log.exception('BUG, this error should have been caught earlier')
+                service.set_error(str(ex))
+
+    @property
+    def all_services_are_running(self):
+        """Return True if all services of this execution are running/active"""
+        for service in self.execution.services:
+            if service.status != service.ACTIVE_STATUS:
+                return False
+        return True
 
     def __lt__(self, other):
         """Compare two jobs according to their size and resource requirements."""
@@ -110,7 +172,7 @@ class SimulatedNode:
 
     def service_fits(self, service) -> bool:
         """Checks whether a service can fit in this node"""
-        if service['description']['required_resources']['memory'] < self.real_free_resources['memory']:
+        if service.description['required_resources']['memory'] < self.node_free_memory():
             return True
         else:
             return False
@@ -136,6 +198,13 @@ class SimulatedNode:
     def container_count(self):
         """Return the number of containers on this node"""
         return self.real_active_containers + len(self.services)
+
+    def node_free_memory(self):
+        """Return the amount of free memory for this node"""
+        total_reserved_memory = self.real_reservations['memory']
+        for service in self.services:
+            total_reserved_memory += service.description['required_resources']['memory']
+        return self.real_free_resources['memory'] - total_reserved_memory
 
 
 class SimulatedPlatform:
@@ -171,6 +240,8 @@ class SimulatedPlatform:
         """Try to find an allocation for elastic services"""
         at_least_one_allocated = False
         for service in job.elastic_services:
+            if service.status == service.ACTIVE_STATUS:
+                continue
             candidate_nodes = []
             for node_name, node in self.nodes.items():
                 if node.service_fits(service):
@@ -179,6 +250,7 @@ class SimulatedPlatform:
                 continue
             candidate_nodes.sort(key=lambda n: n.container_count)  # smallest first
             candidate_nodes[0].service_add(service)
+            service.set_runnable()
             at_least_one_allocated = True
         return at_least_one_allocated
 
@@ -187,7 +259,23 @@ class SimulatedPlatform:
         for service in job.essential_services:
             for node_name, node in self.nodes.items():
                 if node.service_remove(service):
+                    service.set_inactive()
                     break
+
+    def aggregated_free_memory(self):
+        """Return the amount of free memory across all nodes"""
+        total = 0
+        for n in self.nodes:
+            total += n.node_free_memory()
+        return total
+
+    def get_service_allocation(self):
+        """Return a map of service IDs to nodes where they have been allocated."""
+        placements = {}
+        for node_id, node in self.nodes.items():
+            for service in node.services:
+                placements[service.id] = node_id
+        return placements
 
 
 class ZoeSizeBasedScheduler:
@@ -302,6 +390,8 @@ class ZoeSizeBasedScheduler:
                 cluster_status_snapshot = SimulatedPlatform(self.state)
 
                 jobs_to_launch = []
+                free_resources = cluster_status_snapshot.aggregated_free_memory()
+
                 # Try to find a placement solution using a snapshot of the platform status
                 for job in jobs_to_attempt_scheduling:  # type: SizeBasedJob
                     # remove all elastic services from the previous simulation loop
@@ -319,35 +409,36 @@ class ZoeSizeBasedScheduler:
                     for job_aux in jobs_to_launch:
                         cluster_status_snapshot.allocate_elastic(job_aux)
 
-                if len(self.queue) == 0:
+                    current_free_resources = cluster_status_snapshot.aggregated_free_memory()
+                    if current_free_resources >= free_resources and len(jobs_to_launch) > 0:
+                        job_aux = jobs_to_launch.pop()
+                        cluster_status_snapshot.deallocate_essential(job_aux)
+                        cluster_status_snapshot.deallocate_elastic(job_aux)
+                        for job_aux in jobs_to_launch:
+                            cluster_status_snapshot.allocate_elastic(job_aux)
+                    free_resources = current_free_resources
+
+                # We port the results of the simulation into the real cluster
+                for job in jobs_to_launch:  # type: SizeBasedJob
+                    if not job.essentials_started:
+                        ret = job.start_essential(cluster_status_snapshot)
+                        if ret == "fatal":
+                            continue  # trow away the execution
+                        elif ret == "requeue":
+                            self.queue.append(job)
+                            continue
+                        assert ret == "ok"
+
+                    job.start_elastic(cluster_status_snapshot)
+
+                    if job.all_services_are_running:
+                        jobs_to_attempt_scheduling.remove(job)
+
+                for job in jobs_to_attempt_scheduling:
+                    self.queue.append(job)
+
+                if len(self.queue) == 0 or len(jobs_to_launch) == 0:
                     break
-
-            ##### code to throw away
-            e = self.fifo_queue[0]
-            assert isinstance(e, Execution)
-            e.set_starting()
-            self.fifo_queue.pop(0)  # remove the execution form the queue
-
-            try:
-                execution_to_containers(e)
-            except ZoeStartExecutionRetryException as ex:
-                log.warning('Temporary failure starting execution {}: {}'.format(e.id, ex.message))
-                e.set_error_message(ex.message)
-                terminate_execution(e)
-                e.set_scheduled()
-                self.fifo_queue.append(e)
-            except ZoeStartExecutionFatalException as ex:
-                log.error('Fatal error trying to start execution {}: {}'.format(e.id, ex.message))
-                e.set_error_message(ex.message)
-                terminate_execution(e)
-                e.set_error()
-            except Exception as ex:
-                log.exception('BUG, this error should have been caught earlier')
-                e.set_error_message(str(ex))
-                terminate_execution(e)
-                e.set_error()
-            else:
-                e.set_running()
 
     def quit(self):
         """Stop the scheduler thread."""
@@ -358,7 +449,7 @@ class ZoeSizeBasedScheduler:
     def stats(self):
         """Scheduler statistics."""
         return {
-            'queue_length': len(self.fifo_queue),
+            'queue_length': len(self.queue),
             'termination_threads_count': len(self.async_threads)
         }
 

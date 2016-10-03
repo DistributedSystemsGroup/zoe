@@ -17,6 +17,7 @@
 """Translates a ZApp description into Docker containers."""
 
 import logging
+from typing import List
 
 from zoe_master.workspace.filesystem import ZoeFSWorkspace
 from zoe_master.exceptions import ZoeStartExecutionRetryException, ZoeStartExecutionFatalException, ZoeException
@@ -29,6 +30,26 @@ from zoe_lib.swarm_client import DockerContainerOptions, SwarmClient
 log = logging.getLogger(__name__)
 
 
+def service_list_to_containers(execution: Execution, service_list: List[Service], allocations=None) -> None:
+    """Given a subset of services from an execution, tries to start them, raises exception of failure."""
+    env_subst_dict = {
+        'execution_id': execution.id,
+        "execution_name": execution.name,
+        'user_name': execution.user_id,
+        'deployment_name': get_conf().deployment_name,
+    }
+
+    for service in service_list:
+        env_subst_dict['dns_name#' + service.name] = service.dns_name
+
+    for service in service_list:
+        env_subst_dict['dns_name#self'] = service.dns_name
+        service.set_starting()
+        if allocations is not None:
+            on_node = allocations[service.id]
+        _spawn_service(execution, service, env_subst_dict, on_node)
+
+
 def execution_to_containers(execution: Execution) -> None:
     """Translate an execution object into containers.
 
@@ -37,20 +58,7 @@ def execution_to_containers(execution: Execution) -> None:
     """
     ordered_service_list = sorted(execution.services, key=lambda x: x.description['startup_order'])
 
-    env_subst_dict = {
-        'execution_id': execution.id,
-        "execution_name": execution.name,
-        'user_name': execution.user_id,
-        'deployment_name': get_conf().deployment_name,
-    }
-
-    for service in ordered_service_list:
-        env_subst_dict['dns_name#' + service.name] = service.dns_name
-
-    for service in ordered_service_list:
-        env_subst_dict['dns_name#self'] = service.dns_name
-        service.set_starting()
-        _spawn_service(execution, service, env_subst_dict)
+    service_list_to_containers(ordered_service_list)
 
 
 def _gen_environment(service, env_subst_dict, copts):
@@ -67,7 +75,7 @@ def _gen_environment(service, env_subst_dict, copts):
         copts.add_env_variable(env_name, env_value)
 
 
-def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict):
+def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict, on_node=None):
     copts = DockerContainerOptions()
     copts.gelf_log_address = get_conf().gelf_address
     copts.name = service.dns_name
@@ -101,6 +109,9 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
     if 'constraints' in service.description:
         for constraint in service.description['constraints']:
             copts.add_constraint(constraint)
+
+    if on_node is not None:
+        copts.add_constraint('constraint:node=={}'.format(on_node))
 
     fswk = ZoeFSWorkspace()
     if fswk.can_be_attached():

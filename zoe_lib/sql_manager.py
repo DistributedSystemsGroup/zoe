@@ -382,6 +382,7 @@ class Service(Base):
     ACTIVE_STATUS = "active"
     STARTING_STATUS = "starting"
     ERROR_STATUS = "error"
+    RUNNABLE_STATUS = "runnable"
 
     DOCKER_UNDEFINED_STATUS = 'undefined'
     DOCKER_CREATE_STATUS = 'created'
@@ -441,6 +442,10 @@ class Service(Base):
     def set_error(self, error_message):
         """The service could not be created/started."""
         self.sql_manager.service_update(self.id, status=self.ERROR_STATUS, error_message=error_message)
+
+    def set_runnable(self):
+        """The service is elastic and can be started"""
+        self.sql_manager.service_update(self.id, status=self.RUNNABLE_STATUS)
 
     def set_docker_status(self, new_status):
         """Docker has emitted an event related to this service."""
