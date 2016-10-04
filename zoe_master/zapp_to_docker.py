@@ -57,14 +57,15 @@ def _gen_environment(service, env_subst_dict, copts):
     """ Generate a dictionary containing the current cluster status (before the new container is spawned)
 
     This information is used to substitute template strings in the environment variables."""
-    for env_name, env_value in service.description['environment']:
-        try:
-            env_value = env_value.format(**env_subst_dict)
-        except KeyError:
-            error_msg = "Unknown variable in environment expression '{}', known variables are: {}".format(env_value, list(env_subst_dict.keys()))
-            service.set_error(error_msg)
-            raise ZoeStartExecutionFatalException("Service {} has wrong environment expression")
-        copts.add_env_variable(env_name, env_value)
+    if 'environment' in service.description:
+        for env_name, env_value in service.description['environment']:
+            try:
+                env_value = env_value.format(**env_subst_dict)
+            except KeyError:
+                error_msg = "Unknown variable in environment expression '{}', known variables are: {}".format(env_value, list(env_subst_dict.keys()))
+                service.set_error(error_msg)
+                raise ZoeStartExecutionFatalException("Service {} has wrong environment expression")
+            copts.add_env_variable(env_name, env_value)
 
 
 def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict):
