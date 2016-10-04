@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+
+    <div id="my_executions">
+    <h3>Executions</h3>
+    <p><a href="{{ reverse_url('execution_define') }}">New execution</a></p>
+    <table id="exec_list" class="app_list sortable">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Execution name</th>
+        {% if is_admin %}
+        <th>User</th>
+        {% endif %}
+        <th>Status</th>
+        <th>Scheduled</th>
+        <th>Started</th>
+        <th>Finished</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+        {% for e in executions %}
+            <tr class="{{ loop.cycle('odd', 'even') }}">
+                <td>{{ e.id }}</td>
+                <td><a href="/executions/inspect/{{ e.id }}">{{ e.name }}</a></td>
+                {% if is_admin %}
+                <td>{{ e.user_id }}</td>
+                {% endif %}
+                <td>{{ e.status }}</td>
+                <td><script>format_timestamp("{{ e.time_submit }}")</script></td>
+                {% if e.time_start == None %}
+                <td>not yet</td>
+                {% else %}
+                <td><script>format_timestamp("{{ e.time_start }}")</script></td>
+                {% endif %}
+                {% if e.time_end == None %}
+                <td>not yet</td>
+                {% else %}
+                <td><script>format_timestamp("{{ e.time_end }}")</script></td>
+                {% endif %}
+                {% if e.status == "running" or e.status == "submitted" or e.status == "scheduled" %}
+                    <td><a href="/executions/terminate/{{ e.id }}">Terminate</a></td>
+                {% else %}
+                    <td><a href="/executions/restart/{{ e.id }}">Restart</a>,
+                    <a href="/executions/delete/{{ e.id }}">Delete</a></td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+    </div>
+
+{% endblock %}

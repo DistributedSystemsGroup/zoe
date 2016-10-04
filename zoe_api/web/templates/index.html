@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Start{% endblock %}
+{% block content %}
+
+<p>Welcome to Zoe</p>
+
+    <ul>
+    <li><a href="{{ reverse_url('home_user') }}">Guest start page</a></li>
+    <li><a href="{{ reverse_url('home_user') }}">User start page</a></li>
+    </ul>
+
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base_user.html" %}
+{% block title %}New execution definition{% endblock %}
+{% block content %}
+
+<h1>New execution</h1>
+    <form method="post" action="{{ reverse_url('execution_start') }}" enctype="multipart/form-data">
+    <label>Execution name: <input type="text" name="exec_name"></label><br>
+    <label>Application description: <input type="file" name="file"></label><br>
+    <input type="submit" value="Start!">
+    </form>
+
+{% endblock %}

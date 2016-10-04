@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %} - Zoe</title>
+    <script src="/static/jquery-2.1.4.min.js" type="application/javascript"></script>
+    <script src="/static/jquery-ui-1.11.4/jquery-ui.min.js" type="application/javascript"></script>
+    <script src="/static/jquery.wizard.js" type="application/javascript"></script>
+    <script src="/static/jquery.validate.min.js" type="application/javascript"></script>
+    <script src="/static/sorttable.js" type="application/javascript"></script>
+    <script src="/static/moment.min.js" type="application/javascript"></script>
+    <link rel="stylesheet" href="/static/zoe.css" type="text/css">
+    <link rel="stylesheet" href="/static/jquery-ui-1.11.4/jquery-ui.min.css">
+    {% endblock %}
+    {% block custom_head %}
+    {% endblock %}
+</head>
+<body>
+    <script>
+/*        function update_status() {
+            $.getJSON("")
+                .done(function( data ) {
+                    $("#num_nodes").text(data.num_nodes);
+                    $("#num_containers").text(data.num_containers);
+                }).error(function( data ) {
+                    $("#num_nodes").text("N/A");
+                    $("#num_containers").text("N/A");
+                });
+        }
+        update_status();
+        window.setInterval(update_status, 5000);
+*/
+        moment.locale(window.navigator.userLanguage || window.navigator.language);
+
+        function format_timestamp(ts) {
+            document.write(moment(ts).calendar())
+        }
+
+        function format_bytes(bytes, decimals) {
+            if(bytes == 0) {
+                document.write('0 Byte');
+                return;
+            }
+            var k = 1000;
+            var dm = decimals + 1 || 3;
+            var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+            var i = Math.floor(Math.log(bytes) / Math.log(k));
+            document.write((bytes / Math.pow(k, i)).toPrecision(dm) + ' ' + sizes[i]);
+        }
+    </script>
+    <h1>Zoe - Analytics on demand</h1>
+    <div id="content">{% block content %}{% endblock %}</div>
+    <div id="footer">
+        {% block footer %}
+            <div class="status_line">
+                <p>
+                    <span id="app_name"><a href="http://zoe-analytics.eu">Zoe</a> v. {{ zoe_version }}</span>
+<!--                    <span id="status">
+                        [<span id="num_nodes">N/A</span> swarm nodes, <span id="num_containers">N/A</span> active containers]
+                    </span> -->
+                    <span>
+                        &mdash;Submit issues and ideas for improvement at <a href="https://github.com/DistributedSystemsGroup/zoe/issues">Zoe's issue tracker</a>.
+                    </span>
+                </p>
+            </div>
+            <div class="copyright">
+                <h6>&copy; Copyright 2016 by <a href="http://distsysgroup.wordpress.com/">DSG</a></h6>
+            </div>
+        {% endblock %}
+    </div>
+</body>
+</html>

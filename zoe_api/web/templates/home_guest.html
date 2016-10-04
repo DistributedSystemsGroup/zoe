@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block custom_head %}
+{% if refresh > 0 %}
+<meta http-equiv="refresh" content="{{ refresh }}">
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<h2>Guest cluster access page</h2>
+
+    {% if request.remote_addr != gateway_ip %}
+
+    <p>To access your Jupyter Notebook and your Spark cluster, you need to open a browser with a socks proxy configured. To do that, use the following commands.</p>
+
+    <p>On <b>Linux</b> copy and paste this command in a terminal window:</p>
+    <pre>google-chrome --proxy-server={{ user_gateway }} --user-data-dir=/tmp/chrome-zoe-$USER {{ request.url }}</pre>
+
+    <p>On <b>Windows</b> copy and paste this command in a cmd window (Start & cmd):</p>
+    <pre>cd +chrome install directory+
+chrome.exe --proxy-server={{ user_gateway }} --user-data-dir=%TEMP%\chrome-zoe {{ request.url }}</pre>
+
+    {% else %}
+
+    {% if execution_urls|length == 0 %}
+    <p><b>Please wait</b>, this page will refresh automatically.<br>
+    When this message disappears your cluster will be ready to use.</p>
+    {% endif %}
+
+    {% if execution_status == "running" and execution_urls|length > 0 %}
+    <ul>
+    {% for url in execution_urls|sort(0) %}
+        {% if url[0] == "Jupyter Notebook interface" %}
+        <li><span style="font-size: larger; padding-bottom: 10px; display: inline-block"><a href="{{ url[1] }}">{{ url[0] }}</a> &larr; Start here</span></li>
+        {% else %}
+        <li><span style="font-size: smaller"><a href="{{ url[1] }}">{{ url[0] }}</a></span></li>
+        {% endif %}
+    {% endfor %}
+    </ul>
+    {% endif %}
+
+    <p>Useful resources:</p>
+    <ul>
+        <li><a href="https://github.com/DistributedSystemsGroup/Algorithmic-Machine-Learning">Algorithmic Machine Learning course GitHub page</a></li>
+        <li><a href="https://spark.apache.org/docs/1.5.2/api/python/index.html">Spark Python API</a></li>
+    </ul>
+
+    {% endif %}
+{% endblock %}
