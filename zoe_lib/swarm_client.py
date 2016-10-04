@@ -159,7 +159,7 @@ class SwarmClient:
         idx += 1  # At index 4 the nodes begin
         for node in range(node_count):
             idx2 = 0
-            node_stats = SwarmNodeStats(info["SystemStatus"][idx + node][0])
+            node_stats = SwarmNodeStats(info["SystemStatus"][idx + node][0].strip())
             node_stats.docker_endpoint = info["SystemStatus"][idx + node][1]
             idx2 += 1  # ID, skip
             idx2 += 1  # Status

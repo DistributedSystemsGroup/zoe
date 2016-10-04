@@ -81,8 +81,8 @@ def create_tables(cur):
         status TEXT NOT NULL,
         free_cores INT NOT NULL,
         reserved_cores INT NOT NULL,
-        free_memory INT NOT NULL,
-        reserved_memory INT NOT NULL,
+        free_memory NUMERIC NOT NULL,
+        reserved_memory NUMERIC NOT NULL,
         labels TEXT[]
         )''')
 

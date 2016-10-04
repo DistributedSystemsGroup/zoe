@@ -17,6 +17,7 @@
 
 import datetime
 import logging
+from typing import List
 
 import psycopg2
 import psycopg2.extras
@@ -228,11 +229,11 @@ class SQLManager:
         cur.execute(query)
         self.conn.commit()
 
-    def compute_node_new(self, node_id, free_cores, free_memory, container_count, labels):
+    def compute_node_new(self, node_id: str, free_cores: int, reserved_cores: int, free_memory: int, reserved_memory: int, container_count: int, labels: List):
         """Adds a new compute node to the state."""
         cur = self._cursor()
         status = ComputeNode.UP_STATUS
-        query = cur.mogrify('INSERT INTO platform (id, status, free_cores, reserved_cores, free_memory, reserved_memory, labels, container_count) VALUES (%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id', (node_id, status, free_cores, 0, free_memory, 0, labels, container_count))
+        query = cur.mogrify('INSERT INTO platform (id, status, free_cores, reserved_cores, free_memory, reserved_memory, labels, container_count) VALUES (%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id', (node_id, status, free_cores, reserved_cores, free_memory, reserved_memory, labels, container_count))
         cur.execute(query)
         self.conn.commit()
         return cur.fetchone()[0]
@@ -425,27 +426,33 @@ class Service(Base):
     def set_terminating(self):
         """The service is being killed."""
         self.sql_manager.service_update(self.id, status=self.TERMINATING_STATUS)
+        self.status = self.TERMINATING_STATUS
 
     def set_inactive(self):
         """The service is not running."""
         self.sql_manager.service_update(self.id, status=self.INACTIVE_STATUS, docker_id=None)
+        self.status = self.INACTIVE_STATUS
 
     def set_starting(self):
         """The service is being created by Docker."""
         self.sql_manager.service_update(self.id, status=self.STARTING_STATUS)
+        self.status = self.STARTING_STATUS
 
     def set_active(self, docker_id):
         """The service is running and has a valid docker_id."""
         self.sql_manager.service_update(self.id, status=self.ACTIVE_STATUS, docker_id=docker_id, error_message=None)
         self.error_message = None
+        self.status = self.ACTIVE_STATUS
 
     def set_error(self, error_message):
         """The service could not be created/started."""
         self.sql_manager.service_update(self.id, status=self.ERROR_STATUS, error_message=error_message)
+        self.status = self.ERROR_STATUS
 
     def set_runnable(self):
         """The service is elastic and can be started"""
         self.sql_manager.service_update(self.id, status=self.RUNNABLE_STATUS)
+        self.status = self.RUNNABLE_STATUS
 
     def set_docker_status(self, new_status):
         """Docker has emitted an event related to this service."""

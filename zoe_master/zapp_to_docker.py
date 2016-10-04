@@ -47,6 +47,8 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
         service.set_starting()
         if allocations is not None:
             on_node = allocations[service.id]
+        else:
+            on_node = None
         _spawn_service(execution, service, env_subst_dict, on_node)
 
 
@@ -58,7 +60,7 @@ def execution_to_containers(execution: Execution) -> None:
     """
     ordered_service_list = sorted(execution.services, key=lambda x: x.description['startup_order'])
 
-    service_list_to_containers(ordered_service_list)
+    service_list_to_containers(execution, ordered_service_list)
 
 
 def _gen_environment(service, env_subst_dict, copts):
