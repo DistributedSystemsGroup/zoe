@@ -71,10 +71,15 @@ def app_validate(data):
         _service_check(service)
 
     found_monitor = False
+    service_names_unique_check = set()
     for service in data['services']:
         if service['monitor']:
             found_monitor = True
             break
+        if service['name'] in service_names_unique_check:
+            raise InvalidApplicationDescription(msg='Service names must be unique')
+        else:
+            service_names_unique_check.add(service['name'])
     if not found_monitor:
         raise InvalidApplicationDescription(msg="at least one process should have monitor set to True")
 
