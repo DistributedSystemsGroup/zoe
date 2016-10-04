@@ -1,0 +1,49 @@
+{
+  "time_start":1474618279.105027,
+  "time_submit":1474618277.645514,
+  "error_message":null,
+  "description":{
+    "version":2,
+    "priority":512,
+    "requires_binary":true,
+    "services":[
+      {
+        "environment":[
+
+        ],
+        "essential_count":1,
+        "docker_image":"gcr.io/tensorflow/tensorflow",
+        "networks":[
+
+        ],
+        "ports":[
+          {
+            "is_main_endpoint":true,
+            "port_number":8888,
+            "protocol":"http",
+            "expose":true,
+            "path":"/",
+            "name":"Jupyter Notebook interface"
+          }
+        ],
+        "total_count":1,
+        "name":"tensorflow",
+        "monitor":true,
+        "startup_order":0,
+        "required_resources":{
+          "memory":536870912
+        }
+      }
+    ],
+    "name":"tensorflow",
+    "will_end":false
+  },
+  "time_end":null,
+  "status":"running",
+  "services":[
+    273
+  ],
+  "name":"tf2",
+  "user_id":"admin1",
+  "id":105
+}

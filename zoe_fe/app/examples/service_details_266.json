@@ -1,0 +1,56 @@
+{
+  "description":{
+    "required_resources":{
+      "memory":536870912
+    },
+    "total_count":2,
+    "startup_order":1,
+    "networks":[
+
+    ],
+    "docker_image":"172.16.126.122:5000/spark-worker",
+    "name":"spark-worker",
+    "environment":[
+      [
+        "SPARK_WORKER_CORES",
+        "6"
+      ],
+      [
+        "SPARK_WORKER_RAM",
+        "11273240064"
+      ],
+      [
+        "SPARK_MASTER_IP",
+        "{dns_name#spark-master0}"
+      ],
+      [
+        "SPARK_LOCAL_IP",
+        "{dns_name#self}"
+      ],
+      [
+        "HADOOP_USER_NAME",
+        "{user_name}"
+      ]
+    ],
+    "essential_count":1,
+    "monitor":false,
+    "ports":[
+      {
+        "protocol":"http",
+        "is_main_endpoint":false,
+        "port_number":8081,
+        "path":"/",
+        "name":"Spark worker web interface"
+      }
+    ]
+  },
+  "error_message":null,
+  "docker_id":"542c7dd743411f459d7fbe859576b33615298698cbe90f7043a5408e509f9464",
+  "service_group":"spark-worker",
+  "execution_id":100,
+  "name":"spark-worker0",
+  "id":266,
+  "docker_status":"started",
+  "ip_address":"10.0.0.4",
+  "status":"active"
+}
