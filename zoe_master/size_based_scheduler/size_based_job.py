@@ -140,5 +140,5 @@ class SizeBasedJob:
     def __repr__(self):
         essential_str = ','.join([str(x.id) for x in self.essential_services])
         elastic_str = ','.join([str(x.id) for x in self.elastic_services])
-        s = 'exec {} | essential {} | elastic {}'.format(self.execution.id, essential_str, elastic_str)
+        s = 'exec {} | essential {} | elastic {} | size hint {} | size {}'.format(self.execution.id, essential_str, elastic_str, self.size_hint, self.size)
         return s

@@ -16,6 +16,7 @@ class SimulatedNode:
         }
         self.real_active_containers = real_node.container_count
         self.services = []
+        self.name = real_node.id
 
     def service_fits(self, service) -> bool:
         """Checks whether a service can fit in this node"""
@@ -52,6 +53,11 @@ class SimulatedNode:
         for service in self.services:
             total_reserved_memory += service.description['required_resources']['memory']
         return self.real_free_resources['memory'] - total_reserved_memory
+
+    def __repr__(self):
+        services = ','.join([str(s.id) for s in self.services])
+        s = 'SimNode {} | services {}'.format(self.name, services)
+        return s
 
 
 class SimulatedPlatform:
@@ -103,7 +109,7 @@ class SimulatedPlatform:
 
     def deallocate_elastic(self, job: SizeBasedJob):
         """Remove all elastic services from the simulated cluster"""
-        for service in job.essential_services:
+        for service in job.elastic_services:
             for node_name, node in self.nodes.items():
                 if node.service_remove(service):
                     service.set_inactive()

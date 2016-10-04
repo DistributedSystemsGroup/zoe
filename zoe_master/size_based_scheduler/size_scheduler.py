@@ -119,7 +119,7 @@ class ZoeSizeBasedScheduler:
                 break
             job = self.queue.pop(0)
             ret = job.termination_lock.acquire(blocking=False)
-            if ret:
+            if ret and job.execution.status != Execution.TERMINATED_STATUS:
                 out_list.append(job)
             else:
                 log.debug('While popping, throwing away execution {} that has the termination lock held'.format(job.execution.id))
@@ -212,6 +212,7 @@ class ZoeSizeBasedScheduler:
                     break
                 if len(jobs_to_launch) == 0:
                     log.debug('No executions could be started, exiting inner loop')
+                    break
 
     def quit(self):
         """Stop the scheduler thread."""

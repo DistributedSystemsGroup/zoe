@@ -73,13 +73,15 @@ class ZoeMonitor(threading.Thread):
 
         service_id = event['Actor']['Attributes']['zoe.service.id']  # type: int
         service = self.state.service_list(only_one=True, id=service_id)
+        if service is None:
+            return
         if 'exec' in event['Action']:
             pass
         elif 'create' in event['Action']:
             service.set_docker_status(service.DOCKER_CREATE_STATUS)
         elif 'start' in event['Action']:
             service.set_docker_status(service.DOCKER_START_STATUS)
-        elif 'die' in event['Action']:
+        elif 'die' in event['Action'] or 'kill' in event['Action']:
             service.set_docker_status(service.DOCKER_DIE_STATUS)
         elif 'destroy' in event['Action']:
             service.set_docker_status(service.DOCKER_DESTROY_STATUS)

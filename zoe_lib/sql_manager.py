@@ -457,6 +457,7 @@ class Service(Base):
     def set_docker_status(self, new_status):
         """Docker has emitted an event related to this service."""
         self.sql_manager.service_update(self.id, docker_status=new_status)
+        self.docker_status = new_status
         log.debug("service {}, status updated to {}".format(self.id, new_status))
 
     @property
