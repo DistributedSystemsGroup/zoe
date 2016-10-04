@@ -13,12 +13,9 @@ let AUTH_HEADERS: string = 'AUTH_HEADERS'
 
 @Injectable()
 export class ApiService {
-//    private authHeader: Headers
-
     private realEndpoint = true
 
-    private baseUrl = 'http://213.95.228.184/zoe/api/0.6'
-//    private baseUrl = 'http://213.95.228.184/zoe/api/0.6'
+    private baseUrl = 'http://localhost:5001/zoe/api/0.6'
     private softwareInfoEndpoint = '/info'
     private executionEndpoint = '/execution'
     private terminateExecutionEndpoint = '/execution'
@@ -30,7 +27,6 @@ export class ApiService {
     constructor(
         private http: Http,
         private storageService: StorageService
-        //, private localStorageService: LocalStorageService
     ) { }
 
     isUserLoggedIn(): Boolean {
