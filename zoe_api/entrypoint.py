@@ -59,7 +59,10 @@ def zoe_web_main() -> int:
         'template_path': os.path.join(os.path.dirname(__file__), "web", "templates"),
         # 'debug': args.debug
     }
-    app = Application(zoe_api.web.web_init(api_endpoint) + zoe_api.rest_api.api_init(api_endpoint), **app_settings)
+    
+    # Remove the old FE entry point
+    #app = Application(zoe_api.web.web_init(api_endpoint) + zoe_api.rest_api.api_init(api_endpoint), **app_settings)
+    app = Application(zoe_api.rest_api.api_init(api_endpoint), **app_settings)
     JinjaApp.init_app(app)
 
     log.info("Starting HTTP server...")
