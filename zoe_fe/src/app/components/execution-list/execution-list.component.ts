@@ -92,7 +92,10 @@ export class ExecutionListComponent implements OnInit {
           setTimeout(this.getExecutions(), 1000);
         }
       })
-      .catch(error => this.showError('There was an error contactning the server. Please try again later.'));
+      .catch(error => {
+        this.showError('There was an error contactning the server. Please try again later.')
+        this.hideLoading()
+      });
   }
 
   restartExecution(execution: Execution) {
