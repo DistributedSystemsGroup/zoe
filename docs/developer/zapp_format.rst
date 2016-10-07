@@ -42,6 +42,13 @@ required, number [0, 1024)
 
 For now this value is unused.
 
+disable_autorestart
+^^^^^^^^^^^^^^^^^^^
+
+optional, boolean
+
+If set to true, disables all kinds of auorestart on all services of this ZApp.
+
 requires_binary
 ^^^^^^^^^^^^^^^
 
@@ -120,6 +127,8 @@ If set to ``true``, Zoe will monitor this service for termination. When it termi
 If set to ``false``, Zoe will configure Docker to automatically restart the service in case it crashes.
 
 Please note that at least one service must be set as a monitor for each ZApp.
+
+All autorestart behaviour is disabled if the global parameter ``disable_autorestart`` (see above) is enabled.
 
 total_count
 ^^^^^^^^^^^
