@@ -5,5 +5,6 @@
 
 export const environment = {
   production: false,
+  baseHref: '/',
   apiEndpoint: 'http://localhost:5001/zoe/api/0.6'
 };
