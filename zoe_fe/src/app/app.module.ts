@@ -16,6 +16,9 @@ import { ExecutionListComponent } from './components/execution-list/execution-li
 import { ApiService }       from './services/api.service';
 import { StorageService }   from './services/storage.service';
 
+import { APP_BASE_HREF } from '@angular/common';
+import { environment } from '../environments/environment';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -37,7 +40,8 @@ import { StorageService }   from './services/storage.service';
   providers: [
     ApiService,
     StorageService,
-    ZoeRoutingProviders
+    ZoeRoutingProviders,
+    {provide: APP_BASE_HREF, useValue : environment.baseHref }
   ],
   bootstrap: [
     AppComponent
