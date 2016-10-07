@@ -11,8 +11,12 @@ export class StorageService {
   }
 
   getAuthHeader(): Headers {
+    let auth = localStorage.getItem(AUTH_HEADER)
+    if (auth == null)
+      return null
+    
     var headers = new Headers
-    headers.append('Authorization', localStorage.getItem(AUTH_HEADER))
+    headers.append('Authorization', auth)
     return headers
   }
 
