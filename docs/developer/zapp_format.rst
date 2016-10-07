@@ -49,8 +49,8 @@ required, boolean
 
 For now this value is unused.
 
-service
-^^^^^^^
+services
+^^^^^^^^
 
 required, array
 
