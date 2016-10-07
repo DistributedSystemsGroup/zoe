@@ -5,8 +5,11 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class ToDatePipe implements PipeTransform {
 
-  transform(value: any, args?: any): any {
-    return null;
+  transform(value:any) {
+    if (value) {
+      return moment.unix(value).toDate();
+    }
+    return value;
   }
 
 }
