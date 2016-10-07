@@ -29,11 +29,12 @@ log = logging.getLogger(__name__)
 class ZoeMonitor(threading.Thread):
     """The monitor."""
 
-    def __init__(self, state: SQLManager) -> None:
+    def __init__(self, state: SQLManager, scheduler) -> None:
         super().__init__()
         self.setName('monitor')
         self.stop = False
         self.state = state
+        self.scheduler = scheduler
         self.setDaemon(True)
 
         self.start()
@@ -83,6 +84,7 @@ class ZoeMonitor(threading.Thread):
             service.set_docker_status(service.DOCKER_START_STATUS)
         elif 'die' in event['Action'] or 'kill' in event['Action']:
             service.set_docker_status(service.DOCKER_DIE_STATUS)
+            self.scheduler.trigger()
         elif 'destroy' in event['Action']:
             service.set_docker_status(service.DOCKER_DESTROY_STATUS)
         else:
