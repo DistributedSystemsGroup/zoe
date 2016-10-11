@@ -328,6 +328,7 @@ class Service(Base):
     DOCKER_START_STATUS = 'started'
     DOCKER_DIE_STATUS = 'dead'
     DOCKER_DESTROY_STATUS = 'destroyed'
+    DOCKER_OOM_STATUS = 'oom-killed'
 
     def __init__(self, d, sql_manager):
         super().__init__(d, sql_manager)
@@ -367,28 +368,35 @@ class Service(Base):
     def set_terminating(self):
         """The service is being killed."""
         self.sql_manager.service_update(self.id, status=self.TERMINATING_STATUS)
+        self.status = self.TERMINATING_STATUS
 
     def set_inactive(self):
         """The service is not running."""
         self.sql_manager.service_update(self.id, status=self.INACTIVE_STATUS, docker_id=None)
+        self.status = self.INACTIVE_STATUS
 
     def set_starting(self):
         """The service is being created by Docker."""
         self.sql_manager.service_update(self.id, status=self.STARTING_STATUS)
+        self.status = self.STARTING_STATUS
 
     def set_active(self, docker_id):
         """The service is running and has a valid docker_id."""
         self.sql_manager.service_update(self.id, status=self.ACTIVE_STATUS, docker_id=docker_id, error_message=None)
         self.error_message = None
+        self.status = self.ACTIVE_STATUS
 
     def set_error(self, error_message):
         """The service could not be created/started."""
         self.sql_manager.service_update(self.id, status=self.ERROR_STATUS, error_message=error_message)
+        self.status = self.ERROR_STATUS
+        self.error_message = error_message
 
     def set_docker_status(self, new_status):
         """Docker has emitted an event related to this service."""
         self.sql_manager.service_update(self.id, docker_status=new_status)
         log.debug("service {}, status updated to {}".format(self.id, new_status))
+        self.docker_status = new_status
 
     @property
     def ip_address(self):
