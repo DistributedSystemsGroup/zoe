@@ -61,7 +61,7 @@ def main():
     else:
         scheduler = ZoeSizeBasedScheduler(state)
 
-    monitor = ZoeMonitor(state)
+    monitor = ZoeMonitor(state, scheduler)
     checker = ZoeSwarmChecker(state)
 
     restart_resubmit_scheduler(state, scheduler)
