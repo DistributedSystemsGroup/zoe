@@ -155,6 +155,12 @@ def _service_check(data):
         if not hasattr(data['constraints'], '__iter__'):
             raise InvalidApplicationDescription(msg='networks should be an iterable')
 
+    if 'disable_autorestart' in data:
+        try:
+            bool(data['disable_autorestart'])
+        except ValueError:
+            raise InvalidApplicationDescription(msg="disable_autorestart field should be a boolean")
+
 
 def _port_check(data):
     required_keys = ['name', 'protocol', 'port_number', 'is_main_endpoint']

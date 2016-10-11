@@ -97,7 +97,12 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict,
         copts.labels['zoe.monitor'] = 'true'
     else:
         copts.labels['zoe.monitor'] = 'false'
-    copts.restart = not service.description['monitor']  # Monitor containers should not restart
+
+    if 'disable_autorestart' in execution.description and execution.description['disable_autorestart']:
+        log.debug("Autorestart disabled for service {}".format(service.id))
+        copts.restart = False
+    else:
+        copts.restart = not service.description['monitor']  # Monitor containers should not restart
 
     _gen_environment(service, env_subst_dict, copts)
 

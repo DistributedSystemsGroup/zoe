@@ -390,6 +390,7 @@ class Service(Base):
     DOCKER_START_STATUS = 'started'
     DOCKER_DIE_STATUS = 'dead'
     DOCKER_DESTROY_STATUS = 'destroyed'
+    DOCKER_OOM_STATUS = 'oom-killed'
 
     def __init__(self, d, sql_manager):
         super().__init__(d, sql_manager)
@@ -448,6 +449,7 @@ class Service(Base):
         """The service could not be created/started."""
         self.sql_manager.service_update(self.id, status=self.ERROR_STATUS, error_message=error_message)
         self.status = self.ERROR_STATUS
+        self.error_message = error_message
 
     def set_runnable(self):
         """The service is elastic and can be started"""
@@ -459,6 +461,7 @@ class Service(Base):
         self.sql_manager.service_update(self.id, docker_status=new_status)
         self.docker_status = new_status
         log.debug("service {}, status updated to {}".format(self.id, new_status))
+        self.docker_status = new_status
 
     @property
     def ip_address(self):
