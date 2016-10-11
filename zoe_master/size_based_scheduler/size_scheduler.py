@@ -136,16 +136,20 @@ class ZoeSizeBasedScheduler:
             if self.loop_quit:
                 break
 
-            log.debug("Scheduler loop has been triggered")
-            self._update_platform_status()
-
             if len(self.queue) == 0:
+                log.debug("Scheduler loop has been triggered, but the queue is empty")
                 continue
+            log.debug("Scheduler loop has been triggered")
 
             while True:  # Inner loop will run until no new executions can be started or the queue is empty
                 self._refresh_job_sizes()
+                self._update_platform_status()
 
                 self.queue.sort()
+                log.debug('--> Queue dump after sorting')
+                for j in self.queue:
+                    log.debug(str(j))
+                log.debug('--> End dump')
 
                 jobs_to_attempt_scheduling = self._pop_all_with_same_size()
                 log.debug('Scheduler inner loop, jobs to attempt scheduling:')
@@ -153,6 +157,7 @@ class ZoeSizeBasedScheduler:
                     log.debug("-> {}".format(job))
 
                 cluster_status_snapshot = SimulatedPlatform(self.state)
+                log.debug(str(cluster_status_snapshot))
 
                 jobs_to_launch = []
                 free_resources = cluster_status_snapshot.aggregated_free_memory()

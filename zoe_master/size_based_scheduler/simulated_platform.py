@@ -129,3 +129,9 @@ class SimulatedPlatform:
             for service in node.services:
                 placements[service.id] = node_id
         return placements
+
+    def __repr__(self):
+        s = ''
+        for node_name, node in self.nodes.items():
+            s += str(node) + " # "
+        return s
