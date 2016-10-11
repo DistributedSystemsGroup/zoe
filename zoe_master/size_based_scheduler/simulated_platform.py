@@ -52,6 +52,7 @@ class SimulatedNode:
         simulated_reservation = 0
         for service in self.services:
             simulated_reservation += service.description['required_resources']['memory']
+        assert (self.real_free_resources['memory'] - simulated_reservation) >= 0
         return self.real_free_resources['memory'] - simulated_reservation
 
     def __repr__(self):
