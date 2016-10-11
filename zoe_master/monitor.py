@@ -79,7 +79,9 @@ class ZoeMonitor(threading.Thread):
             service.set_docker_status(service.DOCKER_CREATE_STATUS)
         elif 'start' in event['Action']:
             service.set_docker_status(service.DOCKER_START_STATUS)
-        elif 'die' in event['Action']:
+        elif 'die' in event['Action'] or 'kill' in event['Action'] or 'stop' in event['Action']:
+            service.set_docker_status(service.DOCKER_DIE_STATUS)
+        elif 'oom' in event['Action']:
             service.set_docker_status(service.DOCKER_DIE_STATUS)
         elif 'destroy' in event['Action']:
             service.set_docker_status(service.DOCKER_DESTROY_STATUS)
