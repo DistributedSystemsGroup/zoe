@@ -49,14 +49,14 @@ class SimulatedNode:
 
     def node_free_memory(self):
         """Return the amount of free memory for this node"""
-        total_reserved_memory = self.real_reservations['memory']
+        simulated_reservation = 0
         for service in self.services:
-            total_reserved_memory += service.description['required_resources']['memory']
-        return self.real_free_resources['memory'] - total_reserved_memory
+            simulated_reservation += service.description['required_resources']['memory']
+        return self.real_free_resources['memory'] - simulated_reservation
 
     def __repr__(self):
-        services = ','.join([str(s.id) for s in self.services])
-        s = 'SimNode {} | services {}'.format(self.name, services)
+        # services = ','.join([str(s.id) for s in self.services])
+        s = 'SN {} | f {}'.format(self.name, self.node_free_memory())
         return s
 
 
