@@ -31,15 +31,15 @@ import { ApiService } from '../../services/api.service';
               <dt>Status</dt>
               <dd>{{execution.status}}</dd>
               <dt>Submitted</dt>
-              <dd *ngIf="execution.submitted">{{execution.submitted | amFromUnix | date:'medium'}}</dd>
+              <dd *ngIf="execution.submitted">{{execution.submitted | amFromUnix | amDateFormat:'MMM D, YYYY, h:mm:ss a'}}</dd>
               <dd *ngIf="!execution.submitted">Not yet</dd>
               <dt *ngIf="execution.scheduled">Scheduled</dt>
-              <dd *ngIf="execution.scheduled">{{execution.scheduled | amFromUnix | date:'medium'}}</dd>
+              <dd *ngIf="execution.scheduled">{{execution.scheduled | amFromUnix | amDateFormat:'MMM D, YYYY, h:mm:ss a'}}</dd>
               <dt>Started</dt>
-              <dd *ngIf="execution.started">{{execution.started | amFromUnix | date:'medium'}}</dd>
+              <dd *ngIf="execution.started">{{execution.started | amFromUnix | amDateFormat:'MMM D, YYYY, h:mm:ss a'}}</dd>
               <dd *ngIf="!execution.started">Not yet</dd>
               <dt>Finished</dt>
-              <dd *ngIf="execution.finished">{{execution.finished | amFromUnix | date:'medium'}}</dd>
+              <dd *ngIf="execution.finished">{{execution.finished | amFromUnix | amDateFormat:'MMM D, YYYY, h:mm:ss a'}}</dd>
               <dd *ngIf="!execution.finished">Not yet</dd>
             </dl>
             
