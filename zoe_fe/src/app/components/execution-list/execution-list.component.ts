@@ -38,9 +38,9 @@ import { Router } from '@angular/router'
                                 <td>{{execution.name}}</td>
                                 <td>{{execution.owner}}</td>
                                 <td>{{execution.status | capitalize}}</td>
-                                <td><div *ngIf="execution.scheduled">{{execution.scheduled | toDate | date:'medium'}}</div></td>
-                                <td><div *ngIf="execution.started">{{execution.started | toDate | date:'medium'}}</div></td>
-                                <td><div *ngIf="execution.ended">{{execution.ended | toDate | date:'medium'}}</div></td>
+                                <td><div *ngIf="execution.scheduled">{{execution.scheduled | amFromUnix | date:'medium'}}</div></td>
+                                <td><div *ngIf="execution.started">{{execution.started | amFromUnix | date:'medium'}}</div></td>
+                                <td><div *ngIf="execution.ended">{{execution.ended | amFromUnix | date:'medium'}}</div></td>
                                 <td>
                                     <a href="javascript:void(0)" *ngIf="execution.canBeRestarted()" (click)="restartExecution(execution)">Restart</a>
                                     <a href="javascript:void(0)" *ngIf="execution.canBeDeleted()" (click)="deleteExecution(execution.id)">Delete</a>
