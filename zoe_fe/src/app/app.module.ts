@@ -2,7 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
-import { FromUnixPipe } from 'angular2-moment';
+import { FromUnixPipe, DateFormatPipe } from 'angular2-moment';
 import { routing, ZoeRoutingProviders }  from './app-routing.module';
 
 import { AppComponent } from './app.component';
@@ -23,6 +23,8 @@ import { environment } from '../environments/environment';
   declarations: [
     AppComponent,
     CapitalizePipe,
+    FromUnixPipe,
+    DateFormatPipe,
     LoginComponent,
     NavbarComponent,
     ExecutionInfoComponent,
@@ -34,7 +36,6 @@ import { environment } from '../environments/environment';
     FormsModule,
     ReactiveFormsModule,
     HttpModule,
-    FromUnixPipe,
     routing
   ],
   providers: [
