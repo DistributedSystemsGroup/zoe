@@ -1,4 +1,4 @@
-# ZoePorting
+# Zoe Front End
 
 This project was generated with [angular-cli](https://github.com/angular/angular-cli) version 1.0.0-beta.16.
 
@@ -8,6 +8,15 @@ Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app w
 ## Code scaffolding
 
 Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive/pipe/service/class`.
+
+# Configuration
+
+Edit file `/src/enviroments/environments.prod.ts` and configure the path of the zoe Front End application, and the url for the zoe APIs, you can use a relative path in case it is deployed on the same server.
+
+# Installation
+
+Run `npm install` to install all the application's dependencies.
+Run `ng build --env=prod --output-path=build/prod/` to build the application in `build/prod` folder.
 
 ## Build
 
