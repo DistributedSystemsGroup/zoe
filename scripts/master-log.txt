@@ -1,0 +1,455 @@
+ssh://ubuntu@192.168.45.25:22/usr/bin/python3 -u /home/ubuntu/.pycharm_helpers/pydev/pydevd.py --multiproc --qt-support --client '0.0.0.0' --port 40751 --file /home/ubuntu/zoe/zoe-master.py
+pydev debugger: process 15508 is connecting
+
+Connected to pydev debugger (build 162.1967.10)
+Config File (zoe.conf):
+  debug:             true
+  swarm:             zk://bf5.bigfoot.eurecom.fr:2181
+  deployment-name:   devel
+  workspace-base-path:/mnt/cephfs/zoe-workspaces
+  workspace-deployment-path:prod
+  api-listen-uri:    tcp://*:4851
+  dbname:            zoe
+  dbuser:            postgres
+  dbpass:            zoepostgres
+  dbhost:            bf5.bigfoot.eurecom.fr
+  auth-type:         ldap
+  ldap-server-uri:   ldap://m1.bigfoot.eurecom.fr
+  ldap-base-dn:      ou=People,dc=bigfoot,dc=eurecom,dc=fr
+  master-url:        tcp://127.0.0.1:4851
+Defaults:
+  --dbport:          5432
+  --influxdb-dbname: zoe
+  --influxdb-url:    http://localhost:8086
+  --gelf-address:
+  --overlay-network-name:zoe
+  --listen-address:  0.0.0.0
+  --listen-port:     5001
+  --auth-file:       zoepass.csv
+  --ldap-admin-gid:  5000
+  --ldap-user-gid:   5001
+  --ldap-guest-gid:  5002
+2016-10-13 13:25:28,348 INFO MainThread->main: Initializing DB manager
+2016-10-13 13:25:28,354 INFO MainThread->main: Initializing scheduler
+2016-10-13 13:25:28,367 DEBUG MainThread->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:25:28,463 INFO monitor->zoe_master.monitor: Monitor thread started
+2016-10-13 13:25:28,464 INFO checker->zoe_master.consistency: Checker thread started
+2016-10-13 13:25:28,471 INFO MainThread->main: Starting ZMQ API server...
+2016-10-13 13:25:28,483 DEBUG monitor->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:25:28,494 DEBUG checker->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:22,188 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered
+2016-10-13 13:26:22,209 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:22,302 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: --> Queue dump after sorting
+2016-10-13 13:26:22,303 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: exec 57 (big-batch-inelastic) | essential 348,349,350,351,352,353,354,355,356,357 | elastic  | size hint 1000 | size 10000
+2016-10-13 13:26:22,303 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: --> End dump
+2016-10-13 13:26:22,304 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler inner loop, jobs to attempt scheduling:
+2016-10-13 13:26:22,304 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: -> exec 57 (big-batch-inelastic) | essential 348,349,350,351,352,353,354,355,356,357 | elastic  | size hint 1000 | size 10000
+2016-10-13 13:26:22,311 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: SN bf19 | f 36614596198 # SN bf12 | f 69900592742 # SN bf15 | f 70974334566 # SN bf20 | f 70974334566 # SN bf16 | f 105334072934 # SN bf21 | f 70974334566 # SN bf13 | f 70974334566 # SN bf18 | f 36614596198 # SN bf14 | f 105334072934 # SN bf17 | f 36614596198 #
+2016-10-13 13:26:22,314 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Allocation after simulation: {352: 'bf14', 353: 'bf19', 354: 'bf15', 355: 'bf20', 356: 'bf16', 357: 'bf21', 348: 'bf15', 349: 'bf16', 350: 'bf21', 351: 'bf18'}
+2016-10-13 13:26:22,319 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting essential services for execution 57
+2016-10-13 13:26:22,333 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 348
+2016-10-13 13:26:22,349 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:22,518 DEBUG monitor->zoe_lib.sql_manager: service 348, status updated to created
+2016-10-13 13:26:23,015 DEBUG monitor->zoe_lib.sql_manager: service 348, status updated to started
+2016-10-13 13:26:23,026 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 349
+2016-10-13 13:26:23,037 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:23,301 DEBUG monitor->zoe_lib.sql_manager: service 349, status updated to created
+2016-10-13 13:26:23,954 DEBUG metrics->zoe_lib.metrics.logging: api latency: execution_start took 80 ms
+2016-10-13 13:26:23,954 DEBUG metrics->zoe_lib.metrics.logging: api latency: execution_start took 71 ms
+2016-10-13 13:26:23,955 DEBUG metrics->zoe_lib.metrics.logging: api latency: execution_start took 68 ms
+2016-10-13 13:26:23,955 DEBUG metrics->zoe_lib.metrics.logging: api latency: execution_start took 48 ms
+2016-10-13 13:26:24,434 DEBUG monitor->zoe_lib.sql_manager: service 349, status updated to started
+2016-10-13 13:26:24,444 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 350
+2016-10-13 13:26:24,454 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:24,610 DEBUG monitor->zoe_lib.sql_manager: service 350, status updated to created
+2016-10-13 13:26:25,302 DEBUG monitor->zoe_lib.sql_manager: service 350, status updated to started
+2016-10-13 13:26:25,313 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 351
+2016-10-13 13:26:25,325 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:25,457 DEBUG monitor->zoe_lib.sql_manager: service 351, status updated to created
+2016-10-13 13:26:25,989 DEBUG monitor->zoe_lib.sql_manager: service 351, status updated to started
+2016-10-13 13:26:26,000 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 352
+2016-10-13 13:26:26,011 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:26,126 DEBUG monitor->zoe_lib.sql_manager: service 352, status updated to created
+2016-10-13 13:26:26,557 DEBUG monitor->zoe_lib.sql_manager: service 352, status updated to started
+2016-10-13 13:26:26,567 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 353
+2016-10-13 13:26:26,578 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:26,764 DEBUG monitor->zoe_lib.sql_manager: service 353, status updated to created
+2016-10-13 13:26:27,499 DEBUG monitor->zoe_lib.sql_manager: service 353, status updated to started
+2016-10-13 13:26:27,515 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 354
+2016-10-13 13:26:27,529 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:27,676 DEBUG monitor->zoe_lib.sql_manager: service 354, status updated to created
+2016-10-13 13:26:28,442 DEBUG monitor->zoe_lib.sql_manager: service 354, status updated to started
+2016-10-13 13:26:28,452 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 355
+2016-10-13 13:26:28,462 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:28,664 DEBUG monitor->zoe_lib.sql_manager: service 355, status updated to created
+2016-10-13 13:26:29,495 DEBUG monitor->zoe_lib.sql_manager: service 355, status updated to started
+2016-10-13 13:26:29,505 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 356
+2016-10-13 13:26:29,516 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:29,740 DEBUG monitor->zoe_lib.sql_manager: service 356, status updated to created
+2016-10-13 13:26:30,702 DEBUG monitor->zoe_lib.sql_manager: service 356, status updated to started
+2016-10-13 13:26:30,712 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 357
+2016-10-13 13:26:30,723 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:30,880 DEBUG monitor->zoe_lib.sql_manager: service 357, status updated to created
+2016-10-13 13:26:31,547 DEBUG monitor->zoe_lib.sql_manager: service 357, status updated to started
+2016-10-13 13:26:31,562 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: execution 57: all services started
+2016-10-13 13:26:31,572 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:31,648 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: --> Queue dump after sorting
+2016-10-13 13:26:31,649 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: exec 60 (small-interactive) | essential 378,379 | elastic 380,381,382 | size hint 70 | size 350
+2016-10-13 13:26:31,650 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: exec 58 (big-batch-elastic) | essential 358,359,360 | elastic 361,362,363,364,365,366,367 | size hint 700 | size 7000
+2016-10-13 13:26:31,650 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: exec 59 (big-batch-elastic) | essential 368,369,370 | elastic 371,372,373,374,375,376,377 | size hint 700 | size 7000
+2016-10-13 13:26:31,651 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: --> End dump
+2016-10-13 13:26:31,651 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler inner loop, jobs to attempt scheduling:
+2016-10-13 13:26:31,652 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: -> exec 60 (small-interactive) | essential 378,379 | elastic 380,381,382 | size hint 70 | size 350
+2016-10-13 13:26:31,656 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: SN bf19 | f 19434727014 # SN bf12 | f 69900592742 # SN bf18 | f 19434727014 # SN bf16 | f 70974334566 # SN bf15 | f 36614596198 # SN bf20 | f 53794465382 # SN bf13 | f 70974334566 # SN bf21 | f 36614596198 # SN bf14 | f 88154203750 # SN bf17 | f 36614596198 #
+2016-10-13 13:26:31,671 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Allocation after simulation: {378: 'bf18', 379: 'bf13', 380: 'bf14', 381: 'bf17', 382: 'bf19'}
+2016-10-13 13:26:31,671 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting essential services for execution 60
+2016-10-13 13:26:31,680 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 378
+2016-10-13 13:26:31,690 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:31,893 DEBUG monitor->zoe_lib.sql_manager: service 378, status updated to created
+2016-10-13 13:26:32,835 DEBUG monitor->zoe_lib.sql_manager: service 378, status updated to started
+2016-10-13 13:26:32,848 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 379
+2016-10-13 13:26:32,859 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:33,196 DEBUG monitor->zoe_lib.sql_manager: service 379, status updated to created
+2016-10-13 13:26:34,478 DEBUG monitor->zoe_lib.sql_manager: service 379, status updated to started
+2016-10-13 13:26:34,490 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting elastic service 380 for execution 60
+2016-10-13 13:26:34,496 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 380
+2016-10-13 13:26:34,507 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:34,669 DEBUG monitor->zoe_lib.sql_manager: service 380, status updated to created
+2016-10-13 13:26:35,262 DEBUG monitor->zoe_lib.sql_manager: service 380, status updated to started
+2016-10-13 13:26:35,268 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting elastic service 381 for execution 60
+2016-10-13 13:26:35,273 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 381
+2016-10-13 13:26:35,284 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:35,472 DEBUG monitor->zoe_lib.sql_manager: service 381, status updated to created
+2016-10-13 13:26:36,220 DEBUG monitor->zoe_lib.sql_manager: service 381, status updated to started
+2016-10-13 13:26:36,225 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting elastic service 382 for execution 60
+2016-10-13 13:26:36,230 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 382
+2016-10-13 13:26:36,241 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:36,367 DEBUG monitor->zoe_lib.sql_manager: service 382, status updated to created
+2016-10-13 13:26:36,998 DEBUG monitor->zoe_lib.sql_manager: service 382, status updated to started
+2016-10-13 13:26:37,007 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: execution 60: all services started
+2016-10-13 13:26:37,018 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:37,506 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: --> Queue dump after sorting
+2016-10-13 13:26:37,507 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: exec 58 (big-batch-elastic) | essential 358,359,360 | elastic 361,362,363,364,365,366,367 | size hint 700 | size 7000
+2016-10-13 13:26:37,508 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: exec 59 (big-batch-elastic) | essential 368,369,370 | elastic 371,372,373,374,375,376,377 | size hint 700 | size 7000
+2016-10-13 13:26:37,508 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: --> End dump
+2016-10-13 13:26:37,509 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler inner loop, jobs to attempt scheduling:
+2016-10-13 13:26:37,509 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: -> exec 58 (big-batch-elastic) | essential 358,359,360 | elastic 361,362,363,364,365,366,367 | size hint 700 | size 7000
+2016-10-13 13:26:37,510 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: -> exec 59 (big-batch-elastic) | essential 368,369,370 | elastic 371,372,373,374,375,376,377 | size hint 700 | size 7000
+2016-10-13 13:26:37,514 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: SN bf19 | f 14066017894 # SN bf12 | f 69900592742 # SN bf15 | f 36614596198 # SN bf20 | f 53794465382 # SN bf16 | f 70974334566 # SN bf21 | f 36614596198 # SN bf13 | f 65605625446 # SN bf18 | f 18360985190 # SN bf14 | f 82785494630 # SN bf17 | f 31245887078 #
+2016-10-13 13:26:38,482 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Allocation after simulation: {358: 'bf12', 359: 'bf15', 360: 'bf20', 361: 'bf18', 362: 'bf14', 363: 'bf17', 364: 'bf12', 365: 'bf15', 366: 'bf20', 367: 'bf16', 368: 'bf16', 369: 'bf21', 370: 'bf13', 371: 'bf21', 372: 'bf13', 373: 'bf14', 374: 'bf12', 375: 'bf20', 376: 'bf16', 377: 'bf13'}
+2016-10-13 13:26:38,482 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting essential services for execution 58
+2016-10-13 13:26:38,491 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 358
+2016-10-13 13:26:38,503 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:38,737 DEBUG monitor->zoe_lib.sql_manager: service 358, status updated to created
+2016-10-13 13:26:39,699 DEBUG monitor->zoe_lib.sql_manager: service 358, status updated to started
+2016-10-13 13:26:39,710 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 359
+2016-10-13 13:26:39,721 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:39,868 DEBUG monitor->zoe_lib.sql_manager: service 359, status updated to created
+2016-10-13 13:26:40,409 DEBUG monitor->zoe_lib.sql_manager: service 359, status updated to started
+2016-10-13 13:26:40,420 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 360
+2016-10-13 13:26:40,430 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:40,655 DEBUG monitor->zoe_lib.sql_manager: service 360, status updated to created
+2016-10-13 13:26:41,260 DEBUG monitor->zoe_lib.sql_manager: service 360, status updated to started
+2016-10-13 13:26:41,270 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting elastic service 361 for execution 58
+2016-10-13 13:26:41,275 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 361
+2016-10-13 13:26:41,285 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:41,493 DEBUG monitor->zoe_lib.sql_manager: service 361, status updated to created
+2016-10-13 13:26:43,276 DEBUG monitor->zoe_lib.sql_manager: service 361, status updated to started
+2016-10-13 13:26:43,282 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting elastic service 362 for execution 58
+2016-10-13 13:26:43,287 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 362
+2016-10-13 13:26:43,298 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:43,460 DEBUG monitor->zoe_lib.sql_manager: service 362, status updated to created
+2016-10-13 13:26:44,047 DEBUG monitor->zoe_lib.sql_manager: service 362, status updated to started
+2016-10-13 13:26:44,053 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting elastic service 363 for execution 58
+2016-10-13 13:26:44,058 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 363
+2016-10-13 13:26:44,070 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:44,228 DEBUG monitor->zoe_lib.sql_manager: service 363, status updated to created
+2016-10-13 13:26:44,983 DEBUG monitor->zoe_lib.sql_manager: service 363, status updated to started
+2016-10-13 13:26:44,989 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting elastic service 364 for execution 58
+2016-10-13 13:26:44,994 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 364
+2016-10-13 13:26:45,005 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:45,219 DEBUG monitor->zoe_lib.sql_manager: service 364, status updated to created
+2016-10-13 13:26:45,879 DEBUG monitor->zoe_lib.sql_manager: service 364, status updated to started
+2016-10-13 13:26:45,888 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting elastic service 365 for execution 58
+2016-10-13 13:26:45,895 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 365
+2016-10-13 13:26:45,906 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:46,045 DEBUG monitor->zoe_lib.sql_manager: service 365, status updated to created
+2016-10-13 13:26:46,537 DEBUG monitor->zoe_lib.sql_manager: service 365, status updated to started
+2016-10-13 13:26:46,543 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting elastic service 366 for execution 58
+2016-10-13 13:26:46,549 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 366
+2016-10-13 13:26:46,562 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:46,805 DEBUG monitor->zoe_lib.sql_manager: service 366, status updated to created
+2016-10-13 13:26:47,815 DEBUG monitor->zoe_lib.sql_manager: service 366, status updated to started
+2016-10-13 13:26:47,821 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting elastic service 367 for execution 58
+2016-10-13 13:26:47,827 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 367
+2016-10-13 13:26:47,840 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:48,024 DEBUG monitor->zoe_lib.sql_manager: service 367, status updated to created
+2016-10-13 13:26:49,163 DEBUG monitor->zoe_lib.sql_manager: service 367, status updated to started
+2016-10-13 13:26:49,173 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: execution 58: all services started
+2016-10-13 13:26:49,174 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting essential services for execution 59
+2016-10-13 13:26:49,184 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 368
+2016-10-13 13:26:49,197 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:49,336 DEBUG monitor->zoe_lib.sql_manager: service 368, status updated to created
+2016-10-13 13:26:50,322 DEBUG monitor->zoe_lib.sql_manager: service 368, status updated to started
+2016-10-13 13:26:50,332 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 369
+2016-10-13 13:26:50,344 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:50,467 DEBUG monitor->zoe_lib.sql_manager: service 369, status updated to created
+2016-10-13 13:26:51,160 DEBUG monitor->zoe_lib.sql_manager: service 369, status updated to started
+2016-10-13 13:26:51,171 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 370
+2016-10-13 13:26:51,182 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:51,388 DEBUG monitor->zoe_lib.sql_manager: service 370, status updated to created
+2016-10-13 13:26:52,414 DEBUG monitor->zoe_lib.sql_manager: service 370, status updated to started
+2016-10-13 13:26:52,425 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting elastic service 371 for execution 59
+2016-10-13 13:26:52,431 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 371
+2016-10-13 13:26:52,444 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:52,599 DEBUG monitor->zoe_lib.sql_manager: service 371, status updated to created
+2016-10-13 13:26:53,152 DEBUG monitor->zoe_lib.sql_manager: service 371, status updated to started
+2016-10-13 13:26:53,198 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting elastic service 372 for execution 59
+2016-10-13 13:26:53,203 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 372
+2016-10-13 13:26:53,219 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:53,525 DEBUG monitor->zoe_lib.sql_manager: service 372, status updated to created
+2016-10-13 13:26:54,212 DEBUG metrics->zoe_lib.metrics.logging: api latency: execution_start took 70 ms
+2016-10-13 13:26:54,519 DEBUG monitor->zoe_lib.sql_manager: service 372, status updated to started
+2016-10-13 13:26:54,525 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting elastic service 373 for execution 59
+2016-10-13 13:26:54,530 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 373
+2016-10-13 13:26:54,541 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:54,733 DEBUG monitor->zoe_lib.sql_manager: service 373, status updated to created
+2016-10-13 13:26:55,223 DEBUG monitor->zoe_lib.sql_manager: service 373, status updated to started
+2016-10-13 13:26:55,228 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting elastic service 374 for execution 59
+2016-10-13 13:26:55,233 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 374
+2016-10-13 13:26:55,243 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:55,450 DEBUG monitor->zoe_lib.sql_manager: service 374, status updated to created
+2016-10-13 13:26:56,506 DEBUG monitor->zoe_lib.sql_manager: service 374, status updated to started
+2016-10-13 13:26:56,512 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting elastic service 375 for execution 59
+2016-10-13 13:26:56,517 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 375
+2016-10-13 13:26:56,529 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:56,722 DEBUG monitor->zoe_lib.sql_manager: service 375, status updated to created
+2016-10-13 13:26:57,783 DEBUG monitor->zoe_lib.sql_manager: service 375, status updated to started
+2016-10-13 13:26:58,003 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting elastic service 376 for execution 59
+2016-10-13 13:26:58,009 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 376
+2016-10-13 13:26:58,020 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:58,254 DEBUG monitor->zoe_lib.sql_manager: service 376, status updated to created
+2016-10-13 13:26:58,829 DEBUG monitor->zoe_lib.sql_manager: service 376, status updated to started
+2016-10-13 13:26:58,836 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting elastic service 377 for execution 59
+2016-10-13 13:26:58,841 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 377
+2016-10-13 13:26:58,853 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:26:59,120 DEBUG monitor->zoe_lib.sql_manager: service 377, status updated to created
+2016-10-13 13:27:00,542 DEBUG monitor->zoe_lib.sql_manager: service 377, status updated to started
+2016-10-13 13:27:00,552 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: execution 59: all services started
+2016-10-13 13:27:00,563 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:27:00,644 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: --> Queue dump after sorting
+2016-10-13 13:27:00,645 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: exec 61 (small-interactive) | essential 383,384 | elastic 385,386,387 | size hint 70 | size 350
+2016-10-13 13:27:00,645 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: --> End dump
+2016-10-13 13:27:00,646 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler inner loop, jobs to attempt scheduling:
+2016-10-13 13:27:00,647 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: -> exec 61 (small-interactive) | essential 383,384 | elastic 385,386,387 | size hint 70 | size 350
+2016-10-13 13:27:00,651 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: SN bf19 | f 14066017894 # SN bf12 | f 18360985190 # SN bf15 | f 2254857830 # SN bf20 | f 2254857830 # SN bf16 | f 19434727014 # SN bf21 | f 2254857830 # SN bf13 | f 14066017894 # SN bf18 | f 1181116006 # SN bf14 | f 48425756262 # SN bf17 | f 14066017894 #
+2016-10-13 13:27:00,665 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Allocation after simulation: {384: 'bf17', 385: 'bf19', 386: 'bf14', 387: 'bf17', 383: 'bf19'}
+2016-10-13 13:27:00,666 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting essential services for execution 61
+2016-10-13 13:27:00,675 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 383
+2016-10-13 13:27:00,685 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:27:00,843 DEBUG monitor->zoe_lib.sql_manager: service 383, status updated to created
+2016-10-13 13:27:01,405 DEBUG monitor->zoe_lib.sql_manager: service 383, status updated to started
+2016-10-13 13:27:01,416 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 384
+2016-10-13 13:27:01,426 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:27:01,626 DEBUG monitor->zoe_lib.sql_manager: service 384, status updated to created
+2016-10-13 13:27:02,450 DEBUG monitor->zoe_lib.sql_manager: service 384, status updated to started
+2016-10-13 13:27:02,461 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting elastic service 385 for execution 61
+2016-10-13 13:27:02,467 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 385
+2016-10-13 13:27:02,478 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:27:02,640 DEBUG monitor->zoe_lib.sql_manager: service 385, status updated to created
+2016-10-13 13:27:03,170 DEBUG monitor->zoe_lib.sql_manager: service 385, status updated to started
+2016-10-13 13:27:03,176 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting elastic service 386 for execution 61
+2016-10-13 13:27:03,182 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 386
+2016-10-13 13:27:03,192 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:27:03,340 DEBUG monitor->zoe_lib.sql_manager: service 386, status updated to created
+2016-10-13 13:27:03,981 DEBUG monitor->zoe_lib.sql_manager: service 386, status updated to started
+2016-10-13 13:27:03,987 DEBUG scheduler->zoe_master.size_based_scheduler.size_based_job: starting elastic service 387 for execution 61
+2016-10-13 13:27:03,993 DEBUG scheduler->zoe_master.zapp_to_docker: Autorestart disabled for service 387
+2016-10-13 13:27:04,003 DEBUG scheduler->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:27:04,173 DEBUG monitor->zoe_lib.sql_manager: service 387, status updated to created
+2016-10-13 13:27:04,965 DEBUG monitor->zoe_lib.sql_manager: service 387, status updated to started
+2016-10-13 13:27:04,974 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: execution 61: all services started
+2016-10-13 13:27:04,975 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: empty queue, exiting inner loop
+2016-10-13 13:27:04,975 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:04,976 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:04,976 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:04,977 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:23,357 DEBUG monitor->zoe_lib.sql_manager: service 348, status updated to dead
+2016-10-13 13:27:23,358 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:25,063 DEBUG monitor->zoe_lib.sql_manager: service 349, status updated to dead
+2016-10-13 13:27:25,064 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:25,862 DEBUG monitor->zoe_lib.sql_manager: service 350, status updated to dead
+2016-10-13 13:27:25,862 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:26,731 DEBUG monitor->zoe_lib.sql_manager: service 351, status updated to dead
+2016-10-13 13:27:26,731 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:27,429 DEBUG monitor->zoe_lib.sql_manager: service 352, status updated to dead
+2016-10-13 13:27:27,430 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:28,106 DEBUG monitor->zoe_lib.sql_manager: service 353, status updated to dead
+2016-10-13 13:27:28,107 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:28,767 DEBUG monitor->zoe_lib.sql_manager: service 354, status updated to dead
+2016-10-13 13:27:28,768 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:30,318 DEBUG monitor->zoe_lib.sql_manager: service 355, status updated to dead
+2016-10-13 13:27:30,319 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:31,610 DEBUG monitor->zoe_lib.sql_manager: service 356, status updated to dead
+2016-10-13 13:27:31,611 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:32,046 DEBUG monitor->zoe_lib.sql_manager: service 357, status updated to dead
+2016-10-13 13:27:32,047 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:33,760 DEBUG monitor->zoe_lib.sql_manager: service 378, status updated to dead
+2016-10-13 13:27:33,761 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:35,813 DEBUG monitor->zoe_lib.sql_manager: service 380, status updated to dead
+2016-10-13 13:27:35,813 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:36,042 DEBUG monitor->zoe_lib.sql_manager: service 379, status updated to dead
+2016-10-13 13:27:36,043 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:37,019 DEBUG monitor->zoe_lib.sql_manager: service 381, status updated to dead
+2016-10-13 13:27:37,020 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:37,675 DEBUG monitor->zoe_lib.sql_manager: service 382, status updated to dead
+2016-10-13 13:27:37,677 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:40,580 DEBUG monitor->zoe_lib.sql_manager: service 358, status updated to dead
+2016-10-13 13:27:40,581 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:40,754 DEBUG monitor->zoe_lib.sql_manager: service 359, status updated to dead
+2016-10-13 13:27:40,755 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:42,031 DEBUG monitor->zoe_lib.sql_manager: service 360, status updated to dead
+2016-10-13 13:27:42,032 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:44,284 DEBUG monitor->zoe_lib.sql_manager: service 361, status updated to dead
+2016-10-13 13:27:44,285 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:44,579 DEBUG monitor->zoe_lib.sql_manager: service 362, status updated to dead
+2016-10-13 13:27:44,580 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:45,611 DEBUG monitor->zoe_lib.sql_manager: service 363, status updated to dead
+2016-10-13 13:27:45,612 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:46,813 DEBUG monitor->zoe_lib.sql_manager: service 364, status updated to dead
+2016-10-13 13:27:46,813 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:46,853 DEBUG monitor->zoe_lib.sql_manager: service 365, status updated to dead
+2016-10-13 13:27:46,854 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:48,772 DEBUG monitor->zoe_lib.sql_manager: service 366, status updated to dead
+2016-10-13 13:27:48,773 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:50,134 DEBUG monitor->zoe_lib.sql_manager: service 367, status updated to dead
+2016-10-13 13:27:50,134 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:51,287 DEBUG monitor->zoe_lib.sql_manager: service 368, status updated to dead
+2016-10-13 13:27:51,287 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:51,537 DEBUG monitor->zoe_lib.sql_manager: service 369, status updated to dead
+2016-10-13 13:27:51,538 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:53,726 DEBUG monitor->zoe_lib.sql_manager: service 371, status updated to dead
+2016-10-13 13:27:53,727 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:54,076 DEBUG monitor->zoe_lib.sql_manager: service 370, status updated to dead
+2016-10-13 13:27:54,076 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:55,725 DEBUG monitor->zoe_lib.sql_manager: service 373, status updated to dead
+2016-10-13 13:27:55,726 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:56,276 DEBUG monitor->zoe_lib.sql_manager: service 372, status updated to dead
+2016-10-13 13:27:56,277 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:57,291 DEBUG monitor->zoe_lib.sql_manager: service 374, status updated to dead
+2016-10-13 13:27:57,292 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:58,766 DEBUG monitor->zoe_lib.sql_manager: service 375, status updated to dead
+2016-10-13 13:27:58,767 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:27:59,431 DEBUG monitor->zoe_lib.sql_manager: service 376, status updated to dead
+2016-10-13 13:27:59,432 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:28:01,841 DEBUG monitor->zoe_lib.sql_manager: service 377, status updated to dead
+2016-10-13 13:28:01,842 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:28:02,003 DEBUG monitor->zoe_lib.sql_manager: service 383, status updated to dead
+2016-10-13 13:28:02,004 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:28:03,229 DEBUG monitor->zoe_lib.sql_manager: service 384, status updated to dead
+2016-10-13 13:28:03,230 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:28:03,799 DEBUG monitor->zoe_lib.sql_manager: service 385, status updated to dead
+2016-10-13 13:28:03,800 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:28:04,506 DEBUG monitor->zoe_lib.sql_manager: service 386, status updated to dead
+2016-10-13 13:28:04,507 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:28:05,517 DEBUG monitor->zoe_lib.sql_manager: service 387, status updated to dead
+2016-10-13 13:28:05,517 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:28:22,481 DEBUG termination_58->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:28:22,500 DEBUG termination_60->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:28:22,519 DEBUG termination_61->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:28:22,535 DEBUG termination_57->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:28:22,584 DEBUG termination_58->zoe_master.zapp_to_docker: Service big-batch6 terminated
+2016-10-13 13:28:22,585 DEBUG termination_59->zoe_lib.swarm_client: Connecting to Swarm at bf5:2380
+2016-10-13 13:28:22,589 DEBUG termination_61->zoe_master.zapp_to_docker: Service fake-notebook0 terminated
+2016-10-13 13:28:22,595 DEBUG monitor->zoe_lib.sql_manager: service 364, status updated to destroyed
+2016-10-13 13:28:22,610 DEBUG termination_60->zoe_master.zapp_to_docker: Service fake-spark0 terminated
+2016-10-13 13:28:22,626 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Thread termination_58 join failed
+2016-10-13 13:28:22,630 DEBUG monitor->zoe_lib.sql_manager: service 383, status updated to destroyed
+2016-10-13 13:28:22,646 DEBUG termination_61->zoe_master.zapp_to_docker: Service fake-spark0 terminated
+2016-10-13 13:28:22,659 DEBUG monitor->zoe_lib.sql_manager: service 379, status updated to destroyed
+2016-10-13 13:28:22,689 DEBUG monitor->zoe_lib.sql_manager: service 384, status updated to destroyed
+2016-10-13 13:28:22,694 DEBUG termination_61->zoe_master.zapp_to_docker: Service fake-spark1 terminated
+2016-10-13 13:28:22,709 DEBUG termination_58->zoe_master.zapp_to_docker: Service big-batch0 terminated
+2016-10-13 13:28:22,725 DEBUG termination_57->zoe_master.zapp_to_docker: Service big-batch0 terminated
+2016-10-13 13:28:22,726 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Thread termination_60 join failed
+2016-10-13 13:28:22,731 DEBUG termination_60->zoe_master.zapp_to_docker: Service fake-spark2 terminated
+2016-10-13 13:28:22,738 DEBUG monitor->zoe_lib.sql_manager: service 358, status updated to destroyed
+2016-10-13 13:28:22,779 DEBUG monitor->zoe_lib.sql_manager: service 381, status updated to destroyed
+2016-10-13 13:28:22,784 DEBUG termination_58->zoe_master.zapp_to_docker: Service big-batch7 terminated
+2016-10-13 13:28:22,790 DEBUG termination_59->zoe_master.zapp_to_docker: Service big-batch0 terminated
+2016-10-13 13:28:22,795 DEBUG termination_61->zoe_master.zapp_to_docker: Service fake-spark2 terminated
+2016-10-13 13:28:22,809 DEBUG termination_60->zoe_master.zapp_to_docker: Service fake-spark3 terminated
+2016-10-13 13:28:22,815 DEBUG termination_57->zoe_master.zapp_to_docker: Service big-batch4 terminated
+2016-10-13 13:28:22,822 DEBUG monitor->zoe_lib.sql_manager: service 385, status updated to destroyed
+2016-10-13 13:28:22,827 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Thread termination_61 join failed
+2016-10-13 13:28:22,864 DEBUG monitor->zoe_lib.sql_manager: service 348, status updated to destroyed
+2016-10-13 13:28:22,870 DEBUG termination_58->zoe_master.zapp_to_docker: Service big-batch8 terminated
+2016-10-13 13:28:22,885 DEBUG termination_61->zoe_master.zapp_to_docker: Service fake-spark3 terminated
+2016-10-13 13:28:22,895 DEBUG monitor->zoe_lib.sql_manager: service 368, status updated to destroyed
+2016-10-13 13:28:22,901 DEBUG termination_60->zoe_master.zapp_to_docker: Service fake-notebook0 terminated
+2016-10-13 13:28:22,912 DEBUG termination_57->zoe_master.zapp_to_docker: Service big-batch1 terminated
+2016-10-13 13:28:22,928 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Thread termination_57 join failed
+2016-10-13 13:28:22,928 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:28:22,932 DEBUG monitor->zoe_lib.sql_manager: service 386, status updated to destroyed
+2016-10-13 13:28:22,951 DEBUG termination_59->zoe_master.zapp_to_docker: Service big-batch2 terminated
+2016-10-13 13:28:22,957 DEBUG monitor->zoe_lib.sql_manager: service 382, status updated to destroyed
+2016-10-13 13:28:22,981 DEBUG monitor->zoe_lib.sql_manager: service 365, status updated to destroyed
+2016-10-13 13:28:22,987 DEBUG termination_60->zoe_master.zapp_to_docker: Service fake-spark1 terminated
+2016-10-13 13:28:22,994 DEBUG monitor->zoe_lib.sql_manager: service 352, status updated to destroyed
+2016-10-13 13:28:22,999 DEBUG termination_58->zoe_master.zapp_to_docker: Service big-batch4 terminated
+2016-10-13 13:28:23,005 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:28:23,020 DEBUG termination_59->zoe_master.zapp_to_docker: Service big-batch6 terminated
+2016-10-13 13:28:23,029 DEBUG monitor->zoe_lib.sql_manager: service 387, status updated to destroyed
+2016-10-13 13:28:23,036 DEBUG termination_57->zoe_master.zapp_to_docker: Service big-batch2 terminated
+2016-10-13 13:28:23,064 DEBUG monitor->zoe_lib.sql_manager: service 349, status updated to destroyed
+2016-10-13 13:28:23,072 DEBUG termination_58->zoe_master.zapp_to_docker: Service big-batch5 terminated
+2016-10-13 13:28:23,076 DEBUG termination_59->zoe_master.zapp_to_docker: Service big-batch7 terminated
+2016-10-13 13:28:23,085 DEBUG monitor->zoe_lib.sql_manager: service 366, status updated to destroyed
+2016-10-13 13:28:23,103 DEBUG monitor->zoe_lib.sql_manager: service 378, status updated to destroyed
+2016-10-13 13:28:23,115 DEBUG termination_57->zoe_master.zapp_to_docker: Service big-batch3 terminated
+2016-10-13 13:28:23,135 DEBUG monitor->zoe_lib.sql_manager: service 370, status updated to destroyed
+2016-10-13 13:28:23,140 DEBUG termination_59->zoe_master.zapp_to_docker: Service big-batch8 terminated
+2016-10-13 13:28:23,158 DEBUG termination_57->zoe_master.zapp_to_docker: Service big-batch7 terminated
+2016-10-13 13:28:23,164 DEBUG termination_58->zoe_master.zapp_to_docker: Service big-batch1 terminated
+2016-10-13 13:28:23,183 DEBUG monitor->zoe_lib.sql_manager: service 362, status updated to destroyed
+2016-10-13 13:28:23,200 DEBUG monitor->zoe_lib.sql_manager: service 380, status updated to destroyed
+2016-10-13 13:28:23,205 DEBUG termination_59->zoe_master.zapp_to_docker: Service big-batch9 terminated
+2016-10-13 13:28:23,211 DEBUG monitor->zoe_lib.sql_manager: service 350, status updated to destroyed
+2016-10-13 13:28:23,229 DEBUG termination_58->zoe_master.zapp_to_docker: Service big-batch3 terminated
+2016-10-13 13:28:23,234 DEBUG termination_57->zoe_master.zapp_to_docker: Service big-batch8 terminated
+2016-10-13 13:28:23,262 DEBUG monitor->zoe_lib.sql_manager: service 374, status updated to destroyed
+2016-10-13 13:28:23,269 DEBUG termination_59->zoe_master.zapp_to_docker: Service big-batch1 terminated
+2016-10-13 13:28:23,274 DEBUG termination_58->zoe_master.zapp_to_docker: Service big-batch2 terminated
+2016-10-13 13:28:23,282 DEBUG monitor->zoe_lib.sql_manager: service 363, status updated to destroyed
+2016-10-13 13:28:23,301 DEBUG monitor->zoe_lib.sql_manager: service 375, status updated to destroyed
+2016-10-13 13:28:23,311 DEBUG termination_57->zoe_master.zapp_to_docker: Service big-batch6 terminated
+2016-10-13 13:28:23,318 DEBUG termination_59->zoe_master.zapp_to_docker: Service big-batch3 terminated
+2016-10-13 13:28:23,325 DEBUG monitor->zoe_lib.sql_manager: service 351, status updated to destroyed
+2016-10-13 13:28:23,343 DEBUG monitor->zoe_lib.sql_manager: service 359, status updated to destroyed
+2016-10-13 13:28:23,348 DEBUG termination_58->zoe_master.zapp_to_docker: Service big-batch9 terminated
+2016-10-13 13:28:23,353 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:28:23,372 DEBUG monitor->zoe_lib.sql_manager: service 376, status updated to destroyed
+2016-10-13 13:28:23,376 DEBUG termination_59->zoe_master.zapp_to_docker: Service big-batch4 terminated
+2016-10-13 13:28:23,392 DEBUG monitor->zoe_lib.sql_manager: service 355, status updated to destroyed
+2016-10-13 13:28:23,398 DEBUG termination_57->zoe_master.zapp_to_docker: Service big-batch5 terminated
+2016-10-13 13:28:23,405 DEBUG monitor->zoe_lib.sql_manager: service 377, status updated to destroyed
+2016-10-13 13:28:23,423 DEBUG termination_59->zoe_master.zapp_to_docker: Service big-batch5 terminated
+2016-10-13 13:28:23,429 DEBUG monitor->zoe_lib.sql_manager: service 361, status updated to destroyed
+2016-10-13 13:28:23,435 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:28:23,442 DEBUG monitor->zoe_lib.sql_manager: service 356, status updated to destroyed
+2016-10-13 13:28:23,449 DEBUG termination_57->zoe_master.zapp_to_docker: Service big-batch9 terminated
+2016-10-13 13:28:23,455 DEBUG scheduler->zoe_master.size_based_scheduler.size_scheduler: Scheduler loop has been triggered, but the queue is empty
+2016-10-13 13:28:23,456 DEBUG monitor->zoe_lib.sql_manager: service 369, status updated to destroyed
+2016-10-13 13:28:23,463 DEBUG monitor->zoe_lib.sql_manager: service 360, status updated to destroyed
+2016-10-13 13:28:23,471 DEBUG monitor->zoe_lib.sql_manager: service 354, status updated to destroyed
+2016-10-13 13:28:23,479 DEBUG monitor->zoe_lib.sql_manager: service 371, status updated to destroyed
+2016-10-13 13:28:23,486 DEBUG monitor->zoe_lib.sql_manager: service 367, status updated to destroyed
+2016-10-13 13:28:23,492 DEBUG monitor->zoe_lib.sql_manager: service 372, status updated to destroyed
+2016-10-13 13:28:23,499 DEBUG monitor->zoe_lib.sql_manager: service 353, status updated to destroyed
+2016-10-13 13:28:23,507 DEBUG monitor->zoe_lib.sql_manager: service 373, status updated to destroyed
+2016-10-13 13:28:23,513 DEBUG monitor->zoe_lib.sql_manager: service 357, status updated to destroyed
+2016-10-13 13:28:23,540 DEBUG metrics->zoe_lib.metrics.logging: api latency: execution_terminate took 9 ms
+2016-10-13 13:28:23,540 DEBUG metrics->zoe_lib.metrics.logging: api latency: execution_terminate took 7 ms
+2016-10-13 13:28:23,541 DEBUG metrics->zoe_lib.metrics.logging: api latency: execution_terminate took 15 ms
+2016-10-13 13:28:23,541 DEBUG metrics->zoe_lib.metrics.logging: api latency: execution_terminate took 13 ms
+2016-10-13 13:28:23,542 DEBUG metrics->zoe_lib.metrics.logging: api latency: execution_terminate took 47 ms
