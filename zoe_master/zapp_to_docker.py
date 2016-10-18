@@ -39,7 +39,7 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
         'deployment_name': get_conf().deployment_name,
     }
 
-    for service in service_list:
+    for service in execution.services:
         env_subst_dict['dns_name#' + service.name] = service.dns_name
 
     for service in service_list:
@@ -72,9 +72,9 @@ def _gen_environment(service, env_subst_dict, copts):
             try:
                 env_value = env_value.format(**env_subst_dict)
             except KeyError:
-                error_msg = "Unknown variable in environment expression '{}', known variables are: {}".format(env_value, list(env_subst_dict.keys()))
+                error_msg = "Unknown variable in environment expression '{}' for service {}, known variables are: {}".format(env_value, service.name, list(env_subst_dict.keys()))
                 service.set_error(error_msg)
-                raise ZoeStartExecutionFatalException("Service {} has wrong environment expression")
+                raise ZoeStartExecutionFatalException(error_msg)
             copts.add_env_variable(env_name, env_value)
 
 
