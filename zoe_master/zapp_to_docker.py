@@ -25,6 +25,7 @@ from zoe_lib.config import get_conf
 from zoe_lib.exceptions import ZoeLibException, ZoeNotEnoughResourcesException
 from zoe_lib.sql_manager import Execution, Service
 from zoe_lib.swarm_client import DockerContainerOptions, SwarmClient
+from zoe_lib import exec_logs
 
 log = logging.getLogger(__name__)
 
@@ -146,6 +147,7 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
 def terminate_execution(execution: Execution) -> None:
     """Terminate an execution, making sure no containers are left in Swarm."""
     execution.set_cleaning_up()
+    exec_logs.save(execution)
     swarm = SwarmClient(get_conf())
     for service in execution.services:
         assert isinstance(service, Service)
