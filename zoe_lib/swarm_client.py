@@ -202,6 +202,7 @@ class SwarmClient:
         else:
             log_config = docker.utils.LogConfig(type="json-file")
 
+        time_start = time.time()
         try:
             host_config = self.cli.create_host_config(network_mode=options.network_name,
                                                       binds=options.get_volume_binds(),
@@ -222,6 +223,7 @@ class SwarmClient:
                                              ports=options.ports,
                                              labels=options.labels)
             self.cli.start(container=cont.get('Id'))
+            log.debug('container startup time: {:.2f}'.format(time.time() - time_start))
         except docker.errors.APIError as e:
             if cont is not None:
                 self.cli.remove_container(container=cont.get('Id'), force=True)

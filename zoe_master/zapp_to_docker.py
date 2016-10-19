@@ -1,5 +1,4 @@
 # Copyright (c) 2016, Daniele Venzano
-# Copyright (c) 2016, Daniele Venzano
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +16,7 @@
 """Translates a ZApp description into Docker containers."""
 
 import logging
+import time
 from typing import List
 
 from zoe_master.workspace.filesystem import ZoeFSWorkspace
@@ -49,7 +49,9 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
             on_node = allocations[service.id]
         else:
             on_node = None
+        time_start = time.time()
         _spawn_service(execution, service, env_subst_dict, on_node)
+        log.debug('service {} startup time: {:.2f}s'.format(service.id, time_start - time.time()))
 
 
 def execution_to_containers(execution: Execution) -> None:
