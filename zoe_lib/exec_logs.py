@@ -72,6 +72,6 @@ def delete(execution: Execution):
     if path is None:
         return
 
-    shutil.rmtree(path)
+    shutil.rmtree(path, ignore_errors=True)
 
     _shutdown()
