@@ -18,6 +18,9 @@
 import logging
 
 from zoe_lib.sql_manager import Execution, SQLManager
+from zoe_lib import exec_logs
+from zoe_lib.config import get_conf
+
 from zoe_master.scheduler import ZoeScheduler
 
 log = logging.getLogger(__name__)
@@ -59,4 +62,5 @@ def restart_resubmit_scheduler(state: SQLManager, scheduler: ZoeScheduler):
 
 def execution_delete(scheduler: ZoeScheduler, execution: Execution):
     """Remove an execution from the scheduler."""
+    exec_logs.delete(execution)
     scheduler.terminate(execution)

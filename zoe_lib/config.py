@@ -84,6 +84,8 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--ldap-user-gid', type=int, help='LDAP group ID for users', default=5001)
         argparser.add_argument('--ldap-guest-gid', type=int, help='LDAP group ID for guests', default=5002)
 
+        argparser.add_argument('--service-log-path', help='Save service logs in this directory, EXPERIMENTAL', default='')
+
         opts = argparser.parse_args()
         if opts.debug:
             argparser.print_values()
