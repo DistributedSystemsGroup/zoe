@@ -61,8 +61,8 @@ def app_validate(data):
         priority = int(data['priority'])
     except ValueError:
         raise InvalidApplicationDescription(msg="priority field must be an int")
-    if priority < 0 or priority > 1024:
-        raise InvalidApplicationDescription(msg="priority must be between 0 and 1024")
+#    if priority < 0 or priority > 1024:
+#        raise InvalidApplicationDescription(msg="priority must be between 0 and 1024")
 
     if 'services' not in data:
         raise InvalidApplicationDescription(msg='the application should contain a list of services')
