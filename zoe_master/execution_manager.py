@@ -19,7 +19,6 @@ import logging
 
 from zoe_lib.sql_manager import Execution, SQLManager
 from zoe_lib import exec_logs
-from zoe_lib.config import get_conf
 
 from zoe_master.scheduler import ZoeScheduler
 
