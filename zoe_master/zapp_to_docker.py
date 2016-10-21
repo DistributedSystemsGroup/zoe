@@ -52,7 +52,7 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
             on_node = None
         time_start = time.time()
         _spawn_service(execution, service, env_subst_dict, on_node)
-        log.debug('service {} startup time: {:.2f}s'.format(service.id, time_start - time.time()))
+        log.debug('service {} startup time: {:.2f}s'.format(service.id, time.time() - time_start))
 
 
 def execution_to_containers(execution: Execution) -> None:
