@@ -59,6 +59,9 @@ def save(execution: Execution):
 
         swarm = SwarmClient(get_conf())
         log_gen = swarm.logs(service.docker_id, stream=True, follow=False)
+        if log_gen is None:
+            _shutdown()
+            return
         with open(fpath, 'wb') as fp:
             for line in log_gen:
                 fp.write(line)
