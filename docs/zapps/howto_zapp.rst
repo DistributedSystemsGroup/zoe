@@ -24,7 +24,7 @@ In this guide we are going to use Python because it is a very easy language to u
 
 We are planning graphical tools and a packaging system for ZApps, so stay tuned for updates! In the `Zoe Applications repository <https://github.com/DistributedSystemsGroup/zoe-applications>`_ there is already a very simple web interface we use internally for our users.
 
-.. image:: figures/zapp_structure.png
+.. image:: /figures/zapp_structure.png
 
 A ZApp is a tree of nested dictionaries (other languages call them maps or hashmaps). The actual JSON tree is flattened because Zoe does not need to know about Frameworks, it is a logical subdivision that helps the user.
 

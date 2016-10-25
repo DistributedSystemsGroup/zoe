@@ -11,7 +11,7 @@ To setup a more convenient loggin solution, Zoe provides two alternatives:
 2. Using the ``service-log-path`` option: logs will be stored in the directory specified when the execution terminates. The directory can be exposed via http or NFS to give access to users. On the other hand, if the log are too big, Zoe will spend a big amount of time saving the data and resources will not be freed until the the copying process has not finished.
 
 In our experience, web interfaces like Kibana or Graylog are not useful to the Zoe users: they want to quickly dig through logs of their executions to find an error or an interesting number to correlate to some other number in some other log. The web interfaces (option 1) are slow and cluttered compared to using grep on a text file (option 2).
-Which alternative is good for you depends on the usage pattern of your users, your log storage/auditing requirements, etc.
+Which alternative is good for you depends on the usage pattern of your users, your log auditing requirements, etc.
 
 Optional Kafka support
 ----------------------
