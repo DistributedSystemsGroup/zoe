@@ -28,9 +28,12 @@ from zoe_api.auth.ldap import LDAPAuthenticator
 from zoe_api.auth.file import PlainTextAuthenticator
 from zoe_api.auth.base import BaseAuthenticator  # pylint: disable=unused-import
 
+from zoe_api.rest_api.oauth_utils import auth_controller, mongo
+
+import json
+import time
 
 log = logging.getLogger(__name__)
-
 
 def catch_exceptions(func):
     """
@@ -69,11 +72,31 @@ def catch_exceptions(func):
 def get_auth(handler: tornado.web.RequestHandler):
     """Try to authenticate a request."""
     auth_header = handler.request.headers.get('Authorization')
-    if auth_header is None or not auth_header.startswith('Basic '):
+    if auth_header is None or not (auth_header.startswith('Basic ') or auth_header.startswith('Bearer ')):
         raise ZoeRestAPIException('missing or wrong authentication information', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
-    auth_decoded = base64.decodebytes(bytes(auth_header[6:], 'ascii')).decode('utf-8')
-    username, password = auth_decoded.split(':', 2)
+    #Process for authentication with token
+    if "Bearer" in auth_header:
+        token = auth_header[7:]
+        key = 'oauth2_{}'.format(token)
+        access = auth_controller.access_token_store.rs.get(key)
+
+        if access:
+            access = json.loads(access.decode())
+            username = access['client_id']
+            passwords = mongo['db']['oauth_clients'].find({'identifier':username})
+            password = ''
+            for p in passwords:
+                password = p['secret']
+        else:
+            raise ZoeRestAPIException('Invalid Token', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+        if access['expires_at'] <= int(time.time()):
+            raise ZoeRestAPIException('Expired token', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
+    #Process for authentication with username, password
+    else:
+        auth_decoded = base64.decodebytes(bytes(auth_header[6:], 'ascii')).decode('utf-8')
+        username, password = auth_decoded.split(':', 2)
 
     if get_conf().auth_type == 'text':
         authenticator = PlainTextAuthenticator()  # type: BaseAuthenticator
