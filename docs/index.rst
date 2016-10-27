@@ -45,6 +45,7 @@ Contents
   architecture
   rest-api
   vision
+  motivations
   roadmap
 
 Zoe applications

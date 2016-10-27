@@ -30,15 +30,16 @@ Zoe runs processes inside containers and the Zoe application description is very
 
       - Proxies and SSH gateways
 
-  - Elastic
+  - Elastic (can be automatically resized)
 
     - Streaming:
 
       - Spark streaming user jobs
       - Storm
       - Flink streaming
+      - Kafka
 
-- Batch: will eventually finish by themselves
+- Self-ending/Ephemeral: will eventually finish by themselves
 
   - Elastic:
 
@@ -55,4 +56,4 @@ All the applications in the **long-running** category need to be deployed, manag
 
 The **elastic, long-running** applications have a degree more of flexibility, that can be taken into account by Zoe. The have all the same needs as the non-elastic applications, but they can also be scaled according to many criteria (priority, latency, data volume).
 
-The applications in the **batch** category, instead, need to be scheduled according to policies that give more or less priority to different jobs, taking also into account the elasticity of some of these computing engines.
+The applications in the **self-ending** category, instead, need to be scheduled according to policies that give more or less priority to different jobs, taking also into account the elasticity of some of these computing engines.
