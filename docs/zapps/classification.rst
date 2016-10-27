@@ -5,6 +5,8 @@ Classification
 
 Zoe runs processes inside containers and the Zoe application description is very generic, allowing any kind of application to be described in Zoe and submitted for execution. While the main focus of Zoe are so-called "analytic applications", there are many other tools that can be run on the same cluster, for monitoring, storage, log management, history servers, etc. These applications can be described in Zoe and executed, but they have quite different scheduling constraint.
 
+Please note that in this context an "elastic" service is a service that "can be automatically resized". HDFS can be resized, but it is done as an administrative operation that requires setting up partitions and managing the network and disk traffic.
+
 - Long running: potentially will never terminate
 
   - Non elastic
@@ -39,7 +41,7 @@ Zoe runs processes inside containers and the Zoe application description is very
       - Flink streaming
       - Kafka
 
-- Self-ending/Ephemeral: will eventually finish by themselves
+- Ephemeral: will eventually finish by themselves
 
   - Elastic:
 
@@ -56,4 +58,4 @@ All the applications in the **long-running** category need to be deployed, manag
 
 The **elastic, long-running** applications have a degree more of flexibility, that can be taken into account by Zoe. The have all the same needs as the non-elastic applications, but they can also be scaled according to many criteria (priority, latency, data volume).
 
-The applications in the **self-ending** category, instead, need to be scheduled according to policies that give more or less priority to different jobs, taking also into account the elasticity of some of these computing engines.
+The applications in the **ephemeral** category, instead, will eventually terminate by themselves: a batch job is a good example of such applications.
