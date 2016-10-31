@@ -380,4 +380,8 @@ class SwarmClient:
         :param follow:
         :return:
         """
-        return self.cli.logs(docker_id, stdout=True, stderr=True, follow=follow, stream=stream, timestamps=True)
+        try:
+            return self.cli.logs(docker_id, stdout=True, stderr=True, follow=follow, stream=stream, timestamps=True)
+        except docker.errors.NullResource:
+            return None
+
