@@ -1,15 +1,16 @@
-import { Serializable } from '../interfaces/serializable'
+import { Serializable } from '../interfaces/serializable';
 
 export class Resource implements Serializable<Resource> {
-    memory: string
+    memory: string;
 
-    rawObject: Object
+    rawObject: Object;
 
     deserialize(input) {
-        this.rawObject = input
+        this.rawObject = input;
 
-        if (input.hasOwnProperty('memory'))
+        if (input.hasOwnProperty('memory')) {
             this.memory = input.memory;
+        }
 
         return this;
     }

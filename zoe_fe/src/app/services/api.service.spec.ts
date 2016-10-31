@@ -1,6 +1,6 @@
 /* tslint:disable:no-unused-variable */
-
-import { TestBed, async, inject } from '@angular/core/testing';
+/*
+import { TestBed, async, inject, ComponentFixture } from '@angular/core/testing';
 import { ApiService } from './api.service';
 
 describe('Service: Api', () => {
@@ -14,3 +14,4 @@ describe('Service: Api', () => {
     expect(service).toBeTruthy();
   }));
 });
+*/

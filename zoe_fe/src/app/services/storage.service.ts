@@ -36,3 +36,25 @@ export class StorageService {
     localStorage.removeItem(USERNAME)
   }
 }
+
+export class StorageServiceStub extends StorageService {
+  private headers: Headers;
+  private username: string;
+
+  constructor(
+      headers: Headers,
+      username: string
+  ) {
+    super()
+    this.headers = headers;
+    this.username = username;
+  }
+
+  setAuthHeader(headers: Headers) { this.headers = headers }
+  getAuthHeader(): Headers { return this.headers }
+  removeAuthHeader() { this.headers = null }
+
+  setUsername(username: string) { this.username = username}
+  getUsername(): string { return this.username }
+  removeUsername() { this.username = null }
+}

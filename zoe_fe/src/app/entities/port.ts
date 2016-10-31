@@ -1,31 +1,36 @@
-import { Serializable } from '../interfaces/serializable'
+import { Serializable } from '../interfaces/serializable';
 
 export class Port implements Serializable<Port> {
-    protocol: string
-    name: string
-    path: string
-    isMainEndpoint: boolean
-    portNumber: number
+    protocol: string;
+    name: string;
+    path: string;
+    isMainEndpoint: boolean;
+    portNumber: number;
 
-    rawObject: Object
+    rawObject: Object;
 
     deserialize(input) {
-        this.rawObject = input
+        this.rawObject = input;
 
-        if (input.hasOwnProperty('protocol'))
+        if (input.hasOwnProperty('protocol')) {
             this.protocol = input.protocol;
+        }
 
-        if (input.hasOwnProperty('name'))
+        if (input.hasOwnProperty('name')) {
             this.name = input.name;
+        }
 
-        if (input.hasOwnProperty('path'))
+        if (input.hasOwnProperty('path')) {
             this.path = input.path;
+        }
 
-        if (input.hasOwnProperty('port_number'))
+        if (input.hasOwnProperty('port_number')) {
             this.portNumber = input.port_number;
+        }
 
-        if (input.hasOwnProperty('is_main_endpoint'))
+        if (input.hasOwnProperty('is_main_endpoint')) {
             this.isMainEndpoint = input.is_main_endpoint;
+        }
 
         return this;
     }

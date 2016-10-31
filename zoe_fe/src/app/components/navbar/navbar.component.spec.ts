@@ -1,36 +1,73 @@
 /* tslint:disable:no-unused-variable */
 
-import { TestBed, async } from '@angular/core/testing';
+import { TestBed, async, ComponentFixture } from '@angular/core/testing';
 import { NavbarComponent } from './navbar.component';
+import { By } from '@angular/platform-browser';
+import { ApiService } from '../../services/api.service';
+import { FromUnixPipe, DateFormatPipe } from 'angular2-moment';
+import { CapitalizePipe } from '../../pipes/capitalize.pipe';
+import { RouterLinkStubDirective } from '../../testing/router-stubs';
+import { RouterLinkActive, } from '@angular/router';
+
+let comp:    NavbarComponent;
+let fixture: ComponentFixture<NavbarComponent>;
 
 describe('Component: Navbar', () => {
+  let apiServiceStub = {
+    isUserLoggedIn: () => true
+  };
+
+  let routerStub = {
+    navigateByUrl: (url: string) => true
+  };
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      declarations: [
+        RouterLinkActive,
+        RouterLinkStubDirective,
+        NavbarComponent,
+        CapitalizePipe,
+        FromUnixPipe,
+        DateFormatPipe
+      ], // declare the test component
+      providers: [
+        {provide: ApiService, useValue: apiServiceStub }
+      ]
+    });
+
+    fixture = TestBed.createComponent(NavbarComponent);
+
+    comp = fixture.componentInstance; // BannerComponent test instance
+
+    let apiService = TestBed.get(ApiService);
+  });
+
   it('should create an instance', () => {
-    let component = new NavbarComponent();
-    expect(component).toBeTruthy();
+    expect(fixture).toBeTruthy();
   });
 
   it('should have title "Zoe"', () => {
-    let component = new LoginComponent();
-    expect(component).toBeTruthy();
-    let compiled = component.debugElement.nativeElement;
-    expect(compiled.querySelector('nav a.navbar-brand').textContent).toContain('Zoe');
+    expect(fixture.debugElement.query(By.css('nav a.navbar-brand')).nativeElement.textContent).toContain('Zoe');
   });
 
   it('should have the toggle for small screen', () => {
-    let component = new LoginComponent();
-    let compiled = component.debugElement.nativeElement;
-    expect(compiled.querySelector('span.sr-only').textContent).toContain('Toggle navigation');
+    expect(fixture.debugElement.query(By.css('span.sr-only')).nativeElement.textContent).toContain('Toggle navigation');
   });
 
-  it('should have the "Executlions List" link', () => {
-    let component = new LoginComponent();
-    let compiled = component.debugElement.nativeElement;
-    expect(compiled.querySelector('a[href="/executions/list"]').textContent).toContain('Executions list');
-  });
+  it('should have 3 links', () => {
+    fixture.whenStable().then(() => { // wait for async getQuote
+      fixture.detectChanges();        // update view with quote
+      let links = fixture.debugElement.queryAll(By.css('a'))
+      console.log(links.length)
+      expect(links.length).toBe(3);
 
-  it('should have the "New Execution" link', () => {
-    let component = new LoginComponent();
-    let compiled = component.debugElement.nativeElement;
-    expect(compiled.querySelector('a[href="/executions/new"]').textContent).toContain('New Execution');
+      let link1 = links[0]
+      console.log(link1)
+      let link2 = links[1]
+      console.log(link2)
+      let link3 = links[2]
+      console.log(link3)
+    });
   });
 });

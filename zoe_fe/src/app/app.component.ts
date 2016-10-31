@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'zoe',
+  selector: 'app-zoe',
   template: `
         <navbar></navbar>
             
