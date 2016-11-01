@@ -26,6 +26,7 @@ from zoe_lib.config import get_conf
 from zoe_api.exceptions import ZoeRestAPIException, ZoeNotFoundException, ZoeAuthException, ZoeException
 from zoe_api.auth.ldap import LDAPAuthenticator
 from zoe_api.auth.file import PlainTextAuthenticator
+from zoe_api.auth.ldapsasl import LDAPSASLAuthenticator
 from zoe_api.auth.base import BaseAuthenticator  # pylint: disable=unused-import
 
 from zoe_api.rest_api.oauth_utils import auth_controller, mongo
@@ -102,6 +103,8 @@ def get_auth(handler: tornado.web.RequestHandler):
         authenticator = PlainTextAuthenticator()  # type: BaseAuthenticator
     elif get_conf().auth_type == 'ldap':
         authenticator = LDAPAuthenticator()
+    elif get_conf().auth_type == 'ldapsasl':
+        authenticator = LDAPSASLAuthenticator()
     else:
         raise ZoeException('Configuration error, unknown authentication method: {}'.format(get_conf().auth_type))
     uid, role = authenticator.auth(username, password)
