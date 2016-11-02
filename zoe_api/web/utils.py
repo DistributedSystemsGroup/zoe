@@ -22,6 +22,7 @@ from zoe_lib.config import get_conf
 
 from zoe_api.auth.base import BaseAuthenticator  # pylint: disable=unused-import
 from zoe_api.auth.ldap import LDAPAuthenticator
+from zoe_api.auth.ldapsasl import LDAPSASLAuthenticator
 from zoe_api.auth.file import PlainTextAuthenticator
 import zoe_api.exceptions
 from zoe_api.web.custom_request_handler import ZoeRequestHandler
@@ -52,16 +53,37 @@ def catch_exceptions(func):
 
     return func_wrapper
 
-
 def missing_auth(handler: ZoeRequestHandler):
-    """Sends a 401 response that enables basic auth"""
-    handler.set_status(401, 'Could not verify your access level for that URL. You have to login with proper credentials.')
-    handler.set_header('WWW-Authenticate', 'Basic realm="Login Required"')
-    handler.finish()
+    if handler.get_argument('username') is not None:
+        handler.redirect(handler.get_argument('next', u'login'))
+    else:
+        """Sends a 401 response that enables basic auth"""
+        handler.set_status(401, 'Could not verify your access level for that URL. You have to login with proper credentials.')
+        handler.set_header('WWW-Authenticate', 'Basic realm="Login Required"')
+        handler.finish()
 
+def get_auth_login(username, password):
+    if get_conf().auth_type == 'text':
+        authenticator = PlainTextAuthenticator()  # type: BaseAuthenticator
+    elif get_conf().auth_type == 'ldap':
+        authenticator = LDAPAuthenticator()
+    elif get_conf().auth_type == 'ldapsasl':
+        authenticator = LDAPSASLAuthenticator()
+    else:
+        raise zoe_api.exceptions.ZoeException('Configuration error, unknown authentication method: {}'.format(get_conf().auth_type))
+    uid, role = authenticator.auth(username, password)
+    if uid is None:
+        raise zoe_api.exceptions.ZoeAuthException
+    return uid, role
 
 def get_auth(handler: ZoeRequestHandler):
     """Try to authenticate a request."""
+
+    if handler.get_secure_cookie('zoe'):
+        cookie_val = str(handler.get_secure_cookie('zoe'))
+        uid, role = cookie_val[2:-1].split('.')
+        log.info('Authentication done using cookie')
+        return uid, role
 
     auth_header = handler.request.headers.get('Authorization')
     if auth_header is None or not auth_header.startswith('Basic '):
@@ -79,7 +101,7 @@ def get_auth(handler: ZoeRequestHandler):
     uid, role = authenticator.auth(username, password)
     if uid is None:
         raise zoe_api.exceptions.ZoeAuthException
-
+    log.info('Authentication done using auth-mechanism')
     return uid, role
 
 

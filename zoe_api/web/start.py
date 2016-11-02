@@ -19,9 +19,8 @@ from random import randint
 import json
 
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
-from zoe_api.web.utils import get_auth, catch_exceptions
+from zoe_api.web.utils import get_auth, get_auth_login, catch_exceptions
 from zoe_api.web.custom_request_handler import ZoeRequestHandler
-
 
 class RootWeb(ZoeRequestHandler):
     """Handler class"""
@@ -35,6 +34,26 @@ class RootWeb(ZoeRequestHandler):
         """Home page without authentication."""
         self.render('index.html')
 
+class LoginWeb(ZoeRequestHandler):
+    def initialize(self, **kwargs):
+        """Initializes the request handler."""
+        super().initialize(**kwargs)
+        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
+
+    @catch_exceptions
+    def get(self):
+        self.render('login.html')
+
+    @catch_exceptions
+    def post(self):
+        username = self.get_argument("username", "")
+        password = self.get_argument("password", "")
+        uid, role = get_auth_login(username, password)
+
+        if not self.get_secure_cookie('zoe'):
+            cookieVal = uid + '.' + role
+            self.set_secure_cookie('zoe',cookieVal)
+        self.redirect(self.get_argument("next", u"/user"))
 
 class HomeWeb(ZoeRequestHandler):
     """Handler class"""

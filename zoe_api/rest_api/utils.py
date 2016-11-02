@@ -72,6 +72,12 @@ def catch_exceptions(func):
 
 def get_auth(handler: tornado.web.RequestHandler):
     """Try to authenticate a request."""
+    if handler.get_secure_cookie('zoe'):
+        cookie_val = str(handler.get_secure_cookie('zoe'))
+        uid, role = cookie_val[2:-1].split('.')
+        log.info('Authentication done using cookie')
+        return uid, role
+
     auth_header = handler.request.headers.get('Authorization')
     if auth_header is None or not (auth_header.startswith('Basic ') or auth_header.startswith('Bearer ')):
         raise ZoeRestAPIException('missing or wrong authentication information', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
@@ -110,5 +116,6 @@ def get_auth(handler: tornado.web.RequestHandler):
     uid, role = authenticator.auth(username, password)
     if uid is None:
         raise ZoeRestAPIException('missing or wrong authentication information', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
+    log.info('Authentication done using auth-mechanism')
 
     return uid, role
