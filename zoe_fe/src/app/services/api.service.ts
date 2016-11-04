@@ -56,7 +56,7 @@ export class ApiService {
   }
   
   getUserCredentials(): Promise<Credentials> {
-    if (environment.auth.type == 'ldap') {
+    if (this.isAuthLDAP()) {
       this.storageService.removeCredentials();
 
       return this.http.get(this.baseUrl + this.userInfoEndpoint)
@@ -69,11 +69,13 @@ export class ApiService {
           })
           .catch(this.handleError);
     }
+    return (this.storageService.getAuthHeader() != null);
   }
 
   loginHandler(username: string, headers: Headers, response: any): Boolean {
     this.storageService.removeAuthHeader();
     this.storageService.removeCredentials();
+    this.storageService.removeUsername();
 
     if (!response.ok) {
       return false;

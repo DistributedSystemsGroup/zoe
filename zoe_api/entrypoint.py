@@ -32,7 +32,7 @@ from zoe_api.web.custom_request_handler import JinjaApp
 
 log = logging.getLogger("zoe_api")
 LOG_FORMAT = '%(asctime)-15s %(levelname)s %(threadName)s->%(name)s: %(message)s'
-
+COOKIE_SECRET = "bZJc2sWbQLKos6GkHn/VB9oXwQt8S0R0kRvJ5/xJ89E=" 
 
 def zoe_web_main() -> int:
     """
@@ -57,12 +57,13 @@ def zoe_web_main() -> int:
     app_settings = {
         'static_path': os.path.join(os.path.dirname(__file__), "web", "static"),
         'template_path': os.path.join(os.path.dirname(__file__), "web", "templates"),
-        # 'debug': args.debug
+        'cookie_secret': COOKIE_SECRET,
+        'debug': args.debug
     }
     
     # Remove the old FE entry point
-    #app = Application(zoe_api.web.web_init(api_endpoint) + zoe_api.rest_api.api_init(api_endpoint), **app_settings)
-    app = Application(zoe_api.rest_api.api_init(api_endpoint), **app_settings)
+    app = Application(zoe_api.web.web_init(api_endpoint) + zoe_api.rest_api.api_init(api_endpoint), **app_settings)
+    #app = Application(zoe_api.rest_api.api_init(api_endpoint), **app_settings)
     JinjaApp.init_app(app)
 
     log.info("Starting HTTP server...")

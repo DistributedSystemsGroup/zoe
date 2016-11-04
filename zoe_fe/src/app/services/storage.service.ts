@@ -8,15 +8,15 @@ let ROLE: string = 'role'
 
 @Injectable()
 export class StorageService {
-  setAuthHeader(headers: Headers) {
+  setAuthHeader(headers:Headers) {
     sessionStorage.setItem(AUTH_HEADER, headers.get("authorization"))
   }
 
-  getAuthHeader(): Headers {
+  getAuthHeader():Headers {
     let auth = sessionStorage.getItem(AUTH_HEADER)
     if (auth == null)
       return null
-    
+
     var headers = new Headers
     headers.append('Authorization', auth)
     return headers
@@ -26,11 +26,11 @@ export class StorageService {
     sessionStorage.removeItem(AUTH_HEADER)
   }
 
-  setUsername(username: string) {
+  setUsername(username:string) {
     sessionStorage.setItem(USERNAME, username)
   }
 
-  getUsername(): string {
+  getUsername():string {
     return sessionStorage.getItem(USERNAME)
   }
 
@@ -38,11 +38,11 @@ export class StorageService {
     sessionStorage.removeItem(USERNAME)
   }
 
-  setRole(role: string) {
+  setRole(role:string) {
     sessionStorage.setItem(ROLE, role)
   }
 
-  getRole(): string {
+  getRole():string {
     return sessionStorage.getItem(ROLE)
   }
 
@@ -50,17 +50,17 @@ export class StorageService {
     sessionStorage.removeItem(ROLE)
   }
 
-  setCredentials(credentials: Credentials) {
+  setCredentials(credentials:Credentials) {
     this.setUsername(credentials.username)
     this.setRole(credentials.role)
   }
 
-  getCredentials(): Credentials {
+  getCredentials():Credentials {
     let username = this.getUsername
     let role = this.getRole
 
     if (username == null || role == null)
-        return null
+      return null
 
     let credentials = new Credentials()
     credentials.username = username
