@@ -69,7 +69,8 @@ export class ApiService {
           })
           .catch(this.handleError);
     }
-    return (this.storageService.getAuthHeader() != null);
+
+    return Promise.resolve(null)
   }
 
   loginHandler(username: string, headers: Headers, response: any): Boolean {

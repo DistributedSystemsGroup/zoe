@@ -56,21 +56,21 @@ export class StorageService {
   }
 
   getCredentials():Credentials {
-    let username = this.getUsername
-    let role = this.getRole
+    let username = this.getUsername();
+    let role = this.getRole();
 
     if (username == null || role == null)
-      return null
+      return null;
 
-    let credentials = new Credentials()
-    credentials.username = username
-    credentials.role = role
+    let credentials = new Credentials();
+    credentials.username = username;
+    credentials.role = role;
 
-    return credentials
+    return credentials;
   }
 
   removeCredentials() {
-    this.removeUsername()
-    this.removeRole()
+    this.removeUsername();
+    this.removeRole();
   }
 }
