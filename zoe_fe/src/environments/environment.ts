@@ -6,5 +6,10 @@
 export const environment = {
   production: false,
   baseHref: '/',
-  apiEndpoint: 'http://localhost:5001/zoe/api/0.6'
+  apiEndpoint: 'http://localhost:5001/zoe/api/0.6',
+  auth: {
+    type: 'ldap', // or 'basic'
+    kerberos: false,
+    adfs: false
+  }
 };

@@ -58,10 +58,10 @@ import { Router } from '@angular/router'
     `
 })
 export class ExecutionListComponent implements OnInit {
-  private adminMode = true
-  private loading = false
-  private errorMessage: string
-  private executionsList: Execution[]
+  private adminMode = true;
+  private loading = false;
+  private errorMessage: string;
+  private executionsList: Execution[];
 
   closeResult: string;
 
@@ -72,16 +72,18 @@ export class ExecutionListComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.getExecutions()
+    let credentials = this.storageService.getCredentials();
+    this.adminMode = credentials.isAdmin();
+    this.getExecutions();
   }
 
   getExecutions() : void {
-    this.showLoading()
+    this.showLoading();
     this.apiService.getAllExecutions()
       .then(executions => {
-        this.executionsList = executions
-        this.hideLoading()
-        this.hideError()
+        this.executionsList = executions;
+        this.hideLoading();
+        this.hideError();
 
         // check if any execution has "starting" status, if so, refresh the list after 2sec
         if (this.executionsList.filter(execution => execution.status == 'starting').length > 0) {
@@ -93,17 +95,17 @@ export class ExecutionListComponent implements OnInit {
         }
       })
       .catch(error => {
-        this.showError('There was an error contactning the server. Please try again later.')
+        this.showError('There was an error contactning the server. Please try again later.');
         this.hideLoading()
       });
   }
 
   restartExecution(execution: Execution) {
-    this.showLoading()
+    this.showLoading();
     this.apiService.startExecution(execution.name, execution.description.rawObject)
       .then(executionId => this.router.navigateByUrl('executions/' + executionId))
       .catch(error => {
-        this.showError('There was an error while trying to restart this execution. Please try again.')
+        this.showError('There was an error while trying to restart this execution. Please try again.');
         this.hideLoading()
       })
   }
@@ -112,9 +114,9 @@ export class ExecutionListComponent implements OnInit {
     this.apiService.deleteExecution(id)
       .then(terminated => {
         if (terminated)
-          this.getExecutions()
+          this.getExecutions();
         else {
-          this.showError('Error while trying to delete execution ' + id)
+          this.showError('Error while trying to delete execution ' + id);
           this.hideLoading()
         }
       });
@@ -124,9 +126,9 @@ export class ExecutionListComponent implements OnInit {
     this.apiService.terminateExecution(id)
       .then(terminated => {
         if (terminated)
-          this.getExecutions()
+          this.getExecutions();
         else {
-          this.showError('Error while trying to terminate execution ' + id)
+          this.showError('Error while trying to terminate execution ' + id);
           this.hideLoading()
         }
       });
@@ -138,36 +140,36 @@ export class ExecutionListComponent implements OnInit {
 
   buttonTitle() : string {
     if (this.adminMode)
-      return 'View all'
+      return 'View all';
     else
-      return 'View mine'
+      return 'View mine';
   }
 
   showLoading() {
-    this.loading = true
+    this.loading = true;
   }
 
   hideLoading() {
-    this.loading = false
+    this.loading = false;
   }
 
   executionToDisplay(): Execution[] {
     if (this.executionsList) {
       if (this.adminMode)
-        return this.executionsList
+        return this.executionsList;
       else
-        return this.executionsList.filter(execution => execution.owner == this.storageService.getUsername())
+        return this.executionsList.filter(execution => execution.owner == this.storageService.getUsername());
     }
     else
-      return null
+      return null;
   }
 
   showError(msg: string) {
-    this.hideLoading()
-    this.errorMessage = msg
+    this.hideLoading();
+    this.errorMessage = msg;
   }
 
   hideError() {
-    this.errorMessage = null
+    this.errorMessage = null;
   }
 }

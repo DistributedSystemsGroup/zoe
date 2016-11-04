@@ -17,7 +17,7 @@ import { ApiService } from '../../services/api.service';
         <div *ngIf="loading" class="spinner-block">
             <div class="spinner-title">Loading...</div> <i class="spinner-icon"></i>
         </div>
-        <div *ngIf="!loading && execution">
+        <div *ngIf="!loading && execution" id="execution-details">
             <h1>Execution <em>{{execution.id}}</em></h1>
             <hr />
             <h3>Details</h3>
@@ -47,7 +47,7 @@ import { ApiService } from '../../services/api.service';
             <div *ngIf="!hasServices()" class="row">
                 <div class="text-danger col-md-3 col-md-offset-1">No services</div>
             </div>
-            <div *ngIf="hasServices()" class="row service-list">
+            <div *ngIf="hasServices()" class="row service-list" id="execution-service">
                 <div class="col-md-6">
                     <dl *ngFor="let service of services" class="dl-horizontal">
                       <dt>Id</dt>
@@ -67,12 +67,12 @@ import { ApiService } from '../../services/api.service';
     `
 })
 export class ExecutionInfoComponent implements OnInit {
-  private loading = true
-  private errorMessage: string
-  private warningMessage: string
+  private loading = true;
+  private errorMessage: string;
+  private warningMessage: string;
 
   private execution: Execution;
-  private services: Service[]
+  private services: Service[];
 
   constructor(
     private route: ActivatedRoute,
@@ -89,46 +89,48 @@ export class ExecutionInfoComponent implements OnInit {
   }
 
   hasServices(): Boolean {
-    return this.services && (this.services.length > 0)
+    return this.services && (this.services.length > 0);
   }
 
   setExecutionDetails(execution: Execution) {
-    this.execution = execution
-    this.getServicesDetails(execution)
+    this.execution = execution;
+    this.getServicesDetails(execution);
   }
 
   getServicesDetails(execution: Execution) {
     if (execution.services && execution.services.length > 0) {
-      this.services = []
+      this.services = [];
 
-      var errors = false
+      let errors = false;
       for (let srv of execution.services) {
         this.apiService.getServiceDetails(srv.toString())
           .then(service => this.services.push(service))
           .catch(error => errors = true);
       }
-      if (errors)
-        this.showWarning('Failed to retrieve one or more services.');
 
-      this.hideLoading()
+      if (errors) {
+        this.showWarning('Failed to retrieve one or more services.');
+      }
+
+      this.hideLoading();
     }
   }
 
   showLoading() {
-    this.loading = true
+    this.loading = true;
   }
 
   hideLoading() {
-    this.loading = false
+    this.loading = false;
   }
 
   showError(msg: string) {
-    this.hideLoading()
-    this.errorMessage = msg
+    this.hideLoading();
+    this.errorMessage = msg;
   }
 
   showWarning(msg: string) {
-    this.hideLoading()
-    this.warningMessage = msg
+    this.hideLoading();
+    this.warningMessage = msg;
   }
 }
