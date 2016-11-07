@@ -84,7 +84,7 @@ def exec_list_cmd(args_):
     """List executions"""
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     data = exec_api.list()
-    for e in data.values():
+    for e in sorted(data.values(), key=lambda x: x['id']):
         print('Execution {} (User: {}, ID: {}): {}'.format(e['name'], e['user_id'], e['id'], e['status']))
 
 
