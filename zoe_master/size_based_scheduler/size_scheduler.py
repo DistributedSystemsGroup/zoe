@@ -31,6 +31,8 @@ from zoe_master.stats import SwarmNodeStats
 
 log = logging.getLogger(__name__)
 
+FIFO = True
+
 
 class ZoeSizeBasedScheduler:
     """The Scheduler class for size-based scheduling."""
@@ -69,11 +71,13 @@ class ZoeSizeBasedScheduler:
             with in_job.termination_lock:
                 terminate_execution(in_job.execution)
                 self.trigger()
+            log.debug('Execution {} terminated successfully'.format(in_job.execution.id))
 
         def async_termination_execution(in_execution):
             """Thread for termination when job is not available (leftovers after a master restart)"""
             terminate_execution(in_execution)
             self.trigger()
+            log.debug('Execution {} terminated successfully'.format(execution.id))
 
         job = None
         for job_aux in self.queue:  # type: SizeBasedJob
@@ -121,6 +125,8 @@ class ZoeSizeBasedScheduler:
             ret = job.termination_lock.acquire(blocking=False)
             if ret and job.execution.status != Execution.TERMINATED_STATUS:
                 out_list.append(job)
+                if FIFO:
+                    return out_list
             else:
                 log.debug('While popping, throwing away execution {} that has the termination lock held'.format(job.execution.id))
 
@@ -128,10 +134,16 @@ class ZoeSizeBasedScheduler:
 
     def loop_start_th(self):
         """The Scheduler thread loop."""
+        auto_trigger_base = 60  # seconds
+        auto_trigger = auto_trigger_base
         while True:
             ret = self.trigger_semaphore.acquire(timeout=1)
             if not ret:  # Semaphore timeout, do some thread cleanup
                 self._cleanup_async_threads()
+                auto_trigger -= 1
+                if auto_trigger == 0:
+                    auto_trigger = auto_trigger_base
+                    self.trigger()
                 continue
             if self.loop_quit:
                 break
@@ -145,7 +157,9 @@ class ZoeSizeBasedScheduler:
                 self._refresh_job_sizes()
                 self._update_platform_status()
 
-                self.queue.sort()
+                if not FIFO:
+                    self.queue.sort()
+
                 log.debug('--> Queue dump after sorting')
                 for j in self.queue:
                     log.debug(str(j))
