@@ -84,7 +84,6 @@ class ZoeMonitor(threading.Thread):
             service.set_docker_status(service.DOCKER_START_STATUS)
         elif 'die' in event['Action'] or 'kill' in event['Action'] or 'stop' in event['Action']:
             service.set_docker_status(service.DOCKER_DIE_STATUS)
-            self.scheduler.trigger()
         elif 'oom' in event['Action']:
             service.set_docker_status(service.DOCKER_OOM_STATUS)
             log.warning('Service {} got killed by an OOM condition'.format(service.id))
