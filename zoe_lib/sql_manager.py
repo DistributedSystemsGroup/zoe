@@ -478,6 +478,10 @@ class Service(Base):
         execution = self.sql_manager.execution_list(only_one=True, id=self.execution_id)
         return execution.user_id
 
+    def is_dead(self):
+        """Returns True if this service is not running."""
+        return self.docker_status == self.DOCKER_DESTROY_STATUS or self.docker_status == self.DOCKER_OOM_STATUS or self.docker_status == self.DOCKER_DIE_STATUS
+
 
 class ComputeNode(Base):
     """A Swarm node."""
