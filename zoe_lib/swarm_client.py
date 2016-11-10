@@ -221,7 +221,8 @@ class SwarmClient:
                                              volumes=options.get_volumes(),
                                              command=options.get_command(),
                                              ports=options.ports,
-                                             labels=options.labels)
+                                             labels=options.labels,
+                                             user='root')
             self.cli.start(container=cont.get('Id'))
         except docker.errors.APIError as e:
             if cont is not None:
