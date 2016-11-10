@@ -56,7 +56,8 @@ export class ApiService {
   }
 
   logout() {
-    
+    this.storageService.removeAuthHeader();
+    this.storageService.removeCredentials();
   }
   
   getUserCredentials(): Promise<Credentials> {
