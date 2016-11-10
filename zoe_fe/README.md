@@ -22,6 +22,10 @@ Run `ng build --env=prod --output-path=build/prod/` to build the application in 
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `-prod` flag for a production build.
 
+### Change the BaseHref
+
+In order to change the `<base href="/">` within the `index.html file`, is it possible to add the following parameter to the `ng build` command: `--base-href x`, where x is the value of the new href. 
+
 ## Running unit tests
 
 Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
