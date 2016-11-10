@@ -354,9 +354,7 @@ class Service(Base):
             'docker_id': self.docker_id,
             'ip_address': self.ip_address,
             'docker_status': self.docker_status,
-            'host_ip_address': self.host_ip_address,
             'proxy_address': self.proxy_address,
-            'host_port': self.host_port
         }
 
     def __eq__(self, other):
@@ -403,21 +401,12 @@ class Service(Base):
         return s_info['ip_address'][get_conf().overlay_network_name]
 
     @property
-    def host_ip_address(self):
-        if self.docker_status != self.DOCKER_START_STATUS:
-            return {}
-        swarm = SwarmClient(get_conf())
-        s_info = swarm.inspect_container(self.docker_id)
-        ip = None
-        portList = s_info['ports']
-        for s in portList.values():
-            if s != None:
-                ip = s[0]
-        return ip             
-
-    @property
     def proxy_address(self):
-        return get_conf().proxy_address
+        if self.host_port is not None:
+            proxyAdd = get_conf().proxy_path + "/" + self.user_id + "/" + str(self.execution_id) + "/" + self.name
+        else:
+            proxyAdd = None
+        return proxyAdd
 
     @property
     def host_port(self):
