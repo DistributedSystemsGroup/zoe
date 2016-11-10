@@ -22,7 +22,7 @@ import { Router } from '@angular/router'
                 <li [routerLinkActive]="['active']"><a [routerLink]="['/executions/new']">New Execution</a></li>
               </ul>
               <ul class="nav navbar-nav navbar-right">
-                <li><a (click)="logout()"><i class="fa fa-power-off" aria-hidden="true"></i> Logout</a></li>
+                <li><a (click)="logout()" style="cursor:pointer;"><i class="fa fa-power-off" aria-hidden="true"></i> Logout</a></li>
               </ul>
             </div>
           </div>
