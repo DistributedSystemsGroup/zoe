@@ -64,11 +64,11 @@ export class ApiService {
   createCookie(name: string, value: string, days: number) {
     if (days) {
       var date = new Date();
-      date.setTime(date.getTime()+(days*24*60*60*1000));
-      var expires = "; expires="+date.toGMTString();
+      date.setTime(date.getTime() + (days*24*60*60*1000));
+      var expires = "; expires=" + date.toUTCString();
     }
     else var expires = "";
-    document.cookie = name+"="+value+expires+"; path=/";
+    document.cookie = name + "=" + value + expires + "; path=/";
   }
 
   removeCookie(name: string) {
