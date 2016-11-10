@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpModule } from '@angular/http';
+import { HttpModule, BaseRequestOptions, RequestOptions, Headers } from '@angular/http';
 import { FromUnixPipe, DateFormatPipe } from 'angular2-moment';
 import { routing, ZoeRoutingProviders }  from './app-routing.module';
 
@@ -16,8 +16,29 @@ import { ExecutionListComponent } from './components/execution-list/execution-li
 import { ApiService }       from './services/api.service';
 import { StorageService }   from './services/storage.service';
 
-import { APP_BASE_HREF } from '@angular/common';
-import { environment } from '../environments/environment';
+import { environment } from '../environments/environment'
+
+/** When FE and BE are deployed on 2 different hostname we need to
+ * enable CORS on the BE. In order to let the browser support the 
+ * cookies between each HTTP request, we need to set 2 different 
+ * options by default in the whole application.
+**/
+class CORSRequestOptions extends BaseRequestOptions {
+  headers: Headers = new Headers({
+    'X-Requested-With': 'XMLHttpRequest'
+  });
+  withCredentials: boolean = true;
+}
+
+let providers = [
+  ApiService,
+  StorageService,
+  ZoeRoutingProviders
+];
+
+if (environment.cors) {
+  providers.push({ provide: RequestOptions, useClass: CORSRequestOptions })
+}
 
 @NgModule({
   declarations: [
@@ -38,12 +59,7 @@ import { environment } from '../environments/environment';
     HttpModule,
     routing
   ],
-  providers: [
-    ApiService,
-    StorageService,
-    ZoeRoutingProviders,
-    {provide: APP_BASE_HREF, useValue : environment.baseHref }
-  ],
+  providers: providers,
   bootstrap: [
     AppComponent
   ]
