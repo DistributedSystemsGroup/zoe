@@ -44,10 +44,13 @@ import { ApiService } from '../../services/api.service';
             </dl>
             
             <h3>Services</h3>
-            <div *ngIf="!hasServices()" class="row">
+            <div *ngIf="loadingServices" class="spinner-block">
+                <div class="spinner-title">Loading...</div> <i class="spinner-icon"></i>
+            </div>
+            <div *ngIf="!loadingServices && !hasServices()" class="row">
                 <div class="text-danger col-md-3 col-md-offset-1">No services</div>
             </div>
-            <div *ngIf="hasServices()" class="row service-list" id="execution-service">
+            <div *ngIf="!loadingServices && hasServices()" class="row service-list" id="execution-service">
                 <div class="col-md-6">
                     <dl *ngFor="let service of services" class="dl-horizontal">
                       <dt>Id</dt>
@@ -68,6 +71,7 @@ import { ApiService } from '../../services/api.service';
 })
 export class ExecutionInfoComponent implements OnInit {
   private loading = true;
+  private loadingServices = true;
   private errorMessage: string;
   private warningMessage: string;
 
@@ -83,8 +87,14 @@ export class ExecutionInfoComponent implements OnInit {
     this.route.params.forEach((params: Params) => {
       let id = params['id'];
       this.apiService.getExecutionDetails(id)
-        .then(execution => this.setExecutionDetails(execution))
-        .catch(error => this.showError('Execution not found.'));
+        .then(execution => {
+          this.setExecutionDetails(execution);
+          this.hideLoading();
+        })
+        .catch(error => {
+          this.showError('Execution not found.');
+          this.hideLoading();
+        });
     });
   }
 
@@ -102,17 +112,31 @@ export class ExecutionInfoComponent implements OnInit {
       this.services = [];
 
       let errors = false;
+      let activeRequests = 0;
       for (let srv of execution.services) {
+        activeRequests += 1;
         this.apiService.getServiceDetails(srv.toString())
-          .then(service => this.services.push(service))
-          .catch(error => errors = true);
+          .then(service => {
+            this.services.push(service);
+            activeRequests -= 1;
+            this.serviceDetailsHandler(activeRequests, errors);
+          })
+          .catch(error => {
+            errors = true;
+            activeRequests -= 1;
+            this.serviceDetailsHandler(activeRequests, errors);
+          });
       }
+    }
+  }
 
-      if (errors) {
-        this.showWarning('Failed to retrieve one or more services.');
-      }
+  serviceDetailsHandler(activeRequests: number, errors: boolean) {
+    if (errors) {
+      this.showWarning('Failed to retrieve one or more services.');
+    }
 
-      this.hideLoading();
+    if (activeRequests == 0) {
+      this.hideServicesLoading();
     }
   }
 
@@ -124,13 +148,23 @@ export class ExecutionInfoComponent implements OnInit {
     this.loading = false;
   }
 
+  showServicesLoading() {
+    this.loadingServices = true;
+  }
+
+  hideServicesLoading() {
+    this.loadingServices = false;
+  }
+
   showError(msg: string) {
     this.hideLoading();
+    this.hideServicesLoading();
     this.errorMessage = msg;
   }
 
   showWarning(msg: string) {
     this.hideLoading();
+    this.hideServicesLoading();
     this.warningMessage = msg;
   }
 }
