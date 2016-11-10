@@ -61,8 +61,24 @@ export class ApiService {
     this.storageService.removeCredentials();
   }
 
+  createCookie(name: string, value: string, days: number) {
+    if (days) {
+      var date = new Date();
+      date.setTime(date.getTime()+(days*24*60*60*1000));
+      var expires = "; expires="+date.toGMTString();
+    }
+    else var expires = "";
+    document.cookie = name+"="+value+expires+"; path=/";
+  }
+
   removeCookie(name: string) {
-    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    this.createCookie(name, "", -1);
+  }
+
+  removeAllCookies() {
+    let cookies = document.cookie.split(";");
+    for (var i = 0; i < cookies.length; i++)
+      this.removeCookie(cookies[i].split("=")[0]);
   }
   
   getUserCredentials(): Promise<Credentials> {
