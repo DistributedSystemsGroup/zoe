@@ -9,7 +9,6 @@ import { CapitalizePipe } from '../../pipes/capitalize.pipe';
 import { RouterLinkStubDirective } from '../../testing/router-stubs';
 import { RouterLinkActive, } from '@angular/router';
 import { Router } from '@angular/router';
-import { RouterLinkStubDirective } from '../../testing/router-stubs';
 
 let comp:    NavbarComponent;
 let fixture: ComponentFixture<NavbarComponent>;

@@ -1,7 +1,8 @@
 /* tslint:disable:no-unused-variable */
 
 import { TestBed, async, ComponentFixture } from '@angular/core/testing';
-import { Execution }  from '../../entities/execution'
+import { Execution }  from '../../entities/execution';
+import { Credentials }  from '../../entities/credentials';
 import { StorageService } from '../../services/storage.service';
 import { ApiService } from '../../services/api.service';
 import { By } from '@angular/platform-browser';
@@ -49,16 +50,20 @@ describe('Component: ExecutionList', () => {
     ];
 
     let routerStub = {
-        navigateByUrl: (url: string) => true
+      navigateByUrl: (url: string) => true
     };
 
     let apiServiceStub = {
-        getAllExecutions: () => executions,
-        isUserLoggedIn: () => true
+      getAllExecutions: () => executions,
+      isUserLoggedIn: () => true
     };
 
     let storageServiceStub = {
-        getUsername: () => "admin"
+      getUsername: () => "admin",
+      getCredentials: () => new Credentials().deserialize({
+        'uid': 'admin',
+        'role': 'admin'
+      })
     };
 
     beforeEach(() => {

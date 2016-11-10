@@ -22,6 +22,7 @@ describe('Component: Login', () => {
 
   let apiServiceStub = {
     isUserLoggedIn: () => false,
+    isLoginNeeded: () => true,
     login: (username: string, password: string) => true
   };
 
@@ -54,18 +55,30 @@ describe('Component: Login', () => {
   });
 
   it('should have title "Login"', () => {
-    expect(fixture.debugElement.query(By.css('h1')).nativeElement.textContent).toContain('Login');
+    fixture.whenStable().then(() => { // wait for async getQuote
+      fixture.detectChanges();        // update view with quote
+      expect(fixture.debugElement.query(By.css('h1')).nativeElement.textContent).toContain('Login');
+    });
   });
 
   it('should have "Username" input field', () => {
-    expect(fixture.debugElement.query(By.css('label[for="inputUsername"]')).nativeElement.textContent).toContain('Username');
+    fixture.whenStable().then(() => { // wait for async getQuote
+      fixture.detectChanges();        // update view with quote
+      expect(fixture.debugElement.query(By.css('label[for="inputUsername"]')).nativeElement.textContent).toContain('Username');
+    });
   });
 
   it('should have "Password" input field', () => {
-    expect(fixture.debugElement.query(By.css('label[for="inputPassword"]')).nativeElement.textContent).toContain('Password');
+    fixture.whenStable().then(() => { // wait for async getQuote
+      fixture.detectChanges();        // update view with quote
+      expect(fixture.debugElement.query(By.css('label[for="inputPassword"]')).nativeElement.textContent).toContain('Password');
+    });
   });
 
   it('should have "Submit" button', () => {
-    expect(fixture.debugElement.query(By.css('button[type="submit"]')).nativeElement.textContent).toContain('Submit');
+    fixture.whenStable().then(() => { // wait for async getQuote
+      fixture.detectChanges();        // update view with quote
+      expect(fixture.debugElement.query(By.css('button[type="submit"]')).nativeElement.textContent).toContain('Submit');
+    });
   });
 });

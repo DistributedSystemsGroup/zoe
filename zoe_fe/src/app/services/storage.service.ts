@@ -55,7 +55,7 @@ export class StorageService {
     this.setRole(credentials.role)
   }
 
-  getCredentials():Credentials {
+  getCredentials(): Credentials {
     let username = this.getUsername();
     let role = this.getRole();
 
