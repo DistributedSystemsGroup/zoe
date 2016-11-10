@@ -36,6 +36,6 @@ export class NavbarComponent {
   }
 
   logout() {
-
+    this.apiService.logout()
   }
 }

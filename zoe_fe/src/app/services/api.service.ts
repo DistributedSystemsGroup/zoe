@@ -54,6 +54,10 @@ export class ApiService {
   isUserLoggedIn(): Boolean {
     return (this.storageService.getCredentials() != null);
   }
+
+  logout() {
+    
+  }
   
   getUserCredentials(): Promise<Credentials> {
     if (this.isAuthLDAP()) {
