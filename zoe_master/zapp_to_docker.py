@@ -66,6 +66,13 @@ def _gen_environment(service, env_subst_dict, copts):
             raise ZoeStartExecutionFatalException("Service {} has wrong environment expression")
         copts.add_env_variable(env_name, env_value)
 
+    #TEST: adding base_url for jupyter_notebook/mongo-express
+    env_names = ['BASE_URL', 'ME_CONFIG_SITE_BASEURL']
+    env_value = '/zoe/' + execution.user_id + '/' + str(execution.id) + '/' + service.name
+    for name in env_names:
+        copts.add_env_variable(name, env_value)
+    log.info('adding base_url environment variable')
+
 
 def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict):
     copts = DockerContainerOptions()
