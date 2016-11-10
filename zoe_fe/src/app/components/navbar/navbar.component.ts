@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ApiService } from '../../services/api.service'
+import { Router } from '@angular/router'
 
 @Component({
   selector: 'navbar',
@@ -29,15 +30,17 @@ import { ApiService } from '../../services/api.service'
     `
 })
 export class NavbarComponent {
-  constructor(private apiService: ApiService) { }
+  constructor(
+    private apiService: ApiService,
+    private router: Router
+  ) { }
 
   isUserLogged(): Boolean {
     return this.apiService.isUserLoggedIn()
   }
 
   logout() {
-    console.log(document);
-    console.log(document.cookie);
     this.apiService.logout();
+    this.router.navigateByUrl('');
   }
 }

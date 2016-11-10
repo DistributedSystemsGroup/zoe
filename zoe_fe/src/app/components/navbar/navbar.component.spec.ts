@@ -8,6 +8,8 @@ import { FromUnixPipe, DateFormatPipe } from 'angular2-moment';
 import { CapitalizePipe } from '../../pipes/capitalize.pipe';
 import { RouterLinkStubDirective } from '../../testing/router-stubs';
 import { RouterLinkActive, } from '@angular/router';
+import { Router } from '@angular/router';
+import { RouterLinkStubDirective } from '../../testing/router-stubs';
 
 let comp:    NavbarComponent;
 let fixture: ComponentFixture<NavbarComponent>;
@@ -32,6 +34,7 @@ describe('Component: Navbar', () => {
         DateFormatPipe
       ], // declare the test component
       providers: [
+        {provide: Router, useValue: routerStub },
         {provide: ApiService, useValue: apiServiceStub }
       ]
     });

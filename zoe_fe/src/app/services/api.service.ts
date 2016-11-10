@@ -56,8 +56,13 @@ export class ApiService {
   }
 
   logout() {
+    this.removeCookie('zoe');
     this.storageService.removeAuthHeader();
     this.storageService.removeCredentials();
+  }
+
+  removeCookie(name: string) {
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
   }
   
   getUserCredentials(): Promise<Credentials> {
