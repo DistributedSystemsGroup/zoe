@@ -98,9 +98,9 @@ class APIEndpoint:
 
         if e.is_active():
             if get_conf().proxy_type == 'apache':
-                proxy = zoe_api.proxy.apache.ApacheProxy(self, application_description)
+                proxy = zoe_api.proxy.apache.ApacheProxy(self, None)
             else:
-                proxy = zoe_api.proxy.nginx.NginxProxy(self, application_description)
+                proxy = zoe_api.proxy.nginx.NginxProxy(self, None)
             proxy.unproxify(uid, role, exec_id)
             return self.master.execution_terminate(exec_id)
         else:
