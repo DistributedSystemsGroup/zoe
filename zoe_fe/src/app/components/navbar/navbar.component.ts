@@ -15,10 +15,13 @@ import { ApiService } from '../../services/api.service'
               </button>
               <a [routerLink]="['']" class="navbar-brand">Zoe</a>
             </div>
-            <div class="collapse navbar-collapse" id="navbar-collapse">
+            <div class="collapse navbar-collapse" id="navbar-collapse" *ngIf="isUserLogged()">
               <ul class="nav navbar-nav">
-                <li *ngIf="isUserLogged()" [routerLinkActive]="['active']"><a [routerLink]="['/executions/list']">Executions list</a></li>
-                <li *ngIf="isUserLogged()" [routerLinkActive]="['active']"><a [routerLink]="['/executions/new']">New Execution</a></li>
+                <li [routerLinkActive]="['active']"><a [routerLink]="['/executions/list']">Executions list</a></li>
+                <li [routerLinkActive]="['active']"><a [routerLink]="['/executions/new']">New Execution</a></li>
+              </ul>
+              <ul class="nav navbar-nav navbar-right">
+                <li><a (click)="logout()"><i class="fa fa-power-off" aria-hidden="true"></i> Logout</a></li>
               </ul>
             </div>
           </div>
@@ -30,5 +33,9 @@ export class NavbarComponent {
 
   isUserLogged(): Boolean {
     return this.apiService.isUserLoggedIn()
+  }
+
+  logout() {
+
   }
 }
