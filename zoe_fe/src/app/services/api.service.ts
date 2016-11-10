@@ -101,11 +101,7 @@ export class ApiService {
     headers.append('Authorization', 'Basic ' +
       btoa(username + ':' + password));
 
-    let endpoint: string
-    if (this.isAuthLDAP())
-      endpoint = this.baseUrl + this.userInfoEndpoint
-    else
-      endpoint = this.baseUrl + this.loginEndpoint
+    let endpoint: string = this.baseUrl + this.loginEndpoint
 
     return this.http.get(endpoint, { headers: headers })
       .toPromise()

@@ -85,13 +85,13 @@ export class ExecutionListComponent implements OnInit {
         this.hideLoading();
         this.hideError();
 
-        // check if any execution has "starting" status, if so, refresh the list after 2sec
+        // check if any execution has "starting" status, if so, refresh the list after 5sec
         if (this.executionsList.filter(execution => execution.status == 'starting').length > 0) {
-          setTimeout(this.getExecutions(), 2000);
+          setTimeout(this.getExecutions(), 5000);
         }
-        // check if any execution has "cleaning up" status, if so, refresh the list after 1sec
+        // check if any execution has "cleaning up" status, if so, refresh the list after 5sec
         else if (this.executionsList.filter(execution => execution.status == 'cleaning up').length > 0) {
-          setTimeout(this.getExecutions(), 1000);
+          setTimeout(this.getExecutions(), 5000);
         }
       })
       .catch(error => {

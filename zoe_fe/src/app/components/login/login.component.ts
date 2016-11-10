@@ -10,7 +10,7 @@ import { ApiService } from '../../services/api.service';
             <div class="spinner-title">Loading...</div> <i class="spinner-icon"></i>
         </div>
         
-        <div *ngIf="!loading" class="spinner-block">
+        <div *ngIf="!loading">
           <h1>Login</h1>
           <form [formGroup]="loginForm" class="form-horizontal" id="login" (ngSubmit)="doLogin()">
               <div class="form-group">
