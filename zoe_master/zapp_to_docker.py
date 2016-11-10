@@ -53,7 +53,7 @@ def execution_to_containers(execution: Execution) -> None:
         _spawn_service(execution, service, env_subst_dict)
 
 
-def _gen_environment(service, env_subst_dict, copts):
+def _gen_environment(execution, service, env_subst_dict, copts):
     """ Generate a dictionary containing the current cluster status (before the new container is spawned)
 
     This information is used to substitute template strings in the environment variables."""
@@ -95,7 +95,7 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
         copts.labels['zoe.monitor'] = 'false'
     copts.restart = not service.description['monitor']  # Monitor containers should not restart
 
-    _gen_environment(service, env_subst_dict, copts)
+    _gen_environment(execution, service, env_subst_dict, copts)
 
     for port in service.description['ports']:
         if 'expose' in port and port['expose']:
