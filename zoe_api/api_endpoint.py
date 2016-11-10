@@ -17,6 +17,7 @@
 
 import logging
 import re
+import _thread
 
 from zoe_lib.config import get_conf
 import zoe_lib.sql_manager
@@ -26,6 +27,9 @@ from zoe_lib.swarm_client import SwarmClient
 
 import zoe_api.master_api
 import zoe_api.exceptions
+
+from zoe_api.proxy.apache import ApacheProxy
+from zoe_api.proxy.nginx import NginxProxy
 
 log = logging.getLogger(__name__)
 
@@ -57,7 +61,7 @@ class APIEndpoint:
         ret = [e for e in execs if e.user_id == uid or role == 'admin']
         return ret
 
-    def execution_start(self, uid, role_, exec_name, application_description):
+    def execution_start(self, uid, role, exec_name, application_description):
         """Start an execution."""
         try:
             zoe_lib.applications.app_validate(application_description)
@@ -73,6 +77,13 @@ class APIEndpoint:
         success, message = self.master.execution_start(new_id)
         if not success:
             raise zoe_api.exceptions.ZoeException('The Zoe master is unavailable, execution will be submitted automatically when the master is back up ({}).'.format(message))
+
+        if get_conf().proxy_type == 'apache':
+            proxy = zoe_api.proxy.apache.ApacheProxy(self, application_description)
+        else:
+            proxy = zoe_api.proxy.nginx.NginxProxy(self, application_description)
+        _thread.start_new_thread(proxy.proxify,(uid, role, new_id))
+
         return new_id
 
     def execution_terminate(self, uid, role, exec_id):
@@ -86,6 +97,11 @@ class APIEndpoint:
             raise zoe_api.exceptions.ZoeAuthException()
 
         if e.is_active():
+            if get_conf().proxy_type == 'apache':
+                proxy = zoe_api.proxy.apache.ApacheProxy(self, application_description)
+            else:
+                proxy = zoe_api.proxy.nginx.NginxProxy(self, application_description)
+            proxy.unproxify(uid, role, exec_id)
             return self.master.execution_terminate(exec_id)
         else:
             raise zoe_api.exceptions.ZoeException('Execution is not running')
