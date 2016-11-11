@@ -21,6 +21,7 @@ import tornado.web
 
 from zoe_api.rest_api.execution import ExecutionAPI, ExecutionCollectionAPI, ExecutionDeleteAPI
 from zoe_api.rest_api.info import InfoAPI
+from zoe_api.rest_api.userinfo import UserInfoAPI
 from zoe_api.rest_api.service import ServiceAPI, ServiceLogsAPI
 from zoe_api.rest_api.discovery import DiscoveryAPI
 from zoe_api.rest_api.statistics import SchedulerStatsAPI
@@ -41,6 +42,7 @@ def api_init(api_endpoint) -> List[tornado.web.URLSpec]:
     api_routes = [
         tornado.web.url(API_PATH + r'/info', InfoAPI, route_args),
         tornado.web.url(API_PATH + r'/login', LoginAPI, route_args),
+        tornado.web.url(API_PATH + r'/userinfo', UserInfoAPI, route_args),
 
         tornado.web.url(API_PATH + r'/execution/([0-9]+)', ExecutionAPI, route_args),
         tornado.web.url(API_PATH + r'/execution/delete/([0-9]+)', ExecutionDeleteAPI, route_args),

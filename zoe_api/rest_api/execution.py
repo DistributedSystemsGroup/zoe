@@ -32,12 +32,14 @@ class ExecutionAPI(RequestHandler):
         
     def set_default_headers(self):
         """Set up the headers for enabling CORS."""
-        self.set_header("Access-Control-Allow-Origin", "*")
+#        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Origin", self.request.headers.get('Origin'))
+        self.set_header("Access-Control-Allow-Credentials", "true")
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-Type, origin, authorization, accept, client-security-token")
         self.set_header("Access-Control-Allow-Methods", "OPTIONS, GET, DELETE")
         self.set_header("Access-Control-Max-Age", "1000")
         
-    def options(self):
+    def options(self, execution_id):
         """Needed for CORS."""
         self.set_status(204)
         self.finish()
@@ -80,12 +82,14 @@ class ExecutionDeleteAPI(RequestHandler):
         
     def set_default_headers(self):
         """Set up the headers for enabling CORS."""
-        self.set_header("Access-Control-Allow-Origin", "*")
+#        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Origin", self.request.headers.get('Origin'))
+        self.set_header("Access-Control-Allow-Credentials", "true")
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-Type, origin, authorization, accept, client-security-token")
         self.set_header("Access-Control-Allow-Methods", "OPTIONS, DELETE")
         self.set_header("Access-Control-Max-Age", "1000")
         
-    def options(self):
+    def options(self, execution_id):
         """Needed for CORS."""
         self.set_status(204)
         self.finish()
@@ -119,7 +123,9 @@ class ExecutionCollectionAPI(RequestHandler):
         
     def set_default_headers(self):
         """Set up the headers for enabling CORS."""
-        self.set_header("Access-Control-Allow-Origin", "*")
+#        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Origin", self.request.headers.get('Origin'))
+        self.set_header("Access-Control-Allow-Credentials", "true")
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-Type, origin, authorization, accept, client-security-token")
         self.set_header("Access-Control-Allow-Methods", "OPTIONS, GET, POST")
         self.set_header("Access-Control-Max-Age", "1000")

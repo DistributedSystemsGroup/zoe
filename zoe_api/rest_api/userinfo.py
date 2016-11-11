@@ -13,47 +13,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""The Discovery API endpoint."""
+"""The Info API endpoint."""
 
 from tornado.web import RequestHandler
-
-from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
-from zoe_api.rest_api.utils import catch_exceptions
+from zoe_api.rest_api.utils import get_auth, catch_exceptions
 
 
-class DiscoveryAPI(RequestHandler):
-    """The Discovery API endpoint."""
+class UserInfoAPI(RequestHandler):
+    """The UserInfo API endpoint."""
 
     def initialize(self, **kwargs):
         """Initializes the request handler."""
         self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-        
+
     def set_default_headers(self):
         """Set up the headers for enabling CORS."""
 #        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Origin", self.request.headers.get('Origin'))
         self.set_header("Access-Control-Allow-Credentials", "true")
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-Type, origin, authorization, accept, client-security-token")
-        self.set_header("Access-Control-Allow-Methods", "OPTIONS, GET")
+        self.set_header("Access-Control-Allow-Methods", "OPTIONS, GET, DELETE")
         self.set_header("Access-Control-Max-Age", "1000")
-        
+    
+    @catch_exceptions    
     def options(self):
         """Needed for CORS."""
         self.set_status(204)
         self.finish()
-
+        
     @catch_exceptions
-    def get(self, execution_id: int, service_group: str):
+    def get(self):
         """HTTP GET method."""
-        self.api_endpoint.execution_by_id(0, 'admin', execution_id)
-        if service_group != 'all':
-            services = self.api_endpoint.service_list(0, 'admin', service_group=service_group, execution_id=execution_id)
-        else:
-            services = self.api_endpoint.service_list(0, 'admin', execution_id=execution_id)
+        uid, role = get_auth(self)
+
         ret = {
-            'service_type': service_group,
-            'execution_id': execution_id,
-            'dns_names': [s.dns_name for s in services]
+            'uid': uid,
+            'role': role
         }
 
         self.write(ret)
