@@ -149,7 +149,6 @@ class SwarmClient:
         elif 'consul://' in url:
             url = url[len('consul://'):]
             manager = consul_swarm(url)
-            print(manager)
         elif 'http://' or 'https://' in url:
             manager = url
         else:
