@@ -119,16 +119,24 @@ class ZoeSizeBasedScheduler:
     def _pop_all_with_same_size(self):
         out_list = []
         while len(self.queue) > 0:
-            if len(out_list) > 0 and self.queue[0].size != out_list[0].size:
-                break
             job = self.queue.pop(0)
             ret = job.termination_lock.acquire(blocking=False)
             if ret and job.execution.status != Execution.TERMINATED_STATUS:
                 out_list.append(job)
-                if FIFO:
-                    return out_list
             else:
                 log.debug('While popping, throwing away execution {} that has the termination lock held'.format(job.execution.id))
+
+        # while len(self.queue) > 0:
+        #     if len(out_list) > 0 and self.queue[0].size != out_list[0].size:
+        #         break
+        #     job = self.queue.pop(0)
+        #     ret = job.termination_lock.acquire(blocking=False)
+        #     if ret and job.execution.status != Execution.TERMINATED_STATUS:
+        #         out_list.append(job)
+        #         if FIFO:
+        #             return out_list
+        #     else:
+        #         log.debug('While popping, throwing away execution {} that has the termination lock held'.format(job.execution.id))
 
         return out_list
 
@@ -178,6 +186,8 @@ class ZoeSizeBasedScheduler:
 
                 # Try to find a placement solution using a snapshot of the platform status
                 for job in jobs_to_attempt_scheduling:  # type: SizeBasedJob
+                    jobs_to_launch_copy = jobs_to_launch.copy()
+
                     # remove all elastic services from the previous simulation loop
                     for job_aux in jobs_to_launch:  # type: SizeBasedJob
                         cluster_status_snapshot.deallocate_elastic(job_aux)
@@ -194,12 +204,14 @@ class ZoeSizeBasedScheduler:
                         cluster_status_snapshot.allocate_elastic(job_aux)
 
                     current_free_resources = cluster_status_snapshot.aggregated_free_memory()
-                    if current_free_resources >= free_resources and len(jobs_to_launch) > 0:
-                        job_aux = jobs_to_launch.pop()
-                        cluster_status_snapshot.deallocate_essential(job_aux)
-                        cluster_status_snapshot.deallocate_elastic(job_aux)
-                        for job_aux in jobs_to_launch:
-                            cluster_status_snapshot.allocate_elastic(job_aux)
+                    if current_free_resources >= free_resources:
+                        # job_aux = jobs_to_launch.pop()
+                        # cluster_status_snapshot.deallocate_essential(job_aux)
+                        # cluster_status_snapshot.deallocate_elastic(job_aux)
+                        # for job_aux in jobs_to_launch:
+                        #    cluster_status_snapshot.allocate_elastic(job_aux)
+                        jobs_to_launch = jobs_to_launch_copy
+                        break
                     free_resources = current_free_resources
 
                 log.debug('Allocation after simulation: {}'.format(cluster_status_snapshot.get_service_allocation()))
@@ -211,7 +223,7 @@ class ZoeSizeBasedScheduler:
                         if ret == "fatal":
                             continue  # trow away the execution
                         elif ret == "requeue":
-                            self.queue.append(job)
+                            self.queue.insert(0, job)
                             continue
                         assert ret == "ok"
 
@@ -224,7 +236,9 @@ class ZoeSizeBasedScheduler:
 
                 for job in jobs_to_attempt_scheduling:
                     job.termination_lock.release()
-                    self.queue.append(job)
+                    # self.queue.insert(0, job)
+
+                self.queue = jobs_to_attempt_scheduling + self.queue
 
                 if len(self.queue) == 0:
                     log.debug('empty queue, exiting inner loop')
