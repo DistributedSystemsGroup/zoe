@@ -28,7 +28,7 @@ class UserInfoAPI(RequestHandler):
 
     def set_default_headers(self):
         """Set up the headers for enabling CORS."""
-        if self.request.headers.get is None:
+        if self.request.headers.get('Origin') is None:
             self.set_header("Access-Control-Allow-Origin", "*")
         else:
             self.set_header("Access-Control-Allow-Origin", self.request.headers.get('Origin'))
