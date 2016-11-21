@@ -18,6 +18,7 @@ class State:
         self.scheduler = SchedulerState()
         self.platform = PlatformState()
         self.jobs = {}
+        self.services = {}
         self.name = 'unk'
 
     def dump(self):
@@ -34,16 +35,14 @@ class State:
         print('<------- end state --------->')
 
     def eq(self, other):
-        return self.scheduler.eq(other.scheduler) and self.platform.eq(other.platform)
+        return self.scheduler.eq(other.scheduler) and self.platform.eq(other.platform) and self.jobs == other.jobs and self.services == other.services
 
 
 class SchedulerState:
     def __init__(self):
-        self.triggered = False
         self.queue = []
 
     def dump(self):
-        print('Triggered: {}'.format(self.triggered))
         print('Queue: {}'.format(self.queue))
 
     def eq(self, other):
@@ -102,38 +101,53 @@ class PlatformState:
     def eq(self, other):
         return self.nodes == other.nodes
 
+
+class Service:
+    def __init__(self, id):
+        self.id = id
+        self.status = 'created'
+
+    def __eq__(self, other):
+        if isinstance(other, Service):
+            return self.id == other.id
+        else:
+            raise NotImplementedError
+
+    def __str__(self):
+        return str(self.id)
+
 state_sequence = []
-
-
-def sched_trigger_cb(previous_state, timestamp, event_match):
-    state = deepcopy(previous_state)
-    state.timestamp = timestamp
-    state.scheduler.triggered = True
-    state.name = 'trigger'
-    return state
-
-
-def sched_trigger_empty_cb(previous_state, timestamp, event_match):
-    state = deepcopy(previous_state)
-    state.timestamp = timestamp
-    state.scheduler.triggered = True
-    state.name = 'trigger_empty'
-    return state
 
 
 def queue_dump_special_cb(previous_state, timestamp, event_list):
     state = deepcopy(previous_state)
     state.timestamp = timestamp
     state.name = 'queue_dump'
-    state.scheduler.triggered = False
     state.scheduler.queue = []
     for event in event_list:
         event_match = re.search(r'^exec (?P<exec_id>[0-9]+) \((?P<exec_name>[a-zA-Z0-9\-]+)\) \| essential (?P<essential_list>[0-9,]+) \| elastic (?P<elastic_list>[0-9,]*) \| size hint (?P<size_hint>[0-9]+) \| size (?P<size>[0-9]+)', event)
         if event_match is None:
             print(event)
         exec_id = int(event_match.group('exec_id'))
-        essential_services = [[x, 'S'] for x in event_match.group('essential_list').split(',')]
-        elastic_services = [[x, 'S'] for x in event_match.group('elastic_list').split(',') if len(x) > 0]
+
+        essential_services = []
+        for id in event_match.group('essential_list').split(','):
+            id = int(id)
+            if id not in state.services:
+                service = Service(id)
+                state.services[id] = service
+                essential_services.append(service)
+
+        elastic_services = []
+        for id in event_match.group('elastic_list').split(','):
+            if len(id) == 0:
+                continue
+            id = int(id)
+            if id not in state.services:
+                service = Service(id)
+                state.services[id] = service
+                elastic_services.append(service)
+
         if exec_id not in state.jobs:
             state.jobs[exec_id] = {
                 'essential': essential_services,
@@ -148,7 +162,6 @@ def queue_dump_special_cb(previous_state, timestamp, event_list):
 def platform_status_cb(previous_state, timestamp, event_match):
     state = deepcopy(previous_state)
     state.timestamp = timestamp
-    state.scheduler.triggered = False
     state.name = 'platform_status'
 
     for i in range(1, 20, 2):
@@ -161,74 +174,42 @@ def platform_status_cb(previous_state, timestamp, event_match):
 def service_started_cb(previous_state, timestamp, event_match):
     state = deepcopy(previous_state)
     state.timestamp = timestamp
-    state.scheduler.triggered = False
     state.name = 'service_started'
 
-    found = False
-    for j in state.jobs.values():
-        for s in j['essential']:
-            if s[0] == event_match.group('service_id'):
-                s[1] = 'R'
-                found = True
-                break
-        if found:
-            break
-        for s in j['elastic']:
-            if s[0] == event_match.group('service_id'):
-                s[1] = 'R'
-                found = True
-                break
-    assert found
+    service_id = int(event_match.group('service_id'))
+    if service_id in state.services:
+        state.services[service_id].status = 'running'
+    else:
+        print('Service {} started, but is unknown'.format(event_match.group('service_id')))
+        assert False
     return state
 
 
 def service_dead_cb(previous_state, timestamp, event_match):
     state = deepcopy(previous_state)
     state.timestamp = timestamp
-    state.scheduler.triggered = False
     state.name = 'service_dead'
 
-    found = False
-    for j in state.jobs.values():
-        for s in j['essential']:
-            if s[0] == event_match.group('service_id'):
-                s[1] = 'D'
-                found = True
-                break
-        if found:
-            break
-        for s in j['elastic']:
-            if s[0] == event_match.group('service_id'):
-                s[1] = 'D'
-                found = True
-                break
-    if not found:
+    service_id = int(event_match.group('service_id'))
+    if service_id in state.services:
+        state.services[service_id].status = 'dead'
+    else:
         print('Service {} died, but is unknown'.format(event_match.group('service_id')))
+        assert False
     return state
 
 
 def service_oom_dead_cb(previous_state, timestamp, event_match):
     state = deepcopy(previous_state)
     state.timestamp = timestamp
-    state.scheduler.triggered = False
     state.name = 'service_dead_oom'
 
-    found = False
-    for j in state.jobs.values():
-        for s in j['essential']:
-            if s[0] == event_match.group('service_id'):
-                s[1] = 'O'
-                found = True
-                break
-        if found:
-            break
-        for s in j['elastic']:
-            if s[0] == event_match.group('service_id'):
-                s[1] = 'O'
-                found = True
-                break
-    if not found:
+    service_id = int(event_match.group('service_id'))
+    if service_id in state.services:
+        state.services[service_id].status = 'oom'
+    else:
         print('Service {} died, but is unknown'.format(event_match.group('service_id')))
+        assert False
     return state
 
 
@@ -236,31 +217,30 @@ def service_destroyed_cb(previous_state, timestamp, event_match):
     state = deepcopy(previous_state)
     state.timestamp = timestamp
     state.name = 'service_destroyed'
-    state.scheduler.triggered = False
-    exec_id = int(event_match.group('service_id'))
+
+    service_id = int(event_match.group('service_id'))
+    if service_id in state.services:
+        state.services[service_id].status = 'destroyed'
+    else:
+        print('Service {} was destroyed, but is unknown'.format(event_match.group('service_id')))
+        assert False
+
     for node_name, node in state.platform.nodes.items():
-        if exec_id in node['services']:
-            node['services'].remove(exec_id)
+        service = state.services[service_id]
+        if service in node['services']:
+            node['services'].remove(service)
             break
 
-    jobs_to_remove = []
-    for job_id, j in state.jobs.items():
-        all_destroyed = True
-        for s in j['essential']:
-            if s[1] != 'D':
-                all_destroyed = False
-                break
-        if not all_destroyed:
-            continue
-        for s in j['elastic']:
-            if s[1] != 'D':
-                all_destroyed = False
-                break
-        if all_destroyed:
-            jobs_to_remove.append(job_id)
-    for job_id in jobs_to_remove:
-        del state.jobs[job_id]
+    return state
 
+
+def exec_terminated_cb(previous_state, timestamp, event_match):
+    state = deepcopy(previous_state)
+    state.timestamp = timestamp
+    state.name = 'service_destroyed'
+    exec_id = int(event_match.group('exec_id'))
+
+    del state.jobs[exec_id]
     return state
 
 
@@ -268,7 +248,6 @@ def all_services_started_cb(previous_state, timestamp, event_match):
     state = deepcopy(previous_state)
     state.timestamp = timestamp
     state.name = 'all_services_started'
-    state.scheduler.triggered = False
     exec_id = int(event_match.group('exec_id'))
     state.scheduler.queue.remove(exec_id)
     return state
@@ -277,11 +256,11 @@ def all_services_started_cb(previous_state, timestamp, event_match):
 def allocation_cb(previous_state, timestamp, event_match):
     state = deepcopy(previous_state)
     state.timestamp = timestamp
-    state.scheduler.triggered = False
     state.name = 'allocation'
     alloc = ast.literal_eval(event_match.group('alloc_dict'))
     for k, v in alloc.items():
-        state.platform.nodes[v]['services'].append(k)
+        service = state.services[k]
+        state.platform.nodes[v]['services'].append(service)
     return state
 
 IGNORE_REGEXES = [
@@ -301,23 +280,24 @@ IGNORE_REGEXES = [
     re.compile(r'starting elastic service [0-9]+ for execution [0-9]+'),
     re.compile(r'^Service .* terminated$'),
     re.compile(r'Thread termination_[0-9]+ join failed'),
-    re.compile(r'Allocation after simulation: {}'),
     re.compile(r'-> exec '),
     re.compile(r'^container startup time:'),
     re.compile(r'^service [0-9]+ startup time:'),
-    re.compile(r'^Service [0-9]+ got killed by an OOM condition')
+    re.compile(r'^Service [0-9]+ got killed by an OOM condition'),
+    re.compile(r'Scheduler loop has been triggered'),
+    re.compile(r'Allocation after simulation: \{\}'),
+    re.compile(r'Docker closed event connection, retrying...')
 ]
 
 EVENTS_REGEXES = [
-    (re.compile(r'Scheduler loop has been triggered$'), sched_trigger_cb),
-    (re.compile(r'Scheduler loop has been triggered, but the queue is empty$'), sched_trigger_empty_cb),
     (re.compile(r'SN (bf[0-9]{2}) \| f ([0-9]+) # SN (bf[0-9]{2}) \| f ([0-9]+) # SN (bf[0-9]{2}) \| f ([0-9]+) # SN (bf[0-9]{2}) \| f ([0-9]+) # SN (bf[0-9]{2}) \| f ([0-9]+) # SN (bf[0-9]{2}) \| f ([0-9]+) # SN (bf[0-9]{2}) \| f ([0-9]+) # SN (bf[0-9]{2}) \| f ([0-9]+) # SN (bf[0-9]{2}) \| f ([0-9]+) # SN (bf[0-9]{2}) \| f ([0-9]+) #'), platform_status_cb),
     (re.compile(r'service (?P<service_id>[0-9]+), status updated to started$'), service_started_cb),
     (re.compile(r'service (?P<service_id>[0-9]+), status updated to dead'), service_dead_cb),
     (re.compile(r'service (?P<service_id>[0-9]+), status updated to oom-killed'), service_oom_dead_cb),
     (re.compile(r'service (?P<service_id>[0-9]+), status updated to destroyed'), service_destroyed_cb),
+    (re.compile(r'Execution (?P<exec_id>[0-9]+) terminated successfully'), exec_terminated_cb),
     (re.compile(r'execution (?P<exec_id>[0-9]+): all services started'), all_services_started_cb),
-    (re.compile(r'Allocation after simulation: (?P<alloc_dict>{[0-9: \',bf]+})'), allocation_cb),
+    (re.compile(r'Allocation after simulation: (?P<alloc_dict>{[0-9: \',bf]+})'), allocation_cb)
 ]
 
 
@@ -338,6 +318,7 @@ def _end_curses(stdscr):
 
 
 def main():
+    #fp = open('/home/ubuntu/zoe-papers/experiments/results/run_8_master_log', 'r')
     fp = open('/tmp/master.log', 'r')
     initial_timestamp = None
     accumulate_log_lines = False
@@ -361,22 +342,8 @@ def main():
         if found:
             continue
 
-        if re.search(r'End dump', line):
-            accumulate_log_lines = False
-            new_state = queue_dump_special_cb(state_sequence[-1], timestamp, accumulator)
-            state_sequence.append(new_state)
-            continue
-        if accumulate_log_lines:
-            accumulator.append(m.group('event'))
-            continue
-
         if len(state_sequence) == 0:
             state_sequence.append(State(timestamp))
-
-        if re.search(r'Queue dump after sorting', line):
-            accumulate_log_lines = True
-            accumulator = []
-            continue
 
         found = False
         for regex, event_cb in EVENTS_REGEXES:
@@ -386,6 +353,22 @@ def main():
                 state_sequence.append(new_state)
                 found = True
                 break
+        if found:
+            continue
+
+        if re.search(r'End dump', line):
+            accumulate_log_lines = False
+            new_state = queue_dump_special_cb(state_sequence[-1], timestamp, accumulator)
+            state_sequence.append(new_state)
+            continue
+        if accumulate_log_lines:
+            accumulator.append(m.group('event'))
+            continue
+
+        if re.search(r'Queue dump after sorting', line):
+            accumulate_log_lines = True
+            accumulator = []
+            continue
 
         if not found:
             print('Event {} is not known'.format(m.group('event')))
@@ -394,7 +377,7 @@ def main():
 
 
 def _draw_node(stdscr, node_name, node, y, x):
-    stdscr.addstr(y, x, node_name)
+    stdscr.addstr(y, x, node_name + ' {}'.format(humanfriendly.format_size(node['free_memory'])))
 
     y += 1
     for service in node['services']:
@@ -403,8 +386,10 @@ def _draw_node(stdscr, node_name, node, y, x):
 
 
 def _draw_platform(stdscr, pl_state, y):
+    stdscr.addstr(y, 0, 'Node details:')
+    y += 1
     x = 0
-    node_width = 5
+    node_width = 15
     for node_name, node in sorted(pl_state.nodes.items()):
         _draw_node(stdscr, node_name, node, y, x)
         x += node_width + 1
@@ -437,33 +422,27 @@ def _draw_state(stdscr, index, state_sequence):
         s = ':'
         stdscr.addstr(y, x, s)
         x += len(s) + 1
-        for id, running in v['essential']:
-            if running == 'R':
+        for service in v['essential']:
+            id = str(service)
+            if service.status == 'running':
                 stdscr.addstr(y, x, id, ESSENTIAL_COLOR | curses.A_BOLD)
-            elif running == 'O':
+            elif service.status == 'oom':
                 stdscr.addstr(y, x, id, ESSENTIAL_COLOR | curses.A_UNDERLINE)
             else:
                 stdscr.addstr(y, x, id, ESSENTIAL_COLOR)
             x += len(id) + 1
-        for id, running in v['elastic']:
-            if running == 'R':
+        for service in v['elastic']:
+            id = str(service)
+            if service.status == 'running':
                 stdscr.addstr(y, x, id, ELASTIC_COLOR | curses.A_BOLD)
-            elif running == 'O':
-                stdscr.addstr(y, x, id, ESSENTIAL_COLOR | curses.A_UNDERLINE)
+            elif service.status == 'oom':
+                stdscr.addstr(y, x, id, ELASTIC_COLOR | curses.A_UNDERLINE)
             else:
                 stdscr.addstr(y, x, id, ELASTIC_COLOR)
             x += len(id) + 1
         y += 1
 
-    stdscr.addstr(y, 0, 'Scheduler state')
-    y += 1
-    if state.scheduler.triggered:
-        stdscr.addstr(y, 0, 'Triggered: [X]')
-    else:
-        stdscr.addstr(y, 0, 'Triggered: [ ]')
-
-    y += 1
-    stdscr.addstr(y, 0, 'Queue: {}'.format(state.scheduler.queue))
+    stdscr.addstr(y, 0, 'Scheduler sorted queue: head->{}'.format(state.scheduler.queue))
     y += 1
     _draw_platform(stdscr, state.platform, y)
 
@@ -476,6 +455,7 @@ def ui(stdscr, state_sequence):
     _draw_state(stdscr, current_state, state_sequence)
 
     while True:
+        stdscr.refresh()
         c = stdscr.getch()
         if c == ord('q'):
             break
