@@ -43,7 +43,9 @@ def main():
     args = config.get_conf()
     if args.debug:
         logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
-
+        file_handler = logging.FileHandler('/tmp/master.log')
+        file_handler.setFormatter(logging.Formatter(LOG_FORMAT))
+        logging.getLogger().addHandler(file_handler)
     else:
         logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
