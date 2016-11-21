@@ -32,8 +32,10 @@ class ExecutionAPI(RequestHandler):
         
     def set_default_headers(self):
         """Set up the headers for enabling CORS."""
-#        self.set_header("Access-Control-Allow-Origin", "*")
-        self.set_header("Access-Control-Allow-Origin", self.request.headers.get('Origin'))
+        if self.request.headers.get is None:
+            self.set_header("Access-Control-Allow-Origin", "*")
+        else:
+            self.set_header("Access-Control-Allow-Origin", self.request.headers.get('Origin'))
         self.set_header("Access-Control-Allow-Credentials", "true")
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-Type, origin, authorization, accept, client-security-token")
         self.set_header("Access-Control-Allow-Methods", "OPTIONS, GET, DELETE")
@@ -82,8 +84,10 @@ class ExecutionDeleteAPI(RequestHandler):
         
     def set_default_headers(self):
         """Set up the headers for enabling CORS."""
-#        self.set_header("Access-Control-Allow-Origin", "*")
-        self.set_header("Access-Control-Allow-Origin", self.request.headers.get('Origin'))
+        if self.request.headers.get is None:
+            self.set_header("Access-Control-Allow-Origin", "*")
+        else:
+            self.set_header("Access-Control-Allow-Origin", self.request.headers.get('Origin'))
         self.set_header("Access-Control-Allow-Credentials", "true")
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-Type, origin, authorization, accept, client-security-token")
         self.set_header("Access-Control-Allow-Methods", "OPTIONS, DELETE")
@@ -123,8 +127,10 @@ class ExecutionCollectionAPI(RequestHandler):
         
     def set_default_headers(self):
         """Set up the headers for enabling CORS."""
-#        self.set_header("Access-Control-Allow-Origin", "*")
-        self.set_header("Access-Control-Allow-Origin", self.request.headers.get('Origin'))
+        if self.request.headers.get is None:
+            self.set_header("Access-Control-Allow-Origin", "*")
+        else:
+            self.set_header("Access-Control-Allow-Origin", self.request.headers.get('Origin'))
         self.set_header("Access-Control-Allow-Credentials", "true")
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-Type, origin, authorization, accept, client-security-token")
         self.set_header("Access-Control-Allow-Methods", "OPTIONS, GET, POST")
