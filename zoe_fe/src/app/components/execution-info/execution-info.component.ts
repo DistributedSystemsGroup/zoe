@@ -62,7 +62,7 @@ import { ApiService } from '../../services/api.service';
                       <dt>Docker Status</dt>
                       <dd>{{service.dockerStatus | capitalize}}</dd>
                       <dt *ngIf="service.link()">Link</dt>
-                      <dd *ngIf="service.link()"><a [href]="service.link().url" target="_blank">{{service.link().name}}</a></dd>
+                      <dd *ngIf="service.link()"><a [href]="'http://'+service.link().url" target="_blank">{{service.link().name}}</a></dd>
                     </dl>
                 </div>
             </div>

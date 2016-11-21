@@ -23,19 +23,20 @@ export class Service implements Serializable<Service> {
     requiredResources: Resource;
     startupOrder: number;
     totalCount: number;
+    proxyAddress: string;
 
     description: ServiceDescription;
 
     rawObject: Object;
 
     link(): Link {
-        if (this.ipAddress && this.description) {
+        if (this.ipAddress && this.description && this.proxyAddress) {
             if (this.description.ports && this.description.ports.length > 0) {
                 let port = this.description.ports[0];
 
                 var link = new Link();
                 link.name = port.name;
-                link.url = port.protocol + '://' + this.ipAddress + ':' + port.portNumber + port.path;
+                link.url = this.proxyAddress;
 
                 return link;
             }
@@ -131,6 +132,10 @@ export class Service implements Serializable<Service> {
 
         if (input.hasOwnProperty('total_count')) {
             this.totalCount = input.total_count;
+        }
+
+        if (input.hasOwnProperty('proxy_address')) {
+            this.proxyAddress = input.proxy_address;
         }
 
         return this;
