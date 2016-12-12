@@ -62,9 +62,12 @@ def save(execution: Execution):
         if log_gen is None:
             _shutdown()
             return
-        with open(fpath, 'wb') as out_fp:
-            for line in log_gen:
-                out_fp.write(line)
+        try:
+            with open(fpath, 'wb') as out_fp:
+                for line in log_gen:
+                    out_fp.write(line)
+        except FileNotFoundError:
+            log.error("Could not create file {}".format(fpath))
 
     _shutdown()
 
