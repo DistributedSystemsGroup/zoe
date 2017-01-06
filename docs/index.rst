@@ -47,6 +47,7 @@ Contents
   vision
   motivations
   roadmap
+  contributing
 
 Zoe applications
 ----------------
