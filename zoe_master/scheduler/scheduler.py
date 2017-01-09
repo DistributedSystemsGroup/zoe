@@ -22,13 +22,15 @@ from zoe_lib.sql_manager import Execution
 
 from zoe_master.exceptions import ZoeStartExecutionFatalException, ZoeStartExecutionRetryException
 from zoe_master.zapp_to_docker import execution_to_containers, terminate_execution
+from zoe_master.scheduler.base_scheduler import ZoeBaseScheduler
 
 log = logging.getLogger(__name__)
 
 
-class ZoeScheduler:
+class ZoeSimpleScheduler(ZoeBaseScheduler):
     """The Scheduler class."""
-    def __init__(self):
+    def __init__(self, state):
+        super().__init__(state)
         self.fifo_queue = []
         self.trigger_semaphore = threading.Semaphore(0)
         self.async_threads = []
@@ -67,13 +69,6 @@ class ZoeScheduler:
         th = threading.Thread(target=async_termination, name='termination_{}'.format(execution.id))
         th.start()
         self.async_threads.append(th)
-
-    def remove_execution(self, execution: Execution):
-        """Removes the execution form the queue."""
-        try:
-            self.fifo_queue.remove(execution)
-        except ValueError:
-            pass
 
     def loop_start_th(self):
         """The Scheduler thread loop."""
