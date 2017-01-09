@@ -1,27 +1,39 @@
 .. _contributing:
 
-How to contribute
-=================
+Contributing to Zoe
+===================
 
-Zoe applications
+Zoe is an open source and project: we welcome any kind of contribution to the code base, the documentation, on the general architecture. Bug reports and features requests are also accepted and treasured.
+
+To better work together we have established some rules on how to contribute.
+
+Bug reports and feature requests
+--------------------------------
+
+Bug reports and feature requests are handled through the GitHub issue system.
+
+For Zoe itself, issues should be reported here: `https://github.com/DistributedSystemsGroup/zoe/issues <https://github.com/DistributedSystemsGroup/zoe/issues>`_
+
+For the sample Zoe applications we provide, reports should be sent here: `https://github.com/DistributedSystemsGroup/zoe-applications/issues <https://github.com/DistributedSystemsGroup/zoe-applications/issues>`_
+
+The issue system should be used for only for bug reports or feature requests. If you have more general questions, you need help setting up Zoe or running some application, please use the mailing list.
+
+The mailing list
 ----------------
 
-Zoe applications are maintained in the `zoe-applications <https://github.com/DistributedSystemsGroup/zoe-applications>`_ repository, feel free to fork it and generate pull requests for new applications, frameworks and services.
+The first step is to subscribe to the mailing list: `http://www.freelists.org/list/zoe <http://www.freelists.org/list/zoe>`_
 
-Check also the :ref:`howto_zapp` document for help on building ZApps from the already-available services and the :ref:`zapp_format`.
+Use the mailing list to stay up-to-date with what other developers are working on, to discuss and propose your ideas. We prefer small and incremental contributions, so it is important to keep in touch with the rest of the community to receive feedback. This way your contribution will be much more easily accepted.
 
-Developer documentation
------------------------
+Code and documentation contributions
+------------------------------------
 
-:ref:`modindex`
+To contribute code and/or documentation you should follow this workflow:
 
-.. toctree::
-  :maxdepth: 2
+1. announce your idea on the mailing list, to prevent duplicated work
+2. fork the Zoe repository via GitHub (if you don't already have a fork)
+3. create a branch that will hold your changes
+4. ... develop and debug ...
+5. generate a pull request via GitHub
 
-  developer/introduction
-  developer/zapp_format
-  developer/rest-api
-  developer/auth
-  developer/api-endpoint
-  developer/master-api
-  developer/scheduler
+Zoe maintainers will review pull requests, give constructive feedback and eventually merge them.

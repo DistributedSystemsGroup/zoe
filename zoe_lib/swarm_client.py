@@ -134,7 +134,7 @@ class SwarmClient:
         else:
             raise ZoeLibException('Unsupported URL scheme for Swarm')
         log.debug('Connecting to Swarm at {}'.format(manager))
-        self.cli = docker.Client(base_url=manager)
+        self.cli = docker.Client(base_url=manager, version="auto")
 
     def info(self) -> SwarmStats:
         """Retrieve Swarm statistics. The Docker API returns a mess difficult to parse."""
@@ -298,16 +298,32 @@ class SwarmClient:
         :type delete: bool
         :return: None
         """
-        if delete:
-            try:
-                self.cli.remove_container(docker_id, force=True)
-            except docker.errors.NotFound:
-                log.warning("cannot remove a non-existent service")
-        else:
-            try:
-                self.cli.kill(docker_id)
-            except docker.errors.NotFound:
-                log.warning("cannot remove a non-existent service")
+        retries = 5
+        while retries > 0:
+            if delete:
+                try:
+                    self.cli.remove_container(docker_id, force=True)
+                    break
+                except docker.errors.NotFound:
+                    log.warning("cannot remove a non-existent service")
+                    break
+                except requests.exceptions.ReadTimeout:
+                    log.error("Read timeout trying to delete a container")
+                    retries -= 1
+                    continue
+            else:
+                try:
+                    self.cli.kill(docker_id)
+                    break
+                except docker.errors.NotFound:
+                    log.warning("cannot remove a non-existent service")
+                    break
+                except requests.exceptions.ReadTimeout:
+                    log.error("Read timeout trying to delete a container")
+                    retries -= 1
+                    continue
+        if retries == 0:
+            log.error("Giving up trying to terminate container {}".format(docker_id))
 
     def event_listener(self, callback: Callable[[str], bool]) -> None:
         """An infinite loop that listens for events from Swarm."""

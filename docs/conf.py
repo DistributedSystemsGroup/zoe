@@ -21,6 +21,8 @@ import os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.basename(__file__), "..", "..")))
 
+from zoe_lib.version import ZOE_VERSION
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -58,7 +60,7 @@ author = 'Daniele Venzano'
 # built documents.
 #
 # The short X.Y version.
-version = '0.8.92'
+version = ZOE_VERSION
 # The full version, including alpha/beta/rc tags.
 release = version
 

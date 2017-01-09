@@ -27,7 +27,7 @@ log = logging.getLogger(__name__)
 
 
 def _path_from_execution(execution: Execution):
-    return os.path.join(get_conf().service_log_path, get_conf().deployment_name,  str(execution.id))
+    return os.path.join(get_conf().service_log_path, get_conf().deployment_name, str(execution.id))
 
 
 def _init(execution: Execution):
@@ -60,11 +60,14 @@ def save(execution: Execution):
         swarm = SwarmClient(get_conf())
         log_gen = swarm.logs(service.docker_id, stream=True, follow=False)
         if log_gen is None:
-            continue
-        with open(fpath, 'wb') as fp:
-            for line in log_gen:
-                fp.write(line)
-
+            _shutdown()
+            return
+        try:
+            with open(fpath, 'wb') as out_fp:
+                for line in log_gen:
+                    out_fp.write(line)
+        except FileNotFoundError:
+            log.error("Could not create file {}".format(fpath))
     _shutdown()
 
 

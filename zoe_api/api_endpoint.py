@@ -101,9 +101,7 @@ class APIEndpoint:
             raise zoe_api.exceptions.ZoeAuthException()
 
         if e.is_active():
-            status, message = self.execution_terminate(uid, role, exec_id)
-            if not status:
-                raise zoe_api.exceptions.ZoeException(message)
+            raise zoe_api.exceptions.ZoeException('Cannot delete an active execution')
 
         status, message = self.master.execution_delete(exec_id)
         if status:
