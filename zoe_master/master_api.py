@@ -26,14 +26,14 @@ from zoe_lib.sql_manager import SQLManager
 
 import zoe_master.execution_manager
 from zoe_master.exceptions import ZoeException
-from zoe_master.scheduler import ZoeScheduler
+from zoe_master.scheduler import ZoeBaseScheduler
 
 log = logging.getLogger(__name__)
 
 
 class APIManager:
     """The API Manager."""
-    def __init__(self, metrics: BaseMetricSender, scheduler: ZoeScheduler, state: SQLManager) -> None:
+    def __init__(self, metrics: BaseMetricSender, scheduler: ZoeBaseScheduler, state: SQLManager) -> None:
         self.context = zmq.Context()
         self.zmq_s = self.context.socket(zmq.REP)
         self.listen_uri = config.get_conf().api_listen_uri
@@ -84,7 +84,7 @@ class APIManager:
                 exec_id = message['exec_id']
                 execution = self.state.execution_list(id=exec_id, only_one=True)
                 if execution is not None:
-                    zoe_master.execution_manager.execution_delete(self.scheduler, execution)
+                    zoe_master.execution_manager.execution_delete(execution)
                 self._reply_ok()
             elif message['command'] == 'scheduler_stats':
                 data = self.scheduler.stats()

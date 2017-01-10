@@ -1,5 +1,5 @@
 Scheduler classes
 =================
 
-.. autoclass:: zoe_master.scheduler.ZoeScheduler
+.. autoclass:: zoe_master.scheduler.ZoeBaseScheduler
    :members:

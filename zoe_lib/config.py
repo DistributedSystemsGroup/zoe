@@ -86,6 +86,8 @@ def load_configuration(test_conf=None):
 
         argparser.add_argument('--service-log-path', help='Save service logs in this directory, EXPERIMENTAL', default='')
 
+        argparser.add_argument('--scheduler-class', help='Scheduler class to use for scheduling ZApps', default='ZoeSimpleScheduler')
+
         opts = argparser.parse_args()
         if opts.debug:
             argparser.print_values()
