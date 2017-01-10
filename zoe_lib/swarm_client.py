@@ -46,7 +46,7 @@ class DockerContainerOptions:
         self.volume_binds = []
         self.volumes = []
         self.command = ""
-        self.memory_limit = '2g'
+        self.memory_limit = 2 * (1024**3)
         self.name = ''
         self.ports = []
         self.network_name = 'bridge'
@@ -81,7 +81,7 @@ class DockerContainerOptions:
         """Get the volumes in another Docker format."""
         return self.volume_binds
 
-    def set_command(self, cmd) -> str:
+    def set_command(self, cmd):
         """Setter for the command to run in the container."""
         self.command = cmd
 
@@ -400,4 +400,3 @@ class SwarmClient:
             return self.cli.logs(docker_id, stdout=True, stderr=True, follow=follow, stream=stream, timestamps=True)
         except docker.errors.NullResource:
             return None
-
