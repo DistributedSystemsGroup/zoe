@@ -1,7 +1,7 @@
 displayName: Userinfo Endpoint
 get: 
   description: This endpoint needs authentication. It returns userID and user role information after a successfully login.
-  securedBy: [sec.oauth_2_0, sec.basic]
+  securedBy: [sec.oauth_2_0, sec.basic, sec.cookie]
   responses: 
     200: 
       description: |

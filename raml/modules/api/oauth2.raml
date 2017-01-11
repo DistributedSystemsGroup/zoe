@@ -2,7 +2,7 @@ displayName: OAuth2 Endpoint
 description: All the endpoints listed in this section require authentication.
 /token:
   displayName: Request an access token
-  securedBy: [sec.basic]
+  securedBy: [sec.basic, sec.cookie]
   post:
     description: Request an access token
     queryParameters:
@@ -88,7 +88,7 @@ description: All the endpoints listed in this section require authentication.
       type: string
   delete: 
     description: Revoke an access token
-    securedBy: [sec.basic]
+    securedBy: [sec.basic, sec.cookie]
     responses:
       200:
         body:

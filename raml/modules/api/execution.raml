@@ -2,7 +2,7 @@ displayName: Execution Endpoint
 description: All the endpoints listed in this section require authentication.
 get:
   description: Get list of execution
-  securedBy: [sec.oauth_2_0, sec.basic]
+  securedBy: [sec.oauth_2_0, sec.basic, sec.cookie]
   responses:
     200:
       body:
@@ -10,7 +10,7 @@ get:
           example: !include samples/executions.sample
 post:
   description: Start an execution
-  securedBy: [sec.oauth_2_0, sec.basic]
+  securedBy: [sec.oauth_2_0, sec.basic, sec.cookie]
   queryParameters:
     json_document:
       description: |
@@ -41,7 +41,7 @@ post:
           }
 /delete/{execution_id}:
   displayName: Terminate a specified execution
-  securedBy: [sec.oauth_2_0, sec.basic]
+  securedBy: [sec.oauth_2_0, sec.basic, sec.cookie]
   uriParameters:
     execution_id:
       displayName: Execution ID
@@ -52,7 +52,7 @@ post:
       200:
 /{execution_id}:
   displayName: Operate action on specified execution
-  securedBy: [sec.oauth_2_0, sec.basic]
+  securedBy: [sec.oauth_2_0, sec.basic, sec.cookie]
   uriParameters:
     execution_id:
       displayName: Execution ID

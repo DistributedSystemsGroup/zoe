@@ -22,3 +22,13 @@ securitySchemes:
   basic:
     description: "Basic authentication using username and password"
     type: Basic Authentication
+  cookie:
+    description: "Authentication using cookie"
+    type: x-cookie
+    describedBy:
+      headers:
+        Cookie:
+          description: Used to hold the cookie content from file or string
+          type: string
+          required: true
+          example: "Cookie: zoe='2|1:0|10:1484124193|3:zoe|16:dGVzdC5hZG1pbg==|4c3950f43cfb39573a7f9713aa051b9e6d8c5f238aa619647a929e92f7d1ea09'" 
