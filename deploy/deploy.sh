@@ -15,8 +15,10 @@ curl -L "https://github.com/docker/compose/releases/download/1.9.0/docker-compos
 chmod +x /usr/local/bin/docker-compose
 
 echo "Setting up docker swarm..."
+echo "Exporting default NIC..."
+export DEFAULT_NIC=$(echo `ip -o -4 route show to default | awk '{print $5}'`)
 echo "Exporting Ip address variable..."
-export HOST_IP=$(echo `ifconfig ens33 2>/dev/null|awk '/inet addr:/ {print $2}'|sed 's/addr://'`)
+export HOST_IP=$(echo `ifconfig $DEFAULT_NIC 2>/dev/null|awk '/inet addr:/ {print $2}'|sed 's/addr://'`)
 echo "Appending new entry in hosts file..."
 echo `ifconfig ens33 2>/dev/null|awk '/inet addr:/ {print $2}'|sed 's/addr://'` zoe | sudo tee --append /etc/hosts > /dev/null
 
@@ -24,7 +26,7 @@ echo "Removing docker.pid/socks..."
 sudo rm /var/run/docker.*
 sudo rm -r /var/run/docker
 echo "Restarting dockerd daemon with new arguments..."
-sudo dockerd --cluster-store=consul://zoe:8500 --cluster-advertise=ens33:2375 -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock &
+sudo dockerd --cluster-store=consul://zoe:8500 --cluster-advertise=$DEFAULT_NIC:2375 -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock &
 
 sleep 5
 
