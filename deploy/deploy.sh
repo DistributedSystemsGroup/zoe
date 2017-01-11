@@ -20,7 +20,7 @@ export DEFAULT_NIC=$(echo `ip -o -4 route show to default | awk '{print $5}'`)
 echo "Exporting Ip address variable..."
 export HOST_IP=$(echo `ifconfig $DEFAULT_NIC 2>/dev/null|awk '/inet addr:/ {print $2}'|sed 's/addr://'`)
 echo "Appending new entry in hosts file..."
-echo `ifconfig ens33 2>/dev/null|awk '/inet addr:/ {print $2}'|sed 's/addr://'` zoe | sudo tee --append /etc/hosts > /dev/null
+echo $HOST_IP zoe | sudo tee --append /etc/hosts > /dev/null
 
 echo "Removing docker.pid/socks..."
 sudo rm /var/run/docker.*
