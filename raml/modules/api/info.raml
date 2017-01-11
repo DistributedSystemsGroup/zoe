@@ -1,8 +1,8 @@
 displayName: Info Endpoint
-get: # HTTP method declaration
+get:
   description: This endpoint does not need authentication. It returns general, static, information about the Zoe software.
-  responses: # declare a response
-    200: # HTTP status code
+  responses:
+    200:
       description: |
         Description  
 
@@ -12,24 +12,24 @@ get: # HTTP method declaration
         * ``application_format_version`` is the version of ZApp format this Zoe is able to understand  
         * ``api_version`` is the API version supported by this Zoe and should match the one used in the request URL
       
-      body: # declare content of response
-        application/json: # media type
+      body:
+        application/json:
           type: object
           properties: {
-            "version": {
-              "type": "string"
+            version: {
+              type: string
             },
-            "deployment_name": {
-              "type": "string"
+            deployment_name: {
+              type: string
             },
-            "application_format_version": {
-              "type": "number"
+            application_format_version: {
+              type: number
             },
-            "api_version": {
-              "type": "string"
+            api_version: {
+              type: string
             }
           }
-          example: | # example how a response looks like
+          example:
             {
               "version" : "0.10.1-beta",
               "deployment_name" : "prod",

@@ -1,17 +1,17 @@
 displayName: Login Endpoint
-get: # HTTP method declaration
+get:
   description: This endpoint needs authentication. It returns a cookie, userID and user role after a successfully login.
   securedBy: [sec.oauth_2_0, sec.basic]
-  responses: # declare a response
-    200: # HTTP status code
+  responses:
+    200: 
       description: |
         Description:
 
         Returns a JSON document where:   
         * ``uid`` is the userID   
         * ``role`` is the user role   
-      body: # declare content of response
-        application/json: # media type
+      body:
+        application/json: 
           type: object
           "properties": {
             "uid": {
@@ -21,7 +21,7 @@ get: # HTTP method declaration
               "type": "string"
             }
           }
-          example: | # example how a response looks like
+          example: 
             {
               "uid" : "admin",
               "role" : "admin"

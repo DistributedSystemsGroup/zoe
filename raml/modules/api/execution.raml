@@ -32,7 +32,7 @@ post:
         application/json:
           type: object
           properties: {
-            "execution_id": {
+            execution_id: {
               type: integer
             }
           }
@@ -80,33 +80,33 @@ post:
           application/json:
             type: object
             properties: {
-              "status": {
-                "type": "string"
+              status: {
+                type: string
               },
-              "description": {
-                "type": "string"
+              description: {
+                type: string
               },
-              "error_message": {
-                "type": "string"
+              error_message: {
+                type: string
               },
-              "time_start": {
-                "type": "number"
+              time_start: {
+                type: number
               },
-              "time_end": {
-                "type": "number"
+              time_end: {
+                type: number
               },
-              "id": {
-                "type": "integer"
+              id: {
+                type: integer
               },
-              "user_id": {
-                "type": "string"
+              user_id: {
+                type: string
               },
-              "name": {
-                "type": "string"
+              name: {
+                type: string
               },
-              "services": {
-                "type": "array"
-              },
+              services: {
+                type: array
+              }
             }
             example: !include samples/execution.sample
   delete:

@@ -1,27 +1,27 @@
 displayName: Userinfo Endpoint
-get: # HTTP method declaration
+get: 
   description: This endpoint needs authentication. It returns userID and user role information after a successfully login.
   securedBy: [sec.oauth_2_0, sec.basic]
-  responses: # declare a response
-    200: # HTTP status code
+  responses: 
+    200: 
       description: |
         Description:
 
         Returns a JSON document where:
         * ``uid`` is the userID   
         * ``role`` is the user role   
-      body: # declare content of response
-        application/json: # media type
+      body: 
+        application/json: 
           type: object
-          "properties": {
-            "uid": {
-              "type": "string"
+          properties: {
+            uid: {
+              type: string
             },
-            "role": {
-              "type": "string"
+            role: {
+              type: string
             }
           }
-          example: | # example how a response looks like
+          example:
             {
               "uid" : "admin",
               "role" : "admin"
