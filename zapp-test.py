@@ -25,7 +25,7 @@ import time
 import zoe_lib.applications
 import zoe_lib.config as config
 from zoe_lib.configargparse import ArgumentParser, FileType
-from zoe_lib.sql_manager import Execution, Service
+from zoe_lib.state.sql_manager import Execution, Service
 from zoe_lib.swarm_client import SwarmClient
 from zoe_master.execution_manager import _digest_application_description
 from zoe_master.zapp_to_docker import execution_to_containers, terminate_execution

@@ -19,9 +19,9 @@ import logging
 import threading
 import time
 
-from zoe_lib.swarm_client import SwarmClient
 from zoe_lib.config import get_conf
-from zoe_lib.sql_manager import SQLManager
+from zoe_lib.state import SQLManager
+from zoe_lib.swarm_client import SwarmClient
 
 log = logging.getLogger(__name__)
 

@@ -18,14 +18,13 @@
 
 import logging
 
-from zoe_master.workspace.filesystem import ZoeFSWorkspace
-from zoe_master.exceptions import ZoeStartExecutionRetryException, ZoeStartExecutionFatalException, ZoeException
-
+from zoe_lib import exec_logs
 from zoe_lib.config import get_conf
 from zoe_lib.exceptions import ZoeLibException, ZoeNotEnoughResourcesException
-from zoe_lib.sql_manager import Execution, Service
+from zoe_lib.state import Execution, Service
 from zoe_lib.swarm_client import DockerContainerOptions, SwarmClient
-from zoe_lib import exec_logs
+from zoe_master.exceptions import ZoeStartExecutionRetryException, ZoeStartExecutionFatalException, ZoeException
+from zoe_master.workspace.filesystem import ZoeFSWorkspace
 
 log = logging.getLogger(__name__)
 

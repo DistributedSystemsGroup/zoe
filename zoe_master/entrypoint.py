@@ -19,16 +19,15 @@
 
 import logging
 
-from zoe_master.master_api import APIManager
-import zoe_master.scheduler
-from zoe_master.execution_manager import restart_resubmit_scheduler
-from zoe_master.monitor import ZoeMonitor
-from zoe_master.consistency import ZoeSwarmChecker
-
 import zoe_lib.config as config
+import zoe_master.scheduler
 from zoe_lib.metrics.influxdb import InfluxDBMetricSender
 from zoe_lib.metrics.logging import LogMetricSender
-from zoe_lib.sql_manager import SQLManager
+from zoe_lib.state import SQLManager
+from zoe_master.consistency import ZoeSwarmChecker
+from zoe_master.execution_manager import restart_resubmit_scheduler
+from zoe_master.master_api import APIManager
+from zoe_master.monitor import ZoeMonitor
 
 log = logging.getLogger("main")
 LOG_FORMAT = '%(asctime)-15s %(levelname)s %(threadName)s->%(name)s: %(message)s'

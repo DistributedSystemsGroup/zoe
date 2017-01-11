@@ -18,14 +18,13 @@
 import logging
 import re
 
-from zoe_lib.config import get_conf
-import zoe_lib.sql_manager
+import zoe_api.exceptions
+import zoe_api.master_api
 import zoe_lib.applications
 import zoe_lib.exceptions
+import zoe_lib.state
+from zoe_lib.config import get_conf
 from zoe_lib.swarm_client import SwarmClient
-
-import zoe_api.master_api
-import zoe_api.exceptions
 
 log = logging.getLogger(__name__)
 
@@ -39,14 +38,14 @@ class APIEndpoint:
     """
     def __init__(self):
         self.master = zoe_api.master_api.APIManager()
-        self.sql = zoe_lib.sql_manager.SQLManager(get_conf())
+        self.sql = zoe_lib.state.SQLManager(get_conf())
 
-    def execution_by_id(self, uid, role, execution_id) -> zoe_lib.sql_manager.Execution:
+    def execution_by_id(self, uid, role, execution_id) -> zoe_lib.state.sql_manager.Execution:
         """Lookup an execution by its ID."""
         e = self.sql.execution_list(id=execution_id, only_one=True)
         if e is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
-        assert isinstance(e, zoe_lib.sql_manager.Execution)
+        assert isinstance(e, zoe_lib.state.sql_manager.Execution)
         if e.user_id != uid and role != 'admin':
             raise zoe_api.exceptions.ZoeAuthException()
         return e
@@ -78,7 +77,7 @@ class APIEndpoint:
     def execution_terminate(self, uid, role, exec_id):
         """Terminate an execution."""
         e = self.sql.execution_list(id=exec_id, only_one=True)
-        assert isinstance(e, zoe_lib.sql_manager.Execution)
+        assert isinstance(e, zoe_lib.state.sql_manager.Execution)
         if e is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
 
@@ -93,7 +92,7 @@ class APIEndpoint:
     def execution_delete(self, uid, role, exec_id):
         """Delete an execution."""
         e = self.sql.execution_list(id=exec_id, only_one=True)
-        assert isinstance(e, zoe_lib.sql_manager.Execution)
+        assert isinstance(e, zoe_lib.state.sql_manager.Execution)
         if e is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
 
@@ -110,7 +109,7 @@ class APIEndpoint:
         else:
             raise zoe_api.exceptions.ZoeException(message)
 
-    def service_by_id(self, uid, role, service_id) -> zoe_lib.sql_manager.Service:
+    def service_by_id(self, uid, role, service_id) -> zoe_lib.state.sql_manager.Service:
         """Lookup a service by its ID."""
         service = self.sql.service_list(id=service_id, only_one=True)
         if service is None:
@@ -145,7 +144,7 @@ class APIEndpoint:
 
     def retry_submit_error_executions(self):
         """Resubmit any execution forgotten by the master."""
-        waiting_execs = self.sql.execution_list(status=zoe_lib.sql_manager.Execution.SUBMIT_STATUS)
+        waiting_execs = self.sql.execution_list(status=zoe_lib.state.sql_manager.Execution.SUBMIT_STATUS)
         if waiting_execs is None or len(waiting_execs) == 0:
             return
         e = waiting_execs[0]
