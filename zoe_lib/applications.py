@@ -67,6 +67,12 @@ def app_validate(data):
     if 'services' not in data:
         raise InvalidApplicationDescription(msg='the application should contain a list of services')
 
+    if 'disable_autorestart' in data:
+        try:
+            bool(data['disable_autorestart'])
+        except ValueError:
+            raise InvalidApplicationDescription(msg="disable_autorestart field should be a boolean")
+
     for service in data['services']:
         _service_check(service)
 
@@ -142,19 +148,9 @@ def _service_check(data):
             if not isinstance(volume[2], bool):
                 raise InvalidApplicationDescription(msg='readonly volume item (third) must be a boolean: {}'.format(volume[2]))
 
-    if 'networks' in data:
-        if not hasattr(data['networks'], '__iter__'):
-            raise InvalidApplicationDescription(msg='networks should be an iterable')
-
     if 'constraints' in data:
         if not hasattr(data['constraints'], '__iter__'):
             raise InvalidApplicationDescription(msg='networks should be an iterable')
-
-    if 'disable_autorestart' in data:
-        try:
-            bool(data['disable_autorestart'])
-        except ValueError:
-            raise InvalidApplicationDescription(msg="disable_autorestart field should be a boolean")
 
 
 def _port_check(data):

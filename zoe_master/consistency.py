@@ -50,17 +50,17 @@ class ZoeSwarmChecker(threading.Thread):
 
             for service in service_list:
                 assert isinstance(service, Service)
-                if service.docker_status == service.DOCKER_DESTROY_STATUS or service.docker_status == service.DOCKER_DIE_STATUS:
+                if service.docker_status == service.BACKEND_DESTROY_STATUS or service.docker_status == service.BACKEND_DIE_STATUS:
                     continue
                 found = False
                 for container in container_list:
-                    if container['id'] == service.docker_id:
+                    if container['id'] == service.backend_id:
                         found = True
                         if container['status'] == 'exited':
                             log.info('resetting status of service {}, died with no event'.format(service.name))
-                            service.set_docker_status(service.DOCKER_DIE_STATUS)
+                            service.set_backend_status(service.BACKEND_DIE_STATUS)
                 if not found:
-                    service.set_docker_status(service.DOCKER_DESTROY_STATUS)
+                    service.set_backend_status(service.BACKEND_DESTROY_STATUS)
 
             time.sleep(CHECK_INTERVAL)
 

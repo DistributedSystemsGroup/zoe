@@ -23,6 +23,30 @@ from zoe_lib.swarm_client import SwarmClient
 log = logging.getLogger(__name__)
 
 
+class ResourceReservation:
+    """The resources reserved by a Service."""
+    def __init__(self, data):
+        self.memory = data['memory']
+        self.cores = data['cores']
+
+
+class VolumeDescription:
+    """A generic description for container volumes."""
+    def __init__(self, data):
+        self.type = "host_directory"
+        self.path = data[0]
+        self.mount_point = data[1]
+        self.readonly = data[2]
+
+
+class ExposedPort:
+    """A port on the container that should be exposed."""
+    def __init__(self, data):
+        self.proto = 'tcp'  # FIXME UDP ports?
+        self.number = data['port_number']
+        self.expose = data['expose'] if 'expose' in data else False
+
+
 class Service:
     """A Zoe Service."""
 
@@ -32,12 +56,12 @@ class Service:
     STARTING_STATUS = "starting"
     ERROR_STATUS = "error"
 
-    DOCKER_UNDEFINED_STATUS = 'undefined'
-    DOCKER_CREATE_STATUS = 'created'
-    DOCKER_START_STATUS = 'started'
-    DOCKER_DIE_STATUS = 'dead'
-    DOCKER_DESTROY_STATUS = 'destroyed'
-    DOCKER_OOM_STATUS = 'oom-killed'
+    BACKEND_UNDEFINED_STATUS = 'undefined'
+    BACKEND_CREATE_STATUS = 'created'
+    BACKEND_START_STATUS = 'started'
+    BACKEND_DIE_STATUS = 'dead'
+    BACKEND_DESTROY_STATUS = 'destroyed'
+    BACKEND_OOM_STATUS = 'oom-killed'
 
     def __init__(self, d, sql_manager):
         self.sql_manager = sql_manager
@@ -49,8 +73,24 @@ class Service:
         self.execution_id = d['execution_id']
         self.description = d['description']
         self.service_group = d['service_group']
-        self.docker_id = d['docker_id']
-        self.docker_status = d['docker_status']
+        self.backend_id = d['backend_id']
+        self.backend_status = d['backend_status']
+
+        # Fields parsed from the JSON description
+        self.image_name = self.description['docker_image']
+        self.is_monitor = self.description['monitor']
+        self.startup_order = self.description['startup_order']
+        self.environment = []
+        if 'environment' in self.description:
+            self.environment = self.description['environment']
+        self.command = ''
+        if 'command' in self.description:
+            self.command = self.description['command']
+        self.resource_reservation = ResourceReservation(self.description['required_resources'])
+        self.volumes = []
+        if 'volumes' in self.description:
+            self.volumes = [VolumeDescription(v) for v in self.description['volumes']]
+        self.ports = [ExposedPort(p) for p in self.description['ports']]
 
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""
@@ -62,9 +102,9 @@ class Service:
             'execution_id': self.execution_id,
             'description': self.description,
             'service_group': self.service_group,
-            'docker_id': self.docker_id,
+            'backend_id': self.backend_id,
             'ip_address': self.ip_address,
-            'docker_status': self.docker_status
+            'backend_status': self.backend_status
         }
 
     def __eq__(self, other):
@@ -102,19 +142,19 @@ class Service:
         self.status = self.ERROR_STATUS
         self.error_message = error_message
 
-    def set_docker_status(self, new_status):
+    def set_backend_status(self, new_status):
         """Docker has emitted an event related to this service."""
-        self.sql_manager.service_update(self.id, docker_status=new_status)
-        log.debug("service {}, status updated to {}".format(self.id, new_status))
+        self.sql_manager.service_update(self.id, backend_status=new_status)
+        log.debug("service {}, backend status updated to {}".format(self.id, new_status))
         self.docker_status = new_status
 
     @property
     def ip_address(self):
         """Getter for the service IP address, queries Swarm as the IP address changes outside our control."""
-        if self.docker_status != self.DOCKER_START_STATUS:
+        if self.docker_status != self.BACKEND_START_STATUS:
             return {}
         swarm = SwarmClient(get_conf())
-        s_info = swarm.inspect_container(self.docker_id)
+        s_info = swarm.inspect_container(self.backend_id)
         return s_info['ip_address'][get_conf().overlay_network_name]
 
     @property

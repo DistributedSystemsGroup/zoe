@@ -21,7 +21,7 @@ import psycopg2.extras
 import zoe_api.exceptions
 from zoe_lib.config import get_conf
 
-SQL_SCHEMA_VERSION = 1  # ---> Increment this value every time the schema changes !!! <---
+SQL_SCHEMA_VERSION = 3  # ---> Increment this value every time the schema changes !!! <---
 
 
 def version_table(cur):

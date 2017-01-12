@@ -27,8 +27,8 @@ import zoe_lib.config as config
 from zoe_lib.configargparse import ArgumentParser, FileType
 from zoe_lib.state.sql_manager import Execution, Service
 from zoe_lib.swarm_client import SwarmClient
+from zoe_master.backends.old_swarm import execution_to_containers, terminate_execution
 from zoe_master.execution_manager import _digest_application_description
-from zoe_master.zapp_to_docker import execution_to_containers, terminate_execution
 
 log = logging.getLogger("main")
 LOG_FORMAT = '%(asctime)-15s %(levelname)s %(name)s (%(threadName)s): %(message)s'
@@ -122,7 +122,7 @@ class FakeSQLManager:
             'docker_id': None,
             'service_group': service_group,
             'error_message': None,
-            'docker_status': Service.DOCKER_UNDEFINED_STATUS
+            'docker_status': Service.BACKEND_UNDEFINED_STATUS
         }
         service = Service(s_dict, self)
         self.services.append(service)

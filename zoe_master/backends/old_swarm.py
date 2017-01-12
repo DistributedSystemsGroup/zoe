@@ -35,7 +35,7 @@ def execution_to_containers(execution: Execution) -> None:
     If an error occurs some containers may have been created and needs to be cleaned-up.
     In case of error exceptions are raised.
     """
-    ordered_service_list = sorted(execution.services, key=lambda x: x.description['startup_order'])
+    ordered_service_list = sorted(execution.services, key=lambda x: x.startup_order)
 
     env_subst_dict = {
         'execution_id': execution.id,
@@ -57,22 +57,21 @@ def _gen_environment(service, env_subst_dict, copts):
     """ Generate a dictionary containing the current cluster status (before the new container is spawned)
 
     This information is used to substitute template strings in the environment variables."""
-    if 'environment' in service.description:
-        for env_name, env_value in service.description['environment']:
-            try:
-                env_value = env_value.format(**env_subst_dict)
-            except KeyError:
-                error_msg = "Unknown variable in environment expression '{}', known variables are: {}".format(env_value, list(env_subst_dict.keys()))
-                service.set_error(error_msg)
-                raise ZoeStartExecutionFatalException("Service {} has wrong environment expression")
-            copts.add_env_variable(env_name, env_value)
+    for env_name, env_value in service.environment:
+        try:
+            env_value = env_value.format(**env_subst_dict)
+        except KeyError:
+            error_msg = "Unknown variable in environment expression '{}', known variables are: {}".format(env_value, list(env_subst_dict.keys()))
+            service.set_error(error_msg)
+            raise ZoeStartExecutionFatalException("Service {} has wrong environment expression")
+        copts.add_env_variable(env_name, env_value)
 
 
 def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict):
     copts = DockerContainerOptions()
     copts.gelf_log_address = get_conf().gelf_address
     copts.name = service.dns_name
-    copts.set_memory_limit(service.description['required_resources']['memory'])
+    copts.set_memory_limit(service.resource_reservation.memory)
     copts.network_name = get_conf().overlay_network_name
     copts.labels = {
         'zoe.execution.name': execution.name,
@@ -83,7 +82,7 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
         'zoe.deployment_name': get_conf().deployment_name,
         'zoe.type': 'app_service'
     }
-    if service.description['monitor']:
+    if service.is_monitor:
         copts.labels['zoe.monitor'] = 'true'
     else:
         copts.labels['zoe.monitor'] = 'false'
@@ -92,21 +91,23 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
         log.debug("Autorestart disabled for service {}".format(service.id))
         copts.restart = False
     else:
-        copts.restart = not service.description['monitor']  # Monitor containers should not restart
+        copts.restart = not service.is_monitor  # Monitor containers should not restart
 
     _gen_environment(service, env_subst_dict, copts)
 
-    for port in service.description['ports']:
-        if 'expose' in port and port['expose']:
-            copts.ports.append(port['port_number'])  # FIXME UDP ports?
+    for port in service.ports:
+        if port.expose:
+            copts.ports.append(port.port_number)  # FIXME UDP ports?
 
-    if 'volumes' in service.description:
-        for path, mount_point, readonly in service.description['volumes']:
-            copts.add_volume_bind(path, mount_point, readonly)
+    for volume in service.volumes:
+        if volume.type == "host_directory":
+            copts.add_volume_bind(volume.path, volume.mount_point, volume.readonly)
+        else:
+            log.warning('Docker Swarm backend does not support volume type {}'.format(volume.type))
 
-    if 'constraints' in service.description:
-        for constraint in service.description['constraints']:
-            copts.add_constraint(constraint)
+    # if 'constraints' in service.description:
+    #     for constraint in service.description['constraints']:
+    #         copts.add_constraint(constraint)
 
     fswk = ZoeFSWorkspace()
     if fswk.can_be_attached():
@@ -114,8 +115,7 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
         copts.add_env_variable('ZOE_WORKSPACE', fswk.get_mountpoint())
 
     # The same dictionary is used for templates in the command
-    if 'command' in service.description:
-        copts.set_command(service.description['command'].format(**env_subst_dict))
+    copts.set_command(service.command.format(**env_subst_dict))
 
     try:
         swarm = SwarmClient(get_conf())
@@ -123,7 +123,7 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
         raise ZoeStartExecutionFatalException(str(e))
 
     try:
-        cont_info = swarm.spawn_container(service.description['docker_image'], copts)
+        cont_info = swarm.spawn_container(service.image_name, copts)
     except ZoeNotEnoughResourcesException:
         service.set_error('Not enough free resources to satisfy reservation request')
         raise ZoeStartExecutionRetryException('Not enough free resources to satisfy reservation request for service {}'.format(service.name))
@@ -132,13 +132,14 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
 
     service.set_active(cont_info["docker_id"])
 
-    if 'networks' in service.description:
-        for net in service.description['networks']:
-            try:
-                swarm.connect_to_network(service.docker_id, net)
-            except ZoeException as e:
-                service.set_error(str(e))
-                raise ZoeStartExecutionFatalException("Failed to attach network {} to service {}".format(net, service.name))
+    # Networks are a Docker-specific feature
+    net = get_conf().overlay_network_name
+    try:
+        swarm.connect_to_network(service.backend_id, net)
+    except ZoeException as e:
+        swarm.terminate_container(service.backend_id, True)
+        service.set_error(str(e))
+        raise ZoeStartExecutionFatalException("Failed to attach network {} to service {}".format(net, service.name))
 
     return
 
@@ -150,9 +151,9 @@ def terminate_execution(execution: Execution) -> None:
     swarm = SwarmClient(get_conf())
     for service in execution.services:
         assert isinstance(service, Service)
-        if service.docker_id is not None:
+        if service.backend_id is not None:
             service.set_terminating()
-            swarm.terminate_container(service.docker_id, delete=True)
+            swarm.terminate_container(service.backend_id, delete=True)
             service.set_inactive()
             log.debug('Service {} terminated'.format(service.name))
     execution.set_terminated()
