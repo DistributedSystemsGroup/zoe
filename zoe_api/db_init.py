@@ -73,8 +73,9 @@ def create_tables(cur):
         execution_id INT REFERENCES execution,
         service_group TEXT NOT NULL,
         name TEXT NOT NULL,
-        docker_id TEXT NULL DEFAULT NULL,
-        docker_status TEXT NOT NULL DEFAULT 'undefined'
+        backend_id TEXT NULL DEFAULT NULL,
+        backend_status TEXT NOT NULL DEFAULT 'undefined',
+        ip_address CIDR NULL DEFAULT NULL
         )''')
 
 

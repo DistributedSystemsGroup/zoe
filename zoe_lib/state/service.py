@@ -18,7 +18,7 @@
 import logging
 
 from zoe_lib.config import get_conf
-from zoe_lib.swarm_client import SwarmClient
+from zoe_master.backends.old_swarm.api_client import SwarmClient
 
 log = logging.getLogger(__name__)
 
@@ -76,6 +76,10 @@ class Service:
         self.backend_id = d['backend_id']
         self.backend_status = d['backend_status']
 
+        self.ip_address = d['ip_address']
+        if self.ip_address is not None and ('/32' in self.ip_address or '/128' in self.ip_address):
+            self.ip_address = self.ip_address.split('/')[0]
+
         # Fields parsed from the JSON description
         self.image_name = self.description['docker_image']
         self.is_monitor = self.description['monitor']
@@ -110,11 +114,6 @@ class Service:
     def __eq__(self, other):
         return self.id == other.id
 
-    @property
-    def dns_name(self):
-        """Getter for the DNS name of this service as it will be registered in Docker's DNS."""
-        return "{}-{}-{}".format(self.name, self.execution_id, get_conf().deployment_name)
-
     def set_terminating(self):
         """The service is being killed."""
         self.sql_manager.service_update(self.id, status=self.TERMINATING_STATUS)
@@ -122,7 +121,7 @@ class Service:
 
     def set_inactive(self):
         """The service is not running."""
-        self.sql_manager.service_update(self.id, status=self.INACTIVE_STATUS, docker_id=None)
+        self.sql_manager.service_update(self.id, status=self.INACTIVE_STATUS, backend_id=None, ip_address=None)
         self.status = self.INACTIVE_STATUS
 
     def set_starting(self):
@@ -130,10 +129,12 @@ class Service:
         self.sql_manager.service_update(self.id, status=self.STARTING_STATUS)
         self.status = self.STARTING_STATUS
 
-    def set_active(self, docker_id):
-        """The service is running and has a valid docker_id."""
-        self.sql_manager.service_update(self.id, status=self.ACTIVE_STATUS, docker_id=docker_id, error_message=None)
+    def set_active(self, backend_id, ip_address):
+        """The service is running and has a valid backend_id."""
+        self.sql_manager.service_update(self.id, status=self.ACTIVE_STATUS, backend_id=backend_id, error_message=None, ip_address=ip_address)
         self.error_message = None
+        self.ip_address = ip_address
+        self.backend_id = backend_id
         self.status = self.ACTIVE_STATUS
 
     def set_error(self, error_message):
@@ -146,16 +147,12 @@ class Service:
         """Docker has emitted an event related to this service."""
         self.sql_manager.service_update(self.id, backend_status=new_status)
         log.debug("service {}, backend status updated to {}".format(self.id, new_status))
-        self.docker_status = new_status
+        self.backend_status = new_status
 
     @property
-    def ip_address(self):
-        """Getter for the service IP address, queries Swarm as the IP address changes outside our control."""
-        if self.docker_status != self.BACKEND_START_STATUS:
-            return {}
-        swarm = SwarmClient(get_conf())
-        s_info = swarm.inspect_container(self.backend_id)
-        return s_info['ip_address'][get_conf().overlay_network_name]
+    def dns_name(self):
+        """Getter for the DNS name of this service as it will be registered in Docker's DNS."""
+        return "{}-{}-{}".format(self.name, self.execution_id, get_conf().deployment_name)
 
     @property
     def user_id(self):

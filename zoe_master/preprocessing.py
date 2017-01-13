@@ -13,11 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Layer in front of the scheduler to perform """
+"""Layer in front of the scheduler to perform request pre-processing."""
 
 import logging
 
-from zoe_lib import exec_logs
 from zoe_lib.state import Execution, SQLManager
 from zoe_master.scheduler import ZoeBaseScheduler
 
@@ -61,4 +60,3 @@ def restart_resubmit_scheduler(state: SQLManager, scheduler: ZoeBaseScheduler):
 def execution_delete(execution: Execution):
     """Remove an execution, must only be called if the execution is NOT running."""
     assert not execution.is_active()
-    exec_logs.delete(execution)

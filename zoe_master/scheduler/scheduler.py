@@ -19,7 +19,7 @@ import logging
 import threading
 
 from zoe_lib.state import Execution
-from zoe_master.backends.old_swarm import execution_to_containers, terminate_execution
+from zoe_master.backends.interface import execution_to_containers, terminate_execution
 from zoe_master.exceptions import ZoeStartExecutionFatalException, ZoeStartExecutionRetryException
 from zoe_master.scheduler.base_scheduler import ZoeBaseScheduler
 

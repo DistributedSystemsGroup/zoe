@@ -27,12 +27,11 @@ class Stats:
         self.timestamp = time.time()
 
 
-class SwarmNodeStats(Stats):
-    """Stats related to a single Swarm node."""
+class NodeStats(Stats):
+    """Stats related to a single node."""
     def __init__(self, name):
         super().__init__()
         self.name = name
-        self.docker_endpoint = None
         self.container_count = 0
         self.cores_total = 0
         self.cores_reserved = 0
@@ -41,21 +40,15 @@ class SwarmNodeStats(Stats):
         self.labels = {}
         self.status = None
         self.error = ''
-        self.last_update = None
-        self.server_version = None
 
 
-class SwarmStats(Stats):
-    """Stats related to the whole Swarm cluster."""
+class ClusterStats(Stats):
+    """Stats related to the whole cluster."""
     def __init__(self):
         super().__init__()
         self.container_count = 0
-        self.image_count = 0
         self.memory_total = 0
         self.cores_total = 0
-        self.placement_strategy = ''
-        self.active_filters = []
-        self.status = 'Unknown'
         self.nodes = []
 
 

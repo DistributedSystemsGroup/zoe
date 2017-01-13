@@ -21,13 +21,12 @@ import logging
 
 import zoe_lib.config as config
 import zoe_master.scheduler
+import zoe_master.backends.interface
 from zoe_lib.metrics.influxdb import InfluxDBMetricSender
 from zoe_lib.metrics.logging import LogMetricSender
 from zoe_lib.state import SQLManager
-from zoe_master.consistency import ZoeSwarmChecker
-from zoe_master.execution_manager import restart_resubmit_scheduler
+from zoe_master.preprocessing import restart_resubmit_scheduler
 from zoe_master.master_api import APIManager
-from zoe_master.monitor import ZoeMonitor
 
 log = logging.getLogger("main")
 LOG_FORMAT = '%(asctime)-15s %(levelname)s %(threadName)s->%(name)s: %(message)s'
@@ -57,8 +56,7 @@ def main():
     log.info("Initializing scheduler")
     scheduler = getattr(zoe_master.scheduler, config.get_conf().scheduler_class)(state)
 
-    monitor = ZoeMonitor(state)
-    checker = ZoeSwarmChecker(state)
+    zoe_master.backends.interface.initialize_backend(state)
 
     restart_resubmit_scheduler(state, scheduler)
 
@@ -73,7 +71,6 @@ def main():
         log.exception('fatal error')
     finally:
         scheduler.quit()
-        monitor.quit()
-        checker.quit()
         api_server.quit()
+        zoe_master.backends.interface.shutdown_backend()
         metrics.quit()

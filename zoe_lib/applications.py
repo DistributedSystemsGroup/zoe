@@ -67,12 +67,6 @@ def app_validate(data):
     if 'services' not in data:
         raise InvalidApplicationDescription(msg='the application should contain a list of services')
 
-    if 'disable_autorestart' in data:
-        try:
-            bool(data['disable_autorestart'])
-        except ValueError:
-            raise InvalidApplicationDescription(msg="disable_autorestart field should be a boolean")
-
     for service in data['services']:
         _service_check(service)
 
@@ -122,11 +116,17 @@ def _service_check(data):
     if not isinstance(data['required_resources'], dict):
         raise InvalidApplicationDescription(msg="required_resources should be a dictionary")
     if 'memory' not in data['required_resources']:
-        raise InvalidApplicationDescription(msg="Missing required key: required_resources -> memory")
+        data['required_resources']['memory'] = 0
+    if 'cores' not in data['required_resources']:
+        data['required_resources']['cores'] = 0
     try:
         int(data['required_resources']['memory'])
     except ValueError:
         raise InvalidApplicationDescription(msg="required_resources -> memory field should be an int")
+    try:
+        int(data['required_resources']['cores'])
+    except ValueError:
+        raise InvalidApplicationDescription(msg="required_resources -> cores field should be an int")
 
     if 'environment' in data:
         if not hasattr(data['environment'], '__iter__'):

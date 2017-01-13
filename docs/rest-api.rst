@@ -190,11 +190,11 @@ Will return a JSON document like this::
     {
        "status" : "active",
        "service_group" : "boinc-client",
-       "docker_status" : "started",
+       "backend_status" : "started",
        "ip_address" : "10.0.0.94",
        "execution_id" : 25158,
        "name" : "boinc-client0",
-       "docker_id" : "d0042c69b54e90327d9287e099304b6c25921d81f639803494ea744445d58430",
+       "backend_id" : "d0042c69b54e90327d9287e099304b6c25921d81f639803494ea744445d58430",
        "error_message" : null,
        "id" : 26774,
        "description" : {
@@ -211,11 +211,11 @@ Where:
 
 * ``status`` is the service status from Zoe point of view. It can be one of "terminating", "inactive", "active" or "starting"
 * ``service_group`` is the name for the service provided in the ZApp description. When the ZApp is unpacked to create the actual containers a single service definition will spawn one or more services with this name in common
-* ``docker_status`` is the container status from the point of view of Docker. Zoe tries her best to keep this value in sync, but the value here can be out of sync by several minutes. It can be one of 'undefined', 'created', 'started', 'dead' or 'destroyed'
+* ``backend_status`` is the container status from the point of view of the container backend. Zoe tries her best to keep this value in sync, but the value here can be out of sync by several minutes. It can be one of 'undefined', 'created', 'started', 'dead' or 'destroyed'
 * ``ip_address`` is the IP address of the container
 * ``execution_id`` is the execution ID this service belongs to
 * ``name`` is the name for this service instance, generated from ``service_group``
-* ``docker_id`` is the Docker ID string
+* ``backend_id`` is the ID used by the backend to identify this container
 * ``error_message`` is currently unused
 * ``id`` is the ID of this service, should match the one given in the URL
 * ``description`` is the service description extracted from the ZApp

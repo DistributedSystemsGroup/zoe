@@ -33,7 +33,7 @@ import docker.utils
 
 import requests.packages
 
-from zoe_master.stats import SwarmStats, SwarmNodeStats
+from zoe_master.stats import ClusterStats, NodeStats
 from zoe_lib.exceptions import ZoeLibException, ZoeNotEnoughResourcesException
 
 log = logging.getLogger(__name__)
@@ -136,12 +136,11 @@ class SwarmClient:
         log.debug('Connecting to Swarm at {}'.format(manager))
         self.cli = docker.Client(base_url=manager, version="auto")
 
-    def info(self) -> SwarmStats:
+    def info(self) -> ClusterStats:
         """Retrieve Swarm statistics. The Docker API returns a mess difficult to parse."""
         info = self.cli.info()
-        pl_status = SwarmStats()
+        pl_status = ClusterStats()
         pl_status.container_count = info["Containers"]
-        pl_status.image_count = info["Images"]
         pl_status.memory_total = info["MemTotal"]
         pl_status.cores_total = info["NCPU"]
 
@@ -158,7 +157,7 @@ class SwarmClient:
         idx = 4
         for node in range(node_count):
             idx2 = 0
-            node_stats = SwarmNodeStats(info["DriverStatus"][idx + node][0])
+            node_stats = NodeStats(info["DriverStatus"][idx + node][0])
             node_stats.docker_endpoint = info["DriverStatus"][idx + node][1]
             idx2 += 1
             if 'Status' in info["DriverStatus"][idx + node + idx2][0]:  # new docker version

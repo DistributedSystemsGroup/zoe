@@ -24,7 +24,6 @@ import zoe_lib.applications
 import zoe_lib.exceptions
 import zoe_lib.state
 from zoe_lib.config import get_conf
-from zoe_lib.swarm_client import SwarmClient
 
 log = logging.getLogger(__name__)
 
@@ -124,18 +123,6 @@ class APIEndpoint:
         ret = [s for s in services if s.user_id == uid or role == 'admin']
         return ret
 
-    def service_logs(self, uid, role, service_id, stream=True):
-        """Retrieve the logs for the given service."""
-        service = self.sql.service_list(id=service_id, only_one=True)
-        if service is None:
-            raise zoe_api.exceptions.ZoeNotFoundException('No such service')
-        if service.user_id != uid and role != 'admin':
-            raise zoe_api.exceptions.ZoeAuthException()
-        if service.docker_id is None:
-            raise zoe_api.exceptions.ZoeNotFoundException('Container is not running')
-        swarm = SwarmClient(get_conf())
-        return swarm.logs(service.docker_id, stream)
-
     def statistics_scheduler(self, uid_, role_):
         """Retrieve statistics about the scheduler."""
         success, message = self.master.scheduler_statistics()
@@ -159,7 +146,7 @@ class APIEndpoint:
         for execution in all_execs:
             if execution.status == execution.RUNNING_STATUS:
                 for service in execution.services:
-                    if service.description['monitor'] and service.docker_status == service.DOCKER_DIE_STATUS or service.docker_status == service.DOCKER_DESTROY_STATUS:
+                    if service.description['monitor'] and service.backend_status == service.BACKEND_DIE_STATUS or service.backend_status == service.BACKEND_DESTROY_STATUS:
                         log.info("Service {} of execution {} died, terminating execution".format(service.name, execution.id))
                         self.master.execution_terminate(execution.id)
                         break

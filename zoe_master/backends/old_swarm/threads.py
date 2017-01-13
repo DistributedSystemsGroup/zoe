@@ -20,13 +20,13 @@ import threading
 import time
 
 from zoe_lib.config import get_conf
-from zoe_lib.state import SQLManager
-from zoe_lib.swarm_client import SwarmClient
+from zoe_lib.state import SQLManager, Service
+from zoe_master.backends.old_swarm.api_client import SwarmClient
 
 log = logging.getLogger(__name__)
 
 
-class ZoeMonitor(threading.Thread):
+class SwarmMonitor(threading.Thread):
     """The monitor."""
 
     def __init__(self, state: SQLManager) -> None:
@@ -76,16 +76,16 @@ class ZoeMonitor(threading.Thread):
         if 'exec' in event['Action']:
             pass
         elif 'create' in event['Action']:
-            service.set_backend_status(service.DOCKER_CREATE_STATUS)
+            service.set_backend_status(service.BACKEND_CREATE_STATUS)
         elif 'start' in event['Action']:
-            service.set_backend_status(service.DOCKER_START_STATUS)
+            service.set_backend_status(service.BACKEND_START_STATUS)
         elif 'die' in event['Action'] or 'kill' in event['Action'] or 'stop' in event['Action']:
-            service.set_backend_status(service.DOCKER_DIE_STATUS)
+            service.set_backend_status(service.BACKEND_DIE_STATUS)
         elif 'oom' in event['Action']:
-            service.set_backend_status(service.DOCKER_OOM_STATUS)
+            service.set_backend_status(service.BACKEND_OOM_STATUS)
             log.warning('Service {} got killed by an OOM condition'.format(service.id))
         elif 'destroy' in event['Action']:
-            service.set_backend_status(service.DOCKER_DESTROY_STATUS)
+            service.set_backend_status(service.BACKEND_DESTROY_STATUS)
         else:
             log.debug('Unmanaged container action: {}'.format(event['Action']))
 
@@ -94,38 +94,45 @@ class ZoeMonitor(threading.Thread):
         self.stop = True
 
 
-SAMPLE_EVENT = {
-    'node': {
-        'Name': 'bf18',
-        'Id': 'VPCL:E5GW:WON3:2DPV:WFO7:EVNO:ZAKS:V2PA:PGKU:RSM7:AAR3:EAV7',
-        'Addr': '192.168.47.18:2375',
-        'Ip': '192.168.47.18'
-    },
-    'timeNano': 1469622892143470822,
-    'Actor': {
-        'ID': 'e4d3e639c1ec2107262f19cf6e57406cf83e376ef4f131461c3f256d0ce64e13',
-        'Attributes': {
-            'node.ip': '192.168.47.18',
-            'image': 'docker-registry:5000/zoerepo/spark-submit',
-            'node.name': 'bf18',
-            'node.addr': '192.168.47.18:2375',
-            'zoe.service.name': 'spark-submit0',
-            'name': 'spark-submit0-60-prod',
-            'zoe.owner': 'milanesio',
-            'zoe.deployment_name': 'prod',
-            'com.docker.swarm.id': 'de7515d8839c461523e8326c552b45da0f9bd0f9af4f68d4d5a55429533405d4',
-            'zoe.execution.id': '60',
-            'zoe.monitor': 'true',
-            'zoe.execution.name': 'testebob',
-            'node.id': 'VPCL:E5GW:WON3:2DPV:WFO7:EVNO:ZAKS:V2PA:PGKU:RSM7:AAR3:EAV7',
-            'zoe.service.id': '233',
-            'zoe.type': 'app_service'
-        }
-    },
-    'status': 'start',
-    'Action': 'start',
-    'id': 'e4d3e639c1ec2107262f19cf6e57406cf83e376ef4f131461c3f256d0ce64e13',
-    'time': 1469622892,
-    'Type': 'container',
-    'from': 'docker-registry:5000/zoerepo/spark-submit node:bf18'
-}
+CHECK_INTERVAL = 300
+
+
+class SwarmStateSynchronizer(threading.Thread):
+    """The Swarm Checker."""
+
+    def __init__(self, state: SQLManager) -> None:
+        super().__init__()
+        self.setName('checker')
+        self.stop = False
+        self.state = state
+        self.setDaemon(True)
+
+        self.start()
+
+    def run(self):
+        """The thread loop."""
+        log.info("Checker thread started")
+        swarm = SwarmClient(get_conf())
+        while not self.stop:
+            service_list = self.state.service_list()
+            container_list = swarm.list(only_label={'zoe.deployment_name': get_conf().deployment_name})
+
+            for service in service_list:
+                assert isinstance(service, Service)
+                if service.backend_status == service.BACKEND_DESTROY_STATUS or service.backend_status == service.BACKEND_DIE_STATUS:
+                    continue
+                found = False
+                for container in container_list:
+                    if container['id'] == service.backend_id:
+                        found = True
+                        if container['status'] == 'exited':
+                            log.info('resetting status of service {}, died with no event'.format(service.name))
+                            service.set_backend_status(service.BACKEND_DIE_STATUS)
+                if not found:
+                    service.set_backend_status(service.BACKEND_DESTROY_STATUS)
+
+            time.sleep(CHECK_INTERVAL)
+
+    def quit(self):
+        """Stops the thread."""
+        self.stop = True
