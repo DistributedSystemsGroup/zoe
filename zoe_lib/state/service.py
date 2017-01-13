@@ -28,6 +28,16 @@ class ResourceReservation:
         self.memory = data['memory']
         self.cores = data['cores']
 
+    def __add__(self, other):
+        if isinstance(other, ResourceReservation):
+            res = {
+                'memory': self.memory + other.memory,
+                'cores': self.cores + other.cores
+            }
+            return ResourceReservation(res)
+        else:
+            return NotImplemented
+
 
 class VolumeDescription:
     """A generic description for container volumes."""

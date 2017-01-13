@@ -64,6 +64,8 @@ class Execution:
         self._status = d['status']
         self.error_message = d['error_message']
 
+        self.priority = self.description['priority']
+
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""
         return {
@@ -142,10 +144,36 @@ class Execution:
         return self.sql_manager.service_list(execution_id=self.id)
 
     @property
-    def essentials_started(self) -> bool:
+    def essential_services_running(self) -> bool:
         """Returns True if all essential services of this execution have started."""
-        ret = True
         for service in self.services:
-            if service.essential:
-                ret = ret and not service.is_dead()
-        return ret
+            if service.essential and service.is_dead():
+                return False
+        return True
+
+    @property
+    def all_services_running(self) -> bool:
+        """Return True if all services of this execution are running/active"""
+        for service in self.services:
+            if service.is_dead():
+                return False
+        return True
+
+    @property
+    def running_services_count(self) -> int:
+        """Returns the number of services of this execution that are running."""
+        count = 0
+        for service in self.services:
+            if not service.is_dead():
+                count += 1
+        return count
+
+    @property
+    def services_count(self) -> int:
+        """Return the total number of services defined for this execution."""
+        return len(self.services)
+
+    @property
+    def total_reservations(self):
+        """Return the union/sum of resources reserved by all services of this execution."""
+        return sum([s.resource_reservation for s in self.services])
