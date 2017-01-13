@@ -73,6 +73,8 @@ class SwarmMonitor(threading.Thread):
 
         service_id = event['Actor']['Attributes']['zoe.service.id']  # type: int
         service = self.state.service_list(only_one=True, id=service_id)
+        if service is None:
+            return
         if 'exec' in event['Action']:
             pass
         elif 'create' in event['Action']:

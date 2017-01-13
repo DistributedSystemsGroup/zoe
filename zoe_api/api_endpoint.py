@@ -144,10 +144,10 @@ class APIEndpoint:
         log.debug('Starting dead execution cleanup task')
         all_execs = self.sql.execution_list()
         for execution in all_execs:
-            if execution.status == execution.RUNNING_STATUS:
+            if execution.is_running():
                 for service in execution.services:
-                    if service.description['monitor'] and service.backend_status == service.BACKEND_DIE_STATUS or service.backend_status == service.BACKEND_DESTROY_STATUS:
-                        log.info("Service {} of execution {} died, terminating execution".format(service.name, execution.id))
+                    if service.description['monitor'] and service.is_dead():
+                        log.info("Service {} ({}) of execution {} died, terminating execution".format(service.id, service.name, execution.id))
                         self.master.execution_terminate(execution.id)
                         break
         log.debug('Cleanup task finished')

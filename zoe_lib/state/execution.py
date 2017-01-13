@@ -127,6 +127,10 @@ class Execution:
         """
         return self._status == self.SCHEDULED_STATUS or self._status == self.RUNNING_STATUS or self._status == self.STARTING_STATUS or self._status == self.CLEANING_UP_STATUS
 
+    def is_running(self):
+        """Returns True is the execution has at least the essential services running."""
+        return self._status == self.RUNNING_STATUS
+
     @property
     def status(self):
         """Getter for the execution status."""
@@ -136,3 +140,12 @@ class Execution:
     def services(self):
         """Getter for this execution service list."""
         return self.sql_manager.service_list(execution_id=self.id)
+
+    @property
+    def essentials_started(self) -> bool:
+        """Returns True if all essential services of this execution have started."""
+        ret = True
+        for service in self.services:
+            if service.essential:
+                ret = ret and not service.is_dead()
+        return ret

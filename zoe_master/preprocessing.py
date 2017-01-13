@@ -25,9 +25,19 @@ log = logging.getLogger(__name__)
 
 def _digest_application_description(state: SQLManager, execution: Execution):
     for service_descr in execution.description['services']:
-        for counter in range(service_descr['total_count']):
+        essential_count = service_descr['essential_count']
+        total_count = service_descr['total_count']
+        elastic_count = total_count - essential_count
+        counter = 0
+        for i in range(essential_count):
             name = "{}{}".format(service_descr['name'], counter)
-            state.service_new(execution.id, name, service_descr['name'], service_descr)
+            state.service_new(execution.id, name, service_descr['name'], service_descr, True)
+            counter += 1
+        for i in range(elastic_count):
+            name = "{}{}".format(service_descr['name'], counter)
+            state.service_new(execution.id, name, service_descr['name'], service_descr, False)
+            counter += 1
+        assert counter == total_count
 
 
 def execution_submit(state: SQLManager, scheduler: ZoeBaseScheduler, execution: Execution):

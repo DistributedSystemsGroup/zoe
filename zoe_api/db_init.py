@@ -75,7 +75,8 @@ def create_tables(cur):
         name TEXT NOT NULL,
         backend_id TEXT NULL DEFAULT NULL,
         backend_status TEXT NOT NULL DEFAULT 'undefined',
-        ip_address CIDR NULL DEFAULT NULL
+        ip_address CIDR NULL DEFAULT NULL,
+        essential BOOLEAN NOT NULL DEFAULT FALSE
         )''')
 
 

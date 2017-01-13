@@ -18,7 +18,6 @@
 import logging
 
 from zoe_lib.config import get_conf
-from zoe_master.backends.old_swarm.api_client import SwarmClient
 
 log = logging.getLogger(__name__)
 
@@ -80,6 +79,8 @@ class Service:
         if self.ip_address is not None and ('/32' in self.ip_address or '/128' in self.ip_address):
             self.ip_address = self.ip_address.split('/')[0]
 
+        self.essential = d['essential']
+
         # Fields parsed from the JSON description
         self.image_name = self.description['docker_image']
         self.is_monitor = self.description['monitor']
@@ -108,7 +109,8 @@ class Service:
             'service_group': self.service_group,
             'backend_id': self.backend_id,
             'ip_address': self.ip_address,
-            'backend_status': self.backend_status
+            'backend_status': self.backend_status,
+            'essential': self.essential
         }
 
     def __eq__(self, other):
@@ -159,3 +161,7 @@ class Service:
         """Getter for the user_id, that is actually taken form the parent execution."""
         execution = self.sql_manager.execution_list(only_one=True, id=self.execution_id)
         return execution.user_id
+
+    def is_dead(self):
+        """Returns True if this service is not running."""
+        return self.backend_status == self.BACKEND_DESTROY_STATUS or self.backend_status == self.BACKEND_OOM_STATUS or self.backend_status == self.BACKEND_DIE_STATUS
