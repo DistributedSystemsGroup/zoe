@@ -18,6 +18,7 @@
 from typing import Dict
 
 from zoe_lib.state import Execution, Service
+from zoe_master.stats import ClusterStats
 
 
 class BaseBackend:
@@ -37,4 +38,8 @@ class BaseBackend:
         raise NotImplementedError
 
     def terminate_service(self, service: Service) -> None:
+        raise NotImplementedError
+
+    def platform_state(self) -> ClusterStats:
+        """Get the platform state."""
         raise NotImplementedError

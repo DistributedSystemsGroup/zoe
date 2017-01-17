@@ -17,6 +17,7 @@
 
 import datetime
 import logging
+import threading
 
 log = logging.getLogger(__name__)
 
@@ -65,6 +66,8 @@ class Execution:
         self.error_message = d['error_message']
 
         self.priority = self.description['priority']
+
+        self.termination_lock = threading.Lock()
 
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""
@@ -122,6 +125,7 @@ class Execution:
         self.error_message = message
         self.sql_manager.execution_update(self.id, error_message=self.error_message)
 
+    @property
     def is_active(self):
         """
         Returns True if the execution is in the scheduler
@@ -129,6 +133,7 @@ class Execution:
         """
         return self._status == self.SCHEDULED_STATUS or self._status == self.RUNNING_STATUS or self._status == self.STARTING_STATUS or self._status == self.CLEANING_UP_STATUS
 
+    @property
     def is_running(self):
         """Returns True is the execution has at least the essential services running."""
         return self._status == self.RUNNING_STATUS
@@ -142,6 +147,16 @@ class Execution:
     def services(self):
         """Getter for this execution service list."""
         return self.sql_manager.service_list(execution_id=self.id)
+
+    @property
+    def essential_services(self):
+        """Getter for this execution essential service list."""
+        return self.sql_manager.service_list(execution_id=self.id, essential=True)
+
+    @property
+    def elastic_services(self):
+        """Getter for this execution elastic service list."""
+        return self.sql_manager.service_list(execution_id=self.id, essential=False)
 
     @property
     def essential_services_running(self) -> bool:
@@ -177,3 +192,6 @@ class Execution:
     def total_reservations(self):
         """Return the union/sum of resources reserved by all services of this execution."""
         return sum([s.resource_reservation for s in self.services])
+
+    def __repr__(self):
+        return str(self.id)

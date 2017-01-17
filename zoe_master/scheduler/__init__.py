@@ -16,4 +16,5 @@
 """The Zoe schedulers"""
 
 from .base_scheduler import ZoeBaseScheduler
-from .scheduler import ZoeSimpleScheduler
+from .simple_scheduler import ZoeSimpleScheduler
+from .elastic_scheduler import ZoeElasticScheduler

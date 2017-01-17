@@ -64,6 +64,7 @@ class Service:
     ACTIVE_STATUS = "active"
     STARTING_STATUS = "starting"
     ERROR_STATUS = "error"
+    RUNNABLE_STATUS = "runnable"
 
     BACKEND_UNDEFINED_STATUS = 'undefined'
     BACKEND_CREATE_STATUS = 'created'

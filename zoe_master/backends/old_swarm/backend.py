@@ -27,6 +27,7 @@ from zoe_master.workspace.filesystem import ZoeFSWorkspace
 import zoe_master.backends.common
 import zoe_master.backends.base
 from zoe_master.backends.old_swarm.threads import SwarmMonitor, SwarmStateSynchronizer
+from zoe_master.stats import NodeStats, ClusterStats
 
 log = logging.getLogger(__name__)
 
@@ -124,3 +125,11 @@ class OldSwarmBackend(zoe_master.backends.base.BaseBackend):
     def terminate_service(self, service: Service) -> None:
         """Terminate and delete a container."""
         self.swarm.terminate_container(service.backend_id, delete=True)
+
+    def platform_state(self) -> ClusterStats:
+        """Get the platform state."""
+        info = self.swarm.info()
+        for node in info.nodes:  # type: NodeStats
+            node.memory_free = node.memory_total - node.memory_reserved
+            node.cores_free = node.cores_total - node.cores_reserved
+        return info

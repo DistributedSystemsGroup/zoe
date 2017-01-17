@@ -35,8 +35,10 @@ class NodeStats(Stats):
         self.container_count = 0
         self.cores_total = 0
         self.cores_reserved = 0
+        self.cores_free = 0
         self.memory_total = 0
         self.memory_reserved = 0
+        self.memory_free = 0
         self.labels = {}
         self.status = None
         self.error = ''

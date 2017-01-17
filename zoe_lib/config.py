@@ -84,7 +84,8 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--ldap-user-gid', type=int, help='LDAP group ID for users', default=5001)
         argparser.add_argument('--ldap-guest-gid', type=int, help='LDAP group ID for guests', default=5002)
 
-        argparser.add_argument('--scheduler-class', help='Scheduler class to use for scheduling ZApps', default='ZoeSimpleScheduler')
+        argparser.add_argument('--scheduler-class', help='Scheduler class to use for scheduling ZApps', choices=['ZoeSimpleScheduler', 'ZoeElasticScheduler'], default='ZoeSimpleScheduler')
+        argparser.add_argument('--scheduler-policy', help='Scheduler policy to use for scheduling ZApps', choices=['FIFO', 'SIZE'], default='FIFO')
 
         argparser.add_argument('--backend', choices=['OldSwarm'], default='OldSwarm')
 

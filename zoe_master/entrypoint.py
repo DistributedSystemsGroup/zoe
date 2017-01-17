@@ -54,7 +54,7 @@ def main():
     state = SQLManager(args)
 
     log.info("Initializing scheduler")
-    scheduler = getattr(zoe_master.scheduler, config.get_conf().scheduler_class)(state)
+    scheduler = getattr(zoe_master.scheduler, config.get_conf().scheduler_class)(state, config.get_conf().scheduler_policy)
 
     zoe_master.backends.interface.initialize_backend(state)
 
