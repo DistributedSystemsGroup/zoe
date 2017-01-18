@@ -27,10 +27,11 @@ from zoe_master.workspace.filesystem import ZoeFSWorkspace
 import zoe_master.backends.common
 import zoe_master.backends.base
 from zoe_master.backends.old_swarm.threads import SwarmMonitor, SwarmStateSynchronizer
-from zoe_master.stats import NodeStats, ClusterStats
+from zoe_master.stats import NodeStats, ClusterStats  # pylint: disable=unused-import
 
 log = logging.getLogger(__name__)
 
+# These two module-level variables hold the references to the monitor and checker threads
 _monitor = None
 _checker = None
 

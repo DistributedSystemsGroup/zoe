@@ -19,8 +19,6 @@ from concurrent.futures import ThreadPoolExecutor
 import logging
 
 from tornado.web import RequestHandler
-import tornado.gen
-import tornado.iostream
 
 from zoe_api.rest_api.utils import catch_exceptions, get_auth
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
@@ -38,7 +36,7 @@ class ServiceAPI(RequestHandler):
         self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
     @catch_exceptions
-    def get(self, service_id) -> dict:
+    def get(self, service_id):
         """HTTP GET method."""
         uid, role = get_auth(self)
 

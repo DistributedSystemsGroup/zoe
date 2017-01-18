@@ -21,9 +21,10 @@ import time
 import zmq
 
 import zoe_lib.config as config
-import zoe_master.preprocessing
 from zoe_lib.metrics.base import BaseMetricSender
 from zoe_lib.state import SQLManager
+
+import zoe_master.preprocessing
 from zoe_master.exceptions import ZoeException
 from zoe_master.scheduler import ZoeBaseScheduler
 

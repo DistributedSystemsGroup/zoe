@@ -19,10 +19,7 @@ class SimulatedNode:
 
     def service_fits(self, service: Service) -> bool:
         """Checks whether a service can fit in this node"""
-        if service.resource_reservation.memory < self.node_free_memory():
-            return True
-        else:
-            return False
+        return service.resource_reservation.memory < self.node_free_memory()
 
     def service_add(self, service):
         """Add a service in this node."""
@@ -56,8 +53,8 @@ class SimulatedNode:
 
     def __repr__(self):
         # services = ','.join([str(s.id) for s in self.services])
-        s = 'SN {} | f {}'.format(self.name, self.node_free_memory())
-        return s
+        out = 'SN {} | f {}'.format(self.name, self.node_free_memory())
+        return out
 
 
 class SimulatedPlatform:
@@ -71,7 +68,7 @@ class SimulatedPlatform:
         """Try to find an allocation for essential services"""
         for service in execution.essential_services:
             candidate_nodes = []
-            for node_name, node in self.nodes.items():
+            for node_id_, node in self.nodes.items():
                 if node.service_fits(service):
                     candidate_nodes.append(node)
             if len(candidate_nodes) == 0:  # this service does not fit anywhere
@@ -84,7 +81,7 @@ class SimulatedPlatform:
     def deallocate_essential(self, execution: Execution):
         """Remove all essential services from the simulated cluster"""
         for service in execution.essential_services:
-            for node_name, node in self.nodes.items():
+            for node_id_, node in self.nodes.items():
                 if node.service_remove(service):
                     break
 
@@ -95,7 +92,7 @@ class SimulatedPlatform:
             if service.status == service.ACTIVE_STATUS:
                 continue
             candidate_nodes = []
-            for node_name, node in self.nodes.items():
+            for node_id_, node in self.nodes.items():
                 if node.service_fits(service):
                     candidate_nodes.append(node)
             if len(candidate_nodes) == 0:  # this service does not fit anywhere
@@ -109,7 +106,7 @@ class SimulatedPlatform:
     def deallocate_elastic(self, execution: Execution):
         """Remove all elastic services from the simulated cluster"""
         for service in execution.elastic_services:
-            for node_name, node in self.nodes.items():
+            for node_id_, node in self.nodes.items():
                 if node.service_remove(service):
                     service.set_inactive()
                     break
@@ -117,8 +114,8 @@ class SimulatedPlatform:
     def aggregated_free_memory(self):
         """Return the amount of free memory across all nodes"""
         total = 0
-        for n_id, n in self.nodes.items():
-            total += n.node_free_memory()
+        for node_id_, node in self.nodes.items():
+            total += node.node_free_memory()
         return total
 
     def get_service_allocation(self):
@@ -130,7 +127,7 @@ class SimulatedPlatform:
         return placements
 
     def __repr__(self):
-        s = ''
-        for node_name, node in self.nodes.items():
-            s += str(node) + " # "
-        return s
+        out = ''
+        for node_id_, node in self.nodes.items():
+            out += str(node) + " # "
+        return out

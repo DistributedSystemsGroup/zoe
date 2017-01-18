@@ -20,11 +20,12 @@
 import logging
 
 import zoe_lib.config as config
-import zoe_master.scheduler
-import zoe_master.backends.interface
 from zoe_lib.metrics.influxdb import InfluxDBMetricSender
 from zoe_lib.metrics.logging import LogMetricSender
 from zoe_lib.state import SQLManager
+
+import zoe_master.scheduler
+import zoe_master.backends.interface
 from zoe_master.preprocessing import restart_resubmit_scheduler
 from zoe_master.master_api import APIManager
 

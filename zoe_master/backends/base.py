@@ -35,9 +35,11 @@ class BaseBackend:
         raise NotImplementedError
 
     def spawn_service(self, execution: Execution, service: Service, env_subst_dict: Dict):
+        """Create a container for a service."""
         raise NotImplementedError
 
     def terminate_service(self, service: Service) -> None:
+        """Terminate the container corresponding to a service."""
         raise NotImplementedError
 
     def platform_state(self) -> ClusterStats:
