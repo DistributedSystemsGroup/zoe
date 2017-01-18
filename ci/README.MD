@@ -1,7 +1,7 @@
 # Zoe Continuous Integration
-----------------------------
+---------------------------
 # Overview
-- Integrated Zoe repository to Jenkins and SonarQube
+- Integrate Zoe repository to Jenkins and SonarQube
 - Each commit to Zoe repository trigger a build at Jenkins:
   - Run SonarQube Scanner to analyze the codebase
   - Create two containers for zoe-master, zoe-api
@@ -16,28 +16,29 @@
 # Configuration
 ### Jenkins
   - Required:
-    - Plugins: Github plugin, SonarQube Plugin, Email Plugin (optional)
+    - Plugins: Github plugin, SonarQube Plugin, Email Plugin (optional), Cobetura Coverage Report (optional)
     - Softwares: Java, Python, Docker
-      - Go to Manage Jenkins, then  Global Tool Configuration to setup Java SDK
+      - Go to **Manage Jenkins**, then  **Global Tool Configuration** to setup Java SDK
   - SonarQube server configuration:
-      - Go to Manage Jenkins then Configure System
+      - Go to **Manage Jenkins** then **Configure System**
       - SonarQube servers: input name, server URL, server version, **sever authentication token** (created on SonarQube Server)
 - Create credentials for Github account
   - Create SSH key pair on Jenkins Server
     - Add public key to Github
     - Add private key to Jenkins credentials
-- Create new item as a **freestyle project** to descibe Github repository
+- Create new item as a **freestyle project** to describe Github repository
   - General
     - Select Github project
     - Insert project URL
   - Source Code Management
     - Select **Git**
     - Repositories
-      - Repository URL: use **SSH URL** of github repository
+      - Repository URL: use **SSH URL** of Github repository
       - Credentials: select the one created above
   - Build Triggers
       - Select **Build when a change is pushed to Github**
   - Post-build Actions [Optional]
+     - Add **Publish Covetura Coverage Report** for getting report from coverage
      - Add **E-mail Notification** for notifying when jobs finish
 ### Github
 - Add new SSH key (the one created on Jenkins server)
@@ -54,12 +55,12 @@
 
 # Execute Shell Script
 Script to execute ci in zoe-kpmg branch i34-t7.4.1
-Push this script inside the **execute shell script** of Jenkins job
+Push this script inside the execute shell script of Jenkins job
 ```
 # Build new container images
-python3 ci/zoeci.py 1 tcp://192.168.12.2:2375 192.168.12.2:5000/zoe:$BUILD_ID
+python3 cicd/zoecicd.py 1 tcp://192.168.12.2:2375 192.168.12.2:5000/zoe:$BUILD_ID
 # Deploy new zoe with the above images for testing
-python3 ci/zoeci.py 0 tcp://192.168.12.2:2375 ci/docker-compose-test.yml 192.168.12.2:5000/zoe:$BUILD_ID
+python3 cicd/zoecicd.py 0 tcp://192.168.12.2:2375 cicd/docker-compose-test.yml 192.168.12.2:5000/zoe:$BUILD_ID
 
 # Run integration test
 cd tests
@@ -77,7 +78,7 @@ cp -r zoe_fe/build/prod .
 tar -cvf prod.tar prod
 
 # Push the built images above to local registry
-python3 ci/zoeci.py 2 tcp://192.168.12.2:2375 192.168.12.2:5000/zoe:$BUILD_ID
+python3 cicd/zoecicd.py 2 tcp://192.168.12.2:2375 192.168.12.2:5000/zoe:$BUILD_ID
 # Redeploy zoe with new images
-python3 ci/zoeci.py 0 tcp://192.168.12.2:2375 ci/docker-compose-prod.yml 192.168.12.2:5000/zoe:$BUILD_ID
+python3 cicd/zoecicd.py 0 tcp://192.168.12.2:2375 cicd/docker-compose-prod.yml 192.168.12.2:5000/zoe:$BUILD_ID
 ```
