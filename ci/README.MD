@@ -54,6 +54,7 @@
 
 # Execute Shell Script
 Script to execute ci in zoe-kpmg branch i34-t7.4.1
+Push this script inside the **execute shell script** of Jenkins job
 ```
 # Build new container images
 python3 ci/zoeci.py 1 tcp://192.168.12.2:2375 192.168.12.2:5000/zoe:$BUILD_ID
