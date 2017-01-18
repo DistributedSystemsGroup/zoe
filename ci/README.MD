@@ -51,3 +51,32 @@
 - On **Administration**, go to **My Account**, then **Security**
 - Generate Tokens, copy this and paste to **server authentication token** on Jenkins configuration
 - The project needs to provides **sonar-properties** file in the repo: http://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner
+
+# Execute Shell Script
+Script to execute ci in zoe-kpmg branch i34-t7.4.1
+```
+# Build new container images
+python3 ci/zoeci.py 1 tcp://192.168.12.2:2375 192.168.12.2:5000/zoe:$BUILD_ID
+# Deploy new zoe with the above images for testing
+python3 ci/zoeci.py 0 tcp://192.168.12.2:2375 ci/docker-compose-test.yml 192.168.12.2:5000/zoe:$BUILD_ID
+
+# Run integration test
+cd tests
+coverage run -p basic_auth_success_test.py
+coverage run -p cookie_auth_success_test.py
+coverage combine
+coverage xml
+cd ..
+
+# Rebuild new frontend
+cd zoe_fe
+ng build --env=prod --output-path=build/prod/
+cd ..
+cp -r zoe_fe/build/prod .
+tar -cvf prod.tar prod
+
+# Push the built images above to local registry
+python3 ci/zoeci.py 2 tcp://192.168.12.2:2375 192.168.12.2:5000/zoe:$BUILD_ID
+# Redeploy zoe with new images
+python3 ci/zoeci.py 0 tcp://192.168.12.2:2375 ci/docker-compose-prod.yml 192.168.12.2:5000/zoe:$BUILD_ID
+```
