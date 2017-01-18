@@ -42,7 +42,7 @@
                 <li><a href="{{ p['protocol'] }}://{{ s['proxy_address'] }}">{{ p['name'] }}</a></li>
             {% else %}
                 <li><a> {{ p['name'] }} IP: {{ s['ip_address'] }}</a></li>
-            {% endif %}    
+            {% endif %}
         {% endfor %}
     {% endif %}
     </ul>

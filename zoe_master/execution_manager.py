@@ -18,7 +18,9 @@
 import logging
 
 from zoe_lib.sql_manager import Execution, SQLManager
-from zoe_master.scheduler import ZoeScheduler
+from zoe_lib import exec_logs
+
+from zoe_master.scheduler import ZoeBaseScheduler
 
 log = logging.getLogger(__name__)
 
@@ -30,18 +32,18 @@ def _digest_application_description(state: SQLManager, execution: Execution):
             state.service_new(execution.id, name, service_descr['name'], service_descr)
 
 
-def execution_submit(state: SQLManager, scheduler: ZoeScheduler, execution: Execution):
+def execution_submit(state: SQLManager, scheduler: ZoeBaseScheduler, execution: Execution):
     """Submit a new execution to the scheduler."""
     _digest_application_description(state, execution)
     scheduler.incoming(execution)
 
 
-def execution_terminate(scheduler: ZoeScheduler, execution: Execution):
+def execution_terminate(scheduler: ZoeBaseScheduler, execution: Execution):
     """Remove an execution form the scheduler."""
     scheduler.terminate(execution)
 
 
-def restart_resubmit_scheduler(state: SQLManager, scheduler: ZoeScheduler):
+def restart_resubmit_scheduler(state: SQLManager, scheduler: ZoeBaseScheduler):
     """Restart work after a restart of the process."""
     sched_execs = state.execution_list(status=Execution.SCHEDULED_STATUS)
     for e in sched_execs:
@@ -57,6 +59,7 @@ def restart_resubmit_scheduler(state: SQLManager, scheduler: ZoeScheduler):
         scheduler.incoming(e)
 
 
-def execution_delete(scheduler: ZoeScheduler, execution: Execution):
-    """Remove an execution from the scheduler, must only be called if the execution is NOT running."""
-    scheduler.remove_execution(execution)
+def execution_delete(execution: Execution):
+    """Remove an execution, must only be called if the execution is NOT running."""
+    assert not execution.is_active()
+    exec_logs.delete(execution)

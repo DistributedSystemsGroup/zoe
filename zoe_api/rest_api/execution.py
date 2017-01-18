@@ -29,7 +29,7 @@ class ExecutionAPI(RequestHandler):
     def initialize(self, **kwargs):
         """Initializes the request handler."""
         self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-        
+
     def set_default_headers(self):
         """Set up the headers for enabling CORS."""
         if self.request.headers.get('Origin') is None:
@@ -40,7 +40,7 @@ class ExecutionAPI(RequestHandler):
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-Type, origin, authorization, accept, client-security-token")
         self.set_header("Access-Control-Allow-Methods", "OPTIONS, GET, DELETE")
         self.set_header("Access-Control-Max-Age", "1000")
-        
+
     def options(self, execution_id):
         """Needed for CORS."""
         self.set_status(204)
@@ -81,7 +81,7 @@ class ExecutionDeleteAPI(RequestHandler):
     def initialize(self, **kwargs):
         """Initializes the request handler."""
         self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-        
+
     def set_default_headers(self):
         """Set up the headers for enabling CORS."""
         if self.request.headers.get('Origin') is None:
@@ -92,7 +92,7 @@ class ExecutionDeleteAPI(RequestHandler):
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-Type, origin, authorization, accept, client-security-token")
         self.set_header("Access-Control-Allow-Methods", "OPTIONS, DELETE")
         self.set_header("Access-Control-Max-Age", "1000")
-        
+
     def options(self, execution_id):
         """Needed for CORS."""
         self.set_status(204)
@@ -124,7 +124,7 @@ class ExecutionCollectionAPI(RequestHandler):
     def initialize(self, **kwargs):
         """Initializes the request handler."""
         self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-        
+
     def set_default_headers(self):
         """Set up the headers for enabling CORS."""
         if self.request.headers.get('Origin') is None:
@@ -135,7 +135,7 @@ class ExecutionCollectionAPI(RequestHandler):
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-Type, origin, authorization, accept, client-security-token")
         self.set_header("Access-Control-Allow-Methods", "OPTIONS, GET, POST")
         self.set_header("Access-Control-Max-Age", "1000")
-        
+
     def options(self):
         """Needed for CORS."""
         self.set_status(204)

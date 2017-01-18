@@ -56,9 +56,7 @@ def catch_exceptions(func):
 def missing_auth(handler: ZoeRequestHandler):
     handler.redirect(handler.get_argument('next', u'login'))
     """Sends a 401 response that enables basic auth"""
-#    handler.set_status(401, 'Could not verify your access level for that URL. You have to login with proper credentials.')
-#    handler.set_header('WWW-Authenticate', 'Basic realm="Login Required"')
-#    handler.finish()
+
 
 def get_auth_login(username, password):
     if get_conf().auth_type == 'text':
@@ -72,6 +70,7 @@ def get_auth_login(username, password):
     uid, role = authenticator.auth(username, password)
     if uid is None:
         raise zoe_api.exceptions.ZoeAuthException
+
     return uid, role
 
 def get_auth(handler: ZoeRequestHandler):

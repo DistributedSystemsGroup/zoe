@@ -36,6 +36,7 @@ import time
 
 log = logging.getLogger(__name__)
 
+
 def catch_exceptions(func):
     """
     Decorator function used to work around the static exception system available in Flask-RESTful
@@ -116,6 +117,6 @@ def get_auth(handler: tornado.web.RequestHandler):
     uid, role = authenticator.auth(username, password)
     if uid is None:
         raise ZoeRestAPIException('missing or wrong authentication information', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
-    log.info('Authentication done using auth-mechanism')
+    log.debug('Authentication done using auth-mechanism')
 
     return uid, role

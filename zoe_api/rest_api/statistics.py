@@ -27,7 +27,7 @@ class SchedulerStatsAPI(RequestHandler):
     def initialize(self, **kwargs):
         """Initializes the request handler."""
         self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-        
+
     def set_default_headers(self):
         """Set up the headers for enabling CORS."""
         if self.request.headers.get('Origin') is None:
@@ -38,8 +38,8 @@ class SchedulerStatsAPI(RequestHandler):
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-Type, origin, authorization, accept, client-security-token")
         self.set_header("Access-Control-Allow-Methods", "OPTIONS, GET")
         self.set_header("Access-Control-Max-Age", "1000")
-    
-    @catch_exceptions    
+
+    @catch_exceptions
     def options(self):
         """Needed for CORS."""
         self.set_status(204)

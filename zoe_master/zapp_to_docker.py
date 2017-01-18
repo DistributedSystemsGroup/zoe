@@ -25,6 +25,7 @@ from zoe_lib.config import get_conf
 from zoe_lib.exceptions import ZoeLibException, ZoeNotEnoughResourcesException
 from zoe_lib.sql_manager import Execution, Service
 from zoe_lib.swarm_client import DockerContainerOptions, SwarmClient
+from zoe_lib import exec_logs
 
 log = logging.getLogger(__name__)
 
@@ -53,25 +54,19 @@ def execution_to_containers(execution: Execution) -> None:
         _spawn_service(execution, service, env_subst_dict)
 
 
-def _gen_environment(execution, service, env_subst_dict, copts):
+def _gen_environment(service, env_subst_dict, copts):
     """ Generate a dictionary containing the current cluster status (before the new container is spawned)
 
     This information is used to substitute template strings in the environment variables."""
-    for env_name, env_value in service.description['environment']:
-        try:
-            env_value = env_value.format(**env_subst_dict)
-        except KeyError:
-            error_msg = "Unknown variable in environment expression '{}', known variables are: {}".format(env_value, list(env_subst_dict.keys()))
-            service.set_error(error_msg)
-            raise ZoeStartExecutionFatalException("Service {} has wrong environment expression")
-        copts.add_env_variable(env_name, env_value)
-
-    #TEST: adding base_url for jupyter_notebook/mongo-express
-    env_names = ['BASE_URL', 'ME_CONFIG_SITE_BASEURL']
-    env_value = '/zoe/' + execution.user_id + '/' + str(execution.id) + '/' + service.name
-    for name in env_names:
-        copts.add_env_variable(name, env_value)
-    log.info('adding base_url environment variable')
+    if 'environment' in service.description:
+        for env_name, env_value in service.description['environment']:
+            try:
+                env_value = env_value.format(**env_subst_dict)
+            except KeyError:
+                error_msg = "Unknown variable in environment expression '{}', known variables are: {}".format(env_value, list(env_subst_dict.keys()))
+                service.set_error(error_msg)
+                raise ZoeStartExecutionFatalException("Service {} has wrong environment expression")
+            copts.add_env_variable(env_name, env_value)
 
 
 def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict):
@@ -93,9 +88,14 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
         copts.labels['zoe.monitor'] = 'true'
     else:
         copts.labels['zoe.monitor'] = 'false'
-    copts.restart = not service.description['monitor']  # Monitor containers should not restart
 
-    _gen_environment(execution, service, env_subst_dict, copts)
+    if 'disable_autorestart' in execution.description and execution.description['disable_autorestart']:
+        log.debug("Autorestart disabled for service {}".format(service.id))
+        copts.restart = False
+    else:
+        copts.restart = not service.description['monitor']  # Monitor containers should not restart
+
+    _gen_environment(service, env_subst_dict, copts)
 
     for port in service.description['ports']:
         if 'expose' in port and port['expose']:
@@ -147,6 +147,7 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
 def terminate_execution(execution: Execution) -> None:
     """Terminate an execution, making sure no containers are left in Swarm."""
     execution.set_cleaning_up()
+    exec_logs.save(execution)
     swarm = SwarmClient(get_conf())
     for service in execution.services:
         assert isinstance(service, Service)

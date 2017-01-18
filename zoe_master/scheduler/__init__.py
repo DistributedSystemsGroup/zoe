@@ -1,4 +1,4 @@
-# Copyright (c) 2016, Daniele Venzano
+# Copyright (c) 2017, Daniele Venzano
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,8 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Versions."""
+"""The Zoe schedulers"""
 
-ZOE_VERSION = '0.12-kpmg'
-ZOE_API_VERSION = '0.6'
-ZOE_APPLICATION_FORMAT_VERSION = 2
+from .base_scheduler import ZoeBaseScheduler
+from .scheduler import ZoeSimpleScheduler

@@ -51,7 +51,7 @@ class DockerContainerOptions:
         self.volume_binds = []
         self.volumes = []
         self.command = ""
-        self.memory_limit = '2g'
+        self.memory_limit = 2 * (1024**3)
         self.name = ''
         self.ports = []
         self.network_name = 'bridge'
@@ -86,7 +86,7 @@ class DockerContainerOptions:
         """Get the volumes in another Docker format."""
         return self.volume_binds
 
-    def set_command(self, cmd) -> str:
+    def set_command(self, cmd):
         """Setter for the command to run in the container."""
         self.command = cmd
 
@@ -154,7 +154,7 @@ class SwarmClient:
         else:
             raise ZoeLibException('Unsupported URL scheme for Swarm')
         log.debug('Connecting to Swarm at {}'.format(manager))
-        self.cli = docker.Client(base_url=manager)
+        self.cli = docker.Client(base_url=manager, version="auto")
 
     def info(self) -> SwarmStats:
         """Retrieve Swarm statistics. The Docker API returns a mess difficult to parse."""
@@ -241,8 +241,7 @@ class SwarmClient:
                                              volumes=options.get_volumes(),
                                              command=options.get_command(),
                                              ports=options.ports,
-                                             labels=options.labels,
-                                             user='root')
+                                             labels=options.labels)
             self.cli.start(container=cont.get('Id'))
         except docker.errors.APIError as e:
             if cont is not None:
@@ -318,16 +317,32 @@ class SwarmClient:
         :type delete: bool
         :return: None
         """
-        if delete:
-            try:
-                self.cli.remove_container(docker_id, force=True)
-            except docker.errors.NotFound:
-                log.warning("cannot remove a non-existent service")
-        else:
-            try:
-                self.cli.kill(docker_id)
-            except docker.errors.NotFound:
-                log.warning("cannot remove a non-existent service")
+        retries = 5
+        while retries > 0:
+            if delete:
+                try:
+                    self.cli.remove_container(docker_id, force=True)
+                    break
+                except docker.errors.NotFound:
+                    log.warning("cannot remove a non-existent service")
+                    break
+                except requests.exceptions.ReadTimeout:
+                    log.error("Read timeout trying to delete a container")
+                    retries -= 1
+                    continue
+            else:
+                try:
+                    self.cli.kill(docker_id)
+                    break
+                except docker.errors.NotFound:
+                    log.warning("cannot remove a non-existent service")
+                    break
+                except requests.exceptions.ReadTimeout:
+                    log.error("Read timeout trying to delete a container")
+                    retries -= 1
+                    continue
+        if retries == 0:
+            log.error("Giving up trying to terminate container {}".format(docker_id))
 
     def event_listener(self, callback: Callable[[str], bool]) -> None:
         """An infinite loop that listens for events from Swarm."""
@@ -392,12 +407,16 @@ class SwarmClient:
                 })
         return conts
 
-    def logs(self, docker_id: str, stream: bool):
+    def logs(self, docker_id: str, stream: bool, follow=None):
         """
         Retrieves the logs of the selected container.
 
         :param docker_id:
         :param stream:
+        :param follow:
         :return:
         """
-        return self.cli.logs(docker_id, stdout=True, stderr=True, stream=stream, timestamps=True)
+        try:
+            return self.cli.logs(docker_id, stdout=True, stderr=True, follow=follow, stream=stream, timestamps=True)
+        except docker.errors.NullResource:
+            return None

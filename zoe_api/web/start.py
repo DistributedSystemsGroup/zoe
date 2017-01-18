@@ -19,7 +19,8 @@ from random import randint
 import json
 
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
-from zoe_api.web.utils import get_auth, get_auth_login, catch_exceptions
+
+from zoe_api.web.utils import get_auth,  catch_exceptions
 from zoe_api.web.custom_request_handler import ZoeRequestHandler
 
 class RootWeb(ZoeRequestHandler):
