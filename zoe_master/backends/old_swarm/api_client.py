@@ -27,9 +27,12 @@ try:
 except ImportError:
     KazooClient = None
 
-import docker
-import docker.errors
-import docker.utils
+try:
+    import docker
+    import docker.errors
+    import docker.utils
+except ImportError:
+    pass
 
 import requests.packages
 
