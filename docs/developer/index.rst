@@ -15,3 +15,4 @@ Developer documentation
   master-api
   scheduler
   backend
+  stats

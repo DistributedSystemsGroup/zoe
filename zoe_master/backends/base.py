@@ -27,11 +27,11 @@ class BaseBackend:
         pass
 
     def init(self, state):
-        """Initializes Swarm backend starting the event monitoring thread."""
+        """Initializes the backend. In general this includes finding the current API endpoint and opening a connection to it, negotiate the API version, etc. Here backend-related threads can be started, too. This method will be called only once at Zoe startup."""
         raise NotImplementedError
 
     def shutdown(self):
-        """Performs a clean shutdown of the resources used by Swarm backend."""
+        """Performs a clean shutdown of the resources used by Swarm backend. Any threads that where started in the init() method should be terminated here. This method will be called when Zoe shuts down."""
         raise NotImplementedError
 
     def spawn_service(self, execution: Execution, service: Service, env_subst_dict: Dict):
@@ -43,5 +43,5 @@ class BaseBackend:
         raise NotImplementedError
 
     def platform_state(self) -> ClusterStats:
-        """Get the platform state."""
+        """Get the platform state. This method should fill-in a new ClusterStats object at each call, with fresh statistics on the available nodes and resource availability. This information will be used for taking scheduling decisions."""
         raise NotImplementedError
