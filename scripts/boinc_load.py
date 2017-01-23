@@ -20,7 +20,6 @@ TARGET_QUEUE_LENGTH = 10
 NUMBER_OF_HOSTS = 10
 ZAPP_PER_HOST = 8
 TOTAL_JOBS = NUMBER_OF_HOSTS * ZAPP_PER_HOST
-# TOTAL_JOBS = 1000
 MAX_TO_START_PER_LOOP = 10
 
 
@@ -66,9 +65,7 @@ def count_jobs(all=False):
     count = 0
     for e_id in execs:
         e = exec_api.get(e_id)
-        if e is None:
-            continue
-        elif not all and e['name'] != 'boinc-loader':
+        if e is None or (not all and e['name'] != 'boinc-loader'):
             continue
         if e['status'] != 'terminated':
             count += 1
@@ -145,8 +142,6 @@ def main():
     log = csv.DictWriter(open('run.csv', 'w'), fieldnames=log_fieldnames)
     log.writeheader()
     zapp = load_zapp(sys.argv[1])
-    # start_batches(zapp, log)
-    # start_continuous(zapp, log)
     keep_some_running(zapp)
 
     print('All Zapps submitted, my work is done.')
