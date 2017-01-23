@@ -48,7 +48,7 @@ def delete_tag_cmd(args):
 def main():
     """Main entrypoint."""
     parser = argparse.ArgumentParser(description="Docker Registry client")
-    parser.add_argument("-r", "--registry", help="Registry URL", default="http:127.0.0.1:5000")
+    parser.add_argument("-r", "--registry", help="Registry URL", default="http://127.0.0.1:5000")
 
     subparser = parser.add_subparsers()
 

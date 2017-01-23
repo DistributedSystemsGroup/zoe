@@ -26,12 +26,7 @@ from zoe_lib.version import ZOE_API_VERSION, ZOE_VERSION
 
 
 def web_init(api_endpoint) -> List[tornado.web.URLSpec]:
-    """Flask init for the web interface."""
-#    def before_request():
-#        """Use the Flask global to hold the api endpoint reference."""
-#        g.api_endpoint = api_endpoint
-
-#    web_bp = Blueprint('web', __name__, template_folder='templates', static_folder='static')
+    """Tornado init for the web interface."""
     route_args = {
         'api_endpoint': api_endpoint
     }
