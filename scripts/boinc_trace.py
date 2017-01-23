@@ -14,6 +14,7 @@ from zoe_lib.statistics import ZoeStatisticsAPI
 from zoe_lib.executions import ZoeExecutionsAPI
 
 TARGET_QUEUE_LENGTH = 5
+INFLUXDB_ADDRESS = '192.168.45.2:8086'
 
 
 def zoe_url():
@@ -51,7 +52,7 @@ def get_influx_cpu_data(exec_id):
         'db': 'telegraf',
         'q': 'SELECT LAST(usage_total) FROM docker_container_cpu WHERE "zoe.execution.id" = \'{}\' AND cpu = \'cpu-total\''.format(exec_id)
     }
-    resp = requests.get("http://192.168.45.2:8086/query", params=query_params)
+    resp = requests.get("http://" + INFLUXDB_ADDRESS + "/query", params=query_params)
     resp = resp.json()
     try:
         cpu_usage = resp['results'][0]['series'][0]['values'][0][1]
@@ -65,7 +66,7 @@ def get_influx_mem_data(exec_id):
         'db': 'telegraf',
         'q': 'SELECT MAX(max_usage) FROM docker_container_mem WHERE "zoe.execution.id" = \'{}\''.format(exec_id)
     }
-    resp = requests.get("http://192.168.45.2:8086/query", params=query_params)
+    resp = requests.get("http://" + INFLUXDB_ADDRESS + "/query", params=query_params)
     resp = resp.json()
     try:
         mem_usage = resp['results'][0]['series'][0]['values'][0][1]
@@ -79,7 +80,7 @@ def get_influx_net_rx_data(exec_id):
         'db': 'telegraf',
         'q': 'SELECT LAST(rx_bytes) FROM docker_container_net WHERE "zoe.execution.id" = \'{}\' AND network = \'eth1\''.format(exec_id)
     }
-    resp = requests.get("http://192.168.45.2:8086/query", params=query_params)
+    resp = requests.get("http://" + INFLUXDB_ADDRESS + "/query", params=query_params)
     resp = resp.json()
     try:
         net_rx_usage = resp['results'][0]['series'][0]['values'][0][1]
@@ -93,7 +94,7 @@ def get_influx_net_tx_data(exec_id):
         'db': 'telegraf',
         'q': 'SELECT LAST(tx_bytes) FROM docker_container_net WHERE "zoe.execution.id" = \'{}\' AND network = \'eth1\''.format(exec_id)
     }
-    resp = requests.get("http://192.168.45.2:8086/query", params=query_params)
+    resp = requests.get("http://" + INFLUXDB_ADDRESS + "/query", params=query_params)
     resp = resp.json()
     try:
         net_tx_usage = resp['results'][0]['series'][0]['values'][0][1]
@@ -107,7 +108,7 @@ def get_influx_blkio_data(exec_id):
         'db': 'telegraf',
         'q': 'SELECT LAST(io_serviced_recursive_total) FROM docker_container_blkio WHERE "zoe.execution.id" = \'{}\''.format(exec_id)
     }
-    resp = requests.get("http://192.168.45.2:8086/query", params=query_params)
+    resp = requests.get("http://" + INFLUXDB_ADDRESS + "/query", params=query_params)
     resp = resp.json()
     try:
         blkio_usage = resp['results'][0]['series'][0]['values'][0][1]
