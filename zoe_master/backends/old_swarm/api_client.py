@@ -265,10 +265,7 @@ class SwarmClient:
         elif docker_info["State"]["Restarting"]:
             info["state"] = "restarting"
             info["running"] = True
-        elif docker_info["State"]["OOMKilled"]:
-            info["state"] = "killed"
-            info["running"] = False
-        elif docker_info["State"]["Dead"]:
+        elif docker_info["State"]["OOMKilled"] or docker_info["State"]["Dead"]:
             info["state"] = "killed"
             info["running"] = False
         else:

@@ -52,10 +52,6 @@ class SwarmMonitor(threading.Thread):
     def _event_cb(self, event: dict) -> bool:
         if event['Type'] == 'container':
             self._container_event(event)
-        elif event['Type'] == 'network':
-            pass
-        elif event['Type'] == 'image':
-            pass
         else:
             log.debug('Unmanaged event type: {}'.format(event['Type']))
             log.debug(str(event))
@@ -75,9 +71,7 @@ class SwarmMonitor(threading.Thread):
         service = self.state.service_list(only_one=True, id=service_id)
         if service is None:
             return
-        if 'exec' in event['Action']:
-            pass
-        elif 'create' in event['Action']:
+        if 'create' in event['Action']:
             service.set_backend_status(service.BACKEND_CREATE_STATUS)
         elif 'start' in event['Action']:
             service.set_backend_status(service.BACKEND_START_STATUS)

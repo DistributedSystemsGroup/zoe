@@ -612,7 +612,7 @@ class ArgumentParser(argparse.ArgumentParser):
                                 value = str(value).lower()
                             config_file_items[config_file_keys[0]] = value
 
-            elif source == _ENV_VAR_SOURCE_KEY:
+            elif source == _ENV_VAR_SOURCE_KEY or source == _DEFAULTS_SOURCE_KEY:
                 for key, (action, value) in settings.items():
                     config_file_keys = self.get_possible_config_keys(action)
                     if config_file_keys:
@@ -622,13 +622,6 @@ class ArgumentParser(argparse.ArgumentParser):
             elif source.startswith(_CONFIG_FILE_SOURCE_KEY):
                 for key, (action, value) in settings.items():
                     config_file_items[key] = value
-            elif source == _DEFAULTS_SOURCE_KEY:
-                for key, (action, value) in settings.items():
-                    config_file_keys = self.get_possible_config_keys(action)
-                    if config_file_keys:
-                        value = getattr(parsed_namespace, action.dest, None)
-                        if value is not None:
-                            config_file_items[config_file_keys[0]] = value
         return config_file_items
 
     def convert_item_to_command_line_arg(self, action, key, value):
