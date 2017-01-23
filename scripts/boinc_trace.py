@@ -7,6 +7,7 @@ Usage: boinc_trace.py <out_file>
 """
 
 import os
+import sys
 
 import requests
 
@@ -14,7 +15,8 @@ from zoe_lib.statistics import ZoeStatisticsAPI
 from zoe_lib.executions import ZoeExecutionsAPI
 
 TARGET_QUEUE_LENGTH = 5
-INFLUXDB_ADDRESS = '192.168.45.2:8086'
+INFLUXDB_PORT = '8086'
+INFLUXDB_ADDRESS = ''
 
 
 def zoe_url():
@@ -119,7 +121,9 @@ def get_influx_blkio_data(exec_id):
 
 def main():
     """Main."""
+    global INFLUXDB_ADDRESS
     exec_api = ZoeExecutionsAPI(zoe_url(), zoe_user(), zoe_pass())
+    INFLUXDB_ADDRESS = sys.argv[1] + ':' + INFLUXDB_PORT
     execs = exec_api.list()
     print('id,time_submit,time_start,time_end,cpu_usage,mem_usage,net_rx_usage,net_tx_usage,blkio_usage')
     for e_id in execs:
