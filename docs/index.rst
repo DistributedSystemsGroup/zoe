@@ -43,7 +43,7 @@ Contents
   logging
   monitoring
   architecture
-  rest-api
+  quality
   vision
   motivations
   roadmap
