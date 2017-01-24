@@ -15,7 +15,6 @@
 
 """Functions needed by the Zoe web interface."""
 
-import base64
 import logging
 
 from zoe_lib.config import get_conf
@@ -53,18 +52,20 @@ def catch_exceptions(func):
 
     return func_wrapper
 
+
 def missing_auth(handler: ZoeRequestHandler):
-    handler.redirect(handler.get_argument('next', u'login'))
-    """Sends a 401 response that enables basic auth"""
+    """Redirect to login page."""
+    handler.redirect(handler.get_argument('next', u'/login'))
 
 
 def get_auth_login(username, password):
+    """Authenticate username and password against the configured user store."""
     if get_conf().auth_type == 'text':
         authenticator = PlainTextAuthenticator()  # type: BaseAuthenticator
     elif get_conf().auth_type == 'ldap':
-        authenticator = LDAPAuthenticator()
+        authenticator = LDAPAuthenticator()  # type: BaseAuthenticator
     elif get_conf().auth_type == 'ldapsasl':
-        authenticator = LDAPSASLAuthenticator()
+        authenticator = LDAPSASLAuthenticator()  # type: BaseAuthenticator
     else:
         raise zoe_api.exceptions.ZoeException('Configuration error, unknown authentication method: {}'.format(get_conf().auth_type))
     uid, role = authenticator.auth(username, password)
@@ -72,6 +73,7 @@ def get_auth_login(username, password):
         raise zoe_api.exceptions.ZoeAuthException
 
     return uid, role
+
 
 def get_auth(handler: ZoeRequestHandler):
     """Try to authenticate a request."""
@@ -83,25 +85,6 @@ def get_auth(handler: ZoeRequestHandler):
         return uid, role
     else:
         handler.redirect(handler.get_argument('next', u'/login'))
-
-#    auth_header = handler.request.headers.get('Authorization')
-#    if auth_header is None or not auth_header.startswith('Basic '):
-#        raise zoe_api.exceptions.ZoeAuthException
-
-#    auth_decoded = base64.decodebytes(bytes(auth_header[6:], 'ascii')).decode('utf-8')
-#    username, password = auth_decoded.split(':', 2)
-
-#    if get_conf().auth_type == 'text':
-#        authenticator = PlainTextAuthenticator()  # type: BaseAuthenticator
-#    elif get_conf().auth_type == 'ldap':
-#        authenticator = LDAPAuthenticator()
-#    else:
-#        raise zoe_api.exceptions.ZoeException('Configuration error, unknown authentication method: {}'.format(get_conf().auth_type))
-#    uid, role = authenticator.auth(username, password)
-#    if uid is None:
-#        raise zoe_api.exceptions.ZoeAuthException
-#    log.info('Authentication done using auth-mechanism')
-#    return uid, role
 
 
 def error_page(handler: ZoeRequestHandler, error_message: str, status: int):

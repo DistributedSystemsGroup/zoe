@@ -1,4 +1,4 @@
-# Copyright (c) 2016, Daniele Venzano
+# Copyright (c) 2016, Quang-Nhat Hoang-Xuan
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,11 +36,12 @@ log = logging.getLogger(__name__)
 
 class LDAPSASLAuthenticator(zoe_api.auth.base.BaseAuthenticator):
     """A simple LDAP authenticator."""
+
     def __init__(self):
         self.connection = ldap.initialize(get_conf().ldap_server_uri)
         self.base_dn = get_conf().ldap_base_dn
         self.connection.protocol_version = ldap.VERSION3
-        self.sasl_auth = ldap.sasl.sasl({},'GSSAPI')
+        self.sasl_auth = ldap.sasl.sasl({}, 'GSSAPI')
 
     def auth(self, username, password):
         """Authenticate the user or raise an exception."""
@@ -48,9 +49,9 @@ class LDAPSASLAuthenticator(zoe_api.auth.base.BaseAuthenticator):
         uid = None
         role = 'guest'
         try:
-            self.connection.sasl_interactive_bind_s('',self.sasl_auth)
+            self.connection.sasl_interactive_bind_s('', self.sasl_auth)
             result = self.connection.search_s(self.base_dn, ldap.SCOPE_SUBTREE, search_filter)
-            
+
             if len(result) == 0:
                 raise zoe_api.exceptions.ZoeAuthException('Unknown user or wrong password.')
             user_dict = result[0][1]
