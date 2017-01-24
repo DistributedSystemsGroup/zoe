@@ -80,6 +80,7 @@ def app_validate(data):
 
 
 def _service_check(data):
+    """Check the service description schema."""
     required_keys = ['name', 'docker_image', 'monitor', 'ports', 'required_resources', 'total_count', 'essential_count', 'startup_order']
     for k in required_keys:
         if k not in data:
@@ -148,12 +149,12 @@ def _service_check(data):
             if not isinstance(volume[2], bool):
                 raise InvalidApplicationDescription(msg='readonly volume item (third) must be a boolean: {}'.format(volume[2]))
 
-    if 'constraints' in data:
-        if not hasattr(data['constraints'], '__iter__'):
-            raise InvalidApplicationDescription(msg='networks should be an iterable')
+    if 'constraints' in data and not hasattr(data['constraints'], '__iter__'):
+        raise InvalidApplicationDescription(msg='networks should be an iterable')
 
 
 def _port_check(data):
+    """Check the port description schema."""
     required_keys = ['name', 'protocol', 'port_number', 'is_main_endpoint']
     for k in required_keys:
         if k not in data:

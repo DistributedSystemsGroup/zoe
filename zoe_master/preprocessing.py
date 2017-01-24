@@ -24,6 +24,7 @@ log = logging.getLogger(__name__)
 
 
 def _digest_application_description(state: SQLManager, execution: Execution):
+    """Read an application description and expand it into services that can be deployed."""
     for service_descr in execution.description['services']:
         essential_count = service_descr['essential_count']
         total_count = service_descr['total_count']

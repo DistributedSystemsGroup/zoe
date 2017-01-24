@@ -29,6 +29,7 @@ log = logging.getLogger(__name__)
 
 
 def _get_backend() -> BaseBackend:
+    """Return the right backend instance by reading the global configuration."""
     backend_name = get_conf().backend
     if backend_name == 'OldSwarm':
         return OldSwarmBackend(get_conf())
