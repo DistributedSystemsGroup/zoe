@@ -90,8 +90,6 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--proxy-config-file', help='Config file path of apache/nginx proxy container', default='/etc/apache2/sites-available/config.conf')
         argparser.add_argument('--proxy-path', help='Proxy base path', default='127.0.0.1')
 
-        argparser.add_argument('--service-log-path', help='Save service logs in this directory, EXPERIMENTAL', default='')
-
         argparser.add_argument('--scheduler-class', help='Scheduler class to use for scheduling ZApps', choices=['ZoeSimpleScheduler', 'ZoeElasticScheduler'], default='ZoeSimpleScheduler')
         argparser.add_argument('--scheduler-policy', help='Scheduler policy to use for scheduling ZApps', choices=['FIFO', 'SIZE'], default='FIFO')
 
