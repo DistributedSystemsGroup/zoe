@@ -105,6 +105,18 @@ class SwarmStateSynchronizer(threading.Thread):
 
         self.start()
 
+    def _find_dead_service(self, container_list, service: Service):
+        """Loop through the containers and try to update the service status."""
+        found = False
+        for container in container_list:
+            if container['id'] == service.backend_id:
+                found = True
+                if container['status'] == 'exited':
+                    log.info('resetting status of service {}, died with no event'.format(service.name))
+                    service.set_backend_status(service.BACKEND_DIE_STATUS)
+        if not found:
+            service.set_backend_status(service.BACKEND_DESTROY_STATUS)
+
     def run(self):
         """The thread loop."""
         log.info("Checker thread started")
@@ -117,15 +129,7 @@ class SwarmStateSynchronizer(threading.Thread):
                 assert isinstance(service, Service)
                 if service.backend_status == service.BACKEND_DESTROY_STATUS or service.backend_status == service.BACKEND_DIE_STATUS:
                     continue
-                found = False
-                for container in container_list:
-                    if container['id'] == service.backend_id:
-                        found = True
-                        if container['status'] == 'exited':
-                            log.info('resetting status of service {}, died with no event'.format(service.name))
-                            service.set_backend_status(service.BACKEND_DIE_STATUS)
-                if not found:
-                    service.set_backend_status(service.BACKEND_DESTROY_STATUS)
+                self._find_dead_service(container_list, service)
 
             time.sleep(CHECK_INTERVAL)
 

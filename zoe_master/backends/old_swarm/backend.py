@@ -42,13 +42,15 @@ class OldSwarmBackend(zoe_master.backends.base.BaseBackend):
         super().__init__(opts)
         self.swarm = SwarmClient(opts)
 
-    def init(self, state):
+    @classmethod
+    def init(cls, state):
         """Initializes Swarm backend starting the event monitoring thread."""
         global _monitor, _checker
         _monitor = SwarmMonitor(state)
         _checker = SwarmStateSynchronizer(state)
 
-    def shutdown(self):
+    @classmethod
+    def shutdown(cls):
         """Performs a clean shutdown of the resources used by Swarm backend."""
         _monitor.quit()
         _checker.quit()
@@ -88,7 +90,7 @@ class OldSwarmBackend(zoe_master.backends.base.BaseBackend):
 
         for port in service.ports:
             if port.expose:
-                copts.ports.append(port.port_number)  # FIXME UDP ports?
+                copts.ports.append(port.port_number)
 
         for volume in service.volumes:
             if volume.type == "host_directory":
@@ -109,12 +111,7 @@ class OldSwarmBackend(zoe_master.backends.base.BaseBackend):
         copts.set_command(service.command.format(**env_subst_dict))
 
         try:
-            swarm = SwarmClient(get_conf())
-        except Exception as e:
-            raise ZoeStartExecutionFatalException(str(e))
-
-        try:
-            cont_info = swarm.spawn_container(service.image_name, copts)
+            cont_info = self.swarm.spawn_container(service.image_name, copts)
         except ZoeNotEnoughResourcesException:
             service.set_error('Not enough free resources to satisfy reservation request')
             raise ZoeStartExecutionRetryException('Not enough free resources to satisfy reservation request for service {}'.format(service.name))

@@ -192,11 +192,6 @@ class ZoeElasticScheduler:
 
                     current_free_resources = cluster_status_snapshot.aggregated_free_memory()
                     if current_free_resources >= free_resources:
-                        # job_aux = jobs_to_launch.pop()
-                        # cluster_status_snapshot.deallocate_essential(job_aux)
-                        # cluster_status_snapshot.deallocate_elastic(job_aux)
-                        # for job_aux in jobs_to_launch:
-                        #    cluster_status_snapshot.allocate_elastic(job_aux)
                         jobs_to_launch = jobs_to_launch_copy
                         break
                     free_resources = current_free_resources
