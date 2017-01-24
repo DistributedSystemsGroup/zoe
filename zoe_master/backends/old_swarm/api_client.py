@@ -23,6 +23,11 @@ from typing import Iterable, Callable, Dict, Any, Union
 import humanfriendly
 
 try:
+    from consul import Consul
+except ImportError:
+    Consul = None
+
+try:
     from kazoo.client import KazooClient
 except ImportError:
     KazooClient = None
@@ -123,6 +128,18 @@ def zookeeper_swarm(zk_server_list: str, path='/docker') -> str:
     zk_client.stop()
     return master.decode('utf-8')
 
+def consul_swarm(consul_ip: str, path='/docker') -> str:
+    """
+    Using consul as discovery service, find the currently active Swarm master.
+    :param consul_ip: consul ip address
+    :param path: Swarm path in Consul
+    :return: Swarm master connection string
+    """
+    leader_key = 'docker/swarm/leader'
+    consul_client = Consul(consul_ip)
+    key_val = consul_client.kv.get(leader_key)
+    master = key_val[1]['Value']
+    return master.decode('utf-8')
 
 class SwarmClient:
     """The Swarm client class that wraps the Docker API."""
@@ -132,6 +149,9 @@ class SwarmClient:
         if 'zk://' in url:
             url = url[len('zk://'):]
             manager = zookeeper_swarm(url)
+        elif 'consul://' in url:
+            url = url[len('consul://'):]
+            manager = consul_swarm(url)
         elif 'http://' or 'https://' in url:
             manager = url
         else:
