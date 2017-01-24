@@ -98,7 +98,7 @@ def start_batches(zapp, log):
             continue
         to_start_now = random.randint(1, MAX_TO_START_PER_LOOP)
         print('Will submit {} new zapps'.format(to_start_now))
-        for i in range(to_start_now):
+        for i_ in range(to_start_now):
             zapp_id = submit_zapp(zapp)
             zapps_to_start -= 1
             print("ZApp submitted with ID {}, queue length {}, {} zapps to go".format(zapp_id, queue_length, zapps_to_start))
@@ -126,7 +126,7 @@ def keep_some_running(zapp):
         zapps_to_start = TOTAL_JOBS - running_zapps
         print('I need to start {} zapps ({} running)'.format(zapps_to_start, running_zapps))
         if zapps_to_start > 0:
-            for i in range(zapps_to_start):
+            for i_ in range(zapps_to_start):
                 queue_length = check_queue_length()
                 zapp_id = submit_zapp(zapp)
                 print("ZApp submitted with ID {}, queue length {}, {} zapps to go".format(zapp_id, queue_length, zapps_to_start))

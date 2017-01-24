@@ -36,6 +36,7 @@ from zoe_lib.applications import app_validate
 
 
 def _log_stream_stdout(service_id, timestamps):
+    """Stream the log on the standard output."""
     service_api = ZoeServiceAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     try:
         for line in service_api.get_logs(service_id):
