@@ -384,17 +384,3 @@ class SwarmClient:
                     'status': cont_info['State']
                 })
         return conts
-
-    def logs(self, docker_id: str, stream: bool, follow=None):
-        """
-        Retrieves the logs of the selected container.
-
-        :param docker_id:
-        :param stream:
-        :param follow:
-        :return:
-        """
-        try:
-            return self.cli.logs(docker_id, stdout=True, stderr=True, follow=follow, stream=stream, timestamps=True)
-        except docker.errors.NullResource:
-            return None
