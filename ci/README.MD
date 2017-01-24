@@ -57,10 +57,13 @@
 Script to execute ci in zoe-kpmg branch i34-t7.4.1
 Push this script inside the execute shell script of Jenkins job
 ```
+# Run Style checker for Sphinx RST documentation
+doc8 docs/
+
 # Build new container images
-python3 cicd/zoecicd.py 1 tcp://192.168.12.2:2375 192.168.12.2:5000/zoe:$BUILD_ID
+python3 ci/zoeci.py 1 tcp://192.168.12.2:2375 192.168.12.2:5000/zoe:$BUILD_ID
 # Deploy new zoe with the above images for testing
-python3 cicd/zoecicd.py 0 tcp://192.168.12.2:2375 cicd/docker-compose-test.yml 192.168.12.2:5000/zoe:$BUILD_ID
+python3 ci/zoeci.py 0 tcp://192.168.12.2:2375 ci/docker-compose-test.yml 192.168.12.2:5000/zoe:$BUILD_ID
 
 # Run integration test
 cd tests
@@ -78,7 +81,7 @@ cp -r zoe_fe/build/prod .
 tar -cvf prod.tar prod
 
 # Push the built images above to local registry
-python3 cicd/zoecicd.py 2 tcp://192.168.12.2:2375 192.168.12.2:5000/zoe:$BUILD_ID
+python3 ci/zoeci.py 2 tcp://192.168.12.2:2375 192.168.12.2:5000/zoe:$BUILD_ID
 # Redeploy zoe with new images
-python3 cicd/zoecicd.py 0 tcp://192.168.12.2:2375 cicd/docker-compose-prod.yml 192.168.12.2:5000/zoe:$BUILD_ID
+python3 ci/zoeci.py 0 tcp://192.168.12.2:2375 ci/docker-compose-prod.yml 192.168.12.2:5000/zoe:$BUILD_ID
 ```
