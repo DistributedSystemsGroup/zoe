@@ -50,6 +50,7 @@ def submit_zapp(zapp):
 
 
 def get_influx_cpu_data(exec_id):
+    """Get CPU data."""
     query_params = {
         'db': 'telegraf',
         'q': 'SELECT LAST(usage_total) FROM docker_container_cpu WHERE "zoe.execution.id" = \'{}\' AND cpu = \'cpu-total\''.format(exec_id)
@@ -64,6 +65,7 @@ def get_influx_cpu_data(exec_id):
 
 
 def get_influx_mem_data(exec_id):
+    """Get memory data."""
     query_params = {
         'db': 'telegraf',
         'q': 'SELECT MAX(max_usage) FROM docker_container_mem WHERE "zoe.execution.id" = \'{}\''.format(exec_id)
@@ -78,6 +80,7 @@ def get_influx_mem_data(exec_id):
 
 
 def get_influx_net_rx_data(exec_id):
+    """Get network RX data."""
     query_params = {
         'db': 'telegraf',
         'q': 'SELECT LAST(rx_bytes) FROM docker_container_net WHERE "zoe.execution.id" = \'{}\' AND network = \'eth1\''.format(exec_id)
@@ -92,6 +95,7 @@ def get_influx_net_rx_data(exec_id):
 
 
 def get_influx_net_tx_data(exec_id):
+    """Get network TX data."""
     query_params = {
         'db': 'telegraf',
         'q': 'SELECT LAST(tx_bytes) FROM docker_container_net WHERE "zoe.execution.id" = \'{}\' AND network = \'eth1\''.format(exec_id)
@@ -106,6 +110,7 @@ def get_influx_net_tx_data(exec_id):
 
 
 def get_influx_blkio_data(exec_id):
+    """Get disk data."""
     query_params = {
         'db': 'telegraf',
         'q': 'SELECT LAST(io_serviced_recursive_total) FROM docker_container_blkio WHERE "zoe.execution.id" = \'{}\''.format(exec_id)

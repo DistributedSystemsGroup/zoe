@@ -86,6 +86,7 @@ def delete_finished():
 
 
 def start_batches(zapp, log):
+    """Start zapps in batches."""
     zapps_to_start = TOTAL_JOBS - count_jobs()
     print('I need to start {} zapps'.format(zapps_to_start))
     while zapps_to_start > 0:
@@ -105,6 +106,7 @@ def start_batches(zapp, log):
 
 
 def start_continuous(zapp, log):
+    """Start zapps with a random distribution of interval times."""
     zapps_to_start = TOTAL_JOBS - count_jobs()
     print('I need to start {} zapps'.format(zapps_to_start))
     while zapps_to_start > 0:
@@ -118,6 +120,7 @@ def start_continuous(zapp, log):
 
 
 def keep_some_running(zapp):
+    """Always keep a certain number of zapps running."""
     while True:
         running_zapps = count_jobs(all=True)
         zapps_to_start = TOTAL_JOBS - running_zapps

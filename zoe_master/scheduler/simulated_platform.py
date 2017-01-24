@@ -52,7 +52,6 @@ class SimulatedNode:
         return self.real_free_resources['memory'] - simulated_reservation
 
     def __repr__(self):
-        # services = ','.join([str(s.id) for s in self.services])
         out = 'SN {} | f {}'.format(self.name, self.node_free_memory())
         return out
 
