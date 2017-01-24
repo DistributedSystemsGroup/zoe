@@ -95,6 +95,8 @@ def load_configuration(test_conf=None):
 
         argparser.add_argument('--backend', choices=['OldSwarm'], default='OldSwarm')
 
+        argparser.add_argument('--cookie-secret', help='secret used to encrypt cookies', default='changeme')
+
         opts = argparser.parse_args()
         if opts.debug:
             argparser.print_values()
