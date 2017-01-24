@@ -32,13 +32,16 @@ try:
 except ImportError:
     KazooClient = None
 
-import docker
-import docker.errors
-import docker.utils
+try:
+    import docker
+    import docker.errors
+    import docker.utils
+except ImportError:
+    pass
 
 import requests.packages
 
-from zoe_master.stats import SwarmStats, SwarmNodeStats
+from zoe_master.stats import ClusterStats, NodeStats
 from zoe_lib.exceptions import ZoeLibException, ZoeNotEnoughResourcesException
 
 log = logging.getLogger(__name__)
@@ -156,49 +159,47 @@ class SwarmClient:
         log.debug('Connecting to Swarm at {}'.format(manager))
         self.cli = docker.Client(base_url=manager, version="auto")
 
-    def info(self) -> SwarmStats:
+    def info(self) -> ClusterStats:
         """Retrieve Swarm statistics. The Docker API returns a mess difficult to parse."""
         info = self.cli.info()
-        pl_status = SwarmStats()
+        pl_status = ClusterStats()
         pl_status.container_count = info["Containers"]
-        pl_status.image_count = info["Images"]
         pl_status.memory_total = info["MemTotal"]
         pl_status.cores_total = info["NCPU"]
 
-        # DriverStatus is a list...
-        idx = 1
-        assert 'Strategy' in info["DriverStatus"][idx][0]
-        pl_status.placement_strategy = info["DriverStatus"][idx][1]
-        idx = 2
-        assert 'Filters' in info["DriverStatus"][idx][0]
-        pl_status.active_filters = [x.strip() for x in info["DriverStatus"][idx][1].split(", ")]
-        idx = 3
-        assert 'Nodes' in info["DriverStatus"][idx][0]
-        node_count = int(info["DriverStatus"][idx][1])
-        idx = 4
+        # SystemStatus is a list...
+        idx = 0  # Role, skip
+        idx += 1
+        assert 'Strategy' in info["SystemStatus"][idx][0]
+        pl_status.placement_strategy = info["SystemStatus"][idx][1]
+        idx += 1
+        assert 'Filters' in info["SystemStatus"][idx][0]
+        pl_status.active_filters = [x.strip() for x in info["SystemStatus"][idx][1].split(", ")]
+        idx += 1
+        assert 'Nodes' in info["SystemStatus"][idx][0]
+        node_count = int(info["SystemStatus"][idx][1])
+        idx += 1  # At index 4 the nodes begin
         for node in range(node_count):
             idx2 = 0
-            node_stats = SwarmNodeStats(info["DriverStatus"][idx + node][0])
-            node_stats.docker_endpoint = info["DriverStatus"][idx + node][1]
-            idx2 += 1
-            if 'Status' in info["DriverStatus"][idx + node + idx2][0]:  # new docker version
-                node_stats.status = info["DriverStatus"][idx + node + idx2][1]
-                idx2 += 1
-            node_stats.container_count = int(info["DriverStatus"][idx + node + idx2][1])
-            idx2 += 1
-            node_stats.cores_reserved = int(info["DriverStatus"][idx + node + idx2][1].split(' / ')[0])
-            node_stats.cores_total = int(info["DriverStatus"][idx + node + idx2][1].split(' / ')[1])
-            idx2 += 1
-            node_stats.memory_reserved = info["DriverStatus"][idx + node + idx2][1].split(' / ')[0]
-            node_stats.memory_total = info["DriverStatus"][idx + node + idx2][1].split(' / ')[1]
-            idx2 += 1
-            node_stats.labels = info["DriverStatus"][idx + node + idx2][1:]
-            idx2 += 1
-            node_stats.error = info["DriverStatus"][idx + node + idx2][1]
-            idx2 += 1
-            node_stats.last_update = info["DriverStatus"][idx + node + idx2][1]
-            idx2 += 1
-            node_stats.server_version = info["DriverStatus"][idx + node + idx2][1]
+            node_stats = NodeStats(info["SystemStatus"][idx + node][0].strip())
+            node_stats.docker_endpoint = info["SystemStatus"][idx + node][1]
+            idx2 += 1  # ID, skip
+            idx2 += 1  # Status
+            node_stats.status = info["SystemStatus"][idx + node + idx2][1]
+            idx2 += 1  # Containers
+            node_stats.container_count = int(info["SystemStatus"][idx + node + idx2][1].split(' ')[0])
+            idx2 += 1  # CPUs
+            node_stats.cores_reserved = int(info["SystemStatus"][idx + node + idx2][1].split(' / ')[0])
+            node_stats.cores_total = int(info["SystemStatus"][idx + node + idx2][1].split(' / ')[1])
+            idx2 += 1  # Memory
+            node_stats.memory_reserved = info["SystemStatus"][idx + node + idx2][1].split(' / ')[0]
+            node_stats.memory_total = info["SystemStatus"][idx + node + idx2][1].split(' / ')[1]
+            idx2 += 1  # Labels
+            node_stats.labels = info["SystemStatus"][idx + node + idx2][1].split(', ')
+            idx2 += 1  # Last update
+            node_stats.last_update = info["SystemStatus"][idx + node + idx2][1]
+            idx2 += 1  # Docker version
+            node_stats.server_version = info["SystemStatus"][idx + node + idx2][1]
 
             node_stats.memory_reserved = humanfriendly.parse_size(node_stats.memory_reserved)
             node_stats.memory_total = humanfriendly.parse_size(node_stats.memory_total)
@@ -284,10 +285,7 @@ class SwarmClient:
         elif docker_info["State"]["Restarting"]:
             info["state"] = "restarting"
             info["running"] = True
-        elif docker_info["State"]["OOMKilled"]:
-            info["state"] = "killed"
-            info["running"] = False
-        elif docker_info["State"]["Dead"]:
+        elif docker_info["State"]["OOMKilled"] or docker_info["State"]["Dead"]:
             info["state"] = "killed"
             info["running"] = False
         else:

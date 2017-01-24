@@ -1,5 +1,9 @@
 #!/usr/bin/python3
 
+"""
+Set the command to execute inside a ZApp.
+"""
+
 import json
 import sys
 

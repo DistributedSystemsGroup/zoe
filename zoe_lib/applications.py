@@ -80,6 +80,7 @@ def app_validate(data):
 
 
 def _service_check(data):
+    """Check the service description schema."""
     required_keys = ['name', 'docker_image', 'monitor', 'ports', 'required_resources', 'total_count', 'essential_count', 'startup_order']
     for k in required_keys:
         if k not in data:
@@ -116,11 +117,17 @@ def _service_check(data):
     if not isinstance(data['required_resources'], dict):
         raise InvalidApplicationDescription(msg="required_resources should be a dictionary")
     if 'memory' not in data['required_resources']:
-        raise InvalidApplicationDescription(msg="Missing required key: required_resources -> memory")
+        data['required_resources']['memory'] = 0
+    if 'cores' not in data['required_resources']:
+        data['required_resources']['cores'] = 0
     try:
         int(data['required_resources']['memory'])
     except ValueError:
         raise InvalidApplicationDescription(msg="required_resources -> memory field should be an int")
+    try:
+        int(data['required_resources']['cores'])
+    except ValueError:
+        raise InvalidApplicationDescription(msg="required_resources -> cores field should be an int")
 
     if 'environment' in data:
         if not hasattr(data['environment'], '__iter__'):
@@ -142,22 +149,12 @@ def _service_check(data):
             if not isinstance(volume[2], bool):
                 raise InvalidApplicationDescription(msg='readonly volume item (third) must be a boolean: {}'.format(volume[2]))
 
-    if 'networks' in data:
-        if not hasattr(data['networks'], '__iter__'):
-            raise InvalidApplicationDescription(msg='networks should be an iterable')
-
-    if 'constraints' in data:
-        if not hasattr(data['constraints'], '__iter__'):
-            raise InvalidApplicationDescription(msg='networks should be an iterable')
-
-    if 'disable_autorestart' in data:
-        try:
-            bool(data['disable_autorestart'])
-        except ValueError:
-            raise InvalidApplicationDescription(msg="disable_autorestart field should be a boolean")
+    if 'constraints' in data and not hasattr(data['constraints'], '__iter__'):
+        raise InvalidApplicationDescription(msg='networks should be an iterable')
 
 
 def _port_check(data):
+    """Check the port description schema."""
     required_keys = ['name', 'protocol', 'port_number', 'is_main_endpoint']
     for k in required_keys:
         if k not in data:

@@ -20,7 +20,6 @@ TARGET_QUEUE_LENGTH = 10
 NUMBER_OF_HOSTS = 10
 ZAPP_PER_HOST = 8
 TOTAL_JOBS = NUMBER_OF_HOSTS * ZAPP_PER_HOST
-# TOTAL_JOBS = 1000
 MAX_TO_START_PER_LOOP = 10
 
 
@@ -66,9 +65,7 @@ def count_jobs(all=False):
     count = 0
     for e_id in execs:
         e = exec_api.get(e_id)
-        if e is None:
-            continue
-        elif not all and e['name'] != 'boinc-loader':
+        if e is None or (not all and e['name'] != 'boinc-loader'):
             continue
         if e['status'] != 'terminated':
             count += 1
@@ -89,6 +86,7 @@ def delete_finished():
 
 
 def start_batches(zapp, log):
+    """Start zapps in batches."""
     zapps_to_start = TOTAL_JOBS - count_jobs()
     print('I need to start {} zapps'.format(zapps_to_start))
     while zapps_to_start > 0:
@@ -100,7 +98,7 @@ def start_batches(zapp, log):
             continue
         to_start_now = random.randint(1, MAX_TO_START_PER_LOOP)
         print('Will submit {} new zapps'.format(to_start_now))
-        for i in range(to_start_now):
+        for i_ in range(to_start_now):
             zapp_id = submit_zapp(zapp)
             zapps_to_start -= 1
             print("ZApp submitted with ID {}, queue length {}, {} zapps to go".format(zapp_id, queue_length, zapps_to_start))
@@ -108,6 +106,7 @@ def start_batches(zapp, log):
 
 
 def start_continuous(zapp, log):
+    """Start zapps with a random distribution of interval times."""
     zapps_to_start = TOTAL_JOBS - count_jobs()
     print('I need to start {} zapps'.format(zapps_to_start))
     while zapps_to_start > 0:
@@ -121,12 +120,13 @@ def start_continuous(zapp, log):
 
 
 def keep_some_running(zapp):
+    """Always keep a certain number of zapps running."""
     while True:
         running_zapps = count_jobs(all=True)
         zapps_to_start = TOTAL_JOBS - running_zapps
         print('I need to start {} zapps ({} running)'.format(zapps_to_start, running_zapps))
         if zapps_to_start > 0:
-            for i in range(zapps_to_start):
+            for i_ in range(zapps_to_start):
                 queue_length = check_queue_length()
                 zapp_id = submit_zapp(zapp)
                 print("ZApp submitted with ID {}, queue length {}, {} zapps to go".format(zapp_id, queue_length, zapps_to_start))
@@ -145,8 +145,6 @@ def main():
     log = csv.DictWriter(open('run.csv', 'w'), fieldnames=log_fieldnames)
     log.writeheader()
     zapp = load_zapp(sys.argv[1])
-    # start_batches(zapp, log)
-    # start_continuous(zapp, log)
     keep_some_running(zapp)
 
     print('All Zapps submitted, my work is done.')

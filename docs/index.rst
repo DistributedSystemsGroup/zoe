@@ -43,7 +43,7 @@ Contents
   logging
   monitoring
   architecture
-  rest-api
+  quality
   vision
   motivations
   roadmap
@@ -68,14 +68,10 @@ Developer documentation
 :ref:`modindex`
 
 .. toctree::
-  :maxdepth: 2
+  :maxdepth: 1
 
-  developer/introduction
-  developer/rest-api
-  developer/auth
-  developer/api-endpoint
-  developer/master-api
-  developer/scheduler
+  developer/index
+
 
 Contacts
 ========

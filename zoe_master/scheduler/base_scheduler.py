@@ -15,20 +15,20 @@
 
 """The base class for Zoe schedulers"""
 
-import zoe_lib.sql_manager
+import zoe_lib.state
 
 
 class ZoeBaseScheduler:
     """The base class for Zoe schedulers"""
 
-    def __init__(self, state: zoe_lib.sql_manager.SQLManager):
+    def __init__(self, state: zoe_lib.state.SQLManager):
         self.state = state
 
     def trigger(self):
         """Trigger a scheduler run."""
         raise NotImplementedError
 
-    def incoming(self, execution: zoe_lib.sql_manager.Execution):
+    def incoming(self, execution: zoe_lib.state.Execution):
         """
         This method adds the execution to the end of the FIFO queue and triggers the scheduler.
         :param execution: The execution
@@ -36,7 +36,7 @@ class ZoeBaseScheduler:
         """
         raise NotImplementedError
 
-    def terminate(self, execution: zoe_lib.sql_manager.Execution) -> None:
+    def terminate(self, execution: zoe_lib.state.Execution) -> None:
         """
         Inform the master that an execution has been terminated. This can be done asynchronously.
         :param execution: the terminated execution

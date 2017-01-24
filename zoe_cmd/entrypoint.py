@@ -36,6 +36,7 @@ from zoe_lib.applications import app_validate
 
 
 def _log_stream_stdout(service_id, timestamps):
+    """Stream the log on the standard output."""
     service_api = ZoeServiceAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
     try:
         for line in service_api.get_logs(service_id):
@@ -157,10 +158,10 @@ def exec_get_cmd(args):
             service = cont_api.get(c_id)
             print('Service {} (ID: {})'.format(service['name'], service['id']))
             print(' - zoe status: {}'.format(service['status']))
-            print(' - docker status: {}'.format(service['docker_status']))
+            print(' - backend status: {}'.format(service['backend_status']))
             if service['error_message'] is not None:
                 print(' - error: {}'.format(service['error_message']))
-            if service['docker_status'] == 'started':
+            if service['backend_status'] == 'started':
                 ip = service['ip_address']
                 for port in service['description']['ports']:
                     print(' - {}: {}://{}:{}{}'.format(port['name'], port['protocol'], ip, port['port_number'], port['path']))

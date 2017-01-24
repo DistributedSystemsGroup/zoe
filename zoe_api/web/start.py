@@ -97,9 +97,4 @@ class HomeWeb(ZoeRequestHandler):
                 else:
                     template_vars['refresh'] = -1
                     template_vars['execution_status'] = execution['status']
-                    # for c_id in execution['services']:
-                    #    c = cont_api.get(c_id)
-                    #    ip = list(c['ip_address'].values())[0]  # FIXME how to decide which network is the right one?
-                    #    for p in c['ports']:
-                    #        template_vars['execution_urls'].append(('{}'.format(p['name']), '{}://{}:{}{}'.format(p['protocol'], ip, p['port_number'], p['path'])))
                     return self.render('home_guest.html', **template_vars)

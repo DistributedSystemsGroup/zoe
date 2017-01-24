@@ -19,8 +19,6 @@ from concurrent.futures import ThreadPoolExecutor
 import logging
 
 from tornado.web import RequestHandler
-import tornado.gen
-import tornado.iostream
 
 from zoe_api.rest_api.utils import catch_exceptions, get_auth
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
@@ -55,75 +53,13 @@ class ServiceAPI(RequestHandler):
         self.finish()
 
     @catch_exceptions
-    def get(self, service_id) -> dict:
+    def get(self, service_id):
         """HTTP GET method."""
         uid, role = get_auth(self)
 
         service = self.api_endpoint.service_by_id(uid, role, service_id)
 
         self.write(service.serialize())
-
-    def data_received(self, chunk):
-        """Not implemented as we do not use stream uploads"""
-        pass
-
-
-class ServiceLogsAPI(RequestHandler):
-    """The Service logs API endpoint."""
-
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-        self.connection_closed = False
-
-    def on_connection_close(self):
-        """Tornado callback for clients closing the connection."""
-        self.connection_closed = True
-
-    def set_default_headers(self):
-        """Set up the headers for enabling CORS."""
-        if self.request.headers.get('Origin') is None:
-            self.set_header("Access-Control-Allow-Origin", "*")
-        else:
-            self.set_header("Access-Control-Allow-Origin", self.request.headers.get('Origin'))
-        self.set_header("Access-Control-Allow-Credentials", "true")
-        self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-Type, origin, authorization, accept, client-security-token")
-        self.set_header("Access-Control-Allow-Methods", "OPTIONS, GET")
-        self.set_header("Access-Control-Max-Age", "1000")
-
-    @catch_exceptions
-    def options(self):
-        """Needed for CORS."""
-        self.set_status(204)
-        self.finish()
-
-    @catch_exceptions
-    @tornado.gen.coroutine
-    def get(self, service_id):
-        """HTTP GET method."""
-
-        uid, role = get_auth(self)
-
-        log_gen = self.api_endpoint.service_logs(uid, role, service_id, stream=True)
-
-        while True:
-            try:
-                log_line = yield THREAD_POOL.submit(next, log_gen)
-            except StopIteration:
-                break
-
-            self.write(log_line)
-
-            try:
-                yield self.flush()
-            except tornado.iostream.StreamClosedError:
-                break
-
-            if self.connection_closed:
-                break
-
-        log.debug('Finished log stream for service {}'.format(service_id))
-        self.finish()
 
     def data_received(self, chunk):
         """Not implemented as we do not use stream uploads"""

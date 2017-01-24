@@ -84,7 +84,7 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--ldap-user-gid', type=int, help='LDAP group ID for users', default=5001)
         argparser.add_argument('--ldap-guest-gid', type=int, help='LDAP group ID for guests', default=5002)
 
-        # Proxy otpions
+        # Proxy options
         argparser.add_argument('--proxy-type', help='Proxy type (apache or nginx)', default='apache')
         argparser.add_argument('--proxy-container', help='Proxy container name', default='apache2')
         argparser.add_argument('--proxy-config-file', help='Config file path of apache/nginx proxy container', default='/etc/apache2/sites-available/config.conf')
@@ -92,7 +92,10 @@ def load_configuration(test_conf=None):
 
         argparser.add_argument('--service-log-path', help='Save service logs in this directory, EXPERIMENTAL', default='')
 
-        argparser.add_argument('--scheduler-class', help='Scheduler class to use for scheduling ZApps', default='ZoeSimpleScheduler')
+        argparser.add_argument('--scheduler-class', help='Scheduler class to use for scheduling ZApps', choices=['ZoeSimpleScheduler', 'ZoeElasticScheduler'], default='ZoeSimpleScheduler')
+        argparser.add_argument('--scheduler-policy', help='Scheduler policy to use for scheduling ZApps', choices=['FIFO', 'SIZE'], default='FIFO')
+
+        argparser.add_argument('--backend', choices=['OldSwarm'], default='OldSwarm')
 
         opts = argparser.parse_args()
         if opts.debug:
