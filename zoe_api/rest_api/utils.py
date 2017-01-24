@@ -120,3 +120,15 @@ def get_auth(handler: tornado.web.RequestHandler):
     log.debug('Authentication done using auth-mechanism')
 
     return uid, role
+
+
+def manage_cors_headers(handler: tornado.web.RequestHandler):
+    """Set up the headers for enabling CORS."""
+    if handler.request.headers.get('Origin') is None:
+        handler.set_header("Access-Control-Allow-Origin", "*")
+    else:
+        handler.set_header("Access-Control-Allow-Origin", handler.request.headers.get('Origin'))
+    handler.set_header("Access-Control-Allow-Credentials", "true")
+    handler.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-Type, origin, authorization, accept, client-security-token")
+    handler.set_header("Access-Control-Allow-Methods", "OPTIONS, GET, DELETE")
+    handler.set_header("Access-Control-Max-Age", "1000")

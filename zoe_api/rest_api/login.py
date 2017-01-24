@@ -1,4 +1,4 @@
-# Copyright (c) 2016, Daniele Venzano
+# Copyright (c) 2016, Quang-Nhat Hoang-Xuan
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 """The Info API endpoint."""
 
 from tornado.web import RequestHandler
-from zoe_api.rest_api.utils import get_auth, catch_exceptions
+from zoe_api.rest_api.utils import get_auth, catch_exceptions, manage_cors_headers
+from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 
 
 class LoginAPI(RequestHandler):
@@ -28,14 +29,7 @@ class LoginAPI(RequestHandler):
 
     def set_default_headers(self):
         """Set up the headers for enabling CORS."""
-        if self.request.headers.get('Origin') is None:
-            self.set_header("Access-Control-Allow-Origin", "*")
-        else:
-            self.set_header("Access-Control-Allow-Origin", self.request.headers.get('Origin'))
-        self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-Type, origin, authorization, accept, client-security-token")
-        self.set_header("Access-Control-Allow-Methods", "OPTIONS, GET, DELETE")
-        self.set_header("Access-Control-Max-Age", "1000")
-        self.set_header("Access-Control-Allow-Credentials", "true")
+        manage_cors_headers(self)
 
     @catch_exceptions
     def options(self):
@@ -48,9 +42,9 @@ class LoginAPI(RequestHandler):
         """HTTP GET method."""
         uid, role = get_auth(self)
 
-        cookieVal = uid + '.' + role
-        
-        self.set_secure_cookie('zoe', cookieVal)
+        cookie_val = uid + '.' + role
+
+        self.set_secure_cookie('zoe', cookie_val)
 
         ret = {
             'uid': uid,

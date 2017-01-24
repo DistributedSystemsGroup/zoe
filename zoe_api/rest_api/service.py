@@ -20,7 +20,7 @@ import logging
 
 from tornado.web import RequestHandler
 
-from zoe_api.rest_api.utils import catch_exceptions, get_auth
+from zoe_api.rest_api.utils import catch_exceptions, get_auth, manage_cors_headers
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 
 log = logging.getLogger(__name__)
@@ -37,14 +37,7 @@ class ServiceAPI(RequestHandler):
 
     def set_default_headers(self):
         """Set up the headers for enabling CORS."""
-        if self.request.headers.get('Origin') is None:
-            self.set_header("Access-Control-Allow-Origin", "*")
-        else:
-            self.set_header("Access-Control-Allow-Origin", self.request.headers.get('Origin'))
-        self.set_header("Access-Control-Allow-Credentials", "true")
-        self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-Type, origin, authorization, accept, client-security-token")
-        self.set_header("Access-Control-Allow-Methods", "OPTIONS, GET")
-        self.set_header("Access-Control-Max-Age", "1000")
+        manage_cors_headers(self)
 
     @catch_exceptions
     def options(self, service_id):

@@ -18,7 +18,7 @@
 from tornado.web import RequestHandler
 import tornado.escape
 
-from zoe_api.rest_api.utils import catch_exceptions, get_auth
+from zoe_api.rest_api.utils import catch_exceptions, get_auth, manage_cors_headers
 import zoe_api.exceptions
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 
@@ -32,14 +32,7 @@ class ExecutionAPI(RequestHandler):
 
     def set_default_headers(self):
         """Set up the headers for enabling CORS."""
-        if self.request.headers.get('Origin') is None:
-            self.set_header("Access-Control-Allow-Origin", "*")
-        else:
-            self.set_header("Access-Control-Allow-Origin", self.request.headers.get('Origin'))
-        self.set_header("Access-Control-Allow-Credentials", "true")
-        self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-Type, origin, authorization, accept, client-security-token")
-        self.set_header("Access-Control-Allow-Methods", "OPTIONS, GET, DELETE")
-        self.set_header("Access-Control-Max-Age", "1000")
+        manage_cors_headers(self)
 
     def options(self, execution_id):
         """Needed for CORS."""
@@ -82,22 +75,6 @@ class ExecutionDeleteAPI(RequestHandler):
         """Initializes the request handler."""
         self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
-    def set_default_headers(self):
-        """Set up the headers for enabling CORS."""
-        if self.request.headers.get('Origin') is None:
-            self.set_header("Access-Control-Allow-Origin", "*")
-        else:
-            self.set_header("Access-Control-Allow-Origin", self.request.headers.get('Origin'))
-        self.set_header("Access-Control-Allow-Credentials", "true")
-        self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-Type, origin, authorization, accept, client-security-token")
-        self.set_header("Access-Control-Allow-Methods", "OPTIONS, DELETE")
-        self.set_header("Access-Control-Max-Age", "1000")
-
-    def options(self, execution_id):
-        """Needed for CORS."""
-        self.set_status(204)
-        self.finish()
-
     @catch_exceptions
     def delete(self, execution_id: int):
         """
@@ -124,22 +101,6 @@ class ExecutionCollectionAPI(RequestHandler):
     def initialize(self, **kwargs):
         """Initializes the request handler."""
         self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-
-    def set_default_headers(self):
-        """Set up the headers for enabling CORS."""
-        if self.request.headers.get('Origin') is None:
-            self.set_header("Access-Control-Allow-Origin", "*")
-        else:
-            self.set_header("Access-Control-Allow-Origin", self.request.headers.get('Origin'))
-        self.set_header("Access-Control-Allow-Credentials", "true")
-        self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-Type, origin, authorization, accept, client-security-token")
-        self.set_header("Access-Control-Allow-Methods", "OPTIONS, GET, POST")
-        self.set_header("Access-Control-Max-Age", "1000")
-
-    def options(self):
-        """Needed for CORS."""
-        self.set_status(204)
-        self.finish()
 
     @catch_exceptions
     def get(self):
