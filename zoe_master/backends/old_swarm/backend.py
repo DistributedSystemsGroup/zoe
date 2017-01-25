@@ -90,7 +90,7 @@ class OldSwarmBackend(zoe_master.backends.base.BaseBackend):
 
         for port in service.ports:
             if port.expose:
-                copts.ports.append(port.port_number)
+                copts.ports.append(port.number)
 
         for volume in service.volumes:
             if volume.type == "host_directory":
