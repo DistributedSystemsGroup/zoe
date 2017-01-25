@@ -267,7 +267,7 @@ class SwarmClient:
             raise ZoeLibException(str(e))
 
         info = {
-            "docker_id": docker_id,
+            "backend_id": docker_id,
             "ip_address": {}
         }  # type: Dict[str, Any]
         for net in docker_info["NetworkSettings"]["Networks"]:

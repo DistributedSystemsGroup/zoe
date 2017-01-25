@@ -118,7 +118,7 @@ class OldSwarmBackend(zoe_master.backends.base.BaseBackend):
         except (ZoeException, ZoeLibException) as e:
             raise ZoeStartExecutionFatalException(str(e))
 
-        service.set_active(cont_info["docker_id"], cont_info['ip_address'][get_conf().overlay_network_name])
+        service.set_active(cont_info["backend_id"], cont_info['ip_address'][get_conf().overlay_network_name])
 
     def terminate_service(self, service: Service) -> None:
         """Terminate and delete a container."""
