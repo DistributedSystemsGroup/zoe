@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Base authenticator class."""
+"""Proxifying using Apache2 Container."""
 
 import docker
 import time
@@ -28,20 +28,15 @@ log = logging.getLogger(__name__)
 
 class ApacheProxy(zoe_api.proxy.base.BaseProxy):
     """Apache proxy class."""
-    def __init__(self, apiEndpoint, appDescription):
-        self.appDesc = appDescription
+    def __init__(self, apiEndpoint):
         self.api_endpoint = apiEndpoint
 
-        if self.appDesc is not None:
-            services = self.appDesc['services']
-            self.total_ctn = 0
-            for srv in services:
-                self.total_ctn += srv['total_count']
-
+    """Proxify function."""
     def proxify(self, uid, role, id):
         try:
             length_service = 0
-
+            
+            #Wait until all the services get created and started to be able to get the backend_id
             while self.api_endpoint.execution_by_id(uid, role, id).status != 'running':
                 log.info('Waiting for all services get started...')
                 length_service = len(self.api_endpoint.execution_by_id(uid, role, id).services)
@@ -58,7 +53,8 @@ class ApacheProxy(zoe_api.proxy.base.BaseProxy):
                         time.sleep(1)
                     else:
                         l = l - 1 
-                 
+            
+            #Start proxifying by adding entry to use proxypass and proxypassreverse in apache2 config file
             for srv in exe.services:
                 swarm = SwarmClient(get_conf())
                 
@@ -81,6 +77,8 @@ class ApacheProxy(zoe_api.proxy.base.BaseProxy):
         except Exception as ex:
             log.error(ex)
 
+    #The apache2 server is running inside a container
+    #Adding new entries with the proxy path and the ip:port of the application to the apache2 config file
     def dispatch_to_docker(self, base_path, original_path):
         proxy = ['ProxyPass ' + base_path + '/api/kernels/ ws://' + original_path + '/api/kernels/',
                  'ProxyPassReverse ' + base_path + '/api/kernels/ ws://' + original_path + '/api/kernels/',
@@ -106,6 +104,7 @@ class ApacheProxy(zoe_api.proxy.base.BaseProxy):
         reloadID = docker_client.exec_create(get_conf().proxy_container, reloadCommand)
         docker_client.exec_start(reloadID)
 
+    #Simply remove the added entries at the apache2 config file when terminating applcations
     def unproxify(self, uid, role, id):
         log.info('Unproxifying for user %s - execution %s', uid, str(id))
         pattern = '/zoe\/' + uid + '\/' + str(id) + '/d'

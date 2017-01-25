@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Base authenticator class."""
+"""Base Proxy class."""
 
 
 class BaseProxy:
-    """Base authenticator class."""
+    """Base proxy class."""
 
     def proxify(self, uid, role, id):
         """The methods that needs to be overridden by implementations."""

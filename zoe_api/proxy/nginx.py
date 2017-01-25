@@ -27,7 +27,7 @@ log = logging.getLogger(__name__)
 
 class NginxProxy(zoe_api.proxy.base.BaseProxy):
     """Nginx proxy class."""
-    def __init__(self, apiEndpoint, appDescription):
+    def __init__(self, apiEndpoint):
         return {}
 
     def proxify(self, uid, role, id):
