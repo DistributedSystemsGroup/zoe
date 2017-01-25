@@ -1,4 +1,4 @@
-# Copyright (c) 2016, Quang-Nhat Hoang-Xuan
+# Copyright (c) 2017, Daniele Venzano
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,25 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Base authenticator class."""
+"""The high-level interface that Zoe uses to talk to the configured container backend."""
 
-import docker
-import time
-import logging
+from typing import Dict
 
-import zoe_api.proxy.base
-import zoe_api.api_endpoint
-from zoe_lib.config import get_conf
+from zoe_lib.state import Service, Execution
+from zoe_master.exceptions import ZoeStartExecutionFatalException
 
-log = logging.getLogger(__name__)
+JUPYTER_NOTEBOOK='BASE_URL'
+MONGO_EXPRESS='ME_CONFIG_SITE_BASEURL'
 
-class NginxProxy(zoe_api.proxy.base.BaseProxy):
-    """Nginx proxy class."""
-    def __init__(self, apiEndpoint, appDescription):
-        return {}
-
-    def proxify(self, uid, role, id):
-        return {}
-
-    def unproxify(self, uid, role, id):
-        return {}
+def gen_proxypath(execution: Execution, service: Service):
+    proxy_path_value = '/zoe/' + execution.user_id + '/' + str(execution.id) + '/' + service.name
+    return proxy_path_value

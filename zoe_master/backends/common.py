@@ -17,11 +17,11 @@
 
 from typing import Dict
 
-from zoe_lib.state import Service
+from zoe_lib.state import Service, Execution
+from zoe_master.backends.proxy import gen_proxypath, JUPYTER_NOTEBOOK, MONGO_EXPRESS
 from zoe_master.exceptions import ZoeStartExecutionFatalException
 
-
-def gen_environment(service: Service, env_subst_dict: Dict):
+def gen_environment(execution: Execution, service: Service, env_subst_dict: Dict):
     """ Generate a dictionary containing the current cluster status (before the new container is spawned)
 
     This information is used to substitute template strings in the environment variables."""
@@ -34,4 +34,10 @@ def gen_environment(service: Service, env_subst_dict: Dict):
             service.set_error(error_msg)
             raise ZoeStartExecutionFatalException("Service {} has wrong environment expression")
         env_list.append((env_name, env_value))
+
+    #if 'jupyter' in service.image_name:
+    env_list.append((JUPYTER_NOTEBOOK, gen_proxypath(execution, service)))
+    #elif 'mongo-express' in service.image_name:
+    env_list.append((MONGO_EXPRESS, gen_proxypath(execution, service)))
+
     return env_list

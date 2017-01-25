@@ -55,6 +55,9 @@ class ExposedPort:
         self.number = data['port_number']
         self.expose = data['expose'] if 'expose' in data else False
 
+    def isExpose(self):
+        return self.expose
+
 
 class Service:
     """A Zoe Service."""
@@ -121,7 +124,8 @@ class Service:
             'backend_id': self.backend_id,
             'ip_address': self.ip_address,
             'backend_status': self.backend_status,
-            'essential': self.essential
+            'essential': self.essential,
+            'proxy_address': self.proxy_address
         }
 
     def __eq__(self, other):
@@ -172,6 +176,15 @@ class Service:
         """Getter for the user_id, that is actually taken form the parent execution."""
         execution = self.sql_manager.execution_list(only_one=True, id=self.execution_id)
         return execution.user_id
+
+    @property
+    def proxy_address(self):
+        for p in self.ports:
+            if p.isExpose():
+                proxyAdd = get_conf().proxy_path + "/" + self.user_id + "/" + str(self.execution_id) + "/" + self.name
+            else:
+                proxyAdd = None
+        return proxyAdd
 
     def is_dead(self):
         """Returns True if this service is not running."""

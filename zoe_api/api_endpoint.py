@@ -59,7 +59,7 @@ class APIEndpoint:
         ret = [e for e in execs if e.user_id == uid or role == 'admin']
         return ret
 
-    def execution_start(self, uid, role_, exec_name, application_description):
+    def execution_start(self, uid, role, exec_name, application_description):
         """Start an execution."""
         try:
             zoe_lib.applications.app_validate(application_description)

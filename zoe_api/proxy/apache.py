@@ -21,7 +21,7 @@ import logging
 
 import zoe_api.proxy.base
 import zoe_api.api_endpoint
-from zoe_lib.swarm_client import SwarmClient
+from zoe_master.backends.old_swarm.api_client import SwarmClient
 from zoe_lib.config import get_conf
 
 log = logging.getLogger(__name__)
@@ -41,17 +41,28 @@ class ApacheProxy(zoe_api.proxy.base.BaseProxy):
     def proxify(self, uid, role, id):
         try:
             length_service = 0
-           
-            while self.api_endpoint.execution_by_id(uid, role, id)._status != 'running':
+
+            while self.api_endpoint.execution_by_id(uid, role, id).status != 'running':
                 log.info('Waiting for all services get started...')
                 length_service = len(self.api_endpoint.execution_by_id(uid, role, id).services)
                 time.sleep(1)
 
             exe = self.api_endpoint.execution_by_id(uid, role, id)
-
+            l = len(exe.services)
+            
+            while l != 0:
+                exe = self.api_endpoint.execution_by_id(uid, role, id)
+                l = len(exe.services)
+                for srv in exe.services:
+                    if srv.backend_id == None:
+                        time.sleep(1)
+                    else:
+                        l = l - 1 
+                 
             for srv in exe.services:
                 swarm = SwarmClient(get_conf())
-                s_info = swarm.inspect_container(srv.docker_id)
+                
+                s_info = swarm.inspect_container(srv.backend_id)
                 ip, p = None, None
                 portList = s_info['ports']
 

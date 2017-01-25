@@ -84,7 +84,7 @@ class OldSwarmBackend(zoe_master.backends.base.BaseBackend):
         # copts.restart = not service.is_monitor  # Monitor containers should not restart
         copts.restart = False
 
-        env_vars = zoe_master.backends.common.gen_environment(service, env_subst_dict)
+        env_vars = zoe_master.backends.common.gen_environment(execution, service, env_subst_dict)
         for name, value in env_vars:
             copts.add_env_variable(name, value)
 
