@@ -94,7 +94,7 @@ class APIEndpoint:
         if e.user_id != uid and role != 'admin':
             raise zoe_api.exceptions.ZoeAuthException()
 
-        if e.is_active():
+        if e.is_active:
             if get_conf().proxy_type == 'apache':
                 proxy = zoe_api.proxy.apache.ApacheProxy(self, None)
             else:
@@ -114,7 +114,7 @@ class APIEndpoint:
         if e.user_id != uid and role != 'admin':
             raise zoe_api.exceptions.ZoeAuthException()
 
-        if e.is_active():
+        if e.is_active:
             raise zoe_api.exceptions.ZoeException('Cannot delete an active execution')
 
         status, message = self.master.execution_delete(exec_id)
@@ -160,7 +160,7 @@ class APIEndpoint:
         log.debug('Starting dead execution cleanup task')
         all_execs = self.sql.execution_list()
         for execution in all_execs:
-            if execution.is_running():
+            if execution.is_running:
                 for service in execution.services:
                     if service.description['monitor'] and service.is_dead():
                         log.info("Service {} ({}) of execution {} died, terminating execution".format(service.id, service.name, execution.id))
