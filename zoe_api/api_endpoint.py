@@ -17,7 +17,7 @@
 
 import logging
 import re
-import _thread
+import threading
 
 import zoe_api.exceptions
 import zoe_api.master_api
@@ -80,7 +80,7 @@ class APIEndpoint:
             proxy = zoe_api.proxy.apache.ApacheProxy(self, application_description)
         else:
             proxy = zoe_api.proxy.nginx.NginxProxy(self, application_description)
-        _thread.start_new_thread(proxy.proxify,(uid, role, new_id))
+        threading.Thread(target=proxy.proxify,args=(uid, role, new_id)).start()
 
         return new_id
 
