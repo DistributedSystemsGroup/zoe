@@ -92,7 +92,8 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
             return "fatal"
         else:
             execution.set_running()
-            return "ok"
+    
+    return "ok"
 
 
 def start_all(execution: Execution) -> str:
