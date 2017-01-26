@@ -89,7 +89,7 @@ class ApacheProxy(zoe_api.proxy.base.BaseProxy):
                  '',
                  '</VirtualHost>']
 
-        docker_client = docker.Client(base_url="unix:///var/run/docker.sock")
+        docker_client = SwarmClient(get_conf()).cli
 
         delCommand = "sed -i '$ d' " + get_conf().proxy_config_file # /etc/apache2/sites-available/all.conf"
         delID = docker_client.exec_create(get_conf().proxy_container, delCommand)
