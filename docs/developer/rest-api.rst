@@ -264,6 +264,24 @@ Statistics endpoint
 
 This endpoint does not need authentication. It returns current statistics about the internal Zoe status.
 
+Scheduler
+^^^^^^^^^
+Request::
+
+    curl http://bf5:8080/api/0.6/statistics/scheduler
+
+Will return a JSON document, like this::
+
+    {
+       "termination_threads_count" : 0,
+       "queue_length" : 0
+    }
+
+Where:
+
+* ``termination_threads_count`` is the number of executions that are pending for termination and cleanup
+* ``queue_length`` is the number of executions in the queue waiting to be started
+
 OAuth2 endpoint
 ---------------
 
@@ -335,22 +353,4 @@ Instead of sending raw username, password to request results from other api endp
 Example::
 
     curl -H 'Authorization: Bearer 378f8d5f-2eb5-4181-b632-ad23c4534d32' http://bf5:8080/api/0.6/execution
-
-Scheduler
-^^^^^^^^^
-Request::
-
-    curl http://bf5:8080/api/0.6/statistics/scheduler
-
-Will return a JSON document, like this::
-
-    {
-       "termination_threads_count" : 0,
-       "queue_length" : 0
-    }
-
-Where:
-
-* ``termination_threads_count`` is the number of executions that are pending for termination and cleanup
-* ``queue_length`` is the number of executions in the queue waiting to be started
 
