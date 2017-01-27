@@ -50,6 +50,12 @@ class AccessTokenStore(AccessTokenStore):
         res = sql.delete_refresh_token(refresh_token)
         return res
 
+    def get_client_id_by_refresh_token(self, refresh_token):
+        sql = zoe_lib.state.SQLManager(get_conf())
+        data = sql.get_client_id_by_refresh_token(refresh_token)
+
+        return data
+
     def get_client_id_by_access_token(self, access_token):
         sql = zoe_lib.state.SQLManager(get_conf())
         data = sql.get_client_id_by_access_token(access_token)

@@ -216,6 +216,13 @@ class SQLManager:
 
         return cur.fetchone()
 
+    def get_client_id_by_refresh_token(self, refresh_token):
+        cur = self._cursor()
+        query = 'SELECT * FROM oauth_token WHERE refresh_token = %s'
+        cur.execute(query, (refresh_token,))
+
+        return cur.fetchone()
+
     def save_token(self, client_id, grant_type, token, data, expires_at, refresh_token, refresh_expires_at, scopes, user_id):
         cur = self._cursor()
         expires_at = datetime.datetime.fromtimestamp(expires_at)

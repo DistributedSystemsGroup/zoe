@@ -86,7 +86,11 @@ def get_auth(handler: tornado.web.RequestHandler):
     if "Bearer" in auth_header:
         token = auth_header[7:]
 
-        data = token_store.get_client_id_by_access_token(token)
+        if 'token' in handler.request.uri:
+            data = token_store.get_client_id_by_refresh_token(token)
+        else:
+            data = token_store.get_client_id_by_access_token(token)
+
         if data:
             uid = data["client_id"]
             role = client_store.get_role_by_client_id(uid)
