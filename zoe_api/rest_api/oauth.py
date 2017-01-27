@@ -42,7 +42,7 @@ Input: curl -u 'admin:admin' http://localhost:5001/api/0.6/oauth/token -X POST -
 Output: {"token_type": "Bearer", "access_token": "3ddbe9ba-6a21-4e4d-993b-70556390c5d3", "refresh_token": "9bab190f-e211-42aa-917e-20ce987e355e", "expires_in": 36000}
 
 *To refresh a token
-Input: curl  -H 'Authorization: Bearer 9bab190f-e211-42aa-917e-20ce987e355e' http://localhost:5001/api/0.6/oauth/token -X POST -H 'Content-Type: application/json' -d '{"grant_type": "refresh_token", "refresh_token": "9bab190f-e211-42aa-917e-20ce987e355e"}'
+Input: curl  -H 'Authorization: Bearer 9bab190f-e211-42aa-917e-20ce987e355e' http://localhost:5001/api/0.6/oauth/token -X POST -H 'Content-Type: application/json' -d '{"grant_type": "refresh_token"}'
 Output: {"token_type": "Bearer", "access_token": "378f8d5f-2eb5-4181-b632-ad23c4534d32", "expires_in": 36000}
 
 *To revoke a token, the passed token could be the access token or refresh token
@@ -68,11 +68,12 @@ class OAuthGetAPI(RequestHandler):
         uid, role = get_auth(self)
         
         grant_type = oauth2.grant.RefreshToken.grant_type + ':' + oauth2.grant.ResourceOwnerGrant.grant_type
+
         try:
             self.client_store.save_client(uid, '', role, '', grant_type, '')
         except psycopg2.IntegrityError as e:
             log.warn('User is already had')
-        
+
         response = self._dispatch_request(uid)
         self._map_response(response)
 
@@ -84,7 +85,6 @@ class OAuthGetAPI(RequestHandler):
             auth_header = self.request.headers.get('Authorization')
             refresh_token = auth_header[7:]
             params['refresh_token'] = refresh_token
-
 
         params['password'] = ''
         params['username'] = ''
