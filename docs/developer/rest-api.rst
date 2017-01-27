@@ -354,3 +354,32 @@ Example::
 
     curl -H 'Authorization: Bearer 378f8d5f-2eb5-4181-b632-ad23c4534d32' http://bf5:8080/api/0.6/execution
 
+Login endpoint
+--------------
+Get back a cookie for further authentication/authorization with other api endpoints instead of using raw username, password
+
+Request::
+
+   curl -u 'username:password' -c zoe_cookie.txt http://bf5:8080/api/0.6/login
+
+Will return a JSON document, like this::
+
+    {
+        "role": "admin",
+        "uid": "admin"
+    }
+
+And a file named zoe_cookie.txt contains the cookie information.
+
+Pass this cookie on each api request which requires authentication.
+
+Example::
+
+    curl -b zoe_cookie.txt http://bf5:8080/api/0.6/execution
+
+Note:
+
+- For zoe web interface, we require cookie_based mechanism for authentication/authorization.
+- Every unauthorized request will be redirected to **http://bf5:8080/login**
+- After successfully login, a cookie will be saved at browser for further authentication/authorization purpose.
+
