@@ -180,3 +180,63 @@ class SQLManager:
         cur.execute(query)
         self.conn.commit()
         return cur.fetchone()[0]
+
+    """ The above section is used for Oauth2 authentication mechanism """
+
+    def fetch_by_refresh_token(self, refresh_token):
+        cur = self._cursor()
+        query = 'SELECT * FROM oauth_token WHERE refresh_token = %s'
+        cur.execute(query, (refresh_token,))
+
+        return cur.fetchone()
+
+    def delete_refresh_token(self, refresh_token):
+        cur = self._cursor()
+        check_exists = 'SELECT * FROM oauth_token WHERE refresh_token = %s OR token = %s'
+        cur.execute(check_exists, (refresh_token, refresh_token))
+        res = 0
+        if cur.fetchone():
+            res = 1
+        query = 'DELETE FROM oauth_token WHERE refresh_token = %s OR token = %s'
+        cur.execute(query, (refresh_token, refresh_token))
+        self.conn.commit()
+        return res
+
+    def fetch_existing_token_of_user(self, client_id, grant_type, user_id):
+        cur = self._cursor()
+        query = 'SELECT * FROM oauth_token WHERE client_id = %s AND grant_type = %s AND user_id = %s'
+        cur.execute(query, (client_id, grant_type, user_id,))
+
+        return cur.fetchone()
+
+    def get_client_id_by_access_token(self, access_token):
+        cur = self._cursor()
+        query = 'SELECT * FROM oauth_token WHERE token = %s'
+        cur.execute(query, (access_token,))
+
+        return cur.fetchone()
+
+    def save_token(self, client_id, grant_type, token, data, expires_at, refresh_token, refresh_expires_at, scopes, user_id):
+        cur = self._cursor()
+        expires_at = datetime.datetime.fromtimestamp(expires_at)
+        if refresh_expires_at == None:
+            query = cur.mogrify('UPDATE oauth_token SET token = %s, expires_at = %s WHERE client_id=%s', (token, expires_at, client_id))
+        else:
+            refresh_token_expires_at = datetime.datetime.fromtimestamp(refresh_expires_at)
+            query = cur.mogrify('INSERT INTO oauth_token (client_id, grant_type, token, data, expires_at, refresh_token, refresh_token_expires_at, scopes, user_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT (client_id) DO UPDATE SET token = %s, expires_at = %s, refresh_token = %s, refresh_token_expires_at = %s', (client_id, grant_type, token, data, expires_at, refresh_token, refresh_token_expires_at, scopes, user_id, token, expires_at, refresh_token, refresh_token_expires_at))
+
+        cur.execute(query)
+        self.conn.commit()
+
+    def save_client(self, identifier, secret, role, redirect_uris, authorized_grants, authorized_response_types):
+        cur = self._cursor()
+        query = cur.mogrify('INSERT INTO oauth_client (identifier, secret, role, redirect_uris, authorized_grants, authorized_response_types) VALUES (%s,%s,%s,%s,%s,%s)', (identifier, secret, role, redirect_uris, authorized_grants, authorized_response_types))
+        cur.execute(query)
+        self.conn.commit()
+
+    def fetch_by_client_id(self, client_id):
+        cur = self._cursor()
+        query = 'SELECT * FROM oauth_client WHERE identifier = %s'
+        cur.execute(query, (client_id,))
+
+        return cur.fetchone()
