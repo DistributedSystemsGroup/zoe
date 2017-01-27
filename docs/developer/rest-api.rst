@@ -264,6 +264,78 @@ Statistics endpoint
 
 This endpoint does not need authentication. It returns current statistics about the internal Zoe status.
 
+OAuth2 endpoint
+---------------
+
+This endpoint aims to help users authenticate/authorize via an access token instead of raw username/password. It does need authentication when users require new access token. You can refresh an access token by a refresh token.
+
+Request new access token
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Request::
+
+    curl -u 'username:password' http://bf5:8080/api/0.6/oauth/token -X POST -H 'Content-Type: application/json' -d '{"grant_type": "password"}'
+
+Will return a JSON document, like this::
+
+    {
+        "token_type": "Bearer",
+        "access_token": "3ddbe9ba-6a21-4e4d-993b-70556390c5d3",
+        "refresh_token": "9bab190f-e211-42aa-917e-20ce987e355e",
+        "expires_in": 36000
+    }
+
+Where:
+
+* ``token_type`` is the type of the token, **Bearer** is used as default
+* ``access_token`` is the token used for further authentication/authorization with others api endpoints
+* ``refresh_token`` is the token used to get new access token when the current one has expired
+* ``expires_in`` is the duration of time (second) when the access_token would be expired
+
+Refresh an access token
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Request::
+
+    curl  -H 'Authorization: Bearer 9bab190f-e211-42aa-917e-20ce987e355e' http://bf5:8080/api/0.6/oauth/token -X POST -H 'Content-Type: application/json' -d '{"grant_type": "refresh_token"}'
+
+Will return a JSON document, like this::
+
+    {
+        "token_type": "Bearer",
+        "access_token": "378f8d5f-2eb5-4181-b632-ad23c4534d32",
+        "expires_in": 36000
+    }
+
+Where:
+
+* ``access_token`` is the new access token after users issue a refresh
+
+Revoke an access/refresh token
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Request::
+
+    curl -u 'usernam:password' -X DELETE http://bf5:8080/api/0.6/oauth/revoke/<token>
+
+Where:
+
+* ``token`` is the access token or refresh token needs to be revoked
+
+Will return a JSON document, like this::
+
+    {
+        "ret": "Revoked token."
+    }
+
+Authenticate other api endpoint
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Instead of sending raw username, password to request results from other api endpoints which require authentication, use an access token with header ``Authorization: Bearer <token>``
+
+Example::
+
+    curl -H 'Authorization: Bearer 378f8d5f-2eb5-4181-b632-ad23c4534d32' http://bf5:8080/api/0.6/execution
+
 Scheduler
 ^^^^^^^^^
 Request::
@@ -281,3 +353,4 @@ Where:
 
 * ``termination_threads_count`` is the number of executions that are pending for termination and cleanup
 * ``queue_length`` is the number of executions in the queue waiting to be started
+
