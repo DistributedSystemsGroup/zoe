@@ -51,8 +51,7 @@ class DockerContainerOptions:
     """Wrapper for the Docker container options."""
     def __init__(self):
         self.env = {}
-        self.volume_binds = []
-        self.volumes = []
+        self.volumes = {}
         self.command = ""
         self.memory_limit = 2 * (1024**3)
         self.name = ''
@@ -78,16 +77,11 @@ class DockerContainerOptions:
 
     def add_volume_bind(self, path: str, mountpoint: str, readonly=False) -> None:
         """Add a volume to the container."""
-        self.volumes.append(mountpoint)
-        self.volume_binds.append(path + ":" + mountpoint + ":" + ("ro" if readonly else "rw"))
+        self.volumes[path] = {'bind': mountpoint, 'mode': ("ro" if readonly else "rw")}
 
     def get_volumes(self) -> Iterable[str]:
         """Get the volumes in Docker format."""
         return self.volumes
-
-    def get_volume_binds(self) -> Iterable[str]:
-        """Get the volumes in another Docker format."""
-        return self.volume_binds
 
     def set_command(self, cmd):
         """Setter for the command to run in the container."""
@@ -146,7 +140,7 @@ class SwarmClient:
     """The Swarm client class that wraps the Docker API."""
     def __init__(self, opts: Namespace) -> None:
         self.opts = opts
-        url = opts.swarm
+        url = opts.backend_swarm_url
         if 'zk://' in url:
             url = url[len('zk://'):]
             manager = zookeeper_swarm(url, opts.backend_swarm_zk_path)
@@ -158,7 +152,7 @@ class SwarmClient:
         else:
             raise ZoeLibException('Unsupported URL scheme for Swarm')
         log.debug('Connecting to Swarm at {}'.format(manager))
-        self.cli = docker.Client(base_url=manager, version="auto")
+        self.cli = docker.DockerClient(base_url=manager, version="auto")
 
     def info(self) -> ClusterStats:
         """Retrieve Swarm statistics. The Docker API returns a mess difficult to parse."""
@@ -215,36 +209,44 @@ class SwarmClient:
         cont = None
         port_bindings = {}  # type: Dict[str, Any]
         for port in options.ports:
-            port_bindings[port] = None
+            port_bindings[str(port) + '/tcp'] = None
 
         for constraint in options.constraints:
             options.add_env_variable(constraint, None)
 
         if options.gelf_log_address != '':
-            log_config = docker.utils.LogConfig(type="gelf", config={'gelf-address': options.gelf_log_address, 'labels': ",".join(options.labels)})
+            log_config = {
+                "type": "gelf",
+                "config": {
+                    'gelf-address': options.gelf_log_address,
+                    'labels': ",".join(options.labels)
+                }
+            }
         else:
-            log_config = docker.utils.LogConfig(type="json-file")
+            log_config = {
+                "type": "json-file",
+                "config": {}
+            }
 
         try:
-            host_config = self.cli.create_host_config(network_mode=options.network_name,
-                                                      binds=options.get_volume_binds(),
-                                                      mem_limit=options.get_memory_limit(),
-                                                      memswap_limit=options.get_memory_limit(),
-                                                      restart_policy=options.restart_policy,
-                                                      port_bindings=port_bindings,
-                                                      log_config=log_config)
-            cont = self.cli.create_container(image=image,
-                                             environment=options.environment,
-                                             network_disabled=False,
-                                             host_config=host_config,
-                                             detach=True,
-                                             name=options.name,
-                                             hostname=options.name,
-                                             volumes=options.get_volumes(),
-                                             command=options.get_command(),
-                                             ports=options.ports,
-                                             labels=options.labels)
-            self.cli.start(container=cont.get('Id'))
+            cont = self.cli.containers.run(image=image,
+                                           command=options.get_command(),
+                                           detach=True,
+                                           environment=options.environment,
+                                           hostname=options.name,
+                                           labels=options.labels,
+                                           log_config=log_config,
+                                           mem_limit=options.get_memory_limit(),
+                                           memswap_limit=options.get_memory_limit(),
+                                           name=options.name,
+                                           networks=[options.network_name],
+                                           network_disabled=False,
+                                           network_mode=options.network_name,
+                                           ports=port_bindings,
+                                           restart_policy=options.restart_policy,
+                                           volumes=options.get_volumes())
+        except docker.errors.ImageNotFound:
+            raise ZoeLibException(message='Image not found')
         except docker.errors.APIError as e:
             if cont is not None:
                 self.cli.remove_container(container=cont.get('Id'), force=True)
@@ -257,54 +259,64 @@ class SwarmClient:
                 self.cli.remove_container(container=cont.get('Id'), force=True)
             raise ZoeLibException(str(e))
 
-        info = self.inspect_container(cont.get('Id'))
+        cont = self.cli.containers.get(cont.id)
+        return self._container_summary(cont)
+
+    def _container_summary(self, container: docker.models.containers.Container):
+        """Translate a docker-specific container object into a simple dictionary."""
+        info = {
+            "id": container.id,
+            "ip_address": {},
+            "name": container.name,
+            'host': container.attrs['Node']['Name'],
+            'labels': container.attrs['Config']['Labels']
+        }  # type: Dict[str, Any]
+
+        for net in container.attrs["NetworkSettings"]["Networks"]:
+            if len(container.attrs["NetworkSettings"]["Networks"][net]['IPAddress']) > 0:
+                info["ip_address"][net] = container.attrs["NetworkSettings"]["Networks"][net]['IPAddress']
+            else:
+                info["ip_address"][net] = None
+
+        if container.status == 'running':
+            info["state"] = "running"
+            info["running"] = True
+        elif container.status == "paused":
+            info["state"] = "paused"
+            info["running"] = False
+        elif container.status == 'restarting':
+            info["state"] = "restarting"
+            info["running"] = True
+        elif container.status == 'OOMKilled' or container.status == 'exited':
+            info["state"] = "killed"
+            info["running"] = False
+        else:
+            log.error('Unknown container status: {}'.format(container.status))
+            info["state"] = "unknown"
+            info["running"] = False
+
+        info['ports'] = {}
+        if container.attrs['NetworkSettings']['Ports'] is not None:
+            for port in container.attrs['NetworkSettings']['Ports']:
+                if container.attrs['NetworkSettings']['Ports'][port] is not None:
+                    mapping = (
+                        container.attrs['NetworkSettings']['Ports'][port][0]['HostIp'],
+                        container.attrs['NetworkSettings']['Ports'][port][0]['HostPort']
+                    )
+                    info['ports'][port] = mapping
+                else:
+                    info['ports'][port] = None
+
+
         return info
 
     def inspect_container(self, docker_id: str) -> Dict[str, Any]:
         """Retrieve information about a running container."""
         try:
-            docker_info = self.cli.inspect_container(container=docker_id)
+            cont = self.cli.container.get(docker_id)
         except Exception as e:
             raise ZoeLibException(str(e))
-
-        info = {
-            "docker_id": docker_id,
-            "ip_address": {}
-        }  # type: Dict[str, Any]
-        for net in docker_info["NetworkSettings"]["Networks"]:
-            if len(docker_info["NetworkSettings"]["Networks"][net]['IPAddress']) > 0:
-                info["ip_address"][net] = docker_info["NetworkSettings"]["Networks"][net]['IPAddress']
-            else:
-                info["ip_address"][net] = None
-
-        if docker_info["State"]["Running"]:
-            info["state"] = "running"
-            info["running"] = True
-        elif docker_info["State"]["Paused"]:
-            info["state"] = "paused"
-            info["running"] = True
-        elif docker_info["State"]["Restarting"]:
-            info["state"] = "restarting"
-            info["running"] = True
-        elif docker_info["State"]["OOMKilled"] or docker_info["State"]["Dead"]:
-            info["state"] = "killed"
-            info["running"] = False
-        else:
-            info["state"] = "unknown"
-            info["running"] = False
-
-        info['ports'] = {}
-        if docker_info['NetworkSettings']['Ports'] is not None:
-            for port in docker_info['NetworkSettings']['Ports']:
-                if docker_info['NetworkSettings']['Ports'][port] is not None:
-                    mapping = (
-                        docker_info['NetworkSettings']['Ports'][port][0]['HostIp'],
-                        docker_info['NetworkSettings']['Ports'][port][0]['HostPort']
-                    )
-                    info['ports'][port] = mapping
-                else:
-                    info['ports'][port] = None
-        return info
+        return self._container_summary(cont)
 
     def terminate_container(self, docker_id: str, delete=False) -> None:
         """
@@ -316,32 +328,14 @@ class SwarmClient:
         :type delete: bool
         :return: None
         """
-        retries = 5
-        while retries > 0:
-            if delete:
-                try:
-                    self.cli.remove_container(docker_id, force=True)
-                    break
-                except docker.errors.NotFound:
-                    log.warning("cannot remove a non-existent service")
-                    break
-                except requests.exceptions.ReadTimeout:
-                    log.error("Read timeout trying to delete a container")
-                    retries -= 1
-                    continue
-            else:
-                try:
-                    self.cli.kill(docker_id)
-                    break
-                except docker.errors.NotFound:
-                    log.warning("cannot remove a non-existent service")
-                    break
-                except requests.exceptions.ReadTimeout:
-                    log.error("Read timeout trying to delete a container")
-                    retries -= 1
-                    continue
-        if retries == 0:
-            log.error("Giving up trying to terminate container {}".format(docker_id))
+        try:
+            cont = self.cli.containers.get(docker_id)
+        except docker.errors.NotFound:
+            return
+
+        cont.stop(timeout=5)
+        if delete:
+            cont.remove(force=True)
 
     def event_listener(self, callback: Callable[[str], bool]) -> None:
         """An infinite loop that listens for events from Swarm."""
@@ -366,16 +360,20 @@ class SwarmClient:
     def connect_to_network(self, container_id: str, network_id: str) -> None:
         """Connect a container to a network."""
         try:
-            self.cli.connect_container_to_network(container_id, network_id)
-        except Exception as e:
-            log.exception(str(e))
+            net = self.cli.networks.get(network_id)
+        except docker.errors.NotFound:
+            log.error('Trying to connect to a non-existent network')
+            return
+        net.connect(container_id)
 
     def disconnect_from_network(self, container_id: str, network_id: str) -> None:
         """Disconnects a container from a network."""
         try:
-            self.cli.disconnect_container_from_network(container_id, network_id)
-        except Exception as e:
-            log.exception(str(e))
+            net = self.cli.networks.get(network_id)
+        except docker.errors.NotFound:
+            log.error('Trying to connect to a non-existent network')
+            return
+        net.disconnect(container_id)
 
     def list(self, only_label=None) -> Iterable[dict]:
         """
@@ -384,24 +382,18 @@ class SwarmClient:
         :param only_label: filter containers with only a certain label
         :return: a list of containers
         """
-        ret = self.cli.containers(all=True)
+        ret = self.cli.containers.list(all=True)
         conts = []
         for cont_info in ret:
             match = True
             for key, value in only_label.items():
-                if key not in cont_info['Labels']:
+                if key not in cont_info.attrs['Config']['Labels']:
                     match = False
                     break
-                if cont_info['Labels'][key] != value:
+                if cont_info.attrs['Config']['Labels'][key] != value:
                     match = False
                     break
             if match:
-                aux = cont_info['Names'][0].split('/')  # Swarm returns container names in the form /host/name
-                conts.append({
-                    'id': cont_info['Id'],
-                    'host': aux[1],
-                    'name': aux[2],
-                    'labels': cont_info['Labels'],
-                    'status': cont_info['State']
-                })
+                conts.append(self._container_summary(cont_info))
+
         return conts

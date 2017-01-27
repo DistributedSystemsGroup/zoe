@@ -23,6 +23,7 @@ from zoe_lib.state import Execution, Service
 
 from zoe_master.backends.base import BaseBackend
 from zoe_master.backends.old_swarm.backend import OldSwarmBackend
+from zoe_master.backends.old_swarm_new_api.backend import OldSwarmNewAPIBackend
 from zoe_master.exceptions import ZoeStartExecutionFatalException, ZoeStartExecutionRetryException
 
 log = logging.getLogger(__name__)
@@ -33,6 +34,8 @@ def _get_backend() -> BaseBackend:
     backend_name = get_conf().backend
     if backend_name == 'OldSwarm':
         return OldSwarmBackend(get_conf())
+    elif backend_name == 'OldSwarmNewAPI':
+        return OldSwarmNewAPIBackend(get_conf())
     else:
         log.error('Unknown backend selected')
         assert False
@@ -92,7 +95,7 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
             return "fatal"
         else:
             execution.set_running()
-            return "ok"
+    return "ok"
 
 
 def start_all(execution: Execution) -> str:
