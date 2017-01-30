@@ -1,6 +1,6 @@
 # Zoe Changelog
 
-## Version 0.20.0
+## Version 0.20.0 - in progress
 
 * The scheduler implementation is now configurable
 * New elastic scheduler added, the default remains the one available in previous releases
