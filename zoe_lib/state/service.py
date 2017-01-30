@@ -111,6 +111,12 @@ class Service:
             self.volumes = [VolumeDescription(v) for v in self.description['volumes']]
         self.ports = [ExposedPort(p) for p in self.description['ports']]
 
+        if get_conf().backend == 'Kubernetes':
+            if 'replicas' in self.description:
+                self.replicas = self.description['replicas']
+            else:
+                self.replicas = 1
+
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""
         return {

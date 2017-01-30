@@ -18,10 +18,12 @@
 import docker
 import time
 import logging
+import random
 
 import zoe_api.proxy.base
 import zoe_api.api_endpoint
 from zoe_master.backends.old_swarm.api_client import SwarmClient
+from zoe_master.backends.kubernetes.api_client import KubernetesClient
 from zoe_lib.config import get_conf
 
 log = logging.getLogger(__name__)
@@ -56,17 +58,31 @@ class ApacheProxy(zoe_api.proxy.base.BaseProxy):
             
             #Start proxifying by adding entry to use proxypass and proxypassreverse in apache2 config file
             for srv in exe.services:
-                swarm = SwarmClient(get_conf())
-                
-                s_info = swarm.inspect_container(srv.backend_id)
                 ip, p = None, None
-                portList = s_info['ports']
+                if get_conf().backend == 'OldSwarm':
+                    swarm = SwarmClient(get_conf())
+                    s_info = swarm.inspect_container(srv.docker_id)
+                    portList = s_info['ports']
 
-                for s in portList.values():
-                    if s != None:
-                        ip = s[0]
-                        p = s[1]
+                    for s in portList.values():
+                        if s != None:
+                            ip = s[0]
+                            p = s[1]
 
+                else:
+                    kube = KubernetesClient(get_conf())
+                    s_info = kube.inspect_service(srv.dns_name)
+                    
+                    kubeNodes = kube.info().nodes
+                    hostIP = random.choice(kubeNodes).name
+                    
+                    while 'nodePort' not in s_info['port_forwarding'][0]:
+                        log.info('Waiting for service get started before proxifying...')
+                        s_info = kube.inspect_service(srv.dns_name)
+                        time.sleep(0.5)
+
+                    ip = hostIP
+                    p = s_info['port_forwarding'][0]['nodePort']
                 base_path = '/zoe/' + uid + '/' + str(id) + '/' + srv.name
                 original_path = str(ip) + ':' + str(p) + base_path
                 
@@ -89,7 +105,7 @@ class ApacheProxy(zoe_api.proxy.base.BaseProxy):
                  '',
                  '</VirtualHost>']
 
-        docker_client = SwarmClient(get_conf()).cli
+        docker_client = docker.Client(base_url=get_conf().proxy_docker_sock)
 
         delCommand = "sed -i '$ d' " + get_conf().proxy_config_file # /etc/apache2/sites-available/all.conf"
         delID = docker_client.exec_create(get_conf().proxy_container, delCommand)
@@ -108,7 +124,7 @@ class ApacheProxy(zoe_api.proxy.base.BaseProxy):
     def unproxify(self, uid, role, id):
         log.info('Unproxifying for user %s - execution %s', uid, str(id))
         pattern = '/zoe\/' + uid + '\/' + str(id) + '/d'
-        docker_client = docker.Client(base_url="unix:///var/run/docker.sock")
+        docker_client = docker.Client(base_url=get_conf().proxy_docker_sock)
         delCommand = 'sed -i "' + pattern + '" ' + get_conf().proxy_config_file #  /etc/apache2/sites-available/all.conf'
         delID = docker_client.exec_create(get_conf().proxy_container, delCommand)
         docker_client.exec_start(delID)
