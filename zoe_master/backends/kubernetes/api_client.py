@@ -29,11 +29,14 @@ import humanfriendly
 from typing import Iterable, Callable, Dict, Any, Union
 
 from zoe_master.stats import ClusterStats, NodeStats
+from zoe_lib.version import ZOE_VERSION
 
 from argparse import Namespace
 from typing import Dict, Any
 
 log = logging.getLogger(__name__)
+
+zoe_labels = {"app": "zoe", "version": ZOE_VERSION}
 
 class DockerContainerOptions:
     """Wrapper for the Docker container options."""
@@ -267,11 +270,15 @@ class KubernetesClient:
         config = KubernetesReplicationControllerConf()
         config.setName(options.name)
 
-        config.setLabels({'service_name' : options.name, 'app': 'zoe'})
+        config.setLabels(zoe_labels)
+        config.setLabels({'service_name' : options.name})
         config.setReplicas(options.get_replicas())
         
-        config.setSpecSelector({'service_name' : options.name, 'app': 'zoe'})
-        config.setSpecTemplateMetadataLabels({'service_name': options.name, 'app': 'zoe'})
+        config.setSpecSelector(zoe_labels)
+        config.setSpecSelector({'service_name' : options.name})
+        
+        config.setSpecTemplateMetadataLabels(zoe_labels)
+        config.setSpecTemplateMetadataLabels({'service_name': options.name})
 
         config.setSpecTemplateSpecContainerImage(image)
         config.setSpecTemplateSpecContainerName(options.name)
@@ -344,7 +351,7 @@ class KubernetesClient:
 
     def replication_controller_list(self):
         """Get list of replication controller."""
-        repconList = pykube.ReplicationController.objects(self.api).filter(selector={"app":"zoe"}).iterator()
+        repconList = pykube.ReplicationController.objects(self.api).filter(selector=zoe_labels).iterator()
         rclist = []
         try:
             for rc in repconList:
@@ -356,7 +363,7 @@ class KubernetesClient:
 
     def replication_controller_event(self):
         """Get event stream of the replication controller."""
-        rcStream =  pykube.ReplicationController.objects(self.api).filter(selector={"app":"zoe"}).watch()
+        rcStream =  pykube.ReplicationController.objects(self.api).filter(selector=zoe_labels).watch()
         return rcStream
 
     def spawn_service(self, image: str, options: DockerContainerOptions):
@@ -364,12 +371,14 @@ class KubernetesClient:
         config = KubernetesServiceConf()
 
         config.setName(options.name)
-        config.setLabels({'service_name' : options.name, 'app' : 'zoe'})
+        config.setLabels(zoe_labels)
+        config.setLabels({'service_name' : options.name})
 
         if len(options.ports) > 0:
             config.setPorts(options.ports)
 
-        config.setSelectors({'service_name' : options.name, 'app' : 'zoe'})
+        config.setSelectors(zoe_labels)
+        config.setSelectors({'service_name' : options.name})
 
         try:
             pykube.Service(self.api, config.getJson()).create()
@@ -417,7 +426,9 @@ class KubernetesClient:
             pykube.ReplicationController(self.api, delObj).delete()
 
             delObj['kind'] = 'Pod'
-            pods = pykube.Pod.objects(self.api).filter(namespace="default", selector={"service_name": name, "app": "zoe"}).iterator()
+            pod_selector=zoe_labels
+            pod_selector['service_name'] = name
+            pods = pykube.Pod.objects(self.api).filter(namespace="default", selector=pod_selector).iterator()
             for p in pods:
                 delObj['metadata']['name'] = str(p)
                 pykube.Pod(self.api, delObj).delete()
