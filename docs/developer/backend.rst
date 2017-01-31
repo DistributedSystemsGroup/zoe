@@ -23,12 +23,3 @@ Whenever Zoe needs to access the container backend it will create a new instance
 
 .. autoclass:: zoe_master.backends.base.BaseBackend
    :members:
-
-Obligations for backends
-------------------------
-
-When a backend creates a container it must:
-
-1. add all variables from ``zoe_master.backends.common.gen_environment(service, execution)`` to the environment of the container
-2. add all volumes from ``zoe_master.backends.common.gen_volumes(service, execution)`` to the environment of the container
-3. run the /zoe.sh script as the container entrypoint, passing any command specified in the application description as one or more arguments

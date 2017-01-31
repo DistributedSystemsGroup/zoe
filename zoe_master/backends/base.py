@@ -15,10 +15,9 @@
 
 """The base class that all backends should implement."""
 
-from typing import Dict
-
 from zoe_lib.state import Execution, Service
 from zoe_master.stats import ClusterStats
+from zoe_master.backends.service_instance import ServiceInstance
 
 
 class BaseBackend:
@@ -34,8 +33,17 @@ class BaseBackend:
         """Performs a clean shutdown of the resources used by Swarm backend. Any threads that where started in the init() method should be terminated here. This method will be called when Zoe shuts down."""
         raise NotImplementedError
 
-    def spawn_service(self, execution: Execution, service: Service):
-        """Create a container for a service."""
+    def spawn_service(self, service_instance: ServiceInstance):
+        """Create a container for a service.
+
+        The backend translates all the configuration parameters given in the ServiceInstance object into backend-specific container options and starts the container.
+
+        This function should either:
+
+        * raise ``ZoeStartExecutionRetryException`` in case a temporary error is generated
+        * raise ``ZoeStartExecutionFatalException`` in case a fatal error is generated
+        * return a backend-specific ID that will be used later by Zoe to interact with the running container
+        """
         raise NotImplementedError
 
     def terminate_service(self, service: Service) -> None:
