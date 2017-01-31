@@ -39,6 +39,9 @@ def _check_configuration_sanity():
     if not os.access(config.get_conf().logs_base_path, os.W_OK):
         log.error('Logs directory {} is not writable'.format(config.get_conf().logs_base_path))
         return 1
+    if not os.path.exists(os.path.join(config.get_conf().workspace_base_path, config.get_conf().workspace_deployment_path)):
+        log.error('Workspace base directory does not exist: {}'.format(os.path.join(config.get_conf().workspace_base_path, config.get_conf().workspace_deployment_path)))
+        return 1
     return 0
 
 
