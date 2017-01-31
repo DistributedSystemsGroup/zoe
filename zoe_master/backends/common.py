@@ -15,23 +15,38 @@
 
 """The high-level interface that Zoe uses to talk to the configured container backend."""
 
-from typing import Dict
+from zoe_lib.state import Service, Execution
+from zoe_lib.config import get_conf
+from zoe_master.workspace.filesystem import ZoeFSWorkspace
 
-from zoe_lib.state import Service
-from zoe_master.exceptions import ZoeStartExecutionFatalException
 
+def gen_environment(service: Service, execution: Execution):
+    """Return the list of environment variables that needs to be added to all containers."""
+    fswk = ZoeFSWorkspace()
+    env_list = [
+        ('ZOE_EXECUTION_ID', execution.id),
+        ('ZOE_EXECUTION_NAME', execution.name),
+        ('ZOE_SERVICE_GROUP', service.service_group),
+        ('ZOE_SERVICE_NAME', service.name),
+        ('ZOE_SERVICE_ID', service.id),
+        ('ZOE_OWNER', execution.user_id),
+        ('ZOE_DEPLOYMENT_NAME', get_conf().deployment_name),
+        ('ZOE_MY_DNS_NAME', service.dns_name),
+        ('ZOE_WORKSPACE', fswk.get_mountpoint())
+    ]
+    service_list = []
+    for tmp_service in execution.services:
+        service_list.append(tmp_service.dns_name)
+    env_list.append(('ZOE_EXECUTION_SERVICE_LIST', ','.join(service_list)))
 
-def gen_environment(service: Service, env_subst_dict: Dict):
-    """ Generate a dictionary containing the current cluster status (before the new container is spawned)
-
-    This information is used to substitute template strings in the environment variables."""
-    env_list = []
-    for env_name, env_value in service.environment:
-        try:
-            env_value = env_value.format(**env_subst_dict)
-        except KeyError:
-            error_msg = "Unknown variable in environment expression '{}', known variables are: {}".format(env_value, list(env_subst_dict.keys()))
-            service.set_error(error_msg)
-            raise ZoeStartExecutionFatalException("Service {} has wrong environment expression")
-        env_list.append((env_name, env_value))
     return env_list
+
+
+def gen_volumes(service: Service, execution: Execution):
+    """Return the list of default volumes to be added to all containers."""
+    vol_list = []
+    fswk = ZoeFSWorkspace()
+    if fswk.can_be_attached():
+        vol_list.append(fswk.get(execution.user_id))
+
+    return vol_list

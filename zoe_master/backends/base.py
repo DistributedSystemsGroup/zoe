@@ -34,7 +34,7 @@ class BaseBackend:
         """Performs a clean shutdown of the resources used by Swarm backend. Any threads that where started in the init() method should be terminated here. This method will be called when Zoe shuts down."""
         raise NotImplementedError
 
-    def spawn_service(self, execution: Execution, service: Service, env_subst_dict: Dict):
+    def spawn_service(self, execution: Execution, service: Service):
         """Create a container for a service."""
         raise NotImplementedError
 

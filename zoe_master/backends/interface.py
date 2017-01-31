@@ -59,21 +59,10 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
 
     ordered_service_list = sorted(service_list, key=lambda x: x.startup_order)
 
-    env_subst_dict = {
-        'execution_id': execution.id,
-        "execution_name": execution.name,
-        'user_name': execution.user_id,
-        'deployment_name': get_conf().deployment_name,
-    }
-
     for service in ordered_service_list:
-        env_subst_dict['dns_name#' + service.name] = service.dns_name
-
-    for service in ordered_service_list:
-        env_subst_dict['dns_name#self'] = service.dns_name
         service.set_starting()
         try:
-            backend.spawn_service(execution, service, env_subst_dict)
+            backend.spawn_service(execution, service)
         except ZoeStartExecutionRetryException as ex:
             log.warning('Temporary failure starting service {} of execution {}: {}'.format(service.id, execution.id, ex.message))
             execution.set_error_message(ex.message)

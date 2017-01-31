@@ -16,14 +16,12 @@
 """Zoe backend implementation for old-style stand-alone Docker Swarm."""
 
 import logging
-from typing import Dict
 
 from zoe_lib.config import get_conf
 from zoe_lib.exceptions import ZoeLibException, ZoeNotEnoughResourcesException
 from zoe_lib.state import Execution, Service
 from zoe_master.backends.old_swarm.api_client import DockerContainerOptions, SwarmClient
 from zoe_master.exceptions import ZoeStartExecutionRetryException, ZoeStartExecutionFatalException, ZoeException
-from zoe_master.workspace.filesystem import ZoeFSWorkspace
 import zoe_master.backends.common
 import zoe_master.backends.base
 from zoe_master.backends.old_swarm.threads import SwarmMonitor, SwarmStateSynchronizer
@@ -55,7 +53,7 @@ class OldSwarmNewAPIBackend(zoe_master.backends.base.BaseBackend):
         _monitor.quit()
         _checker.quit()
 
-    def spawn_service(self, execution: Execution, service: Service, env_subst_dict: Dict):
+    def spawn_service(self, execution: Execution, service: Service):
         """Spawn a service, translating a Zoe Service into a Docker container."""
         copts = DockerContainerOptions()
         copts.gelf_log_address = get_conf().gelf_address
@@ -84,7 +82,7 @@ class OldSwarmNewAPIBackend(zoe_master.backends.base.BaseBackend):
         # copts.restart = not service.is_monitor  # Monitor containers should not restart
         copts.restart = False
 
-        env_vars = zoe_master.backends.common.gen_environment(service, env_subst_dict)
+        env_vars = zoe_master.backends.common.gen_environment(service, execution)
         for name, value in env_vars:
             copts.add_env_variable(name, value)
 
@@ -92,7 +90,8 @@ class OldSwarmNewAPIBackend(zoe_master.backends.base.BaseBackend):
             if port.expose:
                 copts.ports.append(port.number)
 
-        for volume in service.volumes:
+        zoe_volumes = zoe_master.backends.common.gen_volumes(service, execution)
+        for volume in service.volumes + zoe_volumes:
             if volume.type == "host_directory":
                 copts.add_volume_bind(volume.path, volume.mount_point, volume.readonly)
             else:
@@ -101,11 +100,6 @@ class OldSwarmNewAPIBackend(zoe_master.backends.base.BaseBackend):
         # if 'constraints' in service.description:
         #     for constraint in service.description['constraints']:
         #         copts.add_constraint(constraint)
-
-        fswk = ZoeFSWorkspace()
-        if fswk.can_be_attached():
-            copts.add_volume_bind(fswk.get_path(execution.user_id), fswk.get_mountpoint(), False)
-            copts.add_env_variable('ZOE_WORKSPACE', fswk.get_mountpoint())
 
         # The same dictionary is used for templates in the command
         copts.set_command(service.command.format(**env_subst_dict))
