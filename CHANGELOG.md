@@ -6,6 +6,8 @@
 * New elastic scheduler added, the default remains the one available in previous releases
 * Abstraction of container backends, that are now configurable as well
 * Added a new backend based on the old swarm, but using the new docker API library. The old Swarm backend is not deprecated and will be removed in the next release
+* Use underscores in container labels instead of dots, to work around special meaning of dots in several monitoring systems
+* A revised ZApp format and packaging, see the ZApp documentation for more details
 
 ## Version 0.10.2
 
