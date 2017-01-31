@@ -17,13 +17,12 @@
 
 import logging
 
-from zoe_lib.config import get_conf
 from zoe_lib.exceptions import ZoeLibException, ZoeNotEnoughResourcesException
-from zoe_lib.state import Execution, Service
-from zoe_master.backends.old_swarm_new_api.api_client import DockerContainerOptions, SwarmClient
+from zoe_lib.state import Service
+from zoe_master.backends.old_swarm_new_api.api_client import SwarmClient
 from zoe_master.exceptions import ZoeStartExecutionRetryException, ZoeStartExecutionFatalException, ZoeException
-import zoe_master.backends.common
 import zoe_master.backends.base
+from zoe_master.backends.service_instance import ServiceInstance
 from zoe_master.backends.old_swarm_new_api.threads import SwarmMonitor, SwarmStateSynchronizer
 from zoe_master.stats import NodeStats, ClusterStats  # pylint: disable=unused-import
 
@@ -53,66 +52,16 @@ class OldSwarmNewAPIBackend(zoe_master.backends.base.BaseBackend):
         _monitor.quit()
         _checker.quit()
 
-    def spawn_service(self, execution: Execution, service: Service):
+    def spawn_service(self, service_instance: ServiceInstance):
         """Spawn a service, translating a Zoe Service into a Docker container."""
-        copts = DockerContainerOptions()
-        copts.gelf_log_address = get_conf().gelf_address
-        copts.name = service.dns_name
-        copts.set_memory_limit(service.resource_reservation.memory)
-        copts.network_name = get_conf().overlay_network_name
-        copts.labels = {
-            'zoe.execution.name': execution.name,
-            'zoe.execution.id': str(execution.id),
-            'zoe.service.name': service.name,
-            'zoe.service.id': str(service.id),
-            'zoe.owner': execution.user_id,
-            'zoe.deployment_name': get_conf().deployment_name,
-            'zoe.type': 'app_service'
-        }
-        if service.is_monitor:
-            copts.labels['zoe.monitor'] = 'true'
-        else:
-            copts.labels['zoe.monitor'] = 'false'
-
-        # Always disable autorestart
-        # if 'disable_autorestart' in execution.description and execution.description['disable_autorestart']:
-        #     log.debug("Autorestart disabled for service {}".format(service.id))
-        #     copts.restart = False
-        # else:
-        # copts.restart = not service.is_monitor  # Monitor containers should not restart
-        copts.restart = False
-
-        env_vars = zoe_master.backends.common.gen_environment(service, execution)
-        for name, value in env_vars:
-            copts.add_env_variable(name, value)
-
-        for port in service.ports:
-            if port.expose:
-                copts.ports.append(port.number)
-
-        zoe_volumes = zoe_master.backends.common.gen_volumes(service, execution)
-        for volume in service.volumes + zoe_volumes:
-            if volume.type == "host_directory":
-                copts.add_volume_bind(volume.path, volume.mount_point, volume.readonly)
-            else:
-                log.warning('Docker Swarm backend does not support volume type {}'.format(volume.type))
-
-        # if 'constraints' in service.description:
-        #     for constraint in service.description['constraints']:
-        #         copts.add_constraint(constraint)
-
-        # The same dictionary is used for templates in the command
-        copts.set_command(service.command.format(**env_subst_dict))
-
         try:
-            cont_info = self.swarm.spawn_container(service.image_name, copts)
+            cont_info = self.swarm.spawn_container(service_instance)
         except ZoeNotEnoughResourcesException:
-            service.set_error('Not enough free resources to satisfy reservation request')
-            raise ZoeStartExecutionRetryException('Not enough free resources to satisfy reservation request for service {}'.format(service.name))
+            raise ZoeStartExecutionRetryException('Not enough free resources to satisfy reservation request for service {}'.format(service_instance.name))
         except (ZoeException, ZoeLibException) as e:
             raise ZoeStartExecutionFatalException(str(e))
 
-        service.set_active(cont_info["id"], cont_info['ip_address'][get_conf().overlay_network_name])
+        return cont_info["id"]
 
     def terminate_service(self, service: Service) -> None:
         """Terminate and delete a container."""

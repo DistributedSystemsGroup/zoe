@@ -67,6 +67,7 @@ class DockerContainerOptions:
         self.labels = []
         self.gelf_log_address = ''
         self.constraints = []
+        self.entrypoint = ''
 
     def add_constraint(self, constraint):
         """Add a placement constraint (use docker syntax)."""
@@ -101,6 +102,10 @@ class DockerContainerOptions:
     def get_command(self) -> str:
         """Getter for the command to run in the container."""
         return self.command
+
+    def set_entrypoint(self, entrypoint):
+        """Setter for the entrypoint."""
+        self.entrypoint = entrypoint
 
     def set_memory_limit(self, limit: int):
         """Setter for the memory limit of the container."""
@@ -252,6 +257,7 @@ class SwarmClient:
                                              volumes=options.get_volumes(),
                                              command=options.get_command(),
                                              ports=options.ports,
+                                             entrypoint=options.entrypoint,
                                              labels=options.labels)
             self.cli.start(container=cont.get('Id'))
         except docker.errors.APIError as e:

@@ -22,6 +22,7 @@ from zoe_lib.config import get_conf
 from zoe_lib.state import Execution, Service
 
 from zoe_master.backends.base import BaseBackend
+from zoe_master.backends.service_instance import ServiceInstance
 from zoe_master.backends.old_swarm.backend import OldSwarmBackend
 import zoe_master.backends.old_swarm.api_client
 from zoe_master.backends.old_swarm_new_api.backend import OldSwarmNewAPIBackend
@@ -67,10 +68,12 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
 
     for service in ordered_service_list:
         service.set_starting()
+        instance = ServiceInstance(execution, service)
         try:
-            backend.spawn_service(execution, service)
+            backend_id = backend.spawn_service(instance)
         except ZoeStartExecutionRetryException as ex:
             log.warning('Temporary failure starting service {} of execution {}: {}'.format(service.id, execution.id, ex.message))
+            service.set_error(ex.message)
             execution.set_error_message(ex.message)
             terminate_execution(execution)
             execution.set_scheduled()
@@ -89,7 +92,8 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
             execution.set_error()
             return "fatal"
         else:
-            execution.set_running()
+            service.set_active(backend_id)
+
     return "ok"
 
 

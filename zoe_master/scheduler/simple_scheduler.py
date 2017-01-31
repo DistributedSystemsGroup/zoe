@@ -108,6 +108,8 @@ class ZoeSimpleScheduler(ZoeBaseScheduler):
             ret = start_all(e)
             if ret == 'requeue':
                 self.fifo_queue.append(e)
+            else:
+                e.set_running()
 
     def quit(self):
         """Stop the scheduler thread."""

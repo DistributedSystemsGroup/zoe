@@ -15,10 +15,9 @@
 
 """Interface to the low-level Docker API."""
 
-from argparse import Namespace
 import time
 import logging
-from typing import Iterable, Callable, Dict, Any, Union
+from typing import Iterable, Callable, Dict, Any
 
 import humanfriendly
 
@@ -47,71 +46,12 @@ else:
 
 import requests.packages
 
-from zoe_master.stats import ClusterStats, NodeStats
+from zoe_lib.config import get_conf
 from zoe_lib.exceptions import ZoeLibException, ZoeNotEnoughResourcesException
+from zoe_master.stats import ClusterStats, NodeStats
+from zoe_master.backends.service_instance import ServiceInstance
 
 log = logging.getLogger(__name__)
-
-
-class DockerContainerOptions:
-    """Wrapper for the Docker container options."""
-    def __init__(self):
-        self.env = {}
-        self.volumes = {}
-        self.command = ""
-        self.memory_limit = 2 * (1024**3)
-        self.name = ''
-        self.ports = []
-        self.network_name = 'bridge'
-        self.restart = True
-        self.labels = []
-        self.gelf_log_address = ''
-        self.constraints = []
-
-    def add_constraint(self, constraint):
-        """Add a placement constraint (use docker syntax)."""
-        self.constraints.append(constraint)
-
-    def add_env_variable(self, name: str, value: Union[str, None]) -> None:
-        """Add an environment variable to the container definition."""
-        self.env[name] = value
-
-    @property
-    def environment(self) -> Dict[str, Union[str, None]]:
-        """Access the environment variables."""
-        return self.env
-
-    def add_volume_bind(self, path: str, mountpoint: str, readonly=False) -> None:
-        """Add a volume to the container."""
-        self.volumes[path] = {'bind': mountpoint, 'mode': ("ro" if readonly else "rw")}
-
-    def get_volumes(self) -> Iterable[str]:
-        """Get the volumes in Docker format."""
-        return self.volumes
-
-    def set_command(self, cmd):
-        """Setter for the command to run in the container."""
-        self.command = cmd
-
-    def get_command(self) -> str:
-        """Getter for the command to run in the container."""
-        return self.command
-
-    def set_memory_limit(self, limit: int):
-        """Setter for the memory limit of the container."""
-        self.memory_limit = limit
-
-    def get_memory_limit(self) -> int:
-        """Getter for the memory limit of the container."""
-        return self.memory_limit
-
-    @property
-    def restart_policy(self) -> Dict[str, str]:
-        """Getter for the restart policy of the container."""
-        if self.restart:
-            return {'Name': 'always'}
-        else:
-            return {}
 
 
 def zookeeper_swarm(zk_server_list: str, path='/docker') -> str:
@@ -144,13 +84,16 @@ def consul_swarm(consul_ip: str) -> str:
 
 class SwarmClient:
     """The Swarm client class that wraps the Docker API."""
-    def __init__(self, opts: Namespace) -> None:
-        self.opts = opts
-        url = opts.backend_swarm_url
+    def __init__(self) -> None:
+        url = get_conf().backend_swarm_url
         if 'zk://' in url:
+            if KazooClient is None:
+                raise ZoeLibException('ZooKeeper URL for Swarm, but the kazoo package is not installed')
             url = url[len('zk://'):]
-            manager = zookeeper_swarm(url, opts.backend_swarm_zk_path)
+            manager = zookeeper_swarm(url, get_conf().backend_swarm_zk_path)
         elif 'consul://' in url:
+            if Consul is None:
+                raise ZoeLibException('Consul URL for Swarm, but the consul package is not installed')
             url = url[len('consul://'):]
             manager = consul_swarm(url)
         elif 'http://' or 'https://' in url:
@@ -210,22 +153,20 @@ class SwarmClient:
         pl_status.timestamp = time.time()
         return pl_status
 
-    def spawn_container(self, image: str, options: DockerContainerOptions) -> Dict[str, Any]:
+    def spawn_container(self, service_instance: ServiceInstance) -> Dict[str, Any]:
         """Create and start a new container."""
         cont = None
         port_bindings = {}  # type: Dict[str, Any]
-        for port in options.ports:
-            port_bindings[str(port) + '/tcp'] = None
+        for port in service_instance.ports:
+            if port.expose:
+                port_bindings[str(port.number) + '/tcp'] = None
 
-        for constraint in options.constraints:
-            options.add_env_variable(constraint, None)
-
-        if options.gelf_log_address != '':
+        if get_conf().gelf_address != '':
             log_config = {
                 "type": "gelf",
                 "config": {
-                    'gelf-address': options.gelf_log_address,
-                    'labels': ",".join(options.labels)
+                    'gelf-address': get_conf().gelf_address,
+                    'labels': ",".join(service_instance.labels)
                 }
             }
         else:
@@ -234,23 +175,30 @@ class SwarmClient:
                 "config": {}
             }
 
+        environment = {}
+        for name, value in service_instance.environment:
+            environment[name] = value
+
+        volumes = {}
+        for volume in service_instance.volumes:
+            volumes[volume.path] = {'bind': volume.mountpoint, 'mode': ("ro" if volume.readonly else "rw")}
+
         try:
-            cont = self.cli.containers.run(image=image,
-                                           command=options.get_command(),
+            cont = self.cli.containers.run(image=service_instance.image_name,
+                                           command=service_instance.command,
                                            detach=True,
-                                           environment=options.environment,
-                                           hostname=options.name,
-                                           labels=options.labels,
+                                           environment=environment,
+                                           hostname=service_instance.hostname,
+                                           labels=service_instance.labels,
                                            log_config=log_config,
-                                           mem_limit=options.get_memory_limit(),
-                                           memswap_limit=options.get_memory_limit(),
-                                           name=options.name,
-                                           networks=[options.network_name],
+                                           mem_limit=service_instance.memory_limit,
+                                           memswap_limit=service_instance.memory_limit,
+                                           name=service_instance.name,
+                                           networks=[get_conf().overlay_network_name],
                                            network_disabled=False,
-                                           network_mode=options.network_name,
+                                           network_mode=get_conf().overlay_network_name,
                                            ports=port_bindings,
-                                           restart_policy=options.restart_policy,
-                                           volumes=options.get_volumes())
+                                           volumes=volumes)
         except docker.errors.ImageNotFound:
             raise ZoeLibException(message='Image not found')
         except docker.errors.APIError as e:
