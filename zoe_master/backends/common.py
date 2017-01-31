@@ -15,9 +15,14 @@
 
 """The high-level interface that Zoe uses to talk to the configured container backend."""
 
-from zoe_lib.state import Service, Execution
+import os
+import logging
+
+from zoe_lib.state import Service, Execution, VolumeDescription
 from zoe_lib.config import get_conf
 from zoe_master.workspace.filesystem import ZoeFSWorkspace
+
+log = logging.getLogger(__name__)
 
 
 def gen_environment(service: Service, execution: Execution):
@@ -42,11 +47,28 @@ def gen_environment(service: Service, execution: Execution):
     return env_list
 
 
+def _create_logs_directories(exec_id, service_name):
+    path = get_conf().logs_base_path + '/' + get_conf().deployment_name + str(exec_id) + '/' + service_name
+    try:
+        os.makedirs(path)
+    except OSError as e:
+        log.error('Cannot create path {}: {}'.format(path, str(e)))
+        return None
+    return path
+
+
 def gen_volumes(service: Service, execution: Execution):
     """Return the list of default volumes to be added to all containers."""
     vol_list = []
     fswk = ZoeFSWorkspace()
-    if fswk.can_be_attached():
-        vol_list.append(fswk.get(execution.user_id))
+    wk_vol = fswk.get(execution.user_id)
+
+    vol_list.append(wk_vol)
+
+    logs_path = _create_logs_directories(execution.id, service.name)
+    if logs_path is not None:
+        logs_mountpoint = '/logs'
+        logs_vol = VolumeDescription((logs_path, logs_mountpoint, True))
+        vol_list.append(logs_vol)
 
     return vol_list

@@ -18,8 +18,8 @@ All information from Zoe is passed in predefined environment variables:
 
 A number of volumes will be mounted on all containers:
 
-* User workspace, same for all containers of a certain user
-* Logs, different for each container
+* User workspace, same for all containers of a certain user, mounted at /workspace
+* Logs, different for each container, mounted at /logs
 
 A Zoe script will be the entrypoint for all ZApp containers. If a command is specified for a container, it must be a user-specified script that will be run by the Zoe script.
 

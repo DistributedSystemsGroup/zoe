@@ -65,6 +65,8 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--gelf-address', help='Enable Docker GELF log output to this destination (ex. udp://1.2.3.4:1234)', default='')
         argparser.add_argument('--workspace-base-path', help='Path where user workspaces will be created by Zoe. Must be visible at this path on all Swarm hosts.', default='/mnt/zoe-workspaces')
         argparser.add_argument('--workspace-deployment-path', help='Path appended to the workspace path to distinguish this deployment. If unspecified is equal to the deployment name.', default='--default--')
+        argparser.add_argument('--logs-base-path', help='Base path where containers will be able to save logs. Must be a shared directory, visible at this path on all Swarm hosts and writable by Zoe.', default='/mnt/zoe-logs')
+
         argparser.add_argument('--overlay-network-name', help='Name of the Swarm overlay network Zoe should use', default='zoe')
 
         # API options
