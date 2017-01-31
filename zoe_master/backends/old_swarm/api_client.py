@@ -32,12 +32,17 @@ try:
 except ImportError:
     KazooClient = None
 
+AVAILABLE = True
 try:
     import docker
     import docker.errors
     import docker.utils
 except ImportError:
-    pass
+    AVAILABLE = False
+try:
+    docker.Client()
+except:
+    AVAILABLE = False
 
 import requests.packages
 
@@ -148,9 +153,13 @@ class SwarmClient:
         self.opts = opts
         url = opts.swarm
         if 'zk://' in url:
+            if KazooClient is None:
+                raise ZoeLibException('ZooKeeper URL for Swarm, but the kazoo package is not installed')
             url = url[len('zk://'):]
             manager = zookeeper_swarm(url, opts.backend_swarm_zk_path)
         elif 'consul://' in url:
+            if Consul is None:
+                raise ZoeLibException('Consul URL for Swarm, but the consul package is not installed')
             url = url[len('consul://'):]
             manager = consul_swarm(url)
         elif 'http://' or 'https://' in url:

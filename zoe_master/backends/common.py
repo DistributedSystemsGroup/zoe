@@ -48,7 +48,7 @@ def gen_environment(service: Service, execution: Execution):
 
 
 def _create_logs_directories(exec_id, service_name):
-    path = get_conf().logs_base_path + '/' + get_conf().deployment_name + str(exec_id) + '/' + service_name
+    path = get_conf().logs_base_path + '/' + get_conf().deployment_name + '/' + str(exec_id) + '/' + service_name
     try:
         os.makedirs(path)
     except OSError as e:

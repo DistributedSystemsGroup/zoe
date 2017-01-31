@@ -23,8 +23,10 @@ from zoe_lib.state import Execution, Service
 
 from zoe_master.backends.base import BaseBackend
 from zoe_master.backends.old_swarm.backend import OldSwarmBackend
+import zoe_master.backends.old_swarm.api_client
 from zoe_master.backends.old_swarm_new_api.backend import OldSwarmNewAPIBackend
-from zoe_master.exceptions import ZoeStartExecutionFatalException, ZoeStartExecutionRetryException
+import zoe_master.backends.old_swarm_new_api.api_client
+from zoe_master.exceptions import ZoeStartExecutionFatalException, ZoeStartExecutionRetryException, ZoeException
 
 log = logging.getLogger(__name__)
 
@@ -33,8 +35,12 @@ def _get_backend() -> BaseBackend:
     """Return the right backend instance by reading the global configuration."""
     backend_name = get_conf().backend
     if backend_name == 'OldSwarm':
+        if not zoe_master.backends.old_swarm.api_client.AVAILABLE:
+            raise ZoeException('The OldSwarm backend requires docker-py version <= 1.10.2')
         return OldSwarmBackend(get_conf())
     elif backend_name == 'OldSwarmNewAPI':
+        if not zoe_master.backends.old_swarm_new_api.api_client.AVAILABLE:
+            raise ZoeException('The OldSwarmNewAPI backend requires docker python version >= 2.0.2')
         return OldSwarmNewAPIBackend(get_conf())
     else:
         log.error('Unknown backend selected')

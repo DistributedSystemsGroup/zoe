@@ -32,12 +32,18 @@ try:
 except ImportError:
     KazooClient = None
 
+AVAILABLE = True
 try:
     import docker
     import docker.errors
     import docker.utils
 except ImportError:
-    pass
+    AVAILABLE = False
+else:
+    try:
+        docker.DockerClient()
+    except:
+        AVAILABLE = False
 
 import requests.packages
 
@@ -289,6 +295,9 @@ class SwarmClient:
             info["running"] = True
         elif container.status == 'OOMKilled' or container.status == 'exited':
             info["state"] = "killed"
+            info["running"] = False
+        elif container.status == 'created':
+            info["state"] = 'created'
             info["running"] = False
         else:
             log.error('Unknown container status: {}'.format(container.status))

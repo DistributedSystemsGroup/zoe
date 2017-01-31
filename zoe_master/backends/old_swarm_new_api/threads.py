@@ -21,7 +21,7 @@ import time
 
 from zoe_lib.config import get_conf
 from zoe_lib.state import SQLManager, Service
-from zoe_master.backends.old_swarm.api_client import SwarmClient
+from zoe_master.backends.old_swarm_new_api.api_client import SwarmClient
 
 log = logging.getLogger(__name__)
 
