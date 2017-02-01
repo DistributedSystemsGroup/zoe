@@ -123,7 +123,7 @@ class SwarmStateSynchronizer(threading.Thread):
         swarm = SwarmClient(get_conf())
         while not self.stop:
             service_list = self.state.service_list()
-            container_list = swarm.list(only_label={'zoe.deployment_name': get_conf().deployment_name})
+            container_list = swarm.list(only_label={'zoe_deployment_name': get_conf().deployment_name})
 
             for service in service_list:
                 assert isinstance(service, Service)

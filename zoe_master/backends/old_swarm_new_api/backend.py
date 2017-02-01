@@ -23,7 +23,7 @@ from zoe_master.backends.old_swarm_new_api.api_client import SwarmClient
 from zoe_master.exceptions import ZoeStartExecutionRetryException, ZoeStartExecutionFatalException, ZoeException
 import zoe_master.backends.base
 from zoe_master.backends.service_instance import ServiceInstance
-from zoe_master.backends.old_swarm_new_api.threads import SwarmMonitor, SwarmStateSynchronizer
+from zoe_master.backends.old_swarm_new_api.threads import SwarmStateSynchronizer
 from zoe_master.stats import NodeStats, ClusterStats  # pylint: disable=unused-import
 
 log = logging.getLogger(__name__)
@@ -37,19 +37,17 @@ class OldSwarmNewAPIBackend(zoe_master.backends.base.BaseBackend):
     """Zoe backend implementation for old-style stand-alone Docker Swarm."""
     def __init__(self, opts):
         super().__init__(opts)
-        self.swarm = SwarmClient(opts)
+        self.swarm = SwarmClient()
 
     @classmethod
     def init(cls, state):
         """Initializes Swarm backend starting the event monitoring thread."""
         global _monitor, _checker
-        _monitor = SwarmMonitor(state)
         _checker = SwarmStateSynchronizer(state)
 
     @classmethod
     def shutdown(cls):
         """Performs a clean shutdown of the resources used by Swarm backend."""
-        _monitor.quit()
         _checker.quit()
 
     def spawn_service(self, service_instance: ServiceInstance):

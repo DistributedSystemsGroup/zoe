@@ -50,6 +50,7 @@ from zoe_lib.config import get_conf
 from zoe_lib.exceptions import ZoeLibException, ZoeNotEnoughResourcesException
 from zoe_master.stats import ClusterStats, NodeStats
 from zoe_master.backends.service_instance import ServiceInstance
+from zoe_lib.state import Service
 
 log = logging.getLogger(__name__)
 
@@ -100,7 +101,6 @@ class SwarmClient:
             manager = url
         else:
             raise ZoeLibException('Unsupported URL scheme for Swarm')
-        log.debug('Connecting to Swarm at {}'.format(manager))
         self.cli = docker.DockerClient(base_url=manager, version="auto")
 
     def info(self) -> ClusterStats:
@@ -233,23 +233,26 @@ class SwarmClient:
                 info["ip_address"][net] = None
 
         if container.status == 'running':
-            info["state"] = "running"
+            info["state"] = Service.BACKEND_START_STATUS
             info["running"] = True
-        elif container.status == "paused":
-            info["state"] = "paused"
+        elif container.status == 'paused':
+            info["state"] = Service.BACKEND_DIE_STATUS
             info["running"] = False
         elif container.status == 'restarting':
-            info["state"] = "restarting"
+            info["state"] = Service.BACKEND_START_STATUS
             info["running"] = True
-        elif container.status == 'OOMKilled' or container.status == 'exited':
-            info["state"] = "killed"
+        elif container.status == 'OOMKilled':
+            info["state"] = Service.BACKEND_OOM_STATUS
+            info["running"] = False
+        elif container.status == 'exited':
+            info["state"] = Service.BACKEND_DIE_STATUS
             info["running"] = False
         elif container.status == 'created':
-            info["state"] = 'created'
+            info["state"] = Service.BACKEND_CREATE_STATUS
             info["running"] = False
         else:
             log.error('Unknown container status: {}'.format(container.status))
-            info["state"] = "unknown"
+            info["state"] = Service.BACKEND_UNDEFINED_STATUS
             info["running"] = False
 
         info['ports'] = {}
@@ -263,7 +266,6 @@ class SwarmClient:
                     info['ports'][port] = mapping
                 else:
                     info['ports'][port] = None
-
 
         return info
 
