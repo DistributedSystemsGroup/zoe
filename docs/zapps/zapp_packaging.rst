@@ -9,12 +9,13 @@ All information from Zoe is passed in predefined environment variables:
 
 * ZOE_EXECUTION_NAME
 * ZOE_EXECUTION_ID
-* ZOE_SERVICE_GROUP
-* ZOE_SERVICE_NAME
+* ZOE_SERVICE_GROUP : name of the service as given in the ZApp description
+* ZOE_SERVICE_NAME : name of the service instance
 * ZOE_SERVICE_ID
 * ZOE_OWNER
 * ZOE_DEPLOYMENT_NAME
 * ZOE_MY_DNS_NAME
+* ZOE_EXECUTION_SERVICE_LIST : comma-separated list of all the DNS names of the other services in this execution
 
 A number of volumes will be mounted on all containers:
 
