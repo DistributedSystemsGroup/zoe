@@ -232,20 +232,14 @@ class SwarmClient:
             else:
                 info["ip_address"][net] = None
 
-        if container.status == 'running':
+        if container.status == 'running' or container.status == 'restarting':
             info["state"] = Service.BACKEND_START_STATUS
             info["running"] = True
-        elif container.status == 'paused':
+        elif container.status == 'paused' or container.status == 'exited':
             info["state"] = Service.BACKEND_DIE_STATUS
             info["running"] = False
-        elif container.status == 'restarting':
-            info["state"] = Service.BACKEND_START_STATUS
-            info["running"] = True
         elif container.status == 'OOMKilled':
             info["state"] = Service.BACKEND_OOM_STATUS
-            info["running"] = False
-        elif container.status == 'exited':
-            info["state"] = Service.BACKEND_DIE_STATUS
             info["running"] = False
         elif container.status == 'created':
             info["state"] = Service.BACKEND_CREATE_STATUS
