@@ -24,6 +24,8 @@ from zoe_master.workspace.filesystem import ZoeFSWorkspace
 
 log = logging.getLogger(__name__)
 
+LOGS_MOUNT_POINT = '/logs'
+
 
 def gen_environment(service: Service, execution: Execution):
     """Return the list of environment variables that needs to be added to all containers."""
@@ -37,7 +39,8 @@ def gen_environment(service: Service, execution: Execution):
         ('ZOE_OWNER', execution.user_id),
         ('ZOE_DEPLOYMENT_NAME', get_conf().deployment_name),
         ('ZOE_MY_DNS_NAME', service.dns_name),
-        ('ZOE_WORKSPACE', fswk.get_mountpoint())
+        ('ZOE_WORKSPACE', fswk.get_mountpoint()),
+        ('ZOE_LOG_STORAGE', LOGS_MOUNT_POINT)
     ]
     service_list = []
     for tmp_service in execution.services:
@@ -67,8 +70,7 @@ def gen_volumes(service: Service, execution: Execution):
 
     logs_path = _create_logs_directories(execution.id, service.name)
     if logs_path is not None:
-        logs_mountpoint = '/logs'
-        logs_vol = VolumeDescription((logs_path, logs_mountpoint, True))
+        logs_vol = VolumeDescription((logs_path, LOGS_MOUNT_POINT, True))
         vol_list.append(logs_vol)
 
     return vol_list

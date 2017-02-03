@@ -1,0 +1,149 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "definitions": {
+    "service-options": {
+      "type": "object",
+      "properties": {
+        "instances": {
+          "type": "object",
+          "properties": {
+            "essential_min": {
+              "type": "integer"
+            },
+            "essential_max": {
+              "type": "integer"
+            },
+            "elastic_min": {
+              "type": "integer"
+            },
+            "elastic_max": {
+              "type": "integer"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "essential_min",
+            "essential_max",
+            "elastic_min",
+            "elastic_max"
+          ]
+        },
+        "resources": {
+          "type": "object",
+          "properties": {
+            "memory": {
+              "type": "object",
+              "properties": {
+                "min": {
+                  "type": "integer"
+                },
+                "max": {
+                  "type": "integer"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "min",
+                "max"
+              ]
+            },
+            "cores": {
+              "type": "object",
+              "properties": {
+                "min": {
+                  "type": "integer"
+                },
+                "max": {
+                  "type": "integer"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "min",
+                "max"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "memory",
+            "cores"
+          ]
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/parameter"
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false,
+      "required": ["instances", "resources", "parameters"]
+    },
+    "parameter": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "environment"
+          ]
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "int",
+            "string"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "readable_name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "default": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            }
+          ]
+        },
+        "min": { "type": "integer" },
+        "max": {
+          "type": "integer"
+        }
+      },
+      "required": ["kind", "type", "name", "readable_name", "description", "default"]
+    }
+  },
+
+  "type": "object",
+  "properties": {
+    "name": {"type": "string"},
+    "version": {"type": "string"},
+    "package_version": {
+      "type": "integer",
+      "enum": [1]
+    },
+    "maintainer": {"type": "string"},
+    "license": {"type": "string"},
+    "options": {
+      "type": "object",
+      "patternProperties": {
+        "[a-z\\-]": { "$ref": "#/definitions/service-options" }
+      },
+      "minItems": 1
+    }
+  },
+  "additionalProperties": false,
+  "required": ["name", "version", "package_version", "maintainer", "license"]
+}

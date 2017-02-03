@@ -8,3 +8,4 @@ psycopg2>=2.6.1
 pyzmq>=15.2.0
 typing
 python-consul
+jsonschema>=2.5.1
