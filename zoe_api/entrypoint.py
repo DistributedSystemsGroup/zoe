@@ -38,9 +38,6 @@ def _check_configuration_sanity():
     if config.get_conf().auth_type == 'ldap' and not zoe_api.auth.ldap.LDAP_AVAILABLE:
         log.error("LDAP authentication requested, but 'pyldap' module not installed.")
         return 1
-    if not os.access(config.get_conf().zapp_storage, os.W_OK):
-        log.error("Cannot write to ZApp storage path {}".format(config.get_conf().zapp_storage))
-        return 1
     return 0
 
 

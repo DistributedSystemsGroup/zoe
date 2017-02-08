@@ -23,7 +23,6 @@ import zoe_api.master_api
 import zoe_lib.applications
 import zoe_lib.exceptions
 import zoe_lib.state
-import zoe_lib.zapps.zapp_storage
 from zoe_lib.config import get_conf
 
 log = logging.getLogger(__name__)
