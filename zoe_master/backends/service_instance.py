@@ -38,6 +38,10 @@ class ServiceInstance:
             'zoe.deployment_name': get_conf().deployment_name,
             'zoe.type': 'app_service'
         }
+        if service.is_monitor:
+            self.labels['zoe_monitor'] = 'true'
+        else:
+            self.labels['zoe_monitor'] = 'false'
 
         self.labels = zoe_master.backends.common.gen_labels(service, execution)
         self.environment = service.environment + zoe_master.backends.common.gen_environment(service, execution)

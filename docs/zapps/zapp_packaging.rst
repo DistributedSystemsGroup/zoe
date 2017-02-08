@@ -33,7 +33,6 @@ ZApps will be distributed as self-contained set of files with this structure:
 * app.json : ZApp description (the current one with a few changes)
 * icon.png : an icon to be shown on graphical interfaces
 * metadata.json : metadata for the app and options that can be set to modify the app behaviour
-* README.md : documentation on the ZApp and its parameters, in markdown format
 * docker/
   * docker/image1/Dockerfile : the dockerfile needed to build the image for service 1
   * docker/image1/* : all the other files required to build the image for service 1
