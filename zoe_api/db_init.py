@@ -78,7 +78,26 @@ def create_tables(cur):
         ip_address CIDR NULL DEFAULT NULL,
         essential BOOLEAN NOT NULL DEFAULT FALSE
         )''')
-
+    #Create oauth_client and oauth_token tables for oAuth2
+    cur.execute('''CREATE TABLE oauth_client (
+        identifier TEXT PRIMARY KEY,
+        secret TEXT,
+        role TEXT,
+        redirect_uris TEXT,
+        authorized_grants TEXT,
+        authorized_response_types TEXT
+        )''')
+    cur.execute('''CREATE TABLE oauth_token (
+        client_id TEXT PRIMARY KEY,
+        grant_type TEXT,
+        token TEXT,
+        data TEXT,
+        expires_at TIMESTAMP,
+        refresh_token TEXT,
+        refresh_token_expires_at TIMESTAMP,
+        scopes TEXT,
+        user_id TEXT
+        )''')
 
 def init():
     """DB init entrypoint."""
