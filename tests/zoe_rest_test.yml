@@ -1,0 +1,53 @@
+---
+- config:
+    - testset: "Basic Tests"
+    - timeout: 100
+- test:
+    - name: "info endpoint"
+    - url: "/api/0.6/info"
+    - method: "GET"
+    - expected_status: [200]
+    - group: "Successful"
+    - validators:
+        - compare: {jsonpath_mini: "api_version",     comparator: "eq",     expected: "0.6"}
+        - compare: {jsonpath_mini: "deployment_name",     comparator: "eq",     expected: "compose"}
+        - compare: {jsonpath_mini: "version",     comparator: "eq",     expected: "0.10.1-beta"}
+        - compare: {jsonpath_mini: "application_format_version",     comparator: "eq",     expected: 2}
+
+- test:
+    - name: "execution details"
+    - url: "/api/0.6/execution/23"
+    - method: "GET"
+    - auth_username: "test"
+    - auth_password: "1234"
+    - expected_status: [200]
+    - group: "Successful"
+
+- test:
+    - name: "terminate execution"
+    - url: "/api/0.6/execution/23"
+    - method: "DELETE"
+    - auth_username: "test"
+    - auth_password: "1234"
+    - expected_status: [400]
+    - group: "Successful"
+    - validators:
+        - compare: {jsonpath_mini: "message", comparator: "eq", expected: "Execution is not running"}
+
+- test:
+    - name: "list all executions"
+    - url: "/api/0.6/execution"
+    - method: "GET"
+    - auth_username: "test"
+    - auth_password: "1234"
+    - expected_status: [200]
+    - group: "Successful"
+
+- test:
+    - name: "start execution"
+    - url: "/api/0.6/execution"
+    - method: "POST"
+    - auth_username: "test"
+    - auth_password: "1234"
+    - expected_status: [400]
+    - group: "Successful"

@@ -1,0 +1,23 @@
+{
+    "name": "alpine", 
+    "priority": 512, 
+    "requires_binary": true, 
+    "services": [
+        {
+            "docker_image": "alpine", 
+            "environment": [],
+            "essential_count": 1, 
+            "monitor": true, 
+            "name": "tensorflow",
+            "networks": [],
+            "ports": [],
+            "required_resources": {
+                "memory": 33554432
+            }, 
+            "startup_order": 0, 
+            "total_count": 1
+         }
+    ], 
+    "version": 2, 
+    "will_end": false
+}
