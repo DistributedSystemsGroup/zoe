@@ -1,6 +1,6 @@
 #!groovy
 
-node {
+node('docker-trusty') {
     stage('Cleanup') {
         step([$class: 'WsCleanup'])
     }
@@ -12,9 +12,25 @@ node {
         }
     }
 
+    stage('Install prerequisites') {
+        sh "virtualenv venv"
+        sh """
+        . venv/bin/activate
+        pip install -r requirements.txt
+        """
+
+        sh """
+        . venv/bin/activate
+        pip install -r requirements_tests.txt
+        """
+    }
+
     stage('Test') {
         try {
-            sh 'bash ./run_tests.sh'
+            sh """
+            . venv/bin/activate
+            bash ./run_tests.sh
+            """
             currentBuild.result = 'SUCCESS'
         } catch (Exception err) {
             currentBuild.result = 'FAILURE'
@@ -36,13 +52,12 @@ node {
             }
         } catch (Exception err) {
             currentBuild.result = 'FAILURE'
-        }
+            }
     }
 
     stage('Notification and cleanup') {
         echo "Sending notifications"
         step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: 'daniele.venzano@eurecom.fr', sendToIndividuals: true])
         step([$class: 'GitHubCommitStatusSetter', errorHandlers: [[$class: 'ChangingBuildStatusErrorHandler', result: 'FAILURE']], reposSource: [$class: 'ManuallyEnteredRepositorySource', url: 'https://github.com/DistributedSystemsGroup/zoe.git']])
-        step([$class: 'WsCleanup'])
     }
 }
