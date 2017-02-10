@@ -107,11 +107,27 @@ class ExecutionCollectionAPI(RequestHandler):
         """
         Returns a list of all active executions.
 
+        Return a list of all executions which have status equal to ..."
+
+        example:  curl -u 'username:password' -X GET -H "Content-Type: application/json" -d '{"status":"terminated"}' http://bf5:8080/api/0.6/execution
+
         :return:
         """
         uid, role = get_auth(self)
 
-        execs = self.api_endpoint.execution_list(uid, role)
+        filt_dict = {}
+
+        try:
+            if self.request.body:
+                filt_dict = tornado.escape.json_decode(self.request.body)
+        except ValueError:
+            raise zoe_api.exceptions.ZoeRestAPIExecution('Error decoding JSON data')
+        
+        if 'status' in filt_dict:
+            execs = self.api_endpoint.execution_list(uid, role, status=filt_dict['status'])
+        else:
+            execs = self.api_endpoint.execution_list(uid, role)
+
         self.write(dict([(e.id, e.serialize()) for e in execs]))
 
     @catch_exceptions
