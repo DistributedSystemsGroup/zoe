@@ -34,7 +34,7 @@ class ExecutionAPI(RequestHandler):
         """Set up the headers for enabling CORS."""
         manage_cors_headers(self)
 
-    def options(self, execution_id):
+    def options(self, execution_id_):
         """Needed for CORS."""
         self.set_status(204)
         self.finish()

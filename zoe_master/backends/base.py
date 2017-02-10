@@ -15,7 +15,7 @@
 
 """The base class that all backends should implement."""
 
-from zoe_lib.state import Execution, Service
+from zoe_lib.state import Service
 from zoe_master.stats import ClusterStats
 from zoe_master.backends.service_instance import ServiceInstance
 

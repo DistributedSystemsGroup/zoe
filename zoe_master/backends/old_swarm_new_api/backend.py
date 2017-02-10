@@ -29,7 +29,6 @@ from zoe_master.stats import NodeStats, ClusterStats  # pylint: disable=unused-i
 log = logging.getLogger(__name__)
 
 # These two module-level variables hold the references to the monitor and checker threads
-_monitor = None
 _checker = None
 
 
@@ -42,7 +41,7 @@ class OldSwarmNewAPIBackend(zoe_master.backends.base.BaseBackend):
     @classmethod
     def init(cls, state):
         """Initializes Swarm backend starting the event monitoring thread."""
-        global _monitor, _checker
+        global _checker
         _checker = SwarmStateSynchronizer(state)
 
     @classmethod

@@ -64,7 +64,10 @@ class ZAppPackage:
         fpath = os.path.join(self.load_path, self.METADATA_FILE)
         schema = json.load(open(METADATA_SCHEMA_PATH, 'r'))
         metadata = json.load(open(fpath, 'r'))
-        json_schema_validate(metadata, schema)
+        try:
+            json_schema_validate(metadata, schema)
+        except ValidationError as e:
+            raise ZoeException(str(e))
 
         # Code for handling previous package versions goes here
         self.package_version = metadata['package_version']

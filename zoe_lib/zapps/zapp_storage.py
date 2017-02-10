@@ -42,10 +42,10 @@ class ZAppStorage:
 
         return all_zapps
 
-    def load(self, id):
+    def load(self, zapp_id):
         """Loads a specific ZApp given its ID."""
         zapps = self.list()
         for zapp in zapps:
-            if zapp.id == id:
+            if zapp.id == zapp_id:
                 return zapp
         return None

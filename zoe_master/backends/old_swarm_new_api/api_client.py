@@ -31,7 +31,6 @@ try:
 except ImportError:
     KazooClient = None
 
-AVAILABLE = True
 try:
     import docker
     import docker.errors
@@ -41,16 +40,17 @@ except ImportError:
 else:
     try:
         docker.DockerClient()
-    except:
+        AVAILABLE = True
+    except AttributeError:
         AVAILABLE = False
 
 import requests.packages
 
 from zoe_lib.config import get_conf
 from zoe_lib.exceptions import ZoeLibException, ZoeNotEnoughResourcesException
+from zoe_lib.state import Service
 from zoe_master.stats import ClusterStats, NodeStats
 from zoe_master.backends.service_instance import ServiceInstance
-from zoe_lib.state import Service
 
 log = logging.getLogger(__name__)
 

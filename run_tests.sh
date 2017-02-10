@@ -2,6 +2,6 @@
 
 set -e
 
-pylint *.py zoe_*
+pylint --ignore old_swarm *.py zoe_*
 doc8 docs/
 
