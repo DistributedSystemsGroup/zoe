@@ -88,6 +88,10 @@ def load_configuration(test_conf=None):
 
         argparser.add_argument('--scheduler-class', help='Scheduler class to use for scheduling ZApps', default='ZoeSimpleScheduler')
 
+        argparser.add_argument('--docker-tls-cert', help='Docker TLS certificate file', default='cert.pem')
+        argparser.add_argument('--docker-tls-key', help='Docker TLS private key file', default='key.pem')
+        argparser.add_argument('--docker-tls-ca', help='Docker TLS CA certificate file', default='ca.pem')
+
         opts = argparser.parse_args()
         if opts.debug:
             argparser.print_values()

@@ -408,6 +408,15 @@ class Service(Base):
         return s_info['ip_address'][get_conf().overlay_network_name]
 
     @property
+    def ports(self):
+        """Getter for the port mappings created by Swarm."""
+        if self.docker_status != self.DOCKER_START_STATUS:
+            return {}
+        swarm = SwarmClient(get_conf())
+        s_info = swarm.inspect_container(self.docker_id)
+        return s_info['ports']
+
+    @property
     def user_id(self):
         """Getter for the user_id, that is actually taken form the parent execution."""
         execution = self.sql_manager.execution_list(only_one=True, id=self.execution_id)

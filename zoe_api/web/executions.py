@@ -130,11 +130,20 @@ class ExecutionInspectWeb(ZoeRequestHandler):
         e = self.api_endpoint.execution_by_id(uid, role, execution_id)
 
         services_info = []
+        endpoints = []
         for service in e.services:
             services_info.append(self.api_endpoint.service_by_id(uid, role, service.id))
+            port_mappings = service.ports
+            for port in service.description['ports']:
+                if 'expose' in port and port['expose']:
+                    port_number = str(port['port_number']) + "/tcp"
+                    if port_number in port_mappings:
+                        endpoint = port['protocol'] + "://" + port_mappings[port_number][0] + ":" + port_mappings[port_number][1] + port['path']
+                        endpoints.append((port['name'], endpoint))
 
         template_vars = {
             "e": e,
+            "endpoints": endpoints,
             "services_info": services_info
         }
         self.render('execution_inspect.html', **template_vars)

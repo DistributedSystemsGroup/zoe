@@ -23,6 +23,17 @@
 <p>Error message: <code>{{ e.error_message }}</code></p>
 {% endif %}
 
+<div id="endpoints">
+{% if endpoints|length > 0 %}
+<h3>Endpoints:</h3>
+{% endif %}
+<ul>
+{% for e in endpoints %}
+    <li><a href="{{ e[1] }}">{{ e[0] }}</a></li>
+{% endfor %}
+</ul>
+</div>
+
 <div id="container_list">
 {% if services_info|length > 0 %}
 <h3>Services:</h3>
@@ -35,11 +46,6 @@
     <li>Docker status: {{ s['docker_status'] }}</li>
     {% if s['error_message'] is not none %}
         <li>Error: {{ s['error_message'] }}</li>
-    {% endif %}
-    {% if s['docker_status'] == 'started' %}
-        {% for p in s['description']['ports'] %}
-            <li><a href="{{ p['protocol'] }}://{{ s['ip_address'] }}:{{ p['port_number'] }}{{ p['path'] }}">{{ p['name'] }}</a></li>
-        {% endfor %}
     {% endif %}
     </ul>
 {% endfor %}

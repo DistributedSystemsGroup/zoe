@@ -48,7 +48,7 @@ def catch_exceptions(func):
             return error_page(self, str(e), 400)
         except Exception as e:
             log.exception(str(e))
-            return {'message': str(e)}, 500
+            return error_page(self, str(e), 500)
 
     return func_wrapper
 
