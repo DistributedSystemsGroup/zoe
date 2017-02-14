@@ -62,17 +62,18 @@ class ApacheProxy(zoe_api.proxy.base.BaseProxy):
                 ip, p = None, None
                 portList = s_info['ports']
 
-                for s in portList.values():
-                    if s != None:
-                        ip = s[0]
-                        p = s[1]
+                for k,v in portList.items():
+                    exposedPort = k.split('/tcp')[0]
+                    if v != None:
+                        ip = v[0]
+                        p = v[1]
 
-                base_path = '/zoe/' + uid + '/' + str(id) + '/' + srv.name
-                original_path = str(ip) + ':' + str(p) + base_path
+                    base_path = '/zoe/' + uid + '/' + str(id) + '/' + srv.name + '/' + exposedPort
+                    original_path = str(ip) + ':' + str(p) + base_path
                 
-                if ip is not None and p is not None:
-                    log.info('Proxifying %s', srv.name)
-                    self.dispatch_to_docker(base_path, original_path)
+                    if ip is not None and p is not None:
+                        log.info('Proxifying %s', srv.name + ' port ' + exposedPort)
+                        self.dispatch_to_docker(base_path, original_path)
 
         except Exception as ex:
             log.error(ex)

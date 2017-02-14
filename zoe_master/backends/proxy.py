@@ -23,6 +23,9 @@ from zoe_master.exceptions import ZoeStartExecutionFatalException
 JUPYTER_NOTEBOOK='BASE_URL'
 MONGO_EXPRESS='ME_CONFIG_SITE_BASEURL'
 
+JUPYTER_PORT='8888'
+MONGO_PORT='27017'
+
 def gen_proxypath(execution: Execution, service: Service):
     proxy_path_value = '/zoe/' + execution.user_id + '/' + str(execution.id) + '/' + service.name
     return proxy_path_value
