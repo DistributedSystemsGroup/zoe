@@ -76,10 +76,11 @@ class APIEndpoint:
         if not success:
             raise zoe_api.exceptions.ZoeException('The Zoe master is unavailable, execution will be submitted automatically when the master is back up ({}).'.format(message))
 
-        if get_conf().proxy_type == 'apache':
-            proxy = zoe_api.proxy.apache.ApacheProxy(self)
-        else:
-            proxy = zoe_api.proxy.nginx.NginxProxy(self)
+        if get_conf().deployment_name != 'test':
+            if get_conf().proxy_type == 'apache':
+                proxy = zoe_api.proxy.apache.ApacheProxy(self)
+            else:
+                proxy = zoe_api.proxy.nginx.NginxProxy(self)
         threading.Thread(target=proxy.proxify,args=(uid, role, new_id)).start()
 
         return new_id
@@ -95,11 +96,12 @@ class APIEndpoint:
             raise zoe_api.exceptions.ZoeAuthException()
 
         if e.is_active:
-            if get_conf().proxy_type == 'apache':
-                proxy = zoe_api.proxy.apache.ApacheProxy(self)
-            else:
-                proxy = zoe_api.proxy.nginx.NginxProxy(self)
-            proxy.unproxify(uid, role, exec_id)
+            if get_conf().deployment_name != 'test':
+                if get_conf().proxy_type == 'apache':
+                    proxy = zoe_api.proxy.apache.ApacheProxy(self)
+                else:
+                    proxy = zoe_api.proxy.nginx.NginxProxy(self)
+                proxy.unproxify(uid, role, exec_id)
             return self.master.execution_terminate(exec_id)
         else:
             raise zoe_api.exceptions.ZoeException('Execution is not running')
