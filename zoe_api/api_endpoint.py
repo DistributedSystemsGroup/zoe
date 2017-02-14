@@ -81,7 +81,7 @@ class APIEndpoint:
                 proxy = zoe_api.proxy.apache.ApacheProxy(self)
             else:
                 proxy = zoe_api.proxy.nginx.NginxProxy(self)
-        threading.Thread(target=proxy.proxify,args=(uid, role, new_id)).start()
+            threading.Thread(target=proxy.proxify,args=(uid, role, new_id)).start()
 
         return new_id
 
