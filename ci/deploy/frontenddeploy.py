@@ -31,7 +31,7 @@ class ZoeFrontendDeploy():
         return
 
     def deploy(self):
-    """ Put new frontend folder behind apache2 container """
+#    """ Put new frontend folder behind apache2 container """
         try:    
             retcode = 1
             #do backup

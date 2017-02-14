@@ -137,7 +137,7 @@ class ZoeBackendDeploy():
             print(ex)
 
     def deploy(self, image):
-        '''deploy with docker-compose, if success, return, else, fallback '''
+#        '''deploy with docker-compose, if success, return, else, fallback '''
         try:
 
             retcode = 1
