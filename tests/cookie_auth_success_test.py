@@ -5,7 +5,7 @@ import unittest
 
 class ZoeRestTestSuccess(unittest.TestCase):
 
-    uri = 'http://192.168.12.2:5100/api/0.6/'
+    uri = 'http://192.168.12.2:5100/api/0.7/'
     id = ''
     s = None
 

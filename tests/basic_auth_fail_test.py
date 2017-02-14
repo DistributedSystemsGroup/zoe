@@ -5,7 +5,7 @@ import unittest
 
 class ZoeRestTestSuccess(unittest.TestCase):
 
-    uri = 'http://localhost:5001/api/0.6/'
+    uri = 'http://localhost:5001/api/0.7/'
     auth = ('test', '1234')
     wrong_auth = ('test', '123')
     id = '-1'
