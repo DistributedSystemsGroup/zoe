@@ -59,7 +59,7 @@ class ZoeImage():
         self.tag = tag
 
     def build(self):
-    """ Build docker image """
+#    """ Build docker image """
         ret = 1
         
         for line in self.cli.build(path='.', tag=self.tag, rm=True):
@@ -70,7 +70,7 @@ class ZoeImage():
         return ret
 
     def push(self):
-    """ Push docker image """
+#    """ Push docker image """
         ret = 1
         
         for line in self.cli.push(self.tag, stream=True):
