@@ -35,7 +35,6 @@ class ZoeDeploy():
         self.frontend = ZoeFrontendDeploy(dockerUrl, 'apache2')
 
     def deploy(self):
-    """ Deploy zoe backend and frontend """
         try:
             retBE = self.backend.deploy(self.currentImage)
             print('Deployed BE with latest image...')
