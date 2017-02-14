@@ -40,10 +40,10 @@ def gen_environment(execution: Execution, service: Service, env_subst_dict: Dict
     #elif 'mongo-express' in service.image_name:
     env_list.append((MONGO_EXPRESS, gen_proxypath(execution, service) + '/' + MONGO_PORT))
 
-    env_list.append('EXECUTION_ID', str(execution.id))
-    env_list.append('DEPLOY_NAME', get_conf().deployment_name)
-    env_list.append('UID', execution.user_id)
-    env_list.append('SERVICE_NAME', service.name)
-    env_list.append('PROXY_PATH', get_conf().proxy_path)
+    env_list.append(('EXECUTION_ID', str(execution.id)))
+    env_list.append(('DEPLOY_NAME', get_conf().deployment_name))
+    env_list.append(('UID', execution.user_id))
+    env_list.append(('SERVICE_NAME', service.name))
+    env_list.append(('PROXY_PATH', get_conf().proxy_path))
 
     return env_list
