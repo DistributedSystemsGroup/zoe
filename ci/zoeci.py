@@ -45,7 +45,7 @@ class ZoeDeploy():
     
             retFE = 1
             if  self.typeDeploy == 1:
-                retFE = self.frontend.deploy()
+                #retFE = self.frontend.deploy()
                 print('Deployed FE with latest codes...')
                 if retFE == 0 or retBE == 0:
                     retFE = self.frontend.fallback()
