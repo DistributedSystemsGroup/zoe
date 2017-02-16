@@ -1,6 +1,8 @@
 Zoe - Container-based Analytics as a Service
 ============================================
 
+Note: this branch contains Zoe 0.10.2 with changes related to the AML course for the spring semester.
+
 Zoe provides a simple way to provision data analytics applications using Docker Swarm.
 
 Resources:
