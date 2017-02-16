@@ -1,22 +1,32 @@
 {
     "name": "aml-lab",
     "priority": 512,
-    "requires_binary": false,
+    "requires_binary": true,
     "services": [
         {
-            "docker_image": "192.168.45.252:5000/zoerepo/spark-master",
+            "docker_image": "docker-registry:5000/zapps/spark2-master",
             "environment": [
                 [
                     "SPARK_MASTER_IP",
-                    "spark-master-{execution_name}-{user_name}-{deployment_name}-zoe.{user_name}-{deployment_name}-zoe"
+                    "{dns_name#self}"
+                ],
+                [
+                    "HADOOP_USER_NAME",
+                    "{user_name}"
+                ],
+                [
+                    "PYTHONHASHSEED",
+                    "42"
                 ]
             ],
+            "essential_count": 1,
             "monitor": false,
             "name": "spark-master",
             "networks": [],
             "ports": [
                 {
-                    "is_main_endpoint": false,
+                    "expose": true,
+                    "is_main_endpoint": true,
                     "name": "Spark master web interface",
                     "path": "/",
                     "port_number": 8080,
@@ -25,10 +35,12 @@
             ],
             "required_resources": {
                 "memory": 536870912
-            }
+            },
+            "startup_order": 0,
+            "total_count": 1
         },
         {
-            "docker_image": "192.168.45.252:5000/zoerepo/spark-worker",
+            "docker_image": "docker-registry:5000/zapps/spark2-worker",
             "environment": [
                 [
                     "SPARK_WORKER_CORES",
@@ -40,15 +52,24 @@
                 ],
                 [
                     "SPARK_MASTER_IP",
-                    "spark-master-{execution_name}-{user_name}-{deployment_name}-zoe.{user_name}-{deployment_name}-zoe"
+                    "{dns_name#spark-master0}"
                 ],
                 [
                     "SPARK_LOCAL_IP",
-                    "spark-worker0-{execution_name}-{user_name}-{deployment_name}-zoe.{user_name}-{deployment_name}-zoe"
+                    "{dns_name#self}"
+                ],
+                [
+                    "PYTHONHASHSEED",
+                    "42"
+                ],
+                [
+                    "HADOOP_USER_NAME",
+                    "{user_name}"
                 ]
             ],
+            "essential_count": 1,
             "monitor": false,
-            "name": "spark-worker0",
+            "name": "spark-worker",
             "networks": [],
             "ports": [
                 {
@@ -61,14 +82,16 @@
             ],
             "required_resources": {
                 "memory": 12884901888
-            }
+            },
+            "startup_order": 1,
+            "total_count": 2
         },
         {
-            "docker_image": "192.168.45.252:5000/zoerepo/spark-jupyter-notebook",
+            "docker_image": "docker-registry:5000/zapps/spark2-jupyter-notebook",
             "environment": [
                 [
                     "SPARK_MASTER",
-                    "spark://spark-master-{execution_name}-{user_name}-{deployment_name}-zoe.{user_name}-{deployment_name}-zoe:7077"
+                    "spark://{dns_name#spark-master0}:7077"
                 ],
                 [
                     "SPARK_EXECUTOR_RAM",
@@ -79,14 +102,23 @@
                     "2147483648"
                 ],
                 [
+                    "HADOOP_USER_NAME",
+                    "{user_name}"
+                ],
+                [
                     "NB_USER",
                     "{user_name}"
                 ],
                 [
+                    "PYTHONHASHSEED",
+                    "42"
+                ],
+                [
                     "NAMENODE_HOST",
-                    "hdfs-namenode.hdfs"
+                    "hdfs-namenode.zoe"
                 ]
             ],
+            "essential_count": 1,
             "monitor": true,
             "name": "spark-jupyter",
             "networks": [],
@@ -99,6 +131,7 @@
                     "protocol": "http"
                 },
                 {
+                    "expose": true,
                     "is_main_endpoint": true,
                     "name": "Jupyter Notebook interface",
                     "path": "/",
@@ -107,46 +140,12 @@
                 }
             ],
             "required_resources": {
-                "memory": 4294967296
-            }
-        },
-        {
-            "docker_image": "192.168.45.252:5000/zoerepo/spark-worker",
-            "environment": [
-                [
-                    "SPARK_WORKER_CORES",
-                    "6"
-                ],
-                [
-                    "SPARK_WORKER_RAM",
-                    "11273240064"
-                ],
-                [
-                    "SPARK_MASTER_IP",
-                    "spark-master-{execution_name}-{user_name}-{deployment_name}-zoe.{user_name}-{deployment_name}-zoe"
-                ],
-                [
-                    "SPARK_LOCAL_IP",
-                    "spark-worker1-{execution_name}-{user_name}-{deployment_name}-zoe.{user_name}-{deployment_name}-zoe"
-                ]
-            ],
-            "monitor": false,
-            "name": "spark-worker1",
-            "networks": [],
-            "ports": [
-                {
-                    "is_main_endpoint": false,
-                    "name": "Spark worker web interface",
-                    "path": "/",
-                    "port_number": 8081,
-                    "protocol": "http"
-                }
-            ],
-            "required_resources": {
                 "memory": 12884901888
-            }
+            },
+            "startup_order": 0,
+            "total_count": 1
         }
     ],
-    "version": 1,
+    "version": 2,
     "will_end": false
 }

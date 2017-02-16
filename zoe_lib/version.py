@@ -15,6 +15,6 @@
 
 """Versions."""
 
-ZOE_VERSION = '0.20.0-beta'
+ZOE_VERSION = '0.10.3-aml'
 ZOE_API_VERSION = '0.6'
 ZOE_APPLICATION_FORMAT_VERSION = 2

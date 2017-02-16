@@ -48,38 +48,42 @@ class HomeWeb(ZoeRequestHandler):
         """Home page with authentication."""
         uid, role = get_auth(self)
 
-        if role == 'user' or role == 'admin':
-            executions = self.api_endpoint.execution_list(uid, role)
+        executions = self.api_endpoint.execution_list(uid, role)
 
-            template_vars = {
-                'executions': sorted(executions, key=lambda e: e.id),
-                'is_admin': role == 'admin',
-            }
-            self.render('home_user.html', **template_vars)
+        template_vars = {
+            'executions': sorted(executions, key=lambda e: e.id),
+            'is_admin': role == 'admin',
+        }
+        self.render('home_user.html', **template_vars)
+
+
+class HomeGuestWeb(ZoeRequestHandler):
+    """Handler for guest accesses."""
+    @catch_exceptions
+    def get(self):
+        """Home page with demo/code access."""
+        template_vars = {
+            'kind': 'normal'
+        }
+        return self.render('home_guest.html', **template_vars)
+
+        app_descr = json.load(open('contrib/zoeapps/eurecom_aml_lab.json', 'r'))
+        execution = self.api_endpoint.execution_list(uid, role, name='aml-lab')
+        if len(execution) == 0 or execution[0]['status'] == 'terminated' or execution[0]['status'] == 'finished':
+            self.api_endpoint.execution_start(uid, role, 'aml-lab', app_descr)
+            template_vars['execution_status'] = 'submitted'
+            return self.render('home_guest.html', **template_vars)
         else:
-            template_vars = {
-                'refresh': randint(2, 8),
-                'execution_status': 'Please wait...',
-                'execution_urls': [],
-            }
-
-            app_descr = json.load(open('contrib/zoeapps/eurecom_aml_lab.json', 'r'))
-            execution = self.api_endpoint.execution_list(uid, role, name='aml-lab')
-            if len(execution) == 0 or execution[0]['status'] == 'terminated' or execution[0]['status'] == 'finished':
-                self.api_endpoint.execution_start(uid, role, 'aml-lab', app_descr)
-                template_vars['execution_status'] = 'submitted'
+            execution = execution[0]
+            if execution['status'] != 'running':
+                template_vars['execution_status'] = execution['status']
                 return self.render('home_guest.html', **template_vars)
             else:
-                execution = execution[0]
-                if execution['status'] != 'running':
-                    template_vars['execution_status'] = execution['status']
-                    return self.render('home_guest.html', **template_vars)
-                else:
-                    template_vars['refresh'] = -1
-                    template_vars['execution_status'] = execution['status']
-                    # for c_id in execution['services']:
-                    #    c = cont_api.get(c_id)
-                    #    ip = list(c['ip_address'].values())[0]  # FIXME how to decide which network is the right one?
-                    #    for p in c['ports']:
-                    #        template_vars['execution_urls'].append(('{}'.format(p['name']), '{}://{}:{}{}'.format(p['protocol'], ip, p['port_number'], p['path'])))
-                    return self.render('home_guest.html', **template_vars)
+                template_vars['refresh'] = -1
+                template_vars['execution_status'] = execution['status']
+                # for c_id in execution['services']:
+                #    c = cont_api.get(c_id)
+                #    ip = list(c['ip_address'].values())[0]  # FIXME how to decide which network is the right one?
+                #    for p in c['ports']:
+                #        template_vars['execution_urls'].append(('{}'.format(p['name']), '{}://{}:{}{}'.format(p['protocol'], ip, p['port_number'], p['path'])))
+                return self.render('home_guest.html', **template_vars)
