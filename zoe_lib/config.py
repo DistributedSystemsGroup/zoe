@@ -92,6 +92,8 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--docker-tls-key', help='Docker TLS private key file', default='key.pem')
         argparser.add_argument('--docker-tls-ca', help='Docker TLS CA certificate file', default='ca.pem')
 
+        argparser.add_argument('--aml-ttl', help='TimeToLive in hours for AML executions', type=int, default=4)
+
         opts = argparser.parse_args()
         if opts.debug:
             argparser.print_values()

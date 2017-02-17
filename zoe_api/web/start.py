@@ -48,6 +48,9 @@ class HomeWeb(ZoeRequestHandler):
         """Home page with authentication."""
         uid, role = get_auth(self)
 
+        if role == 'guest':
+            return self._aml_homepage(uid)
+
         executions = self.api_endpoint.execution_list(uid, role)
 
         template_vars = {
@@ -56,14 +59,10 @@ class HomeWeb(ZoeRequestHandler):
         }
         self.render('home_user.html', **template_vars)
 
-
-class HomeGuestWeb(ZoeRequestHandler):
-    """Handler for guest accesses."""
-    @catch_exceptions
-    def get(self):
-        """Home page with demo/code access."""
+    def _aml_homepage(self, uid):
+        """Home page for students of the AML course."""
         template_vars = {
-            'kind': 'normal'
+            'uid': uid
         }
         return self.render('home_guest.html', **template_vars)
 

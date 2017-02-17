@@ -3,44 +3,143 @@
 {% block title %}Home{% endblock %}
 
 {% block custom_head %}
-{% if refresh > 0 %}
-<meta http-equiv="refresh" content="{{ refresh }}">
-{% endif %}
+    <script type="application/javascript">
+    const AJAX_URL = "{{ reverse_url('ajax') }}";
+    const SLOW_UPDATE = 60000;
+    const FAST_UPDATE = 1000;
+    let update_interval = null;
+
+    function ajax(data, success_cb) {
+        $.ajax({
+            url: AJAX_URL,
+            type: 'POST',
+            data: JSON.stringify(data),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            async: true,
+            success: success_cb,
+            error: function () {
+                    show_error('AJAX communication error, the operation will be retried');
+                }
+        });
+    }
+
+    function show_error(msg) {
+        let error_box = $("#ajax-error");
+        error_box.text("Error: " + msg);
+        error_box.show();
+    }
+
+    let state = "init";
+    let execution_id = -1;
+    function state_machine() {
+        if (state == "init") {
+            clearInterval(update_interval);
+            update_interval = setInterval(function(){update_zoe_status();}, FAST_UPDATE);
+            $("#state-init").show();
+            $("#state-starting").hide();
+            $("#state-started").hide();
+            ajax({'type': 'start'},
+                function (data) {
+                    if (data['status'] == 'ok') {
+                        $("#ajax-error").hide();
+                        state = "starting";
+                        execution_id = data['execution_id'];
+                    } else {
+                        show_error(data.message);
+                    }
+                },
+                function () {
+                    show_error('AJAX communication error, the operation will be retried');
+                }
+            );
+        } else if (state == "starting") {
+            $("#state-init").hide();
+            $("#state-starting").show();
+            $("#state-started").hide();
+        } else if (state == "started") {
+            clearInterval(update_interval);
+            update_interval = setInterval(function(){update_zoe_status();}, SLOW_UPDATE);
+            $("#state-init").hide();
+            $("#state-starting").hide();
+            $("#state-started").show();
+        }
+    }
+
+    function update_zoe_status() {
+        if (execution_id < 0) {
+            $("#zoe-status").text('off');
+            state = "init";
+        } else {
+            ajax({'type': 'query_status', 'exec_id': execution_id},
+                function (data) {
+                    if (data['status'] == 'ok') {
+                        $("#ajax-error").hide();
+                        $("#zoe-status").text(data['exec_status']);
+                        if (data['exec_status'] == 'running') {
+                            state = "started";
+                            $('#time_remaining').text(moment.duration(data['ttl'] * 1000).humanize());
+                            let s = "";
+                            for (let ep of data['endpoints']) {
+                                s += "<li><a href=\"" + ep[1] + "\">" + ep[0] + "</a></li>\n";
+                            }
+                            $("#endpoints").html(s);
+                        } else if (data['exec_status'] == 'terminated' || data['exec_status'] == 'none' || data['exec_status'] == 'error') {
+                            state = "init";
+                        }
+                    } else {
+                        show_error(data.message);
+                    }
+                }
+            );
+        }
+        state_machine();
+    }
+    state_machine();
+    </script>
+
+    <style>
+    body {
+        width: 80%;
+    }
+    .state-box {
+        border: 1px solid black;
+        margin-top: 2em;
+        margin-bottom: 2em;
+        width: 40%;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    </style>
 {% endblock %}
 
 {% block content %}
 
-<h2>Guest cluster access page</h2>
+<h2>Algorithmic Machine Learning cluster management</h2>
 
-    {% if request.remote_addr != gateway_ip %}
+    <p>You are logged in as {{ uid }}.</p>
 
-    <p>To access your Jupyter Notebook and your Spark cluster, you need to open a browser with a socks proxy configured. To do that, use the following commands.</p>
+    <p>Through this page you will be able to access the Jupyter notebook web interface, which you will use to upload and work on the notebooks provided on the <a href="https://github.com/DistributedSystemsGroup/Algorithmic-Machine-Learning">Algorithmic Machine Learning course GitHub page</a>.</p>
 
-    <p>On <b>Linux</b> copy and paste this command in a terminal window:</p>
-    <pre>google-chrome --proxy-server={{ user_gateway }} --user-data-dir=/tmp/chrome-zoe-$USER {{ request.url }}</pre>
+    <p>The work environment contains also an Apache Spark cluster and is created dynamically when you first access this page. After a fixed amount of time, the resources are freed and the Notebook and Spark are terminated. The files you saved in your workspace will be available for your next session.</p>
 
-    <p>On <b>Windows</b> copy and paste this command in a cmd window (Start & cmd):</p>
-    <pre>cd +chrome install directory+
-chrome.exe --proxy-server={{ user_gateway }} --user-data-dir=%TEMP%\chrome-zoe {{ request.url }}</pre>
+    <span style="color: darkred; display: none;" id="ajax-error">AJAX communication error, retrying...</span>
 
-    {% else %}
+    <div class="state-box">
+        <div id="state-init">
+            <p>Checking your cluster status...</p>
+        </div>
 
-    {% if execution_urls|length == 0 %}
-    <p><b>Please wait</b>, this page will refresh automatically.<br>
-    When this message disappears your cluster will be ready to use.</p>
-    {% endif %}
+        <div id="state-starting" style="display: none;">
+            <p>Please wait, your cluster is <span id="zoe-status">...</span></p>
+        </div>
 
-    {% if execution_status == "running" and execution_urls|length > 0 %}
-    <ul>
-    {% for url in execution_urls|sort(0) %}
-        {% if url[0] == "Jupyter Notebook interface" %}
-        <li><span style="font-size: larger; padding-bottom: 10px; display: inline-block"><a href="{{ url[1] }}">{{ url[0] }}</a> &larr; Start here</span></li>
-        {% else %}
-        <li><span style="font-size: smaller"><a href="{{ url[1] }}">{{ url[0] }}</a></span></li>
-        {% endif %}
-    {% endfor %}
-    </ul>
-    {% endif %}
+        <div id="state-started" style="display: none;">
+            <p>Your cluster is running, it will be destroyed in about <span id="time_remaining"></span></p>
+            <ul id="endpoints"></ul>
+        </div>
+
+    </div>
 
     <p>Useful resources:</p>
     <ul>
@@ -48,5 +147,4 @@ chrome.exe --proxy-server={{ user_gateway }} --user-data-dir=%TEMP%\chrome-zoe {
         <li><a href="https://spark.apache.org/docs/1.5.2/api/python/index.html">Spark Python API</a></li>
     </ul>
 
-    {% endif %}
 {% endblock %}

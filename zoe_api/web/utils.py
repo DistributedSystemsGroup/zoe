@@ -70,9 +70,14 @@ def get_auth(handler: ZoeRequestHandler):
     auth_decoded = base64.decodebytes(bytes(auth_header[6:], 'ascii')).decode('utf-8')
     username, password = auth_decoded.split(':', 2)
 
-    if get_conf().auth_type == 'text':
-        authenticator = PlainTextAuthenticator()  # type: BaseAuthenticator
-    elif get_conf().auth_type == 'ldap':
+    # First of all try to authenticate against a fixed list of users in a text file
+    authenticator = PlainTextAuthenticator()  # type: BaseAuthenticator
+    uid, role = authenticator.auth(username, password)
+    if uid is not None:
+        return uid, role
+
+    # It it fails, continue with the normal authentication
+    if get_conf().auth_type == 'ldap':
         authenticator = LDAPAuthenticator()
     else:
         raise zoe_api.exceptions.ZoeException('Configuration error, unknown authentication method: {}'.format(get_conf().auth_type))

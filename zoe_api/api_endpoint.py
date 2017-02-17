@@ -15,6 +15,7 @@
 
 """The real API, exposed as web pages or REST API."""
 
+from datetime import datetime, timedelta
 import logging
 import re
 
@@ -57,7 +58,7 @@ class APIEndpoint:
         ret = [e for e in execs if e.user_id == uid or role == 'admin']
         return ret
 
-    def execution_start(self, uid, role_, exec_name, application_description):
+    def execution_start(self, uid, role_, exec_name, application_description) -> int:
         """Start an execution."""
         try:
             zoe_lib.applications.app_validate(application_description)
@@ -159,9 +160,33 @@ class APIEndpoint:
         all_execs = self.sql.execution_list()
         for execution in all_execs:
             if execution.status == execution.RUNNING_STATUS:
+                terminated = False
                 for service in execution.services:
                     if service.description['monitor'] and service.docker_status == service.DOCKER_DIE_STATUS or service.docker_status == service.DOCKER_DESTROY_STATUS:
                         log.info("Service {} of execution {} died, terminating execution".format(service.name, execution.id))
                         self.master.execution_terminate(execution.id)
+                        terminated = True
                         break
+                if not terminated and execution.name == "aml-lab":
+                    log.debug('Looking at AML execution {}...'.format(execution.id))
+                    if datetime.now() - execution.time_start > timedelta(hours=get_conf().aml_ttl):
+                        log.info('Terminating AML-LAB execution for user {}, timer expired'.format(execution.user_id))
+                        self.master.execution_terminate(execution.id)
+
         log.debug('Cleanup task finished')
+
+    def execution_endpoints(self, uid, role, execution: zoe_lib.sql_manager.Execution):
+        """Return a list of the services and public endpoints available for a certain execution."""
+        services_info = []
+        endpoints = []
+        for service in execution.services:
+            services_info.append(self.service_by_id(uid, role, service.id))
+            port_mappings = service.ports
+            for port in service.description['ports']:
+                if 'expose' in port and port['expose']:
+                    port_number = str(port['port_number']) + "/tcp"
+                    if port_number in port_mappings:
+                        endpoint = port['protocol'] + "://" + port_mappings[port_number][0] + ":" + port_mappings[port_number][1] + port['path']
+                        endpoints.append((port['name'], endpoint))
+
+        return services_info, endpoints
