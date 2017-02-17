@@ -130,3 +130,29 @@ class ExecutionCollectionAPI(RequestHandler):
     def data_received(self, chunk):
         """Not implemented as we do not use stream uploads"""
         pass
+
+
+class ExecutionEndpointsAPI(RequestHandler):
+    """The ExecutionEndpoints API endpoint."""
+
+    def initialize(self, **kwargs):
+        """Initializes the request handler."""
+        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
+
+    @catch_exceptions
+    def get(self, execution_id: int):
+        """
+        Get a list of execution endpoints.
+
+        :param execution_id: the execution to be deleted
+        """
+        uid, role = get_auth(self)
+
+        execution = self.api_endpoint.execution_by_id(uid, role, execution_id)
+        services_, endpoints = self.api_endpoint.execution_endpoints(uid, role, execution)
+
+        self.write({'endpoints': endpoints})
+
+    def data_received(self, chunk):
+        """Not implemented as we do not use stream uploads"""
+        pass

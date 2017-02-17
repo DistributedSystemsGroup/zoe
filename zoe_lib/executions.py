@@ -110,3 +110,16 @@ class ZoeExecutionsAPI(ZoeAPIBase):
             raise ZoeAPIException(data['message'])
         else:
             return data['execution_id']
+
+    def endpoints(self, execution_id):
+        """
+        Retrieve the public endpoints exposed by a running execution.
+
+        :param execution_id: the execution to inspect
+        :return:
+        """
+        data, status_code = self._rest_get('/execution/endpoints/' + str(execution_id))
+        if status_code == 200:
+            return data['endpoints']
+        else:
+            return None

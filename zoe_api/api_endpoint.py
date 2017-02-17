@@ -175,7 +175,7 @@ class APIEndpoint:
 
         log.debug('Cleanup task finished')
 
-    def execution_endpoints(self, uid, role, execution: zoe_lib.sql_manager.Execution):
+    def execution_endpoints(self, uid: str, role: str, execution: zoe_lib.sql_manager.Execution):
         """Return a list of the services and public endpoints available for a certain execution."""
         services_info = []
         endpoints = []

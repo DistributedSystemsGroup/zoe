@@ -136,9 +136,11 @@ def exec_get_cmd(args):
         print('Execution not found')
     else:
         print('Execution {} (ID: {})'.format(execution['name'], execution['id']))
+        print('Application name: {}'.format(execution['description']['name']))
         print('Status: {}'.format(execution['status']))
         if execution['status'] == 'error':
             print('Last error: {}'.format(execution['error_message']))
+        print()
         print('Time submit: {}'.format(datetime.datetime.fromtimestamp(execution['time_submit'])))
 
         if execution['time_start'] is None:
@@ -150,9 +152,17 @@ def exec_get_cmd(args):
             print('Time end: {}'.format('not yet'))
         else:
             print('Time end: {}'.format(datetime.datetime.fromtimestamp(execution['time_end'])))
+        print()
 
-        app = execution['description']
-        print('Application name: {}'.format(app['name']))
+        endpoints = exec_api.endpoints(execution['id'])
+        if len(endpoints) > 0:
+            print('Exposed endpoints:')
+        else:
+            print('This ZApp does not expose any endpoint')
+        for ep in endpoints:
+            print(' - {}: {}'.format(ep[0], ep[1]))
+
+        print()
         for c_id in execution['services']:
             service = cont_api.get(c_id)
             print('Service {} (ID: {})'.format(service['name'], service['id']))
@@ -160,10 +170,6 @@ def exec_get_cmd(args):
             print(' - docker status: {}'.format(service['docker_status']))
             if service['error_message'] is not None:
                 print(' - error: {}'.format(service['error_message']))
-            if service['docker_status'] == 'started':
-                ip = service['ip_address']
-                for port in service['description']['ports']:
-                    print(' - {}: {}://{}:{}{}'.format(port['name'], port['protocol'], ip, port['port_number'], port['path']))
 
 
 def exec_kill_cmd(args):
