@@ -86,6 +86,7 @@
                             $("#endpoints").html(s);
                         } else if (data['exec_status'] == 'terminated' || data['exec_status'] == 'none' || data['exec_status'] == 'error') {
                             state = "init";
+                            update_interval = setInterval(function(){update_zoe_status();}, FAST_UPDATE);
                         }
                     } else {
                         show_error(data.message);
