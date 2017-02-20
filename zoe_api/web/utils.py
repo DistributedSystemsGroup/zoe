@@ -72,9 +72,11 @@ def get_auth(handler: ZoeRequestHandler):
 
     # First of all try to authenticate against a fixed list of users in a text file
     authenticator = PlainTextAuthenticator()  # type: BaseAuthenticator
-    uid, role = authenticator.auth(username, password)
-    if uid is not None:
+    try:
+        uid, role = authenticator.auth(username, password)
         return uid, role
+    except zoe_api.exceptions.ZoeAuthException:
+        pass
 
     # It it fails, continue with the normal authentication
     if get_conf().auth_type == 'ldap':
