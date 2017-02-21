@@ -1,6 +1,8 @@
 Zoe - Container-based Analytics as a Service
 ============================================
 
+Stable version: 0.10.2
+
 Zoe provides a simple way to provision data analytics applications using containers.
 
 Resources:
