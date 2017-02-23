@@ -126,16 +126,10 @@ def _service_check(data):
     except ValueError:
         raise InvalidApplicationDescription(msg="required_resources -> memory field should be an int")
 
-    if get_conf().backend == 'OldSwarm':
-        try:
-            int(data['required_resources']['cores'])
-        except ValueError:
-            raise InvalidApplicationDescription(msg="required_resources -> cores field should be a int")
-    elif get_conf().backend == 'Kubernetes':
-        try:
-            float(data['required_resources']['cores'])
-        except ValueError:
-            raise InvalidApplicationDescription(msg="required_resources -> cores field should be a float")    
+    try:
+        float(data['required_resources']['cores'])
+    except ValueError:
+        raise InvalidApplicationDescription(msg="required_resources -> cores field should be a float")    
 
     if 'environment' in data:
         if not hasattr(data['environment'], '__iter__'):
