@@ -173,6 +173,7 @@ class Service:
         execution = self.sql_manager.execution_list(only_one=True, id=self.execution_id)
         return execution.user_id
 
+    @property
     def is_dead(self):
         """Returns True if this service is not running."""
         return self.backend_status == self.BACKEND_DESTROY_STATUS or self.backend_status == self.BACKEND_OOM_STATUS or self.backend_status == self.BACKEND_DIE_STATUS

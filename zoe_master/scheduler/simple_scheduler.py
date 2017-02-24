@@ -19,9 +19,7 @@ import logging
 import threading
 
 from zoe_lib.state import Execution
-
-from zoe_master.exceptions import ZoeStartExecutionFatalException, ZoeStartExecutionRetryException
-from zoe_master.zapp_to_docker import execution_to_containers, terminate_execution
+from zoe_master.backends.interface import start_all, terminate_execution
 from zoe_master.scheduler.base_scheduler import ZoeBaseScheduler
 from zoe_master.exceptions import UnsupportedSchedulerPolicyError
 
@@ -107,24 +105,9 @@ class ZoeSimpleScheduler(ZoeBaseScheduler):
             e.set_starting()
             self.fifo_queue.pop(0)  # remove the execution form the queue
 
-            try:
-                execution_to_containers(e)
-            except ZoeStartExecutionRetryException as ex:
-                log.warning('Temporary failure starting execution {}: {}'.format(e.id, ex.message))
-                e.set_error_message(ex.message)
-                terminate_execution(e)
-                e.set_scheduled()
+            ret = start_all(e)
+            if ret == 'requeue':
                 self.fifo_queue.append(e)
-            except ZoeStartExecutionFatalException as ex:
-                log.error('Fatal error trying to start execution {}: {}'.format(e.id, ex.message))
-                e.set_error_message(ex.message)
-                terminate_execution(e)
-                e.set_error()
-            except Exception as ex:
-                log.exception('BUG, this error should have been caught earlier')
-                e.set_error_message(str(ex))
-                terminate_execution(e)
-                e.set_error()
             else:
                 e.set_running()
 

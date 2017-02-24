@@ -24,7 +24,7 @@ import zoe_lib.config as config
 from zoe_lib.metrics.base import BaseMetricSender
 from zoe_lib.state import SQLManager
 
-import zoe_master.execution_manager
+import zoe_master.preprocessing
 from zoe_master.exceptions import ZoeException
 from zoe_master.scheduler import ZoeBaseScheduler
 
@@ -70,7 +70,7 @@ class APIManager:
                 else:
                     execution.set_scheduled()
                     self._reply_ok()
-                    zoe_master.execution_manager.execution_submit(self.state, self.scheduler, execution)
+                    zoe_master.preprocessing.execution_submit(self.state, self.scheduler, execution)
             elif message['command'] == 'execution_terminate':
                 exec_id = message['exec_id']
                 execution = self.state.execution_list(id=exec_id, only_one=True)
@@ -79,12 +79,12 @@ class APIManager:
                 else:
                     execution.set_cleaning_up()
                     self._reply_ok()
-                    zoe_master.execution_manager.execution_terminate(self.scheduler, execution)
+                    zoe_master.preprocessing.execution_terminate(self.scheduler, execution)
             elif message['command'] == 'execution_delete':
                 exec_id = message['exec_id']
                 execution = self.state.execution_list(id=exec_id, only_one=True)
                 if execution is not None:
-                    zoe_master.execution_manager.execution_delete(execution)
+                    zoe_master.preprocessing.execution_delete(execution)
                 self._reply_ok()
             elif message['command'] == 'scheduler_stats':
                 data = self.scheduler.stats()

@@ -157,7 +157,7 @@ def exec_get_cmd(args):
             service = cont_api.get(c_id)
             print('Service {} (ID: {})'.format(service['name'], service['id']))
             print(' - zoe status: {}'.format(service['status']))
-            print(' - docker status: {}'.format(service['docker_status']))
+            print(' - backend status: {}'.format(service['docker_status']))
             if service['error_message'] is not None:
                 print(' - error: {}'.format(service['error_message']))
             if service['docker_status'] == 'started':
