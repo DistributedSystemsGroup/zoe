@@ -15,6 +15,8 @@
 
 """The base class that all backends should implement."""
 
+from typing import Generator
+
 from zoe_lib.state import Service
 from zoe_master.stats import ClusterStats
 from zoe_master.backends.service_instance import ServiceInstance
@@ -25,15 +27,15 @@ class BaseBackend:
     def __init__(self, conf):
         pass
 
-    def init(self, state):
+    def init(self, state) -> None:
         """Initializes the backend. In general this includes finding the current API endpoint and opening a connection to it, negotiate the API version, etc. Here backend-related threads can be started, too. This method will be called only once at Zoe startup."""
         raise NotImplementedError
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         """Performs a clean shutdown of the resources used by Swarm backend. Any threads that where started in the init() method should be terminated here. This method will be called when Zoe shuts down."""
         raise NotImplementedError
 
-    def spawn_service(self, service_instance: ServiceInstance):
+    def spawn_service(self, service_instance: ServiceInstance) -> str:
         """Create a container for a service.
 
         The backend translates all the configuration parameters given in the ServiceInstance object into backend-specific container options and starts the container.
@@ -52,4 +54,8 @@ class BaseBackend:
 
     def platform_state(self) -> ClusterStats:
         """Get the platform state. This method should fill-in a new ClusterStats object at each call, with fresh statistics on the available nodes and resource availability. This information will be used for taking scheduling decisions."""
+        raise NotImplementedError
+
+    def service_log(self, service: Service) -> Generator[str, str, str]:
+        """Return a generator that produces log lines. The log is the stdout/stderr of the main process running as the given service."""
         raise NotImplementedError

@@ -20,8 +20,8 @@ import os
 import shutil
 
 from zoe_lib.state import Execution
-from zoe_lib.swarm_client import SwarmClient
 from zoe_lib.config import get_conf
+from zoe_master.backends.interface import get_service_log
 
 log = logging.getLogger(__name__)
 
@@ -57,8 +57,7 @@ def save(execution: Execution):
         fname = service.name + '.txt'
         fpath = os.path.join(path, fname)
 
-        swarm = SwarmClient(get_conf())
-        log_gen = swarm.logs(service.docker_id, stream=True, follow=False)
+        log_gen = get_service_log(service)
         if log_gen is None:
             _shutdown()
             return

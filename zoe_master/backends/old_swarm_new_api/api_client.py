@@ -350,3 +350,22 @@ class SwarmClient:
                 conts.append(self._container_summary(cont_info))
 
         return conts
+
+    def logs(self, docker_id: str, stream: bool, follow=None):
+        """
+        Retrieves the logs of the selected container.
+
+        :param docker_id:
+        :param stream:
+        :param follow:
+        :return:
+        """
+        try:
+            cont = self.cli.containers.get(docker_id)
+        except (docker.errors.NotFound, docker.errors.APIError):
+            return None
+
+        try:
+            return cont.logs(docker_id, stdout=True, stderr=True, follow=follow, stream=stream, timestamps=True, tail='all')
+        except docker.errors.APIError:
+            return None

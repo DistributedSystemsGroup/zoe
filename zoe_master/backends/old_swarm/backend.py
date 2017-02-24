@@ -101,3 +101,7 @@ class OldSwarmBackend(zoe_master.backends.base.BaseBackend):
             node.memory_free = node.memory_total - node.memory_reserved
             node.cores_free = node.cores_total - node.cores_reserved
         return info
+
+    def service_log(self, service: Service):
+        """Get the log."""
+        return self.swarm.logs(service.backend_id, True, False)

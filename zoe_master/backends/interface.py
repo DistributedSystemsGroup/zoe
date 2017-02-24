@@ -139,3 +139,9 @@ def get_platform_state():
     """Retrieves the state of the platform by querying the container backend. Platform state includes information on free/reserved resources for each node. This information is used for advanced scheduling."""
     backend = _get_backend()
     return backend.platform_state()
+
+
+def get_service_log(service):
+    """Retrieve the log (usually stdout/stderr) of the main processes running in the container."""
+    backend = _get_backend()
+    return backend.service_log(service)

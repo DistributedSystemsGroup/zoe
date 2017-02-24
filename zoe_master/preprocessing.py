@@ -18,7 +18,7 @@
 import logging
 
 from zoe_lib.state import Execution, SQLManager
-from zoe_lib import exec_logs
+from zoe_master import exec_logs
 from zoe_master.scheduler import ZoeBaseScheduler
 
 log = logging.getLogger(__name__)
