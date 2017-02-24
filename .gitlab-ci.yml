@@ -9,9 +9,10 @@ variables:
   POSTGRES_PASSWORD: zoepass
 
 static_test:
-  - pip install -r requirements.txt
-  - pip install -r requirements_tests.txt
-  - chmod 755 run_tests.sh && ./run_tests.sh
+  script:
+    - pip install -r requirements.txt
+    - pip install -r requirements_tests.txt
+    - chmod 755 run_tests.sh && ./run_tests.sh
 
 SonarQube:
   image: sonar-scanner
@@ -21,4 +22,4 @@ SonarQube:
     SONAR_PROJECT_VERSION: "$CI_BUILD_ID"
     SONARQUBE_SERVER_URL: "$SONARQUBE_SERVER_URL"
   script:
-  - /usr/bin/sonar-scanner-run.sh
+    - /usr/bin/sonar-scanner-run.sh
