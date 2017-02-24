@@ -22,7 +22,7 @@ from tornado.web import RequestHandler
 import tornado.gen
 import tornado.iostream
 
-from zoe_api.rest_api.utils import catch_exceptions, get_auth
+from zoe_api.rest_api.utils import catch_exceptions, get_auth, manage_cors_headers
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 
 log = logging.getLogger(__name__)
@@ -37,8 +37,18 @@ class ServiceAPI(RequestHandler):
         """Initializes the request handler."""
         self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
+    def set_default_headers(self):
+        """Set up the headers for enabling CORS."""
+        manage_cors_headers(self)
+
     @catch_exceptions
-    def get(self, service_id) -> dict:
+    def options(self, service_id_):
+        """Needed for CORS."""
+        self.set_status(204)
+        self.finish()
+
+    @catch_exceptions
+    def get(self, service_id):
         """HTTP GET method."""
         uid, role = get_auth(self)
 

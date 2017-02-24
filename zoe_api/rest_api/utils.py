@@ -26,6 +26,7 @@ from zoe_lib.config import get_conf
 from zoe_api.exceptions import ZoeRestAPIException, ZoeNotFoundException, ZoeAuthException, ZoeException
 from zoe_api.auth.ldap import LDAPAuthenticator
 from zoe_api.auth.file import PlainTextAuthenticator
+from zoe_api.auth.ldapsasl import LDAPSASLAuthenticator
 from zoe_api.auth.base import BaseAuthenticator  # pylint: disable=unused-import
 
 
@@ -68,6 +69,12 @@ def catch_exceptions(func):
 
 def get_auth(handler: tornado.web.RequestHandler):
     """Try to authenticate a request."""
+    if handler.get_secure_cookie('zoe'):
+        cookie_val = str(handler.get_secure_cookie('zoe'))
+        uid, role = cookie_val[2:-1].split('.')
+        log.info('Authentication done using cookie')
+        return uid, role
+
     auth_header = handler.request.headers.get('Authorization')
     if auth_header is None or not auth_header.startswith('Basic '):
         raise ZoeRestAPIException('missing or wrong authentication information', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
@@ -79,10 +86,25 @@ def get_auth(handler: tornado.web.RequestHandler):
         authenticator = PlainTextAuthenticator()  # type: BaseAuthenticator
     elif get_conf().auth_type == 'ldap':
         authenticator = LDAPAuthenticator()
+    elif get_conf().auth_type == 'ldapsasl':
+        authenticator = LDAPSASLAuthenticator()
     else:
         raise ZoeException('Configuration error, unknown authentication method: {}'.format(get_conf().auth_type))
     uid, role = authenticator.auth(username, password)
     if uid is None:
         raise ZoeRestAPIException('missing or wrong authentication information', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
+    log.debug('Authentication done using auth-mechanism')
 
     return uid, role
+
+
+def manage_cors_headers(handler: tornado.web.RequestHandler):
+    """Set up the headers for enabling CORS."""
+    if handler.request.headers.get('Origin') is None:
+        handler.set_header("Access-Control-Allow-Origin", "*")
+    else:
+        handler.set_header("Access-Control-Allow-Origin", handler.request.headers.get('Origin'))
+    handler.set_header("Access-Control-Allow-Credentials", "true")
+    handler.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-Type, origin, authorization, accept, client-security-token")
+    handler.set_header("Access-Control-Allow-Methods", "OPTIONS, GET, DELETE")
+    handler.set_header("Access-Control-Max-Age", "1000")

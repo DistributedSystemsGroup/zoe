@@ -5,6 +5,9 @@
 * Add Jenkinsfile with test pipeline
 * Update moment.js third-party library
 * Docker TLS support
+* Add CORS headers to the Rest API
+* Add a login endpoint with cookie-based request authentication
+* Add LDAP SASL authentication
 
 ## Version 0.10.2
 

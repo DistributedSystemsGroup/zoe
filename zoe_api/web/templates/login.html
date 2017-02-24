@@ -1,0 +1,27 @@
+        <div id="main-container">
+            <div id="main">
+                <h1>
+                    <img alt="zoe dummy login page" src="{{ static_url("img/logo.png") }}">
+                </h1>
+                <div id="login-form">
+                    <form action="/login" method="post" id="login_form">
+                        <fieldset>
+                            <label for="username">Username</label>
+                            <input autocapitalize="off" autocorrect="off" class="text-input" id="username" name="username" tabindex="1" type="text" value="">
+                        </fieldset>
+
+                        <fieldset>
+                            <label for="password">Password</label>
+                            <input class="text-input" id="password" name="password" tabindex="2" type="password" value="">
+                        </fieldset>
+                        <fieldset>
+                            <span class="errormessage">{{errormessage}}</span>
+                        </fieldset>
+
+                        <div id="form_btn">
+                            <input id="signin-btn" class="btn btn-blue" type="submit" value="Sign In" tabindex="3">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>

@@ -27,13 +27,13 @@ from zoe_lib.version import ZOE_API_VERSION, ZOE_VERSION
 
 def web_init(api_endpoint) -> List[tornado.web.URLSpec]:
     """Tornado init for the web interface."""
-
     route_args = {
         'api_endpoint': api_endpoint
     }
     web_routes = [
         tornado.web.url(r'/', zoe_api.web.start.RootWeb, route_args, name='root'),
         tornado.web.url(r'/user', zoe_api.web.start.HomeWeb, route_args, name='home_user'),
+        tornado.web.url(r'/login', zoe_api.web.start.LoginWeb, route_args, name='login'),
 
         tornado.web.url(r'/executions/new', zoe_api.web.executions.ExecutionDefineWeb, route_args, name='execution_define'),
         tornado.web.url(r'/executions/start', zoe_api.web.executions.ExecutionStartWeb, route_args, name='execution_start'),

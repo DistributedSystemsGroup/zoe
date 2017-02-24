@@ -219,10 +219,10 @@ class-attribute-rgx=([A-Za-z_][A-Za-z0-9_]{2,30}|(__.*__))$
 class-attribute-name-hint=([A-Za-z_][A-Za-z0-9_]{2,30}|(__.*__))$
 
 # Regular expression matching correct constant names
-const-rgx=(([A-Z_][A-Z0-9_]*)|(__.*__)|log|([A-Z][A-Za-z]*Type))$
+const-rgx=(([A-Z_][A-Za-z0-9_]*)|(__.*__)|log|([A-Z][A-Za-z]*Type))$
 
 # Naming hint for constant names
-const-name-hint=(([A-Z_][A-Z0-9_]*)|(__.*__)|log|([A-Z][A-Za-z]*Type))$
+const-name-hint=(([A-Z_][A-Za-z0-9_]*)|(__.*__)|log|([A-Z][A-Za-z]*Type))$
 
 # Regular expression matching correct attribute names
 attr-rgx=([a-z_][a-z0-9_]{2,30}|id)$
@@ -254,7 +254,7 @@ notes=FIXME,TODO
 [DESIGN]
 
 # Maximum number of arguments for function / method
-max-args=5
+max-args=7
 
 # Argument names that match this expression will be ignored. Default to name
 # with leading underscore

@@ -19,7 +19,7 @@ from random import randint
 import json
 
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
-from zoe_api.web.utils import get_auth, catch_exceptions
+from zoe_api.web.utils import get_auth_login, get_auth, catch_exceptions
 from zoe_api.web.custom_request_handler import ZoeRequestHandler
 
 
@@ -34,6 +34,31 @@ class RootWeb(ZoeRequestHandler):
     def get(self):
         """Home page without authentication."""
         self.render('index.html')
+
+
+class LoginWeb(ZoeRequestHandler):
+    """The login web page."""
+    def initialize(self, **kwargs):
+        """Initializes the request handler."""
+        super().initialize(**kwargs)
+        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
+
+    @catch_exceptions
+    def get(self):
+        """Login page."""
+        self.render('login.html')
+
+    @catch_exceptions
+    def post(self):
+        """Try to authenticate."""
+        username = self.get_argument("username", "")
+        password = self.get_argument("password", "")
+        uid, role = get_auth_login(username, password)
+
+        if not self.get_secure_cookie('zoe'):
+            cookie_val = uid + '.' + role
+            self.set_secure_cookie('zoe', cookie_val)
+        self.redirect(self.get_argument("next", u"/user"))
 
 
 class HomeWeb(ZoeRequestHandler):
@@ -77,9 +102,4 @@ class HomeWeb(ZoeRequestHandler):
                 else:
                     template_vars['refresh'] = -1
                     template_vars['execution_status'] = execution['status']
-                    # for c_id in execution['services']:
-                    #    c = cont_api.get(c_id)
-                    #    ip = list(c['ip_address'].values())[0]  # FIXME how to decide which network is the right one?
-                    #    for p in c['ports']:
-                    #        template_vars['execution_urls'].append(('{}'.format(p['name']), '{}://{}:{}{}'.format(p['protocol'], ip, p['port_number'], p['path'])))
                     return self.render('home_guest.html', **template_vars)
