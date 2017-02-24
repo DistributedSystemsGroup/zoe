@@ -21,6 +21,7 @@
 
 import json
 import datetime
+import logging
 
 from jinja2 import Environment, FileSystemLoader, Markup
 
@@ -28,8 +29,9 @@ from tornado.escape import squeeze, linkify, url_escape, xhtml_escape
 import tornado.web
 
 import zoe_lib.version
-
 import zoe_api.web.utils
+
+log = logging.getLogger(__name__)
 
 
 class JinjaApp(object):
@@ -122,6 +124,7 @@ class ZoeRequestHandler(tornado.web.RequestHandler):
         try:
             html = self._render(template, **kwargs)
         except Exception:
+            log.exception('Jinja2 template exception')
             zoe_api.web.utils.error_page(self, 'Jinja2 template exception', 500)
             return
         self.finish(html)
