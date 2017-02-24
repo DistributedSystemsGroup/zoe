@@ -18,19 +18,22 @@
 import logging
 import threading
 
-from zoe_lib.sql_manager import Execution
+from zoe_lib.state import Execution
 
 from zoe_master.exceptions import ZoeStartExecutionFatalException, ZoeStartExecutionRetryException
 from zoe_master.zapp_to_docker import execution_to_containers, terminate_execution
 from zoe_master.scheduler.base_scheduler import ZoeBaseScheduler
+from zoe_master.exceptions import UnsupportedSchedulerPolicyError
 
 log = logging.getLogger(__name__)
 
 
 class ZoeSimpleScheduler(ZoeBaseScheduler):
     """The Scheduler class."""
-    def __init__(self, state):
+    def __init__(self, state, policy):
         super().__init__(state)
+        if policy != 'FIFO':
+            raise UnsupportedSchedulerPolicyError
         self.fifo_queue = []
         self.trigger_semaphore = threading.Semaphore(0)
         self.async_threads = []

@@ -18,20 +18,33 @@
 """Zoe Master main entrypoint."""
 
 import logging
+import os
 
-from zoe_master.master_api import APIManager
-import zoe_master.scheduler
-from zoe_master.execution_manager import restart_resubmit_scheduler
 from zoe_master.monitor import ZoeMonitor
 from zoe_master.consistency import ZoeSwarmChecker
 
 import zoe_lib.config as config
 from zoe_lib.metrics.influxdb import InfluxDBMetricSender
 from zoe_lib.metrics.logging import LogMetricSender
-from zoe_lib.sql_manager import SQLManager
+from zoe_lib.state import SQLManager
+
+import zoe_master.scheduler
+from zoe_master.execution_manager import restart_resubmit_scheduler
+from zoe_master.master_api import APIManager
+from zoe_master.exceptions import ZoeException
 
 log = logging.getLogger("main")
 LOG_FORMAT = '%(asctime)-15s %(levelname)s %(threadName)s->%(name)s: %(message)s'
+
+
+def _check_configuration_sanity():
+    if not os.access(config.get_conf().logs_base_path, os.W_OK):
+        log.error('Logs directory {} is not writable'.format(config.get_conf().logs_base_path))
+        return 1
+    if not os.path.exists(os.path.join(config.get_conf().workspace_base_path, config.get_conf().workspace_deployment_path)):
+        log.error('Workspace base directory does not exist: {}'.format(os.path.join(config.get_conf().workspace_base_path, config.get_conf().workspace_deployment_path)))
+        return 1
+    return 0
 
 
 def main():
@@ -43,9 +56,12 @@ def main():
     args = config.get_conf()
     if args.debug:
         logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
-
     else:
         logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
+
+    ret = _check_configuration_sanity()
+    if ret != 0:
+        return ret
 
     if config.get_conf().influxdb_enable:
         metrics = InfluxDBMetricSender(config.get_conf().deployment_name, config.get_conf().influxdb_url, config.get_conf().influxdb_dbname)

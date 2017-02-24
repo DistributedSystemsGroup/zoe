@@ -18,14 +18,13 @@
 import logging
 import re
 
-from zoe_lib.config import get_conf
-import zoe_lib.sql_manager
+import zoe_api.exceptions
+import zoe_api.master_api
 import zoe_lib.applications
 import zoe_lib.exceptions
+import zoe_lib.state
 from zoe_lib.swarm_client import SwarmClient
-
-import zoe_api.master_api
-import zoe_api.exceptions
+from zoe_lib.config import get_conf
 
 log = logging.getLogger(__name__)
 
@@ -39,14 +38,14 @@ class APIEndpoint:
     """
     def __init__(self):
         self.master = zoe_api.master_api.APIManager()
-        self.sql = zoe_lib.sql_manager.SQLManager(get_conf())
+        self.sql = zoe_lib.state.SQLManager(get_conf())
 
-    def execution_by_id(self, uid, role, execution_id) -> zoe_lib.sql_manager.Execution:
+    def execution_by_id(self, uid, role, execution_id) -> zoe_lib.state.sql_manager.Execution:
         """Lookup an execution by its ID."""
         e = self.sql.execution_list(id=execution_id, only_one=True)
         if e is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
-        assert isinstance(e, zoe_lib.sql_manager.Execution)
+        assert isinstance(e, zoe_lib.state.sql_manager.Execution)
         if e.user_id != uid and role != 'admin':
             raise zoe_api.exceptions.ZoeAuthException()
         return e
@@ -78,14 +77,14 @@ class APIEndpoint:
     def execution_terminate(self, uid, role, exec_id):
         """Terminate an execution."""
         e = self.sql.execution_list(id=exec_id, only_one=True)
-        assert isinstance(e, zoe_lib.sql_manager.Execution)
+        assert isinstance(e, zoe_lib.state.sql_manager.Execution)
         if e is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
 
         if e.user_id != uid and role != 'admin':
             raise zoe_api.exceptions.ZoeAuthException()
 
-        if e.is_active():
+        if e.is_active:
             return self.master.execution_terminate(exec_id)
         else:
             raise zoe_api.exceptions.ZoeException('Execution is not running')
@@ -93,14 +92,14 @@ class APIEndpoint:
     def execution_delete(self, uid, role, exec_id):
         """Delete an execution."""
         e = self.sql.execution_list(id=exec_id, only_one=True)
-        assert isinstance(e, zoe_lib.sql_manager.Execution)
+        assert isinstance(e, zoe_lib.state.sql_manager.Execution)
         if e is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
 
         if e.user_id != uid and role != 'admin':
             raise zoe_api.exceptions.ZoeAuthException()
 
-        if e.is_active():
+        if e.is_active:
             raise zoe_api.exceptions.ZoeException('Cannot delete an active execution')
 
         status, message = self.master.execution_delete(exec_id)
@@ -110,7 +109,7 @@ class APIEndpoint:
         else:
             raise zoe_api.exceptions.ZoeException(message)
 
-    def service_by_id(self, uid, role, service_id) -> zoe_lib.sql_manager.Service:
+    def service_by_id(self, uid, role, service_id) -> zoe_lib.state.sql_manager.Service:
         """Lookup a service by its ID."""
         service = self.sql.service_list(id=service_id, only_one=True)
         if service is None:
@@ -125,14 +124,14 @@ class APIEndpoint:
         ret = [s for s in services if s.user_id == uid or role == 'admin']
         return ret
 
-    def service_logs(self, uid, role, service_id, stream=True):
+    def service_logs(self, uid, role, service_id):
         """Retrieve the logs for the given service."""
         service = self.sql.service_list(id=service_id, only_one=True)
         if service is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such service')
         if service.user_id != uid and role != 'admin':
             raise zoe_api.exceptions.ZoeAuthException()
-        if service.docker_id is None:
+        if service.backend_id is None:
             raise zoe_api.exceptions.ZoeNotFoundException('Container is not running')
         swarm = SwarmClient(get_conf())
         return swarm.logs(service.docker_id, stream)
@@ -145,7 +144,7 @@ class APIEndpoint:
 
     def retry_submit_error_executions(self):
         """Resubmit any execution forgotten by the master."""
-        waiting_execs = self.sql.execution_list(status=zoe_lib.sql_manager.Execution.SUBMIT_STATUS)
+        waiting_execs = self.sql.execution_list(status=zoe_lib.state.sql_manager.Execution.SUBMIT_STATUS)
         if waiting_execs is None or len(waiting_execs) == 0:
             return
         e = waiting_execs[0]
@@ -158,10 +157,10 @@ class APIEndpoint:
         log.debug('Starting dead execution cleanup task')
         all_execs = self.sql.execution_list()
         for execution in all_execs:
-            if execution.status == execution.RUNNING_STATUS:
+            if execution.is_running:
                 for service in execution.services:
-                    if service.description['monitor'] and service.docker_status == service.DOCKER_DIE_STATUS or service.docker_status == service.DOCKER_DESTROY_STATUS:
-                        log.info("Service {} of execution {} died, terminating execution".format(service.name, execution.id))
+                    if service.description['monitor'] and service.is_dead():
+                        log.info("Service {} ({}) of execution {} died, terminating execution".format(service.id, service.name, execution.id))
                         self.master.execution_terminate(execution.id)
                         break
         log.debug('Cleanup task finished')

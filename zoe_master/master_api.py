@@ -22,7 +22,7 @@ import zmq
 
 import zoe_lib.config as config
 from zoe_lib.metrics.base import BaseMetricSender
-from zoe_lib.sql_manager import SQLManager
+from zoe_lib.state import SQLManager
 
 import zoe_master.execution_manager
 from zoe_master.exceptions import ZoeException

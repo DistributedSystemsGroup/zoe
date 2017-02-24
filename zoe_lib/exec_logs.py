@@ -19,7 +19,7 @@ import logging
 import os
 import shutil
 
-from zoe_lib.sql_manager import Execution
+from zoe_lib.state import Execution
 from zoe_lib.swarm_client import SwarmClient
 from zoe_lib.config import get_conf
 
