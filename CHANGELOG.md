@@ -1,5 +1,17 @@
 # Zoe Changelog
 
+## Version 0.10.3
+
+* Add Jenkinsfile with test pipeline
+* Update moment.js third-party library
+
+## Version 0.10.2
+
+* Documentation updates
+* Log management bug fixes
+* Fix a bug with the scheduler time trigger
+* Sort by ID when listing execution from the command-line client
+
 ## Version 0.10.1
 
 * Service discovery API endpoint: simple, read-only, unauthenticated access to a list of DNS names of services. Needed for frameworks that need a list of hosts for configuration, can be used by scripts in the images.
