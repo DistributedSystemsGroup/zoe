@@ -1,14 +1,20 @@
 #!/usr/bin/python3
 
+"""
+Find the Swarm manager by querying ZooKeeper.
+"""
+
 import sys
 
 from kazoo.client import KazooClient
 
+
 def zookeeper_swarm(zk_server_list, path='/swarm'):
-    path = path + '/docker/swarm/leader'
+    """Query ZooKeeper."""
+    path += '/docker/swarm/leader'
     zk = KazooClient(hosts=zk_server_list)
     zk.start()
-    master, stat = zk.get(path)
+    master, stat_ = zk.get(path)
     zk.stop()
     return master.decode('utf-8')
 
