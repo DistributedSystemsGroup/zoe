@@ -8,3 +8,4 @@ RUN apk add --no-cache wget && \
     apk del wget
 
 COPY files/sonar-scanner-run.sh /usr/bin
+RUN chmod 755 /usr/bin/sonar-scanner-run.sh
