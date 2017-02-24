@@ -34,6 +34,11 @@ To contribute code and/or documentation you should follow this workflow:
 2. fork the Zoe repository via GitHub (if you don't already have a fork)
 3. create a branch that will hold your changes
 4. ... develop and debug ...
-5. generate a pull request via GitHub
+5. when you are ready propose your changes on the mailing list
 
-Zoe maintainers will review pull requests, give constructive feedback and eventually merge them.
+Zoe maintainers will review your code, give constructive feedback and eventually perform a pull and a merge.
+
+Code quality and tests
+^^^^^^^^^^^^^^^^^^^^^^
+
+Contributors can setup their own CI pipeline following the quality guidelines (:ref:`quality`). At a bare minimum all code should be tested via the `run_tests.sh` script available in the root of the repository. Accepted contributions will be run through the CI pipeline at Eurecom before being published on the public repository.

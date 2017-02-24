@@ -20,7 +20,7 @@ To better understand what we mean by "analytic service", here are a few examples
 
 A number of predefined applications for testing and customization can be found at the `zoe-applications <https://github.com/DistributedSystemsGroup/zoe-applications>`_ repository.
 
-Have a look at the :ref:`vision` and at the :ref:`roadmap` to see what we are currently planning and feel free to `contact us <daniele.venzano@eurecom.fr>`_ via email or through the `GitHub issue tracker <https://github.com/DistributedSystemsGroup/zoe/issues>`_ to pose questions or suggest ideas and new features.
+Have a look at the :ref:`vision` and at the `roadmap <https://github.com/DistributedSystemsGroup/zoe/wiki>`_ to see what we are currently planning and feel free to `contact us <daniele.venzano@eurecom.fr>`_ via email or through the `GitHub issue tracker <https://github.com/DistributedSystemsGroup/zoe/issues>`_ to pose questions or suggest ideas and new features.
 
 A note on terminology (needs to be updated)
 -------------------------------------------
@@ -43,10 +43,9 @@ Contents
   logging
   monitoring
   architecture
-  rest-api
+  quality
   vision
   motivations
-  roadmap
   contributing
 
 Zoe applications
@@ -68,14 +67,10 @@ Developer documentation
 :ref:`modindex`
 
 .. toctree::
-  :maxdepth: 2
+  :maxdepth: 1
 
-  developer/introduction
-  developer/rest-api
-  developer/auth
-  developer/api-endpoint
-  developer/master-api
-  developer/scheduler
+  developer/index
+
 
 Contacts
 ========
