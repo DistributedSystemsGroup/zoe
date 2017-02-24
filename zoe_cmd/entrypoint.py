@@ -35,20 +35,6 @@ from zoe_lib.executions import ZoeExecutionsAPI
 from zoe_lib.applications import app_validate
 
 
-def _log_stream_stdout(service_id, timestamps):
-    service_api = ZoeServiceAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    try:
-        for line in service_api.get_logs(service_id):
-            if timestamps:
-                print(line[0], line[1])
-            else:
-                print(line[1])
-    except KeyboardInterrupt:
-        print('CTRL-C detected, exiting...')
-        return 'interrupt'
-    return 'stream_end'
-
-
 def info_cmd(args_):
     """Queries the info endpoint."""
     info_api = ZoeInfoAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
@@ -105,26 +91,9 @@ def exec_start_cmd(args):
             if old_status != current_status:
                 print('Execution is now {}'.format(current_status))
                 old_status = current_status
-            if current_status == 'running':
+            if current_status == 'terminated':
                 break
             time.sleep(1)
-        monitor_service_id = None
-        service_api = ZoeServiceAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-        for service_id in execution['services']:
-            service = service_api.get(service_id)
-            if service['description']['monitor']:
-                monitor_service_id = service['id']
-                break
-
-        print('\n>------ start of log streaming -------<\n')
-        why_stop = _log_stream_stdout(monitor_service_id, False)
-        print('\n>------ end of log streaming -------<\n')
-        if why_stop == 'stream_end':
-            print('Execution finished')
-            exit(0)
-        elif why_stop == 'interrupt':
-            print('Do not worry, your execution ({}) is still running.'.format(exec_id))
-            exit(1)
 
 
 def exec_get_cmd(args):
@@ -178,11 +147,6 @@ def exec_rm_cmd(args):
     exec_api.delete(args.id)
 
 
-def logs_cmd(args):
-    """Retrieves and streams the logs of a service."""
-    _log_stream_stdout(args.service_id, args.timestamps)
-
-
 def stats_cmd(args_):
     """Prints statistics on Zoe internals."""
     stats_api = ZoeStatisticsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
@@ -211,7 +175,7 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     argparser_app_validate.set_defaults(func=app_validate_cmd)
 
     argparser_exec_start = subparser.add_parser('start', help="Start an application")
-    argparser_exec_start.add_argument('-s', '--synchronous', action='store_true', help="Do not detach, wait for execution to finish, print main service log")
+    argparser_exec_start.add_argument('-s', '--synchronous', action='store_true', help="Do not detach, wait for execution to finish")
     argparser_exec_start.add_argument('name', help="Name of the execution")
     argparser_exec_start.add_argument('jsonfile', type=FileType("r"), help='Application description')
     argparser_exec_start.set_defaults(func=exec_start_cmd)
@@ -234,11 +198,6 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     argparser_execution_kill = subparser.add_parser('exec-rm', help="Deletes an execution")
     argparser_execution_kill.add_argument('id', type=int, help="Execution id")
     argparser_execution_kill.set_defaults(func=exec_rm_cmd)
-
-    argparser_logs = subparser.add_parser('logs', help="Streams the service logs")
-    argparser_logs.add_argument('service_id', type=int, help="Service id")
-    argparser_logs.add_argument('-t', '--timestamps', action='store_true', help="Prefix timestamps for each line")
-    argparser_logs.set_defaults(func=logs_cmd)
 
     argparser_stats = subparser.add_parser('stats', help="Prints all available statistics")
     argparser_stats.set_defaults(func=stats_cmd)
