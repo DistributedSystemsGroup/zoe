@@ -126,15 +126,19 @@ class SwarmClient:
     def __init__(self, opts: Namespace) -> None:
         self.opts = opts
         url = opts.swarm
+        tls = False
         if 'zk://' in url:
             url = url[len('zk://'):]
             manager = zookeeper_swarm(url)
-        elif 'http://' or 'https://' in url:
+        elif 'http://' in url:
+            manager = url
+        elif 'https://' in url:
+            tls = docker.tls.TLSConfig(client_cert=(opts.docker_tls_cert, opts.docker_tls_key), verify=opts.docker_tls_ca)
             manager = url
         else:
             raise ZoeLibException('Unsupported URL scheme for Swarm')
-        log.debug('Connecting to Swarm at {}'.format(manager))
-        self.cli = docker.Client(base_url=manager, version="auto")
+        # log.debug('Connecting to Swarm at {}'.format(manager))
+        self.cli = docker.Client(base_url=manager, version="auto", tls=tls)
 
     def info(self) -> SwarmStats:
         """Retrieve Swarm statistics. The Docker API returns a mess difficult to parse."""

@@ -4,6 +4,7 @@
 
 * Add Jenkinsfile with test pipeline
 * Update moment.js third-party library
+* Docker TLS support
 
 ## Version 0.10.2
 
