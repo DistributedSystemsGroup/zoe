@@ -3,7 +3,7 @@
 if [ -z "${SONAR_PROJECT_KEY}" ]; then
   echo "Undefined \"projectKey\"" && exit 1
 else
-  COMMAND="sonar-scanner -Dsonar.sourceEncoding=UTF-8 -Dsonar.exclusions=\"zoe_api/web/static/**\" -Dsonar.host.url=\"$SONARQUBE_SERVER_URL\" -Dsonar.login=\"$SONARQUBE_USER\" -Dsonar.password=\"$SONARQUBE_PASSWORD\" -Dsonar.projectKey=\"${SONAR_PROJECT_KEY}\""
+  COMMAND="sonar-scanner -Dsonar.sourceEncoding=UTF-8 -Dsonar.sources=. -Dsonar.exclusions=\"zoe_api/web/static/**\" -Dsonar.host.url=\"$SONARQUBE_SERVER_URL\" -Dsonar.login=\"$SONARQUBE_USER\" -Dsonar.password=\"$SONARQUBE_PASSWORD\" -Dsonar.projectKey=\"${SONAR_PROJECT_KEY}\""
 
   if [ ! -z "${SONAR_PROJECT_VERSION}" ]; then
     COMMAND="$COMMAND -Dsonar.projectVersion=\"${SONAR_PROJECT_VERSION}\""
@@ -24,4 +24,3 @@ else
 
   eval ${COMMAND}
 fi
-sonar.exclusions=zoe_api/web/static/**
