@@ -34,6 +34,13 @@ log = logging.getLogger("zoe_api")
 LOG_FORMAT = '%(asctime)-15s %(levelname)s %(threadName)s->%(name)s: %(message)s'
 
 
+def _check_configuration_sanity():
+    if config.get_conf().auth_type == 'ldap' and not zoe_api.auth.ldap.LDAP_AVAILABLE:
+        log.error("LDAP authentication requested, but 'pyldap' module not installed.")
+        return 1
+    return 0
+
+
 def zoe_web_main() -> int:
     """
     This is the entry point for the Zoe Web script.
@@ -46,9 +53,9 @@ def zoe_web_main() -> int:
     else:
         logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
-    if config.get_conf().auth_type == 'ldap' and not zoe_api.auth.ldap.LDAP_AVAILABLE:
-        log.error("LDAP authentication requested, but 'pyldap' module not installed.")
-        return 1
+    ret = _check_configuration_sanity()
+    if ret != 0:
+        return ret
 
     zoe_api.db_init.init()
 
