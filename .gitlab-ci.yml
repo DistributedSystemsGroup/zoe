@@ -1,6 +1,6 @@
 image: python:3.4
 services:
-  - postgres
+  - postgres:9.3
 
 variables:
   # Configure postgres service (https://hub.docker.com/_/postgres/)
@@ -15,7 +15,7 @@ static_test:
     - chmod 755 run_tests.sh && ./run_tests.sh
 
 SonarQube:
-  image: sonar-scanner
+  image: zoerepo/sonar-scanner
   variables:
     SONAR_PROJECT_KEY: "zoe.public.eurecom"
     SONAR_PROJECT_NAME: "$CI_PROJECT_NAME"
