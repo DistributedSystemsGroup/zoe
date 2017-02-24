@@ -1,6 +1,6 @@
 # Zoe Changelog
 
-## Version 0.10.3
+## Version 0.11.0
 
 * Add Jenkinsfile with test pipeline
 * Update moment.js third-party library
@@ -8,6 +8,9 @@
 * Add CORS headers to the Rest API
 * Add a login endpoint with cookie-based request authentication
 * Add LDAP SASL authentication
+* Backend abstraction and support for new Python Docker library (>2.0))
+* New elastic scheduler 
+* Zoe API version is now 0.7
 
 ## Version 0.10.2
 
