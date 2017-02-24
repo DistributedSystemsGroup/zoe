@@ -1,5 +1,11 @@
 # pylint: skip-file
-# Taken from https://github.com/bw2/ConfigArgParse
+
+"""
+Unified command line and configuration argument parsing.
+
+Taken from https://github.com/bw2/ConfigArgParse
+"""
+
 import argparse
 import os
 import re
@@ -18,7 +24,7 @@ ACTION_TYPES_THAT_DONT_NEED_A_VALUE = {argparse._StoreTrueAction, argparse._Stor
 _parsers = {}  # type: Dict[Any, Any]
 
 
-def initArgumentParser(name=None, **kwargs):
+def init_argument_parser(name=None, **kwargs):
     """Creates a global ArgumentParser instance with the given name,
     passing any args other than "name" to the ArgumentParser constructor.
     This instance can then be retrieved using getArgumentParser(..)
@@ -37,7 +43,7 @@ def initArgumentParser(name=None, **kwargs):
     _parsers[name] = ArgumentParser(**kwargs)
 
 
-def getArgumentParser(name=None, **kwargs):
+def get_argument_parser(name=None, **kwargs):
     """Returns the global ArgumentParser instance with the given name. The 1st
     time this function is called, a new ArgumentParser instance will be created
     for the given name, and any args other than "name" will be passed on to the
@@ -47,7 +53,7 @@ def getArgumentParser(name=None, **kwargs):
         name = "default"
 
     if len(kwargs) > 0 or name not in _parsers:
-        initArgumentParser(name, **kwargs)
+        init_argument_parser(name, **kwargs)
 
     return _parsers[name]
 
@@ -132,12 +138,15 @@ class DefaultConfigFileParser(ConfigFileParser):
 
     """
 
-    def get_syntax_description(self):
+    @classmethod
+    def get_syntax_description(cls):
+        """Return an help string about configuration syntax."""
         msg = ("Config file syntax allows: key=value, flag=true, stuff=[a,b,c] "
                "(for details, see syntax at https://goo.gl/R74nmi).")
         return msg
 
-    def parse(self, stream):
+    @classmethod
+    def parse(cls, stream):
         """Parses the keys + values from a config file."""
 
         items = OrderedDict()
@@ -168,11 +177,11 @@ class DefaultConfigFileParser(ConfigFileParser):
                 items[key] = value
                 continue
 
-            raise ConfigFileParserException("Unexpected line %s in %s: %s" % (i,
-                                                                              getattr(stream, 'name', 'stream'), line))
+            raise ConfigFileParserException("Unexpected line %s in %s: %s" % (i, getattr(stream, 'name', 'stream'), line))
         return items
 
-    def serialize(self, items):
+    @classmethod
+    def serialize(cls, items):
         """Does the inverse of config parsing by taking parsed values and
         converting them back to a string representing config file contents.
         """
@@ -183,67 +192,6 @@ class DefaultConfigFileParser(ConfigFileParser):
                 value = "[" + ", ".join(value) + "]"
             r.write("%s = %s\n" % (key, value))
         return r.getvalue()
-
-
-class YAMLConfigFileParser(ConfigFileParser):
-    """Parses YAML config files. Depends on the PyYAML module.
-    https://pypi.python.org/pypi/PyYAML
-    """
-
-    def get_syntax_description(self):
-        msg = ("The config file uses YAML syntax and must represent a YAML "
-               "'mapping' (for details, see http://learn.getgrav.org/advanced/yaml).")
-        return msg
-
-    def _load_yaml(self):
-        """lazy-import PyYAML so that configargparse doesn't have to dependend
-        on it unless this parser is used."""
-        try:
-            import yaml
-        except ImportError:
-            raise ConfigFileParserException("Could not import yaml. "
-                                            "It can be installed by running 'pip install PyYAML'")
-
-        return yaml
-
-    def parse(self, stream):
-        """Parses the keys and values from a config file."""
-        yaml = self._load_yaml()
-
-        try:
-            parsed_obj = yaml.safe_load(stream)
-        except Exception as e:
-            raise ConfigFileParserException("Couldn't parse config file: %s" % e)
-
-        if type(parsed_obj) != dict:
-            raise ConfigFileParserException("The config file doesn't appear to "
-                                            "contain 'key: value' pairs (aka. a YAML mapping). "
-                                            "yaml.load('%s') returned type '%s' instead of 'dict'." % (
-                                                getattr(stream, 'name', 'stream'), type(parsed_obj).__name__))
-
-        result = OrderedDict()
-        for key, value in parsed_obj.items():
-            if type(value) == list:
-                result[key] = value
-            else:
-                result[key] = str(value)
-
-        return result
-
-    def serialize(self, items, default_flow_style=False):
-        """Does the inverse of config parsing by taking parsed values and
-        converting them back to a string representing config file contents.
-
-        Args:
-            default_flow_style: defines serialization format (see PyYAML docs)
-        """
-
-        # lazy-import so there's no dependency on yaml unless this class is used
-        yaml = self._load_yaml()
-
-        # it looks like ordering can't be preserved: http://pyyaml.org/ticket/29
-        items = dict(items)
-        return yaml.dump(items, default_flow_style=default_flow_style)
 
 
 # used while parsing args to keep track of where they came from
@@ -711,6 +659,7 @@ class ArgumentParser(argparse.ArgumentParser):
             # Otherwise it sys.exits(..) if, for example, config file
             # is_required=True and user doesn't provide it.
             def error_method(self, message):
+                """Empty error handler."""
                 pass
 
             arg_parser.error = types.MethodType(error_method, arg_parser)
@@ -905,8 +854,8 @@ SUPPRESS = argparse.SUPPRESS
 ZERO_OR_MORE = argparse.ZERO_OR_MORE
 
 # create shorter aliases for the key methods and class names
-getArgParser = getArgumentParser
-getParser = getArgumentParser
+getArgParser = get_argument_parser
+getParser = get_argument_parser
 
 ArgParser = ArgumentParser
 Parser = ArgumentParser
