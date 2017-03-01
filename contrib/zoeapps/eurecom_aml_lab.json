@@ -34,7 +34,7 @@
                 }
             ],
             "required_resources": {
-                "memory": 536870912
+                "memory": -1
             },
             "startup_order": 0,
             "total_count": 1
@@ -81,7 +81,7 @@
                 }
             ],
             "required_resources": {
-                "memory": 12884901888
+                "memory": -1
             },
             "startup_order": 1,
             "total_count": 2
@@ -140,7 +140,7 @@
                 }
             ],
             "required_resources": {
-                "memory": 12884901888
+                "memory": -1
             },
             "startup_order": 0,
             "total_count": 1
