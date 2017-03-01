@@ -73,8 +73,7 @@ def _spawn_service(execution: Execution, service: Service, env_subst_dict: dict)
     copts = DockerContainerOptions()
     copts.gelf_log_address = get_conf().gelf_address
     copts.name = service.dns_name
-    if service.description['required_resources']['memory'] != -1:
-        copts.set_memory_limit(service.description['required_resources']['memory'])
+    copts.set_memory_limit(service.description['required_resources']['memory'])
     copts.network_name = get_conf().overlay_network_name
     copts.labels = {
         'zoe.execution.name': execution.name,

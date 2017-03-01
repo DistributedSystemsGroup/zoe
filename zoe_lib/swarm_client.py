@@ -208,13 +208,20 @@ class SwarmClient:
             log_config = docker.utils.LogConfig(type="json-file")
 
         try:
-            host_config = self.cli.create_host_config(network_mode=options.network_name,
-                                                      binds=options.get_volume_binds(),
-                                                      mem_limit=options.get_memory_limit(),
-                                                      memswap_limit=options.get_memory_limit(),
-                                                      restart_policy=options.restart_policy,
-                                                      port_bindings=port_bindings,
-                                                      log_config=log_config)
+            if options.get_memory_limit() == -1:
+                host_config = self.cli.create_host_config(network_mode=options.network_name,
+                                                          binds=options.get_volume_binds(),
+                                                          restart_policy=options.restart_policy,
+                                                          port_bindings=port_bindings,
+                                                          log_config=log_config)
+            else:
+                host_config = self.cli.create_host_config(network_mode=options.network_name,
+                                                          binds=options.get_volume_binds(),
+                                                          mem_limit=options.get_memory_limit(),
+                                                          memswap_limit=options.get_memory_limit(),
+                                                          restart_policy=options.restart_policy,
+                                                          port_bindings=port_bindings,
+                                                          log_config=log_config)
             cont = self.cli.create_container(image=image,
                                              environment=options.environment,
                                              network_disabled=False,
