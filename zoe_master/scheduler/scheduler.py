@@ -21,6 +21,7 @@ import threading
 from zoe_lib.sql_manager import Execution
 
 from zoe_master.exceptions import ZoeStartExecutionFatalException, ZoeStartExecutionRetryException
+from zoe_master.plugins.storage.crystal import Crystal
 from zoe_master.zapp_to_docker import execution_to_containers, terminate_execution
 from zoe_master.scheduler.base_scheduler import ZoeBaseScheduler
 
@@ -106,6 +107,14 @@ class ZoeSimpleScheduler(ZoeBaseScheduler):
 
             try:
                 execution_to_containers(e)
+
+                if 'plugins' in e.description:
+                    plugins = e.description['plugins']
+                    if 'storage' in plugins:
+                        for plugin in plugins['storage']:
+                            if plugin['name'] is 'crystal':
+                                Crystal(plugin['channel']).transmit_policy(plugin['tenant'], plugin['policy'])
+
             except ZoeStartExecutionRetryException as ex:
                 log.warning('Temporary failure starting execution {}: {}'.format(e.id, ex.message))
                 e.set_error_message(ex.message)
