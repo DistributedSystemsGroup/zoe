@@ -17,12 +17,15 @@ import pika
 
 
 class RabbitMQ:
-    def __init__(self, host):
+    def __init__(self, username, password, host):
+        self.username = username
+        self.password = password
         self.host = host
         self.channel = None
 
     def open_connection(self):
-        connection = pika.BlockingConnection(pika.ConnectionParameters(self.host))
+        credentials = pika.PlainCredentials(self.username, self.password)
+        connection = pika.BlockingConnection(pika.ConnectionParameters(self.host, credentials=credentials))
         self.channel = connection.channel()
 
     def send_message(self, queue, message):

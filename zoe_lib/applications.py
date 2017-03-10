@@ -198,7 +198,7 @@ def _storage_plugin_check(data):
 
 
 def _channel_check(data):
-    required_keys = ['protocol', 'host']
+    required_keys = ['protocol', 'host', 'username', 'password']
     for k in required_keys:
         if k not in data:
             raise InvalidApplicationDescription(msg="Missing required key: %s" % k)
