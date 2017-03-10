@@ -25,7 +25,7 @@ class Crystal:
 
     def transmit_policy(self, tenant, policy):
         message = "{}:{}".format(tenant, policy)
-        if self.channel['protocol'] is 'rabbitmq':
+        if self.channel['protocol'] == 'rabbitmq':
             log.debug("Transmitting policy to Crystal via RabbitMQ")
             rmq = RabbitMQ(self.channel['username'], self.channel['password'], self.channel['host'])
             rmq.open_connection()
