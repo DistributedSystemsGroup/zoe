@@ -190,7 +190,7 @@ def _storage_plugin_check(data):
     if data['name'] not in supported_plugins:
         raise InvalidApplicationDescription(msg="Storage plugin ({}) not supported. {}".format(data['name'], supported_plugins))
 
-    supported_policies = ['platinum, gold, silver, bronze']
+    supported_policies = ['platinum', 'gold', 'silver', 'bronze']
     if data['policy'] not in supported_policies:
         raise InvalidApplicationDescription(msg="Policy ({}) not supported. {}".format(data['policy'], supported_policies))
 
