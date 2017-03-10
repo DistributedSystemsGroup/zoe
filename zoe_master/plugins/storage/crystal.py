@@ -12,8 +12,11 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import logging
 
 from zoe_master.plugins.connectors import RabbitMQ
+
+log = logging.getLogger(__name__)
 
 
 class Crystal:
@@ -23,6 +26,7 @@ class Crystal:
     def transmit_policy(self, tenant, policy):
         message = "{}:{}".format(tenant, policy)
         if self.channel['protocol'] is 'rabbitmq':
+            log.debug("Transmitting policy to Crystal via RabbitMQ")
             rmq = RabbitMQ(self.channel['username'], self.channel['password'], self.channel['host'])
             rmq.open_connection()
             rmq.send_message(self.channel['queue'], message)

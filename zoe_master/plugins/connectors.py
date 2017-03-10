@@ -12,8 +12,11 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import logging
 import pika
+
+
+log = logging.getLogger(__name__)
 
 
 class RabbitMQ:
@@ -24,11 +27,13 @@ class RabbitMQ:
         self.channel = None
 
     def open_connection(self):
+        log.debug("Opening connection to RabbitMQ: {}".format(self.host))
         credentials = pika.PlainCredentials(self.username, self.password)
         connection = pika.BlockingConnection(pika.ConnectionParameters(self.host, credentials=credentials))
         self.channel = connection.channel()
 
     def send_message(self, queue, message):
+        log.debug("Sending message to RabbitMQ. Message -> {} // Queue -> {}".format(message, queue))
         self.channel.basic_publish(exchange='',
                                    routing_key=queue,
                                    body=message)

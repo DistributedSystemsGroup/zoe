@@ -113,6 +113,7 @@ class ZoeSimpleScheduler(ZoeBaseScheduler):
                     if 'storage' in plugins:
                         for plugin in plugins['storage']:
                             if plugin['name'] is 'crystal':
+                                log.debug("Transmitting policy to Storage Plugin: Crystal")
                                 Crystal(plugin['channel']).transmit_policy(plugin['tenant'], plugin['policy'])
 
             except ZoeStartExecutionRetryException as ex:
