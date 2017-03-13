@@ -22,6 +22,7 @@ import re
 
 from zoe_lib.exceptions import InvalidApplicationDescription
 import zoe_lib.version
+from zoe_lib.config import get_conf
 
 log = logging.getLogger(__name__)
 
@@ -124,10 +125,11 @@ def _service_check(data):
         int(data['required_resources']['memory'])
     except ValueError:
         raise InvalidApplicationDescription(msg="required_resources -> memory field should be an int")
+
     try:
-        int(data['required_resources']['cores'])
+        float(data['required_resources']['cores'])
     except ValueError:
-        raise InvalidApplicationDescription(msg="required_resources -> cores field should be an int")
+        raise InvalidApplicationDescription(msg="required_resources -> cores field should be a float")    
 
     if 'environment' in data:
         if not hasattr(data['environment'], '__iter__'):
@@ -151,6 +153,16 @@ def _service_check(data):
 
     if 'constraints' in data and not hasattr(data['constraints'], '__iter__'):
         raise InvalidApplicationDescription(msg='networks should be an iterable')
+
+    if get_conf().backend == 'Kubernetes':
+        if 'replicas' not in data:
+            data['replicas'] = 1
+    
+        try:
+            int(data['replicas'])
+        except ValueError:
+            raise InvalidApplicationDescription(msg="replicas field should be an int")
+
 
 
 def _port_check(data):
