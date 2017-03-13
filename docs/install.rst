@@ -79,3 +79,19 @@ Docker compose - demo install
 -----------------------------
 
 In the repository there is also a ``docker-compose.yml`` file that can be used to start a simple Zoe deployment for testing and demonstration purposes. By modifying the compose configuration file and adding volumes with customized configuration files it is possible to run more complex Zoe configurations.
+
+Linux standalone install
+------------------------
+
+The following steps describe how to run a minimal workable Zoe on a fresh Ubuntu machine. The current supported OS is Ubuntu 16.04 but it is straightforward to modify to work with other versions.
+
+```
+git clone http://github.com/DistributedSystemsGroup/zoe-kpmg.git
+```
+
+Go to ``deploy`` folder, then:
+
+```
+chmod +x deploy.sh
+sudo ./deploy.sh
+```

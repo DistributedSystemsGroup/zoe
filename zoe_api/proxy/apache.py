@@ -59,6 +59,7 @@ class ApacheProxy(zoe_api.proxy.base.BaseProxy):
             #Start proxifying by adding entry to use proxypass and proxypassreverse in apache2 config file
             for srv in exe.services:
                 ip, p = None, None
+
                 if get_conf().backend == 'OldSwarm':
                     swarm = SwarmClient(get_conf())
                     s_info = swarm.inspect_container(srv.docker_id)
@@ -85,9 +86,9 @@ class ApacheProxy(zoe_api.proxy.base.BaseProxy):
                     p = s_info['port_forwarding'][0]['nodePort']
                 base_path = '/zoe/' + uid + '/' + str(id) + '/' + srv.name
                 original_path = str(ip) + ':' + str(p) + base_path
-                
+
                 if ip is not None and p is not None:
-                    log.info('Proxifying %s', srv.name)
+                    log.info('Proxifying %s', srv.name + ' port ' + exposedPort)
                     self.dispatch_to_docker(base_path, original_path)
 
         except Exception as ex:
