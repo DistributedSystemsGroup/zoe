@@ -210,3 +210,5 @@ def _channel_check(data):
     if data['protocol'] is 'rabbitmq':
         if 'queue' not in data:
             raise InvalidApplicationDescription(msg="Missing required key: queue")
+        if 'exchange' not in data:
+            raise InvalidApplicationDescription(msg="Missing required key: exchange")

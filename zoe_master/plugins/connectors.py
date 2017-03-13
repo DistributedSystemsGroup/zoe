@@ -32,9 +32,9 @@ class RabbitMQ:
         connection = pika.BlockingConnection(pika.ConnectionParameters(self.host, credentials=credentials))
         self.channel = connection.channel()
 
-    def send_message(self, queue, message):
-        log.debug("Sending message to RabbitMQ. Message -> {} // Queue -> {}".format(message, queue))
-        self.channel.basic_publish(exchange='',
+    def send_message(self, exchange, queue, message):
+        log.debug("Sending message to RabbitMQ. Message -> {} // Exchange -> {} // Queue -> {}".format(message, exchange, queue))
+        self.channel.basic_publish(exchange=exchange,
                                    routing_key=queue,
                                    body=message)
 

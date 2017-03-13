@@ -29,5 +29,5 @@ class Crystal:
             log.debug("Transmitting policy to Crystal via RabbitMQ")
             rmq = RabbitMQ(self.channel['username'], self.channel['password'], self.channel['host'])
             rmq.open_connection()
-            rmq.send_message(self.channel['queue'], message)
+            rmq.send_message(self.channel['exchange'], self.channel['queue'], message)
             rmq.close_connection()
