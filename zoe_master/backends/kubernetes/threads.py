@@ -65,13 +65,14 @@ class KubernetesMonitor(threading.Thread):
                                     log.debug('Reached desired number of replicas')
                                     service.set_backend_status(service.BACKEND_START_STATUS)
                 else:
-                    if w.object.name in self.serviceId:
-                        sid = self.serviceId[w.object.name]
-                        self.serviceId.pop(w.object.name)
-                        service = self.state.service_list(only_one=True, id=sid)
-                        if service is not None:
-                            log.info('Destroyed all replicas')
-                            service.set_backend_status(service.BACKEND_DESTROY_STATUS)
+                    if w.type != 'ADDED':
+                        if w.object.name in self.serviceId:
+                            sid = self.serviceId[w.object.name]
+                            self.serviceId.pop(w.object.name)
+                            service = self.state.service_list(only_one=True, id=sid)
+                            if service is not None:
+                                log.info('Destroyed all replicas')
+                                service.set_backend_status(service.BACKEND_DESTROY_STATUS)
                 time.sleep(1)
             
             time.sleep(2)
