@@ -71,7 +71,7 @@ def app_validate(data):
 
 def _validate_all_services(data):
     for service in data:
-        _service_check(data)
+        _service_check(service)
 
     found_monitor = False
     for service in data['services']:
