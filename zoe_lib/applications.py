@@ -76,7 +76,7 @@ def _validate_all_services(data):
         _service_check(service)
 
     found_monitor = False
-    for service in data['services']:
+    for service in data:
         if service['monitor']:
             found_monitor = True
             break
