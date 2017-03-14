@@ -62,14 +62,21 @@ class ApacheProxy(zoe_api.proxy.base.BaseProxy):
 
                 if get_conf().backend == 'OldSwarm':
                     swarm = SwarmClient(get_conf())
-                    s_info = swarm.inspect_container(srv.docker_id)
+                    s_info = swarm.inspect_container(srv.backend_id)
                     portList = s_info['ports']
 
-                    for s in portList.values():
-                        if s != None:
-                            ip = s[0]
-                            p = s[1]
-
+                    for k,v in portList.items():
+                        exposedPort = k.split('/tcp')[0]
+                        if v != None:
+                            ip = v[0]
+                            p = v[1]
+                        
+                        base_path = '/zoe/' + uid + '/' + str(id) + '/' + srv.name + '/' + exposedPort
+                        original_path = str(ip) + ':' + str(p) + base_path
+                                        
+                        if ip is not None and p is not None:
+                            log.info('Proxifying %s', srv.name + ' port ' + exposedPort)
+                            self.dispatch_to_docker(base_path, original_path)
                 else:
                     kube = KubernetesClient(get_conf())
                     s_info = kube.inspect_service(srv.dns_name)
@@ -84,12 +91,13 @@ class ApacheProxy(zoe_api.proxy.base.BaseProxy):
 
                     ip = hostIP
                     p = s_info['port_forwarding'][0]['nodePort']
-                base_path = '/zoe/' + uid + '/' + str(id) + '/' + srv.name
-                original_path = str(ip) + ':' + str(p) + base_path
+                    exposedPort = s_info['port_forwarding'][0]['port']
+                    base_path = '/zoe/' + uid + '/' + str(id) + '/' + srv.name + '/' + str(exposedPort)
+                    original_path = str(ip) + ':' + str(p) + base_path
 
-                if ip is not None and p is not None:
-                    log.info('Proxifying %s', srv.name + ' port ' + exposedPort)
-                    self.dispatch_to_docker(base_path, original_path)
+                    if ip is not None and p is not None:
+                        log.info('Proxifying %s', srv.name + ' port ' + str(exposedPort))
+                        self.dispatch_to_docker(base_path, original_path)
 
         except Exception as ex:
             log.error(ex)
