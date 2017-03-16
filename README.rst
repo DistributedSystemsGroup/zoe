@@ -1,44 +1,98 @@
 Zoe - Container-based Analytics as a Service
 ============================================
 
-Zoe provides a simple way to provision data analytics applications using Docker Swarm.
+Zoe provides a simple way to provision data analytics applications.
 
 Resources:
 
--  Main website: http://zoe-analytics.eu
--  Documentation: http://docs.zoe-analytics.eu
--  How to install: http://zoe-analytics.readthedocs.org/en/latest/install.html
+- Main website: http://zoe-analytics.eu
+- Documentation: http://docs.zoe-analytics.eu
+- How to install: :ref:`install`
 
-Zoe applications can be easily created by users, we provide several examples in the `zoe-applications https://github.com/DistributedSystemsGroup/zoe-applications`_ repository to get you started.
+Zoe applications:
 
-Other Zoe resources:
-
-- Zoe applications: https://github.com/DistributedSystemsGroup/zoe-applications
-- Zoe logger: https://github.com/DistributedSystemsGroup/zoe-logger
+- Repository: https://github.com/DistributedSystemsGroup/zoe-applications
+- How to create a ZApp: :ref:`howto_zapp`
 
 
-A note on the master branch
----------------------------
-We are currently redesigning Zoe with a new architecture, so the master branch is unstable and changes very rapidly.
-The latest stable version is maintained under the 0.9.7-stable branch. All the documentation currently refers to this stable version, unless otherwise noted.
+
+Zoe is a user facing software that hides the complexities of managing resources, configuring and deploying complex distributed applications on private clouds. The main focus are data analysis applications, such as `Spark <http://spark.apache.org/>`_, but Zoe has a very flexible application description format that lets you easily describe any kind of application.
+
+Zoe uses containerization technology to provide fast startup times and process isolation. A smart scheduler is able to prioritize executions according to several policies, maximising the use of the available capacity and maintaining a queue of executions that are ready to run.
+
+Zoe currently supports Docker Swarm as the container backend. It can be located anywhere, on Amazon or in your own private cloud, and Zoe does not need exclusive access to it, meaning your Swarm could also be running other services: Zoe will not interfere with them. Zoe is meant as a private service, adding data-analytics capabilities to new or existing clusters.
+
+The core components of Zoe are application-independent and users are free to create and execute application descriptions for any kind of service combination. Zoe targets analytics services in particular: we offer a number of tested sample ZApps and Frameworks that can be used as starting examples.
+
+To better understand what we mean by "analytic service", here are a few examples:
+
+* Spark
+* Zookeeper
+* Hadoop (HDFS in particular)
+* Cassandra
+* Impala
+* ... suggestions welcome!
+
+A number of predefined applications for testing and customization can be found at the `zoe-applications <https://github.com/DistributedSystemsGroup/zoe-applications>`_ repository.
+
+Have a look at the :ref:`vision` and at the :ref:`roadmap` to see what we are currently planning and feel free to `contact us <daniele.venzano@eurecom.fr>`_ via email or through the `GitHub issue tracker <https://github.com/DistributedSystemsGroup/zoe/issues>`_ to pose questions or suggest ideas and new features.
+
+A note on terminology (needs to be updated)
+-------------------------------------------
+
+We are spending a lot of effort to use consistent naming throughout the documentation, the software, the website and all the other resources associated with Zoe. Check the :ref:`architecture` document for the details, but here is a quick reference:
+
+ * Zoe Components: the Zoe processes, the Master, the API and the service monitor
+ * Zoe Applications: a composition of Zoe Frameworks, is the highest-level entry in application descriptions that the use submits to Zoe, can be abbreviated in ZApp(s).
+ * Zoe Frameworks: a composition of Zoe Services, is used to describe re-usable pieces of Zoe Applications, like a Spark cluster
+ * Zoe Services: one to one with a Docker container, describes a single service/process tree running in an isolated container
+
+Contents
+--------
+
+.. toctree::
+  :maxdepth: 2
+
+  install
+  config_file
+  logging
+  monitoring
+  architecture
+  quality
+  vision
+  motivations
+  roadmap
+  contributing
+
+Zoe applications
+----------------
+
+:ref:`modindex`
+
+.. toctree::
+  :maxdepth: 2
+
+  zapps/classification
+  zapps/howto_zapp
+  zapps/zapp_format
+  zapps/contributing
+
+Developer documentation
+-----------------------
+
+:ref:`modindex`
+
+.. toctree::
+  :maxdepth: 1
+
+  developer/index
 
 
-Repository contents
--------------------
+Contacts
+========
 
-- `contrib`: supervisord config files
-- `docs`: Sphinx documentation
-- `scripts`: Scripts used to test Zoe images outside of Zoe
-- `zoe_cmd`: Command-line client
-- `zoe_lib`: Client-side library, contains also some modules needed by the observer and the master processes
-- `zoe_master`: The core of Zoe, the server process that listens for client requests and creates the containers on Swarm
-- `zoe_api`: The web client interface
+`Zoe website <http://zoe-analytics.eu>`_
 
-|Travis build| |Documentation Status|
+The main discussion area for issues, questions and feature requests is the `GitHub issue tracker <https://github.com/DistributedSystemsGroup/zoe/issues>`_.
 
 Zoe is licensed under the terms of the Apache 2.0 license.
-
-.. |Documentation Status| image:: https://readthedocs.org/projects/zoe-analytics/badge/?version=latest
-   :target: https://readthedocs.org/projects/zoe-analytics/?badge=latest
-.. |Travis build| image:: https://travis-ci.org/DistributedSystemsGroup/zoe.svg
-   :target: https://travis-ci.org/DistributedSystemsGroup/zoe
