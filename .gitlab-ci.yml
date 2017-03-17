@@ -1,0 +1,48 @@
+image: docker:latest
+services:
+  - docker:dind
+
+stages:
+  - static-test
+  - build
+  - integration-test
+  - deploy
+
+variables:
+  # Configure postgres service (https://hub.docker.com/_/postgres/)
+  POSTGRES_DB: zoe
+  POSTGRES_USER: zoeuser
+  POSTGRES_PASSWORD: zoepass
+
+before_script:
+  - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.example.com
+
+#lint:
+#  stage: static-test
+#  image: python:3.4
+#  script:
+#    - pip install -r requirements.txt
+#    - pip install -r requirements_tests.txt
+#    - chmod 755 run_tests.sh && ./run_tests.sh
+#
+#SonarQube:
+#  stage: static-test
+#  image: zoerepo/sonar-scanner
+#  variables:
+#    SONAR_PROJECT_KEY: "zoe.$CI_BUILD_REF_NAME"
+#    SONAR_PROJECT_NAME: "Zoe devel"
+#    SONAR_PROJECT_VERSION: "$CI_BUILD_REF"
+#    SONARQUBE_SERVER_URL: "$SONARQUBE_SERVER_URL"
+#  script:
+#    - /usr/bin/sonar-scanner-run.sh
+
+images:
+  stage: build
+  script:
+    - docker build --pull -t $ZOE_TEST_IMAGE .
+    - docker push $ZOE_TEST_IMAGE
+
+api-test:
+  stage: integration-test
+  services:
+    - postgres:9.3
