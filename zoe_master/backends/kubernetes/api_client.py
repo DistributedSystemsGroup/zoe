@@ -20,23 +20,20 @@ try:
 except ImportError:
     pykube = None
 
-import operator
+from argparse import Namespace
+from typing import Iterable, Dict, Any, Union
+
 import logging
 import json
 import time
 import humanfriendly
 
-from typing import Iterable, Callable, Dict, Any, Union
-
 from zoe_master.stats import ClusterStats, NodeStats
 from zoe_lib.version import ZOE_VERSION
 
-from argparse import Namespace
-from typing import Dict, Any
-
 log = logging.getLogger(__name__)
 
-zoe_labels = {"app": "zoe", "version": ZOE_VERSION}
+ZOE_LABELS = {"app": "zoe", "version": ZOE_VERSION}
 
 class DockerContainerOptions:
     """Wrapper for the Docker container options."""
@@ -115,16 +112,19 @@ class DockerContainerOptions:
             return {}
 
     def set_replicas(self, reps: int):
+        """Setter to set replicas"""
         self.replicas = reps
 
     def get_replicas(self) -> int:
+        """Getter to get replicas"""
         return self.replicas
 
 class KubernetesConf:
+    """Kubeconfig class"""
     def __init__(self, jsonfile):
         self.config = {}
-        with open(jsonfile, 'r') as f:
-            self.config = json.load(f)
+        with open(jsonfile, 'r') as inp:
+            self.config = json.load(inp)
 
 class KubernetesServiceConf:
     """ Wrapper for Kubernetes Service configuration """
@@ -138,28 +138,33 @@ class KubernetesServiceConf:
         self.conf['spec']['selector'] = {}
         self.conf['spec']['type'] = 'LoadBalancer'
 
-    def setName(self, name):
+    def set_name(self, name):
+        """Setter to set name"""
         self.conf['metadata']['name'] = name
 
-    def setLabels(self, lb: dict):
-        for k in lb:
-            self.conf['metadata']['labels'][k] = lb[k]
+    def set_labels(self, lbs: dict):
+        """Setter to set label"""
+        for key in lbs:
+            self.conf['metadata']['labels'][key] = lbs[key]
 
-    def setPorts(self, ports):
+    def set_ports(self, ports):
+        """Setter to set ports"""
         self.conf['spec']['ports'] = [{} for _ in range(len(ports))]
         count = 0
 
-        for p in ports:
+        for prt in ports:
             self.conf['spec']['ports'][count]['name'] = 'http'
-            self.conf['spec']['ports'][count]['port'] = p
-            self.conf['spec']['ports'][count]['targetPort'] = p
+            self.conf['spec']['ports'][count]['port'] = prt
+            self.conf['spec']['ports'][count]['targetPort'] = prt
             count = count + 1
 
-    def setSelectors(self, selectors: dict):
-        for k in selectors:
-            self.conf['spec']['selector'][k] = selectors[k]
+    def set_selectors(self, selectors: dict):
+        """Setter to set selectors"""
+        for key in selectors:
+            self.conf['spec']['selector'][key] = selectors[key]
 
-    def getJson(self):
+    def get_json(self):
+        """get Json files"""
         return self.conf
 
 class KubernetesReplicationControllerConf:
@@ -170,11 +175,11 @@ class KubernetesReplicationControllerConf:
         self.conf['apiVersion'] = "v1"
         self.conf['metadata'] = {}
         self.conf['metadata']['labels'] = {}
-        
+
         self.conf['spec'] = {}
-        
+
         self.conf['spec']['replicas'] = 1
-        
+
         self.conf['spec']['selector'] = {}
 
         self.conf['spec']['template'] = {}
@@ -184,31 +189,39 @@ class KubernetesReplicationControllerConf:
         self.conf['spec']['template']['spec'] = {}
         self.conf['spec']['template']['spec']['containers'] = [{}]
 
-    def setName(self, name):
+    def set_name(self, name):
+        """Setter to set name"""
         self.conf['metadata']['name'] = name
 
-    def setLabels(self, lb: dict):
-        for k in lb:
-            self.conf['metadata']['labels'][k] = lb[k]
+    def set_labels(self, lbs: dict):
+        """Setter to set label"""
+        for key in lbs:
+            self.conf['metadata']['labels'][key] = lbs[key]
 
-    def setReplicas(self, reps):
+    def set_replicas(self, reps):
+        """Setter to set replicas"""
         self.conf['spec']['replicas'] = reps
 
-    def setSpecSelector(self, lb: dict):
-        for k in lb:
-            self.conf['spec']['selector'][k] = lb[k]
+    def set_spec_selector(self, lbs: dict):
+        """Setter to set specselector"""
+        for key in lbs:
+            self.conf['spec']['selector'][key] = lbs[key]
 
-    def setSpecTemplateMetadataLabels(self, lb: dict):
-        for k in lb:
-            self.conf['spec']['template']['metadata']['labels'][k] = lb[k]
+    def set_temp_meta_labels(self, lbs: dict):
+        """Setter to set spectemplatemetadatalabel"""
+        for key in lbs:
+            self.conf['spec']['template']['metadata']['labels'][key] = lbs[key]
 
-    def setSpecTemplateSpecContainerImage(self, image):
+    def set_spec_container_image(self, image):
+        """Setter to set container image"""
         self.conf['spec']['template']['spec']['containers'][0]['image'] = image
 
-    def setSpecTemplateSpecContainerName(self, name):
+    def set_spec_container_name(self, name):
+        """Setter to set container name"""
         self.conf['spec']['template']['spec']['containers'][0]['name'] = name
 
-    def setSpecTemplateSpecContainerEnv(self, env: dict):
+    def set_spec_container_env(self, env: dict):
+        """Setter to set container environment"""
         self.conf['spec']['template']['spec']['containers'][0]['env'] = [{} for _ in range(len(env))]
         count = 0
 
@@ -217,29 +230,33 @@ class KubernetesReplicationControllerConf:
             self.conf['spec']['template']['spec']['containers'][0]['env'][count]['value'] = env[k]
             count = count + 1
 
-    def setSpecTemplateSpecContainerPorts(self, ports):
+    def set_spec_container_ports(self, ports):
+        """Setter to set container ports"""
         self.conf['spec']['template']['spec']['containers'][0]['ports'] = [{} for _ in range(len(ports))]
         count = 0
 
-        for p in ports:
-            self.conf['spec']['template']['spec']['containers'][0]['ports'][count]['containerPort'] = p
+        for prt in ports:
+            self.conf['spec']['template']['spec']['containers'][0]['ports'][count]['containerPort'] = prt
             count = count + 1
 
-    def setSpecTemplateSpecContainerMemLimit(self, memlimit):
+    def set_spec_container_mem_limit(self, memlimit):
+        """Setter to set container mem limit"""
         memset = str(memlimit / (1024*1024)) + "Mi"
         self.conf['spec']['template']['spec']['containers'][0]['resources'] = {}
         self.conf['spec']['template']['spec']['containers'][0]['resources']['limits'] = {}
         self.conf['spec']['template']['spec']['containers'][0]['resources']['limits']['memory'] = memset
 
-    def setSpecTemplateSpecContainerCoreLimit(self, corelimit):
+    def set_spec_container_core_limit(self, corelimit):
+        """Setter to set container corelimit"""
         self.conf['spec']['template']['spec']['containers'][0]['resources']['limits']['cpu'] = corelimit
 
-    def setSpecTemplateSpecContainerVolumes(self, volumes, name):
+    def set_spec_container_volumes(self, volumes, name):
+        """Setter to set container volumes"""
         self.conf['spec']['template']['spec']['containers'][0]['volumeMounts'] = [{} for _ in range(len(volumes))]
         count = 0
 
-        for v in volumes:
-            vsplit = v.split(':')
+        for vol in volumes:
+            vsplit = vol.split(':')
             self.conf['spec']['template']['spec']['containers'][0]['volumeMounts'][count]['mountPath'] = vsplit[0]
             self.conf['spec']['template']['spec']['containers'][0]['volumeMounts'][count]['name'] = name + "-" + str(count)
             count = count + 1
@@ -247,60 +264,61 @@ class KubernetesReplicationControllerConf:
         self.conf['spec']['template']['spec']['volumes'] = [{} for _ in range(len(volumes))]
         count = 0
 
-        for v in volumes:
-            vsplit = v.split(':')
+        for vol in volumes:
+            vsplit = vol.split(':')
             self.conf['spec']['template']['spec']['volumes'][count]['name'] = name + "-" + str(count)
             self.conf['spec']['template']['spec']['volumes'][count]['hostPath'] = {}
             self.conf['spec']['template']['spec']['volumes'][count]['hostPath']['path'] = vsplit[1]
             count = count + 1
 
-    def getJson(self):
+    def get_json(self):
+        """Get json file"""
         return self.conf
 
 class KubernetesClient:
     """The Kubernetes client class that wraps the Kubernetes API."""
     def __init__(self, opts: Namespace) -> None:
-        try:
-            self.api = pykube.HTTPClient(pykube.KubeConfig.from_file(opts.kube_config_file))
-        except Exception as e:
-            log.error(e)
+        #try:
+        self.api = pykube.HTTPClient(pykube.KubeConfig.from_file(opts.kube_config_file))
+        #except Exception as e:
+        #    log.error(e)
 
     def spawn_replication_controller(self, image: str, options: DockerContainerOptions):
         """Create and start a new replication controller."""
         config = KubernetesReplicationControllerConf()
-        config.setName(options.name)
+        config.set_name(options.name)
 
-        config.setLabels(zoe_labels)
-        config.setLabels({'service_name' : options.name})
-        config.setReplicas(options.get_replicas())
-        
-        config.setSpecSelector(zoe_labels)
-        config.setSpecSelector({'service_name' : options.name})
-        
-        config.setSpecTemplateMetadataLabels(zoe_labels)
-        config.setSpecTemplateMetadataLabels({'service_name': options.name})
+        config.set_labels(ZOE_LABELS)
+        config.set_labels({'service_name' : options.name})
+        config.set_replicas(options.get_replicas())
 
-        config.setSpecTemplateSpecContainerImage(image)
-        config.setSpecTemplateSpecContainerName(options.name)
+        config.set_spec_selector(ZOE_LABELS)
+        config.set_spec_selector({'service_name' : options.name})
+
+        config.set_temp_meta_labels(ZOE_LABELS)
+        config.set_temp_meta_labels({'service_name': options.name})
+
+        config.set_spec_container_image(image)
+        config.set_spec_container_name(options.name)
 
         if len(options.environment) > 0:
-            config.setSpecTemplateSpecContainerEnv(options.environment)
+            config.set_spec_container_env(options.environment)
 
         if len(options.ports) > 0:
-            config.setSpecTemplateSpecContainerPorts(options.ports)
+            config.set_spec_container_ports(options.ports)
 
-        config.setSpecTemplateSpecContainerMemLimit(options.get_memory_limit())
-        
+        config.set_spec_container_mem_limit(options.get_memory_limit())
+
         if options.get_cores_limit() != 0:
-            config.setSpecTemplateSpecContainerCoreLimit(options.get_cores_limit())
+            config.set_spec_container_core_limit(options.get_cores_limit())
 
         if len(list(options.get_volume_binds())) > 0:
-            config.setSpecTemplateSpecContainerVolumes(list(options.get_volume_binds()), options.name)
+            config.set_spec_container_volumes(list(options.get_volume_binds()), options.name)
 
         info = {}
 
         try:
-            pykube.ReplicationController(self.api, config.getJson()).create()
+            pykube.ReplicationController(self.api, config.get_json()).create()
             log.info('Created ReplicationController on Kubernetes cluster')
             info = self.inspect_replication_controller(options.name)
         except Exception as ex:
@@ -311,9 +329,9 @@ class KubernetesClient:
     def inspect_replication_controller(self, name):
         """Get information about a specific replication controller."""
         try:
-            repconList = pykube.ReplicationController.objects(self.api)
-            rc = repconList.get_by_name(name)
-            rc_info = rc.obj
+            repcon_list = pykube.ReplicationController.objects(self.api)
+            rep = repcon_list.get_by_name(name)
+            rc_info = rep.obj
 
             info = {
                 "backend_id": rc_info['metadata']['uid']
@@ -322,16 +340,16 @@ class KubernetesClient:
             info['ip_address'] = '0.0.0.0'
 
             no_replicas = rc_info['spec']['replicas']
-            
+
             if 'readyReplicas' in rc_info['status']:
                 ready_replicas = rc_info['status']['readyReplicas']
             else:
                 ready_replicas = 0
-            
+
             info['replicas'] = no_replicas
             info['readyReplicas'] = ready_replicas
 
-            if ready_replicas <=0 :
+            if ready_replicas <= 0:
                 info['state'] = 'undefined'
                 info['running'] = False
             if ready_replicas > 0 and ready_replicas <= no_replicas:
@@ -351,37 +369,36 @@ class KubernetesClient:
 
     def replication_controller_list(self):
         """Get list of replication controller."""
-        repconList = pykube.ReplicationController.objects(self.api).filter(selector=zoe_labels).iterator()
+        repcon_list = pykube.ReplicationController.objects(self.api).filter(selector=ZOE_LABELS).iterator()
         rclist = []
         try:
-            for rc in repconList:
-                rclist.append(self.inspect_replication_controller(rc.name))
+            for rep in repcon_list:
+                rclist.append(self.inspect_replication_controller(rep.name))
         except Exception as ex:
             log.error(ex)
         return rclist
-                    
 
     def replication_controller_event(self):
         """Get event stream of the replication controller."""
-        rcStream =  pykube.ReplicationController.objects(self.api).filter(selector=zoe_labels).watch()
-        return rcStream
+        rc_stream = pykube.ReplicationController.objects(self.api).filter(selector=ZOE_LABELS).watch()
+        return rc_stream
 
-    def spawn_service(self, image: str, options: DockerContainerOptions):
+    def spawn_service(self, options: DockerContainerOptions):
         """Create and start a new Service object."""
         config = KubernetesServiceConf()
 
-        config.setName(options.name)
-        config.setLabels(zoe_labels)
-        config.setLabels({'service_name' : options.name})
+        config.set_name(options.name)
+        config.set_labels(ZOE_LABELS)
+        config.set_labels({'service_name' : options.name})
 
         if len(options.ports) > 0:
-            config.setPorts(options.ports)
+            config.set_ports(options.ports)
 
-        config.setSelectors(zoe_labels)
-        config.setSelectors({'service_name' : options.name})
+        config.set_selectors(ZOE_LABELS)
+        config.set_selectors({'service_name' : options.name})
 
         try:
-            pykube.Service(self.api, config.getJson()).create()
+            pykube.Service(self.api, config.get_json()).create()
             log.info('created service on Kubernetes cluster')
         except Exception as ex:
             log.error(ex)
@@ -390,8 +407,8 @@ class KubernetesClient:
     def inspect_service(self, name) -> Dict[str, Any]:
         """Get information of a specific service."""
         try:
-            srvList = pykube.Service.objects(self.api)
-            service = srvList.get_by_name(name)
+            service_list = pykube.Service.objects(self.api)
+            service = service_list.get_by_name(name)
             srv_info = service.obj
 
             info = {
@@ -402,11 +419,11 @@ class KubernetesClient:
             if 'clusterIP' in srv_info['spec']:
                 info['clusterIP'] = srv_info['spec']['clusterIP']
 
-            l = len(srv_info['spec']['ports'])
+            lgth = len(srv_info['spec']['ports'])
 
-            info['port_forwarding'] = [{} for _ in range(l)]
+            info['port_forwarding'] = [{} for _ in range(lgth)]
 
-            for i in range(l):
+            for i in range(lgth):
                 info['port_forwarding'][i]['port'] = srv_info['spec']['ports'][i]['port']
                 info['port_forwarding'][i]['nodePort'] = srv_info['spec']['ports'][i]['nodePort']
         except Exception as ex:
@@ -417,77 +434,76 @@ class KubernetesClient:
     def terminate(self, name):
         """Terminate a service.
         It will terminate Service, then ReplicationController and Pods have the same labels."""
-        delObj = {'apiVersion': 'v1', 'kind': '', 'metadata' : {'name' : name}}
+        del_obj = {'apiVersion': 'v1', 'kind': '', 'metadata' : {'name' : name}}
         try:
-            delObj['kind'] = 'Service'
-            pykube.Service(self.api, delObj).delete()
+            del_obj['kind'] = 'Service'
+            pykube.Service(self.api, del_obj).delete()
 
-            delObj['kind'] = 'ReplicationController' 
-            pykube.ReplicationController(self.api, delObj).delete()
+            del_obj['kind'] = 'ReplicationController'
+            pykube.ReplicationController(self.api, del_obj).delete()
 
-            delObj['kind'] = 'Pod'
-            pod_selector=zoe_labels
+            del_obj['kind'] = 'Pod'
+            pod_selector = ZOE_LABELS
             pod_selector['service_name'] = name
             pods = pykube.Pod.objects(self.api).filter(namespace="default", selector=pod_selector).iterator()
-            for p in pods:
-                delObj['metadata']['name'] = str(p)
-                pykube.Pod(self.api, delObj).delete()
+            for pod in pods:
+                del_obj['metadata']['name'] = str(pod)
+                pykube.Pod(self.api, del_obj).delete()
 
             log.info('Service deleted on Kubernetes cluster')
         except Exception as ex:
             log.error(ex)
 
-    def info(self) -> ClusterStats:
+    def info(self) -> ClusterStats: #pylint: disable=too-many-locals
         """Retrieve Kubernetes cluster statistics."""
         pl_status = ClusterStats()
-        
-        nodeList = pykube.Node.objects(self.api).iterator()
-        nodeDict = {}
+
+        node_list = pykube.Node.objects(self.api).iterator()
+        node_dict = {}
 
         #Get basic information from nodes
-        for node in nodeList:
-            ns = NodeStats(node.name)
-            ns.cores_total = float(node.obj['status']['allocatable']['cpu'])
-            ns.memory_total = humanfriendly.parse_size(node.obj['status']['allocatable']['memory'])
-            ns.labels = node.obj['metadata']['labels']
-            nodeDict[node.name] = ns
-        
+        for node in node_list:
+            nss = NodeStats(node.name)
+            nss.cores_total = float(node.obj['status']['allocatable']['cpu'])
+            nss.memory_total = humanfriendly.parse_size(node.obj['status']['allocatable']['memory'])
+            nss.labels = node.obj['metadata']['labels']
+            node_dict[node.name] = nss
+
         #Get information from all running pods, then accummulate to nodes
-        podList = pykube.Pod.objects(self.api).filter(namespace=pykube.all).iterator()
-        for pod in podList:
-            hostIP = pod.obj['status']['hostIP']
-            ns = nodeDict[hostIP]
-            ns.container_count = ns.container_count + 1
-            specCont = pod.obj['spec']['containers'][0]
-            if 'resources' in specCont:
-                if 'requests' in specCont['resources']:
-                    if 'memory' in specCont['resources']['requests']:
-                        memory = specCont['resources']['requests']['memory']
-                        ns.memory_reserved = ns.memory_reserved + humanfriendly.parse_size(memory)
-                    if 'cpu' in specCont['resources']['requests']:
-                        cpu = specCont['resources']['requests']['cpu']
+        pod_list = pykube.Pod.objects(self.api).filter(namespace=pykube.all).iterator()
+        for pod in pod_list:
+            host_ip = pod.obj['status']['hostIP']
+            nss = node_dict[host_ip]
+            nss.container_count = nss.container_count + 1
+            spec_cont = pod.obj['spec']['containers'][0]
+            if 'resources' in spec_cont:
+                if 'requests' in spec_cont['resources']:
+                    if 'memory' in spec_cont['resources']['requests']:
+                        memory = spec_cont['resources']['requests']['memory']
+                        nss.memory_reserved = nss.memory_reserved + humanfriendly.parse_size(memory)
+                    if 'cpu' in spec_cont['resources']['requests']:
+                        cpu = spec_cont['resources']['requests']['cpu']
                         #ex: cpu could be 100m or 0.1
                         cpu_splitted = cpu.split('m')
                         if len(cpu_splitted) > 1:
                             cpu_float = int(cpu_splitted[0]) / 1000
                         else:
                             cpu_float = int(cpu_splitted[0])
-                        ns.cores_reserved = round(ns.cores_reserved + cpu_float, 3)
+                        nss.cores_reserved = round(nss.cores_reserved + cpu_float, 3)
 
-        contTotal = 0
-        memTotal = 0
-        cpuTotal = 0
-        
-        for nodeIP in nodeDict:
-            pl_status.nodes.append(nodeDict[nodeIP])
-            contTotal = contTotal + nodeDict[nodeIP].container_count
-            memTotal = memTotal + nodeDict[nodeIP].memory_total
-            cpuTotal = cpuTotal + nodeDict[nodeIP].cores_total
+        cont_total = 0
+        mem_total = 0
+        cpu_total = 0
 
-        pl_status.container_count = contTotal
-        pl_status.memory_total = memTotal
-        pl_status.cores_total = cpuTotal
+        for node_ip in node_dict:
+            pl_status.nodes.append(node_dict[node_ip])
+            cont_total = cont_total + node_dict[node_ip].container_count
+            mem_total = mem_total + node_dict[node_ip].memory_total
+            cpu_total = cpu_total + node_dict[node_ip].cores_total
+
+        pl_status.container_count = cont_total
+        pl_status.memory_total = mem_total
+        pl_status.cores_total = cpu_total
         pl_status.timestamp = time.time()
 
         return pl_status
-

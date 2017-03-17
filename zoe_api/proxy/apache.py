@@ -15,10 +15,10 @@
 
 """Proxifying using Apache2 Container."""
 
-import docker
 import time
 import logging
 import random
+import docker
 
 import zoe_api.proxy.base
 import zoe_api.api_endpoint
@@ -33,78 +33,77 @@ class ApacheProxy(zoe_api.proxy.base.BaseProxy):
     def __init__(self, apiEndpoint):
         self.api_endpoint = apiEndpoint
 
-    """Proxify function."""
-    def proxify(self, uid, role, id):
+    def proxify(self, uid, role, execution_id): #pylint: disable=too-many-locals
+        """Proxify function."""
         try:
-            length_service = 0
-            
             #Wait until all the services get created and started to be able to get the backend_id
-            while self.api_endpoint.execution_by_id(uid, role, id).status != 'running':
+            while self.api_endpoint.execution_by_id(uid, role, execution_id).status != 'running':
                 log.info('Waiting for all services get started...')
-                length_service = len(self.api_endpoint.execution_by_id(uid, role, id).services)
                 time.sleep(1)
 
-            exe = self.api_endpoint.execution_by_id(uid, role, id)
-            l = len(exe.services)
-            
-            while l != 0:
-                exe = self.api_endpoint.execution_by_id(uid, role, id)
-                l = len(exe.services)
+            exe = self.api_endpoint.execution_by_id(uid, role, execution_id)
+            lth = len(exe.services)
+
+            while lth != 0:
+                exe = self.api_endpoint.execution_by_id(uid, role, execution_id)
+                lth = len(exe.services)
                 for srv in exe.services:
-                    if srv.backend_id == None:
+                    if srv.backend_id is None:
                         time.sleep(1)
                     else:
-                        l = l - 1 
-            
+                        lth = lth - 1
+
             #Start proxifying by adding entry to use proxypass and proxypassreverse in apache2 config file
             for srv in exe.services:
-                ip, p = None, None
+                ip, port = None, None
 
                 if get_conf().backend == 'OldSwarm':
                     swarm = SwarmClient(get_conf())
                     s_info = swarm.inspect_container(srv.backend_id)
-                    portList = s_info['ports']
+                    port_list = s_info['ports']
 
-                    for k,v in portList.items():
-                        exposedPort = k.split('/tcp')[0]
-                        if v != None:
-                            ip = v[0]
-                            p = v[1]
-                        
-                        base_path = '/zoe/' + uid + '/' + str(id) + '/' + srv.name + '/' + exposedPort
-                        original_path = str(ip) + ':' + str(p) + base_path
-                                        
-                        if ip is not None and p is not None:
-                            log.info('Proxifying %s', srv.name + ' port ' + exposedPort)
+                    for key, val in port_list.items():
+                        exposed_port = key.split('/tcp')[0]
+                        if val != None:
+                            ip = val[0]
+                            port = val[1]
+
+                        base_path = '/zoe/' + uid + '/' + str(execution_id) + '/' + srv.name + '/' + exposed_port
+                        original_path = str(ip) + ':' + str(port) + base_path
+
+                        if ip is not None and port is not None:
+                            log.info('Proxifying %s', srv.name + ' port ' + exposed_port)
                             self.dispatch_to_docker(base_path, original_path)
                 else:
                     kube = KubernetesClient(get_conf())
                     s_info = kube.inspect_service(srv.dns_name)
-                    
-                    kubeNodes = kube.info().nodes
-                    hostIP = random.choice(kubeNodes).name
-                    
+
+                    kube_nodes = kube.info().nodes
+                    host_ip = random.choice(kube_nodes).name
+
                     while 'nodePort' not in s_info['port_forwarding'][0]:
                         log.info('Waiting for service get started before proxifying...')
                         s_info = kube.inspect_service(srv.dns_name)
                         time.sleep(0.5)
 
-                    ip = hostIP
-                    p = s_info['port_forwarding'][0]['nodePort']
-                    exposedPort = s_info['port_forwarding'][0]['port']
-                    base_path = '/zoe/' + uid + '/' + str(id) + '/' + srv.name + '/' + str(exposedPort)
-                    original_path = str(ip) + ':' + str(p) + base_path
+                    ip = host_ip
+                    port = s_info['port_forwarding'][0]['nodePort']
+                    exposed_port = s_info['port_forwarding'][0]['port']
+                    base_path = '/zoe/' + uid + '/' + str(execution_id) + '/' + srv.name + '/' + str(exposed_port)
+                    original_path = str(ip) + ':' + str(port) + base_path
 
-                    if ip is not None and p is not None:
-                        log.info('Proxifying %s', srv.name + ' port ' + str(exposedPort))
+                    if ip is not None and port is not None:
+                        log.info('Proxifying %s', srv.name + ' port ' + str(exposed_port))
                         self.dispatch_to_docker(base_path, original_path)
 
         except Exception as ex:
             log.error(ex)
 
-    #The apache2 server is running inside a container
-    #Adding new entries with the proxy path and the ip:port of the application to the apache2 config file
     def dispatch_to_docker(self, base_path, original_path):
+        """
+        The apache2 server is running inside a container
+        Adding new entries with the proxy path and the ip:port of the application to the apache2 config file
+        """
         proxy = ['ProxyPass ' + base_path + '/api/kernels/ ws://' + original_path + '/api/kernels/',
                  'ProxyPassReverse ' + base_path + '/api/kernels/ ws://' + original_path + '/api/kernels/',
                  'ProxyPass ' + base_path + '/terminals/websocket/ ws://' + original_path + '/terminals/websocket/',
@@ -116,24 +115,24 @@ class ApacheProxy(zoe_api.proxy.base.BaseProxy):
 
         docker_client = docker.Client(base_url=get_conf().proxy_docker_sock)
 
-        delCommand = "sed -i '$ d' " + get_conf().proxy_config_file # /etc/apache2/sites-available/all.conf"
-        delID = docker_client.exec_create(get_conf().proxy_container, delCommand)
-        docker_client.exec_start(delID)
+        del_command = "sed -i '$ d' " + get_conf().proxy_config_file # /etc/apache2/sites-available/all.conf"
+        del_id = docker_client.exec_create(get_conf().proxy_container, del_command)
+        docker_client.exec_start(del_id)
 
-        for s in proxy:
-            command = 'bash -c "echo ' + "'" + s + "'" + '  >> /etc/apache2/sites-available/all.conf"'
-            id = docker_client.exec_create(get_conf().proxy_container, command)
-            docker_client.exec_start(id)
+        for entry in proxy:
+            command = 'bash -c "echo ' + "'" + entry + "'" + '  >> /etc/apache2/sites-available/all.conf"'
+            execution_id = docker_client.exec_create(get_conf().proxy_container, command)
+            docker_client.exec_start(execution_id)
 
-        reloadCommand = 'service apache2 reload'
-        reloadID = docker_client.exec_create(get_conf().proxy_container, reloadCommand)
-        docker_client.exec_start(reloadID)
+        reload_command = 'service apache2 reload'
+        reload_id = docker_client.exec_create(get_conf().proxy_container, reload_command)
+        docker_client.exec_start(reload_id)
 
     #Simply remove the added entries at the apache2 config file when terminating applcations
-    def unproxify(self, uid, role, id):
-        log.info('Unproxifying for user %s - execution %s', uid, str(id))
-        pattern = '/zoe\/' + uid + '\/' + str(id) + '/d'
+    def unproxify(self, uid, role, execution_id):
+        log.info('Unproxifying for user %s - execution %s', uid, str(execution_id))
+        pattern = '/zoe\/' + uid + '\/' + str(execution_id) + '/d' #pylint: disable=anomalous-backslash-in-string
         docker_client = docker.Client(base_url=get_conf().proxy_docker_sock)
-        delCommand = 'sed -i "' + pattern + '" ' + get_conf().proxy_config_file #  /etc/apache2/sites-available/all.conf'
-        delID = docker_client.exec_create(get_conf().proxy_container, delCommand)
-        docker_client.exec_start(delID)
+        del_command = 'sed -i "' + pattern + '" ' + get_conf().proxy_config_file #  /etc/apache2/sites-available/all.conf'
+        del_id = docker_client.exec_create(get_conf().proxy_container, del_command)
+        docker_client.exec_start(del_id)

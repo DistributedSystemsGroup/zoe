@@ -15,17 +15,15 @@
 
 """The high-level interface that Zoe uses to talk to the configured container backend."""
 
-from typing import Dict
-
 from zoe_lib.state import Service, Execution
-from zoe_master.exceptions import ZoeStartExecutionFatalException
 
-JUPYTER_NOTEBOOK='BASE_URL'
-MONGO_EXPRESS='ME_CONFIG_SITE_BASEURL'
+JUPYTER_NOTEBOOK = 'BASE_URL'
+MONGO_EXPRESS = 'ME_CONFIG_SITE_BASEURL'
 
-JUPYTER_PORT='8888'
-MONGO_PORT='27017'
+JUPYTER_PORT = '8888'
+MONGO_PORT = '27017'
 
 def gen_proxypath(execution: Execution, service: Service):
+    """ gen proxy address path """
     proxy_path_value = '/zoe/' + execution.user_id + '/' + str(execution.id) + '/' + service.name
     return proxy_path_value

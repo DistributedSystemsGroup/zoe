@@ -181,9 +181,10 @@ class SQLManager:
         self.conn.commit()
         return cur.fetchone()[0]
 
-    """ The above section is used for Oauth2 authentication mechanism """
+    #The above section is used for Oauth2 authentication mechanism
 
     def fetch_by_refresh_token(self, refresh_token):
+        """ get info from refreshtoken """
         cur = self._cursor()
         query = 'SELECT * FROM oauth_token WHERE refresh_token = %s'
         cur.execute(query, (refresh_token,))
@@ -191,6 +192,7 @@ class SQLManager:
         return cur.fetchone()
 
     def delete_refresh_token(self, refresh_token):
+        """ delete info by refreshtoken """
         cur = self._cursor()
         check_exists = 'SELECT * FROM oauth_token WHERE refresh_token = %s OR token = %s'
         cur.execute(check_exists, (refresh_token, refresh_token))
@@ -203,6 +205,7 @@ class SQLManager:
         return res
 
     def fetch_existing_token_of_user(self, client_id, grant_type, user_id):
+        """ get info from clientid granttype userid """
         cur = self._cursor()
         query = 'SELECT * FROM oauth_token WHERE client_id = %s AND grant_type = %s AND user_id = %s'
         cur.execute(query, (client_id, grant_type, user_id,))
@@ -210,6 +213,7 @@ class SQLManager:
         return cur.fetchone()
 
     def get_client_id_by_access_token(self, access_token):
+        """ get clientid from accesstoken """
         cur = self._cursor()
         query = 'SELECT * FROM oauth_token WHERE token = %s'
         cur.execute(query, (access_token,))
@@ -217,16 +221,18 @@ class SQLManager:
         return cur.fetchone()
 
     def get_client_id_by_refresh_token(self, refresh_token):
+        """ get clientid from refreshtoken """
         cur = self._cursor()
         query = 'SELECT * FROM oauth_token WHERE refresh_token = %s'
         cur.execute(query, (refresh_token,))
 
         return cur.fetchone()
 
-    def save_token(self, client_id, grant_type, token, data, expires_at, refresh_token, refresh_expires_at, scopes, user_id):
+    def save_token(self, client_id, grant_type, token, data, expires_at, refresh_token, refresh_expires_at, scopes, user_id): #pylint: disable=too-many-arguments
+        """ save token to db """
         cur = self._cursor()
         expires_at = datetime.datetime.fromtimestamp(expires_at)
-        if refresh_expires_at == None:
+        if refresh_expires_at is None:
             query = cur.mogrify('UPDATE oauth_token SET token = %s, expires_at = %s WHERE client_id=%s', (token, expires_at, client_id))
         else:
             refresh_token_expires_at = datetime.datetime.fromtimestamp(refresh_expires_at)
@@ -236,12 +242,14 @@ class SQLManager:
         self.conn.commit()
 
     def save_client(self, identifier, secret, role, redirect_uris, authorized_grants, authorized_response_types):
+        """ save clientinfo to db """
         cur = self._cursor()
         query = cur.mogrify('INSERT INTO oauth_client (identifier, secret, role, redirect_uris, authorized_grants, authorized_response_types) VALUES (%s,%s,%s,%s,%s,%s)', (identifier, secret, role, redirect_uris, authorized_grants, authorized_response_types))
         cur.execute(query)
         self.conn.commit()
 
     def fetch_by_client_id(self, client_id):
+        """ get info from clientid """
         cur = self._cursor()
         query = 'SELECT * FROM oauth_client WHERE identifier = %s'
         cur.execute(query, (client_id,))

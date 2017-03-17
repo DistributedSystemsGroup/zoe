@@ -34,7 +34,7 @@ class ExecutionAPI(RequestHandler):
         """Set up the headers for enabling CORS."""
         manage_cors_headers(self)
 
-    def options(self, execution_id):
+    def options(self, execution_id): # pylint: disable=unused-argument
         """Needed for CORS."""
         self.set_status(204)
         self.finish()
@@ -121,8 +121,8 @@ class ExecutionCollectionAPI(RequestHandler):
             if self.request.body:
                 filt_dict = tornado.escape.json_decode(self.request.body)
         except ValueError:
-            raise zoe_api.exceptions.ZoeRestAPIExecution('Error decoding JSON data')
-        
+            raise zoe_api.exceptions.ZoeRestAPIException('Error decoding JSON data')
+
         if 'status' in filt_dict:
             execs = self.api_endpoint.execution_list(uid, role, status=filt_dict['status'])
         else:

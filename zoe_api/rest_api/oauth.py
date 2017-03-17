@@ -15,21 +15,16 @@
 
 """The oAuth2 API endpoints."""
 
-from tornado.web import RequestHandler
-import tornado.escape
 import logging
+import json
+import psycopg2
 
-import zoe_lib.config as config
-import zoe_api.exceptions
+from tornado.web import RequestHandler
 
 import oauth2.grant
-import json
-import requests
-import psycopg2
 
 from zoe_api.rest_api.utils import catch_exceptions, get_auth
 from zoe_api.rest_api.oauth_utils import auth_controller, client_store, token_store
-from zoe_api.api_endpoint import APIEndpoint
 
 log = logging.getLogger(__name__)
 
@@ -66,13 +61,13 @@ class OAuthGetAPI(RequestHandler):
     def post(self):
         """REQUEST/REFRESH token"""
         uid, role = get_auth(self)
-        
+
         grant_type = oauth2.grant.RefreshToken.grant_type + ':' + oauth2.grant.ResourceOwnerGrant.grant_type
 
         try:
             self.client_store.save_client(uid, '', role, '', grant_type, '')
-        except psycopg2.IntegrityError as e:
-            log.warn('User is already had')
+        except psycopg2.IntegrityError:
+            log.info('User is already had')
 
         response = self._dispatch_request(uid)
         self._map_response(response)
@@ -95,7 +90,6 @@ class OAuthGetAPI(RequestHandler):
         request.post_param = lambda key: params[key]
         return self.auth_controller.dispatch(request, environ={})
 
-    
     def _map_response(self, response):
         for name, value in list(response.headers.items()):
             self.set_header(name, value)
@@ -109,7 +103,8 @@ class OAuthGetAPI(RequestHandler):
     def data_received(self, chunk):
         pass
 
-class OAuthRevokeAPI(RequestHandler):
+class OAuthRevokeAPI(RequestHandler): # pylint: disable=abstract-method
+    """The OAuthRevokeAPI endpoint."""
 
     def initialize(self, **kwargs):
         """Initializes the request handler."""
@@ -120,8 +115,8 @@ class OAuthRevokeAPI(RequestHandler):
     @catch_exceptions
     def delete(self, token):
         """DELETE token (logout)"""
-        uid, role = get_auth(self)
-        
+        get_auth(self)
+
         res = self.token_store.delete_refresh_token(token)
 
         if res == 0:

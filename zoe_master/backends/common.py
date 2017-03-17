@@ -17,10 +17,10 @@
 
 from typing import Dict
 
+from zoe_lib.config import get_conf
 from zoe_lib.state import Service, Execution
 from zoe_master.backends.proxy import gen_proxypath, JUPYTER_NOTEBOOK, MONGO_EXPRESS, JUPYTER_PORT, MONGO_PORT
 from zoe_master.exceptions import ZoeStartExecutionFatalException
-from zoe_lib.config import get_conf
 
 def gen_environment(execution: Execution, service: Service, env_subst_dict: Dict):
     """ Generate a dictionary containing the current cluster status (before the new container is spawned)

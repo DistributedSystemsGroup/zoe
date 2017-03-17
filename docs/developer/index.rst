@@ -16,3 +16,4 @@ Developer documentation
   scheduler
   backend
   stats
+  kube-backend

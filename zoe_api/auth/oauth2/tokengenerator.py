@@ -15,7 +15,6 @@
 
 """ Token generator for oauth2."""
 
-import base64
 import hashlib
 import os
 import uuid
@@ -64,7 +63,6 @@ class TokenGenerator(object):
         """
         raise NotImplementedError
 
-
 class URandomTokenGenerator(TokenGenerator):
     """
     Create a token using ``os.urandom()``.
@@ -85,7 +83,6 @@ class URandomTokenGenerator(TokenGenerator):
 
         return hash_gen.hexdigest()[:self.token_length]
 
-
 class Uuid4(TokenGenerator):
     """
     Generate a token using uuid4.
@@ -96,4 +93,3 @@ class Uuid4(TokenGenerator):
         :rtype: str
         """
         return str(uuid.uuid4())
-

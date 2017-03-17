@@ -40,7 +40,7 @@ class ServiceAPI(RequestHandler):
         manage_cors_headers(self)
 
     @catch_exceptions
-    def options(self, service_id):
+    def options(self, service_id): # pylint: disable=unused-argument
         """Needed for CORS."""
         self.set_status(204)
         self.finish()
