@@ -42,7 +42,7 @@ images:
     - docker build --pull -t $ZOE_TEST_IMAGE .
     - docker push $ZOE_TEST_IMAGE
 
-api-test:
-  stage: integration-test
-  services:
-    - postgres:9.3
+#api-test:
+#  stage: integration-test
+#  services:
+#    - postgres:9.3
