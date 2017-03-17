@@ -20,16 +20,18 @@ log = logging.getLogger(__name__)
 
 
 class RabbitMQ:
-    def __init__(self, username, password, host):
+    def __init__(self, username, password, host, port=None):
         self.username = username
         self.password = password
         self.host = host
+        self.port = port
         self.channel = None
 
     def open_connection(self):
         log.debug("Opening connection to RabbitMQ: {}".format(self.host))
         credentials = pika.PlainCredentials(self.username, self.password)
-        connection = pika.BlockingConnection(pika.ConnectionParameters(self.host, credentials=credentials))
+        connection = pika.BlockingConnection(
+            pika.ConnectionParameters(host=self.host, port=self.port, credentials=credentials))
         self.channel = connection.channel()
 
     def send_message(self, exchange, queue, message):
