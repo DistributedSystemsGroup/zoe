@@ -17,9 +17,10 @@
 
 """Container Parameter class"""
 
-from typing import Iterable, Callable, Dict, Any, Union
+from typing import Iterable
 
 class DockerContainerParameter():
+    """ Class holding Docker Container configuration """
     def __init__(self):
         self.image = ''
         self.volumes = []
@@ -32,24 +33,31 @@ class DockerContainerParameter():
         self.hostname = ''
 
     def set_gelf(self, gelf_address):
+        """ setter gelf_address """
         self.gelf_address = gelf_address
-        
+
     def get_gelf(self) -> str:
-        return self.gelf_address     
+        """ getter gelf_addres """
+        return self.gelf_address
 
     def set_ports(self, ports):
+        """ setter ports """
         self.ports.append(ports)
 
     def get_ports(self) -> Iterable[str]:
+        """ getter ports """
         return self.ports
 
     def set_image(self, image) -> str:
+        """ setter image """
         self.image = image
 
     def get_image(self) -> str:
+        """ getter image """
         return self.image
 
     def set_volumes(self, volumes):
+        """ setter volume """
         self.volumes.append(volumes)
 
     def get_volumes(self) -> Iterable[str]:
@@ -65,14 +73,17 @@ class DockerContainerParameter():
         return self.command
 
     def set_name(self, name) -> str:
+        """ setter for name """
         self.name = name
 
     def get_name(self) -> str:
+        """ getter for name """
         return self.name
 
     def set_hostname(self, hostname) -> str:
+        """ setter for hostname """
         self.hostname = hostname
 
     def get_hostname(self) -> str:
+        """ getter for hostname """
         return self.hostname
-

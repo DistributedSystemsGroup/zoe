@@ -18,25 +18,25 @@
 """Frontend deploy."""
 
 from  docker import Client
-import sys
 
 class ZoeFrontendDeploy():
+    """ Zoe frontend deploy class """
     def __init__(self, dockerUrl, apache2):
         self.src = 'prod.tar'
-        self.srcBackup = 'backup.tar'
+        self.src_backup = 'backup.tar'
         self.dst = '/var/www/'
-        self.dstBackup = '/var/www/prod'
+        self.dst_backup = '/var/www/prod'
         self.cli = Client(base_url=dockerUrl)
         self.apache2 = apache2
         return
 
     def deploy(self):
-#    """ Put new frontend folder behind apache2 container """
-        try:    
+        """ Put new frontend folder behind apache2 container """
+        try:
             retcode = 1
-            #do backup
-            strm, stat = self.cli.get_archive(container=self.apache2, path=self.dstBackup)
-            filebackup = open(self.srcBackup, 'wb')
+            strm, stat = self.cli.get_archive(container=self.apache2, path=self.dst_backup)
+            print(stat)
+            filebackup = open(self.src_backup, 'wb')
             filebackup.write(strm.read())
 
             filedata = open(self.src, 'rb').read()
@@ -49,9 +49,10 @@ class ZoeFrontendDeploy():
         return retcode
 
     def fallback(self):
+        """ Fallback to previous successfull build """
         try:
             retcode = 1
-            filebackup = open(self.srcBackup, 'rb').read()
+            filebackup = open(self.src_backup, 'rb').read()
             res = self.cli.put_archive(container=self.apache2, path=self.dst, data=filebackup)
             if res is False:
                 retcode = 0
