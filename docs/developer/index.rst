@@ -17,3 +17,4 @@ Developer documentation
   backend
   stats
   kube-backend
+  ci
