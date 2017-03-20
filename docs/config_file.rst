@@ -15,7 +15,9 @@ zoe.conf
 Common options:
 
 * ``debug = <true|false>`` : enable or disable debug log output
-* ``swarm = zk://zk1:2181,zk2:2181,zk3:2181`` : connection string to the Swarm API endpoint. Can be expressed by a plain http URL or as a zookeeper node list in case Swarm is configured for HA.
+* ``backend = <OldSwarm|Kubernetes>`` : type of cluster that zoe-master works with
+* ``swarm = zk://zk1:2181,zk2:2181,zk3:2181`` : connection string to the Swarm API endpoint. Can be expressed by a plain http URL or as a zookeeper node list in case Swarm is configured for HA. Specified if ``backend`` is ``OldSwarm``.
+* ``kube-config-file = /opt/zoe/kube.conf`` : the configuration file of Kubernetes cluster that zoe works with. Specified if ``backend`` is ``Kubernetes``.
 * ``api-listen-uri = tcp://*:4850`` : ZeroMQ server connection string, used for the master listening endpoint
 * ``deployment-name = devel`` : name of this Zoe deployment. Can be used to have multiple Zoe deployments using the same Swarm (devel and prod, for example)
 * ``workspace-deployment-path`` : path appended to the workspace path to distinguish this deployment. If unspecified is equal to the deployment name
@@ -47,3 +49,7 @@ API options:
 * ``ldap-admin-gid = 5000`` : LDAP group ID for admins
 * ``ldap-user-gid = 5001`` : LDAP group ID for users
 * ``ldap-guest-gid = 5002`` : LDAP group ID for guests
+
+Proxy options:
+
+Please refer to proxy documentation.
