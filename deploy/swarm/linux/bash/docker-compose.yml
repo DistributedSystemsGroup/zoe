@@ -11,14 +11,14 @@ services:
 	networks:
   	- zoe
   zoe-api:
-	image: zoerepo/zoe
+	image: zoerepo/zoe:devel
 	command: python3 zoe-api.py --debug --swarm ${SWARM_URL} --deployment-name compose --master-url tcp://zoe-master:4850 --dbuser postgres --dbhost postgres --dbname postgres --dbpass postgres --overlay-network-name my-net
 	ports:
   	- "8080:5001"
 	depends_on:
   	- postgres
   zoe-master:
-	image: zoerepo/zoe
+	image: zoerepo/zoe:devel
 	ports:
   	- "4850:4850"
 	volumes:

@@ -1,0 +1,25 @@
+---
+# Deploy Zoe
+- name: Get default NIC
+  shell: echo `ip -o -4 route show to default | awk '{print $5}'`
+  register: default_nic
+
+- name: Get host IP
+  shell: echo `ifconfig {{ default_nic.stdout }} 2>/dev/null|awk '/inet addr:/ {print $2}'|sed 's/addr://'`
+  register: host_ip
+
+- name: Create Swarm overlay network
+  shell: docker -H :4000 network create --driver overlay my-net
+
+- name: Get Swarm URL
+  shell: echo ' {{ host_ip.stdout }}:4000 '
+  register: swarm_url
+
+- name: Place swarm_url to docker-compose.yml
+  replace:
+    dest: '{{role_path}}/files/docker-compose.yml'
+    regexp: '--swarm '
+    replace: '--swarm {{swarm_url.stdout }}'
+
+- name: Get Zoe up
+  shell: docker-compose -f {{role_path}}/files/docker-compose.yml up -d

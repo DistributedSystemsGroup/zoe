@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: zoe-api-fsdna
+  namespace: fsdna
+  labels:
+    app: zoe-api
+    task: test
+spec:
+  replicas: 3
+  selector:
+    app: zoe-api
+    task: test
+  template:
+    metadata:
+      labels:
+        app: zoe-api
+        task: test
+    spec:
+      containers:
+      - name: zoe-api-fsdna
+        image: zoe-repo/zoe:devel
+        ports:
+          - containerPort: 5001
+            name: zoe-api
+        command: ["python3", "zoe-api.py", "--debug", "--backend", "Kubernetes", "--deployment-name", "prod", "--dbuser", "postgres", "--dbhost", "zoe-postgres-service", "--dbport", "5432", "--dbname", "postgres", "--dbpass", "postgres", "--overlay-network-name", "my-net", "--master-url", "tcp://zoe-master-service:4850", "--auth-type", "text", "--proxy-type", "apache", "--proxy-container", "apache2", "--proxy-config-file", "/etc/apache2/sites-available/all.conf", "--proxy-path", "fsdna.on.kpmg.de/zoe", "--proxy-docker-sock", "tcp://192.168.12.2:2375"]
+        volumeMounts:
+          - name: kube-config
+            mountPath: /opt/zoe/kube.conf
+      volumes:
+      - name: kube-config
+        hostPath:
+          path: /media/sdb/kubernetes/config
