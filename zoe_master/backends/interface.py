@@ -35,7 +35,7 @@ def _get_backend() -> BaseBackend:
     if backend_name == 'OldSwarm':
         return OldSwarmBackend(get_conf())
     elif backend_name == 'Kubernetes':
-        return KubernetesBackend(get_conf())    
+        return KubernetesBackend(get_conf())
     else:
         log.error('Unknown backend selected')
         assert False
@@ -95,7 +95,7 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
             return "fatal"
         else:
             execution.set_running()
-    
+
     return "ok"
 
 

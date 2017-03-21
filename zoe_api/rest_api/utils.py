@@ -15,6 +15,7 @@
 
 """Utility functions needed by the Zoe REST API."""
 
+import time
 import base64
 import logging
 import functools
@@ -27,11 +28,7 @@ from zoe_api.exceptions import ZoeRestAPIException, ZoeNotFoundException, ZoeAut
 from zoe_api.auth.ldap import LDAPAuthenticator
 from zoe_api.auth.file import PlainTextAuthenticator
 from zoe_api.auth.ldapsasl import LDAPSASLAuthenticator
-from zoe_api.auth.base import BaseAuthenticator
-from zoe_api.rest_api.oauth_utils import auth_controller, client_store, token_store
-
-import json
-import time
+from zoe_api.rest_api.oauth_utils import client_store, token_store
 
 log = logging.getLogger(__name__)
 

@@ -129,7 +129,7 @@ def _service_check(data):
     try:
         float(data['required_resources']['cores'])
     except ValueError:
-        raise InvalidApplicationDescription(msg="required_resources -> cores field should be a float")    
+        raise InvalidApplicationDescription(msg="required_resources -> cores field should be a float")
 
     if 'environment' in data:
         if not hasattr(data['environment'], '__iter__'):
@@ -157,7 +157,7 @@ def _service_check(data):
     if get_conf().backend == 'Kubernetes':
         if 'replicas' not in data:
             data['replicas'] = 1
-    
+
         try:
             int(data['replicas'])
         except ValueError:

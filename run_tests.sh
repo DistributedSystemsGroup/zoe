@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
-pylint *.py zoe_*
-doc8 docs/
+set -e
 
+pylint --ignore old_swarm *.py zoe_*
+doc8 docs/

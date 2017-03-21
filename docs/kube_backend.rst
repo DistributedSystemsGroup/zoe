@@ -1,4 +1,4 @@
-.. _kube_backend:
+.. _kube-backend:
 
 Kubernetes backend for Zoe
 ==========================

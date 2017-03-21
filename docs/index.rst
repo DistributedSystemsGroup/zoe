@@ -78,6 +78,7 @@ Development and contributing to the project
   quality
   motivations
   vision
+  roadmap
   contributing
 
 External resources
