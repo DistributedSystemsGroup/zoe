@@ -54,10 +54,14 @@ def main():
     log.info("Initializing DB manager")
     state = SQLManager(args)
 
+    try:
+        zoe_master.backends.interface.initialize_backend(state)
+    except ZoeException as e:
+        log.error('Cannot initialize backend: {}'.format(e.message))
+        return 1
+
     log.info("Initializing scheduler")
     scheduler = getattr(zoe_master.scheduler, config.get_conf().scheduler_class)(state, config.get_conf().scheduler_policy)
-
-    zoe_master.backends.interface.initialize_backend(state)
 
     restart_resubmit_scheduler(state, scheduler)
 

@@ -196,3 +196,8 @@ class Service:
     def is_dead(self):
         """Returns True if this service is not running."""
         return self.backend_status == self.BACKEND_DESTROY_STATUS or self.backend_status == self.BACKEND_OOM_STATUS or self.backend_status == self.BACKEND_DIE_STATUS
+
+    @property
+    def unique_name(self):
+        """Returns a name for this service that is unique across multiple Zoe instances running on the same backend."""
+        return self.name + '-' + str(self.execution_id) + '-' + get_conf().deployment_name

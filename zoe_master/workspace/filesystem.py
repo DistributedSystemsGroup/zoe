@@ -19,6 +19,7 @@ import logging
 import os.path
 
 import zoe_lib.config as config
+from zoe_lib.state import VolumeDescription
 import zoe_master.workspace.base
 
 log = logging.getLogger(__name__)
@@ -45,4 +46,8 @@ class ZoeFSWorkspace(zoe_master.workspace.base.ZoeWorkspaceBase):
     @classmethod
     def get_mountpoint(cls):
         """Get the volume mount point."""
-        return '/mnt/workspace'
+        return '/workspace'
+
+    def get(self, user_id):
+        """Return a VolumeDescription for the user workspace."""
+        return VolumeDescription((self.get_path(user_id), self.get_mountpoint(), False))

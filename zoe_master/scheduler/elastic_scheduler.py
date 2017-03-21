@@ -207,6 +207,8 @@ class ZoeElasticScheduler:
                         elif ret == "requeue":
                             self.queue.insert(0, job)
                             continue
+                        elif ret == "ok":
+                            job.set_running()
                         assert ret == "ok"
 
                     start_elastic(job)
