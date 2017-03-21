@@ -15,7 +15,7 @@ variables:
   POSTGRES_PASSWORD: zoepass
 
 before_script:
-  - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.example.com
+  - docker login -u gitlab-ci-runner -p $REGISTRY_PASSWORD docker-registry:5000
 
 #lint:
 #  stage: static-test
