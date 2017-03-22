@@ -12,10 +12,10 @@ All Zoe processes use one single configuration file, called zoe.conf. It is sear
 
 zoe.conf
 --------
+
 Common options:
 
 * ``debug = <true|false>`` : enable or disable debug log output
-* ``swarm = zk://zk1:2181,zk2:2181,zk3:2181`` : connection string to the Swarm API endpoint. Can be expressed by a plain http URL or as a zookeeper node list in case Swarm is configured for HA.
 * ``api-listen-uri = tcp://*:4850`` : ZeroMQ server connection string, used for the master listening endpoint
 * ``deployment-name = devel`` : name of this Zoe deployment. Can be used to have multiple Zoe deployments using the same Swarm (devel and prod, for example)
 * ``workspace-deployment-path`` : path appended to the workspace path to distinguish this deployment. If unspecified is equal to the deployment name
@@ -25,6 +25,7 @@ Common options:
 * ``gelf-address = udp://1.2.3.4:1234`` : Enable Docker GELF log output to this destination
 * ``workspace-base-path = /mnt/zoe-workspaces`` : Base directory where user workspaces will be created. This directory should reside on a shared filesystem visible by all Docker hosts.
 * ``overlay-network-name = zoe`` : name of the pre-configured Docker overlay network Zoe should use
+* ``backend = Swarm`` : ' Name of the backend to enable and use
 
 Database options:
 
@@ -39,11 +40,23 @@ API options:
 * ``listen-address`` : address Zoe will use to listen for incoming connections to the web interface
 * ``listen-port`` : port Zoe will use to listen for incoming connections to the web interface
 * ``master-url = tcp://127.0.0.1:4850`` : address of the Zoe Master ZeroMQ API
+* ``cookie-secret = changeme``: secret used to encrypt cookies
 
 * ``ldap-server-uri = ldap://localhost`` : LDAP server to use for user authentication
 * ``ldap-base-dn = ou=something,dc=any,dc=local`` : LDAP base DN for users
-* ``ldap-bind-user = cn=guest,ou=something,dc=any,dc=local`` : LDAP user to bind as for user lookup
-* ``ldap-bind-password = notsosecret`` : LDAP bind user password
 * ``ldap-admin-gid = 5000`` : LDAP group ID for admins
 * ``ldap-user-gid = 5001`` : LDAP group ID for users
 * ``ldap-guest-gid = 5002`` : LDAP group ID for guests
+
+Scheduler options:
+
+* ``scheduler-class = <**ZoeSimpleScheduler** | ZoeElasticScheduler>`` : Scheduler class to use for scheduling ZApps
+* ``scheduler-policy = <**FIFO** | SIZE>`` : Scheduler policy to use for scheduling ZApps
+
+Swarm backend options:
+
+* ``backend-swarm-url = zk://zk1:2181,zk2:2181,zk3:2181`` : connection string to the Swarm API endpoint. Can be expressed by a plain http URL or as a zookeeper node list in case Swarm is configured for HA.
+* ``backend-swarm-zk-path = /docker`` : ZooKeeper path used by Docker Swarm
+* ``backend-swarm-tls-cert = cert.pem`` : Docker TLS certificate file
+* ``backend-swarm-tls-key = key.pem`` : Docker TLS private key file
+* ``backend-swarm-tls-ca = ca.pem`` : Docker TLS CA certificate file
