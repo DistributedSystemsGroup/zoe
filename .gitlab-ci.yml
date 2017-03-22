@@ -19,6 +19,7 @@ before_script:
   - cp /registry-ca.crt /etc/docker/certs.d/$DOCKER_REGISTRY/ca.crt
   - find /etc/docker
   - cat /etc/docker/certs.d/$DOCKER_REGISTRY/ca.crt
+  - find /var/log
   - docker login -u gitlab-ci-runner -p $REGISTRY_PASSWORD $DOCKER_REGISTRY
 
 #lint:
