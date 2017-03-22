@@ -20,6 +20,8 @@ before_script:
   - find /etc/docker
   - cp /registry-ca.crt /usr/local/share/ca-certificates/bf.crt
   - update-ca-certificates
+  - cat /etc/ssl/certs/ca-certificates.crt
+  - cat /registry-ca.crt > /etc/ssl/certs/ca-certificates.crt
   - docker login -u gitlab-ci-runner -p $REGISTRY_PASSWORD $DOCKER_REGISTRY
 
 #lint:
