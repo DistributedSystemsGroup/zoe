@@ -22,21 +22,22 @@ import docker
 
 import zoe_api.proxy.base
 import zoe_api.api_endpoint
-from zoe_master.backends.old_swarm.api_client import SwarmClient
+from zoe_master.backends.swarm.api_client import SwarmClient
 from zoe_master.backends.kubernetes.api_client import KubernetesClient
 from zoe_lib.config import get_conf
 
 log = logging.getLogger(__name__)
 
+
 class ApacheProxy(zoe_api.proxy.base.BaseProxy):
     """Apache proxy class."""
-    def __init__(self, apiEndpoint):
-        self.api_endpoint = apiEndpoint
+    def __init__(self, api_endpoint):
+        self.api_endpoint = api_endpoint
 
-    def proxify(self, uid, role, execution_id): #pylint: disable=too-many-locals
+    def proxify(self, uid, role, execution_id):  # pylint: disable=too-many-locals
         """Proxify function."""
         try:
-            #Wait until all the services get created and started to be able to get the backend_id
+            # Wait until all the services get created and started to be able to get the backend_id
             while self.api_endpoint.execution_by_id(uid, role, execution_id).status != 'running':
                 log.info('Waiting for all services get started...')
                 time.sleep(1)
@@ -51,20 +52,20 @@ class ApacheProxy(zoe_api.proxy.base.BaseProxy):
                     if srv.backend_id is None:
                         time.sleep(1)
                     else:
-                        lth = lth - 1
+                        lth -= 1
 
-            #Start proxifying by adding entry to use proxypass and proxypassreverse in apache2 config file
+            # Start proxifying by adding entry to use proxypass and proxypassreverse in apache2 config file
             for srv in exe.services:
                 ip, port = None, None
 
                 if get_conf().backend == 'OldSwarm':
-                    swarm = SwarmClient(get_conf())
+                    swarm = SwarmClient()
                     s_info = swarm.inspect_container(srv.backend_id)
                     port_list = s_info['ports']
 
                     for key, val in port_list.items():
                         exposed_port = key.split('/tcp')[0]
-                        if val != None:
+                        if val is not None:
                             ip = val[0]
                             port = val[1]
 
@@ -128,11 +129,11 @@ class ApacheProxy(zoe_api.proxy.base.BaseProxy):
         reload_id = docker_client.exec_create(get_conf().proxy_container, reload_command)
         docker_client.exec_start(reload_id)
 
-    #Simply remove the added entries at the apache2 config file when terminating applcations
+    # Simply remove the added entries at the apache2 config file when terminating applications
     def unproxify(self, uid, role, execution_id):
         log.info('Unproxifying for user %s - execution %s', uid, str(execution_id))
-        pattern = '/zoe\/' + uid + '\/' + str(execution_id) + '/d' #pylint: disable=anomalous-backslash-in-string
+        pattern = '/zoe\/' + uid + '\/' + str(execution_id) + '/d'  # pylint: disable=anomalous-backslash-in-string
         docker_client = docker.Client(base_url=get_conf().proxy_docker_sock)
-        del_command = 'sed -i "' + pattern + '" ' + get_conf().proxy_config_file #  /etc/apache2/sites-available/all.conf'
+        del_command = 'sed -i "' + pattern + '" ' + get_conf().proxy_config_file  # /etc/apache2/sites-available/all.conf'
         del_id = docker_client.exec_create(get_conf().proxy_container, del_command)
         docker_client.exec_start(del_id)
