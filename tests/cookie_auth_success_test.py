@@ -3,7 +3,7 @@ import json
 import time
 import unittest
 
-from config import ZOE_API_URI, ZOE_AUTH
+from test_config import ZOE_API_URI, ZOE_AUTH
 
 class ZoeRestTestSuccess(unittest.TestCase):
 
