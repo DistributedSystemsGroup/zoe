@@ -26,11 +26,6 @@ from zoe_master.backends.service_instance import ServiceInstance
 from zoe_master.exceptions import ZoeStartExecutionFatalException, ZoeStartExecutionRetryException, ZoeException
 
 try:
-    from zoe_master.backends.old_swarm.backend import OldSwarmBackend
-except ImportError as ex:
-    OldSwarmBackend = None
-
-try:
     from zoe_master.backends.swarm.backend import SwarmBackend
 except ImportError as ex:
     SwarmBackend = None
@@ -46,11 +41,7 @@ log = logging.getLogger(__name__)
 def _get_backend() -> BaseBackend:
     """Return the right backend instance by reading the global configuration."""
     backend_name = get_conf().backend
-    if backend_name == 'OldSwarm':
-        if OldSwarmBackend is None:
-            raise ZoeException('The OldSwarm backend requires docker python version < 2')
-        return OldSwarmBackend(get_conf())
-    elif backend_name == 'Kubernetes':
+    if backend_name == 'Kubernetes':
         if KubernetesBackend is None:
             raise ZoeException('The Kubernetes backend requires the pykube module')
         return KubernetesBackend(get_conf())
