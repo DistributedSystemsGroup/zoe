@@ -15,8 +15,6 @@ variables:
   POSTGRES_PASSWORD: zoepass
 
 before_script:
-  - mkdir -p /etc/docker/certs.d/$DOCKER_REGISTRY
-  - cp /ca.pem /etc/docker/certs.d/$DOCKER_REGISTRY/ca.crt
   - docker login -u gitlab-ci-runner -p $REGISTRY_PASSWORD $DOCKER_REGISTRY
 
 #lint:
