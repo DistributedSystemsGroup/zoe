@@ -13,25 +13,21 @@ variables:
   POSTGRES_DB: zoe
   POSTGRES_USER: zoeuser
   POSTGRES_PASSWORD: zoepass
+  DOCKER_DRIVER: overlay
 
 before_script:
   - mkdir -p /etc/docker/certs.d/$DOCKER_REGISTRY
   - cp /registry-ca.crt /etc/docker/certs.d/$DOCKER_REGISTRY/ca.crt
-  - find /etc/docker
-  - cp /registry-ca.crt /usr/local/share/ca-certificates/bf.crt
-  - update-ca-certificates
-  - cat /etc/ssl/certs/ca-certificates.crt
-  - cat /registry-ca.crt > /etc/ssl/certs/ca-certificates.crt
-  - docker login -u gitlab-ci-runner -p $REGISTRY_PASSWORD $DOCKER_REGISTRY
+#  - docker login -u gitlab-ci-runner -p $REGISTRY_PASSWORD $DOCKER_REGISTRY
 
-#lint:
-#  stage: static-test
-#  image: python:3.4
-#  script:
-#    - pip install -r requirements.txt
-#    - pip install -r requirements_tests.txt
-#    - chmod 755 run_tests.sh && ./run_tests.sh
-#
+lint:
+  stage: static-test
+  image: python:3.4
+  script:
+    - pip install -r requirements.txt
+    - pip install -r requirements_tests.txt
+    - chmod 755 run_tests.sh && ./run_tests.sh
+
 #SonarQube:
 #  stage: static-test
 #  image: zoerepo/sonar-scanner
