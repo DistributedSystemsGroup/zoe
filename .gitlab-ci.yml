@@ -10,13 +10,13 @@ variables:
   POSTGRES_USER: zoeuser
   POSTGRES_PASSWORD: zoepass
 
-lint:
-  stage: static-test
-  image: python:3.4
-  script:
-    - pip install -r requirements.txt
-    - pip install -r requirements_tests.txt
-    - chmod 755 run_tests.sh && ./run_tests.sh
+#lint:
+#  stage: static-test
+#  image: python:3.4
+#  script:
+#    - pip install -r requirements.txt
+#    - pip install -r requirements_tests.txt
+#    - chmod 755 run_tests.sh && ./run_tests.sh
 
 #SonarQube:
 #  stage: static-test
