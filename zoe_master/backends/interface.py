@@ -22,9 +22,18 @@ from zoe_lib.config import get_conf
 from zoe_lib.state import Execution, Service
 
 from zoe_master.backends.base import BaseBackend
-from zoe_master.backends.old_swarm.backend import OldSwarmBackend
-from zoe_master.backends.kubernetes.backend import KubernetesBackend
-from zoe_master.exceptions import ZoeStartExecutionFatalException, ZoeStartExecutionRetryException
+from zoe_master.backends.service_instance import ServiceInstance
+from zoe_master.exceptions import ZoeStartExecutionFatalException, ZoeStartExecutionRetryException, ZoeException
+
+try:
+    from zoe_master.backends.swarm.backend import SwarmBackend
+except ImportError as ex:
+    SwarmBackend = None
+
+try:
+    from zoe_master.backends.kubernetes.backend import KubernetesBackend
+except ImportError:
+    KubernetesBackend = None
 
 log = logging.getLogger(__name__)
 
@@ -32,10 +41,14 @@ log = logging.getLogger(__name__)
 def _get_backend() -> BaseBackend:
     """Return the right backend instance by reading the global configuration."""
     backend_name = get_conf().backend
-    if backend_name == 'OldSwarm':
-        return OldSwarmBackend(get_conf())
-    elif backend_name == 'Kubernetes':
+    if backend_name == 'Kubernetes':
+        if KubernetesBackend is None:
+            raise ZoeException('The Kubernetes backend requires the pykube module')
         return KubernetesBackend(get_conf())
+    elif backend_name == 'Swarm':
+        if SwarmBackend is None:
+            raise ZoeException('The Swarm backend requires docker python version >= 2.0.2')
+        return SwarmBackend(get_conf())
     else:
         log.error('Unknown backend selected')
         assert False
@@ -72,10 +85,12 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
     for service in ordered_service_list:
         env_subst_dict['dns_name#self'] = service.dns_name
         service.set_starting()
+        instance = ServiceInstance(execution, service, env_subst_dict)
         try:
-            backend.spawn_service(execution, service, env_subst_dict)
+            backend_id, ip_address = backend.spawn_service(instance)
         except ZoeStartExecutionRetryException as ex:
             log.warning('Temporary failure starting service {} of execution {}: {}'.format(service.id, execution.id, ex.message))
+            service.set_error(ex.message)
             execution.set_error_message(ex.message)
             terminate_execution(execution)
             execution.set_scheduled()
@@ -94,7 +109,8 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
             execution.set_error()
             return "fatal"
         else:
-            execution.set_running()
+            log.debug('Service {} started'.format(instance.name))
+            service.set_active(backend_id, ip_address)
 
     return "ok"
 

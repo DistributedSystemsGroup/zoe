@@ -25,6 +25,7 @@ import tornado.web
 from zoe_lib.config import get_conf
 
 from zoe_api.exceptions import ZoeRestAPIException, ZoeNotFoundException, ZoeAuthException, ZoeException
+from zoe_api.auth.base import BaseAuthenticator
 from zoe_api.auth.ldap import LDAPAuthenticator
 from zoe_api.auth.file import PlainTextAuthenticator
 from zoe_api.auth.ldapsasl import LDAPSASLAuthenticator
@@ -79,7 +80,7 @@ def get_auth(handler: tornado.web.RequestHandler):
     if auth_header is None or not (auth_header.startswith('Basic ') or auth_header.startswith('Bearer ')):
         raise ZoeRestAPIException('missing or wrong authentication information', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
-    #Process for authentication with token
+    # Process for authentication with token
     if "Bearer" in auth_header:
         token = auth_header[7:]
 
@@ -99,7 +100,7 @@ def get_auth(handler: tornado.web.RequestHandler):
 
         return uid, role
 
-    #Process for authentication with username, password
+    # Process for authentication with username, password
     else:
         auth_decoded = base64.decodebytes(bytes(auth_header[6:], 'ascii')).decode('utf-8')
         username, password = auth_decoded.split(':', 2)
@@ -107,9 +108,9 @@ def get_auth(handler: tornado.web.RequestHandler):
     if get_conf().auth_type == 'text':
         authenticator = PlainTextAuthenticator()  # type: BaseAuthenticator
     elif get_conf().auth_type == 'ldap':
-        authenticator = LDAPAuthenticator()
+        authenticator = LDAPAuthenticator()  # type: BaseAuthenticator
     elif get_conf().auth_type == 'ldapsasl':
-        authenticator = LDAPSASLAuthenticator()
+        authenticator = LDAPSASLAuthenticator()  # type: BaseAuthenticator
     else:
         raise ZoeException('Configuration error, unknown authentication method: {}'.format(get_conf().auth_type))
     uid, role = authenticator.auth(username, password)

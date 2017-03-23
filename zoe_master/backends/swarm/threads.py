@@ -22,6 +22,7 @@ import time
 from zoe_lib.config import get_conf
 from zoe_lib.state import SQLManager, Service
 from zoe_master.backends.swarm.api_client import SwarmClient
+from zoe_master.exceptions import ZoeException
 
 log = logging.getLogger(__name__)
 
@@ -53,8 +54,10 @@ class SwarmStateSynchronizer(threading.Thread):
         while not self.stop:
             swarm = SwarmClient()
             service_list = self.state.service_list()
-            container_list = swarm.list(only_label={'zoe.deployment_name': get_conf().deployment_name})
-
+            try:
+                container_list = swarm.list(only_label={'zoe_deployment_name': get_conf().deployment_name})
+            except ZoeException:
+                continue
             containers = {}
             for cont in container_list:
                 containers[cont['id']] = cont
@@ -72,11 +75,6 @@ class SwarmStateSynchronizer(threading.Thread):
                         continue
                     else:
                         service.set_backend_status(service.BACKEND_DESTROY_STATUS)
-
-            for container in container_list:
-                if container['id'] not in services:
-                    log.warning('Found an unknown Zoe container, killing it: {} {}'.format(container['name'], container['labels']))
-                    swarm.terminate_container(container['id'], True)
 
             time.sleep(CHECK_INTERVAL)
 

@@ -151,18 +151,12 @@ def _service_check(data):
             if not isinstance(volume[2], bool):
                 raise InvalidApplicationDescription(msg='readonly volume item (third) must be a boolean: {}'.format(volume[2]))
 
-    if 'constraints' in data and not hasattr(data['constraints'], '__iter__'):
-        raise InvalidApplicationDescription(msg='networks should be an iterable')
-
-    if get_conf().backend == 'Kubernetes':
-        if 'replicas' not in data:
-            data['replicas'] = 1
-
-        try:
-            int(data['replicas'])
-        except ValueError:
-            raise InvalidApplicationDescription(msg="replicas field should be an int")
-
+    if 'replicas' not in data:
+        data['replicas'] = 1
+    try:
+        int(data['replicas'])
+    except ValueError:
+        raise InvalidApplicationDescription(msg="replicas field should be an int")
 
 
 def _port_check(data):

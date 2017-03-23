@@ -21,6 +21,8 @@ from zoe_lib.config import get_conf
 from zoe_lib.state import Service, Execution
 from zoe_master.backends.proxy import gen_proxypath, JUPYTER_NOTEBOOK, MONGO_EXPRESS, JUPYTER_PORT, MONGO_PORT
 from zoe_master.exceptions import ZoeStartExecutionFatalException
+from zoe_master.workspace.filesystem import ZoeFSWorkspace
+
 
 def gen_environment(execution: Execution, service: Service, env_subst_dict: Dict):
     """ Generate a dictionary containing the current cluster status (before the new container is spawned)
@@ -36,6 +38,7 @@ def gen_environment(execution: Execution, service: Service, env_subst_dict: Dict
             raise ZoeStartExecutionFatalException("Service {} has wrong environment expression")
         env_list.append((env_name, env_value))
 
+    # FIXME this code needs to be removed/changed to be generic
     #if 'jupyter' in service.image_name:
     env_list.append((JUPYTER_NOTEBOOK, gen_proxypath(execution, service) + '/' + JUPYTER_PORT))
     #elif 'mongo-express' in service.image_name:
@@ -47,4 +50,30 @@ def gen_environment(execution: Execution, service: Service, env_subst_dict: Dict
     env_list.append(('SERVICE_NAME', service.name))
     env_list.append(('PROXY_PATH', get_conf().proxy_path))
 
+    fswk = ZoeFSWorkspace()
+    env_list.append(('ZOE_WORKSPACE', fswk.get_mountpoint()))
     return env_list
+
+
+def gen_volumes(service_: Service, execution: Execution):
+    """Return the list of default volumes to be added to all containers."""
+    vol_list = []
+    fswk = ZoeFSWorkspace()
+    wk_vol = fswk.get(execution.user_id)
+
+    vol_list.append(wk_vol)
+
+    return vol_list
+
+
+def gen_labels(service: Service, execution: Execution):
+    """Generate container labels, useful for identifying containers in monitoring systems."""
+    return {
+        'zoe_execution_name': execution.name,
+        'zoe_execution_id': str(execution.id),
+        'zoe_service_name': service.name,
+        'zoe_service_id': str(service.id),
+        'zoe_owner': execution.user_id,
+        'zoe_deployment_name': get_conf().deployment_name,
+        'zoe_type': 'app_service'
+    }

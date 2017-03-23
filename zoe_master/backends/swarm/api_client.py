@@ -31,29 +31,27 @@ try:
 except ImportError:
     KazooClient = None
 
-try:
-    import docker
-    import docker.errors
-    import docker.utils
-except ImportError:
-    AVAILABLE = False
-else:
-    try:
-        docker.DockerClient()
-        AVAILABLE = True
-    except AttributeError:
-        AVAILABLE = False
+import docker
+import docker.tls
+import docker.errors
+import docker.utils
+import docker.models.containers
 
 import requests.packages
 
 from zoe_lib.config import get_conf
-from zoe_lib.exceptions import ZoeLibException, ZoeNotEnoughResourcesException
 from zoe_lib.state import Service
 from zoe_master.stats import ClusterStats, NodeStats
 from zoe_master.backends.service_instance import ServiceInstance
+from zoe_master.exceptions import ZoeException, ZoeNotEnoughResourcesException
 
 log = logging.getLogger(__name__)
 
+try:
+    docker.DockerClient()
+except AttributeError:
+    log.error('Docker package does not have the DockerClient attribute')
+    raise ImportError('Wrong Docker library version')
 
 def zookeeper_swarm(zk_server_list: str, path='/docker') -> str:
     """
@@ -87,21 +85,25 @@ class SwarmClient:
     """The Swarm client class that wraps the Docker API."""
     def __init__(self) -> None:
         url = get_conf().backend_swarm_url
+        tls = False
         if 'zk://' in url:
             if KazooClient is None:
-                raise ZoeLibException('ZooKeeper URL for Swarm, but the kazoo package is not installed')
+                raise ZoeException('ZooKeeper URL for Swarm, but the kazoo package is not installed')
             url = url[len('zk://'):]
             manager = zookeeper_swarm(url, get_conf().backend_swarm_zk_path)
         elif 'consul://' in url:
             if Consul is None:
-                raise ZoeLibException('Consul URL for Swarm, but the consul package is not installed')
+                raise ZoeException('Consul URL for Swarm, but the consul package is not installed')
             url = url[len('consul://'):]
             manager = consul_swarm(url)
-        elif 'http://' or 'https://' in url:
+        elif 'http://' in url:
+            manager = url
+        elif 'https://' in url:
+            tls = docker.tls.TLSConfig(client_cert=(get_conf().backend_swarm_tls_cert, get_conf().backend_swarm_tls_key), verify=get_conf().backend_swarm_tls_ca)
             manager = url
         else:
-            raise ZoeLibException('Unsupported URL scheme for Swarm')
-        self.cli = docker.DockerClient(base_url=manager, version="auto")
+            raise ZoeException('Unsupported URL scheme for Swarm')
+        self.cli = docker.DockerClient(base_url=manager, version="auto", tls=tls)
 
     def info(self) -> ClusterStats:
         """Retrieve Swarm statistics. The Docker API returns a mess difficult to parse."""
@@ -181,7 +183,9 @@ class SwarmClient:
 
         volumes = {}
         for volume in service_instance.volumes:
-            volumes[volume.path] = {'bind': volume.mountpoint, 'mode': ("ro" if volume.readonly else "rw")}
+            if volume.type != "host_directory":
+                log.error('Swarm backend does not support volume type {}'.format(volume.type))
+            volumes[volume.path] = {'bind': volume.mount_point, 'mode': ("ro" if volume.readonly else "rw")}
 
         try:
             cont = self.cli.containers.run(image=service_instance.image_name,
@@ -200,18 +204,18 @@ class SwarmClient:
                                            ports=port_bindings,
                                            volumes=volumes)
         except docker.errors.ImageNotFound:
-            raise ZoeLibException(message='Image not found')
+            raise ZoeException(message='Image not found')
         except docker.errors.APIError as e:
             if cont is not None:
                 self.cli.remove_container(container=cont.get('Id'), force=True)
             if e.explanation == b'no resources available to schedule container':
                 raise ZoeNotEnoughResourcesException(message=e.explanation.decode('utf-8'))
             else:
-                raise ZoeLibException(message=e.explanation.decode('utf-8'))
+                raise ZoeException(message=e.explanation.decode('utf-8'))
         except Exception as e:
             if cont is not None:
                 self.cli.remove_container(container=cont.get('Id'), force=True)
-            raise ZoeLibException(str(e))
+            raise ZoeException(str(e))
 
         cont = self.cli.containers.get(cont.id)
         return self._container_summary(cont)
@@ -268,7 +272,7 @@ class SwarmClient:
         try:
             cont = self.cli.container.get(docker_id)
         except Exception as e:
-            raise ZoeLibException(str(e))
+            raise ZoeException(str(e))
         return self._container_summary(cont)
 
     def terminate_container(self, docker_id: str, delete=False) -> None:
@@ -335,7 +339,10 @@ class SwarmClient:
         :param only_label: filter containers with only a certain label
         :return: a list of containers
         """
-        ret = self.cli.containers.list(all=True)
+        try:
+            ret = self.cli.containers.list(all=True)
+        except docker.errors.APIError as ex:
+            raise ZoeException(str(ex))
         conts = []
         for cont_info in ret:
             match = True

@@ -22,7 +22,9 @@ import time
 from zoe_lib.config import get_conf
 from zoe_lib.state import SQLManager, Service
 from zoe_master.backends.kubernetes.api_client import KubernetesClient
+
 log = logging.getLogger(__name__)
+
 
 class KubernetesMonitor(threading.Thread):
     """The monitor."""
@@ -40,7 +42,7 @@ class KubernetesMonitor(threading.Thread):
     def run(self):
         """An infinite loop that listens for events from Kubernetes."""
         log.info("Monitor thread started")
-        while True: # pylint: disable=too-many-nested-blocks
+        while True:  # pylint: disable=too-many-nested-blocks
             for event in self.kube.replication_controller_event():
                 log.debug('%s: %s', event.object.name, event.type)
                 if event.type != 'DELETED' and event.type != 'ADDED':
@@ -79,7 +81,9 @@ class KubernetesMonitor(threading.Thread):
         """Stops the thread."""
         self.stop = True
 
+
 CHECK_INTERVAL = 300
+
 
 class KubernetesStateSynchronizer(threading.Thread):
     """The Kubernetes Checker."""

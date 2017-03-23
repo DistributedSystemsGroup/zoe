@@ -17,10 +17,10 @@
 
 import logging
 
-from zoe_lib.exceptions import ZoeLibException, ZoeNotEnoughResourcesException
 from zoe_lib.state import Service
+from zoe_lib.config import get_conf
 from zoe_master.backends.swarm.api_client import SwarmClient
-from zoe_master.exceptions import ZoeStartExecutionRetryException, ZoeStartExecutionFatalException, ZoeException
+from zoe_master.exceptions import ZoeStartExecutionRetryException, ZoeStartExecutionFatalException, ZoeException, ZoeNotEnoughResourcesException
 import zoe_master.backends.base
 from zoe_master.backends.service_instance import ServiceInstance
 from zoe_master.backends.swarm.threads import SwarmStateSynchronizer
@@ -32,7 +32,7 @@ log = logging.getLogger(__name__)
 _checker = None
 
 
-class OldSwarmNewAPIBackend(zoe_master.backends.base.BaseBackend):
+class SwarmBackend(zoe_master.backends.base.BaseBackend):
     """Zoe backend implementation for old-style stand-alone Docker Swarm."""
     def __init__(self, opts):
         super().__init__(opts)
@@ -55,10 +55,10 @@ class OldSwarmNewAPIBackend(zoe_master.backends.base.BaseBackend):
             cont_info = self.swarm.spawn_container(service_instance)
         except ZoeNotEnoughResourcesException:
             raise ZoeStartExecutionRetryException('Not enough free resources to satisfy reservation request for service {}'.format(service_instance.name))
-        except (ZoeException, ZoeLibException) as e:
+        except ZoeException as e:
             raise ZoeStartExecutionFatalException(str(e))
 
-        return cont_info["id"]
+        return cont_info["id"], cont_info['ip_address'][get_conf().overlay_network_name]
 
     def terminate_service(self, service: Service) -> None:
         """Terminate and delete a container."""
