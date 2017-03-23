@@ -98,6 +98,7 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--kube-config-file', help='Kubernetes configuration file', default='/opt/zoe/kube.conf')
 
         argparser.add_argument('--cookie-secret', help='secret used to encrypt cookies', default='changeme')
+        argparser.add_argument('--log-file', help='output logs to a file', default='stderr')
 
         opts = argparser.parse_args()
         if opts.debug:

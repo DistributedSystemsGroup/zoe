@@ -41,10 +41,13 @@ def zoe_web_main() -> int:
     """
     config.load_configuration()
     args = config.get_conf()
-    if args.debug:
-        logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
-    else:
-        logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
+    log_args = {
+        'level': logging.DEBUG if args.debug else logging.INFO,
+        'format': LOG_FORMAT
+    }
+    if args.log_file != "stderr":
+        log_args['filename'] = args.log_file
+    logging.basicConfig(**log_args)
 
     if config.get_conf().auth_type == 'ldap' and not zoe_api.auth.ldap.LDAP_AVAILABLE:
         log.error("LDAP authentication requested, but 'pyldap' module not installed.")
