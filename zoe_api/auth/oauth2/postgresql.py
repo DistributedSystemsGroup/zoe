@@ -15,17 +15,18 @@
 
 """ Store adapters to read/write data to from/to PostgresSQL. """
 
-import datetime, time
 import zoe_lib.state
 
 from zoe_lib.config import get_conf
-from oauth2.store import AccessTokenStore, AuthCodeStore, ClientStore
-from oauth2.datatype import AccessToken, AuthorizationCode, Client
-from oauth2.error import AccessTokenNotFound, AuthCodeNotFound, ClientNotFoundError
+from oauth2.store import AccessTokenStore, ClientStore
+from oauth2.datatype import AccessToken, Client
+from oauth2.error import AccessTokenNotFound, ClientNotFoundError
 
-class AccessTokenStore(AccessTokenStore):
+class AccessTokenStorePg(AccessTokenStore):
+    """ AccessTokenStore for postgresql  """
 
     def fetch_by_refresh_token(self, refresh_token):
+        """ get accesstoken from refreshtoken """
         sql = zoe_lib.state.SQLManager(get_conf())
         data = sql.fetch_by_refresh_token(refresh_token)
 
@@ -51,18 +52,21 @@ class AccessTokenStore(AccessTokenStore):
         return res
 
     def get_client_id_by_refresh_token(self, refresh_token):
+        """ get clientID from refreshtoken """
         sql = zoe_lib.state.SQLManager(get_conf())
         data = sql.get_client_id_by_refresh_token(refresh_token)
 
         return data
 
     def get_client_id_by_access_token(self, access_token):
+        """ get clientID from accesstoken """
         sql = zoe_lib.state.SQLManager(get_conf())
         data = sql.get_client_id_by_access_token(access_token)
 
         return data
 
     def fetch_existing_token_of_user(self, client_id, grant_type, user_id):
+        """ get accesstoken from userid """
         sql = zoe_lib.state.SQLManager(get_conf())
         data = sql.fetch_existing_token_of_user(client_id, grant_type, user_id)
 
@@ -80,23 +84,26 @@ class AccessTokenStore(AccessTokenStore):
                            user_id=data["user_id"])
 
     def save_token(self, access_token):
+        """ save accesstoken """
         sql = zoe_lib.state.SQLManager(get_conf())
         sql.save_token(access_token.client_id,
-                            access_token.grant_type,
-                            access_token.token,
-                            access_token.data,
-                            access_token.expires_at,
-                            access_token.refresh_token,
-                            access_token.refresh_expires_at,
-                            access_token.scopes,
-                            access_token.user_id)
+                       access_token.grant_type,
+                       access_token.token,
+                       access_token.data,
+                       access_token.expires_at,
+                       access_token.refresh_token,
+                       access_token.refresh_expires_at,
+                       access_token.scopes,
+                       access_token.user_id)
 
         return True
 
 
-class ClientStore(ClientStore):
+class ClientStorePg(ClientStore):
+    """ ClientStore for postgres """
 
     def save_client(self, identifier, secret, role, redirect_uris, authorized_grants, authorized_response_types):
+        """ save client to db """
         sql = zoe_lib.state.SQLManager(get_conf())
         sql.save_client(identifier,
                         secret,
@@ -107,10 +114,11 @@ class ClientStore(ClientStore):
         return True
 
     def fetch_by_client_id(self, client_id):
+        """ get client by clientid """
         sql = zoe_lib.state.SQLManager(get_conf())
         client_data = sql.fetch_by_client_id(client_id)
 
-        client_data_grants= client_data["authorized_grants"].split(':')
+        client_data_grants = client_data["authorized_grants"].split(':')
 
         if client_data is None:
             raise ClientNotFoundError
@@ -122,6 +130,7 @@ class ClientStore(ClientStore):
                       authorized_response_types=client_data["authorized_response_types"])
 
     def get_role_by_client_id(self, client_id):
+        """ get client role by clientid """
         sql = zoe_lib.state.SQLManager(get_conf())
         client_data = sql.fetch_by_client_id(client_id)
 

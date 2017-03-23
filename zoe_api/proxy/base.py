@@ -19,9 +19,10 @@
 class BaseProxy:
     """Base proxy class."""
 
-    def proxify(self, uid, role, id):
+    def proxify(self, uid, role, execution_id):
         """The methods that needs to be overridden by implementations."""
         raise NotImplementedError
 
-    def unproxify(self, uid, role, id):
+    def unproxify(self, uid, role, execution_id):
+        """The methods that needs to be overridden by implementations."""
         raise NotImplementedError

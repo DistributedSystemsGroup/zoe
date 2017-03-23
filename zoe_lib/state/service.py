@@ -55,7 +55,8 @@ class ExposedPort:
         self.number = data['port_number']
         self.expose = data['expose'] if 'expose' in data else False
 
-    def isExpose(self):
+    def is_expose(self):
+        """ return expose """
         return self.expose
 
 
@@ -184,12 +185,13 @@ class Service:
 
     @property
     def proxy_address(self):
-        for p in self.ports:
-            if p.isExpose():
-                proxyAdd = get_conf().proxy_path + "/" + self.user_id + "/" + str(self.execution_id) + "/" + self.name
+        """Get proxy address path"""
+        for port in self.ports:
+            if port.is_expose():
+                proxy_addr = get_conf().proxy_path + "/" + self.user_id + "/" + str(self.execution_id) + "/" + self.name
             else:
-                proxyAdd = None
-        return proxyAdd
+                proxy_addr = None
+        return proxy_addr
 
     def is_dead(self):
         """Returns True if this service is not running."""

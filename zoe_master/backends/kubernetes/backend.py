@@ -114,7 +114,7 @@ class KubernetesBackend(zoe_master.backends.base.BaseBackend):
         copts.set_replicas(service.replicas)
 
         try:
-            self.kube.spawn_service(service.description['docker_image'], copts)
+            self.kube.spawn_service(copts)
             rc_info = self.kube.spawn_replication_controller(service.description['docker_image'], copts)
         except ZoeNotEnoughResourcesException:
             service.set_error('Not enough free resources to satisfy reservation request')
