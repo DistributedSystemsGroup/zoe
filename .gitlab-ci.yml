@@ -38,10 +38,27 @@ images:
     - cp /registry-ca.crt /etc/docker/certs.d/$DOCKER_REGISTRY/ca.crt
     - docker login -u gitlab-ci-runner -p $REGISTRY_PASSWORD $DOCKER_REGISTRY
   script:
-    - docker build --pull -t $ZOE_TEST_IMAGE .
-    - docker push $ZOE_TEST_IMAGE
+    - sh ci/build_images.sh
 
-#api-test:
-#  stage: integration-test
-#  services:
-#    - postgres:9.3
+api-test:
+  stage: integration-test
+  services:
+    - postgres:9.3
+  image: docker:latest
+  script:
+    - docker run $DOCKER_REGISTRY:ci/$ZOE_TEST_IMAGE
+    -
+
+docs:
+  stage: deploy
+  image: python:3.4
+  script:
+    - pip install sphinx
+    - sh ./build_docs.sh
+
+frontend:
+  stage: deploy
+  image: nodejs:latest
+  script:
+    - cd zoe_fe
+    - ng build --env=prod --output-path=build/prod

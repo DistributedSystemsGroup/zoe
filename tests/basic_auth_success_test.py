@@ -1,11 +1,13 @@
 import requests
 import json
 import time
+import sys
 import unittest
+
 
 class ZoeRestTestSuccess(unittest.TestCase):
 
-    uri = 'http://192.168.12.2:5100/api/0.7/'
+    uri = ''
     auth = ('admin', 'admin')
     id = ''
 
@@ -28,7 +30,7 @@ class ZoeRestTestSuccess(unittest.TestCase):
         self.assertEqual(r.status_code, 200)
 
     def test_4_service_details(self):
-        print('Test service details api aendpoint')
+        print('Test service details api endpoint')
         r = requests.get(self.__class__.uri + 'execution/' + self.__class__.id, auth=self.__class__.auth)
         sid = r.json()["services"][0]
         r = requests.get(self.__class__.uri + 'service/' + str(sid), auth=self.__class__.auth)
@@ -48,18 +50,21 @@ class ZoeRestTestSuccess(unittest.TestCase):
         print('Test delete execution api endpoint')
         r = requests.delete(self.__class__.uri + 'execution/delete/' + self.__class__.id, auth=self.__class__.auth)
         self.assertEqual(r.status_code, 204)
-        
+
     def test_2_start_execution(self):
         print('Test start execution api endpoint')
-        
+
         data = []
 
         with open('tf.json', encoding='utf-8') as data_file:
             data = json.loads(data_file.read())
-        
+
         r = requests.post(self.__class__.uri + 'execution', auth=self.__class__.auth, json={"application": data, "name": "requests"})
         self.assertEqual(r.status_code, 201)
         self.__class__.id = str(r.json()['execution_id'])
 
 if __name__ == '__main__':
+        if len(sys.argv) > 1:
+            API_SERVER = sys.argv.pop()
+            ZoeRestTestSuccess.uri = 'http://' + API_SERVER + '/api/0.7/'
         unittest.main()
