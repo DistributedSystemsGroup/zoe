@@ -9,6 +9,7 @@ variables:
   POSTGRES_DB: zoe
   POSTGRES_USER: zoeuser
   POSTGRES_PASSWORD: zoepass
+  ZOE_TEST_IMAGE: zoe:$CI_BUILD_REF
 
 #lint:
 #  stage: static-test
@@ -35,7 +36,7 @@ images:
   before_script:
     - mkdir -p /etc/docker/certs.d/$DOCKER_REGISTRY
     - cp /registry-ca.crt /etc/docker/certs.d/$DOCKER_REGISTRY/ca.crt
-  #  - docker login -u gitlab-ci-runner -p $REGISTRY_PASSWORD $DOCKER_REGISTRY
+    - docker login -u gitlab-ci-runner -p $REGISTRY_PASSWORD $DOCKER_REGISTRY
   script:
     - docker build --pull -t $ZOE_TEST_IMAGE .
     - docker push $ZOE_TEST_IMAGE
