@@ -9,7 +9,7 @@ variables:
   POSTGRES_USER: zoeuser
   POSTGRES_PASSWORD: zoepass
   ZOE_TEST_IMAGE: zoe:$CI_BUILD_REF
-  ZOE_COMMON_OPTIONS: --debug --backend-swarm-url http://172.17.0.1:2375 --deployment-name test${CI_BUILD_REF} --dbuser ${POSTGRES_USER} --dbhost postgres --dbport 5432 --dbname ${POSTGRES_DB} --dbpass ${POSTGRES_PASSWORD} --master-url tcp://localhost:4850 --auth-type text --proxy-type none --listen-port 5100 --workspace-base-path /tmp
+  ZOE_COMMON_OPTIONS: --debug --backend-swarm-url http://container-router.vms:2375 --deployment-name test${CI_BUILD_REF} --dbuser ${POSTGRES_USER} --dbhost postgres --dbport 5432 --dbname ${POSTGRES_DB} --dbpass ${POSTGRES_PASSWORD} --master-url tcp://localhost:4850 --auth-type text --proxy-type none --listen-port 5100 --workspace-base-path /tmp
 
 #lint:
 #  stage: static-test
@@ -37,6 +37,7 @@ api-test:
   image: python:3.4
   before_script:
     - pip install -r requirements.txt
+    - pip install -r requirements_tests.txt
     - echo "admin,admin,admin" > zoepass.csv
     - mkdir /tmp/test${CI_BUILD_REF}
   script:
