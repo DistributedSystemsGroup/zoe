@@ -77,6 +77,8 @@ images:
   script:
     - docker build --pull -t ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE} .
     - docker push ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE}
+  only:
+    - master
 
 docs:
   stage: deploy
@@ -93,6 +95,8 @@ docs:
     - rsync -avz docs/_build/html/ ubuntu@${STAGING_IP}:${STAGING_PATH}/docs
   environment:
     name: staging
+  only:
+    - master
 
 #frontend:
 #  stage: deploy
