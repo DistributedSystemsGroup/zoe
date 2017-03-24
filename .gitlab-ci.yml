@@ -30,14 +30,14 @@ variables:
 #  script:
 #    - /usr/bin/sonar-scanner-run.sh
 
-frontend-unittest:
-  stage: static-test
-  image: node:latest
-  script:
-    - cd zoe_fe
-    - npm install
-    - npm install -g @angular/cli
-    - ng test
+#frontend-unittest:
+#  stage: static-test
+#  image: node:latest
+#  script:
+#    - cd zoe_fe
+#    - npm install
+#    - npm install -g @angular/cli
+#    - ng test
 
 #api-test:
 #  stage: integration-test
@@ -76,15 +76,29 @@ frontend-unittest:
 docs:
   stage: deploy
   image: python:3.4
+  before_script:
+    - which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
   script:
     - pip install -r requirements.txt
     - sh ./build_docs.sh
+    - rsync -avz docs/_build/html/ ubuntu@${STAGING_IP}:/srv/httpd/docs/
+  environment:
+    name: staging
 
 frontend:
   stage: deploy
   image: node:latest
+  before_script:
+    - which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
   script:
     - cd zoe_fe
     - npm install
     - npm install -g @angular/cli
     - ng build --env=prod --output-path=build/prod
+    - rsync -avz build/prod/ ubuntu@${STAGING_IP}:/srv/httpd/
+  environment:
+    name: staging
