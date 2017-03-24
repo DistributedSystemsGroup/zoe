@@ -58,7 +58,7 @@ api-test:
   script:
     - cd tests
     - coverage run -p basic_auth_success_test.py localhost:5100
-    - coverage run -p cookie_auth_success_test.py
+    - coverage run -p cookie_auth_success_test.py localhost:5100
     - coverage combine
     - coverage report
   artifacts:
