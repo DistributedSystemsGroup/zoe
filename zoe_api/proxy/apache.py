@@ -18,6 +18,7 @@
 import time
 import logging
 import random
+
 import docker
 
 import zoe_api.proxy.base
@@ -114,26 +115,25 @@ class ApacheProxy(zoe_api.proxy.base.BaseProxy):
                  '',
                  '</VirtualHost>']
 
-        docker_client = docker.Client(base_url=get_conf().proxy_docker_sock)
+        docker_client = docker.DockerClient(base_url=get_conf().proxy_docker_sock)
 
-        del_command = "sed -i '$ d' " + get_conf().proxy_config_file # /etc/apache2/sites-available/all.conf"
-        del_id = docker_client.exec_create(get_conf().proxy_container, del_command)
-        docker_client.exec_start(del_id)
+        del_command = "sed -i '$ d' " + get_conf().proxy_config_file  # /etc/apache2/sites-available/all.conf"
+        proxy_container = docker_client.containers.get(get_conf().proxy_container)
+        proxy_container.exec_run(del_command)
 
         for entry in proxy:
             command = 'bash -c "echo ' + "'" + entry + "'" + '  >> /etc/apache2/sites-available/all.conf"'
-            execution_id = docker_client.exec_create(get_conf().proxy_container, command)
-            docker_client.exec_start(execution_id)
+            proxy_container.exec_run(command)
 
         reload_command = 'service apache2 reload'
-        reload_id = docker_client.exec_create(get_conf().proxy_container, reload_command)
-        docker_client.exec_start(reload_id)
+        proxy_container.exec_run(reload_command)
 
     # Simply remove the added entries at the apache2 config file when terminating applications
     def unproxify(self, uid, role, execution_id):
+        """Un-proxify."""
         log.info('Unproxifying for user %s - execution %s', uid, str(execution_id))
         pattern = '/zoe\/' + uid + '\/' + str(execution_id) + '/d'  # pylint: disable=anomalous-backslash-in-string
-        docker_client = docker.Client(base_url=get_conf().proxy_docker_sock)
+        docker_client = docker.DockerClient(base_url=get_conf().proxy_docker_sock)
         del_command = 'sed -i "' + pattern + '" ' + get_conf().proxy_config_file  # /etc/apache2/sites-available/all.conf'
-        del_id = docker_client.exec_create(get_conf().proxy_container, del_command)
-        docker_client.exec_start(del_id)
+        proxy_container = docker_client.containers.get(get_conf().proxy_container)
+        proxy_container.exec_run(del_command)
