@@ -99,6 +99,7 @@ def create_tables(cur):
         user_id TEXT
         )''')
 
+
 def init():
     """DB init entrypoint."""
     dsn = 'dbname=' + get_conf().dbname + \

@@ -55,6 +55,7 @@ def main():
     }
     if args.log_file != "stderr":
         log_args['filename'] = args.log_file
+    logging.basicConfig(**log_args)
 
     ret = _check_configuration_sanity()
     if ret != 0:
