@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-ZOE_TEST_IMAGE=${ZOE_TEST_IMAGE:-zoe:manual}
-DOCKER_REGISTRY=${DOCKER_REGISTRY:-docker-registry:5000}
 CI_BUILD_REF=${CI_BUILD_REF:-manual}
 ZOE_COMMON_OPTIONS="--debug --backend-swarm-url http://localhost:2375 --deployment-name test${CI_BUILD_REF} --dbuser postgres --dbhost localhost --dbport 5432 --dbname postgres --dbpass postgres --master-url tcp://localhost:4850 --auth-type text --proxy-type none --listen-port 5100 --workspace-base-path /tmp"
 
