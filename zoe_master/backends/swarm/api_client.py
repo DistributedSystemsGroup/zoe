@@ -53,6 +53,7 @@ except AttributeError:
     log.error('Docker package does not have the DockerClient attribute')
     raise ImportError('Wrong Docker library version')
 
+
 def zookeeper_swarm(zk_server_list: str, path='/docker') -> str:
     """
     Given a Zookeeper server list, find the currently active Swarm master.

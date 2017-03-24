@@ -2,5 +2,5 @@
 
 set -e
 
-pylint *.py zoe_* ci/*.py tests/*.py
+pylint *.py zoe_* tests/*.py
 doc8 docs/

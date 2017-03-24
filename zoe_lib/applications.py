@@ -22,7 +22,6 @@ import re
 
 from zoe_lib.exceptions import InvalidApplicationDescription
 import zoe_lib.version
-from zoe_lib.config import get_conf
 
 log = logging.getLogger(__name__)
 

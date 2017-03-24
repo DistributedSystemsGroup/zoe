@@ -25,7 +25,7 @@ import tornado.web
 from zoe_lib.config import get_conf
 
 from zoe_api.exceptions import ZoeRestAPIException, ZoeNotFoundException, ZoeAuthException, ZoeException
-from zoe_api.auth.base import BaseAuthenticator
+from zoe_api.auth.base import BaseAuthenticator  # pylint-bug #1063 pylint: disable=unused-import
 from zoe_api.auth.ldap import LDAPAuthenticator
 from zoe_api.auth.file import PlainTextAuthenticator
 from zoe_api.auth.ldapsasl import LDAPSASLAuthenticator
