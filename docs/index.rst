@@ -41,6 +41,7 @@ Contents
   install
   config_file
   logging
+  proxy
   monitoring
   architecture
   quality
