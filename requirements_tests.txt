@@ -3,3 +3,4 @@ vulture
 doc8
 sphinx
 mypy-lang
+coverage
