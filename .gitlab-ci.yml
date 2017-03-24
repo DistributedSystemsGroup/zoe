@@ -85,4 +85,5 @@ frontend:
   script:
     - cd zoe_fe
     - npm install
+    - npm install -g @angular/cli
     - ng build --env=prod --output-path=build/prod
