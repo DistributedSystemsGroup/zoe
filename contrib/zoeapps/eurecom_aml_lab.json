@@ -99,7 +99,7 @@
                 ],
                 [
                     "SPARK_DRIVER_RAM",
-                    "2147483648"
+                    "4294967296"
                 ],
                 [
                     "HADOOP_USER_NAME",
