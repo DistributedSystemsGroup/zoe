@@ -1,0 +1,25 @@
+services:
+  - postgres:9.3
+
+variables:
+  # Configure postgres service (https://hub.docker.com/_/postgres/)
+  POSTGRES_DB: zoe
+  POSTGRES_USER: zoeuser
+  POSTGRES_PASSWORD: zoepass
+
+static_test:
+  image: python:3.4
+  script:
+    - pip install -r requirements.txt
+    - pip install -r requirements_tests.txt
+    - chmod 755 run_tests.sh && ./run_tests.sh
+
+SonarQube:
+  image: zoerepo/sonar-scanner
+  variables:
+    SONAR_PROJECT_KEY: "zoe.$CI_BUILD_REF_NAME"
+    SONAR_PROJECT_NAME: "Zoe"
+    SONAR_PROJECT_VERSION: "$CI_BUILD_REF"
+    SONARQUBE_SERVER_URL: "$SONARQUBE_SERVER_URL"
+  script:
+    - /usr/bin/sonar-scanner-run.sh
