@@ -36,6 +36,7 @@ frontend-unittest:
   script:
     - cd zoe_fe
     - npm install
+    - npm install -g @angular/cli
     - ng test
 
 #api-test:
