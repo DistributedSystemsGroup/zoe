@@ -208,14 +208,14 @@ class SwarmClient:
             raise ZoeException(message='Image not found')
         except docker.errors.APIError as e:
             if cont is not None:
-                self.cli.remove_container(container=cont.get('Id'), force=True)
+                cont.remove(force=True)
             if e.explanation == b'no resources available to schedule container':
                 raise ZoeNotEnoughResourcesException(message=e.explanation.decode('utf-8'))
             else:
                 raise ZoeException(message=e.explanation.decode('utf-8'))
         except Exception as e:
             if cont is not None:
-                self.cli.remove_container(container=cont.get('Id'), force=True)
+                cont.remove(force=True)
             raise ZoeException(str(e))
 
         cont = self.cli.containers.get(cont.id)
