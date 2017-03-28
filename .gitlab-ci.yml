@@ -98,18 +98,20 @@ docs:
   only:
     - master
 
-#frontend:
-#  stage: deploy
-#  image: node:latest
-#  before_script:
-#    - which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )
-#    - eval $(ssh-agent -s)
-#    - ssh-add <(echo "$SSH_PRIVATE_KEY")
-#  script:
-#    - cd zoe_fe
-#    - npm install
-#    - npm install -g @angular/cli
-#    - ng build --env=prod --output-path=build/prod
-#    - rsync -avz build/prod/ ubuntu@${STAGING_IP}:${STAGING_PATH}
-#  environment:
-#    name: staging
+frontend:
+  stage: deploy
+  image: node:latest
+  before_script:
+    - which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+  script:
+    - cd zoe_fe
+    - npm install
+    - npm install -g --save-dev @angular/cli
+    - ng build --env=prod --output-path=build/prod
+    - rsync -avz build/prod/ ubuntu@${STAGING_IP}:${STAGING_PATH}
+  environment:
+    name: staging
+  only:
+    - master
