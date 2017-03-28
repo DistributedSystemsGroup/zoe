@@ -96,7 +96,7 @@ variables:
 #  environment:
 #    name: staging
 #  only:
-    - master
+#    - master
 
 frontend:
   stage: deploy
