@@ -11,91 +11,91 @@ variables:
   ZOE_TEST_IMAGE: zoe:$CI_BUILD_REF
   ZOE_COMMON_OPTIONS: --debug --backend-swarm-url ${SWARM_URL} --deployment-name test${CI_BUILD_REF} --dbuser ${POSTGRES_USER} --dbhost postgres --dbport 5432 --dbname ${POSTGRES_DB} --dbpass ${POSTGRES_PASSWORD} --master-url tcp://localhost:4850 --auth-type text --proxy-type none --listen-port 5100 --workspace-base-path /tmp
 
-lint:
-  stage: static-test
-  image: python:3.4
-  script:
-    - pip install -r requirements.txt
-    - pip install -r requirements_tests.txt
-    - chmod 755 run_tests.sh && ./run_tests.sh
-
-SonarQube:
-  stage: static-test
-  image: zoerepo/sonar-scanner
-  variables:
-    SONAR_PROJECT_KEY: "zoe.devel"
-    SONAR_BRANCH: "$CI_BUILD_REF_NAME"
-    SONAR_PROJECT_NAME: "Zoe devel"
-    SONAR_PROJECT_VERSION: "$CI_BUILD_REF"
-    SONARQUBE_SERVER_URL: "$SONARQUBE_SERVER_URL"
-  script:
-    - /usr/bin/sonar-scanner-run.sh
-
-#frontend-unittest:
+#lint:
 #  stage: static-test
-#  image: node:latest
+#  image: python:3.4
 #  script:
-#    - cd zoe_fe
-#    - npm install
-#    - npm install -g @angular/cli
-#    - ng test
-
-api-test:
-  stage: integration-test
-  services:
-    - postgres:9.3
-  image: python:3.4
-  before_script:
-    - pip install -r requirements.txt
-    - pip install -r requirements_tests.txt
-    - echo "admin,admin,admin" > zoepass.csv
-    - mkdir /tmp/test${CI_BUILD_REF}
-    - python3 create_db_tables.py ${ZOE_COMMON_OPTIONS}
-    - python3 zoe-api.py ${ZOE_COMMON_OPTIONS} --log-file zoe-api-${CI_BUILD_REF}.log &
-    - sleep 1
-    - python3 zoe-master.py ${ZOE_COMMON_OPTIONS} --log-file zoe-master-${CI_BUILD_REF}.log &
-    - sleep 1
-  script:
-    - cd tests
-    - coverage run -p basic_auth_success_test.py localhost:5100
-    - coverage run -p cookie_auth_success_test.py localhost:5100
-    - coverage combine
-    - coverage report
-  artifacts:
-    paths:
-      - zoe-api-${CI_BUILD_REF}.log
-      - zoe-master-${CI_BUILD_REF}.log
-      - tests
-
-images:
-  image: docker:latest
-  stage: build
-  before_script:
-    - mkdir -p /etc/docker/certs.d/$DOCKER_REGISTRY
-    - cp /registry-ca.crt /etc/docker/certs.d/$DOCKER_REGISTRY/ca.crt
-    - docker login -u gitlab-ci-runner -p $REGISTRY_PASSWORD $DOCKER_REGISTRY
-  script:
-    - docker build --pull -t ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE} .
-    - docker push ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE}
-  only:
-    - master
-
-docs:
-  stage: deploy
-  image: ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE}
-  before_script:
-    - which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )
-    - eval $(ssh-agent -s)
-    - ssh-add <(echo "$SSH_PRIVATE_KEY")
-    - mkdir -p ~/.ssh
-    - 'echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    - apt-get update -y && apt-get install rsync -y
-  script:
-    - sh ./build_docs.sh
-    - rsync -avz docs/_build/html/ ubuntu@${STAGING_IP}:${STAGING_PATH}/docs
-  environment:
-    name: staging
-  only:
+#    - pip install -r requirements.txt
+#    - pip install -r requirements_tests.txt
+#    - chmod 755 run_tests.sh && ./run_tests.sh
+#
+#SonarQube:
+#  stage: static-test
+#  image: zoerepo/sonar-scanner
+#  variables:
+#    SONAR_PROJECT_KEY: "zoe.devel"
+#    SONAR_BRANCH: "$CI_BUILD_REF_NAME"
+#    SONAR_PROJECT_NAME: "Zoe devel"
+#    SONAR_PROJECT_VERSION: "$CI_BUILD_REF"
+#    SONARQUBE_SERVER_URL: "$SONARQUBE_SERVER_URL"
+#  script:
+#    - /usr/bin/sonar-scanner-run.sh
+#
+##frontend-unittest:
+##  stage: static-test
+##  image: node:latest
+##  script:
+##    - cd zoe_fe
+##    - npm install
+##    - npm install -g @angular/cli
+##    - ng test
+#
+#api-test:
+#  stage: integration-test
+#  services:
+#    - postgres:9.3
+#  image: python:3.4
+#  before_script:
+#    - pip install -r requirements.txt
+#    - pip install -r requirements_tests.txt
+#    - echo "admin,admin,admin" > zoepass.csv
+#    - mkdir /tmp/test${CI_BUILD_REF}
+#    - python3 create_db_tables.py ${ZOE_COMMON_OPTIONS}
+#    - python3 zoe-api.py ${ZOE_COMMON_OPTIONS} --log-file zoe-api-${CI_BUILD_REF}.log &
+#    - sleep 1
+#    - python3 zoe-master.py ${ZOE_COMMON_OPTIONS} --log-file zoe-master-${CI_BUILD_REF}.log &
+#    - sleep 1
+#  script:
+#    - cd tests
+#    - coverage run -p basic_auth_success_test.py localhost:5100
+#    - coverage run -p cookie_auth_success_test.py localhost:5100
+#    - coverage combine
+#    - coverage report
+#  artifacts:
+#    paths:
+#      - zoe-api-${CI_BUILD_REF}.log
+#      - zoe-master-${CI_BUILD_REF}.log
+#      - tests
+#
+#images:
+#  image: docker:latest
+#  stage: build
+#  before_script:
+#    - mkdir -p /etc/docker/certs.d/$DOCKER_REGISTRY
+#    - cp /registry-ca.crt /etc/docker/certs.d/$DOCKER_REGISTRY/ca.crt
+#    - docker login -u gitlab-ci-runner -p $REGISTRY_PASSWORD $DOCKER_REGISTRY
+#  script:
+#    - docker build --pull -t ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE} .
+#    - docker push ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE}
+#  only:
+#    - master
+#
+#docs:
+#  stage: deploy
+#  image: ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE}
+#  before_script:
+#    - which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )
+#    - eval $(ssh-agent -s)
+#    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+#    - mkdir -p ~/.ssh
+#    - 'echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+#    - apt-get update -y && apt-get install rsync -y
+#  script:
+#    - sh ./build_docs.sh
+#    - rsync -avz docs/_build/html/ ubuntu@${STAGING_IP}:${STAGING_PATH}/docs
+#  environment:
+#    name: staging
+#  only:
     - master
 
 frontend:
@@ -113,5 +113,3 @@ frontend:
     - rsync -avz build/prod/ ubuntu@${STAGING_IP}:${STAGING_PATH}
   environment:
     name: staging
-  only:
-    - master
