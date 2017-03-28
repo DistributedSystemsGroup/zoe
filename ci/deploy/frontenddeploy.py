@@ -17,8 +17,8 @@
 
 """Frontend deploy."""
 
-from  docker import Client
-import sys
+import docker
+
 
 class ZoeFrontendDeploy():
     def __init__(self, dockerUrl, apache2):
@@ -26,21 +26,22 @@ class ZoeFrontendDeploy():
         self.srcBackup = 'backup.tar'
         self.dst = '/var/www/'
         self.dstBackup = '/var/www/prod'
-        self.cli = Client(base_url=dockerUrl)
+        self.cli = docker.DockerClient(base_url=dockerUrl)
         self.apache2 = apache2
         return
 
     def deploy(self):
-#    """ Put new frontend folder behind apache2 container """
-        try:    
+        """ Put new frontend folder behind apache2 container """
+        try:
             retcode = 1
             #do backup
-            strm, stat = self.cli.get_archive(container=self.apache2, path=self.dstBackup)
+            container = self.cli.containers.get(self.apache2)
+            strm, stat = container.get_archive(path=self.dstBackup)
             filebackup = open(self.srcBackup, 'wb')
             filebackup.write(strm.read())
 
             filedata = open(self.src, 'rb').read()
-            res = self.cli.put_archive(container=self.apache2, path=self.dst, data=filedata)
+            res = container.put_archive(path=self.dst, data=filedata)
             if res is False:
                 retcode = 0
         except Exception as ex:
@@ -50,9 +51,10 @@ class ZoeFrontendDeploy():
 
     def fallback(self):
         try:
+            container = self.cli.containers.get(self.apache2)
             retcode = 1
             filebackup = open(self.srcBackup, 'rb').read()
-            res = self.cli.put_archive(container=self.apache2, path=self.dst, data=filebackup)
+            res = container.put_archive(path=self.dst, data=filebackup)
             if res is False:
                 retcode = 0
         except Exception as ex:

@@ -17,25 +17,23 @@
 
 """Backend Deploy."""
 
-import logging
 import time
 import yaml
-from typing import Iterable, Callable, Dict, Any, Union
 import docker
-from docker import Client
 
 from utils.DockerContainerParameter import DockerContainerParameter
 
+
 class ZoeBackendDeploy():
     def __init__(self, dockerUrl, dockerComposePath):
-        self.cli = Client(base_url=dockerUrl)
+        self.cli = docker.DockerClient(base_url=dockerUrl)
         self.zoe_api = ''
         self.zoe_master = ''
         self.zoe_opts = []
         self.docker_compose_file = dockerComposePath
         self.typeDeploy = 1 if 'prod' in dockerComposePath else 0
         self.parse_docker_compose()
-        self.previousImage=''
+        self.previousImage = ''
 
     def parse_docker_compose(self):
         content = ''
@@ -43,7 +41,7 @@ class ZoeBackendDeploy():
         with open(self.docker_compose_file, 'r') as stream:
             content = list(yaml.load(stream)['services'].items())
 
-        for i in range(0,2):
+        for i in range(0, 2):
 
             opts = DockerContainerParameter()
 
@@ -73,15 +71,13 @@ class ZoeBackendDeploy():
                 if logging['driver'] == 'gelf':
                     opts.set_gelf(logging['options']['gelf-address'])
 
-
             self.zoe_opts.append(opts)
 
     def create_container(self, opts, image):
+        """Create a container."""
 
-        port_binds = {}
-        volume_binds = {}
-        ports = []
-        volumes = []
+        ports = {}
+        volumes = {}
 
         opts.set_image(image)
 
@@ -90,71 +86,73 @@ class ZoeBackendDeploy():
 
             for p in ports_list:
                 splitted = p.split(":")
-                port_binds[int(splitted[0])] = int(splitted[1])
-                ports.append(int(splitted[0]))
+                ports[splitted[0] + '/tcp'] = int(splitted[1])
 
         if len(opts.get_volumes()) != 0:
             volumes_list = opts.get_volumes()[0]
 
             for v in volumes_list:
                 splitted = v.split(":")
-                bind = {'bind' : splitted[1], 'mode': 'rw'}
-                volume_binds[splitted[0]] = bind
-                volumes.append(splitted[1])
+                bind = {'bind': splitted[1], 'mode': 'rw'}
+                volumes[splitted[0]] = bind
 
         if opts.get_gelf() != '':
-            log_config = docker.utils.LogConfig(type = 'gelf', config = {'gelf-address': opts.get_gelf()})
+            log_config = {
+                "type": "gelf",
+                "config": {
+                    'gelf-address': opts.gelf_address
+                }
+            }
+        else:
+            log_config = {
+                "type": "json-file",
+                "config": {}
+            }
 
-
-        host_config = self.cli.create_host_config(
-            network_mode='bridge',
-            port_bindings= port_binds,
-            binds= volume_binds,
-            log_config = log_config)
-
-        ctn = self.cli.create_container(
-            image = opts.get_image(),
-            command = opts.get_command(),
-            hostname = opts.get_hostname(),
-            name = opts.get_name(),
-            tty=True,
-            ports=ports,
-            volumes=volumes,
-            host_config=host_config)
+        cont = self.cli.containers.create(image=opts.get_image(),
+                                          command=opts.get_command(),
+                                          hostname=opts.get_hostname(),
+                                          log_config=log_config,
+                                          name=opts.get_name(),
+                                          tty=True,
+                                          network_disabled=False,
+                                          network_mode='bridge',
+                                          ports=ports,
+                                          volumes=volumes)
 
         print('Created ' + opts.get_name() + '  container')
 
-        return ctn
+        return cont
 
     def export_master_ip(self):
         try:
-            ip_zoe_master = self.cli.inspect_container(self.zoe_master)['NetworkSettings']['Networks']['bridge']['IPAddress']
+            master = self.cli.containers.get(self.zoe_master)
+            ip_zoe_master = master.attrs['NetworkSettings']['Networks']['bridge']['IPAddress']
             hostEntry = ip_zoe_master + '\t' + self.zoe_master
             add_to_host = 'bash -c "echo ' + "'" + hostEntry + "'" + ' >> /etc/hosts"'
-            id = self.cli.exec_create(self.zoe_api, add_to_host)
-            self.cli.exec_start(id)
+            api = self.cli.containers.get(self.zoe_api)
+            api.exec_run(add_to_host)
         except Exception as ex:
             print(ex)
 
     def deploy(self, image):
-#        '''deploy with docker-compose, if success, return, else, fallback '''
+        """deploy with docker-compose, if success, return, else, fallback"""
         try:
-
             retcode = 1
 
             for s in [self.zoe_api, self.zoe_master]:
-                res = self.cli.containers(all=True, filters={'name': s})
+                res = self.cli.containers.list(all=True, filters={'name': s})
                 if len(res) > 0:
                     for r in res:
-                        name = r['Names'][0].split("/")[1]
+                        name = r.attrs['Names'][0].split("/")[1]
                         if self.typeDeploy == 0:
                             if name == s:
-                                self.cli.remove_container(name, force=True)
+                                r.remove(force=True)
                         else:
                             if name == s:
-                                imgID = self.cli.inspect_container(s)['Image']
-                                self.previousImage = self.cli.inspect_image(imgID)['RepoTags'][0]
-                            self.cli.remove_container(name, force=True)
+                                imgID = r.attrs['Image']
+                                self.previousImage = self.cli.images.get(imgID).tags[0]
+                            r.remove(force=True)
                         print('Removed ' + name + ' container')
 
             print('deploying with ' + image)
@@ -163,21 +161,23 @@ class ZoeBackendDeploy():
 
             print('Deploying zoe backend...')
 
-            #start zoe_api
-            self.cli.start(self.zoe_api)
+            # start zoe_api
+            api_c = self.cli.containers.get(self.zoe_api)
+            api_c.start(self.zoe_api)
             print('Started latest ' + self.zoe_api + ' container...')
-            if not self.cli.inspect_container(self.zoe_api)['State']['Running']:
+            if not api_c.attrs['State']['Running']:
                 retcode = -1
-    
+
             time.sleep(5)
-    
-            #start zoe_master
-            self.cli.start(self.zoe_master)
+
+            # start zoe_master
+            master_c = self.cli.containers.get(self.zoe_master)
+            master_c.start(self.zoe_master)
             print('Started latest ' + self.zoe_master + ' container...')
-            if not self.cli.inspect_container(self.zoe_master)['State']['Running']:
+            if not master_c.attrs['State']['Running']:
                 retcode = 0
 
-            #export zoe-master ip address to hosts file of zoe-api
+            # export zoe-master ip address to hosts file of zoe-api
             self.export_master_ip()
 
         except Exception as ex:

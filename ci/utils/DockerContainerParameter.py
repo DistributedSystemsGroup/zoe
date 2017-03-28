@@ -17,7 +17,8 @@
 
 """Container Parameter class"""
 
-from typing import Iterable, Callable, Dict, Any, Union
+from typing import Iterable
+
 
 class DockerContainerParameter():
     def __init__(self):
@@ -33,9 +34,9 @@ class DockerContainerParameter():
 
     def set_gelf(self, gelf_address):
         self.gelf_address = gelf_address
-        
+
     def get_gelf(self) -> str:
-        return self.gelf_address     
+        return self.gelf_address
 
     def set_ports(self, ports):
         self.ports.append(ports)

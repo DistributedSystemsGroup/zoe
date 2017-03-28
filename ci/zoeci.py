@@ -17,17 +17,14 @@
 
 """ZOE CI entry point."""
 
-import yaml
 import sys
-from typing import Iterable, Callable, Dict, Any, Union
 import docker
-from docker import Client
 
-from utils.DockerContainerParameter import DockerContainerParameter
 from deploy.frontenddeploy import ZoeFrontendDeploy
 from deploy.backenddeploy import ZoeBackendDeploy
 
-class ZoeDeploy(): 
+
+class ZoeDeploy():
     def __init__(self, dockerUrl, dockerComposePath, image):
         self.currentImage = image
         self.typeDeploy = 1 if 'prod' in dockerComposePath else 0
@@ -40,10 +37,10 @@ class ZoeDeploy():
             print('Deployed BE with latest image...')
             if self.typeDeploy == 1 and retBE == 0:
                 print('Redeploy BE with previous image')
-                self.backend.deploy(self.backend.previousImage) 
-    
+                self.backend.deploy(self.backend.previousImage)
+
             retFE = 1
-            if  self.typeDeploy == 1:
+            if self.typeDeploy == 1:
                 #retFE = self.frontend.deploy()
                 print('Deployed FE with latest codes...')
                 if retFE == 0 or retBE == 0:
@@ -51,33 +48,33 @@ class ZoeDeploy():
         except Exception as ex:
             print(ex)
             retBE = 0
-        return (retBE and retFE)
+        return retBE and retFE
 
 class ZoeImage():
     def __init__(self, dockerUrl, tag):
-        self.cli = Client(base_url=dockerUrl)
+        self.cli = docker.DockerClient(base_url=dockerUrl)
         self.tag = tag
 
     def build(self):
-#    """ Build docker image """
+        """ Build docker image """
         ret = 1
-        
-        for line in self.cli.build(path='.', tag=self.tag, rm=True):
+
+        for line in self.cli.images.build(path='.', tag=self.tag, rm=True):
             print(line)
             if 'error' in str(line):
                 ret = 0
-        
+
         return ret
 
     def push(self):
-#    """ Push docker image """
+        """ Push docker image """
         ret = 1
-        
-        for line in self.cli.push(self.tag, stream=True):
+
+        for line in self.cli.images.push(self.tag, stream=True):
             print(line)
             if 'error' in str(line):
                 ret = 0
-        
+
         return ret
 
 if __name__ == '__main__':
