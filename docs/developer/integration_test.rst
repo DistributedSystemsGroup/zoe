@@ -10,7 +10,7 @@ Zoe Integration Test
 
 * What will it do
 
-  - Launch two containers for zoe-api and zoe-master
+  - Launch two containers for zoe-api and zoe-master, one for postgresql
   - Connect to the backend (kubernetes/swarm) and test the rest API of zoe.
   - The authentication type is ``text`` for simplicity.
   - The test would be described in a Jenkins job
