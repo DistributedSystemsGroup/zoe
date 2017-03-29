@@ -67,17 +67,21 @@ def app_validate(data):
     if 'services' not in data:
         raise InvalidApplicationDescription(msg='the application should contain a list of services')
 
-    for service in data['services']:
+    _validate_all_services(data['services'])
+
+def _validate_all_services(data):
+    print(data)
+    for service in data:
+        print(service)
         _service_check(service)
 
     found_monitor = False
-    for service in data['services']:
+    for service in data:
         if service['monitor']:
             found_monitor = True
             break
     if not found_monitor:
         raise InvalidApplicationDescription(msg="at least one process should have monitor set to True")
-
 
 def _service_check(data):
     """Check the service description schema."""
