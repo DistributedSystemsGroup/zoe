@@ -92,7 +92,7 @@ variables:
 #    - apt-get update -y && apt-get install rsync -y
 #  script:
 #    - sh ./build_docs.sh
-#    - rsync -avz docs/_build/html/ ubuntu@${STAGING_IP}:${STAGING_PATH}/docs
+#    - rsync -avz docs/_build/html/ ubuntu@${STAGING_IP}:${WEB_STAGING_PATH}/docs
 #  environment:
 #    name: staging
 #  only:
@@ -109,10 +109,14 @@ frontend:
     - 'echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     - apt-get update -y && apt-get install rsync -y
   script:
+    - rsync -avz . ubuntu@${STAGING_IP}:${ZOE_STAGING_PATH}
+    - ssh ubuntu@${STAGING_IP} sudo pip install --upgrade -r /srv/zoe/requirements.txt
+    - ssh ubuntu@${STAGING_IP} sudo supervisorctl restart zoe-api
+    - ssh ubuntu@${STAGING_IP} sudo supervisorctl restart zoe-master
     - cd zoe_fe
     - npm install
     - npm install -g --save-dev @angular/cli
     - ng build --env=prod --output-path=build/prod
-    - rsync -avz build/prod/ ubuntu@${STAGING_IP}:${STAGING_PATH}
+    - rsync -avz build/prod/ ubuntu@${STAGING_IP}:${WEB_STAGING_PATH}
   environment:
     name: staging
