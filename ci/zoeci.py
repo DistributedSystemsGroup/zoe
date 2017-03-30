@@ -62,6 +62,7 @@ class ZoeImage():
             self.cli.images.build(path='.', tag=self.tag, rm=True)
         except Exception:
             ret = 0
+            pass
         return ret
 
     def push(self):
