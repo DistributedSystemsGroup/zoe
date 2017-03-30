@@ -64,7 +64,8 @@ class OAuthGetAPI(RequestHandler):
         """Set up the headers for enabling CORS."""
         manage_cors_headers(self)
 
-    def options(self, execution_id): # pylint: disable=unused-argument
+    @catch_exceptions
+    def options(self):  # pylint: disable=unused-argument
         """Needed for CORS."""
         self.set_status(204)
         self.finish()
@@ -113,6 +114,7 @@ class OAuthGetAPI(RequestHandler):
         self.write(response.body)
 
     def data_received(self, chunk):
+        """Not implemented as we do not use stream uploads"""
         pass
 
 
@@ -129,7 +131,8 @@ class OAuthRevokeAPI(RequestHandler):
         """Set up the headers for enabling CORS."""
         manage_cors_headers(self)
 
-    def options(self, execution_id): # pylint: disable=unused-argument
+    @catch_exceptions
+    def options(self, execution_id):  # pylint: disable=unused-argument
         """Needed for CORS."""
         self.set_status(204)
         self.finish()
