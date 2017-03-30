@@ -25,6 +25,8 @@ import oauth2.grant
 
 from zoe_api.rest_api.utils import catch_exceptions, get_auth
 from zoe_api.rest_api.oauth_utils import auth_controller, client_store, token_store
+from zoe_api.rest_api.utils import manage_cors_headers
+from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 
 log = logging.getLogger(__name__)
 
@@ -48,6 +50,7 @@ curl -H 'Authorization: Bearer 378f8d5f-2eb5-4181-b632-ad23c4534d32' http://loca
 
 """
 
+
 class OAuthGetAPI(RequestHandler):
     """The OAuthGetAPI endpoint."""
 
@@ -56,6 +59,15 @@ class OAuthGetAPI(RequestHandler):
         self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
         self.auth_controller = auth_controller
         self.client_store = client_store
+
+    def set_default_headers(self):
+        """Set up the headers for enabling CORS."""
+        manage_cors_headers(self)
+
+    def options(self, execution_id): # pylint: disable=unused-argument
+        """Needed for CORS."""
+        self.set_status(204)
+        self.finish()
 
     @catch_exceptions
     def post(self):
@@ -103,7 +115,8 @@ class OAuthGetAPI(RequestHandler):
     def data_received(self, chunk):
         pass
 
-class OAuthRevokeAPI(RequestHandler): # pylint: disable=abstract-method
+
+class OAuthRevokeAPI(RequestHandler):
     """The OAuthRevokeAPI endpoint."""
 
     def initialize(self, **kwargs):
@@ -111,6 +124,15 @@ class OAuthRevokeAPI(RequestHandler): # pylint: disable=abstract-method
         self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
         self.auth_controller = auth_controller
         self.token_store = token_store
+
+    def set_default_headers(self):
+        """Set up the headers for enabling CORS."""
+        manage_cors_headers(self)
+
+    def options(self, execution_id): # pylint: disable=unused-argument
+        """Needed for CORS."""
+        self.set_status(204)
+        self.finish()
 
     @catch_exceptions
     def delete(self, token):
