@@ -23,30 +23,49 @@ from unittest.mock import patch, MagicMock
 from zoe_lib import applications
 from zoe_lib import version
 
+
 class TestApplicationsMethods(unittest.TestCase):
-    appValidateData = {}
-    portCheckData = {}
+    """Application validation tests."""
+    app_validate_data = {}
+    port_check_data = {}
 
     def setUp(self):
-        currentVersion = version.ZOE_APPLICATION_FORMAT_VERSION
-        self.appValidateData = { "name": "test name", "will_end": True, "priority": 3, "requires_binary": False, "version": currentVersion, "services": {} }
-        self.portCheckData = { "name": "test name", "protocol": "http", "port_number": 3, "is_main_endpoint": True }
+        """Set up tests."""
+        current_version = version.ZOE_APPLICATION_FORMAT_VERSION
+        self.app_validate_data = {
+            "name": "test name",
+            "will_end": True,
+            "priority": 3,
+            "requires_binary": False,
+            "version": current_version,
+            "services": []
+        }
+        self.port_check_data = {
+            "name": "test name",
+            "protocol": "http",
+            "port_number": 3,
+            "is_main_endpoint": True
+        }
 
-    def test_port_check_works_with_valid_port(self):
+    def test_pass_for_valid_port(self):
+        """Test port validation code."""
         try:
-            applications._port_check(self.portCheckData)
+            applications._port_check(self.port_check_data)  # pylint: disable=protected-access
         except Exception:
             self.fail("_port_check threw an exception for valid data")
 
-    def test_port_check_fails_for_invalid_port_number(self):
-        self.portCheckData["port_number"] = "not_a_number"
-        self.assertRaises(applications.InvalidApplicationDescription, applications._port_check, self.portCheckData)
+    def test_fails_for_bad_port_number(self):
+        """Test validation of port number."""
+        self.port_check_data["port_number"] = "not_a_number"
+        self.assertRaises(applications.InvalidApplicationDescription, applications._port_check, self.port_check_data)  # pylint: disable=protected-access
 
-    def test_port_check_fails_for_missing_key(self):
-        del self.portCheckData["name"]
-        self.assertRaises(applications.InvalidApplicationDescription, applications._port_check, self.portCheckData)
+    def test_fails_for_missing_key(self):
+        """Test missing name key from the port definition."""
+        del self.port_check_data["name"]
+        self.assertRaises(applications.InvalidApplicationDescription, applications._port_check, self.port_check_data)  # pylint: disable=protected-access
 
     @patch("zoe_lib.applications._validate_all_services", MagicMock())
     @patch("zoe_lib.applications._port_check", MagicMock())
-    def test_app_validate_succeeds_for_valid_app(self):
-        applications.app_validate(self.appValidateData)
+    def test_pass_for_valid_app(self):
+        """Test validation of entire app."""
+        applications.app_validate(self.app_validate_data)
