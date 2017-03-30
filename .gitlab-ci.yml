@@ -116,6 +116,9 @@ frontend:
     - cd zoe_fe
     - npm install
     - npm install -g --save-dev @angular/cli
+    - 'sed -i -e "s/cors: false,/cors: true,/" src/environments/environment.prod.ts'
+    - 'sed -i -e "s/localhost/192.168.45.189/" src/environments/environment.prod.ts'
+    - 'sed -i -e "s/\/0.6/\/0.7/" src/environments/environment.prod.ts'
     - ng build --env=prod --output-path=build/prod
     - rsync -avz build/prod/ ubuntu@${STAGING_IP}:${WEB_STAGING_PATH}
   environment:
