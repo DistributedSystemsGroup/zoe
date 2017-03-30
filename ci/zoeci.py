@@ -58,23 +58,20 @@ class ZoeImage():
     def build(self):
         """ Build docker image """
         ret = 1
-
-        for line in self.cli.images.build(path='.', tag=self.tag, rm=True):
-            print(line)
-            if 'error' in str(line):
-                ret = 0
-
+        try:
+            self.cli.images.build(path='.', tag=self.tag, rm=True)
+        except Exception:
+            ret = 0
         return ret
 
     def push(self):
         """ Push docker image """
         ret = 1
-
-        for line in self.cli.images.push(self.tag, stream=True):
-            print(line)
-            if 'error' in str(line):
-                ret = 0
-
+        try:
+            self.cli.images.push(self.tag, stream=True)
+        except Exception:
+            ret = 0
+            pass
         return ret
 
 if __name__ == '__main__':

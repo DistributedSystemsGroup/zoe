@@ -144,7 +144,7 @@ class ZoeBackendDeploy():
                 res = self.cli.containers.list(all=True, filters={'name': s})
                 if len(res) > 0:
                     for r in res:
-                        name = r.attrs['Names'][0].split("/")[1]
+                        name = r.name
                         if self.typeDeploy == 0:
                             if name == s:
                                 r.remove(force=True)
@@ -163,7 +163,7 @@ class ZoeBackendDeploy():
 
             # start zoe_api
             api_c = self.cli.containers.get(self.zoe_api)
-            api_c.start(self.zoe_api)
+            api_c.start()
             print('Started latest ' + self.zoe_api + ' container...')
             if not api_c.attrs['State']['Running']:
                 retcode = -1
@@ -172,7 +172,7 @@ class ZoeBackendDeploy():
 
             # start zoe_master
             master_c = self.cli.containers.get(self.zoe_master)
-            master_c.start(self.zoe_master)
+            master_c.start()
             print('Started latest ' + self.zoe_master + ' container...')
             if not master_c.attrs['State']['Running']:
                 retcode = 0
