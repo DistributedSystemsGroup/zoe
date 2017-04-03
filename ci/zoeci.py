@@ -17,85 +17,84 @@
 
 """ZOE CI entry point."""
 
-import yaml
 import sys
-from typing import Iterable, Callable, Dict, Any, Union
-import docker
 from docker import Client
 
-from utils.DockerContainerParameter import DockerContainerParameter
-from deploy.frontenddeploy import ZoeFrontendDeploy
-from deploy.backenddeploy import ZoeBackendDeploy
+from deploy.frontenddeploy import ZoeFrontendDeploy #pylint: disable=import-error
+from deploy.backenddeploy import ZoeBackendDeploy #pylint: disable=import-error
 
-class ZoeDeploy(): 
+class ZoeDeploy():
+    """ Zoe deploy class """
     def __init__(self, dockerUrl, dockerComposePath, image):
-        self.currentImage = image
-        self.typeDeploy = 1 if 'prod' in dockerComposePath else 0
+        self.current_image = image
+        self.type_deploy = 1 if 'prod' in dockerComposePath else 0
         self.backend = ZoeBackendDeploy(dockerUrl, dockerComposePath)
         self.frontend = ZoeFrontendDeploy(dockerUrl, 'apache2')
 
     def deploy(self):
+        """ Deploy frontend and backend """
         try:
-            retBE = self.backend.deploy(self.currentImage)
+            ret_be = self.backend.deploy(self.current_image)
             print('Deployed BE with latest image...')
-            if self.typeDeploy == 1 and retBE == 0:
+            if self.type_deploy == 1 and ret_be == 0:
                 print('Redeploy BE with previous image')
-                self.backend.deploy(self.backend.previousImage) 
-    
-            retFE = 1
-            if  self.typeDeploy == 1:
-                #retFE = self.frontend.deploy()
+                self.backend.deploy(self.backend.previousImage)
+
+            ret_fe = 1
+            if  self.type_deploy == 1:
+                #ret_fe = self.frontend.deploy()
                 print('Deployed FE with latest codes...')
-                if retFE == 0 or retBE == 0:
-                    retFE = self.frontend.fallback()
+                if ret_fe == 0 or ret_be == 0:
+                    ret_fe = self.frontend.fallback()
         except Exception as ex:
             print(ex)
-            retBE = 0
-        return (retBE and retFE)
+            ret_be = 0
+        return ret_be and ret_fe
 
 class ZoeImage():
+    """ Zoe build/push image class """
     def __init__(self, dockerUrl, tag):
         self.cli = Client(base_url=dockerUrl)
         self.tag = tag
 
     def build(self):
-#    """ Build docker image """
-        ret = 1
-        
+        """ Build docker image """
+        build_ret = 1
+
         for line in self.cli.build(path='.', tag=self.tag, rm=True):
             print(line)
             if 'error' in str(line):
-                ret = 0
-        
-        return ret
+                build_ret = 0
+
+        return build_ret
 
     def push(self):
-#    """ Push docker image """
-        ret = 1
-        
+        """ Push docker image """
+        push_ret = 1
+
         for line in self.cli.push(self.tag, stream=True):
             print(line)
             if 'error' in str(line):
-                ret = 0
-        
-        return ret
+                push_ret = 0
+
+        return push_ret
 
 if __name__ == '__main__':
     if len(sys.argv) < 4:
         sys.exit(1)
     else:
         if sys.argv[1] == '0':
-            deployer = ZoeDeploy(sys.argv[2], sys.argv[3], sys.argv[4])
-            ret = deployer.deploy()
+            deployer = ZoeDeploy(sys.argv[2], sys.argv[3], sys.argv[4]) # pylint: disable=invalid-name
+            ret = deployer.deploy() # pylint: disable=invalid-name
             if ret == 0:
                 sys.exit(1)
         elif sys.argv[1] == '1':
-            imghandler = ZoeImage(sys.argv[2], sys.argv[3])
-            ret = imghandler.build()
+            imghandler = ZoeImage(sys.argv[2], sys.argv[3]) # pylint: disable=invalid-name
+            ret = imghandler.build() # pylint: disable=invalid-name
             if ret == 0:
                 sys.exit(1)
         elif sys.argv[1] == '2':
-            imghandler = ZoeImage(sys.argv[2], sys.argv[3])
-            ret = imghandler.push()
+            imghandler = ZoeImage(sys.argv[2], sys.argv[3]) # pylint: disable=invalid-name
+            ret = imghandler.push() # pylint: disable=invalid-name
             if ret == 0:
                 sys.exit(1)

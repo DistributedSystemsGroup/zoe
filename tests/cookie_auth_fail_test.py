@@ -6,11 +6,14 @@ import unittest
 
 import requests
 
+ZOE_API_URI = 'http://192.168.12.2:5100/api/0.7/'
+ZOE_AUTH = ('admin', 'admin')
+
 
 class ZoeRestTestSuccess(unittest.TestCase):
     """Test case class."""
 
-    uri = 'http://localhost:5001/api/0.7/'
+    uri = ZOE_API_URI
     id = '-1'
     session = None
 

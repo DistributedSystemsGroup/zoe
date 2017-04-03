@@ -1,0 +1,6 @@
+description: A Helm chart to deploy Zoe on Kubernetes
+name: zoe
+version: 0.1.0
+maintainers:
+- name: Quang-Nhat Hoang-Xuan
+  email: qhoangxuan@kpmg.com

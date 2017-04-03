@@ -1,0 +1,31 @@
+---
+# Setting up Docker Swarm
+- name: Get default NIC
+  shell: echo `ip -o -4 route show to default | awk '{print $5}'`
+  register: default_nic
+
+- name: Get host IP
+  shell: echo `ifconfig {{ default_nic.stdout }} 2>/dev/null|awk '/inet addr:/ {print $2}'|sed 's/addr://'`
+  register: host_ip
+
+- name: Remove docker.pid
+  file:
+    state: absent
+    path: "/var/run/docker*" 
+
+- name: Stop docker service
+  service:
+    name: docker
+    state: stopped
+
+- name: Start dockerd with new options
+  shell: nohup dockerd --cluster-store=consul://{{ host_ip.stdout }}:8500 --cluster-advertise={{ default_nic.stdout }}:2375 -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock &
+
+- name: Start consul container
+  shell: docker run -itd -p 8500:8500 progrium/consul -server -bootstrap
+
+- name: Start swarm manager container
+  shell: docker run -itd -p 4000:4000 swarm manage -H :4000 --advertise {{ host_ip.stdout }}:4000 consul://{{ host_ip.stdout }}:8500
+
+- name: Start swarm worker container
+  shell: docker run -itd swarm join --addr={{ host_ip.stdout }}:2375 consul://{{ host_ip.stdout }}:8500

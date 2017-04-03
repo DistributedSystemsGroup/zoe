@@ -12,8 +12,9 @@ Installation can be done in two different ways. Both require installation of a f
 1. Development Server
 
  * The first way to install the frontend is to install a local development server; this server will automatically reload when source files are changed. This can be done by the following two steps:
- * Run ``ng serve``
- * Navigate to ``http://localhost:4200/``
+
+   * Run ``ng serve``
+   * Navigate to ``http://localhost:4200/``
 
 2. Proxy Server
 

@@ -67,5 +67,8 @@ Internal module/class/method documentation
   scheduler
   backend
   stats
+  jenkins-ci
+  gitlab-ci
+  integration-test
 
 :ref:`modindex`

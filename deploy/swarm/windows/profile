@@ -1,0 +1,4 @@
+EXTRA_ARGS='--label provider=virtualbox --cluster-store=consul://192.168.99.100:8500 --cluster-advertise=192.168.99.100:2376'
+DOCKER_HOST=' -H tcp://0.0.0.0:2376'
+DOCKER_STORAGE=aufs
+DOCKER_TLS=no

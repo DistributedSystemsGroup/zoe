@@ -1,0 +1,39 @@
+---
+# Install docker-engine
+- name: Install apt-transport-https
+  apt:
+    name: apt-transport-https
+    update_cache: yes
+
+- name: Install ca-certificates
+  apt:
+    name: ca-certificates
+    update_cache: yes
+
+- name: Add repository key
+  apt_key: 
+    keyserver: hkp://p80.pool.sks-keyservers.net:80
+    id: 58118E89F3A912897C070ADBF76221572C52609D
+    state: present
+
+- name: Register apt sources
+  shell: echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" | sudo tee /etc/apt/sources.list.d/docker.list
+
+- name: Update repository
+  apt:
+    update_cache: yes
+
+- name: Install docker-engine
+  apt:
+    name: docker-engine
+    update_cache: yes
+
+- name: Query linux kernel architecture
+  shell: echo "$(uname -s)-$(uname -p)"
+  register: kernel_arch
+
+- name: Download docker-compose
+  command: "{{ item }}"
+  with_items:
+   - "curl -L https://github.com/docker/compose/releases/download/1.9.0/docker-compose-{{ kernel_arch.stdout }} -o /usr/local/bin/docker-compose"
+   - "chmod +x /usr/local/bin/docker-compose"

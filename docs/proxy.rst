@@ -1,6 +1,6 @@
 .. _proxy:
 
-Access Zapps through proxy
+Access ZApps through proxy
 ==========================
 
 Overview

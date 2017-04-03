@@ -52,7 +52,6 @@ Main documentation
   kube_backend
   config_file
   logging
-  proxy
   monitoring
   proxy
 

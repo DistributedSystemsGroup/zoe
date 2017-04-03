@@ -53,6 +53,10 @@ Scheduler options:
 * ``scheduler-class = <**ZoeSimpleScheduler** | ZoeElasticScheduler>`` : Scheduler class to use for scheduling ZApps
 * ``scheduler-policy = <**FIFO** | SIZE>`` : Scheduler policy to use for scheduling ZApps
 
+Backend choice:
+
+* ``backend = <OldSwarm|Kubernetes>`` : type of cluster that zoe-master works with
+
 Swarm backend options:
 
 * ``backend-swarm-url = zk://zk1:2181,zk2:2181,zk3:2181`` : connection string to the Swarm API endpoint. Can be expressed by a plain http URL or as a zookeeper node list in case Swarm is configured for HA.
@@ -60,3 +64,11 @@ Swarm backend options:
 * ``backend-swarm-tls-cert = cert.pem`` : Docker TLS certificate file
 * ``backend-swarm-tls-key = key.pem`` : Docker TLS private key file
 * ``backend-swarm-tls-ca = ca.pem`` : Docker TLS CA certificate file
+
+Kubernetes backend:
+
+* ``kube-config-file = /opt/zoe/kube.conf`` : the configuration file of Kubernetes cluster that zoe works with. Specified if ``backend`` is ``Kubernetes``.
+
+Proxy options:
+
+By default proxy support is disabled. To configure it refer to the :ref:`proxy documentation <proxy>`.

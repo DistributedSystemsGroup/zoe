@@ -7,12 +7,15 @@ import unittest
 
 import requests
 
+ZOE_API_URI = 'http://192.168.12.2:5100/api/0.7/'
+ZOE_AUTH = ('admin', 'admin')
+
 
 class ZoeRestTestSuccess(unittest.TestCase):
     """Test case class."""
 
-    uri = ''
-    auth = ('admin', 'admin')
+    uri = ZOE_API_URI
+    auth = ZOE_AUTH
     id = ''
 
     def tearDown(self):
@@ -67,7 +70,7 @@ class ZoeRestTestSuccess(unittest.TestCase):
         """Test start execution api endpoint."""
         print('Test start execution api endpoint')
 
-        with open('tf.json', encoding='utf-8') as data_file:
+        with open('zapp.json', encoding='utf-8') as data_file:
             data = json.loads(data_file.read())
 
         req = requests.post(self.__class__.uri + 'execution', auth=self.__class__.auth, json={"application": data, "name": "requests"})
