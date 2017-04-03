@@ -1,88 +1,91 @@
+.. _main_index:
+
 Zoe - Container-based Analytics as a Service
 ============================================
 
-Zoe is a user facing software that hides the complexities of managing resources, configuring and deploying complex distributed applications on private clouds. The main focus are data analysis applications, such as `Spark <http://spark.apache.org/>`_, but Zoe has a very flexible application description format that lets you easily describe any kind of application.
+Zoe provides a simple way to provision data analytics applications. It hides the complexities of managing resources, configuring and deploying complex distributed applications on private clouds. Zoe is focused on data analysis applications, such as `Spark <http://spark.apache.org/>`_ or `Tensorflow <https://www.tensorflow.org/>`_. A generic, very flexible application description format lets you easily describe any kind of data analysis application.
 
-Zoe uses containerization technology to provide fast startup times and process isolation. A smart scheduler is able to prioritize executions according to several policies, maximising the use of the available capacity and maintaining a queue of executions that are ready to run.
+Downloading
+-----------
 
-Zoe currently supports Docker Swarm as the container backend. It can be located anywhere, on Amazon or in your own private cloud, and Zoe does not need exclusive access to it, meaning your Swarm could also be running other services: Zoe will not interfere with them. Zoe is meant as a private service, adding data-analytics capabilities to new or existing clusters.
+Get Zoe from the `GitHub repository <https://github.com/DistributedSystemsGroup/zoe>`_. Stable releases are tagged on the master branch and can be downloaded from the `releases page <https://github.com/DistributedSystemsGroup/zoe/releases>`_.
 
-The core components of Zoe are application-independent and users are free to create and execute application descriptions for any kind of service combination. Zoe targets analytics services in particular: we offer a number of tested sample ZApps and Frameworks that can be used as starting examples.
+Zoe is written in Python 3.4+ and requires a number of third-party packages to function. Deployment scripts for the supported back-ends, install and setup instructions are available in the :ref:`installation guide <install>`.
 
-To better understand what we mean by "analytic service", here are a few examples:
+Quick tutorial
+--------------
 
-* Spark
-* Zookeeper
-* Hadoop (HDFS in particular)
-* Cassandra
-* Impala
-* ... suggestions welcome!
+To use the Zoe command-line interface, first of all you have to define three environment variables::
 
-A number of predefined applications for testing and customization can be found at the `zoe-applications <https://github.com/DistributedSystemsGroup/zoe-applications>`_ repository.
+    export ZOE_URL=http://localhost:5000  # address of the zoe-api instance
+    export ZOE_USER=joe                   # User name
+    export ZOE_PASS=joesecret             # Password
 
-Have a look at the :ref:`vision` and at the :ref:`roadmap` to see what we are currently planning and feel free to `contact us <daniele.venzano@eurecom.fr>`_ via email or through the `GitHub issue tracker <https://github.com/DistributedSystemsGroup/zoe/issues>`_ to pose questions or suggest ideas and new features.
+Now you can check that you are up and running with this command::
 
-A note on terminology (needs to be updated)
--------------------------------------------
+    ./zoe.py info
 
-We are spending a lot of effort to use consistent naming throughout the documentation, the software, the website and all the other resources associated with Zoe. Check the :ref:`architecture` document for the details, but here is a quick reference:
+It will return some version information, by querying the zoe-api and zoe-master processes.
 
- * Zoe Components: the Zoe processes, the Master, the API and the service monitor
- * Zoe Applications: a composition of Zoe Frameworks, is the highest-level entry in application descriptions that the use submits to Zoe, can be abbreviated in ZApp(s).
- * Zoe Frameworks: a composition of Zoe Services, is used to describe re-usable pieces of Zoe Applications, like a Spark cluster
- * Zoe Services: one to one with a Docker container, describes a single service/process tree running in an isolated container
+Zoe applications are passed as JSON files. A few sample ZApps are available in the ``contrib/zoeapps/`` directory. To start a ZApp use the following command::
 
-Contents
---------
+    ./zoe.py start joe-spark-notebook contrib/zoeapps/eurecom_aml_lab.json
+
+ZApp execution status can be checked this way::
+
+    ./zoe.py exec-ls                  # Lists all executions, past and present
+    ./zoe.py exec-get <execution id>  # Inspects an execution
+
+Where ``execution id`` is the ID of the ZApp execution to inspect, taken from the ``exec-ls`` command.
+
+
+Where to go from here
+---------------------
+
+Main documentation
+^^^^^^^^^^^^^^^^^^
 
 .. toctree::
-  :maxdepth: 2
+  :maxdepth: 1
 
   install
+  kube_backend
   config_file
   logging
   monitoring
-  architecture
-  quality
-  vision
-  motivations
-  roadmap
-  contributing
+  proxy
 
 Zoe applications
-----------------
-
-:ref:`modindex`
+^^^^^^^^^^^^^^^^
 
 .. toctree::
-  :maxdepth: 2
+  :maxdepth: 1
 
   zapps/classification
   zapps/howto_zapp
   zapps/zapp_format
   zapps/contributing
 
-Developer documentation
------------------------
 
-:ref:`modindex`
+Development and contributing to the project
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. toctree::
   :maxdepth: 1
 
   developer/index
+  architecture
+  quality
+  motivations
+  vision
+  roadmap
+  contributing
 
+External resources
+^^^^^^^^^^^^^^^^^^
 
-Contacts
-========
+- `Zoe Homepage <http://zoe-analytics.eu>`_
+- `Issue tracker <https://github.com/DistributedSystemsGroup/zoe/issues>`_
+- `ZApp repository <https://github.com/DistributedSystemsGroup/zoe-applications>`_
 
-`Zoe website <http://zoe-analytics.eu>`_
-
-`Zoe mailing list <http://www.freelists.org/list/zoe>`_
-
-About us
-========
-
-Zoe is developed as part of the research activities of the `Distributed Systems Group <http://distsysgroup.wordpress.com>`_ at `Eurecom <http://www.eurecom.fr>`_, in Sophia Antipolis, France.
-
-The main discussion area for issues, questions and feature requests is the `GitHub issue tracker <https://github.com/DistributedSystemsGroup/zoe/issues>`_.
+Zoe is licensed under the terms of the Apache 2.0 license.

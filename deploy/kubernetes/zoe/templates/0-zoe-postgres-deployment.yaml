@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "postgres-fullname" . }}
+  labels:
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    component: "{{.Release.Name}}-{{.Values.Postgres.Component}}"
+spec:
+  ports:
+    - port: {{.Values.Postgres.ServicePort}}
+      targetPort: {{.Values.Postgres.ContainerPort}}
+  selector:
+    component: "{{.Release.Name}}-{{.Values.Postgres.Component}}"
+  type: "LoadBalancer"
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "postgres-fullname" . }}
+  labels:
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    component: "{{.Release.Name}}-{{.Values.Postgres.Component}}"
+spec:
+  replicas: {{default 1 .Values.Postgres.Replicas}}
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      component: "{{.Release.Name}}-{{.Values.Postgres.Component}}"
+  template:
+    metadata:
+      labels:
+        heritage: {{.Release.Service | quote }}
+        release: {{.Release.Name | quote }}
+        chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+        component: "{{.Release.Name}}-{{.Values.Postgres.Component}}"
+    spec:
+      containers:
+        - name: {{ template "postgres-fullname" . }}
+          image: "{{.Values.Postgres.Image}}:{{.Values.Postgres.ImageTag}}"
+          ports:
+            - containerPort: {{.Values.Postgres.ContainerPort}}
+          resources:
+            requests:
+              cpu: "{{.Values.Postgres.Cpu}}"
+              memory: "{{.Values.Postgres.Memory}}"
+          env:
+          - name: POSTGRES_USER
+            value: {{ default "postgres" .Values.Postgres.User | quote }}
+          - name: POSTGRES_PASSWORD
+            value: {{ default "postgres" .Values.Postgres.Password | quote }}
+          - name: POSTGRES_DB
+            value: {{ default "postgres" .Values.Postgres.Database | quote }}
