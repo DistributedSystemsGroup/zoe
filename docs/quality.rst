@@ -43,3 +43,17 @@ Zoe is composed of two main processes and depends on a number of external servic
 Instead we are working on a suite of integration tests that will run Zoe components against real, live instances of the services Zoe depends on.
 
 These tests will also be run before commits are pushed to the public repository.
+
+Zapp image vulnerability scan
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We use **clair**, a vulnerability static analyzer for Containers, from **CoreOS** to analyze Zoe docker image before using it.
+
+If the base image you are using to build Zoe has too many vulnerabilities, you could choose another images which have less vulnerabilities.
+
+The result after analyzing would be on the **console output** of the Jenkins job for Zoe. Insert the script below into the Zoe's Jenkins job to do the Clair analysis, all the necessary files could be found on ``ci/clair`` folder:
+
+::
+
+  export imageID=`docker image inspect <your-registry-address>/zoe:$BUILD_ID | grep "Id" | awk -F ' ' '{print $2}' | awk -F ',' '{print $1}' | awk -F '"' '{print $2}'`
+  docker exec clair_clair analyzer $imageID
