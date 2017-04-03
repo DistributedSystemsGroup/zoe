@@ -1,0 +1,11 @@
+{
+  "status": "terminated",
+  "description": "zapp_json_file",
+  "error_message": "null",
+  "time_start": 1481101311.959411,
+  "time_end": 1481299957.196575,
+  "id": 3,
+  "user_id": "test",
+  "name": "mongo",
+  "services": [3]
+}

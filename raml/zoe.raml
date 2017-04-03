@@ -1,0 +1,28 @@
+#%RAML 1.0
+title: Zoe
+version: 0.6
+baseUri: http://{zoe_url}/api/{version}
+
+mediaType: application/json
+
+documentation:
+  - !include modules/docs/intro.raml
+
+uses:
+  sec: modules/security.raml
+
+/info: !include modules/api/info.raml
+
+/login: !include modules/api/login.raml
+
+/userinfo: !include modules/api/userinfo.raml
+
+/oauth: !include modules/api/oauth2.raml
+
+/execution: !include modules/api/execution.raml
+
+/service: !include modules/api/service.raml
+
+/discovery: !include modules/api/discovery.raml
+
+/statistics: !include modules/api/statistics.raml

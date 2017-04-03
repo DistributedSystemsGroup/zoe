@@ -1,0 +1,104 @@
+displayName: OAuth2 Endpoint
+description: All the endpoints listed in this section require authentication.
+/token:
+  displayName: Request an access token
+  securedBy: [sec.basic, sec.cookie]
+  post:
+    description: Request an access token
+    queryParameters:
+      json_document:
+        description: |
+          Description:
+
+            * ``client_id`` and ``username`` could be the same   
+            * ``client_secret`` and ``password`` could be the same
+            * ``grant_type`` is type of grant, could be password or refresh. If ``grant_type`` is refresh, need to provide a ``refresh_token``   
+            * ``scope`` could be left at blank at the moment   
+        example: {
+          "client_id": "test",
+          "client_secret": "test",
+          "grant_type": "password",
+          "username": "test",
+          "password": "test",
+          "scope": ""
+        }
+        required: true
+        type: object
+    body:
+      application/json:
+        type: object
+        properties: {
+          client_id: {
+            type: string
+          },
+          client_secret: {
+            type: string
+          },
+          grant_type: {
+            type: string
+          },
+          username: {
+            type: string
+          },
+          password: {
+            type: string
+          },
+          scope: {
+            type: string
+          }
+        }
+    responses:
+      200:
+        description: |
+          Description:
+
+            * ``access_token`` is the token which is used for authentication and authorization   
+            * ``refresh_token`` is the token which is used to refresh an ``access_token`` when it expired   
+            * ``expires_in`` is time in second which the ``access_token`` would be expired   
+            * ``token_type`` is type of token   
+
+        body:
+          application/json:
+            type: object
+            properties: {
+              access_token: {
+                type: string
+              },
+              refresh_token: {
+                type: string
+              },
+              expires_in: {
+                type: integer
+              },
+              token_type: {
+                type: string
+              }
+            }
+            example: {
+             "access_token": "324e17af-9382-4709-a3a8-67b6afd55b9b",
+             "refresh_token": "fec2e515-5c71-4cda-a72d-3630c8929b42",
+             "expires_in": 3600,
+             "token_type": "Bearer"
+            }
+/revoke/{access_token}:
+  displayName: Revoke an access token
+  uriParameters:
+    access_token:
+      displayName: Access token
+      type: string
+  delete: 
+    description: Revoke an access token
+    securedBy: [sec.basic, sec.cookie]
+    responses:
+      200:
+        body:
+          application/json:
+            type: object
+            properties: {
+              res: {
+                type: string
+              }
+            }
+            example: {
+              "res" : "Revoked token"
+            }

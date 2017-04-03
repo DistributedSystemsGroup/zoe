@@ -1,0 +1,41 @@
+displayName: Discovery Endpoint
+description: This endpoint does not need authentication.
+/by_group/{execution_id}/{service_type}:
+  displayName: Returns a list of services that meet the criteria passed in the URL.
+  uriParameters:
+    execution_id:
+      displayName: Execution ID
+      type: integer
+    service_type:
+      displayName: Service type
+      type: string
+  get:
+    description: Returns a list of services that meet the criteria passed in the URL
+    responses:
+      200:
+        description: |
+          Description:
+
+          Returns a JSON document where:   
+          * ``service_type`` is the name of the service as passed in the URL   
+          * ``execution_id`` is the execution ID as passed in the URL   
+          * ``dns_names`` is the list of DNS names for each service instance currently active (only one in the example above)   
+        body:
+          application/json:
+            type: object
+            properties: {
+              service_type: {
+                type: string
+              },
+              execution_id: {
+                type: string
+              },
+              dns_names: {
+                type: array
+              }
+            }
+            example: {
+              "service_type" : "boinc-client",
+              "execution_id" : "23015",
+              "dns_names" : ["boinc-client0-23015-prod"]
+            }

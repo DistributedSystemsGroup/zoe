@@ -1,0 +1,20 @@
+#%RAML 1.0 DocumentationItem
+  title: Overview
+  content: |
+    Zoe can be used from the command line or the web interface. 
+
+    For more complex tasks also an API is provided, so that Zoe functionality can be accesses programmatically.
+    
+    The API is provided by the zoe-api processes, on the same port of the web interface (5001 by default).
+    
+    Every URL of the API contains, after the hostname and port, the path ``/api/<api version>/``. This document describes API version 0.6.
+    
+    In case the request causes an error, an appropriate HTTP status code is returned. The reply will also contain a JSON document in this format: ``{"message": "missing or wrong authentication information"}``
+    
+    With an error message detailing the kind of error that happened.
+    
+    Some endpoints require credentials for authentication.
+    
+    For now the API uses straightforward HTTP Basic authentication.
+    
+    In case credentials are missing or wrong a 401 status code will be returned.

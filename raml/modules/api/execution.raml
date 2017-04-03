@@ -1,0 +1,115 @@
+displayName: Execution Endpoint
+description: All the endpoints listed in this section require authentication.
+get:
+  description: Get list of execution
+  securedBy: [sec.oauth_2_0, sec.basic, sec.cookie]
+  responses:
+    200:
+      body:
+        application/json:
+          example: !include samples/executions.sample
+post:
+  description: Start an execution
+  securedBy: [sec.oauth_2_0, sec.basic, sec.cookie]
+  queryParameters:
+    json_document:
+      description: |
+        Needs a JSON document passed as the request body, where:   
+        * ``application`` is the full ZApp JSON document, the application description   
+        * ``name`` is the name of the execution provided by the user   
+      example: {
+        "application": "zapp_json",
+        "name": "experiment #33"
+      }
+      required: true
+      type: object
+  body:
+    application/json:
+      type: object
+  responses:
+    200:
+      body:
+        application/json:
+          type: object
+          properties: {
+            execution_id: {
+              type: integer
+            }
+          }
+          example: {
+            "execution_id": 23441
+          }
+/delete/{execution_id}:
+  displayName: Terminate a specified execution
+  securedBy: [sec.oauth_2_0, sec.basic, sec.cookie]
+  uriParameters:
+    execution_id:
+      displayName: Execution ID
+      type: integer
+  delete:
+    description: Terminate an execution
+    responses:
+      200:
+/{execution_id}:
+  displayName: Operate action on specified execution
+  securedBy: [sec.oauth_2_0, sec.basic, sec.cookie]
+  uriParameters:
+    execution_id:
+      displayName: Execution ID
+      type: integer
+  get:
+    description: Get info of an execution
+    responses:
+      200:
+        description: |
+          Description:
+
+          Returns a JSON document where:  
+          * ``status`` is the execution status. It can be on of "submitted", "scheduled", "starting", "error", "running", "cleaning up", "terminated"   
+          * ``description`` is the full ZApp description as submitted by the user   
+          * ``error_message`` contains the error message in case ``status`` is equal to error   
+          * ``time_submit`` is the time the execution was submitted to Zoe   
+          * ``time_start`` is the time the execution started, after it was queued in the scheduler   
+          * ``time_end`` is the time the execution finished or was terminated by the user   
+          * ``id`` is the ID of the execution   
+          * ``user_id`` is the identifier of the user who submitted the ZApp for execution   
+          * ``name`` is the name of the execution   
+          * ``services`` is a list of service IDs that can be used to inspect single services   
+
+        body:
+          application/json:
+            type: object
+            properties: {
+              status: {
+                type: string
+              },
+              description: {
+                type: string
+              },
+              error_message: {
+                type: string
+              },
+              time_start: {
+                type: number
+              },
+              time_end: {
+                type: number
+              },
+              id: {
+                type: integer
+              },
+              user_id: {
+                type: string
+              },
+              name: {
+                type: string
+              },
+              services: {
+                type: array
+              }
+            }
+            example: !include samples/execution.sample
+  delete:
+    description: Delete an execution
+    responses:
+      200:

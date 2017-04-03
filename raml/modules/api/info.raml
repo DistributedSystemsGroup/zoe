@@ -1,0 +1,39 @@
+displayName: Info Endpoint
+get:
+  description: This endpoint does not need authentication. It returns general, static, information about the Zoe software.
+  responses:
+    200:
+      description: |
+        Description  
+
+        Value returns JSON document where:    
+        * ``version`` is the Zoe version  
+        * ``deployment_name`` is the name configured for this deployment (multiple Zoe deployment can share the same cluster)  
+        * ``application_format_version`` is the version of ZApp format this Zoe is able to understand  
+        * ``api_version`` is the API version supported by this Zoe and should match the one used in the request URL
+      
+      body:
+        application/json:
+          type: object
+          properties: {
+            version: {
+              type: string
+            },
+            deployment_name: {
+              type: string
+            },
+            application_format_version: {
+              type: number
+            },
+            api_version: {
+              type: string
+            }
+          }
+          example:
+            {
+              "version" : "0.10.1-beta",
+              "deployment_name" : "prod",
+              "application_format_version" : 2,
+              "api_version" : "0.6"
+            }
+

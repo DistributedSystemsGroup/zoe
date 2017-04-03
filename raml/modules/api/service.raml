@@ -1,0 +1,78 @@
+displayName: Service Endpoint
+description: All the endpoints listed in this section require authentication.
+/logs/{service_id}:
+  displayName: Service standard output and error
+  securedBy: [sec.oauth_2_0, sec.basic, sec.cookie]
+  uriParameters:
+    service_id:
+      displayName: Execution ID
+      type: integer
+  get:
+    description: Get standard output and error of a service
+    responses:
+      200:
+/{service_id}:
+  displayName: Get info of a service
+  uriParameters:
+    service_id:
+      displayName: Service ID
+      type: integer
+  get:
+    description: Get info of a service
+    securedBy: [sec.oauth_2_0, sec.basic, sec.cookie]
+    responses:
+      200:
+        description: |
+          Description
+
+          Returns JSON document where: 
+            * ``status`` is the service status from Zoe point of view. It can be one of "terminating", "inactive", "active" or "starting"   
+            * ``service_group`` is the name for the service provided in the ZApp description. When the ZApp is unpacked to create the actual containers a single service definition will spawn one or more services with this name in common  
+            * ``docker_status`` is the container status from the point of view of Docker. Zoe tries her best to keep this value in sync, but the value here can be out of sync by several minutes. It can be one of 'undefined', 'created', 'started', 'dead' or 'destroyed'  
+            * ``ip_address`` is the IP address of the container  
+            * ``proxy_address`` is the accessible address after proxifying
+            * ``execution_id`` is the execution ID this service belongs to  
+            * ``name`` is the name for this service instance, generated from ``service_group``  
+            * ``docker_id`` is the Docker ID string  
+            * ``error_message`` is currently unused  
+            * ``id`` is the ID of this service, should match the one given in the URL  
+            * ``description`` is the service description extracted from the ZApp   
+        body:
+          application/json:
+            type: object
+            properties: {  
+              status: {
+                type: string
+              },
+              execution_id: {
+                type: number
+              },
+              proxy_address: {
+                type: string
+              },
+              description: {
+                type: string
+              },
+              ip_address: {
+                type: string
+              },
+              service_group: {
+                type: string
+              },
+              docker_id: {
+                type: string
+              },
+              docker_status: {
+                type: string
+              },
+              id: {
+                type: integer
+              },
+              error_message: {
+                type: string
+              },
+              name: {
+                type: string
+              }
+            }
+            example: !include samples/service.sample
