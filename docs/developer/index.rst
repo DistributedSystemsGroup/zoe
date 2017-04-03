@@ -69,6 +69,6 @@ Internal module/class/method documentation
   stats
   jenkins-ci
   gitlab-ci
-  integration-test
+  integration_test
 
 :ref:`modindex`

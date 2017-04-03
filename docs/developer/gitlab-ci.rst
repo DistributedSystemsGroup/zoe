@@ -1,4 +1,4 @@
-.. _gitlab-ci:
+.. _ci-gitlab:
 
 Zoe Continuous Integration with Gitlab pipelines
 ================================================

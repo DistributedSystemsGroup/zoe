@@ -14,8 +14,8 @@ The CI pipeline in detail
 
 Different contributors use different software for managing the CI pipeline.
 
-* :ref:`ci_jenkins`
-* :ref:`ci_gitlab`
+* :ref:`ci-jenkins`
+* :ref:`ci-gitlab`
 
 SonarQube
 ^^^^^^^^^

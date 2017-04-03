@@ -181,11 +181,11 @@ Appendix
 
       - Email Notification Configuration
 
-      .. image:: 3.email.config.png
+      .. image:: imgs/3.email.config.png
 
     - Create Github credentials
 
-      .. image:: 4.github.credential.png
+      .. image:: imgs/4.github.credential.png
 
     - Create Freestyle project
 
