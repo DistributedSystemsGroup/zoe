@@ -3,9 +3,11 @@ import json
 import time
 import unittest
 
+from test_config import ZOE_API_URI, ZOE_AUTH
+
 class ZoeRestTestSuccess(unittest.TestCase):
 
-    uri = 'http://localhost:5001/api/0.7/'
+    uri = ZOE_API_URI
     id = '-1'
     s = None
 

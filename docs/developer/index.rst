@@ -67,5 +67,7 @@ Internal module/class/method documentation
   scheduler
   backend
   stats
+  kube-backend
+  ci
 
 :ref:`modindex`
