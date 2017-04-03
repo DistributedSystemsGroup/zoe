@@ -21,12 +21,11 @@
       ],
       "scripts": [
         "../node_modules/core-js/client/shim.min.js",
-        "../node_modules/zone.js/dist/zone.js",
         "../node_modules/reflect-metadata/Reflect.js",
         "../node_modules/systemjs/dist/system.src.js"
       ],
+      "environmentSource": "environments/environment.ts",
       "environments": {
-        "source": "environments/environment.ts",
         "dev": "environments/environment.ts",
         "prod": "environments/environment.prod.ts"
       }
