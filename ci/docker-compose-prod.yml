@@ -25,5 +25,5 @@ services:
       driver: "gelf"
       options:
         gelf-address: "udp://192.168.12.2:5004"
-        tag: "zoe-api"      
+        tag: "zoe-api"
 

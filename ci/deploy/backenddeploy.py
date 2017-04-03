@@ -189,4 +189,3 @@ class ZoeBackendDeploy():
 
     def fallback(self, image):
         return
-

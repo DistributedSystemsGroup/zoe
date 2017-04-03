@@ -34,7 +34,7 @@ class ExecutionAPI(RequestHandler):
         """Set up the headers for enabling CORS."""
         manage_cors_headers(self)
 
-    def options(self, execution_id): # pylint: disable=unused-argument
+    def options(self, execution_id):  # pylint: disable=unused-argument
         """Needed for CORS."""
         self.set_status(204)
         self.finish()
@@ -75,6 +75,16 @@ class ExecutionDeleteAPI(RequestHandler):
         """Initializes the request handler."""
         self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
+    def set_default_headers(self):
+        """Set up the headers for enabling CORS."""
+        manage_cors_headers(self)
+
+    @catch_exceptions
+    def options(self, execution_id):  # pylint: disable=unused-argument
+        """Needed for CORS."""
+        self.set_status(204)
+        self.finish()
+
     @catch_exceptions
     def delete(self, execution_id: int):
         """
@@ -101,6 +111,16 @@ class ExecutionCollectionAPI(RequestHandler):
     def initialize(self, **kwargs):
         """Initializes the request handler."""
         self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
+
+    def set_default_headers(self):
+        """Set up the headers for enabling CORS."""
+        manage_cors_headers(self)
+
+    @catch_exceptions
+    def options(self):  # pylint: disable=unused-argument
+        """Needed for CORS."""
+        self.set_status(204)
+        self.finish()
 
     @catch_exceptions
     def get(self):

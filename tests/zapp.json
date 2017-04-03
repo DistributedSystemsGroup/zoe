@@ -1,22 +1,22 @@
 {
-    "name": "tensorflow", 
+    "name": "nginx", 
     "priority": 512, 
     "requires_binary": true, 
     "services": [
         {
-            "docker_image": "gcr.io/tensorflow/tensorflow", 
+            "docker_image": "nginx:alpine", 
             "environment": [],
             "essential_count": 1, 
             "monitor": true, 
-            "name": "tensorflow",
+            "name": "nginx",
             "networks": [],
             "ports": [
                 {
                     "expose": false,
                     "is_main_endpoint": true, 
-                    "name": "Jupyter Notebook interface", 
+                    "name": "Nginx Webserver",
                     "path": "/", 
-                    "port_number": 8888, 
+                    "port_number": 80, 
                     "protocol": "http"
                 }
             ], 

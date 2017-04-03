@@ -49,10 +49,10 @@ Main documentation
   :maxdepth: 1
 
   install
+  zoe_fe
   kube_backend
   config_file
   logging
-  proxy
   monitoring
   proxy
 

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: zoe-postgres-service
+  namespace: fsdna
+  labels:
+    app: zoe-postgres
+    task: test
+spec:
+  type: LoadBalancer
+  ports:
+  - name: postgresql
+    port: 5432
+    targetPort: 5432
+  selector:
+    app: zoe-postgres
+    task: test

@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: zoe-postgres-fsdna
+  namespace: fsdna
+  labels:
+    app: zoe-postgres
+    task: test
+spec:
+  replicas: 1
+  selector:
+    app: zoe-postgres
+    task: test
+  template:
+    metadata:
+      labels:
+        app: zoe-postgres
+        task: test
+    spec:
+      containers:
+      - name: zoe-postgres-fsdna
+        image: postgres
+        ports:
+          - containerPort: 5432
+            name: postgresql
+        env:
+          - name: "POSTGRES_USER"
+            value: "postgres"
+          - name: "POSTGRES_PASSWORD"
+            value: "postgres"
+          - name: "POSTGRES_DB"
+            value: "postgres"

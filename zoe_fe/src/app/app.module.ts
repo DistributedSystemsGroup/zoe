@@ -30,7 +30,7 @@ class CORSRequestOptions extends BaseRequestOptions {
   withCredentials: boolean = true;
 }
 
-let providers = [
+let providers: any[] = [
   ApiService,
   StorageService,
   ZoeRoutingProviders
