@@ -18,7 +18,7 @@ How it works
 1. Zoe configuration file:
 
  * ``--backend``: put Kubernetes instead of Docker Swarm
- * ``--kube-config-file``: the configuration file of kubernetes cluster
+ * ``--kube-config-file``: the configuration file of Kubernetes cluster
 
 2. Zoe:
 

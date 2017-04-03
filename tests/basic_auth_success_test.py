@@ -3,10 +3,12 @@ import json
 import time
 import unittest
 
+from test_config import ZOE_API_URI, ZOE_AUTH
+
 class ZoeRestTestSuccess(unittest.TestCase):
 
-    uri = 'http://192.168.12.2:5100/api/0.7/'
-    auth = ('admin', 'admin')
+    uri = ZOE_API_URI
+    auth = ZOE_AUTH
     id = ''
 
     def tearDown(self):
@@ -54,7 +56,7 @@ class ZoeRestTestSuccess(unittest.TestCase):
         
         data = []
 
-        with open('tf.json', encoding='utf-8') as data_file:
+        with open('zapp.json', encoding='utf-8') as data_file:
             data = json.loads(data_file.read())
         
         r = requests.post(self.__class__.uri + 'execution', auth=self.__class__.auth, json={"application": data, "name": "requests"})

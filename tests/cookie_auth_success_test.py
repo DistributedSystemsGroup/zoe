@@ -3,9 +3,11 @@ import json
 import time
 import unittest
 
+from test_config import ZOE_API_URI, ZOE_AUTH
+
 class ZoeRestTestSuccess(unittest.TestCase):
 
-    uri = 'http://192.168.12.2:5100/api/0.7/'
+    uri = ZOE_API_URI
     id = ''
     s = None
 
@@ -15,7 +17,7 @@ class ZoeRestTestSuccess(unittest.TestCase):
     def test_0_login(self):
         print('Test login api endpoint')
         s = requests.Session()
-        r = s.get(self.__class__.uri + 'login', auth=('admin','admin'))
+        r = s.get(self.__class__.uri + 'login', ZOE_AUTH)
 
         self.assertEqual(r.status_code, 200)
 
@@ -79,7 +81,7 @@ class ZoeRestTestSuccess(unittest.TestCase):
         
         data = []
 
-        with open('tf.json', encoding='utf-8') as data_file:
+        with open('zapp.json', encoding='utf-8') as data_file:
             data = json.loads(data_file.read())
         
         s = self.__class__.s

@@ -1,0 +1,17 @@
+---
+#Deploy a minimal Zoe on a fresh Linux machine
+
+- hosts: zoe
+  become: True
+  roles:
+  - role: docker
+
+- hosts: zoe
+  become: True
+  roles:
+  - role: swarm
+
+- hosts: zoe
+  become: True
+  roles:
+  - role: zoe
