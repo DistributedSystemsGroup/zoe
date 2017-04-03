@@ -1,0 +1,27 @@
+version: '2'
+services:
+  postgres:
+	image: postgres
+	environment:
+  	- POSTGRES_USER=postgres
+  	- POSTGRES_DB=postgres
+  	- POSTGRES_PASSWORD=postgres
+  zoe-api:
+    restart: always
+	image: zoerepo/zoe:devel
+	command: python3 zoe-api.py --debug --swarm 192.168.99.100:4000 --deployment-name compose --master-url tcp://zoe-master:4850 --dbuser postgres --dbhost postgres --dbname postgres --dbpass postgres --overlay-network-name my-net
+	ports:
+  	- "8080:5001"
+	depends_on:
+  	- postgres
+  zoe-master:
+    restart: always
+	image: zoerepo/zoe:devel
+	ports:
+  	- "4850:4850"
+	volumes:
+  	- /etc/zoe:/etc/zoe
+  	- /opt/zoe-workspaces:/mnt/zoe-workspaces
+	command: python3 zoe-master.py --debug --swarm 192.168.99.100:4000 --deployment-name compose --dbuser postgres --dbhost postgres --dbname postgres --dbpass postgres --overlay-network-name my-net
+	depends_on:
+  	 zoe-api
