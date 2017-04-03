@@ -78,7 +78,7 @@ images:
     - docker build --pull -t ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE} .
     - docker push ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE}
   only:
-    - master
+    - /^.*master$/
 
 docs:
   stage: deploy
@@ -96,7 +96,7 @@ docs:
   environment:
     name: staging
   only:
-    - master
+    - /^.*master$/
 
 frontend:
   stage: deploy
@@ -123,4 +123,4 @@ frontend:
   environment:
     name: staging
   only:
-    - master
+    - /^.*master$/
