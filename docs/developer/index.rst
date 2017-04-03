@@ -15,5 +15,5 @@ Developer documentation
   master-api
   scheduler
   backend
-  kube-backend
   stats
+  kube-backend
