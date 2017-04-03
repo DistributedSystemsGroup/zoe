@@ -69,5 +69,6 @@ Internal module/class/method documentation
   stats
   kube-backend
   ci
+  integration-test
 
 :ref:`modindex`
