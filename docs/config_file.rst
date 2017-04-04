@@ -50,12 +50,14 @@ API options:
 
 Scheduler options:
 
-* ``scheduler-class = <**ZoeSimpleScheduler** | ZoeElasticScheduler>`` : Scheduler class to use for scheduling ZApps
-* ``scheduler-policy = <**FIFO** | SIZE>`` : Scheduler policy to use for scheduling ZApps
+* ``scheduler-class = <ZoeSimpleScheduler | ZoeElasticScheduler>`` : Scheduler class to use for scheduling ZApps (default: simple scheduler)
+* ``scheduler-policy = <FIFO | SIZE>`` : Scheduler policy to use for scheduling ZApps (default: FIFO)
+
+Default options for the scheduler enable the traditional Zoe scheduler that was already available in the previous releases.
 
 Backend choice:
 
-* ``backend = <OldSwarm|Kubernetes>`` : type of cluster that zoe-master works with
+* ``backend = <Swarm|Kubernetes>`` : cluster back-end to use to run ZApps
 
 Swarm backend options:
 
