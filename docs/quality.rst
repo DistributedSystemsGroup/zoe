@@ -52,3 +52,8 @@ The result after analyzing would be on the **console output** of the Jenkins job
   export imageID=`docker image inspect <your-registry-address>/zoe:$BUILD_ID | grep "Id" | awk -F ' ' '{print $2}' | awk -F ',' '{print $1}' | awk -F '"' '{print $2}'`
   docker exec clair_clair analyzer $imageID
 
+
+RAML API description
+--------------------
+
+Under the directory ``contrib/raml`` there is the `RAML <http://raml.org/>`_ description of the Zoe API.
