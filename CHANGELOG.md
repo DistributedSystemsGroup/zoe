@@ -1,5 +1,15 @@
 # Zoe Changelog
 
+## Version 2017.03
+
+* Major documentation update
+* Deployment scripts to install Zoe on Linux (Kubernetes or Swarm back-ends) or Windows
+* Kubernetes back-end
+* Updated Swarm backend, uses the new Docker Python API
+* Zoe code now goes through an automated testing pipeline
+* Added unit and integration tests
+* Preview of the new AngularJS front-end
+
 ## Version 0.10.1
 
 * Service discovery API endpoint: simple, read-only, unauthenticated access to a list of DNS names of services. Needed for frameworks that need a list of hosts for configuration, can be used by scripts in the images.
