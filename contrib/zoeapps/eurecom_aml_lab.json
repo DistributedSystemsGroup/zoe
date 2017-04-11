@@ -34,7 +34,7 @@
                 }
             ],
             "required_resources": {
-                "memory": -1
+                "memory": 2147483648
             },
             "startup_order": 0,
             "total_count": 1
@@ -48,7 +48,7 @@
                 ],
                 [
                     "SPARK_WORKER_RAM",
-                    "11273240064"
+                    "8589934592"
                 ],
                 [
                     "SPARK_MASTER_IP",
@@ -81,7 +81,7 @@
                 }
             ],
             "required_resources": {
-                "memory": -1
+                "memory": 10737418240
             },
             "startup_order": 1,
             "total_count": 2
@@ -95,11 +95,11 @@
                 ],
                 [
                     "SPARK_EXECUTOR_RAM",
-                    "11273240064"
+                    "8589934592"
                 ],
                 [
                     "SPARK_DRIVER_RAM",
-                    "4294967296"
+                    "7516192768"
                 ],
                 [
                     "HADOOP_USER_NAME",
@@ -140,7 +140,7 @@
                 }
             ],
             "required_resources": {
-                "memory": -1
+                "memory": 8589934592
             },
             "startup_order": 0,
             "total_count": 1
@@ -149,3 +149,4 @@
     "version": 2,
     "will_end": false
 }
+
