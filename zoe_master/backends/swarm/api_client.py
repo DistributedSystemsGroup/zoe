@@ -186,7 +186,7 @@ class SwarmClient:
         for volume in service_instance.volumes:
             if volume.type != "host_directory":
                 log.error('Swarm backend does not support volume type {}'.format(volume.type))
-            volumes[volume.path] = {'bind': volume.mount_point, 'mode': ("ro" if volume.readonly else "rw")}
+            volumes[volume.path] = {'bind': volume.mount_point, 'mode': "ro" if volume.readonly else "rw"}
 
         try:
             cont = self.cli.containers.run(image=service_instance.image_name,
