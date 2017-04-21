@@ -1,4 +1,4 @@
-# Copyright (c) 2016, Daniele Venzano
+# Copyright (c) 2017, Daniele Venzano
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +15,6 @@
 
 """Versions."""
 
-ZOE_VERSION = '2017.03'
+ZOE_VERSION = '2017.06-beta'
 ZOE_API_VERSION = '0.7'
 ZOE_APPLICATION_FORMAT_VERSION = 2
