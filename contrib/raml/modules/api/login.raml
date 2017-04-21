@@ -1,0 +1,29 @@
+displayName: Login Endpoint
+get:
+  description: This endpoint needs authentication. It returns a cookie, userID and user role after a successfully login.
+  securedBy: [sec.oauth_2_0, sec.basic]
+  responses:
+    200: 
+      description: |
+        Description:
+
+        Returns a JSON document where:   
+        * ``uid`` is the userID   
+        * ``role`` is the user role   
+      body:
+        application/json: 
+          type: object
+          "properties": {
+            "uid": {
+              "type": "string"
+            },
+            "role": {
+              "type": "string"
+            }
+          }
+          example: 
+            {
+              "uid" : "admin",
+              "role" : "admin"
+            }
+

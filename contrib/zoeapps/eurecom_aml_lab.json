@@ -140,7 +140,7 @@
                 }
             ],
             "required_resources": {
-                "memory": 12884901888
+                "memory": 4294967296
             },
             "startup_order": 0,
             "total_count": 1

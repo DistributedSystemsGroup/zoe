@@ -41,3 +41,8 @@ class ZoeStartExecutionFatalException(ZoeException):
 class UnsupportedSchedulerPolicyError(ZoeException):
     """The configuration asks for a combination of scheduler and policy that is unsupported."""
     pass
+
+
+class ZoeNotEnoughResourcesException(ZoeException):
+    """Service failed to start due to not enough available resources."""
+    pass

@@ -22,8 +22,8 @@ import zoe_master.backends.common
 
 class ServiceInstance:
     """The ServiceInstance class, a Service that is going to be instantiated into a container."""
-    def __init__(self, execution: Execution, service: Service):
-        self.name = service.name
+    def __init__(self, execution: Execution, service: Service, env_subst_dict):
+        self.name = service.unique_name
         self.hostname = service.dns_name
 
         self.memory_limit = service.resource_reservation.memory
@@ -44,13 +44,13 @@ class ServiceInstance:
             self.labels['zoe_monitor'] = 'false'
 
         self.labels = zoe_master.backends.common.gen_labels(service, execution)
-        self.environment = service.environment + zoe_master.backends.common.gen_environment(service, execution)
+        self.environment = service.environment + zoe_master.backends.common.gen_environment(execution, service, env_subst_dict)
         self.volumes = service.volumes + zoe_master.backends.common.gen_volumes(service, execution)
-
-        self.entrypoint = '/zoe.sh'
 
         self.command = service.command
 
         self.image_name = service.image_name
 
         self.ports = service.ports
+
+        self.replicas_count = service.replicas

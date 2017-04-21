@@ -1,0 +1,34 @@
+#%RAML 1.0 Library
+
+securitySchemes:
+  oauth_2_0:
+    description: |
+      OAuth 2.0 for authenticating all API requests.
+    type: x-oauth2
+    describedBy:
+      headers:
+        Authorization:
+          description: Used to send a valid OAuth 2 access token, it needs to contain "Bearer" and followed by the access token.
+          type: string
+          required: true
+          example: "Authorization: Bearer 378f8d5f-2eb5-4181-b632-ad23c4534d32"
+      responses:
+        400:
+          description: Bad request
+        401:
+          description: Unthorized
+        403:
+          description: Forbidden
+  basic:
+    description: "Basic authentication using username and password"
+    type: Basic Authentication
+  cookie:
+    description: "Authentication using cookie"
+    type: x-cookie
+    describedBy:
+      headers:
+        Cookie:
+          description: Used to hold the cookie content from file or string
+          type: string
+          required: true
+          example: "Cookie: zoe='2|1:0|10:1484124193|3:zoe|16:dGVzdC5hZG1pbg==|4c3950f43cfb39573a7f9713aa051b9e6d8c5f238aa619647a929e92f7d1ea09'" 

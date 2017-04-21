@@ -91,7 +91,7 @@ def exec_start_cmd(args):
             if old_status != current_status:
                 print('Execution is now {}'.format(current_status))
                 old_status = current_status
-            if current_status == 'terminated':
+            if current_status == 'running':
                 break
             time.sleep(1)
 
@@ -126,10 +126,10 @@ def exec_get_cmd(args):
             service = cont_api.get(c_id)
             print('Service {} (ID: {})'.format(service['name'], service['id']))
             print(' - zoe status: {}'.format(service['status']))
-            print(' - backend status: {}'.format(service['docker_status']))
+            print(' - backend status: {}'.format(service['backend_status']))
             if service['error_message'] is not None:
                 print(' - error: {}'.format(service['error_message']))
-            if service['docker_status'] == 'started':
+            if service['backend_status'] == 'started':
                 ip = service['ip_address']
                 for port in service['description']['ports']:
                     print(' - {}: {}://{}:{}{}'.format(port['name'], port['protocol'], ip, port['port_number'], port['path']))
@@ -175,7 +175,7 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     argparser_app_validate.set_defaults(func=app_validate_cmd)
 
     argparser_exec_start = subparser.add_parser('start', help="Start an application")
-    argparser_exec_start.add_argument('-s', '--synchronous', action='store_true', help="Do not detach, wait for execution to finish")
+    argparser_exec_start.add_argument('-s', '--synchronous', action='store_true', help="Do not detach immediately, wait for execution to start before exiting")
     argparser_exec_start.add_argument('name', help="Name of the execution")
     argparser_exec_start.add_argument('jsonfile', type=FileType("r"), help='Application description')
     argparser_exec_start.set_defaults(func=exec_start_cmd)

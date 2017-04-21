@@ -1,0 +1,78 @@
+.navbar .navbar-header .navbar-brand {
+    font-size: 18pt;
+    font-family: 'Chicle', cursive;
+    letter-spacing: 2px;
+}
+
+.container.body {
+    margin-top: 70px;
+}
+
+div.spinner-block {
+    margin-top: 20px;
+    display: block;
+    width: 160px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+div.spinner-title {
+    width: 160px;
+    text-align: center;
+}
+
+i.spinner-icon {
+    display: inline-block;
+    margin-top: 5px;
+    width: 160px;
+    height: 20px;
+    background-image: url("../img/spinner.gif");
+}
+
+div.service-list dl:not(:last-child) {
+    border-bottom: 1px dashed #eee;
+    padding-bottom: 20px;
+}
+
+#executions-list-table {
+    margin-top: 30px;
+}
+
+a:hover,
+a:visited,
+a:link,
+a:active  {
+    text-decoration: none;
+}
+
+form#execution-new {
+    margin-top: 50px;
+}
+
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+
+p.bg-primary,
+p.bg-success,
+p.bg-info,
+p.bg-warning,
+p.bg-danger {
+    padding: 15px;
+}

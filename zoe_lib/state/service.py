@@ -55,6 +55,10 @@ class ExposedPort:
         self.number = data['port_number']
         self.expose = data['expose'] if 'expose' in data else False
 
+    def is_expose(self):
+        """ return expose """
+        return self.expose
+
 
 class Service:
     """A Zoe Service."""
@@ -108,6 +112,11 @@ class Service:
             self.volumes = [VolumeDescription(v) for v in self.description['volumes']]
         self.ports = [ExposedPort(p) for p in self.description['ports']]
 
+        if 'replicas' in self.description:
+            self.replicas = self.description['replicas']
+        else:
+            self.replicas = 1
+
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""
         return {
@@ -121,7 +130,8 @@ class Service:
             'backend_id': self.backend_id,
             'ip_address': self.ip_address,
             'backend_status': self.backend_status,
-            'essential': self.essential
+            'essential': self.essential,
+            'proxy_address': self.proxy_address
         }
 
     def __eq__(self, other):
@@ -174,6 +184,20 @@ class Service:
         return execution.user_id
 
     @property
+    def proxy_address(self):
+        """Get proxy address path"""
+        for port in self.ports:
+            if port.is_expose():
+                proxy_addr = get_conf().proxy_path + "/" + self.user_id + "/" + str(self.execution_id) + "/" + self.name
+            else:
+                proxy_addr = None
+        return proxy_addr
+
     def is_dead(self):
         """Returns True if this service is not running."""
         return self.backend_status == self.BACKEND_DESTROY_STATUS or self.backend_status == self.BACKEND_OOM_STATUS or self.backend_status == self.BACKEND_DIE_STATUS
+
+    @property
+    def unique_name(self):
+        """Returns a name for this service that is unique across multiple Zoe instances running on the same backend."""
+        return self.name + '-' + str(self.execution_id) + '-' + get_conf().deployment_name

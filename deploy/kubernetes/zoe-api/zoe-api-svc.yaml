@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: zoe-api-service
+  namespace: fsdna
+  labels:
+    app: zoe-api
+    task: test
+spec:
+  type: LoadBalancer
+  ports:
+  - name: zoe-api
+    port: 5001
+    targetPort: zoe-api
+  selector:
+    app: zoe-api
+    task: test

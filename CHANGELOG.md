@@ -1,16 +1,14 @@
 # Zoe Changelog
 
-## Version 0.11.0
+## Version 2017.03
 
-* Add Jenkinsfile with test pipeline
-* Update moment.js third-party library
-* Docker TLS support
-* Add CORS headers to the Rest API
-* Add a login endpoint with cookie-based request authentication
-* Add LDAP SASL authentication
-* Backend abstraction and support for new Python Docker library (>2.0))
-* New elastic scheduler 
-* Zoe API version is now 0.7
+* Major documentation update
+* Deployment scripts to install Zoe on Linux (Kubernetes or Swarm back-ends) or Windows
+* Kubernetes back-end
+* Updated Swarm backend, uses the new Docker Python API
+* Zoe code now goes through an automated testing pipeline
+* Added unit and integration tests
+* Preview of the new AngularJS front-end
 
 ## Version 0.10.2
 

@@ -1,0 +1,17 @@
+version: '2'
+services:
+  zoe-api-test:
+    image: 192.168.12.2:5000/zoe:wi9
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: python3 zoe-api.py --debug --backend-swarm-url consul://192.168.12.2 --deployment-name test --dbuser postgres --dbhost 192.168.12.2 --dbport 4321 --dbname postgres --dbpass postgres --overlay-network-name my-net --master-url tcp://zoe-master-test:4850 --auth-type text --proxy-type none --listen-port 5100
+    ports:
+      - "5100:5100"
+  zoe-master-test:
+    image: 192.168.12.2:5000/zoe:wi9
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /mnt/zoe-workspaces:/mnt/zoe-workspaces
+    command: python3 zoe-master.py --debug --backend-swarm-url consul://192.168.12.2 --deployment-name test --dbuser postgres --dbhost 192.168.12.2 --dbport 4321 --dbname postgres --dbpass postgres --overlay-network-name my-net --auth-type text --proxy-type none --listen-port 5100
+    depends_on:
+      - zoe-api-test

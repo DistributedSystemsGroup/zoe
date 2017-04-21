@@ -67,17 +67,21 @@ def app_validate(data):
     if 'services' not in data:
         raise InvalidApplicationDescription(msg='the application should contain a list of services')
 
-    for service in data['services']:
+    _validate_all_services(data['services'])
+
+def _validate_all_services(data):
+    print(data)
+    for service in data:
+        print(service)
         _service_check(service)
 
     found_monitor = False
-    for service in data['services']:
+    for service in data:
         if service['monitor']:
             found_monitor = True
             break
     if not found_monitor:
         raise InvalidApplicationDescription(msg="at least one process should have monitor set to True")
-
 
 def _service_check(data):
     """Check the service description schema."""
@@ -124,10 +128,11 @@ def _service_check(data):
         int(data['required_resources']['memory'])
     except ValueError:
         raise InvalidApplicationDescription(msg="required_resources -> memory field should be an int")
+
     try:
-        int(data['required_resources']['cores'])
+        float(data['required_resources']['cores'])
     except ValueError:
-        raise InvalidApplicationDescription(msg="required_resources -> cores field should be an int")
+        raise InvalidApplicationDescription(msg="required_resources -> cores field should be a float")
 
     if 'environment' in data:
         if not hasattr(data['environment'], '__iter__'):
@@ -149,8 +154,12 @@ def _service_check(data):
             if not isinstance(volume[2], bool):
                 raise InvalidApplicationDescription(msg='readonly volume item (third) must be a boolean: {}'.format(volume[2]))
 
-    if 'constraints' in data and not hasattr(data['constraints'], '__iter__'):
-        raise InvalidApplicationDescription(msg='constraints should be an iterable')
+    if 'replicas' not in data:
+        data['replicas'] = 1
+    try:
+        int(data['replicas'])
+    except ValueError:
+        raise InvalidApplicationDescription(msg="replicas field should be an int")
 
 
 def _port_check(data):

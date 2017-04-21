@@ -62,82 +62,82 @@ span.fakelink {
 }
 
 #wrapper {
-    width: 800px;
+	width: 800px;
 }
 
 #navigation {
-    background-color: #fff;
-    border: #ddd 1px solid;
-    border-radius: 10px;
-    margin: 10px;
-    padding: 10px;
+	background-color: #fff;
+	border: #ddd 1px solid;
+	border-radius: 10px;
+	margin: 10px;
+	padding: 10px;
 }
 
 #navigation li {
-    margin: 2px 0;
+	margin: 2px 0;
 }
 
 label.error {
-    color: #ff0000;
-    margin-left: 10px;
-    position: relative;
+	color: #ff0000;
+	margin-left: 10px;
+	position: relative;
 }
 
 .wizard {
-    background-color: #fff;
-    border: #ddd 1px solid;
-    border-radius: 10px;
-    margin: 10px;
-    padding: 10px;
+	background-color: #fff;
+	border: #ddd 1px solid;
+	border-radius: 10px;
+	margin: 10px;
+	padding: 10px;
 }
 
 .wizard .wizard-header {
-    background-color: #f4f4f4;
-    border-bottom: #ddd 1px solid;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    padding: 5px 10px;
-    margin: 0 0 10px 0;
+	background-color: #f4f4f4;
+	border-bottom: #ddd 1px solid;
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+	padding: 5px 10px;
+	margin: 0 0 10px 0;
 }
 
 .wizard .wizard-step {
-    margin: 10px 0;
+	margin: 10px 0;
 }
 
 .wizard .wizard-step p {
-    padding: 5px;
+	padding: 5px;
 }
 
 .navigation {
-    border-top: #ddd 1px solid;
-    margin-top: 10px;
-    padding-top: 10px;
+	border-top: #ddd 1px solid;
+	margin-top: 10px;
+	padding-top: 10px;
 }
 
 .navigation ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
+	margin: 0;
+	padding: 0;
+	list-style: none;
 }
 
 .navigation li {
-    float: left;
-    margin-right: 10px;
+	float: left;
+	margin-right: 10px;
 }
 
 .clearfix:before, .clearfix:after {
-    content: "\0020";
-    display: block;
-    height: 0;
-    visibility: hidden;
+	content: "\0020";
+	display: block;
+	height: 0;
+	visibility: hidden;
 }
 
 .clearfix:after {
-    clear: both;
+	clear: both;
 }
 
 input {
-    margin-top: 5px;
+	margin-top: 5px;
 }
 
 section {

@@ -15,6 +15,7 @@
 
 """The Service API endpoint."""
 
+from concurrent.futures import ThreadPoolExecutor
 import logging
 
 from tornado.web import RequestHandler
@@ -23,6 +24,8 @@ from zoe_api.rest_api.utils import catch_exceptions, get_auth, manage_cors_heade
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 
 log = logging.getLogger(__name__)
+
+THREAD_POOL = ThreadPoolExecutor(20)
 
 
 class ServiceAPI(RequestHandler):
@@ -37,7 +40,7 @@ class ServiceAPI(RequestHandler):
         manage_cors_headers(self)
 
     @catch_exceptions
-    def options(self, service_id_):
+    def options(self, service_id): # pylint: disable=unused-argument
         """Needed for CORS."""
         self.set_status(204)
         self.finish()

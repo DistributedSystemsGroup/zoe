@@ -15,4 +15,3 @@ RUN echo 'admin,admin,admin' > /opt/zoe/zoepass.csv
 VOLUME /etc/zoe/
 
 RUN python3 ./zoe-api.py --write-config /etc/zoe/zoe.conf
-

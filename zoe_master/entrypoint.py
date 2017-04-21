@@ -36,9 +36,6 @@ LOG_FORMAT = '%(asctime)-15s %(levelname)s %(threadName)s->%(name)s: %(message)s
 
 
 def _check_configuration_sanity():
-    if not os.access(config.get_conf().logs_base_path, os.W_OK):
-        log.error('Logs directory {} is not writable'.format(config.get_conf().logs_base_path))
-        return 1
     if not os.path.exists(os.path.join(config.get_conf().workspace_base_path, config.get_conf().workspace_deployment_path)):
         log.error('Workspace base directory does not exist: {}'.format(os.path.join(config.get_conf().workspace_base_path, config.get_conf().workspace_deployment_path)))
         return 1
@@ -52,10 +49,13 @@ def main():
     """
     config.load_configuration()
     args = config.get_conf()
-    if args.debug:
-        logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
-    else:
-        logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
+    log_args = {
+        'level': logging.DEBUG if args.debug else logging.INFO,
+        'format': LOG_FORMAT
+    }
+    if args.log_file != "stderr":
+        log_args['filename'] = args.log_file
+    logging.basicConfig(**log_args)
 
     ret = _check_configuration_sanity()
     if ret != 0:
@@ -69,14 +69,14 @@ def main():
     log.info("Initializing DB manager")
     state = SQLManager(args)
 
-    log.info("Initializing scheduler")
-    scheduler = getattr(zoe_master.scheduler, config.get_conf().scheduler_class)(state, config.get_conf().scheduler_policy)
-
     try:
         zoe_master.backends.interface.initialize_backend(state)
     except ZoeException as e:
         log.error('Cannot initialize backend: {}'.format(e.message))
         return 1
+
+    log.info("Initializing scheduler")
+    scheduler = getattr(zoe_master.scheduler, config.get_conf().scheduler_class)(state, config.get_conf().scheduler_policy)
 
     restart_resubmit_scheduler(state, scheduler)
 

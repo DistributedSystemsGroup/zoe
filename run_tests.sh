@@ -2,6 +2,6 @@
 
 set -e
 
-pylint --ignore old_swarm *.py zoe_*
+pylint *.py zoe_* tests/*.py
 doc8 docs/
-
+sh ./build_docs.sh

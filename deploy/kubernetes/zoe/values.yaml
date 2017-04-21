@@ -1,0 +1,49 @@
+# Default values for zoe.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+Master:
+  Name: zoe-master
+  Image: "zoerepo/zoe"
+  ImageTag: "devel"
+  Replicas: 3
+  Component: "zoe-master"
+  Cpu: "100m"
+  Memory: "512Mi"
+  ServicePort: 4850
+  ContainerPort: 4850
+
+API:
+  Name: zoe-api
+  Image: "zoerepo/zoe"
+  ImageTag: "devel"
+  Replicas: 3
+  Component: "zoe-api"
+  Cpu: "100m"
+  Memory: "512Mi"
+  ServicePort: 5001
+  ContainerPort: 5001
+
+Postgres:
+  Name: zoe-postgres
+  Image: postgres
+  ImageTag: "latest"
+  Replicas: 1
+  Component: "zoe-postgres"
+  Cpu: "100m"
+  Memory: "512Mi"
+  ServicePort: 5432
+  ContainerPort: 5432
+  User: "postgres"
+  Password: "postgres"
+  Database: "postgres"
+
+Configuration:
+  Swarm: "<Swarm-IP-Address"
+  DeploymentName: "prod"
+  OverlayNetwork: "<Overlay-network-name>"
+  AuthenticationType: "text"
+  ProxyType: "apache"
+  ProxyContainerName: "apache2"
+  ProxyConfigFile: "/etc/apache2/sites-available/all.conf"
+  ProxyPath: "127.0.0.1"
+  ProxyDockerSock: "/var/run/docker.sock"

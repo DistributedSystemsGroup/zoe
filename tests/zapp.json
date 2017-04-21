@@ -1,0 +1,32 @@
+{
+    "name": "nginx", 
+    "priority": 512, 
+    "requires_binary": true, 
+    "services": [
+        {
+            "docker_image": "nginx:alpine", 
+            "environment": [],
+            "essential_count": 1, 
+            "monitor": true, 
+            "name": "nginx",
+            "networks": [],
+            "ports": [
+                {
+                    "expose": false,
+                    "is_main_endpoint": true, 
+                    "name": "Nginx Webserver",
+                    "path": "/", 
+                    "port_number": 80, 
+                    "protocol": "http"
+                }
+            ], 
+            "required_resources": {
+                "memory": 536870912
+            }, 
+            "startup_order": 0, 
+            "total_count": 1
+         }
+    ], 
+    "version": 2, 
+    "will_end": false
+}

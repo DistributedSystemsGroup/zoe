@@ -23,11 +23,17 @@ from zoe_lib.state import Execution, Service
 
 from zoe_master.backends.base import BaseBackend
 from zoe_master.backends.service_instance import ServiceInstance
-from zoe_master.backends.old_swarm.backend import OldSwarmBackend
-import zoe_master.backends.old_swarm.api_client
-from zoe_master.backends.old_swarm_new_api.backend import OldSwarmNewAPIBackend
-import zoe_master.backends.old_swarm_new_api.api_client
 from zoe_master.exceptions import ZoeStartExecutionFatalException, ZoeStartExecutionRetryException, ZoeException
+
+try:
+    from zoe_master.backends.swarm.backend import SwarmBackend
+except ImportError as ex:
+    SwarmBackend = None
+
+try:
+    from zoe_master.backends.kubernetes.backend import KubernetesBackend
+except ImportError:
+    KubernetesBackend = None
 
 log = logging.getLogger(__name__)
 
@@ -35,14 +41,14 @@ log = logging.getLogger(__name__)
 def _get_backend() -> BaseBackend:
     """Return the right backend instance by reading the global configuration."""
     backend_name = get_conf().backend
-    if backend_name == 'OldSwarm':
-        if not zoe_master.backends.old_swarm.api_client.AVAILABLE:
-            raise ZoeException('The OldSwarm backend requires docker-py version <= 1.10.2')
-        return OldSwarmBackend(get_conf())
-    elif backend_name == 'OldSwarmNewAPI':
-        if not zoe_master.backends.old_swarm_new_api.api_client.AVAILABLE:
-            raise ZoeException('The OldSwarmNewAPI backend requires docker python version >= 2.0.2')
-        return OldSwarmNewAPIBackend(get_conf())
+    if backend_name == 'Kubernetes':
+        if KubernetesBackend is None:
+            raise ZoeException('The Kubernetes backend requires the pykube module')
+        return KubernetesBackend(get_conf())
+    elif backend_name == 'Swarm':
+        if SwarmBackend is None:
+            raise ZoeException('The Swarm backend requires docker python version >= 2.0.2')
+        return SwarmBackend(get_conf())
     else:
         log.error('Unknown backend selected')
         assert False
@@ -66,11 +72,22 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
 
     ordered_service_list = sorted(service_list, key=lambda x: x.startup_order)
 
+    env_subst_dict = {
+        'execution_id': execution.id,
+        "execution_name": execution.name,
+        'user_name': execution.user_id,
+        'deployment_name': get_conf().deployment_name,
+    }
+
     for service in ordered_service_list:
+        env_subst_dict['dns_name#' + service.name] = service.dns_name
+
+    for service in ordered_service_list:
+        env_subst_dict['dns_name#self'] = service.dns_name
         service.set_starting()
-        instance = ServiceInstance(execution, service)
+        instance = ServiceInstance(execution, service, env_subst_dict)
         try:
-            backend_id = backend.spawn_service(instance)
+            backend_id, ip_address = backend.spawn_service(instance)
         except ZoeStartExecutionRetryException as ex:
             log.warning('Temporary failure starting service {} of execution {}: {}'.format(service.id, execution.id, ex.message))
             service.set_error(ex.message)
@@ -92,7 +109,8 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
             execution.set_error()
             return "fatal"
         else:
-            service.set_active(backend_id)
+            log.debug('Service {} started'.format(instance.name))
+            service.set_active(backend_id, ip_address)
 
     return "ok"
 
@@ -139,9 +157,3 @@ def get_platform_state():
     """Retrieves the state of the platform by querying the container backend. Platform state includes information on free/reserved resources for each node. This information is used for advanced scheduling."""
     backend = _get_backend()
     return backend.platform_state()
-
-
-def get_service_log(service):
-    """Retrieve the log (usually stdout/stderr) of the main processes running in the container."""
-    backend = _get_backend()
-    return backend.service_log(service)

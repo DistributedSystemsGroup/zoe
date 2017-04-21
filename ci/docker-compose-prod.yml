@@ -1,0 +1,29 @@
+version: '2'
+services:
+  zoe-api:
+    image: 192.168.12.2:5000/zoe:reducetime
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: python3 zoe-api.py --debug --backend-swarm-url consul://192.168.12.2 --deployment-name prod --dbuser postgres --dbhost 192.168.12.2 --dbport 5432 --dbname postgres --dbpass postgres --overlay-network-name my-net --master-url tcp://zoe-master:4850 --auth-type ldap --ldap-server-uri ldap://172.17.0.6 --ldap-base-dn ou=users,dc=example,dc=com --proxy-type apache --proxy-container apache2 --proxy-config-file /etc/apache2/sites-available/all.conf --proxy-path fsdna.on.kpmg.de/zoe --gelf-address udp://192.168.12.2:5004
+    ports:
+      - "5001:5001"
+    logging:
+      driver: "gelf"
+      options:
+        gelf-address: "udp://192.168.12.2:5004"
+        tag: "zoe-api"
+  zoe-master:
+    image: 192.168.12.2:5000/zoe:reducetime
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: python3 zoe-master.py --debug --backend-swarm-url consul://192.168.12.2 --deployment-name prod --dbuser postgres --dbhost 192.168.12.2 --dbport 5432 --dbname postgres --dbpass postgres --overlay-network-name my-net --auth-type ldap --ldap-server-uri ldap://ldapker.example.com --ldap-base-dn ou=users,dc=example,dc=com --proxy-type apache --proxy-container apache2 --proxy-config-file /etc/apache2/sites-available/all.conf --proxy-path fsdna.on.kpmg.de/zoe --gelf-address udp://192.168.12.2:5004
+    ports:
+      - "4850:4850"
+    depends_on:
+      - zoe-api
+    logging:
+      driver: "gelf"
+      options:
+        gelf-address: "udp://192.168.12.2:5004"
+        tag: "zoe-api"
+

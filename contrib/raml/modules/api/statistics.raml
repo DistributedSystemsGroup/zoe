@@ -1,0 +1,27 @@
+displayName: Statistics Endpoint
+description: This endpoint does not need authentication.
+/scheduler:
+  displayName: returns current statistics about the internal Zoe status
+  get:
+    description: current statistics about the internal Zoe status
+    responses:
+      200:
+        description: |
+          Returns a JSON document where:   
+          * ``termination_threads_count`` is the number of executions that are pending for termination and cleanup   
+          * ``queue_length`` is the number of executions in the queue waiting to be started    
+        body:
+          application/json:
+            type: object
+            properties: {
+              termination_threads_count: {
+                type: integer
+              },
+              queue_length: {
+                type: integer
+              }
+            }
+            example: {
+              "termination_threads_count" : 0,
+              "queue_length" : 0
+            }

@@ -83,21 +83,30 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--ldap-user-gid', type=int, help='LDAP group ID for users', default=5001)
         argparser.add_argument('--ldap-guest-gid', type=int, help='LDAP group ID for guests', default=5002)
 
-        argparser.add_argument('--service-log-path', help='Save service logs in this directory, EXPERIMENTAL', default='')
+        # Proxy options
+        argparser.add_argument('--proxy-type', help='Proxy type (apache or nginx)', default='none')
+        argparser.add_argument('--proxy-container', help='Proxy container name', default='apache2')
+        argparser.add_argument('--proxy-config-file', help='Config file path of apache/nginx proxy container', default='/etc/apache2/sites-available/config.conf')
+        argparser.add_argument('--proxy-path', help='Proxy base path', default='127.0.0.1')
+        argparser.add_argument('--proxy-docker-sock', help='Docker sock url which proxy container uses', default='unix://var/run/docker.sock')
 
-        argparser.add_argument('--scheduler-class', help='Scheduler class to use for scheduling ZApps', default='ZoeSimpleScheduler')
+        argparser.add_argument('--scheduler-class', help='Scheduler class to use for scheduling ZApps', choices=['ZoeSimpleScheduler', 'ZoeElasticScheduler'], default='ZoeSimpleScheduler')
         argparser.add_argument('--scheduler-policy', help='Scheduler policy to use for scheduling ZApps', choices=['FIFO', 'SIZE'], default='FIFO')
 
-        argparser.add_argument('--docker-tls-cert', help='Docker TLS certificate file', default='cert.pem')
-        argparser.add_argument('--docker-tls-key', help='Docker TLS private key file', default='key.pem')
-        argparser.add_argument('--docker-tls-ca', help='Docker TLS CA certificate file', default='ca.pem')
+        argparser.add_argument('--backend', choices=['Swarm', 'Kubernetes'], default='Swarm')
 
         # Docker Swarm backend options
-        argparser.add_argument('--backend', choices=['OldSwarm', 'OldSwarmNewAPI'], default='OldSwarmNewAPI')
         argparser.add_argument('--backend-swarm-url', help='Swarm/Docker API endpoint (ex.: zk://zk1:2181,zk2:2181 or http://swarm:2380)', default='http://localhost:2375')
         argparser.add_argument('--backend-swarm-zk-path', help='Swarm/Docker optional ZooKeeper path for Swarm Znodes', default='/docker')
+        argparser.add_argument('--backend-swarm-tls-cert', help='Docker TLS certificate file', default='cert.pem')
+        argparser.add_argument('--backend-swarm-tls-key', help='Docker TLS private key file', default='key.pem')
+        argparser.add_argument('--backend-swarm-tls-ca', help='Docker TLS CA certificate file', default='ca.pem')
+
+        # Kubernetes backend
+        argparser.add_argument('--kube-config-file', help='Kubernetes configuration file', default='/opt/zoe/kube.conf')
 
         argparser.add_argument('--cookie-secret', help='secret used to encrypt cookies', default='changeme')
+        argparser.add_argument('--log-file', help='output logs to a file', default='stderr')
 
         opts = argparser.parse_args()
         if opts.debug:

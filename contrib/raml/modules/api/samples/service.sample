@@ -1,0 +1,13 @@
+{
+  "status": "inactive",
+  "execution_id": 3,
+  "proxy_address": "fsdna.on.kpmg.de/zoe/test/3/tensorflowclusterone0",
+  "description": "zapp_json_file",
+  "ip_address": "172.16.8.12",
+  "service_group": "tensorflowclusterone",
+  "docker_id": "null",
+  "docker_status": "destroyed",
+  "id": 3,
+  "error_message": "null",
+  "name": "tensorflowclusterone0"
+}

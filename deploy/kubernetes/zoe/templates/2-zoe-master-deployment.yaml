@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "master-fullname" . }}
+  labels:
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    component: "{{.Release.Name}}-{{.Values.Master.Component}}"
+spec:
+  ports:
+    - port: {{.Values.Master.ServicePort}}
+      targetPort: {{.Values.Master.ContainerPort}}
+  selector:
+    component: "{{.Release.Name}}-{{.Values.Master.Component}}"
+  type: "LoadBalancer"  
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "master-fullname" . }}
+  labels:
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    component: "{{.Release.Name}}-{{.Values.Master.Component}}"
+spec:
+  replicas: {{default 1 .Values.Master.Replicas}}
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      component: "{{.Release.Name}}-{{.Values.Master.Component}}"
+  template:
+    metadata:
+      labels:
+        heritage: {{.Release.Service | quote }}
+        release: {{.Release.Name | quote }}
+        chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+        component: "{{.Release.Name}}-{{.Values.Master.Component}}"
+    spec:
+      containers:
+        - name: {{ template "master-fullname" . }}
+          image: "{{.Values.Master.Image}}:{{.Values.Master.ImageTag}}"
+          command: ["python3", "zoe-master.py", "--debug", "--swarm", "consul://{{.Values.Configuration.Swarm}}", "--deployment-name", "{{.Values.Configuration.DeploymentName}}", "--dbuser", "{{.Values.Postgres.Database}}", "--dbhost", "{{ template "postgres-fullname" . }}", "--dbport", "{{.Values.Postgres.ServicePort}}", "--dbname", "{{.Values.Postgres.Database}}", "--dbpass", "{{.Values.Postgres.Password}}", "--overlay-network-name", "{{.Values.Configuration.OverlayNetwork}}", "--auth-type", "{{.Values.Configuration.AuthenticationType}}", "--proxy-type", "{{.Values.Configuration.ProxyType}}", "--proxy-container", "{{.Values.Configuration.ProxyContainerName}}", "--proxy-config-file", "{{.Values.Configuration.ProxyConfigFile}}", "--proxy-path", "{{.Values.Configuration.ProxyPath}}", "--proxy-docker-sock", "{{.Values.Configuration.ProxyDockerSock}}"]
+          ports:
+            - containerPort: {{.Values.Master.ContainerPort}}
+          resources:
+            requests:
+              cpu: "{{.Values.Master.Cpu}}"
+              memory: "{{.Values.Master.Memory}}"

@@ -15,61 +15,53 @@
 
 """The high-level interface that Zoe uses to talk to the configured container backend."""
 
-import os
-import logging
+from typing import Dict
 
-from zoe_lib.state import Service, Execution, VolumeDescription
 from zoe_lib.config import get_conf
+from zoe_lib.state import Service, Execution
+from zoe_master.backends.proxy import gen_proxypath, JUPYTER_NOTEBOOK, MONGO_EXPRESS, JUPYTER_PORT, MONGO_PORT
+from zoe_master.exceptions import ZoeStartExecutionFatalException
 from zoe_master.workspace.filesystem import ZoeFSWorkspace
 
-log = logging.getLogger(__name__)
 
+def gen_environment(execution: Execution, service: Service, env_subst_dict: Dict):
+    """ Generate a dictionary containing the current cluster status (before the new container is spawned)
 
-def gen_environment(service: Service, execution: Execution):
-    """Return the list of environment variables that needs to be added to all containers."""
+    This information is used to substitute template strings in the environment variables."""
+    env_list = []
+    for env_name, env_value in service.environment:
+        try:
+            env_value = env_value.format(**env_subst_dict)
+        except KeyError:
+            error_msg = "Unknown variable in environment expression '{}', known variables are: {}".format(env_value, list(env_subst_dict.keys()))
+            service.set_error(error_msg)
+            raise ZoeStartExecutionFatalException("Service {} has wrong environment expression")
+        env_list.append((env_name, env_value))
+
+    # FIXME this code needs to be removed/changed to be generic
+    #if 'jupyter' in service.image_name:
+    env_list.append((JUPYTER_NOTEBOOK, gen_proxypath(execution, service) + '/' + JUPYTER_PORT))
+    #elif 'mongo-express' in service.image_name:
+    env_list.append((MONGO_EXPRESS, gen_proxypath(execution, service) + '/' + MONGO_PORT))
+
+    env_list.append(('EXECUTION_ID', str(execution.id)))
+    env_list.append(('DEPLOY_NAME', get_conf().deployment_name))
+    env_list.append(('UID', execution.user_id))
+    env_list.append(('SERVICE_NAME', service.name))
+    env_list.append(('PROXY_PATH', get_conf().proxy_path))
+
     fswk = ZoeFSWorkspace()
-    env_list = [
-        ('ZOE_EXECUTION_ID', execution.id),
-        ('ZOE_EXECUTION_NAME', execution.name),
-        ('ZOE_SERVICE_GROUP', service.service_group),
-        ('ZOE_SERVICE_NAME', service.name),
-        ('ZOE_SERVICE_ID', service.id),
-        ('ZOE_OWNER', execution.user_id),
-        ('ZOE_DEPLOYMENT_NAME', get_conf().deployment_name),
-        ('ZOE_MY_DNS_NAME', service.dns_name),
-        ('ZOE_WORKSPACE', fswk.get_mountpoint())
-    ]
-    service_list = []
-    for tmp_service in execution.services:
-        service_list.append(tmp_service.dns_name)
-    env_list.append(('ZOE_EXECUTION_SERVICE_LIST', ','.join(service_list)))
-
+    env_list.append(('ZOE_WORKSPACE', fswk.get_mountpoint()))
     return env_list
 
 
-def _create_logs_directories(exec_id, service_name):
-    path = os.path.join(get_conf().logs_base_path, get_conf().deployment_name, str(exec_id), service_name)
-    try:
-        os.makedirs(path)
-    except OSError as e:
-        log.error('Cannot create path {}: {}'.format(path, str(e)))
-        return None
-    return path
-
-
-def gen_volumes(service: Service, execution: Execution):
+def gen_volumes(service_: Service, execution: Execution):
     """Return the list of default volumes to be added to all containers."""
     vol_list = []
     fswk = ZoeFSWorkspace()
     wk_vol = fswk.get(execution.user_id)
 
     vol_list.append(wk_vol)
-
-    logs_path = _create_logs_directories(execution.id, service.name)
-    if logs_path is not None:
-        logs_mountpoint = '/logs'
-        logs_vol = VolumeDescription((logs_path, logs_mountpoint, True))
-        vol_list.append(logs_vol)
 
     return vol_list
 
