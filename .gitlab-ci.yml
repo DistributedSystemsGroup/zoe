@@ -9,7 +9,7 @@ variables:
   POSTGRES_USER: zoeuser
   POSTGRES_PASSWORD: zoepass
   ZOE_TEST_IMAGE: zoe:$CI_BUILD_REF
-  ZOE_COMMON_OPTIONS: --debug --backend-swarm-url ${SWARM_URL} --deployment-name test${CI_BUILD_REF} --dbuser ${POSTGRES_USER} --dbhost postgres --dbport 5432 --dbname ${POSTGRES_DB} --dbpass ${POSTGRES_PASSWORD} --master-url tcp://localhost:4850 --auth-type text --proxy-type none --listen-port 5100 --workspace-base-path /tmp
+  ZOE_COMMON_OPTIONS: --debug --backend-swarm-url ${SWARM_URL} --deployment-name test${CI_BUILD_REF} --dbuser ${POSTGRES_USER} --dbhost postgres --dbport 5432 --dbname ${POSTGRES_DB} --dbpass ${POSTGRES_PASSWORD} --master-url tcp://localhost:4850 --auth-type text --listen-port 5100 --workspace-base-path /tmp
 
 lint:
   stage: static-test
@@ -25,7 +25,7 @@ SonarQube:
   variables:
     SONAR_PROJECT_KEY: "zoe.devel"
     SONAR_BRANCH: "$CI_BUILD_REF_NAME"
-    SONAR_PROJECT_NAME: "Zoe devel"
+    SONAR_PROJECT_NAME: "$CI_PROJECT_NAME"
     SONAR_PROJECT_VERSION: "$CI_BUILD_REF"
     SONARQUBE_SERVER_URL: "$SONARQUBE_SERVER_URL"
   script:
@@ -78,7 +78,7 @@ images:
     - docker build --pull -t ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE} .
     - docker push ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE}
   only:
-    - /^.*master$/
+    - master
 
 docs:
   stage: deploy
@@ -96,7 +96,7 @@ docs:
   environment:
     name: staging
   only:
-    - /^.*master$/
+    - master
 
 frontend:
   stage: deploy
@@ -123,4 +123,4 @@ frontend:
   environment:
     name: staging
   only:
-    - /^.*master$/
+    - master
