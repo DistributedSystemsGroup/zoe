@@ -15,6 +15,7 @@
 
 """Functions needed by the Zoe web interface."""
 
+import base64
 import logging
 
 from zoe_lib.config import get_conf
@@ -48,7 +49,7 @@ def catch_exceptions(func):
             return error_page(self, str(e), 400)
         except Exception as e:
             log.exception(str(e))
-            return {'message': str(e)}, 500
+            return error_page(self, str(e), 500)
 
     return func_wrapper
 
@@ -60,9 +61,17 @@ def missing_auth(handler: ZoeRequestHandler):
 
 def get_auth_login(username, password):
     """Authenticate username and password against the configured user store."""
-    if get_conf().auth_type == 'text':
-        authenticator = PlainTextAuthenticator()  # type: BaseAuthenticator
-    elif get_conf().auth_type == 'ldap':
+
+    # First of all try to authenticate against a fixed list of users in a text file
+    authenticator = PlainTextAuthenticator()  # type: BaseAuthenticator
+    try:
+        uid, role = authenticator.auth(username, password)
+        return uid, role
+    except zoe_api.exceptions.ZoeAuthException:
+        pass
+
+    # It it fails, continue with the normal authentication
+    if get_conf().auth_type == 'ldap':
         authenticator = LDAPAuthenticator()  # type: BaseAuthenticator
     elif get_conf().auth_type == 'ldapsasl':
         authenticator = LDAPSASLAuthenticator()  # type: BaseAuthenticator

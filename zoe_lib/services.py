@@ -45,3 +45,20 @@ class ZoeServiceAPI(ZoeAPIBase):
             raise ZoeAPIException('service "{}" not found'.format(container_id))
         else:
             raise ZoeAPIException('error retrieving service {}'.format(container_id))
+
+    def get_logs(self, container_id):
+        """
+        Retrieve service logs.
+
+        :param container_id:
+        :return:
+        """
+        response, status_code = self._rest_get_stream('/service/logs/' + str(container_id))
+        if status_code == 200:
+            for line in response.iter_lines():
+                line = line.decode('utf-8').split(' ', 1)
+                yield line
+        elif status_code == 404:
+            raise ZoeAPIException('service "{}" not found'.format(container_id))
+        else:
+            raise ZoeAPIException('error retrieving service {}'.format(container_id))

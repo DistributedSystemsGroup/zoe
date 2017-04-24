@@ -83,6 +83,8 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--ldap-user-gid', type=int, help='LDAP group ID for users', default=5001)
         argparser.add_argument('--ldap-guest-gid', type=int, help='LDAP group ID for guests', default=5002)
 
+        argparser.add_argument('--service-log-path', help='Save service logs in this directory, EXPERIMENTAL', default='')
+
         argparser.add_argument('--scheduler-class', help='Scheduler class to use for scheduling ZApps', choices=['ZoeSimpleScheduler', 'ZoeElasticScheduler'], default='ZoeSimpleScheduler')
         argparser.add_argument('--scheduler-policy', help='Scheduler policy to use for scheduling ZApps', choices=['FIFO', 'SIZE'], default='FIFO')
 
@@ -100,6 +102,8 @@ def load_configuration(test_conf=None):
 
         argparser.add_argument('--cookie-secret', help='secret used to encrypt cookies', default='changeme')
         argparser.add_argument('--log-file', help='output logs to a file', default='stderr')
+
+        argparser.add_argument('--aml-ttl', help='TimeToLive in hours for AML executions', type=int, default=4)
 
         opts = argparser.parse_args()
         if opts.debug:

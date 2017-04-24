@@ -19,10 +19,10 @@ from typing import List
 
 import tornado.web
 
-from zoe_api.rest_api.execution import ExecutionAPI, ExecutionCollectionAPI, ExecutionDeleteAPI
+from zoe_api.rest_api.execution import ExecutionAPI, ExecutionCollectionAPI, ExecutionDeleteAPI, ExecutionEndpointsAPI
 from zoe_api.rest_api.info import InfoAPI
 from zoe_api.rest_api.userinfo import UserInfoAPI
-from zoe_api.rest_api.service import ServiceAPI
+from zoe_api.rest_api.service import ServiceAPI, ServiceLogsAPI
 from zoe_api.rest_api.discovery import DiscoveryAPI
 from zoe_api.rest_api.statistics import SchedulerStatsAPI
 from zoe_api.rest_api.oauth import OAuthGetAPI, OAuthRevokeAPI
@@ -46,9 +46,11 @@ def api_init(api_endpoint) -> List[tornado.web.URLSpec]:
 
         tornado.web.url(API_PATH + r'/execution/([0-9]+)', ExecutionAPI, route_args),
         tornado.web.url(API_PATH + r'/execution/delete/([0-9]+)', ExecutionDeleteAPI, route_args),
+        tornado.web.url(API_PATH + r'/execution/endpoints/([0-9]+)', ExecutionEndpointsAPI, route_args),
         tornado.web.url(API_PATH + r'/execution', ExecutionCollectionAPI, route_args),
 
         tornado.web.url(API_PATH + r'/service/([0-9]+)', ServiceAPI, route_args),
+        tornado.web.url(API_PATH + r'/service/logs/([0-9]+)', ServiceLogsAPI, route_args),
 
         tornado.web.url(API_PATH + r'/discovery/by_group/([0-9]+)/([a-z0-9A-Z\-]+)', DiscoveryAPI, route_args),
 

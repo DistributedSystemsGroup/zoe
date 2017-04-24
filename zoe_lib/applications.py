@@ -83,6 +83,7 @@ def _validate_all_services(data):
     if not found_monitor:
         raise InvalidApplicationDescription(msg="at least one process should have monitor set to True")
 
+
 def _service_check(data):
     """Check the service description schema."""
     required_keys = ['name', 'docker_image', 'monitor', 'ports', 'required_resources', 'total_count', 'essential_count', 'startup_order']
