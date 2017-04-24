@@ -187,6 +187,12 @@ class SwarmClient:
                 log.error('Swarm backend does not support volume type {}'.format(volume.type))
             volumes[volume.path] = {'bind': volume.mount_point, 'mode': ("ro" if volume.readonly else "rw")}
 
+        if service_instance.memory_limit is not None:
+            mem_limit = service_instance.memory_limit.max
+        else:
+            mem_limit = 0
+        # Swarm backend does not support cores in a consistent way, see https://github.com/docker/swarm/issues/475
+
         try:
             cont = self.cli.containers.run(image=service_instance.image_name,
                                            command=service_instance.command,
@@ -195,8 +201,8 @@ class SwarmClient:
                                            hostname=service_instance.hostname,
                                            labels=service_instance.labels,
                                            log_config=log_config,
-                                           mem_limit=service_instance.memory_limit,
-                                           memswap_limit=service_instance.memory_limit,
+                                           mem_limit=mem_limit,
+                                           memswap_limit=0,
                                            name=service_instance.name,
                                            networks=[get_conf().overlay_network_name],
                                            network_disabled=False,

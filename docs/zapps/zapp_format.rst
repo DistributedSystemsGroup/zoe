@@ -125,12 +125,16 @@ number <= total_count
 
 The minimum number of services of this type that Zoe must start before being able to consider the ZApp as started. For example, in Spark you need just one worker to produce useful work (essential_count equal to 1), but if there is the possibility of adding up to 9 more workers, the application will run faster (total_count equal to 10).
 
-required_resources
-^^^^^^^^^^^^^^^^^^
+resources
+^^^^^^^^^
 
 object
 
-Resources that need to be reserved for this service. Currently only ``memory`` is supported, specified in bytes.
+Resources that need to be reserved for this service. Each resource is specified as a minimum and a maximum. The application is started if the minimum quantity of resources is available in the systems and it is killed if it passes over the maximum limit. If minimum and maximum limits are specified as ``null``, they will be ignored.
+
+``cores`` and ``memory`` are the resources currently supported.
+
+Support for this feature depends on the scheduler and back-end in use.
 
 startup_order
 ^^^^^^^^^^^^^
@@ -198,8 +202,15 @@ Example
                 "monitor": true,
                 "total_count": 1,
                 "essential_count": 1,
-                "required_resources": {
-                   "memory": 4294967296
+                "resources": {
+                    "memory": {
+                        "min": 4294967296,
+                        "max": 4294967296
+                    },
+                    "cores": {
+                        "min": null,
+                        "max": null
+                    }
                 },
                 "startup_order": 0,
                 "ports": [

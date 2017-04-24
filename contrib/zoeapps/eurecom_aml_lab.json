@@ -18,6 +18,7 @@
                     "42"
                 ]
             ],
+            "volumes": [],
             "essential_count": 1,
             "monitor": false,
             "name": "spark-master",
@@ -29,11 +30,20 @@
                     "protocol": "tcp"
                 }
             ],
-            "required_resources": {
-                "memory": 536870912
+            "resources": {
+                "memory": {
+                    "min": 536870912,
+                    "max": 536870912
+                },
+                "cores": {
+                    "min": null,
+                    "max": null
+                }
             },
             "startup_order": 0,
-            "total_count": 1
+            "total_count": 1,
+            "replicas": 1,
+            "command": null
         },
         {
             "image": "docker-registry:5000/zapps/spark2-worker",
@@ -74,11 +84,21 @@
                     "protocol": "tcp"
                 }
             ],
-            "required_resources": {
-                "memory": 12884901888
+            "resources": {
+                "memory": {
+                    "min": 12884901888,
+                    "max": 12884901888
+                },
+                "cores": {
+                    "min": null,
+                    "max": null
+                }
             },
+            "volumes": [],
             "startup_order": 1,
-            "total_count": 2
+            "total_count": 2,
+            "replicas": 1,
+            "command": null
         },
         {
             "image": "docker-registry:5000/zapps/spark2-jupyter-notebook",
@@ -112,6 +132,7 @@
                     "hdfs-namenode.zoe"
                 ]
             ],
+            "volumes": [],
             "essential_count": 1,
             "monitor": true,
             "name": "spark-jupyter",
@@ -129,11 +150,20 @@
                     "protocol": "tcp"
                 }
             ],
-            "required_resources": {
-                "memory": 4294967296
+            "resources": {
+                "memory": {
+                    "min": 4294967296,
+                    "max": 4294967296
+                },
+                "cores": {
+                    "min": null,
+                    "max": null
+                }
             },
             "startup_order": 0,
-            "total_count": 1
+            "total_count": 1,
+            "replicas": 1,
+            "command": null
         }
     ],
     "version": 3,

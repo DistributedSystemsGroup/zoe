@@ -57,6 +57,11 @@
           "multipleOf": 1.0,
           "minimum": 1
         },
+        "replicas": {
+          "type": "number",
+          "multipleOf": 1.0,
+          "minimum": 1
+        },
         "resources": {
           "type": "object",
           "properties": {
@@ -140,7 +145,7 @@
         }
       },
       "additionalProperties": false,
-      "required": ["name", "image", "ports", "environment", "volumes", "monitor", "startup_order", "essential_count", "total_count", "resources", "command"]
+      "required": ["name", "image", "ports", "environment", "volumes", "monitor", "startup_order", "essential_count", "total_count", "resources", "command", "replicas"]
     },
     "port": {
       "type": "object",
