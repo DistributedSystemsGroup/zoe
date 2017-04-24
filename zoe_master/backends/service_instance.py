@@ -26,8 +26,15 @@ class ServiceInstance:
         self.name = service.unique_name
         self.hostname = service.dns_name
 
-        self.memory_limit = service.resource_reservation.memory
-        self.core_limit = service.resource_reservation.cores
+        if service.resource_reservation.memory.min is None:
+            self.memory_limit = None
+        else:
+            self.memory_limit = service.resource_reservation.memory
+
+        if service.resource_reservation.cores.min is None:
+            self.core_limit = None
+        else:
+            self.core_limit = service.resource_reservation.cores
 
         self.labels = {
             'zoe.execution.name': execution.name,

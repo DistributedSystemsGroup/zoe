@@ -1,10 +1,9 @@
 {
     "name": "aml-lab",
-    "priority": 512,
-    "requires_binary": false,
+    "size": 512,
     "services": [
         {
-            "docker_image": "docker-registry:5000/zapps/spark2-master",
+            "image": "docker-registry:5000/zapps/spark2-master",
             "environment": [
                 [
                     "SPARK_MASTER_IP",
@@ -19,28 +18,35 @@
                     "42"
                 ]
             ],
+            "volumes": [],
             "essential_count": 1,
             "monitor": false,
             "name": "spark-master",
-            "networks": [],
             "ports": [
                 {
-                    "expose": true,
-                    "is_main_endpoint": true,
                     "name": "Spark master web interface",
-                    "path": "/",
+                    "url_template": "http://{ip_port}/",
                     "port_number": 8080,
-                    "protocol": "http"
+                    "protocol": "tcp"
                 }
             ],
-            "required_resources": {
-                "memory": 536870912
+            "resources": {
+                "memory": {
+                    "min": 536870912,
+                    "max": 536870912
+                },
+                "cores": {
+                    "min": null,
+                    "max": null
+                }
             },
             "startup_order": 0,
-            "total_count": 1
+            "total_count": 1,
+            "replicas": 1,
+            "command": null
         },
         {
-            "docker_image": "docker-registry:5000/zapps/spark2-worker",
+            "image": "docker-registry:5000/zapps/spark2-worker",
             "environment": [
                 [
                     "SPARK_WORKER_CORES",
@@ -70,24 +76,32 @@
             "essential_count": 1,
             "monitor": false,
             "name": "spark-worker",
-            "networks": [],
             "ports": [
                 {
-                    "is_main_endpoint": false,
                     "name": "Spark worker web interface",
-                    "path": "/",
+                    "url_template": "http://{ip_port}/",
                     "port_number": 8081,
-                    "protocol": "http"
+                    "protocol": "tcp"
                 }
             ],
-            "required_resources": {
-                "memory": 12884901888
+            "resources": {
+                "memory": {
+                    "min": 12884901888,
+                    "max": 12884901888
+                },
+                "cores": {
+                    "min": null,
+                    "max": null
+                }
             },
+            "volumes": [],
             "startup_order": 1,
-            "total_count": 2
+            "total_count": 2,
+            "replicas": 1,
+            "command": null
         },
         {
-            "docker_image": "docker-registry:5000/zapps/spark2-jupyter-notebook",
+            "image": "docker-registry:5000/zapps/spark2-jupyter-notebook",
             "environment": [
                 [
                     "SPARK_MASTER",
@@ -118,34 +132,40 @@
                     "hdfs-namenode.zoe"
                 ]
             ],
+            "volumes": [],
             "essential_count": 1,
             "monitor": true,
             "name": "spark-jupyter",
-            "networks": [],
             "ports": [
                 {
-                    "is_main_endpoint": false,
                     "name": "Spark application web interface",
-                    "path": "/",
+                    "url_template": "http://{ip_port}/",
                     "port_number": 4040,
-                    "protocol": "http"
+                    "protocol": "tcp"
                 },
                 {
-                    "expose": true,
-                    "is_main_endpoint": true,
                     "name": "Jupyter Notebook interface",
-                    "path": "/",
+                    "url_template": "http://{ip_port}/",
                     "port_number": 8888,
-                    "protocol": "http"
+                    "protocol": "tcp"
                 }
             ],
-            "required_resources": {
-                "memory": 4294967296
+            "resources": {
+                "memory": {
+                    "min": 4294967296,
+                    "max": 4294967296
+                },
+                "cores": {
+                    "min": null,
+                    "max": null
+                }
             },
             "startup_order": 0,
-            "total_count": 1
+            "total_count": 1,
+            "replicas": 1,
+            "command": null
         }
     ],
-    "version": 2,
+    "version": 3,
     "will_end": false
 }

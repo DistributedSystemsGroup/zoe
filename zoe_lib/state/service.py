@@ -22,11 +22,33 @@ from zoe_lib.config import get_conf
 log = logging.getLogger(__name__)
 
 
+class ResourceLimits:
+    """A resource limits description."""
+    def __init__(self, data, unit):
+        if isinstance(data, dict):
+            self.min = data['min']
+            self.max = data['max']
+        elif isinstance(data, ResourceLimits):
+            self.min = data.min
+            self.max = data.max
+        else:
+            raise TypeError
+        self.unit = unit
+
+    def __add__(self, other):
+        if isinstance(other, ResourceLimits) and self.unit == other.unit:
+            res = {
+                'min': self.min + other.min,
+                'max': self.max + other.max
+            }
+            return ResourceLimits(res, self.unit)
+
+
 class ResourceReservation:
     """The resources reserved by a Service."""
     def __init__(self, data):
-        self.memory = data['memory']
-        self.cores = data['cores']
+        self.memory = ResourceLimits(data['memory'], "bytes")
+        self.cores = ResourceLimits(data['cores'], 'units')
 
     def __add__(self, other):
         if isinstance(other, ResourceReservation):
@@ -51,13 +73,8 @@ class VolumeDescription:
 class ExposedPort:
     """A port on the container that should be exposed."""
     def __init__(self, data):
-        self.proto = 'tcp'  # FIXME UDP ports?
+        self.proto = data['protocol']
         self.number = data['port_number']
-        self.expose = data['expose'] if 'expose' in data else False
-
-    def is_expose(self):
-        """ return expose """
-        return self.expose
 
 
 class Service:
@@ -97,25 +114,15 @@ class Service:
         self.essential = d['essential']
 
         # Fields parsed from the JSON description
-        self.image_name = self.description['docker_image']
+        self.image_name = self.description['image']
         self.is_monitor = self.description['monitor']
         self.startup_order = self.description['startup_order']
-        self.environment = []
-        if 'environment' in self.description:
-            self.environment = self.description['environment']
-        self.command = ''
-        if 'command' in self.description:
-            self.command = self.description['command']
-        self.resource_reservation = ResourceReservation(self.description['required_resources'])
-        self.volumes = []
-        if 'volumes' in self.description:
-            self.volumes = [VolumeDescription(v) for v in self.description['volumes']]
+        self.environment = self.description['environment']
+        self.command = self.description['command']
+        self.resource_reservation = ResourceReservation(self.description['resources'])
+        self.volumes = [VolumeDescription(v) for v in self.description['volumes']]
         self.ports = [ExposedPort(p) for p in self.description['ports']]
-
-        if 'replicas' in self.description:
-            self.replicas = self.description['replicas']
-        else:
-            self.replicas = 1
+        self.replicas = self.description['replicas']
 
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""
@@ -186,12 +193,10 @@ class Service:
     @property
     def proxy_address(self):
         """Get proxy address path"""
-        for port in self.ports:
-            if port.is_expose():
-                proxy_addr = get_conf().proxy_path + "/" + self.user_id + "/" + str(self.execution_id) + "/" + self.name
-            else:
-                proxy_addr = None
-        return proxy_addr
+        if len(self.ports) > 0:
+            return get_conf().proxy_path + "/" + self.user_id + "/" + str(self.execution_id) + "/" + self.name
+        else:
+            return None
 
     def is_dead(self):
         """Returns True if this service is not running."""

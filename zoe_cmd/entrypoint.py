@@ -170,10 +170,6 @@ def exec_get_cmd(args):
             print(' - backend status: {}'.format(service['backend_status']))
             if service['error_message'] is not None:
                 print(' - error: {}'.format(service['error_message']))
-            if service['backend_status'] == 'started':
-                ip = service['ip_address']
-                for port in service['description']['ports']:
-                    print(' - {}: {}://{}:{}{}'.format(port['name'], port['protocol'], ip, port['port_number'], port['path']))
 
 
 def exec_kill_cmd(args):

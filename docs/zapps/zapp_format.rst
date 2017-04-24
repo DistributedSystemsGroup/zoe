@@ -9,6 +9,8 @@ A Zoe application description is a JSON document. Currently we generate them via
 
 At the top level map there are some settings, mostly metadata, and a list of services. Each service has its own metadata and some docker-related parameters.
 
+All fields are required.
+
 Top level
 ---------
 
@@ -17,49 +19,35 @@ A ZApp is completely contained in a JSON Object.
 name
 ^^^^
 
-required, string
+string
 
 The name of this Zapp. Do not confuse this with the name of the execution: you can have many executions (experiment-1, experiment-2) of the same ZApp.
 
 version
 ^^^^^^^
 
-required, number
+number
 
 The ZApp format version of this description. Zoe will check this value before trying to parse the rest of the ZApp to make sure it is able to correctly interpret the description.
 
 will_end
 ^^^^^^^^
 
-required, boolean
+boolean
 
 Must be set to False if potentially this application could run forever. For example a Jupyter notebook will never end (must be terminated explicitly by the user), so needs to have this value set to ``false``. A Spark job instead will finish by itself, so for batch ZApps set this value to ``true``.
 
-priority
-^^^^^^^^
+size
+^^^^
 
-required, number [0, 1024)
+number >= 0
 
-For now this value is unused.
-
-disable_autorestart
-^^^^^^^^^^^^^^^^^^^
-
-optional, boolean
-
-If set to true, disables all kinds of auorestart on all services of this ZApp.
-
-requires_binary
-^^^^^^^^^^^^^^^
-
-required, boolean
-
-For now this value is unused.
+This value is used by the Elastic scheduler as an hint to the application size.
 
 services
 ^^^^^^^^
 
-required, array
+array
 
 The list of services to include in this ZApp.
 
@@ -71,14 +59,14 @@ Each service is a JSON Object. At least one service needs to have the monitor ke
 name
 ^^^^
 
-required, string
+string
 
 The name of this service. This value will be combined with other information to generate the unique network names that can be used by services to talk to each other.
 
 environment
 ^^^^^^^^^^^
 
-required, array
+array
 
 Environment variables to be passed to the service/container. Each entry in the array must be an array with two elements, the variable name and its value.
 
@@ -91,17 +79,10 @@ A number of special values can be used, these will be substituted by Zoe when th
 * ``{dns_name#self}`` : the DNS name for this service itself
 * ``{dns_name#<service_name_with_counter>}`` : the DNS name of another service defined in the same ZApp. For example, ``{dns_name#jupyter0}`` will be substituted with the DNS name of the first instance of the Jupyter service,
 
-networks
-^^^^^^^^
-
-optional, array
-
-A list of additional Docker network IDs to connect to this service. By default only the network configured in Zoe configuration file will be connected.
-
 volumes
 ^^^^^^^
 
-optional, array
+array
 
 A list of additional volumes to be mounted in this service container. Each volume is described by an array with three elements:
 
@@ -111,17 +92,17 @@ A list of additional volumes to be mounted in this service container. Each volum
 
 Zoe will always mount the user workspace directory in ``$ZOE_WORKSPACE``.
 
-docker_image
-^^^^^^^^^^^^
+image
+^^^^^
 
-required, string
+string
 
 The full name of the Docker image for this service. The registry can be local, but also images on the Docker Hub will work as expected.
 
 monitor
 ^^^^^^^
 
-required, boolean
+boolean
 
 If set to ``true``, Zoe will monitor this service for termination. When it terminates, Zoe will proceed killing all the other services of the same execution and set the execution status to ``termianted``.
 If set to ``false``, Zoe will configure Docker to automatically restart the service in case it crashes.
@@ -133,82 +114,74 @@ All autorestart behaviour is disabled if the global parameter ``disable_autorest
 total_count
 ^^^^^^^^^^^
 
-required, number
+number
 
 The maximum number of services of this type (with the same docker image and associated options) that can be started by Zoe.
 
 essential_count
 ^^^^^^^^^^^^^^^
 
-required, number <= total_count
+number <= total_count
 
 The minimum number of services of this type that Zoe must start before being able to consider the ZApp as started. For example, in Spark you need just one worker to produce useful work (essential_count equal to 1), but if there is the possibility of adding up to 9 more workers, the application will run faster (total_count equal to 10).
 
-required_resources
-^^^^^^^^^^^^^^^^^^
+resources
+^^^^^^^^^
 
-required, object
+object
 
-Resources that need to be reserved for this service. Currently only ``memory`` is supported, specified in bytes.
+Resources that need to be reserved for this service. Each resource is specified as a minimum and a maximum. The application is started if the minimum quantity of resources is available in the systems and it is killed if it passes over the maximum limit. If minimum and maximum limits are specified as ``null``, they will be ignored.
+
+``cores`` and ``memory`` are the resources currently supported.
+
+Support for this feature depends on the scheduler and back-end in use.
 
 startup_order
 ^^^^^^^^^^^^^
 
-required, number
+number
 
 Relative ordering for service startup. Zoe will start first services with a lower value. Note that Zoe will not wait for the service to be up and running before starting the next in the list.
 
 ports
 ^^^^^
 
-required, array
+array
 
 A list of ports that the user may wants to access. Currently this is tailored for web interfaces, URLs for each port will be shown in the client interfaces. See the *port* section below for details.
 
 Ports
 -----
 
+Zoe will instruct the backend to expose ports on public addresses. This is usually done by port forwarding and depends on the capabilities of the configured back-end.
+
 name
 ^^^^
 
-required, string
+string
 
 A user friendly description for the service exposed on this port.
 
-path
-^^^^
+url_template
+^^^^^^^^^^^^
 
-optional, string
+string
 
-The path part of the URL, after the port number. Must start with '/'.
+A template for the full URL that will be exposed to the user. Zoe will query the backend at run time to get the public IP address and port combination and substitute the ``{ip_port}`` part.
 
 protocol
 ^^^^^^^^
 
-required, string
+string
 
-The URL protocol
-
-is_main_endpoint
-^^^^^^^^^^^^^^^^
-
-required, boolean
-
-Used to emphasize certain service endpoints in the user interface.
-
-expose
-^^^^^^
-
-optional, boolean
-
-Expose this port on a public IP address vie Docker. This feature in incomplete: it works only on TCP port and Zoe will not show anywhere the public IP address, that will be available only by using Docker tools.
+The protocol, either ``tcp`` or ``udp``.
 
 port_number
 ^^^^^^^^^^^
 
-required, number
+number
 
-The port number where this service endpoint is exposed.
+The port number where the service is listening for connections. The external (user-visible) port number will be chosen by the back-end.
 
 Example
 -------
@@ -216,32 +189,35 @@ Example
 
     {
         "name": "Jupyter notebook",
-        "version": 2,
+        "version": 3,
         "will_end": false,
-        "priority": 512,
-        "requires_binary": false,
+        "size": 512,
         "services": [
             {
                 "name": "jupyter",
                 "environment": [
                     ["NB_USER", "{user_name}"]
                 ],
-                "networks": [],
-                "docker_image": "docker-registry:5000/apps/jupyter-notebook",
+                "image": "docker-registry:5000/apps/jupyter-notebook",
                 "monitor": true,
                 "total_count": 1,
                 "essential_count": 1,
-                "required_resources": {
-                   "memory": 4294967296
+                "resources": {
+                    "memory": {
+                        "min": 4294967296,
+                        "max": 4294967296
+                    },
+                    "cores": {
+                        "min": null,
+                        "max": null
+                    }
                 },
                 "startup_order": 0,
                 "ports": [
                     {
                         "name": "Jupyter Notebook interface",
-                        "path": "/",
-                        "protocol": "http",
-                        "is_main_endpoint": true,
-                        "expose": true,
+                        "url_template": "http://{ip_port}/",
+                        "protocol": "tcp",
                         "port_number": 8888
                     }
                 ]

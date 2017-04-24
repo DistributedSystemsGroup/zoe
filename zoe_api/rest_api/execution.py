@@ -117,7 +117,7 @@ class ExecutionCollectionAPI(RequestHandler):
         manage_cors_headers(self)
 
     @catch_exceptions
-    def options(self):  # pylint: disable=unused-argument
+    def options(self):
         """Needed for CORS."""
         self.set_status(204)
         self.finish()
@@ -189,7 +189,7 @@ class ExecutionEndpointsAPI(RequestHandler):
         manage_cors_headers(self)
 
     @catch_exceptions
-    def options(self):  # pylint: disable=unused-argument
+    def options(self):
         """Needed for CORS."""
         self.set_status(204)
         self.finish()

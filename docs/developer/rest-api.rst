@@ -198,12 +198,7 @@ Will return a JSON document like this::
        "error_message" : null,
        "id" : 26774,
        "description" : {
-          "required_resources" : {
-             "memory" : 536870912
-          },
     [...]
-          "name" : "boinc-client",
-          "volumes" : []
        }
     }
 

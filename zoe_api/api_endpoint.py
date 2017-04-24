@@ -195,7 +195,7 @@ class APIEndpoint:
 
         log.debug('Cleanup task finished')
 
-    def execution_endpoints(self, uid: str, role: str, execution: zoe_lib.state.sql_manager.Execution):
+    def execution_endpoints(self, uid: str, role: str, execution: zoe_lib.state.Execution):
         """Return a list of the services and public endpoints available for a certain execution."""
         services_info = []
         endpoints = []
@@ -203,10 +203,9 @@ class APIEndpoint:
             services_info.append(self.service_by_id(uid, role, service.id))
             port_mappings = service.ports
             for port in service.description['ports']:
-                if 'expose' in port and port['expose']:
-                    port_number = str(port['port_number']) + "/tcp"
-                    if port_number in port_mappings:
-                        endpoint = port['protocol'] + "://" + port_mappings[port_number][0] + ":" + port_mappings[port_number][1] + port['path']
-                        endpoints.append((port['name'], endpoint))
+                port_number = str(port['port_number']) + "/" + port['protocol']
+                if port_number in port_mappings:
+                    endpoint = port['url_template'].format(**{"ip_port": port_mappings[port_number][0] + ":" + port_mappings[port_number][1]})
+                    endpoints.append((port['name'], endpoint))
 
         return services_info, endpoints
