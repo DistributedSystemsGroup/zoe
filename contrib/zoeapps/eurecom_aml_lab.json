@@ -3,7 +3,7 @@
     "size": 512,
     "services": [
         {
-            "docker_image": "docker-registry:5000/zapps/spark2-master",
+            "image": "docker-registry:5000/zapps/spark2-master",
             "environment": [
                 [
                     "SPARK_MASTER_IP",
@@ -23,12 +23,10 @@
             "name": "spark-master",
             "ports": [
                 {
-                    "expose": true,
-                    "is_main_endpoint": true,
                     "name": "Spark master web interface",
-                    "path": "/",
+                    "url_template": "http://{ip_port}/",
                     "port_number": 8080,
-                    "protocol": "http"
+                    "protocol": "tcp"
                 }
             ],
             "required_resources": {
@@ -38,7 +36,7 @@
             "total_count": 1
         },
         {
-            "docker_image": "docker-registry:5000/zapps/spark2-worker",
+            "image": "docker-registry:5000/zapps/spark2-worker",
             "environment": [
                 [
                     "SPARK_WORKER_CORES",
@@ -70,11 +68,10 @@
             "name": "spark-worker",
             "ports": [
                 {
-                    "is_main_endpoint": false,
                     "name": "Spark worker web interface",
-                    "path": "/",
+                    "url_template": "http://{ip_port}/",
                     "port_number": 8081,
-                    "protocol": "http"
+                    "protocol": "tcp"
                 }
             ],
             "required_resources": {
@@ -84,7 +81,7 @@
             "total_count": 2
         },
         {
-            "docker_image": "docker-registry:5000/zapps/spark2-jupyter-notebook",
+            "image": "docker-registry:5000/zapps/spark2-jupyter-notebook",
             "environment": [
                 [
                     "SPARK_MASTER",
@@ -120,19 +117,16 @@
             "name": "spark-jupyter",
             "ports": [
                 {
-                    "is_main_endpoint": false,
                     "name": "Spark application web interface",
-                    "path": "/",
+                    "url_template": "http://{ip_port}/",
                     "port_number": 4040,
-                    "protocol": "http"
+                    "protocol": "tcp"
                 },
                 {
-                    "expose": true,
-                    "is_main_endpoint": true,
                     "name": "Jupyter Notebook interface",
-                    "path": "/",
+                    "url_template": "http://{ip_port}/",
                     "port_number": 8888,
-                    "protocol": "http"
+                    "protocol": "tcp"
                 }
             ],
             "required_resources": {
@@ -142,6 +136,6 @@
             "total_count": 1
         }
     ],
-    "version": 2,
+    "version": 3,
     "will_end": false
 }

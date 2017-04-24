@@ -51,13 +51,8 @@ class VolumeDescription:
 class ExposedPort:
     """A port on the container that should be exposed."""
     def __init__(self, data):
-        self.proto = 'tcp'  # FIXME UDP ports?
+        self.proto = data['protocol']
         self.number = data['port_number']
-        self.expose = data['expose'] if 'expose' in data else False
-
-    def is_expose(self):
-        """ return expose """
-        return self.expose
 
 
 class Service:
@@ -186,12 +181,10 @@ class Service:
     @property
     def proxy_address(self):
         """Get proxy address path"""
-        for port in self.ports:
-            if port.is_expose():
-                proxy_addr = get_conf().proxy_path + "/" + self.user_id + "/" + str(self.execution_id) + "/" + self.name
-            else:
-                proxy_addr = None
-        return proxy_addr
+        if len(self.ports) > 0:
+            return get_conf().proxy_path + "/" + self.user_id + "/" + str(self.execution_id) + "/" + self.name
+        else:
+            return None
 
     def is_dead(self):
         """Returns True if this service is not running."""

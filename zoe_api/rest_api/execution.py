@@ -117,7 +117,7 @@ class ExecutionCollectionAPI(RequestHandler):
         manage_cors_headers(self)
 
     @catch_exceptions
-    def options(self):  # pylint: disable=unused-argument
+    def options(self):
         """Needed for CORS."""
         self.set_status(204)
         self.finish()
@@ -171,6 +171,42 @@ class ExecutionCollectionAPI(RequestHandler):
 
         self.set_status(201)
         self.write({'execution_id': new_id})
+
+    def data_received(self, chunk):
+        """Not implemented as we do not use stream uploads"""
+        pass
+
+
+class ExecutionEndpointsAPI(RequestHandler):
+    """The ExecutionEndpoints API endpoint."""
+
+    def initialize(self, **kwargs):
+        """Initializes the request handler."""
+        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
+
+    def set_default_headers(self):
+        """Set up the headers for enabling CORS."""
+        manage_cors_headers(self)
+
+    @catch_exceptions
+    def options(self):
+        """Needed for CORS."""
+        self.set_status(204)
+        self.finish()
+
+    @catch_exceptions
+    def get(self, execution_id: int):
+        """
+        Get a list of execution endpoints.
+
+        :param execution_id: the execution to be deleted
+        """
+        uid, role = get_auth(self)
+
+        execution = self.api_endpoint.execution_by_id(uid, role, execution_id)
+        services_, endpoints = self.api_endpoint.execution_endpoints(uid, role, execution)
+
+        self.write({'endpoints': endpoints})
 
     def data_received(self, chunk):
         """Not implemented as we do not use stream uploads"""

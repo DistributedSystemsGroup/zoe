@@ -161,8 +161,7 @@ class SwarmClient:
         cont = None
         port_bindings = {}  # type: Dict[str, Any]
         for port in service_instance.ports:
-            if port.expose:
-                port_bindings[str(port.number) + '/tcp'] = None
+            port_bindings[str(port.number) + '/' + port.proto] = None
 
         if get_conf().gelf_address != '':
             log_config = {
