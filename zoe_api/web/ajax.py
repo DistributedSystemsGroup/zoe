@@ -46,7 +46,6 @@ class AjaxEndpointWeb(ZoeRequestHandler):
             execution = self.api_endpoint.execution_list(uid, role, name='aml-lab')
             if len(execution) == 0:
                 exec_id = self.api_endpoint.execution_start(uid, role, 'aml-lab', app_descr)
-                pass
             else:
                 execution = execution[0]
                 exec_id = execution.id

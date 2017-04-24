@@ -159,8 +159,8 @@ def exec_get_cmd(args):
             print('Exposed endpoints:')
         else:
             print('This ZApp does not expose any endpoint')
-        for ep in endpoints:
-            print(' - {}: {}'.format(ep[0], ep[1]))
+        for endpoint in endpoints:
+            print(' - {}: {}'.format(endpoint[0], endpoint[1]))
 
         print()
         for c_id in execution['services']:
