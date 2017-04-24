@@ -315,24 +315,6 @@ class SwarmClient:
             if not res:
                 break
 
-    def connect_to_network(self, container_id: str, network_id: str) -> None:
-        """Connect a container to a network."""
-        try:
-            net = self.cli.networks.get(network_id)
-        except docker.errors.NotFound:
-            log.error('Trying to connect to a non-existent network')
-            return
-        net.connect(container_id)
-
-    def disconnect_from_network(self, container_id: str, network_id: str) -> None:
-        """Disconnects a container from a network."""
-        try:
-            net = self.cli.networks.get(network_id)
-        except docker.errors.NotFound:
-            log.error('Trying to connect to a non-existent network')
-            return
-        net.disconnect(container_id)
-
     def list(self, only_label=None) -> Iterable[dict]:
         """
         List running or defined containers.

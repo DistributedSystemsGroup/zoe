@@ -8,7 +8,6 @@
             "essential_count": 1,
             "monitor": true,
             "name": "nginx",
-            "networks": [],
             "ports": [
                 {
                     "expose": false,

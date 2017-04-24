@@ -18,7 +18,6 @@ export class Service implements Serializable<Service> {
     environment: string[][];
     essentialCount: number;
     monitor: boolean;
-    //networks: string[];
     ports: Port[];
     requiredResources: Resource;
     startupOrder: number;

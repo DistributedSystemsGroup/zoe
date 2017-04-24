@@ -84,13 +84,6 @@ A number of special values can be used, these will be substituted by Zoe when th
 * ``{dns_name#self}`` : the DNS name for this service itself
 * ``{dns_name#<service_name_with_counter>}`` : the DNS name of another service defined in the same ZApp. For example, ``{dns_name#jupyter0}`` will be substituted with the DNS name of the first instance of the Jupyter service,
 
-networks
-^^^^^^^^
-
-optional, array
-
-A list of additional Docker network IDs to connect to this service. By default only the network configured in Zoe configuration file will be connected.
-
 volumes
 ^^^^^^^
 
@@ -218,7 +211,6 @@ Example
                 "environment": [
                     ["NB_USER", "{user_name}"]
                 ],
-                "networks": [],
                 "docker_image": "docker-registry:5000/apps/jupyter-notebook",
                 "monitor": true,
                 "total_count": 1,

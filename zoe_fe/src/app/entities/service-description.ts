@@ -7,7 +7,6 @@ export class ServiceDescription implements Serializable<ServiceDescription> {
     environment: string[][];
     requiredResources: Resource;
     startupOrder: number;
-    //networks: string[];
     ports: Port[];
     totalCount: number;
     monitor: boolean;

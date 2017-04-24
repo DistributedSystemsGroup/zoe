@@ -21,7 +21,6 @@
             "essential_count": 1,
             "monitor": false,
             "name": "spark-master",
-            "networks": [],
             "ports": [
                 {
                     "expose": true,
@@ -69,7 +68,6 @@
             "essential_count": 1,
             "monitor": false,
             "name": "spark-worker",
-            "networks": [],
             "ports": [
                 {
                     "is_main_endpoint": false,
@@ -120,7 +118,6 @@
             "essential_count": 1,
             "monitor": true,
             "name": "spark-jupyter",
-            "networks": [],
             "ports": [
                 {
                     "is_main_endpoint": false,
