@@ -3,28 +3,36 @@
     "size": 512,
     "services": [
         {
-            "docker_image": "nginx:alpine",
+            "image": "nginx:alpine",
+            "volumes": [],
             "environment": [],
             "essential_count": 1,
             "monitor": true,
             "name": "nginx",
             "ports": [
                 {
-                    "expose": false,
-                    "is_main_endpoint": true,
                     "name": "Nginx Webserver",
-                    "path": "/",
+                    "url_template": "http://{ip_port}/",
                     "port_number": 80,
-                    "protocol": "http"
+                    "protocol": "tcp"
                 }
             ],
-            "required_resources": {
-                "memory": 536870912
+            "resources": {
+                "memory": {
+                    "min": 536870912,
+                    "max": 536870912
+                },
+                "cores": {
+                    "min": null,
+                    "max": null
+                }
             },
             "startup_order": 0,
-            "total_count": 1
+            "total_count": 1,
+            "replicas": 1,
+            "command": null
          }
     ],
-    "version": 2,
+    "version": 3,
     "will_end": false
 }

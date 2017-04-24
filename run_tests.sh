@@ -3,5 +3,7 @@
 set -e
 
 pylint *.py zoe_* tests/*.py
+pytest --ignore tests pytest --tb=short
+
 doc8 docs/
 sh ./build_docs.sh

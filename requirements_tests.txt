@@ -3,3 +3,4 @@ vulture
 doc8
 mypy-lang
 coverage
+pytest
