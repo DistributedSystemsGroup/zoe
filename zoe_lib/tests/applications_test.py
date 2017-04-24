@@ -36,7 +36,6 @@ class TestApplicationsMethods(unittest.TestCase):
             "name": "test name",
             "will_end": True,
             "priority": 3,
-            "requires_binary": False,
             "version": current_version,
             "services": []
         }

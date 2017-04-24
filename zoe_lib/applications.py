@@ -35,7 +35,7 @@ def app_validate(data):
     :param data: a dictionary containing an application description
     :return: None if the application description is correct
     """
-    required_keys = ['name', 'will_end', 'priority', 'requires_binary', 'version']
+    required_keys = ['name', 'will_end', 'priority', 'version']
     for k in required_keys:
         if k not in data:
             raise InvalidApplicationDescription(msg="Missing required key: %s" % k)
@@ -51,11 +51,6 @@ def app_validate(data):
         bool(data['will_end'])
     except ValueError:
         raise InvalidApplicationDescription(msg="will_end field must be a boolean")
-
-    try:
-        bool(data['requires_binary'])
-    except ValueError:
-        raise InvalidApplicationDescription(msg="requires_binary field must be a boolean")
 
     try:
         priority = int(data['priority'])

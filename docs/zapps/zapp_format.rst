@@ -49,13 +49,6 @@ optional, boolean
 
 If set to true, disables all kinds of auorestart on all services of this ZApp.
 
-requires_binary
-^^^^^^^^^^^^^^^
-
-required, boolean
-
-For now this value is unused.
-
 services
 ^^^^^^^^
 
@@ -219,7 +212,6 @@ Example
         "version": 2,
         "will_end": false,
         "priority": 512,
-        "requires_binary": false,
         "services": [
             {
                 "name": "jupyter",

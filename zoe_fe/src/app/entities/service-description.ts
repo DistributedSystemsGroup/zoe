@@ -46,10 +46,6 @@ export class ServiceDescription implements Serializable<ServiceDescription> {
             this.version = input.version;
         }
 
-        if (input.hasOwnProperty('requires_binary')) {
-            this.requiresBinary = input.requires_binary;
-        }
-
         if (input.hasOwnProperty('required_resources')) {
             this.requiredResources = new Resource().deserialize(input.required_resources);
         }
