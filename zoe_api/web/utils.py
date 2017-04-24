@@ -15,7 +15,6 @@
 
 """Functions needed by the Zoe web interface."""
 
-import base64
 import logging
 
 from zoe_lib.config import get_conf
