@@ -35,7 +35,7 @@ def app_validate(data):
     :param data: a dictionary containing an application description
     :return: None if the application description is correct
     """
-    required_keys = ['name', 'will_end', 'priority', 'version']
+    required_keys = ['name', 'will_end', 'size', 'version']
     for k in required_keys:
         if k not in data:
             raise InvalidApplicationDescription(msg="Missing required key: %s" % k)
@@ -53,11 +53,11 @@ def app_validate(data):
         raise InvalidApplicationDescription(msg="will_end field must be a boolean")
 
     try:
-        priority = int(data['priority'])
+        size = int(data['size'])
     except ValueError:
-        raise InvalidApplicationDescription(msg="priority field must be an int")
-    if priority < 0 or priority > 1024:
-        raise InvalidApplicationDescription(msg="priority must be between 0 and 1024")
+        raise InvalidApplicationDescription(msg="size field must be an int")
+    if size < 0:
+        raise InvalidApplicationDescription(msg="size must be between 0 and 1024")
 
     if 'services' not in data:
         raise InvalidApplicationDescription(msg='the application should contain a list of services')

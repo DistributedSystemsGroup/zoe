@@ -35,12 +35,12 @@ required, boolean
 
 Must be set to False if potentially this application could run forever. For example a Jupyter notebook will never end (must be terminated explicitly by the user), so needs to have this value set to ``false``. A Spark job instead will finish by itself, so for batch ZApps set this value to ``true``.
 
-priority
-^^^^^^^^
+size
+^^^^
 
-required, number [0, 1024)
+required, number >= 0
 
-For now this value is unused.
+This value is used by the Elastic scheduler as an hint to the application size.
 
 disable_autorestart
 ^^^^^^^^^^^^^^^^^^^
@@ -204,7 +204,7 @@ Example
         "name": "Jupyter notebook",
         "version": 2,
         "will_end": false,
-        "priority": 512,
+        "size": 512,
         "services": [
             {
                 "name": "jupyter",

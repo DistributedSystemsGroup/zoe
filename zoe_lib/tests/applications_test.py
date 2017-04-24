@@ -35,7 +35,7 @@ class TestApplicationsMethods(unittest.TestCase):
         self.app_validate_data = {
             "name": "test name",
             "will_end": True,
-            "priority": 3,
+            "size": 3,
             "version": current_version,
             "services": []
         }

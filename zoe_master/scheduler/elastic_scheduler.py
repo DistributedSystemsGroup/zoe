@@ -109,10 +109,10 @@ class ZoeElasticScheduler:
             if exec_data.last_time_scheduled == 0:
                 progress = 0
             else:
-                last_progress = (time.time() - exec_data.last_time_scheduled) / ((execution.services_count / execution.running_services_count) * execution.priority)
+                last_progress = (time.time() - exec_data.last_time_scheduled) / ((execution.services_count / execution.running_services_count) * execution.size)
                 exec_data.progress_sequence.append(last_progress)
                 progress = sum(exec_data.progress_sequence)
-            remaining_execution_time = (1 - progress) * execution.priority
+            remaining_execution_time = (1 - progress) * execution.size
             execution.size = remaining_execution_time * execution.services_count
 
     def _pop_all_with_same_size(self):

@@ -15,9 +15,8 @@ export class ServiceDescription implements Serializable<ServiceDescription> {
     name: string;
 
     willEnd: boolean;
-    priority: number;
+    size: number;
     version: number;
-    requiresBinary: boolean;
     services: Service[];
 
     rawObject: Object;
@@ -37,8 +36,8 @@ export class ServiceDescription implements Serializable<ServiceDescription> {
             this.willEnd = input.will_end;
         }
 
-        if (input.hasOwnProperty('priority')) {
-            this.priority = input.priority;
+        if (input.hasOwnProperty('size')) {
+            this.size = input.size;
         }
 
         if (input.hasOwnProperty('version')) {

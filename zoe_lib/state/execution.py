@@ -65,7 +65,7 @@ class Execution:
         self._status = d['status']
         self.error_message = d['error_message']
 
-        self.priority = self.description['priority']
+        self.size = self.description['size']
 
         self.termination_lock = threading.Lock()
 

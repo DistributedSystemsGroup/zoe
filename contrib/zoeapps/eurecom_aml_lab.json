@@ -1,6 +1,6 @@
 {
     "name": "aml-lab",
-    "priority": 512,
+    "size": 512,
     "services": [
         {
             "docker_image": "docker-registry:5000/zapps/spark2-master",
