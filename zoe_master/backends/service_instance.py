@@ -15,9 +15,13 @@
 
 """When a service from the application description needs to be instantiated, it is transformed into a ServiceInstance, an internal representation of a generic container. This class is used to gather all the attributes that describe a container and to provide a clear interface with the backend."""
 
+import collections
+
 from zoe_lib.state import Service, Execution
 from zoe_lib.config import get_conf
 import zoe_master.backends.common
+
+BackendPort = collections.namedtuple('BackendPort', ['number', 'proto'])
 
 
 class ServiceInstance:
@@ -58,6 +62,8 @@ class ServiceInstance:
 
         self.image_name = service.image_name
 
-        self.ports = service.ports
+        self.ports = []
+        for port in service.ports:
+            self.ports.append(BackendPort(port.internal_number, port.protocol))
 
         self.replicas_count = service.replicas
