@@ -111,6 +111,7 @@ frontend:
   script:
     - rsync -avz . ubuntu@${STAGING_IP}:${ZOE_STAGING_PATH}
     - ssh ubuntu@${STAGING_IP} sudo pip install --upgrade -r /srv/zoe/requirements.txt
+    - ssh ubuntu@${STAGING_IP} /home/ubuntu/clean_zoe_db.sh
     - ssh ubuntu@${STAGING_IP} sudo supervisorctl restart zoe-api
     - ssh ubuntu@${STAGING_IP} sudo supervisorctl restart zoe-master
     - cd zoe_fe
