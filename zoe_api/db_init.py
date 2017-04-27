@@ -124,7 +124,7 @@ def init(force=False):
 
     if force:
         cur.execute("DELETE FROM public.versions WHERE deployment = %s", (get_conf().deployment_name,))
-        cur.execute('DROP SCHEMA {} CASCADE'.format(get_conf().deployment_name))
+        cur.execute('DROP SCHEMA IF EXISTS {} CASCADE'.format(get_conf().deployment_name))
 
     if not check_schema_version(cur, get_conf().deployment_name):
         create_tables(cur)
