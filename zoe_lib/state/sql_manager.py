@@ -120,8 +120,6 @@ class SQLManager:
     def execution_delete(self, execution_id):
         """Delete an execution and its services from the state."""
         cur = self._cursor()
-        query = "DELETE FROM service WHERE execution_id = %s"
-        cur.execute(query, (execution_id,))
         query = "DELETE FROM execution WHERE id = %s"
         cur.execute(query, (execution_id,))
         self.conn.commit()

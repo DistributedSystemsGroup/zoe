@@ -70,7 +70,7 @@ def create_tables(cur):
         status TEXT NOT NULL,
         error_message TEXT NULL DEFAULT NULL,
         description JSON NOT NULL,
-        execution_id INT REFERENCES execution,
+        execution_id INT REFERENCES execution ON DELETE CASCADE,
         service_group TEXT NOT NULL,
         name TEXT NOT NULL,
         backend_id TEXT NULL DEFAULT NULL,
@@ -80,7 +80,7 @@ def create_tables(cur):
         )''')
     cur.execute('''CREATE TABLE port (
         id SERIAL PRIMARY KEY,
-        service_id INT REFERENCES service,
+        service_id INT REFERENCES service ON DELETE CASCADE,
         internal_name TEXT NOT NULL,
         external_ip INET NULL,
         external_port INT NULL,
