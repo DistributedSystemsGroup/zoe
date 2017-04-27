@@ -108,7 +108,7 @@ def create_tables(cur):
         )''')
 
 
-def init():
+def init(force=False):
     """DB init entrypoint."""
     dsn = 'dbname=' + get_conf().dbname + \
         ' user=' + get_conf().dbuser + \
@@ -121,6 +121,11 @@ def init():
 
     version_table(cur)
     cur.execute('SET search_path TO {},public'.format(get_conf().deployment_name))
+
+    if force:
+        cur.execute("DELETE FROM public.versions WHERE deployment = %s", (get_conf().deployment_name,))
+        cur.execute('DROP SCHEMA {} CASCADE'.format(get_conf().deployment_name))
+
     if not check_schema_version(cur, get_conf().deployment_name):
         create_tables(cur)
 
