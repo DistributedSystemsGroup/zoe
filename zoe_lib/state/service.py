@@ -70,13 +70,6 @@ class VolumeDescription:
         self.readonly = data[2]
 
 
-class ExposedPort:
-    """A port on the container that should be exposed."""
-    def __init__(self, data):
-        self.proto = data['protocol']
-        self.number = data['port_number']
-
-
 class Service:
     """A Zoe Service."""
 
@@ -121,7 +114,6 @@ class Service:
         self.command = self.description['command']
         self.resource_reservation = ResourceReservation(self.description['resources'])
         self.volumes = [VolumeDescription(v) for v in self.description['volumes']]
-        self.ports = [ExposedPort(p) for p in self.description['ports']]
         self.replicas = self.description['replicas']
 
     def serialize(self):
@@ -153,6 +145,8 @@ class Service:
         """The service is not running."""
         self.sql_manager.service_update(self.id, status=self.INACTIVE_STATUS, backend_id=None, ip_address=None)
         self.status = self.INACTIVE_STATUS
+        for port in self.ports:
+            port.reset()
 
     def set_starting(self):
         """The service is being created by Docker."""
@@ -189,6 +183,11 @@ class Service:
         """Getter for the user_id, that is actually taken form the parent execution."""
         execution = self.sql_manager.execution_list(only_one=True, id=self.execution_id)
         return execution.user_id
+
+    @property
+    def ports(self):
+        """Getter for the ports exposed by this service."""
+        return self.sql_manager.port_list(service_id=self.id)
 
     @property
     def proxy_address(self):

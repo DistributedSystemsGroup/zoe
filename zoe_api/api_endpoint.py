@@ -179,11 +179,11 @@ class APIEndpoint:
         endpoints = []
         for service in execution.services:
             services_info.append(self.service_by_id(uid, role, service.id))
-            port_mappings = service.ports
             for port in service.description['ports']:
-                port_number = str(port['port_number']) + "/" + port['protocol']
-                if port_number in port_mappings:
-                    endpoint = port['url_template'].format(**{"ip_port": port_mappings[port_number][0] + ":" + port_mappings[port_number][1]})
+                port_key = str(port['port_number']) + "/" + port['protocol']
+                backend_port = self.sql.port_list(only_one=True, service_id=service.id, internal_name=port_key)
+                if backend_port.external_ip is not None:
+                    endpoint = port['url_template'].format(**{"ip_port": backend_port.external_ip + ":" + str(backend_port.external_port)})
                     endpoints.append((port['name'], endpoint))
 
         return services_info, endpoints

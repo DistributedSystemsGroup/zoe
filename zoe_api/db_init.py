@@ -21,7 +21,7 @@ import psycopg2.extras
 import zoe_api.exceptions
 from zoe_lib.config import get_conf
 
-SQL_SCHEMA_VERSION = 3  # ---> Increment this value every time the schema changes !!! <---
+SQL_SCHEMA_VERSION = 4  # ---> Increment this value every time the schema changes !!! <---
 
 
 def version_table(cur):
@@ -78,6 +78,14 @@ def create_tables(cur):
         ip_address CIDR NULL DEFAULT NULL,
         essential BOOLEAN NOT NULL DEFAULT FALSE
         )''')
+    cur.execute('''CREATE TABLE port (
+        id SERIAL PRIMARY KEY,
+        service_id INT REFERENCES service,
+        internal_name TEXT NOT NULL,
+        external_ip INET NULL,
+        external_port INT NULL,
+        description JSON NOT NULL
+    )''')
     #Create oauth_client and oauth_token tables for oAuth2
     cur.execute('''CREATE TABLE oauth_client (
         identifier TEXT PRIMARY KEY,
