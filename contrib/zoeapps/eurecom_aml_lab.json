@@ -48,7 +48,7 @@
                 ],
                 [
                     "SPARK_WORKER_RAM",
-                    "8589934592"
+                    "16106127360"
                 ],
                 [
                     "SPARK_MASTER_IP",
@@ -81,7 +81,7 @@
                 }
             ],
             "required_resources": {
-                "memory": 10737418240
+                "memory": 17179869184
             },
             "startup_order": 1,
             "total_count": 2
@@ -95,7 +95,7 @@
                 ],
                 [
                     "SPARK_EXECUTOR_RAM",
-                    "8589934592"
+                    "16106127360"
                 ],
                 [
                     "SPARK_DRIVER_RAM",
