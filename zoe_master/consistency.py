@@ -25,7 +25,7 @@ from zoe_lib.sql_manager import SQLManager, Service
 
 log = logging.getLogger(__name__)
 
-CHECK_INTERVAL = 300
+CHECK_INTERVAL = 30
 
 
 class ZoeSwarmChecker(threading.Thread):
@@ -59,6 +59,9 @@ class ZoeSwarmChecker(threading.Thread):
                         if container['status'] == 'exited':
                             log.info('resetting status of service {}, died with no event'.format(service.name))
                             service.set_docker_status(service.DOCKER_DIE_STATUS)
+                        elif container['status'] == 'running' and service.docker_status != service.DOCKER_START_STATUS:
+                            log.info('resetting status of service {}, started with no event'.format(service.name))
+                            service.set_docker_status(service.DOCKER_START_STATUS)
                 if not found:
                     service.set_docker_status(service.DOCKER_DESTROY_STATUS)
 
