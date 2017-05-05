@@ -15,6 +15,6 @@ Resources:
 
 Zoe applications (ZApps):
 
-- Repository: https://github.com/DistributedSystemsGroup/zoe-applications
+- Check the zapp-* repositories at: https://gitlab.eurecom.fr/zoe/
 
 Zoe is licensed under the terms of the Apache 2.0 license.
