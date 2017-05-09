@@ -60,7 +60,7 @@ Where:
 
 * ``application`` is the full ZApp JSON document, the application description
 
-Will return a 201 HTTP status in case the JSON document passes validation, 400 otherwise.
+Will return a 200 HTTP status in case the JSON document passes validation, 400 otherwise.
 
 Execution endpoint
 ------------------

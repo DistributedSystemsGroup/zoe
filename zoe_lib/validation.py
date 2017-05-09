@@ -38,7 +38,7 @@ class ZoeValidationAPI(ZoeAPIBase):
             "application": application_description,
         }
         data_, status_code = self._rest_post('/zapp_validate', zapp)
-        if status_code != 201:
+        if status_code != 200:
             return False
         else:
             return True

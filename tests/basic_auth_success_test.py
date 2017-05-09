@@ -85,7 +85,7 @@ class ZoeRestTestSuccess(unittest.TestCase):
             data = json.loads(data_file.read())
 
         req = requests.post(self.__class__.uri + 'zapp_validate', json={"application": data})
-        self.assertEqual(req.status_code, 201)
+        self.assertEqual(req.status_code, 200)
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
