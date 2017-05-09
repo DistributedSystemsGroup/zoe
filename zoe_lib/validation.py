@@ -20,7 +20,6 @@ This module contains the Zoe Info API.
 import logging
 
 from zoe_lib.api_base import ZoeAPIBase
-from zoe_lib.exceptions import ZoeAPIException
 
 log = logging.getLogger(__name__)
 
@@ -38,8 +37,8 @@ class ZoeValidationAPI(ZoeAPIBase):
         zapp = {
             "application": application_description,
         }
-        data, status_code = self._rest_post('/zapp_validate', zapp)
+        data_, status_code = self._rest_post('/zapp_validate', zapp)
         if status_code != 201:
-            raise False
+            return False
         else:
             return True
