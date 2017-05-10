@@ -129,12 +129,11 @@ class ExecutionInspectWeb(ZoeRequestHandler):
 
         e = self.api_endpoint.execution_by_id(uid, role, execution_id)
 
-        services_info = []
-        for service in e.services:
-            services_info.append(self.api_endpoint.service_by_id(uid, role, service.id))
+        services_info, endpoints = self.api_endpoint.execution_endpoints(uid, role, e)
 
         template_vars = {
             "e": e,
+            "endpoints": endpoints,
             "services_info": services_info
         }
         self.render('execution_inspect.html', **template_vars)

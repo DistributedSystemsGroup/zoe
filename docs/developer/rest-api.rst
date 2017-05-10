@@ -5,7 +5,7 @@ Zoe REST API
 
 Zoe can be used from the command line or the web interface. For more complex tasks also an API is provided, so that Zoe functionality can be accesses programmatically.
 
-The API is provided by the zoe-api processes, on the same port of the web interface (5001 by default). Every URL of the API contains, after the hostname and port, the path ``/api/<api version>/``. This document describes API version 0.6.
+The API is provided by the zoe-api processes, on the same port of the web interface (5001 by default). Every URL of the API contains, after the hostname and port, the path ``/api/<api version>/``. **The current API version is 0.7**.
 
 In case the request causes an error, an appropriate HTTP status code is returned. The reply will also contain a JSON document in this format::
 
@@ -22,16 +22,16 @@ Info endpoint
 
 This endpoint does not need authentication. It returns general, static, information about the Zoe software. It is meant for checking that the client is able to talk correctly to the API server::
 
-    curl http://bf5:8080/api/0.6/info
+    curl http://bf5:8080/api/<api_version>/info
 
 
 Will return a JSON document, like this::
 
     {
-        "version" : "0.10.1-beta",
+        "version" : "2017.06",
         "deployment_name" : "prod",
-        "application_format_version" : 2,
-        "api_version" : "0.6"
+        "application_format_version" : 3,
+        "api_version" : "0.7"
     }
 
 Where:
@@ -40,6 +40,27 @@ Where:
 * ``deployment_name`` is the name configured for this deployment (multiple Zoe deployment can share the same cluster)
 * ``application_format_version`` is the version of ZApp format this Zoe is able to understand
 * ``api_version`` is the API version supported by this Zoe and should match the one used in the request URL
+
+ZApp validation endpoint
+------------------------
+
+This endpoint does not need authentication. Use this endpoint to validate ZApp descriptions against the deployed Zoe version.
+
+Usage::
+
+    curl -X POST --data-urlencode @filename http://bf5:8080/api/<api_version>/zapp_validate
+
+Needs a JSON document passed as the request body::
+
+    {
+        "application": <zapp json>,
+    }
+
+Where:
+
+* ``application`` is the full ZApp JSON document, the application description
+
+Will return a 200 HTTP status in case the JSON document passes validation, 400 otherwise.
 
 Execution endpoint
 ------------------
@@ -51,7 +72,7 @@ Execution details
 
 Request (GET)::
 
-    curl -u 'username:password' http://bf5:8080/api/0.6/execution/<execution_id>
+    curl -u 'username:password' http://bf5:8080/api/<api_version>/execution/<execution_id>
 
 Where:
 
@@ -97,7 +118,7 @@ This endpoint terminates a running execution.
 
 Request (DELETE)::
 
-    curl -X DELETE -u 'username:password' http://bf5:8080/api/0.6/execution/<execution_id>
+    curl -X DELETE -u 'username:password' http://bf5:8080/api/<api_version>/execution/<execution_id>
 
 If the request is successful an empty response with status code 200 will be returned.
 
@@ -107,7 +128,7 @@ This endpoint deletes an execution from the database, terminating it if it is ru
 
 Request (DELETE)::
 
-    curl -u 'username:password' http://bf5:8080/api/0.6/execution/delete/<execution_id>
+    curl -u 'username:password' http://bf5:8080/api/<api_version>/execution/delete/<execution_id>
 
 If the request is successful an empty response with status code 200 will be returned.
 
@@ -118,7 +139,7 @@ This endpoint will list all executions belonging to the calling user. If the use
 
 Request (GET)::
 
-    curl -u 'username:password' http://bf5:8080/api/0.6/execution
+    curl -u 'username:password' http://bf5:8080/api/<api_version>/execution
 
 Will return a JSON document like this::
 
@@ -149,7 +170,7 @@ Start execution
 
 Request (POST)::
 
-    curl -X POST -u 'username:password' --data-urlencode @filename http://bf5:8080/api/0.6/execution
+    curl -X POST -u 'username:password' --data-urlencode @filename http://bf5:8080/api/<api_version>/execution
 
 Needs a JSON document passed as the request body::
 
@@ -183,7 +204,7 @@ Service details
 
 Request::
 
-    curl -u 'username:password' http://bf5:8080/api/0.6/service/<service_id>
+    curl -u 'username:password' http://bf5:8080/api/<api_version>/service/<service_id>
 
 Will return a JSON document like this::
 
@@ -198,12 +219,7 @@ Will return a JSON document like this::
        "error_message" : null,
        "id" : 26774,
        "description" : {
-          "required_resources" : {
-             "memory" : 536870912
-          },
     [...]
-          "name" : "boinc-client",
-          "volumes" : []
        }
     }
 
@@ -225,7 +241,7 @@ Service standard output and error
 
 Request::
 
-    curl -u 'username:password' http://bf5:8080/api/0.6/service/logs/<service_id>
+    curl -u 'username:password' http://bf5:8080/api/<api_version>/service/logs/<service_id>
 
 Will stream the service instance output, starting from the time the service started. It will close the connection when the service exits.
 
@@ -236,7 +252,7 @@ This endpoint does not need authentication. It returns a list of services that m
 
 Request::
 
-    curl http://bf5:8080/api/0.6/discovery/by_group/<execution_id>/<service_type>
+    curl http://bf5:8080/api/<api_version>/discovery/by_group/<execution_id>/<service_type>
 
 Where:
 
@@ -268,7 +284,7 @@ Scheduler
 ^^^^^^^^^
 Request::
 
-    curl http://bf5:8080/api/0.6/statistics/scheduler
+    curl http://bf5:8080/api/<api_version>/statistics/scheduler
 
 Will return a JSON document, like this::
 
@@ -292,7 +308,7 @@ Request new access token
 
 Request::
 
-    curl -u 'username:password' http://bf5:8080/api/0.6/oauth/token -X POST -H 'Content-Type: application/json' -d '{"grant_type": "password"}'
+    curl -u 'username:password' http://bf5:8080/api/<api_version>/oauth/token -X POST -H 'Content-Type: application/json' -d '{"grant_type": "password"}'
 
 Will return a JSON document, like this::
 
@@ -315,7 +331,7 @@ Refresh an access token
 
 Request::
 
-    curl  -H 'Authorization: Bearer 9bab190f-e211-42aa-917e-20ce987e355e' http://bf5:8080/api/0.6/oauth/token -X POST -H 'Content-Type: application/json' -d '{"grant_type": "refresh_token"}'
+    curl  -H 'Authorization: Bearer 9bab190f-e211-42aa-917e-20ce987e355e' http://bf5:8080/api/<api_version>/oauth/token -X POST -H 'Content-Type: application/json' -d '{"grant_type": "refresh_token"}'
 
 Will return a JSON document, like this::
 
@@ -334,7 +350,7 @@ Revoke an access/refresh token
 
 Request::
 
-    curl -u 'usernam:password' -X DELETE http://bf5:8080/api/0.6/oauth/revoke/<token>
+    curl -u 'usernam:password' -X DELETE http://bf5:8080/api/<api_version>/oauth/revoke/<token>
 
 Where:
 
@@ -352,7 +368,7 @@ Instead of sending raw username, password to request results from other api endp
 
 Example::
 
-    curl -H 'Authorization: Bearer 378f8d5f-2eb5-4181-b632-ad23c4534d32' http://bf5:8080/api/0.6/execution
+    curl -H 'Authorization: Bearer 378f8d5f-2eb5-4181-b632-ad23c4534d32' http://bf5:8080/api/<api_version>/execution
 
 Login endpoint
 --------------
@@ -360,7 +376,7 @@ Get back a cookie for further authentication/authorization with other api endpoi
 
 Request::
 
-   curl -u 'username:password' -c zoe_cookie.txt http://bf5:8080/api/0.6/login
+   curl -u 'username:password' -c zoe_cookie.txt http://bf5:8080/api/<api_version>/login
 
 Will return a JSON document, like this::
 
@@ -375,11 +391,10 @@ Pass this cookie on each api request which requires authentication.
 
 Example::
 
-    curl -b zoe_cookie.txt http://bf5:8080/api/0.6/execution
+    curl -b zoe_cookie.txt http://bf5:8080/api/<api_version>/execution
 
 Note:
 
 - For zoe web interface, we require cookie_based mechanism for authentication/authorization.
 - Every unauthorized request will be redirected to **http://bf5:8080/login**
 - After successfully login, a cookie will be saved at browser for further authentication/authorization purpose.
-

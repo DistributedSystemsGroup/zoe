@@ -15,6 +15,7 @@
 
 """The real API, exposed as web pages or REST API."""
 
+from datetime import datetime, timedelta
 import logging
 import re
 import threading
@@ -27,6 +28,7 @@ import zoe_lib.applications
 import zoe_lib.exceptions
 import zoe_lib.state
 from zoe_lib.config import get_conf
+from zoe_master.backends.swarm.api_client import SwarmClient
 
 log = logging.getLogger(__name__)
 
@@ -67,6 +69,13 @@ class APIEndpoint:
             log.info('Proxy disabled')
             proxy = None
         return proxy
+
+    def zapp_validate(self, application_description):
+        """Validates the passed ZApp description against the supported schema."""
+        try:
+            zoe_lib.applications.app_validate(application_description)
+        except zoe_lib.exceptions.InvalidApplicationDescription as e:
+            raise zoe_api.exceptions.ZoeException('Invalid application description: ' + e.message)
 
     def execution_start(self, uid, role, exec_name, application_description):
         """Start an execution."""
@@ -144,6 +153,18 @@ class APIEndpoint:
         ret = [s for s in services if s.user_id == uid or role == 'admin']
         return ret
 
+    def service_logs(self, uid, role, service_id, stream=True):
+        """Retrieve the logs for the given service."""
+        service = self.sql.service_list(id=service_id, only_one=True)
+        if service is None:
+            raise zoe_api.exceptions.ZoeNotFoundException('No such service')
+        if service.user_id != uid and role != 'admin':
+            raise zoe_api.exceptions.ZoeAuthException()
+        if service.docker_id is None:
+            raise zoe_api.exceptions.ZoeNotFoundException('Container is not running')
+        swarm = SwarmClient()
+        return swarm.logs(service.docker_id, stream)
+
     def statistics_scheduler(self, uid_, role_):
         """Retrieve statistics about the scheduler."""
         success, message = self.master.scheduler_statistics()
@@ -166,9 +187,32 @@ class APIEndpoint:
         all_execs = self.sql.execution_list()
         for execution in all_execs:
             if execution.is_running:
+                terminated = False
                 for service in execution.services:
                     if service.description['monitor'] and service.is_dead():
                         log.info("Service {} ({}) of execution {} died, terminating execution".format(service.id, service.name, execution.id))
                         self.master.execution_terminate(execution.id)
+                        terminated = True
                         break
+                if not terminated and execution.name == "aml-lab":
+                    log.debug('Looking at AML execution {}...'.format(execution.id))
+                    if datetime.now() - execution.time_start > timedelta(hours=get_conf().aml_ttl):
+                        log.info('Terminating AML-LAB execution for user {}, timer expired'.format(execution.user_id))
+                        self.master.execution_terminate(execution.id)
+
         log.debug('Cleanup task finished')
+
+    def execution_endpoints(self, uid: str, role: str, execution: zoe_lib.state.Execution):
+        """Return a list of the services and public endpoints available for a certain execution."""
+        services_info = []
+        endpoints = []
+        for service in execution.services:
+            services_info.append(self.service_by_id(uid, role, service.id))
+            for port in service.description['ports']:
+                port_key = str(port['port_number']) + "/" + port['protocol']
+                backend_port = self.sql.port_list(only_one=True, service_id=service.id, internal_name=port_key)
+                if backend_port.external_ip is not None:
+                    endpoint = port['url_template'].format(**{"ip_port": backend_port.external_ip + ":" + str(backend_port.external_port)})
+                    endpoints.append((port['name'], endpoint))
+
+        return services_info, endpoints

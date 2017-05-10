@@ -23,6 +23,7 @@ import psycopg2.extras
 
 from .service import Service
 from .execution import Execution
+from .port import Port
 
 log = logging.getLogger(__name__)
 
@@ -119,8 +120,6 @@ class SQLManager:
     def execution_delete(self, execution_id):
         """Delete an execution and its services from the state."""
         cur = self._cursor()
-        query = "DELETE FROM service WHERE execution_id = %s"
-        cur.execute(query, (execution_id,))
         query = "DELETE FROM execution WHERE id = %s"
         cur.execute(query, (execution_id,))
         self.conn.commit()
@@ -181,7 +180,62 @@ class SQLManager:
         self.conn.commit()
         return cur.fetchone()[0]
 
-    #The above section is used for Oauth2 authentication mechanism
+    def port_list(self, only_one=False, **kwargs):
+        """
+        Return a list of ports.
+
+        :param only_one: only one result is expected
+        :type only_one: bool
+        :param kwargs: filter services based on their fields/columns
+        :return: one or more ports
+        """
+        cur = self._cursor()
+        q_base = 'SELECT * FROM port'
+        if len(kwargs) > 0:
+            q = q_base + " WHERE "
+            filter_list = []
+            args_list = []
+            for key, value in kwargs.items():
+                filter_list.append('{} = %s'.format(key))
+                args_list.append(value)
+            q += ' AND '.join(filter_list)
+            query = cur.mogrify(q, args_list)
+        else:
+            query = cur.mogrify(q_base)
+
+        cur.execute(query)
+        if only_one:
+            row = cur.fetchone()
+            if row is None:
+                return None
+            return Port(row, self)
+        else:
+            return [Port(x, self) for x in cur]
+
+    def port_update(self, port_id, **kwargs):
+        """Update the state of an existing port."""
+        cur = self._cursor()
+        arg_list = []
+        value_list = []
+        for key, value in kwargs.items():
+            arg_list.append('{} = %s'.format(key))
+            value_list.append(value)
+        set_q = ", ".join(arg_list)
+        value_list.append(port_id)
+        q_base = 'UPDATE port SET ' + set_q + ' WHERE id=%s'
+        query = cur.mogrify(q_base, value_list)
+        cur.execute(query)
+        self.conn.commit()
+
+    def port_new(self, service_id, internal_name, description):
+        """Adds a new port to the state."""
+        cur = self._cursor()
+        query = cur.mogrify('INSERT INTO port (id, service_id, internal_name, external_ip, external_port, description) VALUES (DEFAULT, %s, %s, NULL, NULL, %s) RETURNING id', (service_id, internal_name, description))
+        cur.execute(query)
+        self.conn.commit()
+        return cur.fetchone()[0]
+
+    # The section below is used for Oauth2 authentication mechanism
 
     def fetch_by_refresh_token(self, refresh_token):
         """ get info from refreshtoken """

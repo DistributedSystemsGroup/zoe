@@ -139,7 +139,7 @@ The function `gen_app()` takes as arguments the options defined in the previous 
 
 Each framework package defines functions that fill in a template. These functions are actually quite simple, but they hide the structure of the Zoe application description format to simplify the creation of ZApps. They are also hiding the complexities of running Spark in Docker containers: network details and configuration options are already defined and setup correctly.
 
-As can be seen in some of the sample applications (have a look at the `eurecom_aml_lab` one, for example) the service descriptions returned by the template functions can be further customized to add environment variables, docker networks, volumes, etc.
+As can be seen in some of the sample applications (have a look at the `eurecom_aml_lab` one, for example) the service descriptions returned by the template functions can be further customized to add environment variables, volumes, etc.
 
 Step 5 - putting it all together
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

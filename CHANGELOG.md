@@ -1,5 +1,9 @@
 # Zoe Changelog
 
+## Version 2017.06
+
+* ZApp description format revision, use JSON schemas
+
 ## Version 2017.03
 
 * Major documentation update

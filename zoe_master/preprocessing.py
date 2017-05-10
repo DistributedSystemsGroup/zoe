@@ -17,6 +17,7 @@
 
 import logging
 
+import zoe_lib.exec_logs as exec_logs
 from zoe_lib.state import Execution, SQLManager
 from zoe_master.scheduler import ZoeBaseScheduler
 
@@ -32,11 +33,24 @@ def _digest_application_description(state: SQLManager, execution: Execution):
         counter = 0
         for service_n_ in range(essential_count):
             name = "{}{}".format(service_descr['name'], counter)
-            state.service_new(execution.id, name, service_descr['name'], service_descr, True)
+            sid = state.service_new(execution.id, name, service_descr['name'], service_descr, True)
+
+            # Ports
+            for port_descr in service_descr['ports']:
+                port_internal = str(port_descr['port_number']) + '/' + port_descr['protocol']
+                state.port_new(sid, port_internal, port_descr)
+
             counter += 1
+
         for service_n_ in range(elastic_count):
             name = "{}{}".format(service_descr['name'], counter)
-            state.service_new(execution.id, name, service_descr['name'], service_descr, False)
+            sid = state.service_new(execution.id, name, service_descr['name'], service_descr, False)
+
+            # Ports
+            for port_descr in service_descr['ports']:
+                port_internal = str(port_descr['port_number']) + '/' + port_descr['protocol']
+                state.port_new(sid, port_internal, port_descr)
+
             counter += 1
         assert counter == total_count
 
@@ -71,3 +85,4 @@ def restart_resubmit_scheduler(state: SQLManager, scheduler: ZoeBaseScheduler):
 def execution_delete(execution: Execution):
     """Remove an execution, must only be called if the execution is NOT running."""
     assert not execution.is_active
+    exec_logs.delete(execution)

@@ -73,7 +73,8 @@ images:
   before_script:
     - mkdir -p /etc/docker/certs.d/$DOCKER_REGISTRY
     - cp /registry-ca.crt /etc/docker/certs.d/$DOCKER_REGISTRY/ca.crt
-    - docker login -u gitlab-ci-runner -p $REGISTRY_PASSWORD $DOCKER_REGISTRY
+    - mkdir -p $HOME/.docker
+    - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
   script:
     - docker build --pull -t ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE} .
     - docker push ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE}
@@ -111,6 +112,7 @@ frontend:
   script:
     - rsync -avz . ubuntu@${STAGING_IP}:${ZOE_STAGING_PATH}
     - ssh ubuntu@${STAGING_IP} sudo pip install --upgrade -r /srv/zoe/requirements.txt
+    - ssh ubuntu@${STAGING_IP} /home/ubuntu/clean_zoe_db.sh
     - ssh ubuntu@${STAGING_IP} sudo supervisorctl restart zoe-api
     - ssh ubuntu@${STAGING_IP} sudo supervisorctl restart zoe-master
     - cd zoe_fe

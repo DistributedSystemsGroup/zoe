@@ -47,6 +47,11 @@ class SwarmStateSynchronizer(threading.Thread):
             old_status = service.backend_status
             service.set_backend_status(container['state'])
             log.debug('Updated service status, {} from {} to {}'.format(service.name, old_status, container['state']))
+        for port in service.ports:
+            if container['ports'][port.internal_name] is not None:
+                port.activate(container['ports'][port.internal_name][0], container['ports'][port.internal_name][1])
+            else:
+                port.reset()
 
     def run(self):
         """The thread loop."""
