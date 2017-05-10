@@ -22,7 +22,6 @@ Common options:
 * ``influxdb-dbname = zoe`` : Name of the InfluxDB database to use for storing metrics
 * ``influxdb-url = http://localhost:8086`` : URL of the InfluxDB service (ex. )
 * ``influxdb-enable = False`` : Enable metric output toward influxDB
-* ``gelf-address = udp://1.2.3.4:1234`` : Enable Docker GELF log output to this destination
 * ``workspace-base-path = /mnt/zoe-workspaces`` : Base directory where user workspaces will be created. This directory should reside on a shared filesystem visible by all Docker hosts.
 * ``overlay-network-name = zoe`` : name of the pre-configured Docker overlay network Zoe should use
 * ``backend = Swarm`` : ' Name of the backend to enable and use
