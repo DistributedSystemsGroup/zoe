@@ -152,7 +152,7 @@ class ZoeElasticScheduler:
                 self._refresh_execution_sizes()
 
                 if self.policy == "SIZE":
-                    self.queue.sort()
+                    self.queue.sort(key=lambda execution: execution.size)
 
                 log.debug('--> Queue dump after sorting')
                 for j in self.queue:
