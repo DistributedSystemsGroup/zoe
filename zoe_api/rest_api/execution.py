@@ -126,8 +126,21 @@ class ExecutionCollectionAPI(RequestHandler):
     def get(self):
         """
         Returns a list of all active executions.
+        
+        The list can be filtered by passing a non-empty JSON dictionary. Any combination of the following filters is supported:
 
-        Return a list of all executions which have status equal to ..."
+        * status: one of submitted, scheduled, starting, error, running, cleaning up, terminated
+        * name: execution mane
+        * user_id: user_id owning the execution (admin only)
+        * limit: limit the number of returned entries
+        * earlier_than_submit: all execution that where submitted earlier than this timestamp
+        * earlier_than_start: all execution that started earlier than this timestamp
+        * earlier_than_end: all execution that ended earlier than this timestamp
+        * later_than_submit: all execution that where submitted later than this timestamp
+        * later_than_start: all execution that started later than this timestamp
+        * later_than_end: all execution that started later than this timestamp
+        
+        All timestamps should be passed as number of seconds since the epoch (UTC timezone).
 
         example:  curl -u 'username:password' -X GET -H "Content-Type: application/json" -d '{"status":"terminated"}' http://bf5:8080/api/0.6/execution
 
@@ -137,16 +150,26 @@ class ExecutionCollectionAPI(RequestHandler):
 
         filt_dict = {}
 
-        try:
-            if self.request.body:
-                filt_dict = tornado.escape.json_decode(self.request.body)
-        except ValueError:
-            raise zoe_api.exceptions.ZoeRestAPIException('Error decoding JSON data')
+        filters = [
+            ('status', str),
+            ('name', str),
+            ('user_id', str),
+            ('limit', int),
+            ('earlier_than_submit', int),
+            ('earlier_than_start', int),
+            ('earlier_than_end', int),
+            ('later_than_submit', int),
+            ('later_than_start', int),
+            ('later_than_end', int)
+        ]
+        for f in filters:
+            if f[0] in self.request.arguments:
+                if f[1] == str:
+                    filt_dict[f[0]] = self.request.arguments[f[0]][0].decode('utf-8')
+                else:
+                    filt_dict[f[0]] = f[1](self.request.arguments[f[0]][0])
 
-        if 'status' in filt_dict:
-            execs = self.api_endpoint.execution_list(uid, role, status=filt_dict['status'])
-        else:
-            execs = self.api_endpoint.execution_list(uid, role)
+        execs = self.api_endpoint.execution_list(uid, role, **filt_dict)
 
         self.write(dict([(e.id, e.serialize()) for e in execs]))
 
