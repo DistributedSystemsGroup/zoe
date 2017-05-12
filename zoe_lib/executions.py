@@ -61,13 +61,26 @@ class ZoeExecutionsAPI(ZoeAPIBase):
         else:
             raise ZoeAPIException(data['message'])
 
-    def list(self):
+    def list(self, **kwargs):
         """
         Returns a list of all executions for the calling user, all of them if the user is admin.
 
+        The list can be filtered by passing arguments. Any combination of the following filters is supported:
+
+        * status: one of submitted, scheduled, starting, error, running, cleaning up, terminated
+        * name: execution mane
+        * user_id: user_id owning the execution (admin only)
+        * limit: limit the number of returned entries
+        * earlier_than_submit: all execution that where submitted earlier than this timestamp
+        * earlier_than_start: all execution that started earlier than this timestamp
+        * earlier_than_end: all execution that ended earlier than this timestamp
+        * later_than_submit: all execution that where submitted later than this timestamp
+        * later_than_start: all execution that started later than this timestamp
+        * later_than_end: all execution that started later than this timestamp
+
         :return:
         """
-        data, status_code = self._rest_get('/execution')
+        data, status_code = self._rest_get('/execution', kwargs)
         if status_code == 200:
             return data
         else:
