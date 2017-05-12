@@ -94,11 +94,11 @@ class SQLManager:
                 args_list.append(value)
             q += ' AND '.join(filter_list)
             if limit > 0:
-                q += ' LIMIT {}'.format(limit)
+                q += ' ORDER BY id DESC LIMIT {}'.format(limit)
             query = cur.mogrify(q, args_list)
         else:
             if limit > 0:
-                q_base += ' LIMIT {}'.format(limit)
+                q_base += ' ORDER BY id DESC LIMIT {}'.format(limit)
             query = cur.mogrify(q_base)
 
         cur.execute(query)
