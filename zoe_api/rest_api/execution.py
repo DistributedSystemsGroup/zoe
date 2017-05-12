@@ -126,7 +126,7 @@ class ExecutionCollectionAPI(RequestHandler):
     def get(self):
         """
         Returns a list of all active executions.
-        
+
         The list can be filtered by passing a non-empty JSON dictionary. Any combination of the following filters is supported:
 
         * status: one of submitted, scheduled, starting, error, running, cleaning up, terminated
@@ -139,7 +139,7 @@ class ExecutionCollectionAPI(RequestHandler):
         * later_than_submit: all execution that where submitted later than this timestamp
         * later_than_start: all execution that started later than this timestamp
         * later_than_end: all execution that started later than this timestamp
-        
+
         All timestamps should be passed as number of seconds since the epoch (UTC timezone).
 
         example:  curl -u 'username:password' -X GET -H "Content-Type: application/json" -d '{"status":"terminated"}' http://bf5:8080/api/0.6/execution
@@ -162,12 +162,12 @@ class ExecutionCollectionAPI(RequestHandler):
             ('later_than_start', int),
             ('later_than_end', int)
         ]
-        for f in filters:
-            if f[0] in self.request.arguments:
-                if f[1] == str:
-                    filt_dict[f[0]] = self.request.arguments[f[0]][0].decode('utf-8')
+        for filter in filters:
+            if filter[0] in self.request.arguments:
+                if filter[1] == str:
+                    filt_dict[filter[0]] = self.request.arguments[filter[0]][0].decode('utf-8')
                 else:
-                    filt_dict[f[0]] = f[1](self.request.arguments[f[0]][0])
+                    filt_dict[filter[0]] = filter[1](self.request.arguments[filter[0]][0])
 
         execs = self.api_endpoint.execution_list(uid, role, **filt_dict)
 

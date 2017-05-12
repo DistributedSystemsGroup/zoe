@@ -82,9 +82,9 @@ def exec_list_cmd(args):
         'later_than_end'
     ]
     filters = {}
-    for k, v in vars(args).items():
-        if k in filter_names:
-            filters[k] = v
+    for key, value in vars(args).items():
+        if key in filter_names:
+            filters[key] = value
     data = exec_api.list(**filters)
     for e in sorted(data.values(), key=lambda x: x['id']):
         print('Execution {} (User: {}, ID: {}): {}'.format(e['name'], e['user_id'], e['id'], e['status']))

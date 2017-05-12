@@ -64,7 +64,7 @@ class ZoeExecutionsAPI(ZoeAPIBase):
     def list(self, **kwargs):
         """
         Returns a list of all executions for the calling user, all of them if the user is admin.
-        
+
         The list can be filtered by passing arguments. Any combination of the following filters is supported:
 
         * status: one of submitted, scheduled, starting, error, running, cleaning up, terminated
