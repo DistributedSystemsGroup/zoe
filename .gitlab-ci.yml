@@ -38,7 +38,7 @@ unittests:
     - pip install -r requirements_tests.txt
     - pytest --ignore tests --tb=short
 
-docs:
+docs-test:
   stage: static-test
   image: python:3.4
   script:
