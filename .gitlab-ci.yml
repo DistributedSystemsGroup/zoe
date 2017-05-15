@@ -60,7 +60,7 @@ SonarQube:
   script:
     - /usr/bin/sonar-scanner-run.sh
   only:
-    - ext/devel/master
+    - devel/master
 
 api-test:
   stage: integration-test
