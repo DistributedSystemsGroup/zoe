@@ -79,14 +79,15 @@ class ZoeAPIBase:
         return req, req.status_code
 
     @retry(ZoeAPIException)
-    def _rest_get(self, path):
+    def _rest_get(self, path, payload=None):
         """
         :type path: str
+        :type payload: dict
         :rtype: (dict, int)
         """
         url = self.url + '/api/' + ZOE_API_VERSION + path
         try:
-            req = requests.get(url, auth=(self.user, self.password))
+            req = requests.get(url, auth=(self.user, self.password), params=payload)
         except requests.exceptions.Timeout:
             raise ZoeAPIException('HTTP connection timeout')
         except requests.exceptions.HTTPError:
