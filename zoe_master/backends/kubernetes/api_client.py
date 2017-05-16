@@ -55,7 +55,6 @@ class KubernetesServiceConf:
             },
             'spec': {
                 'selector': {},
-                'type': 'LoadBalancer',
                 'ports': []
             },
         }
@@ -77,8 +76,8 @@ class KubernetesServiceConf:
         for prt in ports:
             aux = self.conf['spec']['ports']  # type: List[Dict[str, str]]
             aux[count]['name'] = 'http'
-            aux[count]['port'] = prt
-            aux[count]['targetPort'] = prt
+            aux[count]['port'] = prt.number
+            aux[count]['targetPort'] = prt.number
             count += 1
 
     def set_selectors(self, selectors: dict):
@@ -155,8 +154,8 @@ class KubernetesReplicationControllerConf:
         count = 0
 
         for k in env:
-            aux['spec']['containers'][0]['env'][count]['name'] = k
-            aux['spec']['containers'][0]['env'][count]['value'] = env[k]
+            aux['spec']['containers'][0]['env'][count]['name'] = k[0]
+            aux['spec']['containers'][0]['env'][count]['value'] = k[1]
             count += 1
 
     def set_spec_container_ports(self, ports):
@@ -166,7 +165,7 @@ class KubernetesReplicationControllerConf:
         count = 0
 
         for prt in ports:
-            aux['spec']['containers'][0]['ports'][count]['containerPort'] = prt
+            aux['spec']['containers'][0]['ports'][count]['containerPort'] = prt.number
             count += 1
 
     def set_spec_container_mem_limit(self, memlimit):
