@@ -1,0 +1,19 @@
+version: '2'
+services:
+  zoe-api:
+    image: hxquangnhat/zoe:k8s-0.2
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /media/sdb/kubernetes/data/config:/opt/zoe/kube.conf
+    command: python3 zoe-api.py --debug --backend Kubernetes --deployment-name prod --dbuser postgres --dbhost 192.168.12.2 --dbport 5432 --dbname postgres --dbpass postgres --master-url tcp://zoe-master-test:4850 --auth-type text --proxy-type none --proxy-path zoe.fsdna.on.kpmg.de --listen-port 5001
+    ports:
+      - "5001:5001"
+  zoe-master:
+    image: hxquangnhat/zoe:k8s-0.2
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /mnt/zoe-workspaces:/mnt/zoe-workspaces
+      - /media/sdb/kubernetes/data/config:/opt/zoe/kube.conf
+    command: python3 zoe-master.py --debug --backend Kubernetes --deployment-name prod --dbuser postgres --dbhost 192.168.12.2 --dbport 5432 --dbname postgres --dbpass postgres --auth-type text --proxy-type none --proxy-path zoe.fsdna.on.kpmg.de --listen-port 5001
+    depends_on:
+      - zoe-api
