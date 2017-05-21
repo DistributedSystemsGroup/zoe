@@ -21,12 +21,12 @@ import docker
 
 
 class ZoeFrontendDeploy():
-    def __init__(self, dockerUrl, apache2):
+    def __init__(self, dockerUrl, apache2, dockerVersion):
         self.src = 'prod.tar'
         self.srcBackup = 'backup.tar'
         self.dst = '/var/www/'
         self.dstBackup = '/var/www/prod'
-        self.cli = docker.DockerClient(base_url=dockerUrl)
+        self.cli = docker.DockerClient(base_url=dockerUrl, version=dockerVersion)
         self.apache2 = apache2
         return
 
