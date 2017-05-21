@@ -21,12 +21,12 @@ import time
 import yaml
 import docker
 
-from utils.DockerContainerParameter import DockerContainerParameter
+from utils.docker_container_parameter import DockerContainerParameter
 
 
 class ZoeBackendDeploy():
-    def __init__(self, dockerUrl, dockerComposePath):
-        self.cli = docker.DockerClient(base_url=dockerUrl)
+    def __init__(self, dockerUrl, dockerComposePath, dockerVersion):
+        self.cli = docker.DockerClient(base_url=dockerUrl, version=dockerVersion)
         self.zoe_api = ''
         self.zoe_master = ''
         self.zoe_opts = []
@@ -164,6 +164,8 @@ class ZoeBackendDeploy():
             # start zoe_api
             api_c = self.cli.containers.get(self.zoe_api)
             api_c.start()
+            time.sleep(5)
+            api_c = self.cli.containers.get(self.zoe_api)
             print('Started latest ' + self.zoe_api + ' container...')
             if not api_c.attrs['State']['Running']:
                 retcode = -1
@@ -173,6 +175,8 @@ class ZoeBackendDeploy():
             # start zoe_master
             master_c = self.cli.containers.get(self.zoe_master)
             master_c.start()
+            tim.sleep(5)
+            master_c = self.cli.containers.get(self.zoe_master)
             print('Started latest ' + self.zoe_master + ' container...')
             if not master_c.attrs['State']['Running']:
                 retcode = 0

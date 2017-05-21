@@ -25,10 +25,10 @@ from deploy.backenddeploy import ZoeBackendDeploy
 
 
 class ZoeDeploy():
-    def __init__(self, dockerUrl, dockerComposePath, image):
+    def __init__(self, dockerUrl, dockerComposePath, image, dockerVersion):
         self.currentImage = image
         self.typeDeploy = 1 if 'prod' in dockerComposePath else 0
-        self.backend = ZoeBackendDeploy(dockerUrl, dockerComposePath)
+        self.backend = ZoeBackendDeploy(dockerUrl, dockerVersion, dockerComposePath)
         self.frontend = ZoeFrontendDeploy(dockerUrl, 'apache2')
 
     def deploy(self):
@@ -51,8 +51,8 @@ class ZoeDeploy():
         return retBE and retFE
 
 class ZoeImage():
-    def __init__(self, dockerUrl, tag):
-        self.cli = docker.DockerClient(base_url=dockerUrl)
+    def __init__(self, dockerUrl, tag, dockerVersion):
+        self.cli = docker.DockerClient(base_url=dockerUrl, version=dockerVersion)
         self.tag = tag
 
     def build(self):
@@ -60,7 +60,8 @@ class ZoeImage():
         ret = 1
         try:
             self.cli.images.build(path='.', tag=self.tag, rm=True)
-        except Exception:
+        except Exception as ex:
+            print(ex)
             ret = 0
             pass
         return ret
@@ -70,7 +71,8 @@ class ZoeImage():
         ret = 1
         try:
             self.cli.images.push(self.tag, stream=True)
-        except Exception:
+        except Exception as ex:
+            print(ex)
             ret = 0
             pass
         return ret
@@ -80,17 +82,17 @@ if __name__ == '__main__':
         sys.exit(1)
     else:
         if sys.argv[1] == '0':
-            deployer = ZoeDeploy(sys.argv[2], sys.argv[3], sys.argv[4])
+            deployer = ZoeDeploy(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
             ret = deployer.deploy()
             if ret == 0:
                 sys.exit(1)
         elif sys.argv[1] == '1':
-            imghandler = ZoeImage(sys.argv[2], sys.argv[3])
+            imghandler = ZoeImage(sys.argv[2], sys.argv[3], sys.argv[4])
             ret = imghandler.build()
             if ret == 0:
                 sys.exit(1)
         elif sys.argv[1] == '2':
-            imghandler = ZoeImage(sys.argv[2], sys.argv[3])
+            imghandler = ZoeImage(sys.argv[2], sys.argv[3], sys.argv[4])
             ret = imghandler.push()
             if ret == 0:
                 sys.exit(1)
