@@ -175,7 +175,7 @@ class ZoeBackendDeploy():
             # start zoe_master
             master_c = self.cli.containers.get(self.zoe_master)
             master_c.start()
-            tim.sleep(5)
+            time.sleep(5)
             master_c = self.cli.containers.get(self.zoe_master)
             print('Started latest ' + self.zoe_master + ' container...')
             if not master_c.attrs['State']['Running']:
