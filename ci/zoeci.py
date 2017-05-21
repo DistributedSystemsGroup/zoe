@@ -28,7 +28,7 @@ class ZoeDeploy():
     def __init__(self, dockerUrl, dockerComposePath, image, dockerVersion):
         self.currentImage = image
         self.typeDeploy = 1 if 'prod' in dockerComposePath else 0
-        self.backend = ZoeBackendDeploy(dockerUrl, dockerVersion, dockerComposePath)
+        self.backend = ZoeBackendDeploy(dockerUrl, dockerComposePath, dockerVersion)
         self.frontend = ZoeFrontendDeploy(dockerUrl, 'apache2')
 
     def deploy(self):
