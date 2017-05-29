@@ -176,3 +176,5 @@ cleaup-images:
     - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
   script:
     - docker rmi ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE}
+  only:
+    - master
