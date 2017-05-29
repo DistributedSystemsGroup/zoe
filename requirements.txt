@@ -11,3 +11,4 @@ python-oauth2
 python-consul
 pykube>=0.14.0
 sphinx
+jsonschema

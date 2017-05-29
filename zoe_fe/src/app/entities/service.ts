@@ -18,7 +18,6 @@ export class Service implements Serializable<Service> {
     environment: string[][];
     essentialCount: number;
     monitor: boolean;
-    //networks: string[];
     ports: Port[];
     requiredResources: Resource;
     startupOrder: number;
@@ -122,8 +121,8 @@ export class Service implements Serializable<Service> {
             }
         }
 
-        if (input.hasOwnProperty('required_resources')) {
-            this.requiredResources = new Resource().deserialize(input.required_resources);
+        if (input.hasOwnProperty('resources')) {
+            this.requiredResources = new Resource().deserialize(input.resources);
         }
 
         if (input.hasOwnProperty('startup_order')) {

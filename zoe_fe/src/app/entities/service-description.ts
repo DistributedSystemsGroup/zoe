@@ -7,7 +7,6 @@ export class ServiceDescription implements Serializable<ServiceDescription> {
     environment: string[][];
     requiredResources: Resource;
     startupOrder: number;
-    //networks: string[];
     ports: Port[];
     totalCount: number;
     monitor: boolean;
@@ -16,9 +15,8 @@ export class ServiceDescription implements Serializable<ServiceDescription> {
     name: string;
 
     willEnd: boolean;
-    priority: number;
+    size: number;
     version: number;
-    requiresBinary: boolean;
     services: Service[];
 
     rawObject: Object;
@@ -38,20 +36,16 @@ export class ServiceDescription implements Serializable<ServiceDescription> {
             this.willEnd = input.will_end;
         }
 
-        if (input.hasOwnProperty('priority')) {
-            this.priority = input.priority;
+        if (input.hasOwnProperty('size')) {
+            this.size = input.size;
         }
 
         if (input.hasOwnProperty('version')) {
             this.version = input.version;
         }
 
-        if (input.hasOwnProperty('requires_binary')) {
-            this.requiresBinary = input.requires_binary;
-        }
-
-        if (input.hasOwnProperty('required_resources')) {
-            this.requiredResources = new Resource().deserialize(input.required_resources);
+        if (input.hasOwnProperty('resources')) {
+            this.requiredResources = new Resource().deserialize(input.resources);
         }
 
         if (input.hasOwnProperty('environment')) {
