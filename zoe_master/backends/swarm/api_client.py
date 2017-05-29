@@ -186,7 +186,7 @@ class SwarmClient:
                                            environment=environment,
                                            hostname=service_instance.hostname,
                                            labels=service_instance.labels,
-                                           mem_limit=service_instance.memory_limit,
+                                           mem_limit=mem_limit,
                                            memswap_limit=service_instance.memory_limit,
                                            name=service_instance.name,
                                            networks=[get_conf().overlay_network_name],
