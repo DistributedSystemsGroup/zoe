@@ -242,10 +242,11 @@ class KubernetesClient:
         if len(service_instance.ports) > 0:
             config.set_spec_container_ports(service_instance.ports)
 
-        config.set_spec_container_mem_limit(service_instance.memory_limit)
+        if service_instance.memory_limit is not None:
+            config.set_spec_container_mem_limit(service_instance.memory_limit.max)
 
-        if service_instance.core_limit != 0:
-            config.set_spec_container_core_limit(service_instance.core_limit)
+        if service_instance.core_limit is not None:
+            config.set_spec_container_core_limit(service_instance.core_limit.max)
 
         if len(service_instance.volumes) > 0:
             config.set_spec_container_volumes(service_instance.volumes, service_instance.name)

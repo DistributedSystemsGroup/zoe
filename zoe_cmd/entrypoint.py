@@ -66,10 +66,26 @@ def app_get_cmd(args):
         json.dump(execution['description'], sys.stdout, sort_keys=True, indent=4)
 
 
-def exec_list_cmd(args_):
+def exec_list_cmd(args):
     """List executions"""
     exec_api = ZoeExecutionsAPI(utils.zoe_url(), utils.zoe_user(), utils.zoe_pass())
-    data = exec_api.list()
+    filter_names = [
+        'status',
+        'name',
+        'user_id',
+        'limit',
+        'earlier_than_submit',
+        'earlier_than_start',
+        'earlier_than_end',
+        'later_than_submit',
+        'later_than_start',
+        'later_than_end'
+    ]
+    filters = {}
+    for key, value in vars(args).items():
+        if key in filter_names:
+            filters[key] = value
+    data = exec_api.list(**filters)
     for e in sorted(data.values(), key=lambda x: x['id']):
         print('Execution {} (User: {}, ID: {}): {}'.format(e['name'], e['user_id'], e['id'], e['status']))
 
@@ -105,9 +121,11 @@ def exec_get_cmd(args):
         print('Execution not found')
     else:
         print('Execution {} (ID: {})'.format(execution['name'], execution['id']))
+        print('Application name: {}'.format(execution['description']['name']))
         print('Status: {}'.format(execution['status']))
         if execution['status'] == 'error':
             print('Last error: {}'.format(execution['error_message']))
+        print()
         print('Time submit: {}'.format(datetime.datetime.fromtimestamp(execution['time_submit'])))
 
         if execution['time_start'] is None:
@@ -119,9 +137,17 @@ def exec_get_cmd(args):
             print('Time end: {}'.format('not yet'))
         else:
             print('Time end: {}'.format(datetime.datetime.fromtimestamp(execution['time_end'])))
+        print()
 
-        app = execution['description']
-        print('Application name: {}'.format(app['name']))
+        endpoints = exec_api.endpoints(execution['id'])
+        if len(endpoints) > 0:
+            print('Exposed endpoints:')
+        else:
+            print('This ZApp does not expose any endpoint')
+        for endpoint in endpoints:
+            print(' - {}: {}'.format(endpoint[0], endpoint[1]))
+
+        print()
         for c_id in execution['services']:
             service = cont_api.get(c_id)
             print('Service {} (ID: {})'.format(service['name'], service['id']))
@@ -129,10 +155,6 @@ def exec_get_cmd(args):
             print(' - backend status: {}'.format(service['backend_status']))
             if service['error_message'] is not None:
                 print(' - error: {}'.format(service['error_message']))
-            if service['backend_status'] == 'started':
-                ip = service['ip_address']
-                for port in service['description']['ports']:
-                    print(' - {}: {}://{}:{}{}'.format(port['name'], port['protocol'], ip, port['port_number'], port['path']))
 
 
 def exec_kill_cmd(args):
@@ -181,6 +203,16 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     argparser_exec_start.set_defaults(func=exec_start_cmd)
 
     argparser_app_list = subparser.add_parser('exec-ls', help="List all executions for the calling user")
+    argparser_app_list.add_argument('--limit', type=int, help='Limit the number of executions')
+    argparser_app_list.add_argument('--name', help='Show only executions with this name')
+    argparser_app_list.add_argument('--user', help='Show only executions belonging to this user')
+    argparser_app_list.add_argument('--status', choices=["submitted", "scheduled", "starting", "error", "running", "cleaning up", "terminated"], help='Show only executions with this status')
+    argparser_app_list.add_argument('--earlier-than-submit', help='Show only executions submitted earlier than this timestamp (seconds since UTC epoch)')
+    argparser_app_list.add_argument('--earlier-than-start', help='Show only executions started earlier than this timestamp (seconds since UTC epoch)')
+    argparser_app_list.add_argument('--earlier-than-end', help='Show only executions ended earlier than this timestamp (seconds since UTC epoch)')
+    argparser_app_list.add_argument('--later-than-submit', help='Show only executions submitted later than this timestamp (seconds since UTC epoch)')
+    argparser_app_list.add_argument('--later-than-start', help='Show only executions started later than this timestamp (seconds since UTC epoch)')
+    argparser_app_list.add_argument('--later-than-end', help='Show only executions ended later than this timestamp (seconds since UTC epoch)')
     argparser_app_list.set_defaults(func=exec_list_cmd)
 
     argparser_execution_get = subparser.add_parser('exec-get', help="Get execution status")
@@ -195,9 +227,9 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     argparser_execution_kill.add_argument('id', type=int, help="Execution id")
     argparser_execution_kill.set_defaults(func=exec_kill_cmd)
 
-    argparser_execution_kill = subparser.add_parser('exec-rm', help="Deletes an execution")
-    argparser_execution_kill.add_argument('id', type=int, help="Execution id")
-    argparser_execution_kill.set_defaults(func=exec_rm_cmd)
+    argparser_execution_rm = subparser.add_parser('exec-rm', help="Deletes an execution")
+    argparser_execution_rm.add_argument('id', type=int, help="Execution id")
+    argparser_execution_rm.set_defaults(func=exec_rm_cmd)
 
     argparser_stats = subparser.add_parser('stats', help="Prints all available statistics")
     argparser_stats.set_defaults(func=stats_cmd)

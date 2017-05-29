@@ -13,13 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""RESTful Flask API definition."""
+"""RESTful Tornado API definition."""
 
 from typing import List
 
 import tornado.web
 
-from zoe_api.rest_api.execution import ExecutionAPI, ExecutionCollectionAPI, ExecutionDeleteAPI
+from zoe_api.rest_api.execution import ExecutionAPI, ExecutionCollectionAPI, ExecutionDeleteAPI, ExecutionEndpointsAPI
 from zoe_api.rest_api.info import InfoAPI
 from zoe_api.rest_api.userinfo import UserInfoAPI
 from zoe_api.rest_api.service import ServiceAPI
@@ -27,6 +27,7 @@ from zoe_api.rest_api.discovery import DiscoveryAPI
 from zoe_api.rest_api.statistics import SchedulerStatsAPI
 from zoe_api.rest_api.oauth import OAuthGetAPI, OAuthRevokeAPI
 from zoe_api.rest_api.login import LoginAPI
+from zoe_api.rest_api.validation import ZAppValidateAPI
 
 from zoe_lib.version import ZOE_API_VERSION
 
@@ -43,9 +44,11 @@ def api_init(api_endpoint) -> List[tornado.web.URLSpec]:
         tornado.web.url(API_PATH + r'/info', InfoAPI, route_args),
         tornado.web.url(API_PATH + r'/login', LoginAPI, route_args),
         tornado.web.url(API_PATH + r'/userinfo', UserInfoAPI, route_args),
+        tornado.web.url(API_PATH + r'/zapp_validate', ZAppValidateAPI, route_args),
 
         tornado.web.url(API_PATH + r'/execution/([0-9]+)', ExecutionAPI, route_args),
         tornado.web.url(API_PATH + r'/execution/delete/([0-9]+)', ExecutionDeleteAPI, route_args),
+        tornado.web.url(API_PATH + r'/execution/endpoints/([0-9]+)', ExecutionEndpointsAPI, route_args),
         tornado.web.url(API_PATH + r'/execution', ExecutionCollectionAPI, route_args),
 
         tornado.web.url(API_PATH + r'/service/([0-9]+)', ServiceAPI, route_args),

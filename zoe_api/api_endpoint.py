@@ -68,6 +68,13 @@ class APIEndpoint:
             proxy = None
         return proxy
 
+    def zapp_validate(self, application_description):
+        """Validates the passed ZApp description against the supported schema."""
+        try:
+            zoe_lib.applications.app_validate(application_description)
+        except zoe_lib.exceptions.InvalidApplicationDescription as e:
+            raise zoe_api.exceptions.ZoeException('Invalid application description: ' + e.message)
+
     def execution_start(self, uid, role, exec_name, application_description):
         """Start an execution."""
         try:
@@ -172,3 +179,18 @@ class APIEndpoint:
                         self.master.execution_terminate(execution.id)
                         break
         log.debug('Cleanup task finished')
+
+    def execution_endpoints(self, uid: str, role: str, execution: zoe_lib.state.Execution):
+        """Return a list of the services and public endpoints available for a certain execution."""
+        services_info = []
+        endpoints = []
+        for service in execution.services:
+            services_info.append(self.service_by_id(uid, role, service.id))
+            for port in service.description['ports']:
+                port_key = str(port['port_number']) + "/" + port['protocol']
+                backend_port = self.sql.port_list(only_one=True, service_id=service.id, internal_name=port_key)
+                if backend_port.external_ip is not None:
+                    endpoint = port['url_template'].format(**{"ip_port": backend_port.external_ip + ":" + str(backend_port.external_port)})
+                    endpoints.append((port['name'], endpoint))
+
+        return services_info, endpoints

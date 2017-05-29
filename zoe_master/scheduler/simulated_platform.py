@@ -19,7 +19,7 @@ class SimulatedNode:
 
     def service_fits(self, service: Service) -> bool:
         """Checks whether a service can fit in this node"""
-        return service.resource_reservation.memory < self.node_free_memory()
+        return service.resource_reservation.memory.min < self.node_free_memory()
 
     def service_add(self, service):
         """Add a service in this node."""
@@ -47,7 +47,7 @@ class SimulatedNode:
         """Return the amount of free memory for this node"""
         simulated_reservation = 0
         for service in self.services:  # type: Service
-            simulated_reservation += service.resource_reservation.memory
+            simulated_reservation += service.resource_reservation.memory.min
         assert (self.real_free_resources['memory'] - simulated_reservation) >= 0
         return self.real_free_resources['memory'] - simulated_reservation
 

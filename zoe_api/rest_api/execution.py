@@ -117,7 +117,7 @@ class ExecutionCollectionAPI(RequestHandler):
         manage_cors_headers(self)
 
     @catch_exceptions
-    def options(self):  # pylint: disable=unused-argument
+    def options(self):
         """Needed for CORS."""
         self.set_status(204)
         self.finish()
@@ -127,7 +127,20 @@ class ExecutionCollectionAPI(RequestHandler):
         """
         Returns a list of all active executions.
 
-        Return a list of all executions which have status equal to ..."
+        The list can be filtered by passing a non-empty JSON dictionary. Any combination of the following filters is supported:
+
+        * status: one of submitted, scheduled, starting, error, running, cleaning up, terminated
+        * name: execution mane
+        * user_id: user_id owning the execution (admin only)
+        * limit: limit the number of returned entries
+        * earlier_than_submit: all execution that where submitted earlier than this timestamp
+        * earlier_than_start: all execution that started earlier than this timestamp
+        * earlier_than_end: all execution that ended earlier than this timestamp
+        * later_than_submit: all execution that where submitted later than this timestamp
+        * later_than_start: all execution that started later than this timestamp
+        * later_than_end: all execution that started later than this timestamp
+
+        All timestamps should be passed as number of seconds since the epoch (UTC timezone).
 
         example:  curl -u 'username:password' -X GET -H "Content-Type: application/json" -d '{"status":"terminated"}' http://bf5:8080/api/0.6/execution
 
@@ -137,16 +150,26 @@ class ExecutionCollectionAPI(RequestHandler):
 
         filt_dict = {}
 
-        try:
-            if self.request.body:
-                filt_dict = tornado.escape.json_decode(self.request.body)
-        except ValueError:
-            raise zoe_api.exceptions.ZoeRestAPIException('Error decoding JSON data')
+        filters = [
+            ('status', str),
+            ('name', str),
+            ('user_id', str),
+            ('limit', int),
+            ('earlier_than_submit', int),
+            ('earlier_than_start', int),
+            ('earlier_than_end', int),
+            ('later_than_submit', int),
+            ('later_than_start', int),
+            ('later_than_end', int)
+        ]
+        for filt in filters:
+            if filt[0] in self.request.arguments:
+                if filt[1] == str:
+                    filt_dict[filt[0]] = self.request.arguments[filt[0]][0].decode('utf-8')
+                else:
+                    filt_dict[filt[0]] = filt[1](self.request.arguments[filt[0]][0])
 
-        if 'status' in filt_dict:
-            execs = self.api_endpoint.execution_list(uid, role, status=filt_dict['status'])
-        else:
-            execs = self.api_endpoint.execution_list(uid, role)
+        execs = self.api_endpoint.execution_list(uid, role, **filt_dict)
 
         self.write(dict([(e.id, e.serialize()) for e in execs]))
 
@@ -171,6 +194,42 @@ class ExecutionCollectionAPI(RequestHandler):
 
         self.set_status(201)
         self.write({'execution_id': new_id})
+
+    def data_received(self, chunk):
+        """Not implemented as we do not use stream uploads"""
+        pass
+
+
+class ExecutionEndpointsAPI(RequestHandler):
+    """The ExecutionEndpoints API endpoint."""
+
+    def initialize(self, **kwargs):
+        """Initializes the request handler."""
+        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
+
+    def set_default_headers(self):
+        """Set up the headers for enabling CORS."""
+        manage_cors_headers(self)
+
+    @catch_exceptions
+    def options(self):
+        """Needed for CORS."""
+        self.set_status(204)
+        self.finish()
+
+    @catch_exceptions
+    def get(self, execution_id: int):
+        """
+        Get a list of execution endpoints.
+
+        :param execution_id: the execution to be deleted
+        """
+        uid, role = get_auth(self)
+
+        execution = self.api_endpoint.execution_by_id(uid, role, execution_id)
+        services_, endpoints = self.api_endpoint.execution_endpoints(uid, role, execution)
+
+        self.write({'endpoints': endpoints})
 
     def data_received(self, chunk):
         """Not implemented as we do not use stream uploads"""

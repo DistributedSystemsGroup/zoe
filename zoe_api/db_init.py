@@ -21,7 +21,7 @@ import psycopg2.extras
 import zoe_api.exceptions
 from zoe_lib.config import get_conf
 
-SQL_SCHEMA_VERSION = 3  # ---> Increment this value every time the schema changes !!! <---
+SQL_SCHEMA_VERSION = 4  # ---> Increment this value every time the schema changes !!! <---
 
 
 def version_table(cur):
@@ -70,7 +70,7 @@ def create_tables(cur):
         status TEXT NOT NULL,
         error_message TEXT NULL DEFAULT NULL,
         description JSON NOT NULL,
-        execution_id INT REFERENCES execution,
+        execution_id INT REFERENCES execution ON DELETE CASCADE,
         service_group TEXT NOT NULL,
         name TEXT NOT NULL,
         backend_id TEXT NULL DEFAULT NULL,
@@ -78,6 +78,14 @@ def create_tables(cur):
         ip_address CIDR NULL DEFAULT NULL,
         essential BOOLEAN NOT NULL DEFAULT FALSE
         )''')
+    cur.execute('''CREATE TABLE port (
+        id SERIAL PRIMARY KEY,
+        service_id INT REFERENCES service ON DELETE CASCADE,
+        internal_name TEXT NOT NULL,
+        external_ip INET NULL,
+        external_port INT NULL,
+        description JSON NOT NULL
+    )''')
     #Create oauth_client and oauth_token tables for oAuth2
     cur.execute('''CREATE TABLE oauth_client (
         identifier TEXT PRIMARY KEY,
@@ -100,7 +108,7 @@ def create_tables(cur):
         )''')
 
 
-def init():
+def init(force=False):
     """DB init entrypoint."""
     dsn = 'dbname=' + get_conf().dbname + \
         ' user=' + get_conf().dbuser + \
@@ -113,6 +121,11 @@ def init():
 
     version_table(cur)
     cur.execute('SET search_path TO {},public'.format(get_conf().deployment_name))
+
+    if force:
+        cur.execute("DELETE FROM public.versions WHERE deployment = %s", (get_conf().deployment_name,))
+        cur.execute('DROP SCHEMA IF EXISTS {} CASCADE'.format(get_conf().deployment_name))
+
     if not check_schema_version(cur, get_conf().deployment_name):
         create_tables(cur)
 

@@ -161,8 +161,7 @@ class SwarmClient:
         cont = None
         port_bindings = {}  # type: Dict[str, Any]
         for port in service_instance.ports:
-            if port.expose:
-                port_bindings[str(port.number) + '/tcp'] = None
+            port_bindings[str(port.number) + '/' + port.proto] = None
 
         environment = {}
         for name, value in service_instance.environment:
@@ -173,6 +172,12 @@ class SwarmClient:
             if volume.type != "host_directory":
                 log.error('Swarm backend does not support volume type {}'.format(volume.type))
             volumes[volume.path] = {'bind': volume.mount_point, 'mode': ("ro" if volume.readonly else "rw")}
+
+        if service_instance.memory_limit is not None:
+            mem_limit = service_instance.memory_limit.max
+        else:
+            mem_limit = 0
+        # Swarm backend does not support cores in a consistent way, see https://github.com/docker/swarm/issues/475
 
         try:
             cont = self.cli.containers.run(image=service_instance.image_name,
@@ -299,24 +304,6 @@ class SwarmClient:
                 continue
             if not res:
                 break
-
-    def connect_to_network(self, container_id: str, network_id: str) -> None:
-        """Connect a container to a network."""
-        try:
-            net = self.cli.networks.get(network_id)
-        except docker.errors.NotFound:
-            log.error('Trying to connect to a non-existent network')
-            return
-        net.connect(container_id)
-
-    def disconnect_from_network(self, container_id: str, network_id: str) -> None:
-        """Disconnects a container from a network."""
-        try:
-            net = self.cli.networks.get(network_id)
-        except docker.errors.NotFound:
-            log.error('Trying to connect to a non-existent network')
-            return
-        net.disconnect(container_id)
 
     def list(self, only_label=None) -> Iterable[dict]:
         """
