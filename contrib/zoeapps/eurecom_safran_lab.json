@@ -1,0 +1,41 @@
+{
+    "name": "aml-lab-safran",
+    "priority": 512,
+    "requires_binary": true,
+    "services": [
+        {
+            "docker_image": "docker-registry:5000/zapps/jupyter-notebook:2609",
+            "environment": [
+                [
+                    "NB_USER",
+                    "{user_name}"
+                ]
+            ],
+            "essential_count": 1,
+            "monitor": true,
+            "name": "jupyter-notebook",
+            "networks": [],
+            "ports": [
+                {
+                    "expose": true,
+                    "is_main_endpoint": true,
+                    "name": "Jupyter Notebook interface",
+                    "path": "/",
+                    "port_number": 8888,
+                    "protocol": "http"
+                }
+            ],
+            "required_resources": {
+                "memory": 8589934592
+            },
+            "startup_order": 0,
+            "total_count": 1,
+            "volumes": [
+                ["/mnt/cephfs/docker-volumes/safran_data", "/mnt/safran", true]
+            ]
+        }
+    ],
+    "version": 2,
+    "will_end": false
+}
+
