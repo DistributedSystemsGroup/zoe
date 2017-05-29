@@ -163,20 +163,6 @@ class SwarmClient:
         for port in service_instance.ports:
             port_bindings[str(port.number) + '/' + port.proto] = None
 
-        if get_conf().gelf_address != '':
-            log_config = {
-                "type": "gelf",
-                "config": {
-                    'gelf-address': get_conf().gelf_address,
-                    'labels': ",".join(service_instance.labels)
-                }
-            }
-        else:
-            log_config = {
-                "type": "json-file",
-                "config": {}
-            }
-
         environment = {}
         for name, value in service_instance.environment:
             environment[name] = value
@@ -200,9 +186,8 @@ class SwarmClient:
                                            environment=environment,
                                            hostname=service_instance.hostname,
                                            labels=service_instance.labels,
-                                           log_config=log_config,
-                                           mem_limit=mem_limit,
-                                           memswap_limit=0,
+                                           mem_limit=service_instance.memory_limit,
+                                           memswap_limit=service_instance.memory_limit,
                                            name=service_instance.name,
                                            networks=[get_conf().overlay_network_name],
                                            network_disabled=False,

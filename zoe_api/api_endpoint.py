@@ -68,6 +68,13 @@ class APIEndpoint:
             proxy = None
         return proxy
 
+    def zapp_validate(self, application_description):
+        """Validates the passed ZApp description against the supported schema."""
+        try:
+            zoe_lib.applications.app_validate(application_description)
+        except zoe_lib.exceptions.InvalidApplicationDescription as e:
+            raise zoe_api.exceptions.ZoeException('Invalid application description: ' + e.message)
+
     def execution_start(self, uid, role, exec_name, application_description):
         """Start an execution."""
         try:

@@ -104,6 +104,16 @@ class ZoeRestTestSuccess(unittest.TestCase):
         self.assertEqual(req.status_code, 201)
         self.__class__.id = str(req.json()['execution_id'])
 
+    def test_zapp_validate(self):
+        """Test ZApp validation endpoint"""
+        print("Test ZApp validation endpoint")
+
+        with open('zapp.json', encoding='utf-8') as data_file:
+            data = json.loads(data_file.read())
+
+        req = requests.post(self.__class__.uri + 'zapp_validate', json={"application": data})
+        self.assertEqual(req.status_code, 200)
+
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         API_SERVER = sys.argv.pop()
