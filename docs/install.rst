@@ -9,4 +9,4 @@ Multiple deployment options are available:
 * Deployment scripts
 * Manual install
 
-Please refer to [zoe-deploy](https://github.com/DistributedSystemsGroup/zoe-deploy)
+Please refer to `zoe-deploy <https://github.com/DistributedSystemsGroup/zoe-deploy>`_ repository.
