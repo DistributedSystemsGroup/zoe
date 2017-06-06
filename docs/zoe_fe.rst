@@ -1,3 +1,5 @@
+.. _zoe_fe:
+
 Deploying the Angular FrontEnd
 ==============================
 

@@ -24,6 +24,10 @@ Zoe components:
 
 Zoe is written in Python and uses the ``requirements.txt`` file to list the package dependencies needed for all components of Zoe. Not all of them are needed in all cases, for example you need the ``kazoo`` library only if you use Zookeeper to manage Swarm high availability.
 
+Optional components:
+
+* :ref:`api-manager-label`
+
 Overview
 --------
 
@@ -83,3 +87,13 @@ Currently this is the recommended procedure, once the initial Swarm setup has be
 5. Start running ZApps!
 
 In case of troubles, check the logs for errors. Zoe basic functionality can be tested via the ``zoe.py stats`` command. It will query the ``zoe-api`` process, that in turn will query the ``zoe-master`` process.
+
+.. _api-manager-label:
+
+API Manager
+-----------
+
+To provide TLS termination, authentication, load balancing, metrics, and other services to the Zoe API, you can use an API manager in front of the Zoe API. For example:
+
+* Tyk: https://tyk.io/tyk-documentation/get-started/with-tyk-on-premise/
+* Kong: https://getkong.org/docs/0.10.x/proxy/
