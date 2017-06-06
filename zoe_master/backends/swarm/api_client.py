@@ -37,7 +37,7 @@ import docker.errors
 import docker.utils
 import docker.models.containers
 
-import requests.packages
+import requests.exceptions
 
 from zoe_lib.config import get_conf
 from zoe_lib.state import Service
@@ -291,7 +291,7 @@ class SwarmClient:
         while True:
             try:
                 event = next(event_gen)
-            except requests.packages.urllib3.exceptions.ProtocolError:
+            except requests.exceptions.RequestException:
                 log.warning('Docker closed event connection, retrying...')
                 event_gen = self.cli.events(decode=True)
                 continue
