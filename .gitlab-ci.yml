@@ -132,7 +132,6 @@ zoe:
     - mkdir -p ~/.ssh
     - 'echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     - apt-get update -y && apt-get install rsync -y
-    - apt-get update -y && apt-get install rsync -y
   script:
     - rsync -avz . ubuntu@${STAGING_IP}:${ZOE_STAGING_PATH}
     - ssh ubuntu@${STAGING_IP} sudo pip install --upgrade -r /srv/zoe/requirements.txt
@@ -177,3 +176,5 @@ cleaup-images:
     - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
   script:
     - docker rmi ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE}
+  only:
+    - master
