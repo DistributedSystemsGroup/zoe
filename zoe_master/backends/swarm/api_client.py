@@ -37,7 +37,7 @@ import docker.errors
 import docker.utils
 import docker.models.containers
 
-import requests.packages
+import requests.packages  # pylint: disable=no-member
 
 from zoe_lib.config import get_conf
 from zoe_lib.state import Service
