@@ -103,6 +103,7 @@ def load_configuration(test_conf=None):
 
         # Kubernetes backend
         argparser.add_argument('--kube-config-file', help='Kubernetes configuration file', default='/opt/zoe/kube.conf')
+        argparser.add_argument('--kube-namespace', help='The namespace that Zoe operates on', default='default')
 
         argparser.add_argument('--cookie-secret', help='secret used to encrypt cookies', default='changeme')
         argparser.add_argument('--log-file', help='output logs to a file', default='stderr')
