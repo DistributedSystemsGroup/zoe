@@ -18,6 +18,7 @@
 import logging
 import threading
 import time
+import pykube
 
 from zoe_lib.config import get_conf
 from zoe_lib.state import SQLManager, Service
@@ -43,38 +44,43 @@ class KubernetesMonitor(threading.Thread):
         """An infinite loop that listens for events from Kubernetes."""
         log.info("Monitor thread started")
         while True:  # pylint: disable=too-many-nested-blocks
-            for event in self.kube.replication_controller_event():
-                log.debug('%s: %s', event.object.name, event.type)
-                if event.type != 'DELETED' and event.type != 'ADDED':
-                    rc_info = self.kube.inspect_replication_controller(event.object.name)
-                    if rc_info:
-                        rc_uid = rc_info['backend_id']
-                        service = self.state.service_list(only_one=True, backend_id=rc_uid)
-                        if event.object.name not in self.service_id:
-                            self.service_id[event.object.name] = service.id
-                        if service is not None:
-                            if rc_info['readyReplicas'] == 0:
-                                log.debug('Number replicas: 0')
-                                service.set_backend_status(service.BACKEND_UNDEFINED_STATUS)
-                            elif rc_info['readyReplicas'] < rc_info['replicas']:
-                                logstr = 'Number replicas: ' + str(rc_info['readyReplicas'])
-                                log.debug(logstr)
-                                service.set_backend_status(service.BACKEND_CREATE_STATUS)
-                            elif rc_info['readyReplicas'] == rc_info['replicas']:
-                                if service.backend_status != service.BACKEND_START_STATUS:
-                                    log.debug('Reached desired number of replicas')
-                                    service.set_backend_status(service.BACKEND_START_STATUS)
-                else:
-                    if event.type != 'ADDED':
-                        if event.object.name in self.service_id:
-                            sid = self.service_id[event.object.name]
-                            self.service_id.pop(event.object.name)
-                            service = self.state.service_list(only_one=True, id=sid)
+            log.debug("Kubernetes service event stream")
+            try:
+                watch = pykube.ReplicationController.objects(self.kube.api, namespace=get_conf().kube_namespace).watch()
+                for event in watch:
+                    log.debug('%s: %s', event.object.name, event.type)
+                    if event.type != 'DELETED' and event.type != 'ADDED':
+                        rc_info = self.kube.inspect_replication_controller(event.object.name)
+                        if rc_info:
+                            rc_uid = rc_info['backend_id']
+                            service = self.state.service_list(only_one=True, backend_id=rc_uid)
+                            if event.object.name not in self.service_id:
+                                self.service_id[event.object.name] = service.id
                             if service is not None:
-                                log.info('Destroyed all replicas')
-                                service.set_backend_status(service.BACKEND_DESTROY_STATUS)
-                time.sleep(1)
-
+                                if rc_info['readyReplicas'] == 0:
+                                    log.debug('Number replicas: 0')
+                                    service.set_backend_status(service.BACKEND_UNDEFINED_STATUS)
+                                elif rc_info['readyReplicas'] < rc_info['replicas']:
+                                    logstr = 'Number replicas: ' + str(rc_info['readyReplicas'])
+                                    log.debug(logstr)
+                                    service.set_backend_status(service.BACKEND_CREATE_STATUS)
+                                elif rc_info['readyReplicas'] == rc_info['replicas']:
+                                    if service.backend_status != service.BACKEND_START_STATUS:
+                                        log.debug('Reached desired number of replicas')
+                                        service.set_backend_status(service.BACKEND_START_STATUS)
+                    else:
+                        if event.type != 'ADDED':
+                            if event.object.name in self.service_id:
+                                sid = self.service_id[event.object.name]
+                                self.service_id.pop(event.object.name)
+                                service = self.state.service_list(only_one=True, id=sid)
+                                if service is not None:
+                                    log.info('Destroyed all replicas')
+                                    service.set_backend_status(service.BACKEND_DESTROY_STATUS)
+                    time.sleep(1)
+            except Exception as ex:
+                log.error(ex)
+            log.debug("Kubernetes service event stream ended, start new stream")
             time.sleep(2)
 
     def quit(self):
@@ -101,6 +107,7 @@ class KubernetesStateSynchronizer(threading.Thread):
         """Loop through the pods and try to update the service status."""
         found = False
         for rep in repcon_list:
+            log.debug("%s - %s", rep['backend_id'], service.backend_id)
             if rep['backend_id'] == service.backend_id:
                 found = True
                 if rep['running'] is False:
