@@ -83,11 +83,7 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--ldap-guest-gid', type=int, help='LDAP group ID for guests', default=5002)
 
         # Proxy options
-        argparser.add_argument('--proxy-type', help='Proxy type (apache or nginx)', default='none')
-        argparser.add_argument('--proxy-container', help='Proxy container name', default='apache2')
-        argparser.add_argument('--proxy-config-file', help='Config file path of apache/nginx proxy container', default='/etc/apache2/sites-available/config.conf')
         argparser.add_argument('--proxy-path', help='Proxy base path', default='127.0.0.1')
-        argparser.add_argument('--proxy-docker-sock', help='Docker sock url which proxy container uses', default='unix://var/run/docker.sock')
 
         argparser.add_argument('--scheduler-class', help='Scheduler class to use for scheduling ZApps', choices=['ZoeSimpleScheduler', 'ZoeElasticScheduler'], default='ZoeSimpleScheduler')
         argparser.add_argument('--scheduler-policy', help='Scheduler policy to use for scheduling ZApps', choices=['FIFO', 'SIZE'], default='FIFO')
@@ -103,6 +99,7 @@ def load_configuration(test_conf=None):
 
         # Kubernetes backend
         argparser.add_argument('--kube-config-file', help='Kubernetes configuration file', default='/opt/zoe/kube.conf')
+        argparser.add_argument('--kube-namespace', help='The namespace that Zoe operates on', default='default')
 
         argparser.add_argument('--cookie-secret', help='secret used to encrypt cookies', default='changeme')
         argparser.add_argument('--log-file', help='output logs to a file', default='stderr')
