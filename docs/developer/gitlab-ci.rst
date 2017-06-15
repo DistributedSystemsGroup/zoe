@@ -23,6 +23,7 @@ Using the Docker executor, we configured our runner with these options::
       url = "https://gitlab.eurecom.fr/ci"
       token = "<your-token-here>"
       executor = "docker"
+      environment = ["DOCKER_AUTH_CONFIG={ \"auths\": { \"docker-registry:5000\": { \"auth\": \"some-base64-string\" } } }", "DOCKER_REGISTRY=docker-registry:5000"]
       [runners.docker]
         image = "docker:latest"
         disable_cache = false
@@ -37,7 +38,6 @@ Variables
 
 To run the tests a number of variables need to be set from the GitLab interface:
 
-* DOCKER_REGISTRY: the URL of the registry
 * REGISTRY_PASSWORD: the password used for authenticating with the registry via docker login
 * SONARQUBE_SERVER_URL: the URL of the SonarQube server
 * SONARQUBE_USER: the SonarQube user

@@ -18,9 +18,9 @@ The users of Zoe
 Deviation from the current ZApp terminology
 -------------------------------------------
 
-In the current Zoe implementation (0.10.x) ZApps are self-contained descriptions of a set of cooperating processes. They get submitted once, to request the start-up of an execution. This fits well the model of a single spark job or of a throw-away jupyter notebook.
+In the current Zoe implementation ZApps are self-contained descriptions of a set of cooperating processes. They get submitted once, to request the start-up of an execution. This fits well the model of a single spark job or of a throw-away jupyter notebook.
 
-We need to revise a bit this terminology: ZApps remain the top level, user-visible entity. The ZApp building blocks, analytic engines or support tools, are called frameworks. A framework, by itself, cannot be run. It lacks configuration or a user-provided binary to execute, for example. Each framework is composed of one or more processes, that come with some metadata of the needed configuration and a container image.
+ZApps are at the top level, they are the user-visible entity. The ZApp building blocks, analytic engines or support tools, are called frameworks. A framework, by itself, cannot be run. It lacks configuration or a user-provided binary to execute, for example. Each framework is composed of one or more processes, that come with some metadata of the needed configuration and a container image.
 
 A few examples:
 

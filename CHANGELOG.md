@@ -2,7 +2,10 @@
 
 ## Version 2017.06
 
-* ZApp description format revision, use JSON schemas
+* ZApp description format revision
+* use JSON schemas to validate ZApps
+* Expand the execution list API, adding filtering capabilities to limit the number of results returned
+* Several minor bug fixes
 
 ## Version 2017.03
 

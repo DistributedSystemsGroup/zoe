@@ -21,7 +21,7 @@ To use the Zoe command-line interface, first of all you have to define three env
     export ZOE_USER=joe                   # User name
     export ZOE_PASS=joesecret             # Password
 
-Now you can check that you are up and running with this command::
+Now you can check if you are up and running with this command::
 
     ./zoe.py info
 
@@ -53,7 +53,6 @@ Main documentation
   kube_backend
   config_file
   logging
-  monitoring
   proxy
 
 Zoe applications
@@ -65,7 +64,6 @@ Zoe applications
   zapps/classification
   zapps/howto_zapp
   zapps/zapp_format
-  zapps/contributing
 
 
 Development and contributing to the project
