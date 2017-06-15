@@ -19,7 +19,6 @@ from typing import Dict
 
 from zoe_lib.config import get_conf
 from zoe_lib.state import Service, Execution
-from zoe_master.backends.proxy import gen_proxypath, JUPYTER_NOTEBOOK, MONGO_EXPRESS, JUPYTER_PORT, MONGO_PORT
 from zoe_master.exceptions import ZoeStartExecutionFatalException
 from zoe_master.workspace.filesystem import ZoeFSWorkspace
 
@@ -37,12 +36,6 @@ def gen_environment(execution: Execution, service: Service, env_subst_dict: Dict
             service.set_error(error_msg)
             raise ZoeStartExecutionFatalException("Service {} has wrong environment expression")
         env_list.append((env_name, env_value))
-
-    # FIXME this code needs to be removed/changed to be generic
-    #if 'jupyter' in service.image_name:
-    env_list.append((JUPYTER_NOTEBOOK, gen_proxypath(execution, service) + '/' + JUPYTER_PORT))
-    #elif 'mongo-express' in service.image_name:
-    env_list.append((MONGO_EXPRESS, gen_proxypath(execution, service) + '/' + MONGO_PORT))
 
     env_list.append(('EXECUTION_ID', str(execution.id)))
     env_list.append(('DEPLOY_NAME', get_conf().deployment_name))

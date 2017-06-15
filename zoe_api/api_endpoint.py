@@ -18,12 +18,9 @@
 from datetime import datetime, timedelta
 import logging
 import re
-import threading
 
 import zoe_api.exceptions
 import zoe_api.master_api
-from zoe_api.proxy.apache import ApacheProxy
-#from zoe_api.proxy.nginx import NginxProxy
 import zoe_lib.applications
 import zoe_lib.exceptions
 import zoe_lib.state
@@ -60,16 +57,6 @@ class APIEndpoint:
         ret = [e for e in execs if e.user_id == uid or role == 'admin']
         return ret
 
-    def _get_proxy(self):
-        if get_conf().proxy_type == 'apache':
-            proxy = ApacheProxy(self)
-        # elif get_conf().proxy_type == 'nginx':
-        #    proxy = NginxProxy(self)
-        else:
-            log.info('Proxy disabled')
-            proxy = None
-        return proxy
-
     def zapp_validate(self, application_description):
         """Validates the passed ZApp description against the supported schema."""
         try:
@@ -77,7 +64,7 @@ class APIEndpoint:
         except zoe_lib.exceptions.InvalidApplicationDescription as e:
             raise zoe_api.exceptions.ZoeException('Invalid application description: ' + e.message)
 
-    def execution_start(self, uid, role, exec_name, application_description):
+    def execution_start(self, uid, role, exec_name, application_description): # pylint: disable=unused-argument
         """Start an execution."""
         try:
             zoe_lib.applications.app_validate(application_description)
@@ -94,10 +81,6 @@ class APIEndpoint:
         if not success:
             raise zoe_api.exceptions.ZoeException('The Zoe master is unavailable, execution will be submitted automatically when the master is back up ({}).'.format(message))
 
-        proxy = self._get_proxy()
-        if proxy is not None:
-            threading.Thread(target=proxy.proxify, args=(uid, role, new_id)).start()
-
         return new_id
 
     def execution_terminate(self, uid, role, exec_id):
@@ -111,9 +94,6 @@ class APIEndpoint:
             raise zoe_api.exceptions.ZoeAuthException()
 
         if e.is_active:
-            proxy = self._get_proxy()
-            if proxy is not None:
-                proxy.unproxify(uid, role, exec_id)
             return self.master.execution_terminate(exec_id)
         else:
             raise zoe_api.exceptions.ZoeException('Execution is not running')

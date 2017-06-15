@@ -193,7 +193,7 @@ class Service:
     def proxy_address(self):
         """Get proxy address path"""
         if len(self.ports) > 0:
-            return get_conf().proxy_path + "/" + self.user_id + "/" + str(self.execution_id) + "/" + self.name
+            return self.name + "-" + str(self.execution_id) + "-" + get_conf().deployment_name + "." + get_conf().proxy_path
         else:
             return None
 

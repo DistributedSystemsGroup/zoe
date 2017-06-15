@@ -16,11 +16,11 @@ Zoe strives to satisfy the following requirements:
 * short (a few seconds) reaction times to user requests or other system events
 * smart queuing and scheduling of applications when resources are critical
 
-Kubernetes, OpenStack Sahara, Mesos and YARN are the projects that, each in its own way, come near Zoe, without solving the needs we have.
+Kubernetes, OpenStack Sahara, Mesos and YARN are the projects that, each in its own way, come near Zoe, without solving the distributed analytics problem.
 
-Kubernetes (Borg)
------------------
-Kubernetes is a very complex system, both to deploy and to use. It takes some of the architectural principles from Google Borg and targets data centers with vast amounts of resources. We feel that while Kubernetes can certainly run analytic services in containers, it does so at a very high complexity cost for smaller setups. Moreover, in our opinion, certain scheduler choices in how preemption is managed do not apply well to environments with a limited set of users and compute resources, causing a less than optimal resource usage.
+Kubernetes
+----------
+Kubernetes is a very complex system, both to deploy and to use. It takes some of the architectural principles from Google Borg and targets data centers with vast amounts of resources. We feel that while Kubernetes can certainly run analytic services in containers, it does so at a very high complexity cost for smaller setups. Moreover, certain scheduler choices in how preemption is managed do not apply well to environments with a limited set of users and compute resources, causing a less than optimal resource usage.
 
 OpenStack Sahara
 ----------------

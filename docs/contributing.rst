@@ -10,11 +10,7 @@ To better work together we have established some rules on how to contribute.
 Bug reports and feature requests
 --------------------------------
 
-Bug reports and feature requests are handled through the GitHub issue system.
-
-For Zoe itself, issues should be reported here: `https://github.com/DistributedSystemsGroup/zoe/issues <https://github.com/DistributedSystemsGroup/zoe/issues>`_
-
-For the sample Zoe applications we provide, reports should be sent here: `https://github.com/DistributedSystemsGroup/zoe-applications/issues <https://github.com/DistributedSystemsGroup/zoe-applications/issues>`_
+Bug reports and feature requests are handled through the GitHub issue system at: `https://github.com/DistributedSystemsGroup/zoe/issues <https://github.com/DistributedSystemsGroup/zoe/issues>`_
 
 The issue system should be used for only for bug reports or feature requests. If you have more general questions, you need help setting up Zoe or running some application, please use the mailing list.
 
@@ -37,6 +33,20 @@ To contribute code and/or documentation you should follow this workflow:
 5. when you are ready propose your changes on the mailing list
 
 Zoe maintainers will review your code, give constructive feedback and eventually perform a pull and a merge.
+
+Coding style
+^^^^^^^^^^^^
+
+Zoe code conforms to Python's `PEP8 coding style rules <https://www.python.org/dev/peps/pep-0008/>`_, with a few variations, detailed below:
+
+* No line length limit
+* All modules, classes, methods and functions must have a docstring
+* The docstring for private methods is optional
+* Names for unused variables and function parameters must end with ``_``
+
+We also relaxed a number of pylint tests, check the ``.pylintrc`` file at the root of the source repository for details.
+
+In general, if your code passes pylint, run with our configuration file with a 10/10 mark, it is ok and matches Zoe's coding rules.
 
 Code quality and tests
 ^^^^^^^^^^^^^^^^^^^^^^

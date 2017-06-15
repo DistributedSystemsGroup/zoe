@@ -27,14 +27,15 @@ from zoe_master.stats import ClusterStats, NodeStats
 from zoe_master.backends.service_instance import ServiceInstance
 from zoe_lib.version import ZOE_VERSION
 from zoe_lib.state import VolumeDescription
+from zoe_lib.config import get_conf
 
 log = logging.getLogger(__name__)
 
 ZOE_LABELS = {
     "app": "zoe",
-    "version": ZOE_VERSION
+    "version": ZOE_VERSION,
+    "auto-ingress/enabled" : "enabled"
 }
-
 
 class KubernetesConf:
     """Kubeconfig class"""
@@ -51,7 +52,8 @@ class KubernetesServiceConf:
             'kind': 'Service',
             'apiVersion': "v1",
             'metadata': {
-                'labels': {}
+                'labels': {},
+                'namespace': get_conf().kube_namespace
             },
             'spec': {
                 'selector': {},
@@ -97,7 +99,8 @@ class KubernetesReplicationControllerConf:
             'kind': 'ReplicationController',
             'apiVersion': "v1",
             'metadata': {
-                'labels': {}
+                'labels': {},
+                'namespace': get_conf().kube_namespace
             },
             'spec': {
                 'replicas': 1,
@@ -265,7 +268,7 @@ class KubernetesClient:
     def inspect_replication_controller(self, name):
         """Get information about a specific replication controller."""
         try:
-            repcon_list = pykube.ReplicationController.objects(self.api)
+            repcon_list = pykube.ReplicationController.objects(self.api).filter(namespace=get_conf().kube_namespace)
             rep = repcon_list.get_by_name(name)
             rc_info = rep.obj
 
@@ -304,7 +307,7 @@ class KubernetesClient:
 
     def replication_controller_list(self):
         """Get list of replication controller."""
-        repcon_list = pykube.ReplicationController.objects(self.api).filter(selector=ZOE_LABELS).iterator()
+        repcon_list = pykube.ReplicationController.objects(self.api).filter(namespace=get_conf().kube_namespace, selector=ZOE_LABELS).iterator()
         rclist = []
         try:
             for rep in repcon_list:
@@ -312,11 +315,6 @@ class KubernetesClient:
         except Exception as ex:
             log.error(ex)
         return rclist
-
-    def replication_controller_event(self):
-        """Get event stream of the replication controller."""
-        rc_stream = pykube.ReplicationController.objects(self.api).filter(selector=ZOE_LABELS).watch()
-        return rc_stream
 
     def spawn_service(self, service_instance: ServiceInstance):
         """Create and start a new Service object."""
@@ -342,7 +340,7 @@ class KubernetesClient:
     def inspect_service(self, name) -> Dict[str, Any]:
         """Get information of a specific service."""
         try:
-            service_list = pykube.Service.objects(self.api)
+            service_list = pykube.Service.objects(self.api).filter(namespace=get_conf().kube_namespace)
             service = service_list.get_by_name(name)
             srv_info = service.obj
 
@@ -374,7 +372,8 @@ class KubernetesClient:
             'apiVersion': 'v1',
             'kind': '',
             'metadata': {
-                'name': name
+                'name': name,
+                'namespace': get_conf().kube_namespace
             }
         }
         try:
@@ -387,7 +386,7 @@ class KubernetesClient:
             del_obj['kind'] = 'Pod'
             pod_selector = ZOE_LABELS
             pod_selector['service_name'] = name
-            pods = pykube.Pod.objects(self.api).filter(namespace="default", selector=pod_selector).iterator()
+            pods = pykube.Pod.objects(self.api).filter(namespace=get_conf().kube_namespace, selector=pod_selector).iterator()
             for pod in pods:
                 del_obj['metadata']['name'] = str(pod)
                 pykube.Pod(self.api, del_obj).delete()
@@ -400,7 +399,7 @@ class KubernetesClient:
         """Retrieve Kubernetes cluster statistics."""
         pl_status = ClusterStats()
 
-        node_list = pykube.Node.objects(self.api).iterator()
+        node_list = pykube.Node.objects(self.api).filter(namespace=pykube.all).iterator()
         node_dict = {}
 
         # Get basic information from nodes

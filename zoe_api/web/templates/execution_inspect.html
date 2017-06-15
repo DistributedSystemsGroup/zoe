@@ -47,6 +47,18 @@
     {% if s['error_message'] is not none %}
         <li>Error: {{ s['error_message'] }}</li>
     {% endif %}
+<<<<<<< HEAD
+=======
+    {% if s['backend_status'] == 'started' %}
+        {% for p in s['description']['ports'] %}
+            {% if s['proxy_address'] is not none %}
+                <li><a href="http://{{ s['proxy_address'] }}">{{ p['name'] }}</a></li>
+            {% else %}
+                <li><a> {{ p['name'] }} IP: {{ s['ip_address'] }}</a></li>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+>>>>>>> ext/devel/master
     </ul>
 {% endfor %}
 </ul>

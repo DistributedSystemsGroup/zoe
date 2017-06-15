@@ -5,8 +5,6 @@ Roadmap
 
 We, the main developers of Zoe, are an academic research team. As such we have limited resources and through collaborations with other universities and private companies our aim is to do research and advance the state of the art. Our roadmap reflects this and pushes more on large-scale topics than on specific features.
 
-The first priority for Zoe is to mature a stable and modular architecture on which advanced features can be built. Most of the work that is going into version 0.10.x is related to this point.
-
 Scheduler architectures and resource allocation
 -----------------------------------------------
 

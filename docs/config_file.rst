@@ -3,9 +3,9 @@
 Zoe configuration
 =================
 
-Zoe can be configured by files, environment variables or commandline options. The configuration directives listed in this file can be specified by any of the three methods. Use the ``--help`` command-line option to have more details on the format od environment variables and precedence rules.
+Zoe can be configured by files, environment variables or commandline options. The configuration directives listed in this file can be specified by any of the three methods. Use the ``--help`` command-line option to have more details on the format of environment variables and precedence rules.
 
-Also the directive ``--write-config <filename>`` is available: it will generate a configuration file with all options set to the default values.
+The directive ``--write-config <filename>`` is also available: it will generate a configuration file with all options set to the default values.
 
 The Zoe config file have a simple format of ``<option name> = <value>``. Dash characters can be use for comments.
 All Zoe processes use one single configuration file, called zoe.conf. It is searched in the current working directory and in ``/etc/zoe/``.
@@ -23,10 +23,10 @@ Common options:
 * ``influxdb-url = http://localhost:8086`` : URL of the InfluxDB service (ex. )
 * ``influxdb-enable = False`` : Enable metric output toward influxDB
 * ``workspace-base-path = /mnt/zoe-workspaces`` : Base directory where user workspaces will be created. This directory should reside on a shared filesystem visible by all Docker hosts.
-* ``overlay-network-name = zoe`` : name of the pre-configured Docker overlay network Zoe should use
+* ``overlay-network-name = zoe`` : name of the pre-configured Docker overlay network Zoe should use (Swarm backend)
 * ``backend = Swarm`` : ' Name of the backend to enable and use
 
-Database options:
+PostgresQL database options:
 
 * ``dbname = zoe`` : DB name
 * ``dbuser = zoe`` : DB user
