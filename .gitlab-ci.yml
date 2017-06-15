@@ -143,29 +143,6 @@ zoe:
   only:
     - master
 
-#angular_frontend:
-#  stage: deploy
-#  image: node:latest
-#  before_script:
-#    - which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )
-#    - eval $(ssh-agent -s)
-#    - ssh-add <(echo "$SSH_PRIVATE_KEY")
-#    - mkdir -p ~/.ssh
-#    - 'echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-#    - apt-get update -y && apt-get install rsync -y
-#  script:
-#    - cd zoe_fe
-#    - npm install
-#    - npm install -g --save-dev @angular/cli
-#    - 'sed -i -e "s/cors: false,/cors: true,/" src/environments/environment.prod.ts'
-#    - 'sed -i -e "s/apiEndpoint: .*,/apiEndpoint: ''http:\/\/192.168.45.189:5001\/api\/0.7'',/" src/environments/environment.prod.ts'
-#    - ng build --env=prod --output-path=build/prod --base-href /angular
-#    - rsync -avz build/prod/ ubuntu@${STAGING_IP}:${WEB_STAGING_PATH}/angular
-#  environment:
-#    name: staging
-#  only:
-#    - master
-
 cleaup-images:
   image: docker:latest
   stage: cleanup
