@@ -63,11 +63,17 @@ class ResourceReservation:
 
 class VolumeDescription:
     """A generic description for container volumes."""
-    def __init__(self, data):
-        self.type = "host_directory"
-        self.path = data[0]
-        self.mount_point = data[1]
-        self.readonly = data[2]
+    def __init__(self, vtype: str):
+        self.type = vtype
+
+
+class VolumeDescriptionHostPath(VolumeDescription):
+    """Host-based volumes."""
+    def __init__(self, name: str, path: str, readonly: bool):
+        super().__init__("host-directory")
+        self.path = path
+        self.mount_point = '/mnt/' + name
+        self.readonly = readonly
 
 
 class Service:
@@ -113,7 +119,7 @@ class Service:
         self.environment = self.description['environment']
         self.command = self.description['command']
         self.resource_reservation = ResourceReservation(self.description['resources'])
-        self.volumes = [VolumeDescription(v) for v in self.description['volumes']]
+        self.volumes = [VolumeDescriptionHostPath(v['path'], v['name'], v['read_only']) for v in self.description['volumes']]
         self.replicas = self.description['replicas']
 
     def serialize(self):

@@ -15,10 +15,10 @@
 
 """The high-level interface that Zoe uses to talk to the configured container backend."""
 
-from typing import Dict
+from typing import Dict, List
 
 from zoe_lib.config import get_conf
-from zoe_lib.state import Service, Execution
+from zoe_lib.state import Service, Execution, VolumeDescription
 from zoe_master.exceptions import ZoeStartExecutionFatalException
 from zoe_master.workspace.filesystem import ZoeFSWorkspace
 
@@ -48,9 +48,10 @@ def gen_environment(execution: Execution, service: Service, env_subst_dict: Dict
     return env_list
 
 
-def gen_volumes(service_: Service, execution: Execution):
+def gen_volumes(service: Service, execution: Execution) -> List[VolumeDescription]:
     """Return the list of default volumes to be added to all containers."""
-    vol_list = []
+    vol_list = service.volumes
+
     fswk = ZoeFSWorkspace()
     wk_vol = fswk.get(execution.user_id)
 
