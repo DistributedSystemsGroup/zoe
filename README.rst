@@ -1,4 +1,4 @@
-Zoe Analytics - Container-based Analytics as a Service
+.Zoe Analytics - Container-based Analytics as a Service
 ======================================================
 
 Zoe Analytics provides a simple way to provision any kind of data analytics applications.
