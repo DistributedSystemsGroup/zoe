@@ -70,7 +70,7 @@ class VolumeDescription:
 class VolumeDescriptionHostPath(VolumeDescription):
     """Host-based volumes."""
     def __init__(self, name: str, path: str, readonly: bool):
-        super().__init__("host_directory")
+        super().__init__("host-directory")
         self.path = path
         self.mount_point = '/mnt/' + name
         self.readonly = readonly
