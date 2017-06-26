@@ -82,13 +82,13 @@ A number of special values can be used, these will be substituted by Zoe when th
 volumes
 ^^^^^^^
 
-array
+object
 
-A list of additional volumes to be mounted in this service container. Each volume is described by an array with three elements:
+A list of additional volumes to be mounted in this service container. Each volume is described by an object with three elements:
 
-* host path: the path on the host to mounted
-* container path: the path inside the container where host path should be mounted
-* read only: a boolean, if true the mountpoint will be read only
+* name: the name for this volume. In the container the volume will be mounted as ``/mnt/<name>``
+* path: the path on the host (usually on a shared filasystem) that should be mounted in this service container
+* read_only: a boolean, if true the volume will be read only
 
 Zoe will always mount the user workspace directory in ``$ZOE_WORKSPACE``.
 
