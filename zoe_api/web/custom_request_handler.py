@@ -83,10 +83,17 @@ def tojson_filter(obj, **kwargs):
 
 
 class ZoeRequestHandler(tornado.web.RequestHandler):
-    """usage:
-        class JinjaPoweredHandler(JinjaTemplateMixin, tornado.web.RequestHandler):
-            pass
-    """
+    """Custom Zoe Tornado handler."""
+
+    def get_current_user(self):
+        """Implement cookie-auth the Tornado way."""
+        user_id = self.get_secure_cookie("zoeweb_user")
+        if not user_id:
+            return None
+        user = self.application.api_endpoint.user_get(user_id)
+        if user is None or not user.enabled:
+            return None
+        return user
 
     def initialize(self, *args_, **kwargs_):
         """Initialize the Jinja template system."""

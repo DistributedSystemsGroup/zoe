@@ -61,9 +61,11 @@ def zoe_web_main() -> int:
         'static_path': os.path.join(os.path.dirname(__file__), "web", "static"),
         'template_path': os.path.join(os.path.dirname(__file__), "web", "templates"),
         'cookie_secret': config.get_conf().cookie_secret,
+        'login_url': '/login',  # used only by the web interface
         'debug': args.debug
     }
-    app = Application(zoe_api.web.web_init(api_endpoint) + zoe_api.rest_api.api_init(api_endpoint), **app_settings)
+    app = Application(zoe_api.web.web_init() + zoe_api.rest_api.api_init(api_endpoint), **app_settings)
+    app.api_endpoint = api_endpoint
     JinjaApp.init_app(app)
 
     log.info("Starting HTTP server...")

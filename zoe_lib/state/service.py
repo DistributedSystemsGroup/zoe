@@ -18,6 +18,7 @@
 import logging
 
 from zoe_lib.config import get_conf
+from zoe_lib.state.base import Base
 
 log = logging.getLogger(__name__)
 
@@ -70,7 +71,7 @@ class VolumeDescription:
         self.readonly = data[2]
 
 
-class Service:
+class Service(Base):
     """A Zoe Service."""
 
     TERMINATING_STATUS = "terminating"
@@ -88,8 +89,7 @@ class Service:
     BACKEND_OOM_STATUS = 'oom-killed'
 
     def __init__(self, d, sql_manager):
-        self.sql_manager = sql_manager
-        self.id = d['id']
+        super().__init__(d, sql_manager)
 
         self.name = d['name']
         self.status = d['status']
@@ -132,9 +132,6 @@ class Service:
             'essential': self.essential,
             'proxy_address': self.proxy_address
         }
-
-    def __eq__(self, other):
-        return self.id == other.id
 
     def set_terminating(self):
         """The service is being killed."""

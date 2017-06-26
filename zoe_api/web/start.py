@@ -18,6 +18,8 @@
 from random import randint
 import json
 
+import tornado.web
+
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 from zoe_api.web.utils import get_auth_login, get_auth, catch_exceptions
 from zoe_api.web.custom_request_handler import ZoeRequestHandler
@@ -28,11 +30,11 @@ class RootWeb(ZoeRequestHandler):
     def initialize(self, **kwargs):
         """Initializes the request handler."""
         super().initialize(**kwargs)
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
+        self.api_endpoint = self.application.api_endpoint  # type: APIEndpoint
 
-    @catch_exceptions
+    @tornado.web.authenticated
     def get(self):
-        """Home page without authentication."""
+        """Home page."""
         self.render('index.html')
 
 
@@ -41,7 +43,7 @@ class LoginWeb(ZoeRequestHandler):
     def initialize(self, **kwargs):
         """Initializes the request handler."""
         super().initialize(**kwargs)
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
+        self.api_endpoint = self.application.api_endpoint  # type: APIEndpoint
 
     @catch_exceptions
     def get(self):

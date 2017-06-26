@@ -16,6 +16,7 @@
 """Interface to PostgresQL for Zoe state."""
 
 import logging
+from typing import Dict
 
 log = logging.getLogger(__name__)
 
@@ -24,13 +25,16 @@ class Base:
     """
     :type sql_manager: SQLManager
     """
-    def __init__(self, d, sql_manager):
+    def __init__(self, d: Dict, sql_manager):
         """
         :type sql_manager: SQLManager
         """
         self.sql_manager = sql_manager
         self.id = d['id']
 
-    def serialize(self):
+    def serialize(self) -> Dict:
         """Generates a dictionary that can be serialized in JSON."""
         raise NotImplementedError
+
+    def __eq__(self, other):
+        return self.id == other.id

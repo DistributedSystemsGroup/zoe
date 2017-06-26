@@ -19,10 +19,12 @@ import datetime
 import logging
 import threading
 
+from zoe_lib.state.base import Base
+
 log = logging.getLogger(__name__)
 
 
-class Execution:
+class Execution(Base):
     """
     A Zoe execution.
 
@@ -40,8 +42,7 @@ class Execution:
     TERMINATED_STATUS = "terminated"
 
     def __init__(self, d, sql_manager):
-        self.sql_manager = sql_manager
-        self.id = d['id']
+        super().__init__(d, sql_manager)
 
         self.user_id = d['user_id']
         self.name = d['name']
@@ -83,9 +84,6 @@ class Execution:
             'error_message': self.error_message,
             'services': [s.id for s in self.services]
         }
-
-    def __eq__(self, other):
-        return self.id == other.id
 
     def set_scheduled(self):
         """The execution has been added to the scheduler queues."""

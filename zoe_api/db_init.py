@@ -21,7 +21,7 @@ import psycopg2.extras
 import zoe_api.exceptions
 from zoe_lib.config import get_conf
 
-SQL_SCHEMA_VERSION = 4  # ---> Increment this value every time the schema changes !!! <---
+SQL_SCHEMA_VERSION = 5  # ---> Increment this value every time the schema changes !!! <---
 
 
 def version_table(cur):
@@ -47,16 +47,52 @@ def check_schema_version(cur, deployment_name):
     else:
         if row[0] == SQL_SCHEMA_VERSION:
             return True
+        if row[0] == 4:
+            _create_tables_v5(cur)
+            _update_schema_v5(cur)
+            return True
         else:
             raise zoe_api.exceptions.ZoeException('SQL database schema version mismatch: need {}, found {}'.format(SQL_SCHEMA_VERSION, row[0]))
 
 
 def create_tables(cur):
     """Create the Zoe database tables."""
+    _create_tables_v5(cur)
+    _create_tables_v4(cur)
+    _create_tables_v3(cur)
+    _update_schema_v5(cur)
+
+
+def _create_tables_v5(cur):
+    cur.execute('''CREATE TABLE quotas (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        concurrent_executions INT NOT NULL,
+        memory BIGINT NOT NULL,
+        cores INT NOT NULL,
+        volume_size BIGINT NOT NULL
+    )''')
+    cur.execute('''INSERT INTO quotas (id, name, concurrent_executions, memory, cores, volume_size) VALUES (DEFAULT, 'default', 5, 34359738368, 20, 34359738368)''')
+    cur.execute('''CREATE TABLE users (
+        id SERIAL PRIMARY KEY,
+        username TEXT NOT NULL,
+        email TEXT,
+        priority SMALLINT NOT NULL DEFAULT 0,
+        enabled BOOLEAN NOT NULL DEFAULT TRUE,
+        quota_id INT REFERENCES quotas
+    )''')
+
+
+def _update_schema_v5(cur):
+    cur.execute('''ALTER TABLE execution ALTER COLUMN id TYPE BIGINT''')
+    cur.execute('''ALTER TABLE service ALTER COLUMN id TYPE BIGINT''')
+
+
+def _create_tables_v4(cur):
     cur.execute('''CREATE TABLE execution (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL,
-        user_id TEXT NOT NULL,
+        user_id INT REFERENCES users,
         description JSON NOT NULL,
         status TEXT NOT NULL,
         execution_manager_id TEXT NULL,
@@ -78,6 +114,9 @@ def create_tables(cur):
         ip_address CIDR NULL DEFAULT NULL,
         essential BOOLEAN NOT NULL DEFAULT FALSE
         )''')
+
+
+def _create_tables_v3(cur):
     cur.execute('''CREATE TABLE port (
         id SERIAL PRIMARY KEY,
         service_id INT REFERENCES service ON DELETE CASCADE,
@@ -86,7 +125,7 @@ def create_tables(cur):
         external_port INT NULL,
         description JSON NOT NULL
     )''')
-    #Create oauth_client and oauth_token tables for oAuth2
+    # Create oauth_client and oauth_token tables for oAuth2
     cur.execute('''CREATE TABLE oauth_client (
         identifier TEXT PRIMARY KEY,
         secret TEXT,
@@ -104,7 +143,7 @@ def create_tables(cur):
         refresh_token TEXT,
         refresh_token_expires_at TIMESTAMP,
         scopes TEXT,
-        user_id TEXT
+        user_id INT REFERENCES users
         )''')
 
 
@@ -126,8 +165,15 @@ def init(force=False):
         cur.execute("DELETE FROM public.versions WHERE deployment = %s", (get_conf().deployment_name,))
         cur.execute('DROP SCHEMA IF EXISTS {} CASCADE'.format(get_conf().deployment_name))
 
-    if not check_schema_version(cur, get_conf().deployment_name):
-        create_tables(cur)
+    try:
+        if not check_schema_version(cur, get_conf().deployment_name):
+            create_tables(cur)
+    except zoe_api.exceptions.ZoeException as e:
+        if force:
+            cur.execute("DELETE FROM public.versions WHERE deployment = %s", (get_conf().deployment_name,))
+            cur.execute('DROP SCHEMA IF EXISTS {} CASCADE'.format(get_conf().deployment_name))
+        else:
+            raise e
 
     conn.commit()
     cur.close()

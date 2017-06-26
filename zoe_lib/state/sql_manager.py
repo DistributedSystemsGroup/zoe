@@ -24,6 +24,8 @@ import psycopg2.extras
 from .service import Service
 from .execution import Execution
 from .port import Port
+from .quota import Quota
+from .user import User
 
 log = logging.getLogger(__name__)
 
@@ -254,6 +256,125 @@ class SQLManager:
         self.conn.commit()
         return cur.fetchone()[0]
 
+    def quota_list(self, only_one=False, **kwargs):
+        """
+        Return a list of ports.
+
+        :param only_one: only one result is expected
+        :type only_one: bool
+        :param kwargs: filter services based on their fields/columns
+        :return: one or more ports
+        """
+        cur = self._cursor()
+        q_base = 'SELECT * FROM quotas'
+        if len(kwargs) > 0:
+            q = q_base + " WHERE "
+            filter_list = []
+            args_list = []
+            for key, value in kwargs.items():
+                filter_list.append('{} = %s'.format(key))
+                args_list.append(value)
+            q += ' AND '.join(filter_list)
+            query = cur.mogrify(q, args_list)
+        else:
+            query = cur.mogrify(q_base)
+
+        cur.execute(query)
+        if only_one:
+            row = cur.fetchone()
+            if row is None:
+                return None
+            return Quota(row, self)
+        else:
+            return [Quota(x, self) for x in cur]
+
+    def quota_update(self, port_id, **kwargs):
+        """Update the state of an existing port."""
+        cur = self._cursor()
+        arg_list = []
+        value_list = []
+        for key, value in kwargs.items():
+            arg_list.append('{} = %s'.format(key))
+            value_list.append(value)
+        set_q = ", ".join(arg_list)
+        value_list.append(port_id)
+        q_base = 'UPDATE quota SET ' + set_q + ' WHERE id=%s'
+        query = cur.mogrify(q_base, value_list)
+        cur.execute(query)
+        self.conn.commit()
+
+    def quota_new(self, name, concurrent_executions, memory, cores, volume_size):
+        """Adds a new port to the state."""
+        cur = self._cursor()
+        query = cur.mogrify('INSERT INTO quotas (id, name, concurrent_executions, memory, cores, volume_size) VALUES (DEFAULT, %s, %s, %s, %s, %s) RETURNING id', (name, concurrent_executions, memory, cores, volume_size))
+        cur.execute(query)
+        self.conn.commit()
+        return cur.fetchone()[0]
+
+    def quota_delete(self, quota_id):
+        """Delete an execution and its services from the state."""
+        cur = self._cursor()
+        query = "UPDATE users SET quota_id = (SELECT id from quotas WHERE name='default') WHERE quota_id=%s"
+        cur.execute(query, (quota_id,))
+        query = "DELETE FROM quotas WHERE id = %s"
+        cur.execute(query, (quota_id,))
+        self.conn.commit()
+
+    def user_list(self, only_one=False, **kwargs):
+        """
+        Return a list of ports.
+
+        :param only_one: only one result is expected
+        :type only_one: bool
+        :param kwargs: filter services based on their fields/columns
+        :return: one or more ports
+        """
+        cur = self._cursor()
+        q_base = 'SELECT * FROM users'
+        if len(kwargs) > 0:
+            q = q_base + " WHERE "
+            filter_list = []
+            args_list = []
+            for key, value in kwargs.items():
+                filter_list.append('{} = %s'.format(key))
+                args_list.append(value)
+            q += ' AND '.join(filter_list)
+            query = cur.mogrify(q, args_list)
+        else:
+            query = cur.mogrify(q_base)
+
+        cur.execute(query)
+        if only_one:
+            row = cur.fetchone()
+            if row is None:
+                return None
+            return User(row, self)
+        else:
+            return [User(x, self) for x in cur]
+
+    def user_update(self, port_id, **kwargs):
+        """Update the state of an existing port."""
+        cur = self._cursor()
+        arg_list = []
+        value_list = []
+        for key, value in kwargs.items():
+            arg_list.append('{} = %s'.format(key))
+            value_list.append(value)
+        set_q = ", ".join(arg_list)
+        value_list.append(port_id)
+        q_base = 'UPDATE users SET ' + set_q + ' WHERE id=%s'
+        query = cur.mogrify(q_base, value_list)
+        cur.execute(query)
+        self.conn.commit()
+
+    def user_new(self, username):
+        """Adds a new port to the state."""
+        cur = self._cursor()
+        query = cur.mogrify('INSERT INTO users (id, username, email, priority, enabled, quota_id) VALUES (DEFAULT, %s, NULL, DEFAULT, DEFAULT, (SELECT id FROM quotas WHERE name=\'default\')) RETURNING id', (username,))
+        cur.execute(query)
+        self.conn.commit()
+        return cur.fetchone()[0]
+
     # The section below is used for Oauth2 authentication mechanism
 
     def fetch_by_refresh_token(self, refresh_token):
@@ -301,7 +422,7 @@ class SQLManager:
 
         return cur.fetchone()
 
-    def save_token(self, client_id, grant_type, token, data, expires_at, refresh_token, refresh_expires_at, scopes, user_id): #pylint: disable=too-many-arguments
+    def save_token(self, client_id, grant_type, token, data, expires_at, refresh_token, refresh_expires_at, scopes, user_id):  # pylint: disable=too-many-arguments
         """ save token to db """
         cur = self._cursor()
         expires_at = datetime.datetime.fromtimestamp(expires_at)

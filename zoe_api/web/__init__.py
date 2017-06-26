@@ -22,33 +22,20 @@ import tornado.web
 import zoe_api.web.start
 import zoe_api.web.executions
 
-from zoe_lib.version import ZOE_API_VERSION, ZOE_VERSION
 
-
-def web_init(api_endpoint) -> List[tornado.web.URLSpec]:
+def web_init() -> List[tornado.web.URLSpec]:
     """Tornado init for the web interface."""
-    route_args = {
-        'api_endpoint': api_endpoint
-    }
     web_routes = [
-        tornado.web.url(r'/', zoe_api.web.start.RootWeb, route_args, name='root'),
-        tornado.web.url(r'/user', zoe_api.web.start.HomeWeb, route_args, name='home_user'),
-        tornado.web.url(r'/login', zoe_api.web.start.LoginWeb, route_args, name='login'),
+        tornado.web.url(r'/', zoe_api.web.start.RootWeb, name='root'),
+        tornado.web.url(r'/user', zoe_api.web.start.HomeWeb, name='home_user'),
+        tornado.web.url(r'/login', zoe_api.web.start.LoginWeb, name='login'),
 
-        tornado.web.url(r'/executions/new', zoe_api.web.executions.ExecutionDefineWeb, route_args, name='execution_define'),
-        tornado.web.url(r'/executions/start', zoe_api.web.executions.ExecutionStartWeb, route_args, name='execution_start'),
-        tornado.web.url(r'/executions/restart/([0-9]+)', zoe_api.web.executions.ExecutionRestartWeb, route_args, name='execution_restart'),
-        tornado.web.url(r'/executions/terminate/([0-9]+)', zoe_api.web.executions.ExecutionTerminateWeb, route_args, name='execution_terminate'),
-        tornado.web.url(r'/executions/delete/([0-9]+)', zoe_api.web.executions.ExecutionDeleteWeb, route_args, name='execution_delete'),
-        tornado.web.url(r'/executions/inspect/([0-9]+)', zoe_api.web.executions.ExecutionInspectWeb, route_args, name='execution_inspect')
+        tornado.web.url(r'/executions/new', zoe_api.web.executions.ExecutionDefineWeb, name='execution_define'),
+        tornado.web.url(r'/executions/start', zoe_api.web.executions.ExecutionStartWeb, name='execution_start'),
+        tornado.web.url(r'/executions/restart/([0-9]+)', zoe_api.web.executions.ExecutionRestartWeb, name='execution_restart'),
+        tornado.web.url(r'/executions/terminate/([0-9]+)', zoe_api.web.executions.ExecutionTerminateWeb, name='execution_terminate'),
+        tornado.web.url(r'/executions/delete/([0-9]+)', zoe_api.web.executions.ExecutionDeleteWeb, name='execution_delete'),
+        tornado.web.url(r'/executions/inspect/([0-9]+)', zoe_api.web.executions.ExecutionInspectWeb, name='execution_inspect')
     ]
 
     return web_routes
-
-
-def inject_version():
-    """Inject some template variables in all templates."""
-    return {
-        'zoe_version': ZOE_VERSION,
-        'zoe_api_version': ZOE_API_VERSION,
-    }

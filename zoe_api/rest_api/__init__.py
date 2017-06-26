@@ -42,12 +42,16 @@ def api_init(api_endpoint) -> List[tornado.web.URLSpec]:
 
     api_routes = [
         tornado.web.url(API_PATH + r'/info', InfoAPI, route_args),
-        tornado.web.url(API_PATH + r'/login', LoginAPI, route_args),
-        tornado.web.url(API_PATH + r'/userinfo', UserInfoAPI, route_args),
-        tornado.web.url(API_PATH + r'/zapp_validate', ZAppValidateAPI, route_args),
+        tornado.web.url(API_PATH + r'/user/login', UserLoginAPI, route_args),
+        tornado.web.url(API_PATH + r'/user/logout', UserLogoutAPI, route_args),
+        tornado.web.url(API_PATH + r'/user/([0-9]+)', UserInfoAPI, route_args),
+
+        tornado.web.url(API_PATH + r'/quota', QuotaCollectionAPI, route_args),
+        tornado.web.url(API_PATH + r'/quota/([0-9]+)', QuotaAPI, route_args),
+
+        tornado.web.url(API_PATH + r'/zapp/validate', ZAppValidateAPI, route_args),
 
         tornado.web.url(API_PATH + r'/execution/([0-9]+)', ExecutionAPI, route_args),
-        tornado.web.url(API_PATH + r'/execution/delete/([0-9]+)', ExecutionDeleteAPI, route_args),
         tornado.web.url(API_PATH + r'/execution/endpoints/([0-9]+)', ExecutionEndpointsAPI, route_args),
         tornado.web.url(API_PATH + r'/execution', ExecutionCollectionAPI, route_args),
 
