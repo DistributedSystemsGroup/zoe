@@ -4,7 +4,9 @@
     "services": [
         {
             "image": "nginx:alpine",
-            "volumes": [],
+            "volumes": [
+                ["/tmp", "test", true]
+            ],
             "environment": [],
             "essential_count": 1,
             "monitor": true,
