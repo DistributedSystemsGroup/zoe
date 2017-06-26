@@ -174,3 +174,91 @@ class APIEndpoint:
                     endpoints.append((port['name'], endpoint))
 
         return services_info, endpoints
+
+    def user_list(self, uid_, role, **filters):
+        """Generate a optionally filtered list of users."""
+        if role != "admin":
+            raise zoe_api.exceptions.ZoeAuthException()
+
+        return self.sql.user_list(**filters)
+
+    def user_by_username(self, uid, role, user_name):
+        """Lookup a user by its name."""
+        u = self.sql.user_list(username=user_name, only_one=True)
+        if u is None:
+            raise zoe_api.exceptions.ZoeNotFoundException('No such user')
+        assert isinstance(u, zoe_lib.state.sql_manager.User)
+        if u.id != uid and role != 'admin':
+            raise zoe_api.exceptions.ZoeAuthException()
+        return u
+
+    def user_update(self, uid, role, user_name, data):
+        """Update user details."""
+        u = self.sql.user_list(username=user_name, only_one=True)
+        if u.id != uid and role != "admin":
+            raise zoe_api.exceptions.ZoeAuthException()
+
+        if 'enabled' in data:
+            u.set_enabled(bool(data['enabled']))
+
+        if 'priority' in data:
+            priority = int(data['priority'])
+            if priority < 0 or priority > 1024:
+                raise zoe_api.exceptions.ZoeRestAPIException('User priority must be between 0 and 1024')
+            u.set_priority(priority)
+
+        if 'email' in data:
+            if not re.search(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", data['email']):
+                raise zoe_api.exceptions.ZoeRestAPIException('Invalid email address')
+            u.set_email(data['email'])
+
+    def quota_list(self, uid_, role, **filters):
+        """Generate a optionally filtered list of users."""
+        if role != "admin":
+            raise zoe_api.exceptions.ZoeAuthException()
+
+        return self.sql.quota_list(**filters)
+
+    def quota_delete(self, uid_, role, quota_id):
+        """Delete a quota from the database, users with this quota will be reassigned the default one."""
+        if role != "admin":
+            raise zoe_api.exceptions.ZoeAuthException()
+
+        self.sql.quota_delete(quota_id)
+
+    def quota_by_id(self, uid_, role, quota_id):
+        """Retrieve a quota object by its ID."""
+        if role != "admin":
+            raise zoe_api.exceptions.ZoeAuthException()
+
+        return self.sql.quota_list(id=quota_id, only_one=True)
+
+    def quota_update(self, uid_, role, quota_id, data):
+        """Update user details."""
+        if role != "admin":
+            raise zoe_api.exceptions.ZoeAuthException()
+
+        quota = self.sql.quota_list(id=quota_id, only_one=True)
+
+        if 'name' in data:
+            quota.name = data['name']
+        if 'concurrent_executions' in data:
+            value = int(data['concurrent_executions'])
+            if value <= 0:
+                raise zoe_api.exceptions.ZoeRestAPIException('concurrent executions quota must be bigger than 0')
+            quota.concurrent_executions = value
+        if 'memory' in data:
+            value = int(data['memory'])
+            if value <= 1024*1024:
+                raise zoe_api.exceptions.ZoeRestAPIException('memory quota must be bigger than 1MB')
+            quota.memory = data['memory']
+        if 'cores' in data:
+            value = int(data['cores'])
+            if value <= 0:
+                raise zoe_api.exceptions.ZoeRestAPIException('concurrent executions quota must be bigger than 0')
+            quota.cores = value
+        if 'volume_size' in data:
+            value = int(data['volume_size'])
+            if value < 0:
+                raise zoe_api.exceptions.ZoeRestAPIException('memory quota must be equal or bigger than 0 bytes')
+            quota.volume_size = value

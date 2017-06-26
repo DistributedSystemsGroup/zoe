@@ -28,7 +28,7 @@ class Quota(Base):
     def __init__(self, d, sql_manager):
         super().__init__(d, sql_manager)
 
-        self.name = d['name']
+        self._name = d['name']
         self._concurrent_executions = d['concurrent_executions']
         self._memory = d['memory']
         self._cores = d['cores']
@@ -38,11 +38,21 @@ class Quota(Base):
         """Generates a dictionary that can be serialized in JSON."""
         return {
             'id': self.id,
-            'name': self.name,
+            'name': self._name,
             'concurrent_executions': self._concurrent_executions,
             'cores': self._cores,
             'volume_size': self._volume_size
         }
+
+    @property
+    def name(self):
+        """Getter for the name property."""
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
+        self.sql_manager.quota_update(self.id, name=value)
 
     @property
     def concurrent_executions(self):
