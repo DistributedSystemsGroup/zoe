@@ -40,7 +40,7 @@ import docker.models.containers
 import requests.exceptions
 
 from zoe_lib.config import get_conf
-from zoe_lib.state import Service
+from zoe_lib.state import Service, VolumeDescriptionHostPath
 from zoe_master.stats import ClusterStats, NodeStats
 from zoe_master.backends.service_instance import ServiceInstance
 from zoe_master.exceptions import ZoeException, ZoeNotEnoughResourcesException
@@ -169,9 +169,11 @@ class SwarmClient:
 
         volumes = {}
         for volume in service_instance.volumes:
-            if volume.type != "host_directory":
+            if volume.type == "host_directory":
+                assert isinstance(volume, VolumeDescriptionHostPath)
+                volumes[volume.path] = {'bind': volume.mount_point, 'mode': ("ro" if volume.readonly else "rw")}
+            else:
                 log.error('Swarm backend does not support volume type {}'.format(volume.type))
-            volumes[volume.path] = {'bind': volume.mount_point, 'mode': ("ro" if volume.readonly else "rw")}
 
         if service_instance.memory_limit is not None:
             mem_limit = service_instance.memory_limit.max
