@@ -43,8 +43,8 @@ def gen_environment(execution: Execution, service: Service, env_subst_dict: Dict
     env_list.append(('SERVICE_NAME', service.name))
     env_list.append(('PROXY_PATH', get_conf().proxy_path))
 
-    fswk = ZoeFSWorkspace()
-    env_list.append(('ZOE_WORKSPACE', fswk.get_mountpoint()))
+    wk_vol = ZoeFSWorkspace().get(execution.user_id)
+    env_list.append(('ZOE_WORKSPACE', wk_vol.mount_point))
     return env_list
 
 
