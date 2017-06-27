@@ -26,7 +26,7 @@ import pykube
 from zoe_master.stats import ClusterStats, NodeStats
 from zoe_master.backends.service_instance import ServiceInstance
 from zoe_lib.version import ZOE_VERSION
-from zoe_lib.state import VolumeDescription
+from zoe_lib.state import VolumeDescription, VolumeDescriptionHostPath
 from zoe_lib.config import get_conf
 
 log = logging.getLogger(__name__)
@@ -191,22 +191,29 @@ class KubernetesReplicationControllerConf:
         count = 0
 
         for vol in volumes:
-            if vol.type != "host_directory":
-                log.error('Swarm backend does not support volume type {}'.format(vol.type))
-
-            aux['spec']['containers'][0]['volumeMounts'][count]['mountPath'] = vol.mount_point
-            aux['spec']['containers'][0]['volumeMounts'][count]['name'] = name + "-" + str(count)
-            count += 1
+            if vol.type == "host_directory":
+                assert isinstance(vol, VolumeDescriptionHostPath)
+                aux['spec']['containers'][0]['volumeMounts'][count]['mountPath'] = vol.mount_point
+                aux['spec']['containers'][0]['volumeMounts'][count]['name'] = name + "-" + str(count)
+                count += 1
+            else:
+                log.error('Kubernetes backend does not support volume type {}'.format(vol.type))
+                continue
 
         aux['spec']['volumes'] = [{} for _ in range(len(volumes))]
         count = 0
 
         for vol in volumes:
-            aux['spec']['volumes'][count]['name'] = name + "-" + str(count)
-            aux['spec']['volumes'][count]['hostPath'] = {
-                'path': vol.path
-            }
-            count += 1
+            if vol.type == "host_directory":
+                assert isinstance(vol, VolumeDescriptionHostPath)
+                aux['spec']['volumes'][count]['name'] = name + "-" + str(count)
+                aux['spec']['volumes'][count]['hostPath'] = {
+                    'path': vol.path
+                }
+                count += 1
+            else:
+                log.error('Kubernetes backend does not support volume type {}'.format(vol.type))
+                continue
 
     def get_json(self):
         """Get json file"""

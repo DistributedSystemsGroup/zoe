@@ -4,7 +4,13 @@
     "services": [
         {
             "image": "nginx:alpine",
-            "volumes": [],
+            "volumes": [
+                {
+                    "path": "/tmp",
+                    "name": "test",
+                    "read_only": true
+                }
+            ],
             "environment": [],
             "essential_count": 1,
             "monitor": true,
