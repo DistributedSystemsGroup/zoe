@@ -3,9 +3,9 @@
 ZApp format description
 =======================
 
-This document refers to version 2 of the Zoe application description format.
+This document refers to version 3 of the Zoe application description format.
 
-A Zoe application description is a JSON document. Currently we generate them via a set of python scripts available in the `zoe-applications <https://github.com/DistributedSystemsGroup/zoe-applications>`_ repository, but nothing prevents you generating JSON in some other way, obeying the format described here.
+A Zoe application description is a JSON document.
 
 At the top level map there are some settings, mostly metadata, and a list of services. Each service has its own metadata and some docker-related parameters.
 
