@@ -143,7 +143,7 @@ zoe:
   only:
     - master
 
-cleaup-images:
+cleanup-images:
   image: docker:latest
   stage: cleanup
   before_script:
