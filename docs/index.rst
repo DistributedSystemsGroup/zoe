@@ -84,7 +84,7 @@ External resources
 ^^^^^^^^^^^^^^^^^^
 
 - `Zoe Homepage <http://zoe-analytics.eu>`_
+- `ZApp catalog <http://zoe-analytics.eu/zapps>`_
 - `Issue tracker <https://github.com/DistributedSystemsGroup/zoe/issues>`_
-- `ZApp repository <https://github.com/DistributedSystemsGroup/zoe-applications>`_
 
 Zoe is licensed under the terms of the Apache 2.0 license.

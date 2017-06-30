@@ -3,177 +3,111 @@
 How to build a ZApp
 ===================
 
-This tutorial will help you build a Zoe Application description starting from the building blocks available in the `Zoe Applications repository <https://github.com/DistributedSystemsGroup/zoe-applications>`_. First we will cover some general concepts and then we will make an example application, a Spark cluster with a Jupyter notebook.
+This tutorial will help you customize a Zoe Application starting from the `Tensorflow ZApp <https://gitlab.eurecom.fr/zoe/zapp-tensorflow>`_. At the end of the tutorial you will be able to customize existing ZApps, but you will also have understood the tools and process necessary to build new ZApps from scratch.
 
 To understand this tutorial you need:
 
 * basic programming experience in Python
-* a basic understanding of the analytic framework you want to use
-* The Zoe Spark and Jupyter images loaded in a Docker Registry (optional, gives better startup performance)
-
-Here we will not cover how to build Zoe Frameworks and Services. Building them requires in-depth knowledge of Dockerfiles and shell scripting that we cannot include in a short entry-level tutorial such as this one.
+* knowledge of Dockerfiles and associated build commands
 
 General concepts
 ----------------
 
-ZApps are JSON files.
+A ZApp repository contains a number of well-known files, that are used to automatise builds.
 
-While writing a ZApp by hand is always an option, it is not the easiest or safest one. Instead almost every programming language provides primitives to read and write JSON files very easily.
+* ``root``
 
-In this guide we are going to use Python because it is a very easy language to understand and because the library of Zoe Frameworks and Services that we publish is written in Python. This Python code is run offline, outside of Zoe, to produce the ZApp JSON file. It is this JSON file that is submitted to Zoe for execution.
+  * ``docker/`` : directory containing Docker image sources (Dockerfiles and associated files)
+  * ``README-devel.md`` : documentation for the ZApp developer
+  * ``README.md`` : documentation for the ZApp user
+  * ``build_all.sh`` : builds the Docker images and pushes them to a registry
+  * ``gen_*.py`` : Python script that generate the ZApp description JSON files
+  * ``logo.png`` : logo for the ZApp, it will be used in the future ZAppShop
+  * ``validate_all.sh`` : runs the generated JSON files through the Zoe API validation endpoint
 
-We are planning graphical tools and a packaging system for ZApps, so stay tuned for updates! In the `Zoe Applications repository <https://github.com/DistributedSystemsGroup/zoe-applications>`_ there is already a very simple web interface we use internally for our users.
+The scripts expect a number of environment variables to be defined:
 
-.. image:: /figures/zapp_structure.png
+* DOCKER_REGISTRY : hostname (with port if needed) of the Docker registry to use
+* REPOSITORY : name of the image repository inside the registry to use
+* VERSION : image version (normally this is set by the CI environment to be a build number or the commit hash)
+* VALIDATION_URL : Zoe API URL for the validation endpoint (the default expects the zoe-api process to be running on localhost on the 5001 port)
 
-A ZApp is a tree of nested dictionaries (other languages call them maps or hashmaps). The actual JSON tree is flattened because Zoe does not need to know about Frameworks, it is a logical subdivision that helps the user.
+A ZApp is composed by two main elements:
 
-The ZApp format is versioned. Zoe checks the version field as first thing to make sure it can understand the description. This tutorial is based on version 2 of this format.
+* a container image: the format depends on the container backend in use, currently Docker is the most common one
+* a JSON description: the magic ingredient that makes Zoe work
 
-The Spark + Jupyter ZApp
-------------------------
+The JSON description contains all the information needed to start the containers that make up the application. Apart from some metadata, it contains a list of ``services``. Each service describes one or more (almost) identical containers. Please note that Zoe does not replicate services for fault tolerance, but to increase parallelism and performance (think in terms of additional Spark workers, for example).
 
-To build our ZApp, we will write a short Python program that imports the Zoe Frameworks we need and generates a customized ZApp, ready to be submitted to Zoe.
+The ZApp format is versioned. Zoe checks the version field as first thing to make sure it can understand the description. This tutorial is based on version 3 of this format.
 
-What is described below is just one way of doing things, the one we feel it easier to understand.
+The Tensorflow ZApp
+-------------------
 
-Step 1 - setup
-^^^^^^^^^^^^^^
+Clone the `Tensorflow ZApp <https://gitlab.eurecom.fr/zoe/zapp-tensorflow>`_ repository.
 
-Fork and clone the `Zoe Applications repository <https://github.com/DistributedSystemsGroup/zoe-applications>`_, this will let you easily stay updated and commit your own applications.
+It contains two variants of the Tensorflow ZApp that we will examine in detail:
 
-The repository contains::
+1. A simple ZApp that uses the unmodified Google Docker image with a notebook for interactive use
+2. A batch ZApp that uses a custom image containing the HEAD version of Tensorflow
 
-    applications/ : some pre-made scripts to build ZApps
-    frameworks/ : the frameworks we will use to build our own ZApp
-    scripts/ : utility scripts
-    web/ : a web application to customize pre-made ZApps
-    zoe-app-builder.py : the startup script for the web application
 
-To create a new ZApp, create a subdirectory in `applications/`, let's call it `tutorial_zapp`. Inside open a new file in your favourite text editor, called `spark_jupyter.py`::
+The interactive Tensorflow ZApp with stable release from Google
+---------------------------------------------------------------
 
-    $ cd applications/
-    $ mkdir tutorial_zapp
-    $ cd tutorial_zapp
-    $ touch __init__.py  # This way out ZApp can be imported by the app builder
-    $ vi spark_jupyter.py
+Open the ``gen_json_google.py`` script.
 
-Step 2 - imports
-^^^^^^^^^^^^^^^^
+At the beginning of the file we define two constants:
 
-First we need json for the final export::
+* APP_NAME : name of Zoe Application. It is used in various places visible to the user.
+* ZOE_APPLICATION_DESCRIPTION_VERSION : the format version this description conforms to
 
-    import json
+Then there is dictionary called ``options`` that lists parameters that can be changed to obtain different behaviors. In this case the ZApp is quite simple and we can tune only the amount of cores and memory that out ZApp is going to consume. This information is going to be used for scheduling and for placing the container in the cluster.
 
-Then we need to import the frameworks we need::
+To keep the script standardized other constants are defined here, but are not used in this specific ZApp. They load values from the environment, as defined above.
 
-    import frameworks.spark.spark as spark_framework
-    import frameworks.spark.spark_jupyter as spark_jupyter
+``GOOG_IMAGE`` contains the name of the container image that Zoe is going to use. Here we point directly to the Tensorflow image on Google's registry.
 
-These Python modules contain functions that return pre-filled dictionaries, feel free to have a look at their code.
+Services
+^^^^^^^^
 
-Basically we are selecting some building blocks to compose out application:
+The first function that is defined in the script is ``goog_tensorflow_service``. It defines the Tensorflow service in Zoe.
 
-* `spark_framework` contains definitions for the Spark Master and the Spark Worker services
-* `spark_jupyter` contains the definition for a Jupyter service configured with a pyspark engine.
+The format is detailed in the :ref:`zapp_format` document. Of note, here, are the two network ports that are going to be exposed, one for the Tensorboard interface and one for the Notebook web interface.
 
-Finally we need to import the function that will fill in a generic ZApp template::
+The ZApp
+^^^^^^^^
 
-    import applications.app_base
+At the end an ``app`` dictionary is build, containing ZApp metadata and the service we defined above. The dictionary is then dumped in JSON format, that Zoe can understand.
 
-Step 3 - options
-^^^^^^^^^^^^^^^^
+After running the script, the ZApp can be started with ``zoe.py start google-tensorflow goog_tensorflow.json``
 
-Set an application name. It is used mainly for the user interface::
+The batch Tensorflow with custom image
+--------------------------------------
 
-    APP_NAME = 'spark-jupyter'
+First of all have a look at the Dockefile contained in ``docker/tensorflow/Dockerfile``.
 
-If you are using an internal registry to hold Zoe images, set its address here (please note the final '/')::
+It is based on a Ubuntu image and installs everything that is needed to build Tensorflow. Since the build system uses bazel, that in turn needs Java, the resulting image is quite large, but it can be used for developing Tensorflow.
 
-    DOCKER_REGISTRY = '192.168.45.252:5000/'
+It also makes those pesky warnings about Tensorflow not being optimized for your CPU disappear.
 
-Otherwise you can use the images on the Docker Hub::
+The Dockefile clones the Tensorflow repository and build the master branch, HEAD commit.
 
-    DOCKER_REGISTRY = ''
+Please note that there is nothing Zoe-specific in this Dockerfile. Zoe can run pre-built images from public registries as well as custom images from private registries.
 
-Set more options, so that they can be easily changed later::
+Run the ``build_all.sh`` script to build the Docker image. It will take several minutes, so you can have a coffee break in the meantime.
 
-    options = [
-        ('master_mem_limit', 512 * (1024**2), 'Spark Master memory limit (bytes)'),
-        ('worker_mem_limit', 12 * (1024**3), 'Spark Worker memory limit (bytes)'),
-        ('notebook_mem_limit', 4 * (1024**3), 'Notebook memory limit (bytes)'),
-        ('worker_cores', 6, 'Cores used by each worker'),
-        ('worker_count', 2, 'Number of workers'),
-        ('master_image', DOCKER_REGISTRY + 'zoerepo/spark-master', 'Spark Master image'),
-        ('worker_image', DOCKER_REGISTRY + 'zoerepo/spark-worker', 'Spark Worker image'),
-        ('notebook_image', DOCKER_REGISTRY + zoerepo/spark-jupyter-notebook', 'Jupyter notebook image'),
-    ]
+Now open the ``gen_json_standalone.py`` script. It is almost identical to the one we saw above, the only notable change is about the image name, that now is generated from the environment variables used to build the image.
 
-Options are listed in this way (a list of tuples) to ease integration in the app builder web interface. Let's examine each one:
+Depending on the backend in use in you Zoe deployment, you may have to pull the image from the registry before being able to start the ZApp.
 
-* master_mem_limit: reserve 512MB of RAM for the Spark Master
-* worker_mem_limit: reserve 12GB of RAM for each Spark Worker
-* notebook_mem_limit: reserve 4GB of RAM for the Jupyter notebook
-* worker_cores: each Spark worker will use 6 cores for its executor
-* worker_count: we want a total of 2 Spark workers
-* {master,worker,notebook}_image: Docker image names for the services, prefixed with the registry address configured above
-
-The option names here match the arguments names of the function we are going to define next.
-
-Step 4 - the ZApp
-^^^^^^^^^^^^^^^^^
-
-Here we define the main function that generates the ZApp dictionary::
-
-    def gen_app(notebook_mem_limit, master_mem_limit, worker_mem_limit, worker_cores,
-                worker_count,
-                master_image, worker_image, notebook_image):
-        services = [
-            spark_framework.spark_master_service(master_mem_limit, master_image),
-            spark_framework.spark_worker_service(worker_count, worker_mem_limit, worker_cores, worker_image),
-            spark_jupyter.spark_jupyter_notebook_service(notebook_mem_limit, worker_mem_limit, notebook_image)
-        ]
-        return applications.app_base.fill_app_template(APP_NAME, False, services)
-
-The function `gen_app()` takes as arguments the options defined in the previous step. It uses these arguments for calling the framework functions and fill a list of services. Finally, with the call to `fill_app_template()` we are populating a generic template with our options and services.
-
-Each framework package defines functions that fill in a template. These functions are actually quite simple, but they hide the structure of the Zoe application description format to simplify the creation of ZApps. They are also hiding the complexities of running Spark in Docker containers: network details and configuration options are already defined and setup correctly.
-
-As can be seen in some of the sample applications (have a look at the `eurecom_aml_lab` one, for example) the service descriptions returned by the template functions can be further customized to add environment variables, volumes, etc.
-
-Step 5 - putting it all together
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-To make the script executable we need a bit of boilerplate code::
-
-    if __name__ == "__main__":
-        args = {}
-        for opt in options:
-            args[opt[0]] = opt[1]
-        app_dict = gen_app(**args)
-        json.dump(app_dict, sys.stdout, sort_keys=True, indent=4)
-        sys.stdout.write('\n')
-
-This code does not need to change, it takes the option list, transforms it into function arguments, calls `gen_app()` defined above, serializes the output dictionary in human-friendly JSON and dumps it on the standard output.
-
-Now you can save and close the file `spark_jupyter.py`. To execute it do::
-
-    $ PYTHONPATH=../.. python ./spark_jupyter.py | tee my_first_zapp.json
-
-The full description is printed on the screen and saved into a file. The ZApp is available for execution in `my_first_zapp.json`.
+After running the Python script, the ZApp can be started with ``zoe.py start my-long-running-training custom_tensorflow.json``
 
 Concluding remarks
 ^^^^^^^^^^^^^^^^^^
 
-In this tutorial we created a Python script that generates a Zoe Application. This ZApps describes a Spark cluster with two workers and a Jupyter notebook. The ZApp can also be easily customized, adding more workers for example, without having to deal with any configuration detail.
+In this tutorial we examined in detail a sample Tensorflow ZApp. We saw where the memory and cores parameters are defined and how to customize them.
 
-The building blocks, the Frameworks and the Service templates, together with the Docker images, hide all the complexity of configuring such a distributed system composed of many different moving parts.
-
-With Zoe and ZApps we want to have many different levels of abstraction, to leave the flexibility in the hands of our users. From top to bottom, increasing the degrees of flexibility and complexity we have:
-
-1. the web application builder: very high level, for end users. They can customize a limited number of predefined applications
-2. the Python application descriptions: covered in this tutorial, they can be used to create new applications starting from predefined building blocks
-3. the Python service and framework descriptions: can be used as a starting point to create new frameworks and services, together with Docker images
-4. JSON descriptions: create a compatible JSON description from scratch using your own tools and languages for maximum flexibility
+The tutorial has also explained how to use third party Docker images or how to build new ones in-house for running development versions of standard software.
 
 We have a lot of great ideas on how to evolve the ZApp concept, but we are sure you have many more! Any feedback or comment is always welcome, `contact us directly <daniele.venzano@eurecom.fr>`_ or through the `GitHub issue tracker <https://github.com/DistributedSystemsGroup/zoe/issues>`_.

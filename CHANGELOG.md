@@ -6,6 +6,12 @@
 * use JSON schemas to validate ZApps
 * Expand the execution list API, adding filtering capabilities to limit the number of results returned
 * Several minor bug fixes
+* Deployment scripts and zoe frontend moved to external repository for easier maintenance and testing
+* Removed proxy code
+* ZApps have been split into multiple repositories for easier maintenance, testing and automated building
+* Tyk or Kong can be used to provide SSL termination and authentication to the API
+* Documentation update
+* A new script `create_db_tables.py` can be used to create the schema in an empty database, useful for CI scenarios
 
 ## Version 2017.03
 
