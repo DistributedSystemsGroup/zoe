@@ -28,6 +28,7 @@ from zoe_api.rest_api.statistics import SchedulerStatsAPI
 from zoe_api.rest_api.oauth import OAuthGetAPI, OAuthRevokeAPI
 from zoe_api.rest_api.user import LoginAPI, UserAPI, UserCollectionAPI
 from zoe_api.rest_api.validation import ZAppValidateAPI
+from zoe_api.rest_api.quota import QuotaAPI, QuotaCollectionAPI
 
 from zoe_lib.version import ZOE_API_VERSION
 
@@ -43,7 +44,7 @@ def api_init(api_endpoint) -> List[tornado.web.URLSpec]:
     api_routes = [
         tornado.web.url(API_PATH + r'/info', InfoAPI, route_args),
         tornado.web.url(API_PATH + r'/login', LoginAPI, route_args),
-        tornado.web.url(API_PATH + r'/user)', UserCollectionAPI, route_args),
+        tornado.web.url(API_PATH + r'/user', UserCollectionAPI, route_args),
         tornado.web.url(API_PATH + r'/user/([a-zA-Z0-9]+)', UserAPI, route_args),
 
         tornado.web.url(API_PATH + r'/quota', QuotaCollectionAPI, route_args),

@@ -1,0 +1,204 @@
+# Copyright (c) 2017, Daniele Venzano
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Database upgrade."""
+
+import sys
+
+import psycopg2
+import psycopg2.extras
+
+from zoe_lib.config import get_conf, load_configuration
+from zoe_api.db_init import SQL_SCHEMA_VERSION
+
+
+def _get_schema_version(dsn):
+    conn = psycopg2.connect(dsn)
+    cur = conn.cursor()
+    cur.execute('SET search_path TO {},public'.format(get_conf().deployment_name))
+    cur.execute("SELECT version FROM public.versions WHERE deployment = %s", (get_conf().deployment_name,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    if row is None:
+        return None
+    return row[0]
+
+
+def check_schema_version(dsn):
+    """Check if the schema version matches this source code version."""
+    current_version = _get_schema_version(dsn)
+    if current_version is None:
+        print('No database schema found for this deployment, use the "create_db_tables.py" script to create one.')
+        sys.exit(0)
+    else:
+        print("Detected schema version {}".format(current_version))
+        if current_version < 1:
+            print('Schema version {} is too old, cannot upgrade')
+            sys.exit(1)
+        if current_version == SQL_SCHEMA_VERSION:
+            print('DB schema already at latest supported version, no upgrade to perform.')
+            sys.exit(1)
+        elif current_version < SQL_SCHEMA_VERSION:
+            upgrade_schema_from(current_version, dsn)
+        else:
+            print('SQL database schema version mismatch: need {}, found {}, cannot downgrade'.format(SQL_SCHEMA_VERSION, current_version))
+            sys.exit(1)
+
+
+def upgrade_schema_from(start_version, dsn):
+    """Main schema upgrader, calls specific version upgraders as needed"""
+    print('Upgrading database from version {} to version {}'.format(start_version, SQL_SCHEMA_VERSION))
+    while start_version < SQL_SCHEMA_VERSION:
+        new_version = start_version + 1
+        upgraders[new_version](dsn)
+        start_version = new_version
+
+
+def upgrade_to_2(dsn):
+    """Perform schema upgrade from version 2 to version 3."""
+    conn = psycopg2.connect(dsn)
+    cur = conn.cursor()
+    cur.execute('SET search_path TO {},public'.format(get_conf().deployment_name))
+
+    print('Applying schema version 2...')
+
+    cur.execute("ALTER TABLE service ADD CONSTRAINT service_execution_id_fk FOREIGN KEY (id) REFERENCES prod.execution (id) ON DELETE CASCADE")
+
+    cur.execute("UPDATE public.versions SET version = 2 WHERE deployment = %s", (get_conf().deployment_name,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return
+
+
+def upgrade_to_3(dsn):
+    """Perform schema upgrade from version 2 to version 3."""
+    conn = psycopg2.connect(dsn)
+    cur = conn.cursor()
+    cur.execute('SET search_path TO {},public'.format(get_conf().deployment_name))
+
+    print('Applying schema version 3...')
+    cur.execute("ALTER TABLE service RENAME COLUMN docker_id TO backend_id")
+    cur.execute("ALTER TABLE service RENAME COLUMN docker_status TO backend_status")
+    cur.execute("ALTER TABLE service ALTER COLUMN backend_status SET DEFAULT 'undefined'")
+    cur.execute("ALTER TABLE service ALTER COLUMN backend_status SET NOT NULL")
+    cur.execute("ALTER TABLE service ADD ip_address CIDR DEFAULT NULL NULL")
+    cur.execute("ALTER TABLE service ADD essential BOOLEAN DEFAULT FALSE NOT NULL")
+
+    cur.execute('''CREATE TABLE oauth_client (
+        identifier TEXT PRIMARY KEY,
+        secret TEXT,
+        role TEXT,
+        redirect_uris TEXT,
+        authorized_grants TEXT,
+        authorized_response_types TEXT
+        )''')
+    cur.execute('''CREATE TABLE oauth_token (
+        client_id TEXT PRIMARY KEY,
+        grant_type TEXT,
+        token TEXT,
+        data TEXT,
+        expires_at TIMESTAMP,
+        refresh_token TEXT,
+        refresh_token_expires_at TIMESTAMP,
+        scopes TEXT,
+        user_id TEXT
+        )''')
+
+    cur.execute("UPDATE public.versions SET version = 3 WHERE deployment = %s", (get_conf().deployment_name,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return
+
+
+def upgrade_to_4(dsn):
+    """Perform schema upgrade from version 3 to version 4."""
+    conn = psycopg2.connect(dsn)
+    cur = conn.cursor()
+    cur.execute('SET search_path TO {},public'.format(get_conf().deployment_name))
+
+    print('Applying schema version 4...')
+    cur.execute('''CREATE TABLE port (
+        id SERIAL PRIMARY KEY,
+        service_id INT REFERENCES service ON DELETE CASCADE,
+        internal_name TEXT NOT NULL,
+        external_ip INET NULL,
+        external_port INT NULL,
+        description JSON NOT NULL
+    )''')
+
+    cur.execute("UPDATE public.versions SET version = 4 WHERE deployment = %s", (get_conf().deployment_name,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return
+
+
+def upgrade_to_5(dsn):
+    pass
+
+
+upgraders = [
+    None,
+    None,
+    upgrade_to_2,
+    upgrade_to_3,
+    upgrade_to_4,
+    upgrade_to_5
+]
+
+def _create_tables_v5(cur):
+    cur.execute('''CREATE TABLE quotas (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        concurrent_executions INT NOT NULL,
+        memory BIGINT NOT NULL,
+        cores INT NOT NULL,
+        volume_size BIGINT NOT NULL
+    )''')
+    cur.execute('''INSERT INTO quotas (id, name, concurrent_executions, memory, cores, volume_size) VALUES (DEFAULT, 'default', 5, 34359738368, 20, 34359738368)''')
+    cur.execute('''CREATE TABLE users (
+        id SERIAL PRIMARY KEY,
+        username TEXT NOT NULL,
+        email TEXT,
+        priority SMALLINT NOT NULL DEFAULT 0,
+        enabled BOOLEAN NOT NULL DEFAULT TRUE,
+        quota_id INT REFERENCES quotas
+    )''')
+
+
+def _update_schema_v5(cur):
+    cur.execute('''ALTER TABLE execution ALTER COLUMN id TYPE BIGINT''')
+    cur.execute('''ALTER TABLE service ALTER COLUMN id TYPE BIGINT''')
+
+
+def init():
+    """DB upgrade entrypoint."""
+    load_configuration()
+
+    dsn = 'dbname=' + get_conf().dbname + \
+        ' user=' + get_conf().dbuser + \
+        ' password=' + get_conf().dbpass + \
+        ' host=' + get_conf().dbhost + \
+        ' port=' + str(get_conf().dbport)
+
+    check_schema_version(dsn)
+
+    return
+
+if __name__ == "__main__":
+    init()
