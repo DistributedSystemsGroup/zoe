@@ -303,10 +303,10 @@ class SQLManager:
         cur.execute(query)
         self.conn.commit()
 
-    def quota_new(self, name, concurrent_executions, memory, cores, volume_size):
+    def quota_new(self, name, concurrent_executions, memory, cores):
         """Adds a new port to the state."""
         cur = self._cursor()
-        query = cur.mogrify('INSERT INTO quotas (id, name, concurrent_executions, memory, cores, volume_size) VALUES (DEFAULT, %s, %s, %s, %s, %s) RETURNING id', (name, concurrent_executions, memory, cores, volume_size))
+        query = cur.mogrify('INSERT INTO quotas (id, name, concurrent_executions, memory, cores) VALUES (DEFAULT, %s, %s, %s, %s) RETURNING id', (name, concurrent_executions, memory, cores))
         cur.execute(query)
         self.conn.commit()
         return cur.fetchone()[0]

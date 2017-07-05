@@ -32,7 +32,6 @@ class Quota(Base):
         self._concurrent_executions = d['concurrent_executions']
         self._memory = d['memory']
         self._cores = d['cores']
-        self._volume_size = d['volume_size']
 
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""
@@ -41,7 +40,6 @@ class Quota(Base):
             'name': self._name,
             'concurrent_executions': self._concurrent_executions,
             'cores': self._cores,
-            'volume_size': self._volume_size
         }
 
     @property
@@ -86,14 +84,3 @@ class Quota(Base):
         """Setter for cores limit."""
         self._cores = value
         self.sql_manager.quota_update(self.id, cores=value)
-
-    @property
-    def volume_size(self):
-        """Getter for volume_size limit."""
-        return self._volume_size
-
-    @volume_size.setter
-    def volume_size(self, value):
-        """Setter for volume_size limit."""
-        self._volume_size = value
-        self.sql_manager.quota_update(self.id, volume_size=value)

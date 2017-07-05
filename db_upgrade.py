@@ -23,6 +23,7 @@ import psycopg2.extras
 from zoe_lib.config import get_conf, load_configuration
 from zoe_api.db_init import SQL_SCHEMA_VERSION
 
+psycopg2.extensions.register_adapter(dict, psycopg2.extras.Json)
 
 def _get_schema_version(dsn):
     conn = psycopg2.connect(dsn)
@@ -75,8 +76,6 @@ def upgrade_to_2(dsn):
 
     print('Applying schema version 2...')
 
-    cur.execute("ALTER TABLE service ADD CONSTRAINT service_execution_id_fk FOREIGN KEY (id) REFERENCES prod.execution (id) ON DELETE CASCADE")
-
     cur.execute("UPDATE public.versions SET version = 2 WHERE deployment = %s", (get_conf().deployment_name,))
     conn.commit()
     cur.close()
@@ -93,8 +92,6 @@ def upgrade_to_3(dsn):
     print('Applying schema version 3...')
     cur.execute("ALTER TABLE service RENAME COLUMN docker_id TO backend_id")
     cur.execute("ALTER TABLE service RENAME COLUMN docker_status TO backend_status")
-    cur.execute("ALTER TABLE service ALTER COLUMN backend_status SET DEFAULT 'undefined'")
-    cur.execute("ALTER TABLE service ALTER COLUMN backend_status SET NOT NULL")
     cur.execute("ALTER TABLE service ADD ip_address CIDR DEFAULT NULL NULL")
     cur.execute("ALTER TABLE service ADD essential BOOLEAN DEFAULT FALSE NOT NULL")
 
@@ -129,7 +126,9 @@ def upgrade_to_4(dsn):
     """Perform schema upgrade from version 3 to version 4."""
     conn = psycopg2.connect(dsn)
     cur = conn.cursor()
+    cur2 = conn.cursor()
     cur.execute('SET search_path TO {},public'.format(get_conf().deployment_name))
+    cur2.execute('SET search_path TO {},public'.format(get_conf().deployment_name))
 
     print('Applying schema version 4...')
     cur.execute('''CREATE TABLE port (
@@ -141,23 +140,72 @@ def upgrade_to_4(dsn):
         description JSON NOT NULL
     )''')
 
-    cur.execute('''SELECT id, description FROM service''')
-    for service_id, service in cur:
-        service_descr = service['description']
+    print('Filling the new port table with data from old service descriptions')
+    cur.execute("SELECT id, description FROM service")
+    for service_id, service_descr in cur:
         for port_descr in service_descr['ports']:
             port_internal = str(port_descr['port_number']) + '/' + port_descr['protocol']
 
-            cur.execute('INSERT INTO port (id, service_id, internal_name, external_ip, external_port, description) VALUES (DEFAULT, %s, %s, NULL, NULL, %s) RETURNING id', (service_id, port_internal, port_descr))
+            cur2.execute('INSERT INTO port (id, service_id, internal_name, external_ip, external_port, description) VALUES (DEFAULT, %s, %s, NULL, NULL, %s) RETURNING id', (service_id, port_internal, port_descr))
 
     cur.execute("UPDATE public.versions SET version = 4 WHERE deployment = %s", (get_conf().deployment_name,))
     conn.commit()
     cur.close()
+    cur2.close()
     conn.close()
     return
 
 
 def upgrade_to_5(dsn):
-    pass
+    """Perform schema upgrade from version 4 to version 5."""
+    conn = psycopg2.connect(dsn)
+    cur = conn.cursor()
+    cur2 = conn.cursor()
+    cur.execute('SET search_path TO {},public'.format(get_conf().deployment_name))
+    cur2.execute('SET search_path TO {},public'.format(get_conf().deployment_name))
+
+    print('Applying schema version 5...')
+    cur.execute("ALTER TABLE execution ALTER COLUMN id TYPE BIGINT")
+    cur.execute("ALTER TABLE service ALTER COLUMN id TYPE BIGINT")
+
+    cur.execute('''CREATE TABLE quotas (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        concurrent_executions INT NOT NULL,
+        memory BIGINT NOT NULL,
+        cores INT NOT NULL
+    )''')
+    cur.execute('''INSERT INTO quotas (id, name, concurrent_executions, memory, cores) VALUES (DEFAULT, 'default', 5, 34359738368, 20)''')
+    cur.execute('''CREATE TABLE users (
+        id SERIAL PRIMARY KEY,
+        username TEXT NOT NULL,
+        email TEXT,
+        priority SMALLINT NOT NULL DEFAULT 0,
+        enabled BOOLEAN NOT NULL DEFAULT TRUE,
+        quota_id INT REFERENCES quotas
+    )''')
+
+    print('Filling the user table from the execution data...')
+    print('-> The default quota will be assigned to all users')
+    cur.execute("SELECT user_id FROM execution")
+    users = set([u[0] for u in cur])
+    for user_name in users:
+        cur2.execute("INSERT INTO users (id, username, email, priority, enabled, quota_id) VALUES (DEFAULT, %s, NULL, DEFAULT, DEFAULT, currval('quotas_id_seq'))", (user_name, ))
+        cur2.execute("UPDATE execution SET user_id=currval('users_id_seq') WHERE user_id=%s", (user_name, ))
+
+    cur.execute("ALTER TABLE execution ALTER COLUMN user_id TYPE INT USING CAST(user_id AS INT)")
+
+    cur.execute('TRUNCATE oauth_client')
+    cur.execute('TRUNCATE oauth_token')
+    cur.execute('ALTER TABLE oauth_token ALTER COLUMN user_id TYPE INT USING user_id::INT')
+    cur.execute('ALTER TABLE oauth_token ADD CONSTRAINT oauth_token_user_id_fk FOREIGN KEY (user_id) REFERENCES users (id)')
+
+    cur.execute("UPDATE public.versions SET version = 4 WHERE deployment = %s", (get_conf().deployment_name,))
+    conn.commit()
+    cur.close()
+    cur2.close()
+    conn.close()
+    return
 
 
 upgraders = [
@@ -168,30 +216,6 @@ upgraders = [
     upgrade_to_4,
     upgrade_to_5
 ]
-
-def _create_tables_v5(cur):
-    cur.execute('''CREATE TABLE quotas (
-        id SERIAL PRIMARY KEY,
-        name TEXT NOT NULL,
-        concurrent_executions INT NOT NULL,
-        memory BIGINT NOT NULL,
-        cores INT NOT NULL,
-        volume_size BIGINT NOT NULL
-    )''')
-    cur.execute('''INSERT INTO quotas (id, name, concurrent_executions, memory, cores, volume_size) VALUES (DEFAULT, 'default', 5, 34359738368, 20, 34359738368)''')
-    cur.execute('''CREATE TABLE users (
-        id SERIAL PRIMARY KEY,
-        username TEXT NOT NULL,
-        email TEXT,
-        priority SMALLINT NOT NULL DEFAULT 0,
-        enabled BOOLEAN NOT NULL DEFAULT TRUE,
-        quota_id INT REFERENCES quotas
-    )''')
-
-
-def _update_schema_v5(cur):
-    cur.execute('''ALTER TABLE execution ALTER COLUMN id TYPE BIGINT''')
-    cur.execute('''ALTER TABLE service ALTER COLUMN id TYPE BIGINT''')
 
 
 def init():

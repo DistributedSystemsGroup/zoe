@@ -62,10 +62,9 @@ def create_tables(cur):
         name TEXT NOT NULL,
         concurrent_executions INT NOT NULL,
         memory BIGINT NOT NULL,
-        cores INT NOT NULL,
-        volume_size BIGINT NOT NULL
+        cores INT NOT NULL
     )''')
-    cur.execute('''INSERT INTO quotas (id, name, concurrent_executions, memory, cores, volume_size) VALUES (DEFAULT, 'default', 5, 34359738368, 20, 34359738368)''')
+    cur.execute('''INSERT INTO quotas (id, name, concurrent_executions, memory, cores) VALUES (DEFAULT, 'default', 5, 34359738368, 20)''')
 
     # Users
     cur.execute('''CREATE TABLE users (
