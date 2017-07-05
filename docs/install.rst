@@ -73,7 +73,7 @@ This means that you will also need a key-value store supported by Docker. We use
 Images: Docker Hub Vs local Docker registry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A few sample ZApps have their images available on the Docker Hub. We strongly suggest setting up a private registry, containing your customized Zoe Service images. Have a look at the `zoe-applications <https://github.com/DistributedSystemsGroup/zoe-applications>`_ repository for examples of Zoe Applications and Services that can be customized, built and loaded on the Hub or on a local registry.
+A few sample ZApps have their images available on the Docker Hub. We strongly suggest setting up a private registry, containing your customized Zoe Service images.
 
 Zoe
 ---

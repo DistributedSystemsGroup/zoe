@@ -20,6 +20,7 @@ from typing import List
 import tornado.web
 
 import zoe_api.web.start
+import zoe_api.web.ajax
 import zoe_api.web.executions
 
 

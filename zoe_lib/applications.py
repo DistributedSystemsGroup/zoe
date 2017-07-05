@@ -55,9 +55,10 @@ def app_validate(data):
     for service in data['services']:
         if service['monitor']:
             found_monitor = True
-            break
+
         if service['resources']['memory']['min'] is not None and service['resources']['memory']['min'] > service['resources']['memory']['max']:
             raise InvalidApplicationDescription(msg='service {} has mismatching min and max memory limits'.format(service['name']))
+
         if service['resources']['cores']['min'] is not None and service['resources']['cores']['min'] > service['resources']['cores']['max']:
             raise InvalidApplicationDescription(msg='service {} has mismatching min and max memory limits'.format(service['name']))
 

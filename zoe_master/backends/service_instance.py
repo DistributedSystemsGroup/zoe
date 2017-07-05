@@ -56,7 +56,7 @@ class ServiceInstance:
 
         self.labels = zoe_master.backends.common.gen_labels(service, execution)
         self.environment = service.environment + zoe_master.backends.common.gen_environment(execution, service, env_subst_dict)
-        self.volumes = service.volumes + zoe_master.backends.common.gen_volumes(service, execution)
+        self.volumes = zoe_master.backends.common.gen_volumes(service, execution)
 
         self.command = service.command
 

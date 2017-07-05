@@ -17,6 +17,7 @@
 
 import logging
 
+import zoe_lib.exec_logs as exec_logs
 from zoe_lib.state import Execution, SQLManager
 from zoe_master.scheduler import ZoeBaseScheduler
 
@@ -84,3 +85,4 @@ def restart_resubmit_scheduler(state: SQLManager, scheduler: ZoeBaseScheduler):
 def execution_delete(execution: Execution):
     """Remove an execution, must only be called if the execution is NOT running."""
     assert not execution.is_active
+    exec_logs.delete(execution)
