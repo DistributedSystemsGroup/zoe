@@ -124,6 +124,28 @@ class ZoeAPIBase:
         return data, req.status_code
 
     @retry(ZoeAPIException)
+    def _rest_put(self, path, payload):
+        """
+        :type path: str
+        :rtype: (dict, int)
+        """
+        url = self.url + '/api/' + ZOE_API_VERSION + path
+        try:
+            req = requests.put(url, auth=(self.user, self.password), json=payload)
+        except requests.exceptions.Timeout:
+            raise ZoeAPIException('HTTP connection timeout')
+        except requests.exceptions.HTTPError:
+            raise ZoeAPIException('Invalid HTTP response')
+        except requests.exceptions.ConnectionError as e:
+            raise ZoeAPIException('Connection error: {}'.format(e))
+
+        try:
+            data = req.json()
+        except ValueError:
+            data = None
+        return data, req.status_code
+
+    @retry(ZoeAPIException)
     def _rest_delete(self, path):
         """
         :type path: str
