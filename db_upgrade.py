@@ -141,6 +141,14 @@ def upgrade_to_4(dsn):
         description JSON NOT NULL
     )''')
 
+    cur.execute('''SELECT id, description FROM service''')
+    for service_id, service in cur:
+        service_descr = service['description']
+        for port_descr in service_descr['ports']:
+            port_internal = str(port_descr['port_number']) + '/' + port_descr['protocol']
+
+            cur.execute('INSERT INTO port (id, service_id, internal_name, external_ip, external_port, description) VALUES (DEFAULT, %s, %s, NULL, NULL, %s) RETURNING id', (service_id, port_internal, port_descr))
+
     cur.execute("UPDATE public.versions SET version = 4 WHERE deployment = %s", (get_conf().deployment_name,))
     conn.commit()
     cur.close()
