@@ -165,9 +165,12 @@ def upgrade_to_5(dsn):
     cur2.execute('SET search_path TO {},public'.format(get_conf().deployment_name))
 
     print('Applying schema version 5...')
-    cur.execute("ALTER TABLE execution ALTER COLUMN id TYPE BIGINT")
+    print('-> changing type of service id to BIGINT')
     cur.execute("ALTER TABLE service ALTER COLUMN id TYPE BIGINT")
+    print('-> changing type of execution id to BIGINT')
+    cur.execute("ALTER TABLE execution ALTER COLUMN id TYPE BIGINT")
 
+    print('-> create table quotas')
     cur.execute('''CREATE TABLE quotas (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL,
@@ -175,7 +178,9 @@ def upgrade_to_5(dsn):
         memory BIGINT NOT NULL,
         cores INT NOT NULL
     )''')
+    print('-> create default quota')
     cur.execute('''INSERT INTO quotas (id, name, concurrent_executions, memory, cores) VALUES (DEFAULT, 'default', 5, 34359738368, 20)''')
+    print('-> create table users')
     cur.execute('''CREATE TABLE users (
         id SERIAL PRIMARY KEY,
         username TEXT NOT NULL,
@@ -193,14 +198,18 @@ def upgrade_to_5(dsn):
         cur2.execute("INSERT INTO users (id, username, email, priority, enabled, quota_id) VALUES (DEFAULT, %s, NULL, DEFAULT, DEFAULT, currval('quotas_id_seq'))", (user_name, ))
         cur2.execute("UPDATE execution SET user_id=currval('users_id_seq') WHERE user_id=%s", (user_name, ))
 
+    print('-> change type of user_id to INT')
     cur.execute("ALTER TABLE execution ALTER COLUMN user_id TYPE INT USING CAST(user_id AS INT)")
+    print('-> create foreign key for executions.user_id pointing to users.id')
+    cur.execute('ALTER TABLE execution ADD CONSTRAINT execution_user_id_fk FOREIGN KEY (user_id) REFERENCES users (id)')
 
+    print('-> converting oauth tables')
     cur.execute('TRUNCATE oauth_client')
     cur.execute('TRUNCATE oauth_token')
     cur.execute('ALTER TABLE oauth_token ALTER COLUMN user_id TYPE INT USING user_id::INT')
     cur.execute('ALTER TABLE oauth_token ADD CONSTRAINT oauth_token_user_id_fk FOREIGN KEY (user_id) REFERENCES users (id)')
 
-    cur.execute("UPDATE public.versions SET version = 4 WHERE deployment = %s", (get_conf().deployment_name,))
+    cur.execute("UPDATE public.versions SET version = 5 WHERE deployment = %s", (get_conf().deployment_name,))
     conn.commit()
     cur.close()
     cur2.close()
