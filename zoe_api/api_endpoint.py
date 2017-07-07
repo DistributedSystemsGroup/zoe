@@ -59,10 +59,10 @@ class APIEndpoint:
         ret = [e for e in execs if e.user_id == uid or role == 'admin']
 
         for e in ret:
-            u = self.sql.user_list(id=e.user_id, only_one=True)
-            if u is None:
+            user = self.sql.user_list(id=e.user_id, only_one=True)
+            if user is None:
                 raise zoe_api.exceptions.ZoeNotFoundException('No such user')
-            e.user_id = u.username
+            e.user_id = user.username
 
         return ret
 
@@ -222,39 +222,39 @@ class APIEndpoint:
 
     def user_by_username(self, uid, role, user_name) -> zoe_lib.state.User:
         """Lookup a user by its name."""
-        u = self.sql.user_list(username=user_name, only_one=True)
-        if u is None:
+        user = self.sql.user_list(username=user_name, only_one=True)
+        if user is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such user')
-        assert isinstance(u, zoe_lib.state.sql_manager.User)
-        if u.id != uid and role != 'admin':
+        assert isinstance(user, zoe_lib.state.sql_manager.User)
+        if user.id != uid and role != 'admin':
             raise zoe_api.exceptions.ZoeAuthException()
-        return u
+        return user
 
     def user_update(self, uid, role, user_name, data):
         """Update user details."""
-        u = self.sql.user_list(username=user_name, only_one=True)
-        if u.id != uid and role != "admin":
+        user = self.sql.user_list(username=user_name, only_one=True)
+        if user.id != uid and role != "admin":
             raise zoe_api.exceptions.ZoeAuthException()
 
         if 'enabled' in data:
-            u.set_enabled(bool(data['enabled']))
+            user.set_enabled(bool(data['enabled']))
 
         if 'priority' in data:
             priority = int(data['priority'])
             if priority < 0 or priority > 1024:
                 raise zoe_api.exceptions.ZoeRestAPIException('User priority must be between 0 and 1024')
-            u.set_priority(priority)
+            user.set_priority(priority)
 
         if 'email' in data:
             if not re.search(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", data['email']):
                 raise zoe_api.exceptions.ZoeRestAPIException('Invalid email address')
-            u.set_email(data['email'])
+            user.set_email(data['email'])
 
         if 'quota_id' in data:
             quota = self.sql.quota_list(id=data['quota_id'], only_one=True)
             if not quota:
                 raise zoe_api.exceptions.ZoeRestAPIException('Invalid quota ID')
-            u.set_quota(data['quota_id'])
+            user.set_quota(data['quota_id'])
 
     def quota_list(self, uid_, role, **filters):
         """Generate a optionally filtered list of users."""

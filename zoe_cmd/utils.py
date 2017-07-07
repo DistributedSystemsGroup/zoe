@@ -26,8 +26,8 @@ def read_auth(args):
         'pass': None
     }
     try:
-        fp = open(args.auth_file, 'r')
-        for line in fp:
+        filep = open(args.auth_file, 'r')
+        for line in filep:
             if '=' not in line:
                 continue
             key, value = line.split('=')
@@ -44,9 +44,9 @@ def read_auth(args):
     auth['user'] = os.getenv('ZOE_USER', auth['user'])
     auth['pass'] = os.getenv('ZOE_PASS', auth['pass'])
 
-    for k, v in auth.items():
-        if v is None:
-            print('error: missing {} auth parameter'.format(k))
+    for key, value in auth.items():
+        if value is None:
+            print('error: missing {} auth parameter'.format(key))
             return None
 
     return auth

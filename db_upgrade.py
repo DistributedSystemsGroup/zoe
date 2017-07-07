@@ -64,7 +64,7 @@ def upgrade_schema_from(start_version, dsn):
     print('Upgrading database from version {} to version {}'.format(start_version, SQL_SCHEMA_VERSION))
     while start_version < SQL_SCHEMA_VERSION:
         new_version = start_version + 1
-        upgraders[new_version](dsn)
+        UPGRADERS[new_version](dsn)
         start_version = new_version
 
 
@@ -216,7 +216,7 @@ def upgrade_to_5(dsn):
     return
 
 
-upgraders = [
+UPGRADERS = [
     None,
     None,
     upgrade_to_2,
