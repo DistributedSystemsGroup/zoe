@@ -298,7 +298,7 @@ class SQLManager:
             value_list.append(value)
         set_q = ", ".join(arg_list)
         value_list.append(port_id)
-        q_base = 'UPDATE quota SET ' + set_q + ' WHERE id=%s'
+        q_base = 'UPDATE quotas SET ' + set_q + ' WHERE id=%s'
         query = cur.mogrify(q_base, value_list)
         cur.execute(query)
         self.conn.commit()

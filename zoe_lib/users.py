@@ -1,4 +1,4 @@
-# Copyright (c) 2016, Daniele Venzano
+# Copyright (c) 2017, Daniele Venzano
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 # limitations under the License.
 
 """
-This module contains all execution-related API calls for Zoe clients.
+This module contains all user-related API calls for Zoe clients.
 """
 
 import logging
@@ -34,10 +34,10 @@ class ZoeUsersAPI(ZoeAPIBase):
         Disables a user.
 
         :param username: the user to disable
-        :return: True if the operation was successful, False otherwise
+        :return: None if the operation was successful, raises ZoeAPIException otherwise
 
         :type username: str
-        :rtype: bool
+        :rtype: None
         """
         data = {
             'enabled': False
@@ -53,10 +53,10 @@ class ZoeUsersAPI(ZoeAPIBase):
         Enables a user.
 
         :param username: the user to enable
-        :return: True if the operation was successful, False otherwise
+        :return: None if the operation was successful, raises ZoeAPIException otherwise
 
         :type username: str
-        :rtype: bool
+        :rtype: None
         """
         data = {
             'enabled': True
@@ -79,53 +79,42 @@ class ZoeUsersAPI(ZoeAPIBase):
         else:
             raise ZoeAPIException(data['message'])
 
-    def get(self, execution_id):
+    def set_email(self, username, email):
         """
-        Retrieve the Execution object for an existing execution.
+        Sets the email address for a user.
 
-        :param execution_id: the execution to load from the master
-        :return: the Execution object, or None
+        :param username: the user to enable
+        :param email: the user to enable
+        :return: None if the operation was successful, raises ZoeAPIException otherwise
 
-        :type execution_id: int
-        :rtype: dict
+        :type username: str
+        :rtype: bool
         """
-        data, status_code = self._rest_get('/execution/' + str(execution_id))
-        if status_code == 200:
-            return data
-        else:
-            return None
-
-    def start(self, name, application_description):
-        """
-        Submit an application to the master to start a new execution.
-
-        :param name: user-provided name of the execution
-        :param application_description: the application to start
-        :return: the new Execution object, or None in case of error
-
-        :type name: str
-        :type application_description: dict
-        :rtype: int
-        """
-        execution = {
-            "application": application_description,
-            'name': name
+        data = {
+            'email': email
         }
-        data, status_code = self._rest_post('/execution', execution)
-        if status_code != 201:
-            raise ZoeAPIException(data['message'])
-        else:
-            return data['execution_id']
-
-    def endpoints(self, execution_id):
-        """
-        Retrieve the public endpoints exposed by a running execution.
-
-        :param execution_id: the execution to inspect
-        :return:
-        """
-        data, status_code = self._rest_get('/execution/endpoints/' + str(execution_id))
+        data, status_code = self._rest_put('/user/' + str(username), data)
         if status_code == 200:
-            return data['endpoints']
+            return
         else:
-            return None
+            raise ZoeAPIException(data['message'])
+
+    def set_quota(self, username, quota_id):
+        """
+        Sets the email address for a user.
+
+        :param username: the user to modify
+        :param quota_id: the quota ID to associate to this user
+        :return: None if the operation was successful, raises ZoeAPIException otherwise
+
+        :type username: str
+        :rtype: bool
+        """
+        data = {
+            'quota_id': quota_id
+        }
+        data, status_code = self._rest_put('/user/' + str(username), data)
+        if status_code == 200:
+            return
+        else:
+            raise ZoeAPIException(data['message'])

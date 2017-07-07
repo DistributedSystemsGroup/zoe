@@ -28,59 +28,32 @@ class Quota(Base):
     def __init__(self, d, sql_manager):
         super().__init__(d, sql_manager)
 
-        self._name = d['name']
-        self._concurrent_executions = d['concurrent_executions']
-        self._memory = d['memory']
-        self._cores = d['cores']
+        self.name = d['name']
+        self.concurrent_executions = d['concurrent_executions']
+        self.memory = d['memory']
+        self.cores = d['cores']
 
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""
         return {
             'id': self.id,
-            'name': self._name,
-            'concurrent_executions': self._concurrent_executions,
-            'cores': self._cores,
+            'name': self.name,
+            'concurrent_executions': self.concurrent_executions,
+            'cores': self.cores,
+            'memory': self.memory
         }
 
-    @property
-    def name(self):
-        """Getter for the name property."""
-        return self._name
-
-    @name.setter
-    def name(self, value):
-        self._name = value
-        self.sql_manager.quota_update(self.id, name=value)
-
-    @property
-    def concurrent_executions(self):
-        """Getter for concurrent executions limit."""
-        return self._concurrent_executions
-
-    @concurrent_executions.setter
-    def concurrent_executions(self, value):
+    def set_concurrent_executions(self, value):
         """Setter for concurrent execution limit."""
-        self._concurrent_executions = value
+        self.concurrent_executions = value
         self.sql_manager.quota_update(self.id, concurrent_executions=value)
 
-    @property
-    def memory(self):
-        """Getter for memory limit."""
-        return self._memory
-
-    @memory.setter
-    def memory(self, value):
+    def set_memory(self, value):
         """Setter for memory limit."""
-        self._memory = value
+        self.memory = value
         self.sql_manager.quota_update(self.id, memory=value)
 
-    @property
-    def cores(self):
-        """Getter for cores limit."""
-        return self._cores
-
-    @cores.setter
-    def cores(self, value):
+    def set_cores(self, value):
         """Setter for cores limit."""
-        self._cores = value
+        self.cores = value
         self.sql_manager.quota_update(self.id, cores=value)

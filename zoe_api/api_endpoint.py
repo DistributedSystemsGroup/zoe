@@ -53,8 +53,17 @@ class APIEndpoint:
 
     def execution_list(self, uid, role, **filters):
         """Generate a optionally filtered list of executions."""
+        if 'user_id' in filters:
+            filters['user_id'] = self.user_by_username(uid, role, filters['user_id']).id
         execs = self.sql.execution_list(**filters)
         ret = [e for e in execs if e.user_id == uid or role == 'admin']
+
+        for e in ret:
+            u = self.sql.user_list(id=e.user_id, only_one=True)
+            if u is None:
+                raise zoe_api.exceptions.ZoeNotFoundException('No such user')
+            e.user_id = u.username
+
         return ret
 
     def zapp_validate(self, application_description):
@@ -201,9 +210,13 @@ class APIEndpoint:
         if role != "admin":
             raise zoe_api.exceptions.ZoeAuthException()
 
-        return self.sql.user_list(**filters)
+        users = self.sql.user_list(**filters)
+        for user in users:
+            quota = self.sql.quota_list(only_one=True, id=user.quota_id)
+            user.quota_id = quota.name
+        return users
 
-    def user_by_username(self, uid, role, user_name):
+    def user_by_username(self, uid, role, user_name) -> zoe_lib.state.User:
         """Lookup a user by its name."""
         u = self.sql.user_list(username=user_name, only_one=True)
         if u is None:
@@ -233,6 +246,12 @@ class APIEndpoint:
                 raise zoe_api.exceptions.ZoeRestAPIException('Invalid email address')
             u.set_email(data['email'])
 
+        if 'quota_id' in data:
+            quota = self.sql.quota_list(id=data['quota_id'], only_one=True)
+            if not quota:
+                raise zoe_api.exceptions.ZoeRestAPIException('Invalid quota ID')
+            u.set_quota(data['quota_id'])
+
     def quota_list(self, uid_, role, **filters):
         """Generate a optionally filtered list of users."""
         if role != "admin":
@@ -254,6 +273,13 @@ class APIEndpoint:
 
         return self.sql.quota_list(id=quota_id, only_one=True)
 
+    def quota_new(self, uid_, role, name, cc_exec, memory, cores):
+        """Create a new quota."""
+        if role != "admin":
+            raise zoe_api.exceptions.ZoeAuthException()
+
+        return self.sql.quota_new(name, cc_exec, memory, cores)
+
     def quota_update(self, uid_, role, quota_id, data):
         """Update user details."""
         if role != "admin":
@@ -261,25 +287,18 @@ class APIEndpoint:
 
         quota = self.sql.quota_list(id=quota_id, only_one=True)
 
-        if 'name' in data:
-            quota.name = data['name']
         if 'concurrent_executions' in data:
             value = int(data['concurrent_executions'])
             if value <= 0:
                 raise zoe_api.exceptions.ZoeRestAPIException('concurrent executions quota must be bigger than 0')
-            quota.concurrent_executions = value
+            quota.set_concurrent_executions(value)
         if 'memory' in data:
             value = int(data['memory'])
             if value <= 1024*1024:
                 raise zoe_api.exceptions.ZoeRestAPIException('memory quota must be bigger than 1MB')
-            quota.memory = data['memory']
+            quota.set_memory(data['memory'])
         if 'cores' in data:
             value = int(data['cores'])
             if value <= 0:
                 raise zoe_api.exceptions.ZoeRestAPIException('concurrent executions quota must be bigger than 0')
-            quota.cores = value
-        if 'volume_size' in data:
-            value = int(data['volume_size'])
-            if value < 0:
-                raise zoe_api.exceptions.ZoeRestAPIException('memory quota must be equal or bigger than 0 bytes')
-            quota.volume_size = value
+            quota.set_cores(value)

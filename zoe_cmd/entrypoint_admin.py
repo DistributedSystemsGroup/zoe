@@ -24,12 +24,15 @@ import sys
 from argparse import ArgumentParser, Namespace, FileType, RawDescriptionHelpFormatter
 from typing import Tuple
 
+from tabulate import tabulate
+
 from zoe_cmd import utils
 from zoe_lib.info import ZoeInfoAPI
 from zoe_lib.exceptions import ZoeAPIException, InvalidApplicationDescription
 from zoe_lib.executions import ZoeExecutionsAPI
 from zoe_lib.applications import app_validate
 from zoe_lib.users import ZoeUsersAPI
+from zoe_lib.quota import ZoeQuotaAPI
 from zoe_lib.version import ZOE_API_VERSION
 
 
@@ -74,17 +77,96 @@ def exec_list_cmd(auth, args):
         if key in filter_names:
             filters[key] = value
     data = exec_api.list(**filters)
-    for e in sorted(data.values(), key=lambda x: x['id']):
-        print('Execution {} (User: {}, ID: {}): {}'.format(e['name'], e['user_id'], e['id'], e['status']))
+    tabular_data = [[e['id'], e['name'], e['user_id'], e['status']] for e in sorted(data.values(), key=lambda x: x['id'])]
+    headers = ['ID', 'Name', 'User ID', 'Status']
+    print(tabulate(tabular_data, headers))
 
 
 def user_list_cmd(auth, args_):
     """List users."""
     user_api = ZoeUsersAPI(auth['url'], auth['user'], auth['pass'])
     users = user_api.list()
-    for user in users:
-        print(user)
+    data = [[user['id'], user['username'], user['email'], user['enabled'], user['priority'], user['quota_id']] for user in sorted(users.values(), key=lambda x: x['username'])]
+    headers = ['ID', 'Username', 'EMail', 'Enabled', 'Priority', 'Quota ID']
+    print(tabulate(data, headers))
 
+
+def user_enable_cmd(auth, args):
+    """Enable a user."""
+    user_api = ZoeUsersAPI(auth['url'], auth['user'], auth['pass'])
+    user_api.enable(args.username)
+    print('User {} enabled'.format(args.username))
+
+
+def user_disable_cmd(auth, args):
+    """Disable a user."""
+    user_api = ZoeUsersAPI(auth['url'], auth['user'], auth['pass'])
+    user_api.disable(args.username)
+    print('User {} disabled'.format(args.username))
+
+
+def user_email_cmd(auth, args):
+    """Set email for a user."""
+    user_api = ZoeUsersAPI(auth['url'], auth['user'], auth['pass'])
+    user_api.set_email(args.username, args.email)
+    print('User {} now has email {}'.format(args.username, args.email))
+
+
+def user_quota_cmd(auth, args):
+    """Set quota for a user."""
+    user_api = ZoeUsersAPI(auth['url'], auth['user'], auth['pass'])
+    user_api.set_quota(args.username, args.quota_id)
+    quota_api = ZoeQuotaAPI(auth['url'], auth['user'], auth['pass'])
+    quota = quota_api.get(args.quota_id)
+    print('User {} now has quota {}'.format(args.username, quota['name']))
+
+
+def quota_list_cmd(auth, args_):
+    """List quotas"""
+    quota_api = ZoeQuotaAPI(auth['url'], auth['user'], auth['pass'])
+    quotas = quota_api.list()
+    data = [[quota['id'], quota['name'], quota['concurrent_executions'], quota['memory'], quota['cores']] for quota in sorted(quotas.values(), key=lambda x: x['id'])]
+    headers = ['ID', 'Name', 'Concurrent executions', 'Memory', 'Cores']
+    print(tabulate(data, headers))
+
+
+def quota_delete_cmd(auth, args):
+    """Delete a quota"""
+    quota_api = ZoeQuotaAPI(auth['url'], auth['user'], auth['pass'])
+    quota = quota_api.get(args.id)
+    quota_api.delete(args.id)
+    print('Quota {} has been deleted. The default quota has been set for any user with this quota ID.'.format(quota['name']))
+
+
+def quota_new_cmd(auth, args):
+    """Create a new quota."""
+    quota_api = ZoeQuotaAPI(auth['url'], auth['user'], auth['pass'])
+    new_id = quota_api.new(args.name, args.cc_exec, args.memory, args.cores)
+    print('Quota created with ID {}'.format(new_id))
+
+
+def quota_set_cce_cmd(auth, args):
+    """Modify the concurrent executions field for a quota"""
+    quota_api = ZoeQuotaAPI(auth['url'], auth['user'], auth['pass'])
+    quota_api.set_cc_executions(args.id, args.cc_exec)
+    quota = quota_api.get(args.id)
+    print('Quota {} concurrent executions set to {}'.format(quota['name'], args.cc_exec))
+
+
+def quota_set_mem_cmd(auth, args):
+    """Modify the concurrent executions field for a quota"""
+    quota_api = ZoeQuotaAPI(auth['url'], auth['user'], auth['pass'])
+    quota_api.set_memory(args.id, args.memory)
+    quota = quota_api.get(args.id)
+    print('Quota {} memory set to {}'.format(quota['name'], args.memory))
+
+
+def quota_set_cores_cmd(auth, args):
+    """Modify the concurrent executions field for a quota"""
+    quota_api = ZoeQuotaAPI(auth['url'], auth['user'], auth['pass'])
+    quota_api.set_cores(args.id, args.cores)
+    quota = quota_api.get(args.id)
+    print('Quota {} cores set to {}'.format(quota['name'], args.cores))
 
 ENV_HELP_TEXT = '''To authenticate with Zoe you need to define three environment variables:
 ZOE_URL: point to the URL of the Zoe Scheduler (ex.: http://localhost:5000/
@@ -109,10 +191,52 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     subparser = parser.add_subparsers()
 
     # users
-    argparser_user_list = subparser.add_parser('user-ls', help='List users known to Zoe')
-    argparser_user_list.set_defaults(func=user_list_cmd)
+    parser_aux = subparser.add_parser('user-ls', help='List users known to Zoe')
+    parser_aux.set_defaults(func=user_list_cmd)
+
+    parser_aux = subparser.add_parser('user-enable', help='Enable a user')
+    parser_aux.add_argument('username', type=str, help='User to enable')
+    parser_aux.set_defaults(func=user_enable_cmd)
+
+    parser_aux = subparser.add_parser('user-email', help='Set the email address for a user')
+    parser_aux.add_argument('username', type=str, help='User to modify')
+    parser_aux.add_argument('email', type=str, help='Email address')
+    parser_aux.set_defaults(func=user_email_cmd)
+
+    parser_aux = subparser.add_parser('user-quota', help='Set a new quota for a user')
+    parser_aux.add_argument('username', type=str, help='User to modify')
+    parser_aux.add_argument('quota_id', type=int, help='Quota ID')
+    parser_aux.set_defaults(func=user_quota_cmd)
 
     # quotas
+    parser_aux = subparser.add_parser('quota-ls', help='List defined quotas')
+    parser_aux.set_defaults(func=quota_list_cmd)
+
+    parser_aux = subparser.add_parser('quota-delete', help='Delete a quota')
+    parser_aux.add_argument('id', type=str, help='Quota ID to delete')
+    parser_aux.set_defaults(func=quota_delete_cmd)
+
+    parser_aux = subparser.add_parser('quota-new', help='Create a new quota')
+    parser_aux.add_argument('name', type=str, help='New quota name')
+    parser_aux.add_argument('cc_exec', type=int, help='Maximum concurrent executions')
+    parser_aux.add_argument('memory', type=int, help='Maximum amount of memory the user can reserve')
+    parser_aux.add_argument('cores', type=int, help='Maximum amount of cores the user can reserve')
+    parser_aux.set_defaults(func=quota_new_cmd)
+
+    parser_aux = subparser.add_parser('quota-set-cce', help='Modify concurrent executions for a quota')
+    parser_aux.add_argument('id', type=str, help='Quota ID to modify')
+    parser_aux.add_argument('cc_exec', type=int, help='Maximum concurrent executions')
+    parser_aux.set_defaults(func=quota_set_cce_cmd)
+
+    parser_aux = subparser.add_parser('quota-set-memory', help='Modify memory for a quota')
+    parser_aux.add_argument('id', type=str, help='Quota ID to modify')
+    parser_aux.add_argument('memory', type=int, help='Maximum amount of memory the user can reserve')
+    parser_aux.set_defaults(func=quota_set_mem_cmd)
+
+    parser_aux = subparser.add_parser('quota-set-cores', help='Modify cores for a quota')
+    parser_aux.add_argument('id', type=str, help='Quota ID to modify')
+    parser_aux.add_argument('cores', type=int, help='Maximum amount of cores the user can reserve')
+    parser_aux.set_defaults(func=quota_set_cores_cmd)
 
     # zapps
     argparser_zapp_validate = subparser.add_parser('zapp-validate', help='Validate an application description')
