@@ -96,10 +96,13 @@ def get_auth(handler: tornado.web.RequestHandler):
     log.debug('Authentication done using auth-mechanism')
 
     try:
-        handler.application.api_endpoint.user_by_username(uid, role, username)
+        user = handler.application.api_endpoint.user_by_username(uid, role, username)
     except ZoeNotFoundException:
         handler.application.api_endpoint.user_new(uid, role)
         log.info('New user created: {}'.format(uid))
+    else:
+        if not user.enabled:
+            raise ZoeRestAPIException('User has been disabled by and administrator', 401)
 
     return uid, role
 

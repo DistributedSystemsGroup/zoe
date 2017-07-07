@@ -28,6 +28,49 @@ class ZoeBaseScheduler:
         """Trigger a scheduler run."""
         raise NotImplementedError
 
+    def admission_control(self, execution: zoe_lib.state.Execution):
+        """
+        Checks if the execution can be admitted to the scheduler, comparing with user quotas.
+        If the execution passes, incoming() is called, an exception is raised otherwise.
+
+        :param execution: the candidate execution
+        :return:
+        """
+        user = self.state.user_list(only_one=True, id=execution.user_id)
+        quota = self.state.quota_list(only_one=True, id=user.quota_id)
+        if execution.total_reservations['memory'] > quota.memory:
+            execution.set_error_message('Memory reservation over total quota size')
+            execution.set_error()
+            return
+        if execution.total_reservations['cores'] > quota.cores:
+            execution.set_error_message('Cores reservation over total quota size')
+            execution.set_error()
+            return
+
+        user_execs = self.state.execution_list(user_id=user.id, status='running')
+        user_execs += self.state.execution_list(user_id=user.id, status='starting')
+        user_execs += self.state.execution_list(user_id=user.id, status='scheduled')
+        user_execs = [e for e in user_execs if e != execution]  # this one will be in scheduled state
+
+        if len(user_execs) + 1 > quota.concurrent_executions:
+            execution.set_error_message('Reached the quota limit for concurrent executions')
+            execution.set_error()
+            return
+
+        reserved_memory = sum([e.total_reservations['memory'] for e in user_execs])
+        if reserved_memory + execution.total_reservations['memory'] > quota.memory:
+            execution.set_error_message('Memory reservation over total quota size')
+            execution.set_error()
+            return
+
+        reserved_cores = sum([e.total_reservations['cores'] for e in user_execs])
+        if reserved_cores + execution.total_reservations['cores'] > quota.cores:
+            execution.set_error_message('Cores reservation over total quota size')
+            execution.set_error()
+            return
+
+        self.incoming(execution)
+
     def incoming(self, execution: zoe_lib.state.Execution):
         """
         This method adds the execution to the end of the FIFO queue and triggers the scheduler.

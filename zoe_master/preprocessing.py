@@ -58,7 +58,7 @@ def _digest_application_description(state: SQLManager, execution: Execution):
 def execution_submit(state: SQLManager, scheduler: ZoeBaseScheduler, execution: Execution):
     """Submit a new execution to the scheduler."""
     _digest_application_description(state, execution)
-    scheduler.incoming(execution)
+    scheduler.admission_control(execution)
 
 
 def execution_terminate(scheduler: ZoeBaseScheduler, execution: Execution):
@@ -70,7 +70,7 @@ def restart_resubmit_scheduler(state: SQLManager, scheduler: ZoeBaseScheduler):
     """Restart work after a restart of the process."""
     sched_execs = state.execution_list(status=Execution.SCHEDULED_STATUS)
     for e in sched_execs:
-        scheduler.incoming(e)
+        scheduler.admission_control(e)
 
     clean_up_execs = state.execution_list(status=Execution.CLEANING_UP_STATUS)
     for e in clean_up_execs:
@@ -79,7 +79,7 @@ def restart_resubmit_scheduler(state: SQLManager, scheduler: ZoeBaseScheduler):
     starting_execs = state.execution_list(status=Execution.STARTING_STATUS)
     for e in starting_execs:
         scheduler.terminate(e)
-        scheduler.incoming(e)
+        scheduler.admission_control(e)
 
 
 def execution_delete(execution: Execution):
