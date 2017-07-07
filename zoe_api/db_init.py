@@ -118,27 +118,6 @@ def create_tables(cur):
         description JSON NOT NULL
     )''')
 
-    # OAuth
-    cur.execute('''CREATE TABLE oauth_client (
-        identifier TEXT PRIMARY KEY,
-        secret TEXT,
-        role TEXT,
-        redirect_uris TEXT,
-        authorized_grants TEXT,
-        authorized_response_types TEXT
-        )''')
-    cur.execute('''CREATE TABLE oauth_token (
-        client_id TEXT PRIMARY KEY,
-        grant_type TEXT,
-        token TEXT,
-        data TEXT,
-        expires_at TIMESTAMP,
-        refresh_token TEXT,
-        refresh_token_expires_at TIMESTAMP,
-        scopes TEXT,
-        user_id INT REFERENCES users
-        )''')
-
 
 def init(force=False):
     """DB init entrypoint."""

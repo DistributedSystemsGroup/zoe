@@ -205,10 +205,8 @@ def upgrade_to_5(dsn):
     cur.execute('ALTER TABLE execution ADD CONSTRAINT execution_user_id_fk FOREIGN KEY (user_id) REFERENCES users (id)')
 
     print('-> converting oauth tables')
-    cur.execute('TRUNCATE oauth_client')
-    cur.execute('TRUNCATE oauth_token')
-    cur.execute('ALTER TABLE oauth_token ALTER COLUMN user_id TYPE INT USING user_id::INT')
-    cur.execute('ALTER TABLE oauth_token ADD CONSTRAINT oauth_token_user_id_fk FOREIGN KEY (user_id) REFERENCES users (id)')
+    cur.execute('DROP TABLE oauth_client')
+    cur.execute('DROP TABLE oauth_token')
 
     cur.execute("UPDATE public.versions SET version = 5 WHERE deployment = %s", (get_conf().deployment_name,))
     conn.commit()
