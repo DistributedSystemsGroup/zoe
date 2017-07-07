@@ -89,6 +89,8 @@ api-test:
       - zoe-api-${CI_BUILD_REF}.log
       - zoe-master-${CI_BUILD_REF}.log
       - tests
+    when:
+      - always
 
 images:
   image: docker:latest
