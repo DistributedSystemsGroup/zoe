@@ -205,6 +205,10 @@ class APIEndpoint:
 
         return services_info, endpoints
 
+    def user_new(self, uid, role_):
+        """Create a new user, call only if the user has been authenticated successfully."""
+        return self.sql.user_new(uid)
+
     def user_list(self, uid_, role, **filters):
         """Generate a optionally filtered list of users."""
         if role != "admin":

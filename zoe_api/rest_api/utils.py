@@ -89,10 +89,17 @@ def get_auth(handler: tornado.web.RequestHandler):
         authenticator = LDAPSASLAuthenticator()  # type: BaseAuthenticator
     else:
         raise ZoeException('Configuration error, unknown authentication method: {}'.format(get_conf().auth_type))
+
     uid, role = authenticator.auth(username, password)
     if uid is None:
         raise ZoeRestAPIException('missing or wrong authentication information', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
     log.debug('Authentication done using auth-mechanism')
+
+    try:
+        handler.application.api_endpoint.user_by_username(uid, role, username)
+    except ZoeNotFoundException:
+        handler.application.api_endpoint.user_new(uid, role)
+        log.info('New user created: {}'.format(uid))
 
     return uid, role
 
