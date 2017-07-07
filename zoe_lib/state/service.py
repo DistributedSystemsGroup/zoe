@@ -32,6 +32,9 @@ class ResourceLimits:
         elif isinstance(data, ResourceLimits):
             self.min = data.min
             self.max = data.max
+        elif isinstance(data, int):
+            self.min = data
+            self.max = data
         else:
             raise TypeError
         self.unit = unit
@@ -113,14 +116,40 @@ class Service(Base):
         self.essential = d['essential']
 
         # Fields parsed from the JSON description
-        self.image_name = self.description['image']
+        try:
+            self.image_name = self.description['image']
+        except KeyError:
+            self.image_name = self.description['docker_image']  # zapp description v2
+
         self.is_monitor = self.description['monitor']
         self.startup_order = self.description['startup_order']
-        self.environment = self.description['environment']
-        self.command = self.description['command']
-        self.resource_reservation = ResourceReservation(self.description['resources'])
-        self.volumes = [VolumeDescriptionHostPath(v['path'], v['name'], v['read_only']) for v in self.description['volumes']]
-        self.replicas = self.description['replicas']
+
+        try:
+            self.environment = self.description['environment']
+        except KeyError:
+            self.environment = []
+
+        try:
+            self.command = self.description['command']
+        except KeyError:
+            self.command = None
+
+        try:
+            self.resource_reservation = ResourceReservation(self.description['resources'])
+        except KeyError:
+            self.resource_reservation = ResourceReservation({'memory': self.description['required_resources']['memory'], 'cores': 0})  # ZApp description v2
+
+        try:
+            self.volumes = [VolumeDescriptionHostPath(v['path'], v['name'], v['read_only']) for v in self.description['volumes']]
+        except KeyError:
+            self.volumes = []
+        except TypeError:
+            self.volumes = [VolumeDescriptionHostPath(v[0], v[1], v[2]) for v in self.description['volumes']]
+
+        try:
+            self.replicas = self.description['replicas']
+        except KeyError:
+            self.replicas = 0
 
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""
@@ -183,7 +212,7 @@ class Service(Base):
 
     @property
     def user_id(self):
-        """Getter for the user_id, that is actually taken form the parent execution."""
+        """Getter for the user_id, that is actually taken from the parent execution."""
         execution = self.sql_manager.execution_list(only_one=True, id=self.execution_id)
         return execution.user_id
 

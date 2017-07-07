@@ -66,7 +66,10 @@ class Execution(Base):
         self._status = d['status']
         self.error_message = d['error_message']
 
-        self.size = self.description['size']
+        try:
+            self.size = self.description['size']
+        except KeyError:
+            self.size = self.description['priority']  # zapp format v2
 
         self.termination_lock = threading.Lock()
 
