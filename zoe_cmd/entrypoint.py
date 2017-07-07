@@ -26,6 +26,8 @@ import time
 from argparse import ArgumentParser, Namespace, FileType, RawDescriptionHelpFormatter
 from typing import Tuple
 
+from tabulate import tabulate
+
 from zoe_cmd import utils
 from zoe_lib.info import ZoeInfoAPI
 from zoe_lib.services import ZoeServiceAPI
@@ -101,8 +103,9 @@ def exec_list_cmd(auth, args):
         if key in filter_names:
             filters[key] = value
     data = exec_api.list(**filters)
-    for e in sorted(data.values(), key=lambda x: x['id']):
-        print('Execution {} (ID: {}): {}'.format(e['name'], e['id'], e['status']))
+    tabular_data = [[e['id'], e['name'], e['user_id'], e['status']] for e in sorted(data.values(), key=lambda x: x['id'])]
+    headers = ['ID', 'Name', 'User ID', 'Status']
+    print(tabulate(tabular_data, headers))
 
 
 def exec_start_cmd(auth, args):
