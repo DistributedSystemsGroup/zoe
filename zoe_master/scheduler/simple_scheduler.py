@@ -108,6 +108,8 @@ class ZoeSimpleScheduler(ZoeBaseScheduler):
             ret = start_all(e)
             if ret == 'requeue':
                 self.fifo_queue.append(e)
+            elif ret == 'fatal':
+                continue  # throw away the execution
             else:
                 e.set_running()
 
