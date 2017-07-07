@@ -75,6 +75,7 @@ def create_tables(cur):
         enabled BOOLEAN NOT NULL DEFAULT TRUE,
         quota_id INT REFERENCES quotas
     )''')
+    cur.execute('CREATE UNIQUE INDEX users_username_uindex ON users (username)')
 
     # Executions
     cur.execute('''CREATE TABLE execution (

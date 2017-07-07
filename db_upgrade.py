@@ -189,6 +189,7 @@ def upgrade_to_5(dsn):
         enabled BOOLEAN NOT NULL DEFAULT TRUE,
         quota_id INT REFERENCES quotas
     )''')
+    cur.execute('CREATE UNIQUE INDEX users_username_uindex ON users (username)')
 
     print('Filling the user table from the execution data...')
     print('-> The default quota will be assigned to all users')
