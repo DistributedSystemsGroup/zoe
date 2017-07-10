@@ -191,7 +191,6 @@ class SwarmClient:
                                            mem_limit=mem_limit,
                                            memswap_limit=0,
                                            name=service_instance.name,
-                                           networks=[get_conf().overlay_network_name],
                                            network_disabled=False,
                                            network_mode=get_conf().overlay_network_name,
                                            ports=port_bindings,
