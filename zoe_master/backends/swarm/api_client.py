@@ -218,9 +218,12 @@ class SwarmClient:
             "id": container.id,
             "ip_address": {},
             "name": container.name,
-            'host': container.attrs['Node']['Name'],
             'labels': container.attrs['Config']['Labels']
         }  # type: Dict[str, Any]
+        try:
+            info['host'] = container.attrs['Node']['Name'],
+        except KeyError:
+            info['host'] = 'N/A'
 
         for net in container.attrs["NetworkSettings"]["Networks"]:
             if len(container.attrs["NetworkSettings"]["Networks"][net]['IPAddress']) > 0:
