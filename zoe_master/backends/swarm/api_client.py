@@ -201,9 +201,9 @@ class SwarmClient:
             if cont is not None:
                 cont.remove(force=True)
             if e.explanation == b'no resources available to schedule container':
-                raise ZoeNotEnoughResourcesException(message=e.explanation.decode('utf-8'))
+                raise ZoeNotEnoughResourcesException(message=str(e))
             else:
-                raise ZoeException(message=e.explanation.decode('utf-8'))
+                raise ZoeException(message=str(e))
         except Exception as e:
             if cont is not None:
                 cont.remove(force=True)
