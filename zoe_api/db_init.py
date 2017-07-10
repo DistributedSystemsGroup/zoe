@@ -70,6 +70,7 @@ def create_tables(cur):
     cur.execute('''CREATE TABLE users (
         id SERIAL PRIMARY KEY,
         username TEXT NOT NULL,
+        role TEXT NOT NULL,
         email TEXT,
         priority SMALLINT NOT NULL DEFAULT 0,
         enabled BOOLEAN NOT NULL DEFAULT TRUE,

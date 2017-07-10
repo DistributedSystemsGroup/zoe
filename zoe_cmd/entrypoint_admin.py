@@ -86,8 +86,8 @@ def user_list_cmd(auth, args_):
     """List users."""
     user_api = ZoeUsersAPI(auth['url'], auth['user'], auth['pass'])
     users = user_api.list()
-    data = [[user['id'], user['username'], user['email'], user['enabled'], user['priority'], user['quota_id']] for user in sorted(users.values(), key=lambda x: x['username'])]
-    headers = ['ID', 'Username', 'EMail', 'Enabled', 'Priority', 'Quota ID']
+    data = [[user['id'], user['username'], user['role'], user['email'], user['enabled'], user['priority'], user['quota_id']] for user in sorted(users.values(), key=lambda x: x['username'])]
+    headers = ['ID', 'Username', 'Role', 'EMail', 'Enabled', 'Priority', 'Quota ID']
     print(tabulate(data, headers))
 
 

@@ -84,7 +84,7 @@ class ZoeUsersAPI(ZoeAPIBase):
         Sets the email address for a user.
 
         :param username: the user to enable
-        :param email: the user to enable
+        :param email: the email to set
         :return: None if the operation was successful, raises ZoeAPIException otherwise
 
         :type username: str
@@ -92,6 +92,26 @@ class ZoeUsersAPI(ZoeAPIBase):
         """
         data = {
             'email': email
+        }
+        data, status_code = self._rest_put('/user/' + str(username), data)
+        if status_code == 200:
+            return
+        else:
+            raise ZoeAPIException(data['message'])
+
+    def set_role(self, username, role):
+        """
+        Sets the role for a user.
+
+        :param username: the user to enable
+        :param role: the role to set
+        :return: None if the operation was successful, raises ZoeAPIException otherwise
+
+        :type username: str
+        :rtype: bool
+        """
+        data = {
+            'role': role
         }
         data, status_code = self._rest_put('/user/' + str(username), data)
         if status_code == 200:

@@ -103,6 +103,9 @@ def get_auth(handler: tornado.web.RequestHandler):
     else:
         if not user.enabled:
             raise ZoeRestAPIException('User has been disabled by and administrator', 401)
+        if user.role != role:
+            log.info('Role for user {} updated, set to {}'.format(user.name, user.role))
+            user.set_role(role)
 
     return uid, role
 

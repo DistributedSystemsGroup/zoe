@@ -367,10 +367,10 @@ class SQLManager:
         cur.execute(query)
         self.conn.commit()
 
-    def user_new(self, username):
+    def user_new(self, username, role):
         """Adds a new port to the state."""
         cur = self._cursor()
-        query = cur.mogrify('INSERT INTO users (id, username, email, priority, enabled, quota_id) VALUES (DEFAULT, %s, NULL, DEFAULT, DEFAULT, (SELECT id FROM quotas WHERE name=\'default\')) RETURNING id', (username,))
+        query = cur.mogrify('INSERT INTO users (id, username, role, email, priority, enabled, quota_id) VALUES (DEFAULT, %s, %s, NULL, DEFAULT, DEFAULT, (SELECT id FROM quotas WHERE name=\'default\')) RETURNING id', (username, role))
         cur.execute(query)
         self.conn.commit()
         return cur.fetchone()[0]

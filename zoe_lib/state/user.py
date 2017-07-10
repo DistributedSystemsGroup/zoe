@@ -29,6 +29,7 @@ class User(Base):
         super().__init__(d, sql_manager)
 
         self.username = d['username']
+        self.role = d['role']
         self.email = d['email']
         self.priority = d['priority']
         self.enabled = d['enabled']
@@ -39,6 +40,7 @@ class User(Base):
         return {
             'id': self.id,
             'username': self.username,
+            'role': self.role,
             'email': self.email,
             'priority': self.priority,
             'enabled': self.enabled,
@@ -68,3 +70,8 @@ class User(Base):
         """Set a different quota for this user."""
         self.quota_id = quota_id
         self.sql_manager.user_update(self.id, quota_id=quota_id)
+
+    def set_role(self, role):
+        """Set a new role for this user."""
+        self.role = role
+        self.sql_manager.user_update(self.id, role=role)

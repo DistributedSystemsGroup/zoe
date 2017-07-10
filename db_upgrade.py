@@ -184,6 +184,7 @@ def upgrade_to_5(dsn):
     cur.execute('''CREATE TABLE users (
         id SERIAL PRIMARY KEY,
         username TEXT NOT NULL,
+        role TEXT NOT NULL,
         email TEXT,
         priority SMALLINT NOT NULL DEFAULT 0,
         enabled BOOLEAN NOT NULL DEFAULT TRUE,
@@ -196,7 +197,7 @@ def upgrade_to_5(dsn):
     cur.execute("SELECT user_id FROM execution")
     users = set([u[0] for u in cur])
     for user_name in users:
-        cur2.execute("INSERT INTO users (id, username, email, priority, enabled, quota_id) VALUES (DEFAULT, %s, NULL, DEFAULT, DEFAULT, currval('quotas_id_seq'))", (user_name, ))
+        cur2.execute("INSERT INTO users (id, username, role, email, priority, enabled, quota_id) VALUES (DEFAULT, %s, 'user', NULL, DEFAULT, DEFAULT, currval('quotas_id_seq'))", (user_name, ))
         cur2.execute("UPDATE execution SET user_id=currval('users_id_seq') WHERE user_id=%s", (user_name, ))
 
     print('-> change type of user_id to INT')
