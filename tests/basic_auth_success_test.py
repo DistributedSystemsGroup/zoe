@@ -1,6 +1,7 @@
 """Test script for successful basic authentication."""
 
 import json
+import os
 import time
 import sys
 import unittest
@@ -91,4 +92,5 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         API_SERVER = sys.argv.pop()
         ZoeRestTestSuccess.uri = 'http://' + API_SERVER + '/api/0.7/'
+        ZoeRestTestSuccess.auth = (os.getenv('ZOE_USER', ZOE_AUTH[0]), os.getenv('ZOE_PASS', ZOE_AUTH[1]))
     unittest.main()
