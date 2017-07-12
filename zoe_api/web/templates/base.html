@@ -3,11 +3,9 @@
 <head>
     {% block head %}
     <meta charset="UTF-8">
-    <title>{% block title %}{% endblock %} - Zoe</title>
+    <title>{% block title %}{% endblock %} - Zoe Analytics</title>
     <script src="/static/jquery-2.1.4.min.js" type="application/javascript"></script>
     <script src="/static/jquery-ui-1.11.4/jquery-ui.min.js" type="application/javascript"></script>
-    <script src="/static/jquery.wizard.js" type="application/javascript"></script>
-    <script src="/static/jquery.validate.min.js" type="application/javascript"></script>
     <script src="/static/sorttable.js" type="application/javascript"></script>
     <script src="/static/moment.min.js" type="application/javascript"></script>
     <link rel="stylesheet" href="/static/zoe.css" type="text/css">
@@ -49,25 +47,6 @@
             document.write((bytes / Math.pow(k, i)).toPrecision(dm) + ' ' + sizes[i]);
         }
     </script>
-    <h1>Zoe - Analytics on demand</h1>
     <div id="content">{% block content %}{% endblock %}</div>
-    <div id="footer">
-        {% block footer %}
-            <div class="status_line">
-                <p>
-                    <span id="app_name"><a href="http://zoe-analytics.eu">Zoe</a> v. {{ zoe_version }}</span>
-<!--                    <span id="status">
-                        [<span id="num_nodes">N/A</span> swarm nodes, <span id="num_containers">N/A</span> active containers]
-                    </span> -->
-                    <span>
-                        &mdash;Submit issues and ideas for improvement at <a href="https://github.com/DistributedSystemsGroup/zoe/issues">Zoe's issue tracker</a>.
-                    </span>
-                </p>
-            </div>
-            <div class="copyright">
-                <h6>&copy; Copyright 2016 by <a href="http://distsysgroup.wordpress.com/">DSG</a></h6>
-            </div>
-        {% endblock %}
-    </div>
 </body>
 </html>
