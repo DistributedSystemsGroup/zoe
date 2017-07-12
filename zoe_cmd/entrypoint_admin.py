@@ -247,7 +247,7 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     argparser_app_list = subparser.add_parser('exec-ls', help="List all executions for the calling user")
     argparser_app_list.add_argument('--limit', type=int, help='Limit the number of executions')
     argparser_app_list.add_argument('--name', help='Show only executions with this name')
-    argparser_app_list.add_argument('--user', help='Show only executions belonging to this user')
+    argparser_app_list.add_argument('--user_id', help='Show only executions belonging to this user')
     argparser_app_list.add_argument('--status', choices=["submitted", "scheduled", "starting", "error", "running", "cleaning up", "terminated"], help='Show only executions with this status')
     argparser_app_list.add_argument('--earlier-than-submit', help='Show only executions submitted earlier than this timestamp (seconds since UTC epoch)')
     argparser_app_list.add_argument('--earlier-than-start', help='Show only executions started earlier than this timestamp (seconds since UTC epoch)')
