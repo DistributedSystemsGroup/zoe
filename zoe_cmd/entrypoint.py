@@ -175,21 +175,21 @@ def exec_get_cmd(auth, args):
         print()
 
         endpoints = exec_api.endpoints(execution['id'])
-        if len(endpoints) > 0:
+        if endpoints is not None and len(endpoints) > 0:
             print('Exposed endpoints:')
+            for endpoint in endpoints:
+                print(' - {}: {}'.format(endpoint[0], endpoint[1]))
         else:
             print('This ZApp does not expose any endpoint')
-        for endpoint in endpoints:
-            print(' - {}: {}'.format(endpoint[0], endpoint[1]))
 
         print()
+        tabular_data = []
         for c_id in execution['services']:
             service = cont_api.get(c_id)
-            print('Service {} (ID: {})'.format(service['name'], service['id']))
-            print(' - zoe status: {}'.format(service['status']))
-            print(' - backend status: {}'.format(service['backend_status']))
-            if service['error_message'] is not None:
-                print(' - error: {}'.format(service['error_message']))
+            service_data = [service['id'], service['name'], service['status'], service['backend_status'], service['error_message'] if service['error_message'] is not None else '']
+            tabular_data.append(service_data)
+        headers = ['ID', 'Name', 'Zoe status', 'Backend status', 'Error message']
+        print(tabulate(tabular_data, headers))
 
 
 def exec_kill_cmd(auth, args):

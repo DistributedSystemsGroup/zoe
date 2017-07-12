@@ -52,7 +52,10 @@ class Port(Base):
 
         self.internal_number = self.description['port_number']
         self.protocol = self.description['protocol']
-        self.url_template = self.description['url_template']
+        try:
+            self.url_template = self.description['url_template']
+        except KeyError:
+            self.url_template = ''
 
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""
