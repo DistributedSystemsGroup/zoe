@@ -63,7 +63,7 @@ class BaseRequestHandler(RequestHandler):
 
     def get_current_user(self) -> Union[User, None]:
         """Authenticate each request."""
-        if self.get_secure_cookie('zoe_api_user'):
+        if self.get_secure_cookie('zoe_web_user'):
             uid = self.get_secure_cookie('zoe').decode('uft-8')
             log.info('Authentication done using cookie')
             return self._uid_to_user(uid)

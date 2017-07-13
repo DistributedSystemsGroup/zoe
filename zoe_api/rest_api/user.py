@@ -29,7 +29,7 @@ class LoginAPI(BaseRequestHandler):
     @needs_auth
     def get(self):
         """HTTP GET method."""
-        self.set_secure_cookie('zoe_api_user', self.current_user.username)
+        self.set_secure_cookie('zoe_web_user', self.current_user.username)
 
         ret = {
             'uid': self.current_user.username,
