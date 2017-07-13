@@ -40,8 +40,6 @@ def catch_exceptions(func):
         self = args[0]
         try:
             return func(*args, **kwargs)
-        except zoe_api.exceptions.ZoeAuthException:
-            return missing_auth(self)
         except zoe_api.exceptions.ZoeNotFoundException as e:
             return error_page(self, str(e), 404)
         except zoe_api.exceptions.ZoeException as e:
@@ -53,46 +51,37 @@ def catch_exceptions(func):
     return func_wrapper
 
 
-def missing_auth(handler: ZoeRequestHandler):
-    """Redirect to login page."""
-    handler.redirect(handler.get_argument('next', u'/login'))
-
-
-def get_auth_login(username, password):
+def get_auth_login(api_endpoint, username, password):
     """Authenticate username and password against the configured user store."""
 
     # First of all try to authenticate against a fixed list of users in a text file
     authenticator = PlainTextAuthenticator()  # type: BaseAuthenticator
     try:
         uid, role = authenticator.auth(username, password)
-        return uid, role
     except zoe_api.exceptions.ZoeAuthException:
-        pass
-
-    # It it fails, continue with the normal authentication
-    if get_conf().auth_type == 'ldap':
-        authenticator = LDAPAuthenticator()  # type: BaseAuthenticator
-    elif get_conf().auth_type == 'ldapsasl':
-        authenticator = LDAPSASLAuthenticator()  # type: BaseAuthenticator
-    else:
-        raise zoe_api.exceptions.ZoeException('Configuration error, unknown authentication method: {}'.format(get_conf().auth_type))
-    uid, role = authenticator.auth(username, password)
-    if uid is None:
-        raise zoe_api.exceptions.ZoeAuthException
+        # It it fails, continue with the normal authentication
+        if get_conf().auth_type == 'ldap':
+            authenticator = LDAPAuthenticator()  # type: BaseAuthenticator
+        elif get_conf().auth_type == 'ldapsasl':
+            authenticator = LDAPSASLAuthenticator()  # type: BaseAuthenticator
+        else:
+            raise zoe_api.exceptions.ZoeException('Configuration error, unknown authentication method: {}'.format(get_conf().auth_type))
+        uid, role = authenticator.auth(username, password)
+        try:
+            user = api_endpoint.user_identify(uid)
+        except zoe_api.exceptions.ZoeNotFoundException:
+            api_endpoint.user_new(uid, role)
+            log.info('New user created: {}'.format(uid))
+        else:
+            if not user.enabled:
+                raise zoe_api.exceptions.ZoeAuthException('disabled')
+            if user.role != role:
+                log.info('Role for user {} updated, set to {}'.format(user.name, user.role))
+                user.set_role(role)
+            if uid is None:
+                raise
 
     return uid, role
-
-
-def get_auth(handler: ZoeRequestHandler):
-    """Try to authenticate a request."""
-
-    if handler.get_secure_cookie('zoe'):
-        cookie_val = str(handler.get_secure_cookie('zoe'))
-        uid, role = cookie_val[2:-1].split('.')
-        log.info('Authentication done using cookie')
-        return uid, role
-    else:
-        handler.redirect(handler.get_argument('next', u'/login'))
 
 
 def error_page(handler: ZoeRequestHandler, error_message: str, status: int):

@@ -15,77 +15,79 @@
 
 """Main points of entry for the Zoe web interface."""
 
+import re
+
 import tornado.web
 
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
-from zoe_api.web.utils import get_auth_login, get_auth, catch_exceptions
+from zoe_api.web.utils import get_auth_login, catch_exceptions
 from zoe_api.web.custom_request_handler import ZoeRequestHandler
+from zoe_api.exceptions import ZoeAuthException
 
 
 class RootWeb(ZoeRequestHandler):
     """Handler class"""
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        super().initialize(**kwargs)
-        self.api_endpoint = self.application.api_endpoint  # type: APIEndpoint
 
     @tornado.web.authenticated
     def get(self):
         """Home page."""
-        self.render('index.html')
+        self.redirect('/home')
 
 
 class LoginWeb(ZoeRequestHandler):
     """The login web page."""
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        super().initialize(**kwargs)
-        self.api_endpoint = self.application.api_endpoint  # type: APIEndpoint
-
-    @catch_exceptions
     def get(self):
         """Login page."""
-        self.render('login.html')
+        why = self.get_argument('why', None)
+        self.render('login.html', **{'why': why})
 
-    @catch_exceptions
     def post(self):
         """Try to authenticate."""
         username = self.get_argument("username", "")
         password = self.get_argument("password", "")
-        uid, role = get_auth_login(username, password)
+        if not re.match(r'[a-zA-Z0-9]+', username) or len(password) == 0:
+            self.redirect('/login?why=invalid')
 
-        if not self.get_secure_cookie('zoe'):
-            cookie_val = uid + '.' + role
-            self.set_secure_cookie('zoe', cookie_val)
-        self.redirect(self.get_argument("next", u"/user"))
+        try:
+            uid, role = get_auth_login(self.application.api_endpoint, username, password)
+        except ZoeAuthException as e:
+            self.redirect('/login?why={}'.format(e.message))
+            return
+
+        self.set_secure_cookie('zoe_web_user', uid)
+        self.redirect('/home')
+
+
+class LogoutWeb(ZoeRequestHandler):
+    """The logout web page."""
+
+    def get(self):
+        """Logout and redirect to login page."""
+        self.clear_cookie('zoe_web_user')
+        self.redirect('/login')
 
 
 class HomeWeb(ZoeRequestHandler):
     """Handler class"""
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        super().initialize(**kwargs)
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
-    @catch_exceptions
+    @tornado.web.authenticated
     def get(self):
         """Home page with authentication."""
-        uid, role = get_auth(self)
-
-        if role == 'guest':
-            return self._aml_homepage(uid)
-
-        executions = self.api_endpoint.execution_list(uid, role)
+        filters = {
+            'user_id': self.current_user.username,
+            'status': 'running'
+        }
+        executions = self.api_endpoint.execution_list(self.current_user, **filters)
+        filters['status'] = 'starting'
+        executions += self.api_endpoint.execution_list(self.current_user, **filters)
+        filters['status'] = 'scheduled'
+        executions += self.api_endpoint.execution_list(self.current_user, **filters)
+        filters['status'] = 'terminated'
+        filters['limit'] = 5
+        executions += self.api_endpoint.execution_list(self.current_user, **filters)
 
         template_vars = {
             'executions': sorted(executions, key=lambda e: e.id),
-            'is_admin': role == 'admin',
+            'user': self.current_user
         }
         self.render('home_user.html', **template_vars)
-
-    def _aml_homepage(self, uid):
-        """Home page for students of the AML course."""
-        template_vars = {
-            'uid': uid
-        }
-        return self.render('home_guest.html', **template_vars)

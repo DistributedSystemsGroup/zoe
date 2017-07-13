@@ -21,6 +21,8 @@
 
 import json
 import datetime
+from typing import Union
+import traceback
 
 from jinja2 import Environment, FileSystemLoader, Markup
 
@@ -29,6 +31,8 @@ import tornado.web
 
 import zoe_lib.version
 import zoe_api.web.utils
+from zoe_api.api_endpoint import APIEndpoint
+from zoe_lib.state import User
 
 
 class JinjaApp(object):
@@ -84,14 +88,20 @@ def tojson_filter(obj, **kwargs):
 class ZoeRequestHandler(tornado.web.RequestHandler):
     """Custom Zoe Tornado handler."""
 
-    def get_current_user(self):
+    def get_current_user(self) -> Union[User, None]:
         """Implement cookie-auth the Tornado way."""
-        user_id = self.get_secure_cookie("zoeweb_user")
+        user_id = self.get_secure_cookie("zoe_web_user").decode('utf-8')
         if not user_id:
-            return None
-        user = self.application.api_endpoint.user_get(user_id)
+            self.redirect("/login")
+            return
+        user = self.application.api_endpoint.user_identify(user_id)
         if user is None or not user.enabled:
-            return None
+            self.clear_cookie("zoe_web_user")
+            if not user.enabled:
+                self.redirect("/login?why=disabled")
+            else:
+                self.redirect("/login")
+            return
         return user
 
     def initialize(self, *args_, **kwargs_):
@@ -101,6 +111,8 @@ class ZoeRequestHandler(tornado.web.RequestHandler):
             raise RuntimeError("Needs jinja2 Environment. Initialize with JinjaApp.init_app first")
         else:
             self._jinja_env = self.application.settings['jinja_environment']
+        self.api_endpoint = self.application.api_endpoint  # type: APIEndpoint
+        assert isinstance(self.api_endpoint, APIEndpoint)
 
     def _render(self, template, **kwargs):
         """ todo: support multiple template preprocessors """
@@ -128,7 +140,7 @@ class ZoeRequestHandler(tornado.web.RequestHandler):
         try:
             html = self._render(template, **kwargs)
         except Exception:
-            zoe_api.web.utils.error_page(self, 'Jinja2 template exception', 500)
+            zoe_api.web.utils.error_page(self, traceback.format_exc(), 500)
             return
         self.finish(html)
 

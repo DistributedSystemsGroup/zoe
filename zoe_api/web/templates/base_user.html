@@ -1,5 +1,23 @@
 {% extends "base.html" %}
+
+{% block header %}
+<div class="top-header">
+<img class="logo" alt="Zoe Analytics logo" src="{{ static_url("img/logo.png") }}">
+<ul class="header-menu">
+    <li><a href="/zapps">ZApps</a></li>
+    <li><a href="/executions">Executions</a></li>
+    <li><a href="https://github.com/DistributedSystemsGroup/zoe/issues">Issue tracker</a></li>
+    <li><a href="{{ reverse_url("logout") }}">Logout</a></li>
+</ul>
+<span class="current-user">Logged in as: {{ user.username }} ({{ user.role }})</span>
+</div>
+{% endblock %}
+
 {% block footer %}
-    <p><a href="{{ reverse_url("home_user") }}">Home</a></p>
-    {{ super() }}
+    <div id="footer">
+        <div class="copyright">
+            <h6><span id="app_name"><a href="http://zoe-analytics.eu">Zoe</a> v. {{ zoe_version }}</span>
+                &copy; Copyright 2017 by <a href="http://distsysgroup.wordpress.com/">DSG</a></h6>
+        </div>
+    </div>
 {% endblock %}

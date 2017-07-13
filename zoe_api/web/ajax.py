@@ -23,7 +23,7 @@ from tornado.escape import json_decode
 from zoe_lib.config import get_conf
 import zoe_api.exceptions
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
-from zoe_api.web.utils import get_auth, catch_exceptions
+from zoe_api.web.utils import catch_exceptions
 from zoe_api.web.custom_request_handler import ZoeRequestHandler
 
 

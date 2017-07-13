@@ -28,8 +28,9 @@ def web_init() -> List[tornado.web.URLSpec]:
     """Tornado init for the web interface."""
     web_routes = [
         tornado.web.url(r'/', zoe_api.web.start.RootWeb, name='root'),
-        tornado.web.url(r'/user', zoe_api.web.start.HomeWeb, name='home_user'),
+        tornado.web.url(r'/home', zoe_api.web.start.HomeWeb, name='home'),
         tornado.web.url(r'/login', zoe_api.web.start.LoginWeb, name='login'),
+        tornado.web.url(r'/logout', zoe_api.web.start.LogoutWeb, name='logout'),
 
         tornado.web.url(r'/executions/new', zoe_api.web.executions.ExecutionDefineWeb, name='execution_define'),
         tornado.web.url(r'/executions/start', zoe_api.web.executions.ExecutionStartWeb, name='execution_start'),

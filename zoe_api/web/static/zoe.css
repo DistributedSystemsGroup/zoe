@@ -1,145 +1,136 @@
 body {
-    font-family: sans-serif;
-    max-width: 90%;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     margin-left: 20px;
 }
 
 a:link {
-    color: rgba(79, 140, 30, 1);
+    color: #00a9e1;
     text-decoration: none;
 }
 
 a:visited {
-    color: rgba(79, 140, 30, 1);
+    color: #00a9e1;
     text-decoration: none;
 }
 
-div.user_info {
-    font-size: smaller;
-    clear: both;
-    padding-top: 20px;
+/* Header on top of almost all pages */
+div.top-header {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5em;
+    background-color: white;
+    border-bottom: solid 1px black;
 }
 
-table.app_list {
-    border-collapse: collapse;
-}
-
-table.app_list tr {
-    border-top: 1px black solid;
-}
-
-table.app_list td {
-    padding-right: 1.5em;
-}
-
-div.status_line {
-    float: left;
-}
-
-span#app_name {
-    font-family: cursive;
-    font-size: larger;
-}
-
-span#status {
-    font-size: smaller;
-}
-
-div.copyright {
-    float: left;
-    padding-left: 3em;
-}
-
-textarea#log {
-    width: 90%;
-    height: 40em;
-}
-
-span.fakelink {
-    color: rgba(79, 140, 30, 1);
-    text-decoration: none;
-    cursor: pointer;
-}
-
-#wrapper {
-    width: 800px;
-}
-
-#navigation {
-    background-color: #fff;
-    border: #ddd 1px solid;
-    border-radius: 10px;
-    margin: 10px;
-    padding: 10px;
-}
-
-#navigation li {
-    margin: 2px 0;
-}
-
-label.error {
-    color: #ff0000;
-    margin-left: 10px;
-    position: relative;
-}
-
-.wizard {
-    background-color: #fff;
-    border: #ddd 1px solid;
-    border-radius: 10px;
-    margin: 10px;
-    padding: 10px;
-}
-
-.wizard .wizard-header {
-    background-color: #f4f4f4;
-    border-bottom: #ddd 1px solid;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    padding: 5px 10px;
-    margin: 0 0 10px 0;
-}
-
-.wizard .wizard-step {
-    margin: 10px 0;
-}
-
-.wizard .wizard-step p {
-    padding: 5px;
-}
-
-.navigation {
-    border-top: #ddd 1px solid;
-    margin-top: 10px;
-    padding-top: 10px;
-}
-
-.navigation ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.navigation li {
-    float: left;
-    margin-right: 10px;
-}
-
-.clearfix:before, .clearfix:after {
-    content: "\0020";
+div.top-header img.logo {
+    height: 100%;
     display: block;
-    height: 0;
-    visibility: hidden;
+    float: left;
 }
 
-.clearfix:after {
-    clear: both;
+div.top-header ul.header-menu {
+    float: left;
+    list-style: none;
+    margin: 0;
+    height: 5em;
 }
 
-input {
-    margin-top: 5px;
+div.top-header ul.header-menu li {
+    float: left;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    border: 1px solid transparent;
+    transition: border-color ease-in-out 0.15s;
+    font-size: 1.3em;
 }
 
-section {
-    padding-bottom: 10px;
+div.top-header ul.header-menu li:hover {
+    color: #353390;
+}
+
+div.top-header span.current-user {
+    float: right;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+/* Main content of the page */
+#content {
+    width: 90%;
+}
+
+/* Login form */
+div.login-form {
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    margin: 0 0 0 -195px;
+    width: 390px;
+    border: 1px solid #ddd;
+    max-height: none;
+    border-radius: 6px;
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    background-clip: border-box;
+}
+
+div.login-form img.logo {
+    width: 95%;
+    margin: 0 auto;
+    display: block;
+}
+
+div.login-form input {
+    width: 90%;
+    transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    display: block;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    padding: 6px 12px;
+}
+
+div.login-form input:focus {
+    border-color: #33c0c4;
+    outline: 0;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(51, 192, 196, 0.6);
+}
+
+div.login-form label {
+    margin-bottom: 5px;
+    text-align: left;
+    color: #555555;
+    font-weight: bold;
+    display: inline-block;
+}
+
+div.login-form div.form-btn {
+    float: right;
+}
+
+div.login-form fieldset {
+    border: 0;
+}
+
+div.login-form button {
+    white-space: nowrap;
+    padding: 6px 12px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    margin-right: 8px;
+    border: 1px solid transparent;
+}
+
+div.login-form button:hover {
+    color: #fff;
+    background-color: #33c0c4;
+    border-color: #00a9e1;
+}
+
+div.login-form span.error-message {
+    color: red;
 }
