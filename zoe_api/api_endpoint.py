@@ -41,22 +41,22 @@ class APIEndpoint:
         self.master = zoe_api.master_api.APIManager()
         self.sql = zoe_lib.state.SQLManager(get_conf())
 
-    def execution_by_id(self, uid, role, execution_id) -> zoe_lib.state.sql_manager.Execution:
+    def execution_by_id(self, user: zoe_lib.state.User, execution_id) -> zoe_lib.state.sql_manager.Execution:
         """Lookup an execution by its ID."""
         e = self.sql.execution_list(id=execution_id, only_one=True)
         if e is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
         assert isinstance(e, zoe_lib.state.sql_manager.Execution)
-        if e.user_id != uid and role != 'admin':
+        if e.user_id != user.id and user.role != 'admin':
             raise zoe_api.exceptions.ZoeAuthException()
         return e
 
-    def execution_list(self, uid, role, **filters):
+    def execution_list(self, user: zoe_lib.state.User, **filters):
         """Generate a optionally filtered list of executions."""
         if 'user_id' in filters:
-            filters['user_id'] = self.user_by_username(uid, role, filters['user_id']).id
+            filters['user_id'] = self.user_identify(filters['user_id']).id
         execs = self.sql.execution_list(**filters)
-        ret = [e for e in execs if e.user_id == uid or role == 'admin']
+        ret = [e for e in execs if e.user_id == user.id or user.role == 'admin']
 
         for e in ret:
             user = self.sql.user_list(id=e.user_id, only_one=True)
@@ -73,7 +73,7 @@ class APIEndpoint:
         except zoe_lib.exceptions.InvalidApplicationDescription as e:
             raise zoe_api.exceptions.ZoeException('Invalid application description: ' + e.message)
 
-    def execution_start(self, uid, role, exec_name, application_description): # pylint: disable=unused-argument
+    def execution_start(self, user: zoe_lib.state.User, exec_name, application_description):
         """Start an execution."""
         try:
             zoe_lib.applications.app_validate(application_description)
@@ -85,21 +85,21 @@ class APIEndpoint:
         if not re.match(r'^[a-zA-Z0-9\-]+$', exec_name):
             raise zoe_api.exceptions.ZoeException("Execution name can contain only letters, numbers and dashes. '{}' is not valid.".format(exec_name))
 
-        new_id = self.sql.execution_new(exec_name, uid, application_description)
+        new_id = self.sql.execution_new(exec_name, user, application_description)
         success, message = self.master.execution_start(new_id)
         if not success:
             raise zoe_api.exceptions.ZoeException('The Zoe master is unavailable, execution will be submitted automatically when the master is back up ({}).'.format(message))
 
         return new_id
 
-    def execution_terminate(self, uid, role, exec_id):
+    def execution_terminate(self, user: zoe_lib.state.User, exec_id):
         """Terminate an execution."""
         e = self.sql.execution_list(id=exec_id, only_one=True)
         assert isinstance(e, zoe_lib.state.sql_manager.Execution)
         if e is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
 
-        if e.user_id != uid and role != 'admin':
+        if e.user_id != user.id and user.role != 'admin':
             raise zoe_api.exceptions.ZoeAuthException()
 
         if e.is_active:
@@ -107,14 +107,14 @@ class APIEndpoint:
         else:
             raise zoe_api.exceptions.ZoeException('Execution is not running')
 
-    def execution_delete(self, uid, role, exec_id):
+    def execution_delete(self, user: zoe_lib.state.User, exec_id):
         """Delete an execution."""
         e = self.sql.execution_list(id=exec_id, only_one=True)
         assert isinstance(e, zoe_lib.state.sql_manager.Execution)
         if e is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
 
-        if e.user_id != uid and role != 'admin':
+        if e.user_id != user.id and user.role != 'admin':
             raise zoe_api.exceptions.ZoeAuthException()
 
         if e.is_active:
@@ -127,34 +127,34 @@ class APIEndpoint:
         else:
             raise zoe_api.exceptions.ZoeException(message)
 
-    def service_by_id(self, uid, role, service_id) -> zoe_lib.state.sql_manager.Service:
+    def service_by_id(self, user: zoe_lib.state.User, service_id) -> zoe_lib.state.sql_manager.Service:
         """Lookup a service by its ID."""
         service = self.sql.service_list(id=service_id, only_one=True)
         if service is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
-        if service.user_id != uid and role != 'admin':
+        if service.user_id != user.id and user.role != 'admin':
             raise zoe_api.exceptions.ZoeAuthException()
         return service
 
-    def service_list(self, uid, role, **filters):
+    def service_list(self, user: zoe_lib.state.User, **filters):
         """Generate a optionally filtered list of services."""
         services = self.sql.service_list(**filters)
-        ret = [s for s in services if s.user_id == uid or role == 'admin']
+        ret = [s for s in services if s.user_id == user.id or user.role == 'admin']
         return ret
 
-    def service_logs(self, uid, role, service_id, stream=True):
+    def service_logs(self, user: zoe_lib.state.User, service_id, stream=True):
         """Retrieve the logs for the given service."""
         service = self.sql.service_list(id=service_id, only_one=True)
         if service is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such service')
-        if service.user_id != uid and role != 'admin':
+        if service.user_id != user.id and user.role != 'admin':
             raise zoe_api.exceptions.ZoeAuthException()
         if service.docker_id is None:
             raise zoe_api.exceptions.ZoeNotFoundException('Container is not running')
         swarm = SwarmClient()
         return swarm.logs(service.docker_id, stream)
 
-    def statistics_scheduler(self, uid_, role_):
+    def statistics_scheduler(self):
         """Retrieve statistics about the scheduler."""
         success, message = self.master.scheduler_statistics()
         if success:
@@ -190,12 +190,12 @@ class APIEndpoint:
 
         log.debug('Cleanup task finished')
 
-    def execution_endpoints(self, uid: str, role: str, execution: zoe_lib.state.Execution):
+    def execution_endpoints(self, user: zoe_lib.state.User, execution: zoe_lib.state.Execution):
         """Return a list of the services and public endpoints available for a certain execution."""
         services_info = []
         endpoints = []
         for service in execution.services:
-            services_info.append(self.service_by_id(uid, role, service.id))
+            services_info.append(self.service_by_id(user, service.id))
             for port in service.description['ports']:
                 port_key = str(port['port_number']) + "/" + port['protocol']
                 backend_port = self.sql.port_list(only_one=True, service_id=service.id, internal_name=port_key)
@@ -209,9 +209,9 @@ class APIEndpoint:
         """Create a new user, call only if the user has been authenticated successfully."""
         return self.sql.user_new(uid, role)
 
-    def user_list(self, uid_, role, **filters):
+    def user_list(self, user: zoe_lib.state.User, **filters):
         """Generate a optionally filtered list of users."""
-        if role != "admin":
+        if user.role != "admin":
             raise zoe_api.exceptions.ZoeAuthException()
 
         users = self.sql.user_list(**filters)
@@ -220,20 +220,17 @@ class APIEndpoint:
             user.quota_id = quota.name
         return users
 
-    def user_by_username(self, uid, role, user_name) -> zoe_lib.state.User:
+    def user_identify(self, user_name) -> zoe_lib.state.User:
         """Lookup a user by its name."""
         user = self.sql.user_list(username=user_name, only_one=True)
         if user is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such user')
-        assert isinstance(user, zoe_lib.state.sql_manager.User)
-        if user.id != uid and role != 'admin':
-            raise zoe_api.exceptions.ZoeAuthException()
         return user
 
-    def user_update(self, uid, role, user_name, data):
+    def user_update(self, login_user: zoe_lib.state.User, user_name, data):
         """Update user details."""
         user = self.sql.user_list(username=user_name, only_one=True)
-        if user.id != uid and role != "admin":
+        if user.id != login_user.id and login_user.role != "admin":
             raise zoe_api.exceptions.ZoeAuthException()
 
         if 'enabled' in data:
@@ -256,37 +253,37 @@ class APIEndpoint:
                 raise zoe_api.exceptions.ZoeRestAPIException('Invalid quota ID')
             user.set_quota(data['quota_id'])
 
-    def quota_list(self, uid_, role, **filters):
+    def quota_list(self, user: zoe_lib.state.User, **filters):
         """Generate a optionally filtered list of users."""
-        if role != "admin":
+        if user.role != "admin":
             raise zoe_api.exceptions.ZoeAuthException()
 
         return self.sql.quota_list(**filters)
 
-    def quota_delete(self, uid_, role, quota_id):
+    def quota_delete(self, user: zoe_lib.state.User, quota_id):
         """Delete a quota from the database, users with this quota will be reassigned the default one."""
-        if role != "admin":
+        if user.role != "admin":
             raise zoe_api.exceptions.ZoeAuthException()
 
         self.sql.quota_delete(quota_id)
 
-    def quota_by_id(self, uid_, role, quota_id):
+    def quota_by_id(self, user: zoe_lib.state.User, quota_id):
         """Retrieve a quota object by its ID."""
-        if role != "admin":
+        if user.role != "admin":
             raise zoe_api.exceptions.ZoeAuthException()
 
         return self.sql.quota_list(id=quota_id, only_one=True)
 
-    def quota_new(self, uid_, role, name, cc_exec, memory, cores):
+    def quota_new(self, user: zoe_lib.state.User, name, cc_exec, memory, cores):
         """Create a new quota."""
-        if role != "admin":
+        if user.role != "admin":
             raise zoe_api.exceptions.ZoeAuthException()
 
         return self.sql.quota_new(name, cc_exec, memory, cores)
 
-    def quota_update(self, uid_, role, quota_id, data):
+    def quota_update(self, user: zoe_lib.state.User, quota_id, data):
         """Update user details."""
-        if role != "admin":
+        if user.role != "admin":
             raise zoe_api.exceptions.ZoeAuthException()
 
         quota = self.sql.quota_list(id=quota_id, only_one=True)

@@ -128,12 +128,12 @@ class SQLManager:
         cur.execute(query)
         self.conn.commit()
 
-    def execution_new(self, name, user_id, description):
+    def execution_new(self, name, user, description):
         """Create a new execution in the state."""
         cur = self._cursor()
         status = Execution.SUBMIT_STATUS
         time_submit = datetime.datetime.now()
-        query = cur.mogrify('INSERT INTO execution (id, name, user_id, description, status, time_submit) VALUES (DEFAULT, %s,%s,%s,%s,%s) RETURNING id', (name, user_id, description, status, time_submit))
+        query = cur.mogrify('INSERT INTO execution (id, name, user_id, description, status, time_submit) VALUES (DEFAULT, %s,%s,%s,%s,%s) RETURNING id', (name, user.id, description, status, time_submit))
         cur.execute(query)
         self.conn.commit()
         return cur.fetchone()[0]

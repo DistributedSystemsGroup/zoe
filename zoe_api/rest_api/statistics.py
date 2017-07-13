@@ -15,35 +15,15 @@
 
 """The Scheduler Statistics API endpoint."""
 
-from tornado.web import RequestHandler
-
-from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
-from zoe_api.rest_api.utils import catch_exceptions, manage_cors_headers
+from zoe_api.rest_api.utils import catch_exceptions
+from zoe_api.rest_api.custom_request_handler import BaseRequestHandler
 
 
-class SchedulerStatsAPI(RequestHandler):
+class SchedulerStatsAPI(BaseRequestHandler):
     """The Scheduler Statistics API endpoint."""
-
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-
-    def set_default_headers(self):
-        """Set up the headers for enabling CORS."""
-        manage_cors_headers(self)
-
-    @catch_exceptions
-    def options(self):
-        """Needed for CORS."""
-        self.set_status(204)
-        self.finish()
 
     @catch_exceptions
     def get(self):
         """HTTP GET method."""
         statistics = self.api_endpoint.statistics_scheduler(0, 'guest')
         self.write(statistics)
-
-    def data_received(self, chunk):
-        """Not implemented as we do not use stream uploads"""
-        pass

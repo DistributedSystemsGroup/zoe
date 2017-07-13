@@ -21,7 +21,6 @@ import tornado.web
 
 from zoe_api.rest_api.execution import ExecutionAPI, ExecutionCollectionAPI, ExecutionDeleteAPI, ExecutionEndpointsAPI
 from zoe_api.rest_api.info import InfoAPI
-from zoe_api.rest_api.userinfo import UserInfoAPI
 from zoe_api.rest_api.service import ServiceAPI, ServiceLogsAPI
 from zoe_api.rest_api.discovery import DiscoveryAPI
 from zoe_api.rest_api.statistics import SchedulerStatsAPI

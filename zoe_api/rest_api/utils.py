@@ -18,6 +18,7 @@
 import base64
 import logging
 import functools
+from typing import Tuple
 
 import tornado.web
 
@@ -54,6 +55,7 @@ def catch_exceptions(func):
             self.write({'message': e.message})
         except ZoeAuthException as e:
             self.set_status(401)
+            self.add_header('WWW-Authenticate', 'Basic realm="Login Required"')
             self.write({'message': e.message})
         except ZoeException as e:
             self.set_status(400)
@@ -66,17 +68,27 @@ def catch_exceptions(func):
     return func_wrapper
 
 
-def get_auth(handler: tornado.web.RequestHandler):
-    """Try to authenticate a request."""
-    if handler.get_secure_cookie('zoe'):
-        cookie_val = str(handler.get_secure_cookie('zoe'))
-        uid, role = cookie_val[2:-1].split('.')
-        log.info('Authentication done using cookie')
-        return uid, role
+def needs_auth(func):
+    """Decorator function used to check for authentication. Mimics the Tornado @authenticated decorator,
+    but does not redirect, since this is a REST API."""
+    @functools.wraps(func)
+    def func_wrapper(*args, **kwargs):
+        """The actual decorator."""
+        self = args[0]
+        if not self.current_user:
+            self.set_status(401)
+            self.add_header('WWW-Authenticate', 'Basic realm="Login Required"')
+            return
+        return func(*args, **kwargs)
 
+    return func_wrapper
+
+
+def try_basic_auth(handler: tornado.web.RequestHandler) -> Tuple[str, str]:
+    """Try to authenticate a request with HTTP basic auth."""
     auth_header = handler.request.headers.get('Authorization')
     if auth_header is None or not auth_header.startswith('Basic '):
-        raise ZoeRestAPIException('missing or wrong authentication information', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
+        raise ZoeAuthException()
 
     auth_decoded = base64.decodebytes(bytes(auth_header[6:], 'ascii')).decode('utf-8')
     username, password = auth_decoded.split(':', 2)
@@ -88,35 +100,10 @@ def get_auth(handler: tornado.web.RequestHandler):
     elif get_conf().auth_type == 'ldapsasl':
         authenticator = LDAPSASLAuthenticator()  # type: BaseAuthenticator
     else:
-        raise ZoeException('Configuration error, unknown authentication method: {}'.format(get_conf().auth_type))
+        log.error('Configuration error, unknown authentication method: {}'.format(get_conf().auth_type))
+        raise ZoeAuthException()
 
     uid, role = authenticator.auth(username, password)
     if uid is None:
-        raise ZoeRestAPIException('missing or wrong authentication information', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
-    log.debug('Authentication done using auth-mechanism')
-
-    try:
-        user = handler.application.api_endpoint.user_by_username(uid, role, username)
-    except ZoeNotFoundException:
-        handler.application.api_endpoint.user_new(uid, role)
-        log.info('New user created: {}'.format(uid))
-    else:
-        if not user.enabled:
-            raise ZoeRestAPIException('User has been disabled by and administrator', 401)
-        if user.role != role:
-            log.info('Role for user {} updated, set to {}'.format(user.name, user.role))
-            user.set_role(role)
-
+        raise ZoeAuthException()
     return uid, role
-
-
-def manage_cors_headers(handler: tornado.web.RequestHandler):
-    """Set up the headers for enabling CORS."""
-    if handler.request.headers.get('Origin') is None:
-        handler.set_header("Access-Control-Allow-Origin", "*")
-    else:
-        handler.set_header("Access-Control-Allow-Origin", handler.request.headers.get('Origin'))
-    handler.set_header("Access-Control-Allow-Credentials", "true")
-    handler.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-Type, origin, authorization, accept, client-security-token")
-    handler.set_header("Access-Control-Allow-Methods", "OPTIONS, GET, DELETE")
-    handler.set_header("Access-Control-Max-Age", "1000")

@@ -18,79 +18,47 @@
 from concurrent.futures import ThreadPoolExecutor
 import logging
 
-from tornado.web import RequestHandler
 import tornado.gen
 import tornado.iostream
 
-from zoe_api.rest_api.utils import catch_exceptions, get_auth, manage_cors_headers
-from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
+from zoe_api.rest_api.utils import catch_exceptions, needs_auth
+from zoe_api.rest_api.custom_request_handler import BaseRequestHandler
 
 log = logging.getLogger(__name__)
 
 THREAD_POOL = ThreadPoolExecutor(20)
 
 
-class ServiceAPI(RequestHandler):
+class ServiceAPI(BaseRequestHandler):
     """The Service API endpoint."""
 
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-
-    def set_default_headers(self):
-        """Set up the headers for enabling CORS."""
-        manage_cors_headers(self)
-
     @catch_exceptions
-    def options(self, service_id): # pylint: disable=unused-argument
-        """Needed for CORS."""
-        self.set_status(204)
-        self.finish()
-
-    @catch_exceptions
+    @needs_auth
     def get(self, service_id):
         """HTTP GET method."""
-        uid, role = get_auth(self)
-
-        service = self.api_endpoint.service_by_id(uid, role, service_id)
+        service = self.api_endpoint.service_by_id(self.current_user, service_id)
 
         self.write(service.serialize())
 
-    def data_received(self, chunk):
-        """Not implemented as we do not use stream uploads"""
-        pass
 
-
-class ServiceLogsAPI(RequestHandler):
+class ServiceLogsAPI(BaseRequestHandler):
     """The Service logs API endpoint."""
 
     def initialize(self, **kwargs):
         """Initializes the request handler."""
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
+        super().initialize(**kwargs)
         self.connection_closed = False
-
-    def set_default_headers(self):
-        """Set up the headers for enabling CORS."""
-        manage_cors_headers(self)
-
-    @catch_exceptions
-    def options(self, service_id): # pylint: disable=unused-argument
-        """Needed for CORS."""
-        self.set_status(204)
-        self.finish()
 
     def on_connection_close(self):
         """Tornado callback for clients closing the connection."""
         self.connection_closed = True
 
     @catch_exceptions
+    @needs_auth
     @tornado.gen.coroutine
     def get(self, service_id):
         """HTTP GET method."""
-
-        uid, role = get_auth(self)
-
-        log_gen = self.api_endpoint.service_logs(uid, role, service_id, stream=True)
+        log_gen = self.api_endpoint.service_logs(self.current_user, service_id, stream=True)
 
         while True:
             try:
@@ -110,7 +78,3 @@ class ServiceLogsAPI(RequestHandler):
 
         log.debug('Finished log stream for service {}'.format(service_id))
         self.finish()
-
-    def data_received(self, chunk):
-        """Not implemented as we do not use stream uploads"""
-        pass

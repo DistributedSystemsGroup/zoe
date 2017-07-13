@@ -15,108 +15,66 @@
 
 """The Quota API endpoint."""
 
-from tornado.web import RequestHandler
 import tornado.escape
 
-from zoe_api.rest_api.utils import get_auth, catch_exceptions, manage_cors_headers
-from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
+from zoe_api.rest_api.utils import catch_exceptions, needs_auth
 import zoe_api.exceptions
+from zoe_api.rest_api.custom_request_handler import BaseRequestHandler
 
 
-class QuotaAPI(RequestHandler):
+class QuotaAPI(BaseRequestHandler):
     """The Quota API endpoint."""
 
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-
-    def set_default_headers(self):
-        """Set up the headers for enabling CORS."""
-        manage_cors_headers(self)
-
     @catch_exceptions
-    def options(self):
-        """Needed for CORS."""
-        self.set_status(204)
-        self.finish()
-
-    def data_received(self, chunk):
-        """Not implemented as we do not use stream uploads"""
-        pass
-
-    @catch_exceptions
+    @needs_auth
     def get(self, quota_id):
         """Get one quota object."""
-        uid, role = get_auth(self)
-
-        quota = self.api_endpoint.quota_by_id(uid, role, quota_id)
+        quota = self.api_endpoint.quota_by_id(self.current_user, quota_id)
 
         self.write(quota.serialize())
 
     @catch_exceptions
+    @needs_auth
     def put(self, quota_id):
         """Update a quota object."""
-        uid, role = get_auth(self)
-
         try:
             data = tornado.escape.json_decode(self.request.body)
         except ValueError:
             raise zoe_api.exceptions.ZoeRestAPIException('Error decoding JSON data')
 
-        self.api_endpoint.quota_update(uid, role, quota_id, data)
+        self.api_endpoint.quota_update(self.current_user, quota_id, data)
 
         self.set_status(204)
 
     @catch_exceptions
+    @needs_auth
     def delete(self, quota_id):
         """Delete a quota."""
-        uid, role = get_auth(self)
-
-        self.api_endpoint.quota_delete(uid, role, quota_id)
+        self.api_endpoint.quota_delete(self.current_user, quota_id)
 
         self.set_status(204)
 
 
-class QuotaCollectionAPI(RequestHandler):
+class QuotaCollectionAPI(BaseRequestHandler):
     """The Quota API endpoint."""
 
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-
-    def set_default_headers(self):
-        """Set up the headers for enabling CORS."""
-        manage_cors_headers(self)
-
     @catch_exceptions
-    def options(self):
-        """Needed for CORS."""
-        self.set_status(204)
-        self.finish()
-
-    def data_received(self, chunk):
-        """Not implemented as we do not use stream uploads"""
-        pass
-
-    @catch_exceptions
+    @needs_auth
     def get(self):
         """Retrieve a possibly filtered list of quotas."""
-        uid, role = get_auth(self)
-
         filt_dict = {}
-        quotas = self.api_endpoint.quota_list(uid, role, **filt_dict)
+        quotas = self.api_endpoint.quota_list(self.current_user, **filt_dict)
 
         self.write(dict([(q.id, q.serialize()) for q in quotas]))
 
     @catch_exceptions
+    @needs_auth
     def post(self):
         """
         Creates a new quota. Takes a JSON object.
 
         :return: the new quota_id
         """
-        uid, role = get_auth(self)
-
         try:
             data = tornado.escape.json_decode(self.request.body)
         except ValueError:
@@ -127,7 +85,7 @@ class QuotaCollectionAPI(RequestHandler):
         memory = int(data['memory'])
         cores = int(data['cores'])
 
-        new_id = self.api_endpoint.quota_new(uid, role, name, cc_exec, memory, cores)
+        new_id = self.api_endpoint.quota_new(self.current_user, name, cc_exec, memory, cores)
 
         self.set_status(201)
         self.write({'quota_id': new_id})

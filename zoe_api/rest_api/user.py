@@ -15,122 +15,64 @@
 
 """The User API endpoint."""
 
-from tornado.web import RequestHandler
 import tornado.escape
 
-from zoe_api.rest_api.utils import get_auth, catch_exceptions, manage_cors_headers
-from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
+from zoe_api.rest_api.utils import catch_exceptions, needs_auth
 import zoe_api.exceptions
+from zoe_api.rest_api.custom_request_handler import BaseRequestHandler
 
 
-class LoginAPI(RequestHandler):
+class LoginAPI(BaseRequestHandler):
     """The Login API endpoint."""
 
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-
-    def set_default_headers(self):
-        """Set up the headers for enabling CORS."""
-        manage_cors_headers(self)
-
     @catch_exceptions
-    def options(self):
-        """Needed for CORS."""
-        self.set_status(204)
-        self.finish()
-
-    @catch_exceptions
+    @needs_auth
     def get(self):
         """HTTP GET method."""
-        uid, role = get_auth(self)
-
-        cookie_val = uid + '.' + role
-
-        self.set_secure_cookie('zoe', cookie_val)
+        self.set_secure_cookie('zoe_api_user', self.current_user.username)
 
         ret = {
-            'uid': uid,
-            'role': role
+            'uid': self.current_user.username,
+            'role': self.current_user.role
         }
 
         self.write(ret)
 
-    def data_received(self, chunk):
-        """Not implemented as we do not use stream uploads"""
-        pass
 
-
-class UserCollectionAPI(RequestHandler):
+class UserCollectionAPI(BaseRequestHandler):
     """The User collection API endpoint."""
 
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-
-    def set_default_headers(self):
-        """Set up the headers for enabling CORS."""
-        manage_cors_headers(self)
-
     @catch_exceptions
-    def options(self):
-        """Needed for CORS."""
-        self.set_status(204)
-        self.finish()
-
-    @catch_exceptions
+    @needs_auth
     def get(self):
         """HTTP GET method."""
-        uid, role = get_auth(self)
-
         filt_dict = {}
-        users = self.api_endpoint.user_list(uid, role, **filt_dict)
+        users = self.api_endpoint.user_list(self.current_user, **filt_dict)
 
         self.write(dict([(u.id, u.serialize()) for u in users]))
 
-    def data_received(self, chunk):
-        """Not implemented as we do not use stream uploads"""
-        pass
 
-
-class UserAPI(RequestHandler):
+class UserAPI(BaseRequestHandler):
     """The Login API endpoint."""
 
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-
-    def set_default_headers(self):
-        """Set up the headers for enabling CORS."""
-        manage_cors_headers(self)
-
     @catch_exceptions
-    def options(self):
-        """Needed for CORS."""
-        self.set_status(204)
-        self.finish()
-
-    @catch_exceptions
+    @needs_auth
     def get(self, user_name):
         """HTTP GET method."""
-        uid, role = get_auth(self)
+        if self.current_user.role != "admin" and self.current_user.username != user_name:
+            raise zoe_api.exceptions.ZoeAuthException('Unauthorized access')
 
-        user = self.api_endpoint.user_by_username(uid, role, user_name)
+        user = self.api_endpoint.user_identify(user_name)
 
         self.write(user.serialize())
 
     @catch_exceptions
+    @needs_auth
     def put(self, user_name):
         """Update user information"""
-        uid, role = get_auth(self)
-
         try:
             data = tornado.escape.json_decode(self.request.body)
         except ValueError:
             raise zoe_api.exceptions.ZoeRestAPIException('Error decoding JSON data')
 
-        self.api_endpoint.user_update(uid, role, user_name, data)
-
-    def data_received(self, chunk):
-        """Not implemented as we do not use stream uploads"""
-        pass
+        self.api_endpoint.user_update(self.current_user, user_name, data)
