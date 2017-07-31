@@ -26,6 +26,8 @@ import time
 from argparse import ArgumentParser, Namespace, FileType, RawDescriptionHelpFormatter
 from typing import Tuple
 
+from tabulate import tabulate
+
 from zoe_cmd import utils
 from zoe_lib.info import ZoeInfoAPI
 from zoe_lib.services import ZoeServiceAPI
@@ -86,8 +88,9 @@ def exec_list_cmd(args):
         if key in filter_names:
             filters[key] = value
     data = exec_api.list(**filters)
-    for e in sorted(data.values(), key=lambda x: x['id']):
-        print('Execution {} (User: {}, ID: {}): {}'.format(e['name'], e['user_id'], e['id'], e['status']))
+    tabular_data = [[e['id'], e['name'], e['user_id'], e['status']] for e in sorted(data.values(), key=lambda x: x['id'])]
+    headers = ['ID', 'Name', 'User ID', 'Status']
+    print(tabulate(tabular_data, headers))
 
 
 def exec_start_cmd(args):
@@ -142,19 +145,19 @@ def exec_get_cmd(args):
         endpoints = exec_api.endpoints(execution['id'])
         if len(endpoints) > 0:
             print('Exposed endpoints:')
+            for endpoint in endpoints:
+                print(' - {}: {}'.format(endpoint[0], endpoint[1]))
         else:
             print('This ZApp does not expose any endpoint')
-        for endpoint in endpoints:
-            print(' - {}: {}'.format(endpoint[0], endpoint[1]))
 
         print()
+        tabular_data = []
         for c_id in execution['services']:
             service = cont_api.get(c_id)
-            print('Service {} (ID: {})'.format(service['name'], service['id']))
-            print(' - zoe status: {}'.format(service['status']))
-            print(' - backend status: {}'.format(service['backend_status']))
-            if service['error_message'] is not None:
-                print(' - error: {}'.format(service['error_message']))
+            service_data = [service['id'], service['name'], service['status'], service['backend_status'], service['error_message'] if service['error_message'] is not None else '']
+            tabular_data.append(service_data)
+        headers = ['ID', 'Name', 'Zoe status', 'Backend status', 'Error message']
+        print(tabulate(tabular_data, headers))
 
 
 def exec_kill_cmd(args):
@@ -205,7 +208,7 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     argparser_app_list = subparser.add_parser('exec-ls', help="List all executions for the calling user")
     argparser_app_list.add_argument('--limit', type=int, help='Limit the number of executions')
     argparser_app_list.add_argument('--name', help='Show only executions with this name')
-    argparser_app_list.add_argument('--user', help='Show only executions belonging to this user')
+    argparser_app_list.add_argument('--user_id', help='Show only executions belonging to this user')
     argparser_app_list.add_argument('--status', choices=["submitted", "scheduled", "starting", "error", "running", "cleaning up", "terminated"], help='Show only executions with this status')
     argparser_app_list.add_argument('--earlier-than-submit', help='Show only executions submitted earlier than this timestamp (seconds since UTC epoch)')
     argparser_app_list.add_argument('--earlier-than-start', help='Show only executions started earlier than this timestamp (seconds since UTC epoch)')
