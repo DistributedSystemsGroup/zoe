@@ -43,13 +43,13 @@ class KubernetesBackend(zoe_master.backends.base.BaseBackend):
         """Initializes Kubernetes backend starting the event monitoring thread."""
         global _monitor, _checker
         _monitor = KubernetesMonitor(state)
-        _checker = KubernetesStateSynchronizer(state)
+#        _checker = KubernetesStateSynchronizer(state)
 
     @classmethod
     def shutdown(cls):
         """Performs a clean shutdown of the resources used by Swarm backend."""
         _monitor.quit()
-        _checker.quit()
+#        _checker.quit()
 
     def spawn_service(self, service_instance: ServiceInstance):
         """Spawn a service, translating a Zoe Service into a Docker container."""
