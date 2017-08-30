@@ -92,7 +92,7 @@ def get_auth(handler: ZoeRequestHandler):
         log.info('Authentication done using cookie')
         return uid, role
     else:
-        handler.redirect(handler.get_argument('next', u'/login'))
+        return None, None
 
 
 def error_page(handler: ZoeRequestHandler, error_message: str, status: int):

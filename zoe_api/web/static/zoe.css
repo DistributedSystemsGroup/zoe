@@ -32,6 +32,10 @@ table.app_list td {
     padding-right: 1.5em;
 }
 
+table.app_list tr.even {
+    background-color: #F3FEEA;
+}
+
 div.status_line {
     float: left;
 }
@@ -142,4 +146,18 @@ input {
 
 section {
     padding-bottom: 10px;
+}
+
+#loginbox {
+    width: 25em;
+    margin: 0 auto;
+    text-align: center;
+}
+
+#loginbox img {
+    width: 100%;
+}
+
+fieldset {
+    border: 0;
 }

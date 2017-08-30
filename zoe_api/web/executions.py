@@ -33,7 +33,9 @@ class ExecutionDefineWeb(ZoeRequestHandler):
     @catch_exceptions
     def get(self):
         """Define a new execution."""
-        get_auth(self)
+        uid, role_ = get_auth(self)
+        if uid is None:
+            return self.redirect(self.get_argument('next', u'/login'))
 
         self.render('execution_new.html')
 
@@ -49,6 +51,8 @@ class ExecutionStartWeb(ZoeRequestHandler):
     def post(self):
         """Start an execution."""
         uid, role = get_auth(self)
+        if uid is None:
+            return self.redirect(self.get_argument('next', u'/login'))
 
         app_descr_json = self.request.files['file'][0]['body'].decode('utf-8')
         app_descr = json.loads(app_descr_json)
@@ -70,6 +74,8 @@ class ExecutionRestartWeb(ZoeRequestHandler):
     def get(self, execution_id: int):
         """Restart an already defined (and not running) execution."""
         uid, role = get_auth(self)
+        if uid is None:
+            return self.redirect(self.get_argument('next', u'/login'))
 
         e = self.api_endpoint.execution_by_id(uid, role, execution_id)
         new_id = self.api_endpoint.execution_start(uid, role, e.name, e.description)
@@ -88,6 +94,8 @@ class ExecutionTerminateWeb(ZoeRequestHandler):
     def get(self, execution_id: int):
         """Terminate an execution."""
         uid, role = get_auth(self)
+        if uid is None:
+            return self.redirect(self.get_argument('next', u'/login'))
 
         success, message = self.api_endpoint.execution_terminate(uid, role, execution_id)
         if not success:
@@ -107,6 +115,8 @@ class ExecutionDeleteWeb(ZoeRequestHandler):
     def get(self, execution_id: int):
         """Delete an execution."""
         uid, role = get_auth(self)
+        if uid is None:
+            return self.redirect(self.get_argument('next', u'/login'))
 
         success, message = self.api_endpoint.execution_delete(uid, role, execution_id)
         if not success:
@@ -126,14 +136,18 @@ class ExecutionInspectWeb(ZoeRequestHandler):
     def get(self, execution_id):
         """Gather details about an execution."""
         uid, role = get_auth(self)
+        if uid is None:
+            return self.redirect(self.get_argument('next', u'/login'))
 
         e = self.api_endpoint.execution_by_id(uid, role, execution_id)
 
         services_info, endpoints = self.api_endpoint.execution_endpoints(uid, role, e)
 
+        endpoints = self.api_endpoint.execution_endpoints(uid, role, e)[1]
+
         template_vars = {
             "e": e,
+            "services_info": services_info,
             "endpoints": endpoints,
-            "services_info": services_info
         }
         self.render('execution_inspect.html', **template_vars)

@@ -30,7 +30,7 @@ class RootWeb(ZoeRequestHandler):
     @catch_exceptions
     def get(self):
         """Home page without authentication."""
-        self.render('index.html')
+        self.redirect("/user")
 
 
 class LoginWeb(ZoeRequestHandler):
@@ -69,6 +69,8 @@ class HomeWeb(ZoeRequestHandler):
     def get(self):
         """Home page with authentication."""
         uid, role = get_auth(self)
+        if uid is None:
+            return self.redirect(self.get_argument('next', u'/login'))
 
         if role == 'guest':
             return self._aml_homepage(uid)

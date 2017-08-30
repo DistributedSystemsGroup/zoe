@@ -22,7 +22,7 @@
 import json
 import datetime
 
-from jinja2 import Environment, FileSystemLoader, Markup
+from jinja2 import Environment, FileSystemLoader, Markup, TemplateSyntaxError
 
 from tornado.escape import squeeze, linkify, url_escape, xhtml_escape
 import tornado.web
@@ -120,8 +120,11 @@ class ZoeRequestHandler(tornado.web.RequestHandler):
         template = self._jinja_env.get_template(template_name)
         try:
             html = self._render(template, **kwargs)
-        except Exception:
-            zoe_api.web.utils.error_page(self, 'Jinja2 template exception', 500)
+        except TemplateSyntaxError as e:
+            zoe_api.web.utils.error_page(self, 'Template syntax error at {}:{}:<br> {}'.format(e.name, e.lineno, e.message), 500)
+            return
+        except Exception as e:
+            zoe_api.web.utils.error_page(self, 'Jinja2 template exception: {}'.format(e), 500)
             return
         self.finish(html)
 
