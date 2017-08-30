@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base_user.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
 
@@ -40,7 +40,7 @@
                 {% else %}
                 <td><script>format_timestamp("{{ e.time_end }}")</script></td>
                 {% endif %}
-                {% if e.status == "running" or e.status == "submitted" or e.status == "scheduled" %}
+                {% if e.is_active %}
                     <td><a href="/executions/terminate/{{ e.id }}">Terminate</a></td>
                 {% else %}
                     <td><a href="/executions/restart/{{ e.id }}">Restart</a>,
