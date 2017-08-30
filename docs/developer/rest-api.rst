@@ -165,6 +165,27 @@ Will return a JSON document like this::
 
 It is a map with the execution IDs as keys and the full execution details as values.
 
+Starting from verion 0.7 of the API, the execution list can be filtered.
+
+You need to pass via the URL (GET parameters) the criteria to be used for filtering, for example::
+
+    curl -u 'username:password' http://bf5:8080/api/<api_version>/execution?status=terminated\&limit=1
+
+Valid criteria that can be used are:
+
+* status: one of submitted, scheduled, starting, error, running, cleaning up, terminated
+* name: execution mane
+* user_id: user_id owning the execution (admin only)
+* limit: limit the number of returned entries
+* earlier_than_submit: all execution that where submitted earlier than this timestamp
+* earlier_than_start: all execution that started earlier than this timestamp
+* earlier_than_end: all execution that ended earlier than this timestamp
+* later_than_submit: all execution that where submitted later than this timestamp
+* later_than_start: all execution that started later than this timestamp
+* later_than_end: all execution that started later than this timestamp
+
+All timestamps should be passed as number of seconds since the epoch (UTC timezone).
+
 Start execution
 ^^^^^^^^^^^^^^^
 

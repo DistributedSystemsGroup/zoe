@@ -77,7 +77,7 @@ class KubernetesServiceConf:
 
         for prt in ports:
             aux = self.conf['spec']['ports']  # type: List[Dict[str, str]]
-            aux[count]['name'] = 'http'
+            aux[count]['name'] = 'http-' + str(count)
             aux[count]['port'] = prt.number
             aux[count]['targetPort'] = prt.number
             count += 1
@@ -184,6 +184,13 @@ class KubernetesReplicationControllerConf:
         aux = self.conf['spec']['template']  # type: Dict
         aux['spec']['containers'][0]['resources']['limits']['cpu'] = corelimit
 
+    def set_spec_container_command(self, command):
+        """Setter to set container command"""
+        aux = self.conf['spec']['template']
+        aux['spec']['containers'][0]['command'] = []
+        command_arr = command.split(" ")
+        aux['spec']['containers'][0]['command'] = command_arr
+
     def set_spec_container_volumes(self, volumes: List[VolumeDescription], name: str):
         """Setter to set container volumes"""
         aux = self.conf['spec']['template']  # type: Dict
@@ -260,6 +267,9 @@ class KubernetesClient:
 
         if len(service_instance.volumes) > 0:
             config.set_spec_container_volumes(service_instance.volumes, service_instance.name)
+
+        if service_instance.command is not None:
+            config.set_spec_container_command(service_instance.command)
 
         info = {}
 
