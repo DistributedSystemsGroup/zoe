@@ -27,7 +27,7 @@
 <h3>Endpoints</h3>
 {% if endpoints|length > 0 %}
 <ul>
-{% for endp in endpoints %}
+{% for endp in endpoints|sort %}
     <li><a href="{{ endp[1] }}">{{ endp[0] }}</a></li>
 {% endfor %}
 </ul>
