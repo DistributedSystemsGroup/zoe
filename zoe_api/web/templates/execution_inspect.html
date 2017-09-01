@@ -1,6 +1,7 @@
 {% extends "base_user.html" %}
 {% block title %}Inspect execution {{ e.name }}{% endblock %}
 {% block content %}
+<h1>Zoe - Analytics on demand</h1>
 <h2>Detailed information for execution {{ e.name }}</h2>
 <div id="contents">
 <ul>
@@ -23,6 +24,19 @@
 <p>Error message: <code>{{ e.error_message }}</code></p>
 {% endif %}
 
+<div id="endpoints">
+<h3>Endpoints</h3>
+{% if endpoints|length > 0 %}
+<ul>
+{% for endp in endpoints|sort %}
+    <li><a href="{{ endp[1] }}">{{ endp[0] }}</a></li>
+{% endfor %}
+</ul>
+{% else %}
+<p>This execution does not have any active endpoint</p>
+{% endif %}
+</div>
+
 <div id="container_list">
 {% if services_info|length > 0 %}
 <h3>Services:</h3>
@@ -32,18 +46,9 @@
     <li class="container_name" id="{{ s['id'] }}">{{ s['name'] }}</li>
     <ul>
     <li>Zoe status: {{ s['status'] }}</li>
-    <li>Docker status: {{ s['backend_status'] }}</li>
+    <li>Backend status: {{ s['backend_status'] }}</li>
     {% if s['error_message'] is not none %}
         <li>Error: {{ s['error_message'] }}</li>
-    {% endif %}
-    {% if s['backend_status'] == 'started' %}
-        {% for p in s['description']['ports'] %}
-            {% if s['proxy_address'] is not none %}
-                <li><a href="http://{{ s['proxy_address'] }}">{{ p['name'] }}</a></li>
-            {% else %}
-                <li><a> {{ p['name'] }} IP: {{ s['ip_address'] }}</a></li>
-            {% endif %}
-        {% endfor %}
     {% endif %}
     </ul>
 {% endfor %}

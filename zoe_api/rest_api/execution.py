@@ -142,7 +142,7 @@ class ExecutionCollectionAPI(RequestHandler):
 
         All timestamps should be passed as number of seconds since the epoch (UTC timezone).
 
-        example:  curl -u 'username:password' -X GET -H "Content-Type: application/json" -d '{"status":"terminated"}' http://bf5:8080/api/0.6/execution
+        example:  curl -u 'username:password' -X GET 'http://bf5:8080/api/0.6/execution?limit=1&status=terminated'
 
         :return:
         """

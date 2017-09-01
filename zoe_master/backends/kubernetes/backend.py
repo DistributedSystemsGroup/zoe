@@ -22,7 +22,7 @@ from zoe_master.backends.kubernetes.api_client import KubernetesClient
 from zoe_master.exceptions import ZoeStartExecutionRetryException, ZoeStartExecutionFatalException, ZoeException, ZoeNotEnoughResourcesException
 from zoe_master.backends.service_instance import ServiceInstance
 import zoe_master.backends.base
-from zoe_master.backends.kubernetes.threads import KubernetesMonitor, KubernetesStateSynchronizer
+from zoe_master.backends.kubernetes.threads import KubernetesMonitor
 from zoe_master.stats import NodeStats, ClusterStats  # pylint: disable=unused-import
 
 log = logging.getLogger(__name__)
@@ -43,13 +43,13 @@ class KubernetesBackend(zoe_master.backends.base.BaseBackend):
         """Initializes Kubernetes backend starting the event monitoring thread."""
         global _monitor, _checker
         _monitor = KubernetesMonitor(state)
-        _checker = KubernetesStateSynchronizer(state)
+#        _checker = KubernetesStateSynchronizer(state)
 
     @classmethod
     def shutdown(cls):
         """Performs a clean shutdown of the resources used by Swarm backend."""
         _monitor.quit()
-        _checker.quit()
+#        _checker.quit()
 
     def spawn_service(self, service_instance: ServiceInstance):
         """Spawn a service, translating a Zoe Service into a Docker container."""
