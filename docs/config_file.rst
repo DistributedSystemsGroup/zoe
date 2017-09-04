@@ -18,7 +18,7 @@ Common options:
 * ``debug = <true|false>`` : enable or disable debug log output
 * ``api-listen-uri = tcp://*:4850`` : ZeroMQ server connection string, used for the master listening endpoint
 * ``deployment-name = devel`` : name of this Zoe deployment. Can be used to have multiple Zoe deployments using the same Swarm (devel and prod, for example)
-* ``workspace-deployment-path`` : path appended to the workspace path to distinguish this deployment. If unspecified is equal to the deployment name
+* ``workspace-deployment-path`` : path appended to the ``workspace-base-path`` to distinguish this deployment. If left unspecified it is equal to the deployment name
 * ``influxdb-dbname = zoe`` : Name of the InfluxDB database to use for storing metrics
 * ``influxdb-url = http://localhost:8086`` : URL of the InfluxDB service (ex. )
 * ``influxdb-enable = False`` : Enable metric output toward influxDB
