@@ -15,7 +15,7 @@ Zoe is written in Python 3.4+ and requires a number of third-party packages to f
 Quick tutorial
 --------------
 
-To use the Zoe command-line interface, first of all you have to create a configuration file called ``~/.zoerc` containing your login information::
+To use the Zoe command-line interface, first of all you have to create a configuration file called ``~/.zoerc`` containing your login information::
 
     url=http://localhost:5000  # address of the zoe-api instance
     user=joe                   # User name
