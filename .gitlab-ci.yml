@@ -48,20 +48,6 @@ docs-test:
     - doc8 docs/
     - sh ./build_docs.sh
 
-SonarQube:
-  stage: static-test
-  image: zoerepo/sonar-scanner
-  variables:
-    SONAR_PROJECT_KEY: "zoe.devel"
-    SONAR_BRANCH: "$CI_BUILD_REF_NAME"
-    SONAR_PROJECT_NAME: "$CI_PROJECT_NAME"
-    SONAR_PROJECT_VERSION: "$CI_BUILD_REF"
-    SONARQUBE_SERVER_URL: "$SONARQUBE_SERVER_URL"
-  script:
-    - /usr/bin/sonar-scanner-run.sh
-  only:
-    - devel/master
-
 api-test:
   stage: integration-test
   services:
@@ -104,6 +90,18 @@ images:
     - docker push ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE}
   only:
     - master
+
+mirror-github:
+  stage: deploy
+  image: python:3.4
+  before_script:
+    - which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - mkdir -p ~/.ssh
+    - 'echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - ssh -A ubuntu@${STAGING_IP} /home/ubuntu/mirror-github.sh
 
 docs:
   stage: deploy
