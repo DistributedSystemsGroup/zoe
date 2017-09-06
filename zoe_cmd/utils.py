@@ -18,16 +18,35 @@
 import os
 
 
-def zoe_url():
-    """Gets the API URL."""
-    return os.environ['ZOE_URL']
+def read_auth(args):
+    """Fill in a dictionary with authentication information."""
+    auth = {
+        'url': None,
+        'user': None,
+        'pass': None
+    }
+    try:
+        filep = open(args.auth_file, 'r')
+        for line in filep:
+            if '=' not in line:
+                continue
+            key, value = line.split('=')
+            key = key.strip()
+            value = value.strip()
+            if key in auth:
+                auth[key] = value
+            else:
+                print('warning: extraneous value in auth file: {}'.format(line))
+    except OSError:
+        pass
 
+    auth['url'] = os.getenv('ZOE_URL', auth['url'])
+    auth['user'] = os.getenv('ZOE_USER', auth['user'])
+    auth['pass'] = os.getenv('ZOE_PASS', auth['pass'])
 
-def zoe_user():
-    """Gets the API user name."""
-    return os.environ['ZOE_USER']
+    for key, value in auth.items():
+        if value is None:
+            print('error: missing {} auth parameter'.format(key))
+            return None
 
-
-def zoe_pass():
-    """Gets the API password."""
-    return os.environ['ZOE_PASS']
+    return auth

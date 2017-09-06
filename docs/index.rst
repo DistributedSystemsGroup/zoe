@@ -15,11 +15,11 @@ Zoe is written in Python 3.4+ and requires a number of third-party packages to f
 Quick tutorial
 --------------
 
-To use the Zoe command-line interface, first of all you have to define three environment variables::
+To use the Zoe command-line interface, first of all you have to create a configuration file called ``~/.zoerc`` containing your login information::
 
-    export ZOE_URL=http://localhost:5000  # address of the zoe-api instance
-    export ZOE_USER=joe                   # User name
-    export ZOE_PASS=joesecret             # Password
+    url=http://localhost:5000  # address of the zoe-api instance
+    user=joe                   # User name
+    pass=joesecret             # Password
 
 Now you can check if you are up and running with this command::
 
