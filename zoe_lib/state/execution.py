@@ -171,9 +171,17 @@ class Execution:
 
     @property
     def all_services_running(self) -> bool:
-        """Return True if all services of this execution are running/active"""
+        """Return True if all services of this execution are running."""
         for service in self.services:
             if service.is_dead():
+                return False
+        return True
+
+    @property
+    def all_services_active(self) -> bool:
+        """Return True if all services of this execution are active."""
+        for service in self.services:
+            if service.status != service.ACTIVE_STATUS:
                 return False
         return True
 
