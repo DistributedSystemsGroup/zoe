@@ -102,4 +102,3 @@ def main():
         metrics.quit()
         if gelf_listener is not None:
             gelf_listener.quit()
-

@@ -64,6 +64,9 @@ class ServiceLogsAPI(RequestHandler):
         """Initializes the request handler."""
         self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
         self.connection_closed = False
+        self.service_id = None
+        self.stream = None
+        self.log_obj = None
 
     def set_default_headers(self):
         """Set up the headers for enabling CORS."""

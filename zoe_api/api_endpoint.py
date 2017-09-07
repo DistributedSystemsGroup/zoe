@@ -26,7 +26,6 @@ import zoe_lib.applications
 import zoe_lib.exceptions
 import zoe_lib.state
 from zoe_lib.config import get_conf
-from zoe_master.backends.swarm.api_client import SwarmClient
 
 log = logging.getLogger(__name__)
 

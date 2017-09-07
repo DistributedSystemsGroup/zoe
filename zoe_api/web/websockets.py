@@ -38,6 +38,10 @@ class WebSocketEndpointWeb(tornado.websocket.WebSocketHandler):
         """Initializes the request handler."""
         super().initialize()
         self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
+        self.uid = None
+        self.role = None
+        self.log_obj = None
+        self.stream = None
 
     @catch_exceptions
     def open(self, *args, **kwargs):
@@ -111,3 +115,7 @@ class WebSocketEndpointWeb(tornado.websocket.WebSocketHandler):
     def on_close(self):
         """Invoked when the WebSocket is closed."""
         log.debug("WebSocket closed")
+
+    def data_received(self, chunk):
+        """Not implemented as we do not use stream uploads"""
+        pass

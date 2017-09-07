@@ -82,4 +82,3 @@ class GELFListener:
         """Stops the GELF server."""
         self.server.shutdown()
         self.th.join(0.1)
-

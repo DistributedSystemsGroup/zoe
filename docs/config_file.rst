@@ -17,14 +17,24 @@ Common options:
 
 * ``debug = <true|false>`` : enable or disable debug log output
 * ``api-listen-uri = tcp://*:4850`` : ZeroMQ server connection string, used for the master listening endpoint
-* ``deployment-name = devel`` : name of this Zoe deployment. Can be used to have multiple Zoe deployments using the same Swarm (devel and prod, for example)
+* ``deployment-name = devel`` : name of this Zoe deployment. Can be used to have multiple Zoe deployments using the same back-end (devel and prod, for example)
+
+Workspaces:
+
 * ``workspace-deployment-path`` : path appended to the ``workspace-base-path`` to distinguish this deployment. If left unspecified it is equal to the deployment name
+* ``workspace-base-path = /mnt/zoe-workspaces`` : Base directory where user workspaces will be created. This directory should reside on a shared filesystem visible by all Docker hosts.
+
+Metrics:
+
 * ``influxdb-dbname = zoe`` : Name of the InfluxDB database to use for storing metrics
 * ``influxdb-url = http://localhost:8086`` : URL of the InfluxDB service (ex. )
 * ``influxdb-enable = False`` : Enable metric output toward influxDB
-* ``workspace-base-path = /mnt/zoe-workspaces`` : Base directory where user workspaces will be created. This directory should reside on a shared filesystem visible by all Docker hosts.
-* ``overlay-network-name = zoe`` : name of the pre-configured Docker overlay network Zoe should use (Swarm backend)
-* ``backend = Swarm`` : ' Name of the backend to enable and use
+
+Service logs:
+
+* ``gelf-address = 7896``, help='Enable Docker GELF log output to this destination (ex. udp://1.2.3.4:7896)', default='')
+        argparser.add_argument('--gelf-listener', type=int, help='Enable the internal GELF log listener on this port, set to 0 to disable', default='7896')
+        argparser.add_argument('--service-logs-base-path',
 
 PostgresQL database options:
 
@@ -65,6 +75,7 @@ Swarm backend options:
 * ``backend-swarm-tls-cert = cert.pem`` : Docker TLS certificate file
 * ``backend-swarm-tls-key = key.pem`` : Docker TLS private key file
 * ``backend-swarm-tls-ca = ca.pem`` : Docker TLS CA certificate file
+* ``overlay-network-name = zoe`` : name of the pre-configured Docker overlay network Zoe should use (Swarm backend)
 
 Kubernetes backend:
 
