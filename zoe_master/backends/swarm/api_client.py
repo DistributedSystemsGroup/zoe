@@ -181,13 +181,20 @@ class SwarmClient:
             mem_limit = 0
         # Swarm backend does not support cores in a consistent way, see https://github.com/docker/swarm/issues/475
 
-        log_config = {
-            "type": "gelf",
-            "config": {
-                'gelf-address': get_conf().gelf_address,
-                'labels': ",".join(service_instance.labels)
+        if get_conf().gelf_address != '':
+            log_config = {
+                "type": "gelf",
+                "config": {
+                    'gelf-address': get_conf().gelf_address,
+                    'labels': ",".join(service_instance.labels)
+                }
             }
-        }
+        else:
+            log_config = {
+                "type": "json-file",
+                "config": {}
+            }
+
         try:
             cont = self.cli.containers.run(image=service_instance.image_name,
                                            command=service_instance.command,
