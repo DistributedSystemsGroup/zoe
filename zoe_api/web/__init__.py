@@ -20,7 +20,7 @@ from typing import List
 import tornado.web
 
 import zoe_api.web.start
-import zoe_api.web.ajax
+import zoe_api.web.websockets
 import zoe_api.web.executions
 
 from zoe_lib.version import ZOE_API_VERSION, ZOE_VERSION
@@ -43,8 +43,9 @@ def web_init(api_endpoint) -> List[tornado.web.URLSpec]:
         tornado.web.url(r'/executions/terminate/([0-9]+)', zoe_api.web.executions.ExecutionTerminateWeb, route_args, name='execution_terminate'),
         tornado.web.url(r'/executions/delete/([0-9]+)', zoe_api.web.executions.ExecutionDeleteWeb, route_args, name='execution_delete'),
         tornado.web.url(r'/executions/inspect/([0-9]+)', zoe_api.web.executions.ExecutionInspectWeb, route_args, name='execution_inspect'),
+        tornado.web.url(r'/service/logs/([0-9]+)', zoe_api.web.executions.ServiceLogsWeb, route_args, name='service_logs'),
 
-        tornado.web.url(r'/ajax', zoe_api.web.ajax.AjaxEndpointWeb, route_args, name='ajax')
+        tornado.web.url(r'/websocket', zoe_api.web.websockets.WebSocketEndpointWeb, route_args, name='websocket')
     ]
 
     return web_routes

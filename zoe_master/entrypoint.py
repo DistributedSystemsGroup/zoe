@@ -30,6 +30,7 @@ import zoe_master.backends.interface
 from zoe_master.preprocessing import restart_resubmit_scheduler
 from zoe_master.master_api import APIManager
 from zoe_master.exceptions import ZoeException
+from zoe_master.gelf_listener import GELFListener
 
 log = logging.getLogger("main")
 LOG_FORMAT = '%(asctime)-15s %(levelname)s %(threadName)s->%(name)s: %(message)s'
@@ -83,6 +84,11 @@ def main():
     log.info("Starting ZMQ API server...")
     api_server = APIManager(metrics, scheduler, state)
 
+    if config.get_conf().gelf_listener != 0:
+        gelf_listener = GELFListener()
+    else:
+        gelf_listener = None
+
     try:
         api_server.loop()
     except KeyboardInterrupt:
@@ -94,3 +100,6 @@ def main():
         api_server.quit()
         zoe_master.backends.interface.shutdown_backend()
         metrics.quit()
+        if gelf_listener is not None:
+            gelf_listener.quit()
+

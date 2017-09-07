@@ -151,3 +151,26 @@ class ExecutionInspectWeb(ZoeRequestHandler):
             "endpoints": endpoints,
         }
         self.render('execution_inspect.html', **template_vars)
+
+
+class ServiceLogsWeb(ZoeRequestHandler):
+    """Handler class"""
+    def initialize(self, **kwargs):
+        """Initializes the request handler."""
+        super().initialize(**kwargs)
+        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
+
+    @catch_exceptions
+    def get(self, service_id):
+        """Gather details about an execution."""
+        uid, role = get_auth(self)
+        if uid is None:
+            return self.redirect(self.get_argument('next', u'/login'))
+
+        service = self.api_endpoint.service_by_id(uid, role, service_id)
+        #log_obj = self.api_endpoint.service_logs(uid, role, service_id, stream=True)
+
+        template_vars = {
+            "service": service,
+        }
+        self.render('service_logs.html', **template_vars)

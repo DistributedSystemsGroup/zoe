@@ -66,6 +66,11 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--workspace-deployment-path', help='Path appended to the workspace path to distinguish this deployment. If unspecified is equal to the deployment name.', default='--default--')
         argparser.add_argument('--overlay-network-name', help='Name of the Swarm overlay network Zoe should use', default='zoe')
 
+        # Service logs
+        argparser.add_argument('--gelf-address', help='Enable Docker GELF log output to this destination (ex. udp://1.2.3.4:7896)', default='')
+        argparser.add_argument('--gelf-listener', type=int, help='Enable the internal GELF log listener on this port, set to 0 to disable', default='7896')
+        argparser.add_argument('--service-logs-base-path', help='Path where service logs coming from the GELF listern will be stored', default='/var/lib/zoe/service-logs')
+
         # API options
         argparser.add_argument('--listen-address', type=str, help='Address to listen to for incoming connections', default="0.0.0.0")
         argparser.add_argument('--listen-port', type=int, help='Port to listen to for incoming connections', default=5001)

@@ -15,19 +15,15 @@
 
 """The Service API endpoint."""
 
-from concurrent.futures import ThreadPoolExecutor
 import logging
 
-from tornado.web import RequestHandler
-import tornado.gen
+from tornado.web import RequestHandler, asynchronous
 import tornado.iostream
 
 from zoe_api.rest_api.utils import catch_exceptions, get_auth, manage_cors_headers
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 
 log = logging.getLogger(__name__)
-
-THREAD_POOL = ThreadPoolExecutor(20)
 
 
 class ServiceAPI(RequestHandler):
@@ -81,35 +77,25 @@ class ServiceLogsAPI(RequestHandler):
 
     def on_connection_close(self):
         """Tornado callback for clients closing the connection."""
-        self.connection_closed = True
+        log.debug('Finished log stream for service {}'.format(self.service_id))
+        self.finish()
 
     @catch_exceptions
-    @tornado.gen.coroutine
+    @asynchronous
     def get(self, service_id):
         """HTTP GET method."""
 
         uid, role = get_auth(self)
 
-        log_gen = self.api_endpoint.service_logs(uid, role, service_id, stream=True)
+        self.service_id = service_id
+        self.log_obj = self.api_endpoint.service_logs(uid, role, service_id, stream=True)
+        self.stream = tornado.iostream.PipeIOStream(self.log_obj.fileno())
+        self.stream.read_until(b'\n', callback=self._stream_log_line)
 
-        while True:
-            try:
-                log_line = yield THREAD_POOL.submit(next, log_gen)
-            except StopIteration:
-                break
-
-            self.write(log_line)
-
-            try:
-                yield self.flush()
-            except tornado.iostream.StreamClosedError:
-                break
-
-            if self.connection_closed:
-                break
-
-        log.debug('Finished log stream for service {}'.format(service_id))
-        self.finish()
+    def _stream_log_line(self, log_line):
+        self.write(log_line)
+        self.flush()
+        self.stream.read_until(b'\n', callback=self._stream_log_line)
 
     def data_received(self, chunk):
         """Not implemented as we do not use stream uploads"""
