@@ -211,6 +211,7 @@ def stats_cmd(auth, args_):
     stats_api = ZoeStatisticsAPI(auth['url'], auth['user'], auth['pass'])
     sched = stats_api.scheduler()
     print('Scheduler queue length: {}'.format(sched['queue_length']))
+    print('Scheduler running queue length: {}'.format(sched['running_length']))
     print('Termination threads count: {}'.format(sched['termination_threads_count']))
 
 ENV_HELP_TEXT = '''To authenticate with Zoe you need to define three environment variables:

@@ -42,6 +42,7 @@ class ZoeElasticScheduler:
         self.trigger_semaphore = threading.Semaphore(0)
         self.policy = policy
         self.queue = []
+        self.queue_running = []
         self.additional_exec_state = {}
         self.async_threads = []
         self.loop_quit = False
@@ -80,7 +81,10 @@ class ZoeElasticScheduler:
         try:
             self.queue.remove(execution)
         except ValueError:
-            log.error('Terminating execution {} that is not in scheduler queue'.format(execution.id))
+            try:
+                self.queue_running.remove(execution)
+            except ValueError:
+                log.error('Terminating execution {} that is not in any queue'.format(execution.id))
 
         try:
             del self.additional_exec_state[execution.id]
@@ -213,10 +217,11 @@ class ZoeElasticScheduler:
 
                     start_elastic(job)
 
-                    if job.all_services_running:
-                        log.debug('execution {}: all services started'.format(job.id))
+                    if job.all_services_active:
+                        log.debug('execution {}: all services are active'.format(job.id))
                         job.termination_lock.release()
                         jobs_to_attempt_scheduling.remove(job)
+                        self.queue_running.append(job)
 
                 for job in jobs_to_attempt_scheduling:
                     job.termination_lock.release()
@@ -241,5 +246,6 @@ class ZoeElasticScheduler:
         """Scheduler statistics."""
         return {
             'queue_length': len(self.queue),
+            'running_length': len(self.queue_running),
             'termination_threads_count': len(self.async_threads)
         }
