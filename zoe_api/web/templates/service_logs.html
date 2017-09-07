@@ -1,0 +1,27 @@
+{% extends "base_user.html" %}
+{% block title %}Service {{ service.name }} logs{% endblock %}
+{% block content %}
+    <h1>Zoe - Analytics on demand</h1>
+
+<h2>{{ service.name }} console output</h2>
+
+<textarea class="logoutput" id="logoutput" readonly>
+</textarea>
+
+<p><a href="{{ reverse_url("execution_inspect", service.execution_id) }}">Back to execution details</a></p>
+
+<script type="application/javascript">
+var ws = new WebSocket('ws://{{ server_address }}/websocket');
+ws.onopen = function (e) {
+    ws.send(JSON.stringify({
+        command: "service_logs",
+        service_id: {{ service.id }}
+    }));
+};
+
+ws.onmessage = function (evt) {
+    $('#logoutput').append(evt.data);
+};
+</script>
+
+{% endblock %}

@@ -109,7 +109,8 @@ class ZoeRequestHandler(tornado.web.RequestHandler):
             'datetime': datetime,
             'locale': self.locale,
             'handler': self,
-            'zoe_version': zoe_lib.version.ZOE_VERSION
+            'zoe_version': zoe_lib.version.ZOE_VERSION,
+            'server_address': self.request.host
         }
 
         ctx.update(kwargs)

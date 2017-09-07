@@ -1,11 +1,38 @@
 .. _logging:
 
-Container logs
-==============
+Zoe logs and service output
+===========================
 
-By design Zoe does not involve itself with the output from container processes. The logs can be retrieved with the usual Docker command ``docker logs`` while a container is alive, they are lost forever when the container is deleted. This solution however does not scale very well: to examine logs, users need to have access to the docker commandline tools and to the Swarm they are running in.
+Zoe daemons outputs log information on the standard error stream. More verbose output can be enabled by setting the option ``debug`` to ``true``.
 
-In production we recommend to configure your backend to manage the logs according to your policies. Docker Engines, for example, can be configured to send standard output and error to a remote destination in GELF format (others are supported), as soon as they are generated.
+The command-line option ``--log-file`` can be used to specify a file where the output should be written.
 
-A popular logging stack that supports GELF is `ELK <https://www.elastic.co/products>`_. However, in our experience, web interfaces like Kibana or Graylog are not useful to the Zoe users: they want to quickly dig through logs of their executions to find an error or an interesting number to correlate to some other number in some other log. The web interfaces are slow and cluttered compared to using grep on a text file.
-Which alternative is good for you depends on the usage pattern of your users, your log auditing requirements, etc.
+Service logs
+------------
+
+In this section we focus on the output produced by the ZApps and their services.
+
+Companies and users have a wide variety of requirements for this kind of output:
+
+ * It may need to be stored for auditing or research
+ * Users need to access it for debugging or to check progress of their executions
+ * ZApps may generate a lot of output in a very short time: it may become a lot of data moving around
+
+Because of this in Zoe we decided to leave the maximum freedom to administrators deploying Zoe. By default Zoe does not configure the container back-ends to do anything special with the output of containers, so whatever is configured there is respected by Zoe.
+
+In this case the logs command line, API and web interface will not be operational.
+
+Swarm-only integrated log management
+------------------------------------
+
+When using the Swarm back-end, however, Zoe can configure the containers to produce the output in UDP GELF format and send them to a configured destination, via the ``gelf-address`` option. Each messages is enriched with labels to help matching each log line to the ZApp and service that produced it.
+
+GELF is understood by many tools, like Graylog or the `ELK <https://www.elastic.co/products>`_ and it is possible to store the service output in Elasticsearch and make it searchable via Kibana, for example.
+
+Additionally the Zoe master can itself be configured to act as a log collector. This is enabled by setting the option ``gelf-listener`` to the port number specified in ``gelf-address``. In this case the Zoe Master will activate a thread that listens on that UDP port. Logs will be stored in files, in a directory hierarchy built as follows::
+
+    <service-logs-base-path>/<deployment-name>/<execution-id>/<service-name>.txt
+
+In this case the logs command line, API and web interface will work normally.
+
+Please note that the GELF listener implemented in the Zoe Master process is not built to manage high loads of incoming log messages. If the incoming rate is too high, UDP packets (and hence log lines) may be dropped and lost.

@@ -18,6 +18,7 @@
 from datetime import datetime, timedelta
 import logging
 import re
+import os
 
 import zoe_api.exceptions
 import zoe_api.master_api
@@ -25,7 +26,6 @@ import zoe_lib.applications
 import zoe_lib.exceptions
 import zoe_lib.state
 from zoe_lib.config import get_conf
-from zoe_master.backends.swarm.api_client import SwarmClient
 
 log = logging.getLogger(__name__)
 
@@ -134,16 +134,22 @@ class APIEndpoint:
         return ret
 
     def service_logs(self, uid, role, service_id, stream=True):
-        """Retrieve the logs for the given service."""
+        """Retrieve the logs for the given service.
+        If stream is True, a file object is returned, otherwise the log contents as a str object.
+        """
         service = self.sql.service_list(id=service_id, only_one=True)
         if service is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such service')
         if service.user_id != uid and role != 'admin':
             raise zoe_api.exceptions.ZoeAuthException()
-        if service.docker_id is None:
-            raise zoe_api.exceptions.ZoeNotFoundException('Container is not running')
-        swarm = SwarmClient()
-        return swarm.logs(service.docker_id, stream)
+
+        path = os.path.join(get_conf().service_logs_base_path, get_conf().deployment_name, str(service.execution_id), service.name + '.txt')
+        if not os.path.exists(path):
+            raise zoe_api.exceptions.ZoeNotFoundException('Service log not available')
+        if not stream:
+            return open(path, encoding='utf-8').read()
+        else:
+            return open(path, encoding='utf-8')
 
     def statistics_scheduler(self, uid_, role_):
         """Retrieve statistics about the scheduler."""

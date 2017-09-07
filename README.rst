@@ -11,7 +11,7 @@ Resources:
 - Documentation: http://docs.zoe-analytics.eu
 - Roadmap: https://gitlab.eurecom.fr/zoe/main/wikis/home
 - Mailing list: http://www.freelists.org/list/zoe
-- Issue tracker: https://gitlab.eurecom.fr/zoe/main/issues
+- Issue tracker: https://github.com/DistributedSystemsGroup/zoe/issues
 - Stable releases: https://github.com/DistributedSystemsGroup/zoe
 
 Zoe applications (ZApps):

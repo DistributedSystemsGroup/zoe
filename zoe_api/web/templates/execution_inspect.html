@@ -43,13 +43,14 @@
 {% endif %}
 <ul>
 {% for s in services_info %}
-    <li class="container_name" id="{{ s['id'] }}">{{ s['name'] }}</li>
+    <li class="container_name">{{ s['name'] }}</li>
     <ul>
     <li>Zoe status: {{ s['status'] }}</li>
     <li>Backend status: {{ s['backend_status'] }}</li>
     {% if s['error_message'] is not none %}
         <li>Error: {{ s['error_message'] }}</li>
     {% endif %}
+    <li><a href="{{ reverse_url("service_logs", s['id']) }}">Log output</a></li>
     </ul>
 {% endfor %}
 </ul>
