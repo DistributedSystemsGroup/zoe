@@ -97,6 +97,7 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
             return "requeue"
         except ZoeStartExecutionFatalException as ex:
             log.error('Fatal error trying to start service {} of execution {}: {}'.format(service.id, execution.id, ex.message))
+            service.set_error(ex.message)
             execution.set_error_message(ex.message)
             terminate_execution(execution)
             execution.set_error()
