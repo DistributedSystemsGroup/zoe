@@ -9,14 +9,14 @@ Resources:
 
 - Website: http://zoe-analytics.eu
 - Documentation: http://docs.zoe-analytics.eu
-- Roadmap: https://gitlab.eurecom.fr/zoe/main/wikis/home
+- Roadmap: https://github.com/DistributedSystemsGroup/zoe/wiki/RoadMap
 - Mailing list: http://www.freelists.org/list/zoe
 - Issue tracker: https://github.com/DistributedSystemsGroup/zoe/issues
 - Stable releases: https://github.com/DistributedSystemsGroup/zoe
 
 Zoe applications (ZApps):
 
-- Check the zapp-* repositories at: https://gitlab.eurecom.fr/zoe/
+- Check the repositories at: https://gitlab.eurecom.fr/zoe-apps/
 
 Zoe is licensed under the terms of the Apache 2.0 license.
 
