@@ -7,6 +7,8 @@ Zoe is an open source and project: we welcome any kind of contribution to the co
 
 To better work together we have established some rules on how to contribute.
 
+If you need ideas on features that are waiting to be implemented, you can check the `roadmap <https://github.com/DistributedSystemsGroup/zoe/wiki/RoadMap>`_.
+
 Bug reports and feature requests
 --------------------------------
 
