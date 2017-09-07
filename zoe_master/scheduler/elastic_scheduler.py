@@ -207,6 +207,7 @@ class ZoeElasticScheduler:
                     if not job.essential_services_running:
                         ret = start_essential(job)
                         if ret == "fatal":
+                            jobs_to_attempt_scheduling.remove(job)
                             continue  # trow away the execution
                         elif ret == "requeue":
                             self.queue.insert(0, job)
