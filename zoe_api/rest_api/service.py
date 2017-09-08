@@ -15,15 +15,19 @@
 
 """The Service API endpoint."""
 
+from concurrent.futures import ThreadPoolExecutor
 import logging
 
 from tornado.web import RequestHandler
 import tornado.gen
+import tornado.iostream
 
 from zoe_api.rest_api.utils import catch_exceptions, get_auth, manage_cors_headers
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 
 log = logging.getLogger(__name__)
+
+THREAD_POOL = ThreadPoolExecutor(20)
 
 
 class ServiceAPI(RequestHandler):
@@ -81,27 +85,31 @@ class ServiceLogsAPI(RequestHandler):
     def on_connection_close(self):
         """Tornado callback for clients closing the connection."""
         log.debug('Finished log stream for service {}'.format(self.service_id))
+        self.connection_closed = True
         self.finish()
 
     @catch_exceptions
+    @tornado.gen.coroutine
     def get(self, service_id):
         """HTTP GET method."""
 
         uid, role = get_auth(self)
 
-        self.service_id = service_id
-        self.log_obj = self.api_endpoint.service_logs(uid, role, service_id, stream=True)
-        self._stream_log_line()
+        log_obj = self.api_endpoint.service_logs(uid, role, service_id)
 
-    @tornado.gen.coroutine
-    def _stream_log_line(self):
-        while True:
-            line = self.log_obj.read(4096)
-            if line is not None:
-                self.write(line)
-                self.flush()
-            else:
+        while not self.connection_closed:
+            try:
+                log_line = yield THREAD_POOL.submit(next, log_obj)
+            except StopIteration:
                 yield tornado.gen.sleep(0.2)
+                continue
+
+            self.write(log_line)
+
+            try:
+                yield self.flush()
+            except tornado.iostream.StreamClosedError:
+                break
 
     def data_received(self, chunk):
         """Not implemented as we do not use stream uploads"""

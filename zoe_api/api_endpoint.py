@@ -133,7 +133,7 @@ class APIEndpoint:
         ret = [s for s in services if s.user_id == uid or role == 'admin']
         return ret
 
-    def service_logs(self, uid, role, service_id, stream=True):
+    def service_logs(self, uid, role, service_id):
         """Retrieve the logs for the given service.
         If stream is True, a file object is returned, otherwise the log contents as a str object.
         """
@@ -146,10 +146,7 @@ class APIEndpoint:
         path = os.path.join(get_conf().service_logs_base_path, get_conf().deployment_name, str(service.execution_id), service.name + '.txt')
         if not os.path.exists(path):
             raise zoe_api.exceptions.ZoeNotFoundException('Service log not available')
-        if not stream:
-            return open(path, encoding='utf-8').read()
-        else:
-            return open(path, encoding='utf-8')
+        return open(path, encoding='utf-8')
 
     def statistics_scheduler(self, uid_, role_):
         """Retrieve statistics about the scheduler."""
