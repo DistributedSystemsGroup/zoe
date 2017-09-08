@@ -570,6 +570,9 @@ class ArgumentParser(argparse.ArgumentParser):
             elif source.startswith(_CONFIG_FILE_SOURCE_KEY):
                 for key, (action, value) in settings.items():
                     config_file_items[key] = value
+
+        if 'write-config' in config_file_items:
+            del config_file_items['write-config']
         return config_file_items
 
     def convert_item_to_command_line_arg(self, action, key, value):
