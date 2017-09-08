@@ -44,8 +44,7 @@
                 {% if e.is_active %}
                     <td><a href="/executions/terminate/{{ e.id }}">Terminate</a></td>
                 {% else %}
-                    <td><a href="/executions/restart/{{ e.id }}">Restart</a>,
-                    <a href="/executions/delete/{{ e.id }}">Delete</a></td>
+                    <td><a href="/executions/restart/{{ e.id }}">Restart</a></td>
                 {% endif %}
             </tr>
         {% endfor %}

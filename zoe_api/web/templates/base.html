@@ -49,22 +49,29 @@
             document.write((bytes / Math.pow(k, i)).toPrecision(dm) + ' ' + sizes[i]);
         }
     </script>
+    {% if uid %}
+    <div id="userinfo">
+        {{ uid }} ({{ role }}) <a href="{{ reverse_url("logout") }}">logout</a>
+    </div>
+    {% endif %}
     <div id="content">{% block content %}{% endblock %}</div>
     <div id="footer">
         {% block footer %}
             <div class="status_line">
                 <p>
-                    <span id="app_name"><a href="http://zoe-analytics.eu">Zoe</a> v. {{ zoe_version }}</span>
+                    <span id="app_name">
+                        <a href="http://zoe-analytics.eu">Zoe</a> v. {{ zoe_version }}
+                    </span>
 <!--                    <span id="status">
                         [<span id="num_nodes">N/A</span> swarm nodes, <span id="num_containers">N/A</span> active containers]
                     </span> -->
+                    &nbsp;&mdash;&nbsp;
                     <span>
-                        &mdash;Submit issues and ideas for improvement at <a href="https://github.com/DistributedSystemsGroup/zoe/issues">Zoe's issue tracker</a>.
+                        <a href="https://github.com/DistributedSystemsGroup/zoe/issues">Give us some feedback!</a>
                     </span>
+                    &nbsp;&mdash;&nbsp;
+                    <span>&copy; Copyright 2017 by <a href="http://distsysgroup.wordpress.com/">DSG</a></span>
                 </p>
-            </div>
-            <div class="copyright">
-                <h6>&copy; Copyright 2016 by <a href="http://distsysgroup.wordpress.com/">DSG</a></h6>
             </div>
         {% endblock %}
     </div>

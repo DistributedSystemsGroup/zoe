@@ -40,29 +40,8 @@ div.status_line {
     float: left;
 }
 
-span#app_name {
-    font-family: cursive;
-    font-size: larger;
-}
-
-span#status {
+#footer {
     font-size: smaller;
-}
-
-div.copyright {
-    float: left;
-    padding-left: 3em;
-}
-
-textarea#log {
-    width: 90%;
-    height: 40em;
-}
-
-span.fakelink {
-    color: rgba(79, 140, 30, 1);
-    text-decoration: none;
-    cursor: pointer;
 }
 
 #wrapper {
@@ -85,31 +64,6 @@ label.error {
     color: #ff0000;
     margin-left: 10px;
     position: relative;
-}
-
-.wizard {
-    background-color: #fff;
-    border: #ddd 1px solid;
-    border-radius: 10px;
-    margin: 10px;
-    padding: 10px;
-}
-
-.wizard .wizard-header {
-    background-color: #f4f4f4;
-    border-bottom: #ddd 1px solid;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    padding: 5px 10px;
-    margin: 0 0 10px 0;
-}
-
-.wizard .wizard-step {
-    margin: 10px 0;
-}
-
-.wizard .wizard-step p {
-    padding: 5px;
 }
 
 .navigation {
@@ -170,4 +124,12 @@ textarea.logoutput {
     white-space: pre;
     overflow-x: auto;
     overflow-y: auto;
+}
+
+#userinfo {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding-right: 1em;
+    padding-top: 0.4em;
 }

@@ -62,11 +62,13 @@ def get_auth_login(username, password):
     """Authenticate username and password against the configured user store."""
 
     # First of all try to authenticate against a fixed list of users in a text file
-    authenticator = PlainTextAuthenticator()  # type: BaseAuthenticator
     try:
+        authenticator = PlainTextAuthenticator()  # type: BaseAuthenticator
         uid, role = authenticator.auth(username, password)
         return uid, role
     except zoe_api.exceptions.ZoeAuthException:
+        pass
+    except zoe_api.exceptions.ZoeNotFoundException:
         pass
 
     # It it fails, continue with the normal authentication
