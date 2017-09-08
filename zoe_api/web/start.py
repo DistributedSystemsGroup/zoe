@@ -58,6 +58,20 @@ class LoginWeb(ZoeRequestHandler):
         self.redirect(self.get_argument("next", u"/user"))
 
 
+class LogoutWeb(ZoeRequestHandler):
+    """The logout web page."""
+    def initialize(self, **kwargs):
+        """Initializes the request handler."""
+        super().initialize(**kwargs)
+        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
+
+    @catch_exceptions
+    def get(self):
+        """Login page."""
+        self.clear_cookie('zoe')
+        self.redirect(self.get_argument("next", u"/login"))
+
+
 class HomeWeb(ZoeRequestHandler):
     """Handler class"""
     def initialize(self, **kwargs):
@@ -78,6 +92,8 @@ class HomeWeb(ZoeRequestHandler):
         executions = self.api_endpoint.execution_list(uid, role)
 
         template_vars = {
+            "uid": uid,
+            "role": role,
             'executions': sorted(executions, key=lambda e: e.id),
             'is_admin': role == 'admin',
         }

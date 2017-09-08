@@ -33,11 +33,15 @@ class ExecutionDefineWeb(ZoeRequestHandler):
     @catch_exceptions
     def get(self):
         """Define a new execution."""
-        uid, role_ = get_auth(self)
+        uid, role = get_auth(self)
         if uid is None:
             return self.redirect(self.get_argument('next', u'/login'))
 
-        self.render('execution_new.html')
+        template_vars = {
+            "uid": uid,
+            "role": role,
+        }
+        self.render('execution_new.html', **template_vars)
 
 
 class ExecutionStartWeb(ZoeRequestHandler):
@@ -146,6 +150,8 @@ class ExecutionInspectWeb(ZoeRequestHandler):
         endpoints = self.api_endpoint.execution_endpoints(uid, role, e)[1]
 
         template_vars = {
+            "uid": uid,
+            "role": role,
             "e": e,
             "services_info": services_info,
             "endpoints": endpoints,
@@ -168,9 +174,10 @@ class ServiceLogsWeb(ZoeRequestHandler):
             return self.redirect(self.get_argument('next', u'/login'))
 
         service = self.api_endpoint.service_by_id(uid, role, service_id)
-        #log_obj = self.api_endpoint.service_logs(uid, role, service_id, stream=True)
 
         template_vars = {
+            "uid": uid,
+            "role": role,
             "service": service,
         }
         self.render('service_logs.html', **template_vars)
