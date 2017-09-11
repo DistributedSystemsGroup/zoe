@@ -67,6 +67,30 @@ class ExecutionStartWeb(ZoeRequestHandler):
         self.redirect(self.reverse_url('execution_inspect', new_id))
 
 
+class ExecutionListWeb(ZoeRequestHandler):
+    """Handler class"""
+    def initialize(self, **kwargs):
+        """Initializes the request handler."""
+        super().initialize(**kwargs)
+        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
+
+    @catch_exceptions
+    def get(self):
+        """Home page with authentication."""
+        uid, role = get_auth(self)
+        if uid is None:
+            return self.redirect(self.get_argument('next', u'/login'))
+
+        executions = self.api_endpoint.execution_list(uid, role)
+
+        template_vars = {
+            "uid": uid,
+            "role": role,
+            'executions': sorted(executions, key=lambda e: e.id)
+        }
+        self.render('execution_list.html', **template_vars)
+
+
 class ExecutionRestartWeb(ZoeRequestHandler):
     """Handler class"""
     def initialize(self, **kwargs):

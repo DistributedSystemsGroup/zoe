@@ -86,22 +86,16 @@ class HomeWeb(ZoeRequestHandler):
         if uid is None:
             return self.redirect(self.get_argument('next', u'/login'))
 
-        if role == 'guest':
-            return self._aml_homepage(uid)
+        filters = {
+            "user_id": uid,
+            "limit": 5,
 
-        executions = self.api_endpoint.execution_list(uid, role)
+        }
+        executions = self.api_endpoint.execution_list(uid, role, **filters)
 
         template_vars = {
             "uid": uid,
             "role": role,
-            'executions': sorted(executions, key=lambda e: e.id),
-            'is_admin': role == 'admin',
+            'executions': sorted(executions, key=lambda e: e.id)
         }
         self.render('home_user.html', **template_vars)
-
-    def _aml_homepage(self, uid):
-        """Home page for students of the AML course."""
-        template_vars = {
-            'uid': uid
-        }
-        return self.render('home_guest.html', **template_vars)

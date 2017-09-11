@@ -1,11 +1,25 @@
 {% extends "base.html" %}
 
 {% block content_header %}
-    {% if uid %}
-    <div id="userinfo">
+<div class="header">
+    <div id="logos">
+        <img class="logo" src="/static/logo.png" alt="Zoe logo"/>
+    </div>
+    <div id="nav">
+        <div class="nav-item">
+            <a href="{{ reverse_url("home_user") }}">Home</a>
+        </div>
+        <div class="nav-item">
+            <a href="{{ reverse_url("zappshop") }}">ZApp shop</a>
+        </div>
+        <div class="nav-item">
+            <a href="{{ reverse_url("execution_list") }}">My executions</a>
+        </div>
+    </div>
+    <div id="user_info">
         {{ uid }} ({{ role }}) <a href="{{ reverse_url("logout") }}">logout</a>
     </div>
-    {% endif %}
+</div>
 {% endblock %}
 
 {% block content %}

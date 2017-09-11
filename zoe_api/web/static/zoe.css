@@ -14,10 +14,43 @@ a:visited {
     text-decoration: none;
 }
 
-div.user_info {
-    font-size: smaller;
+/* header */
+
+div.header {
+    width: 100%;
+    height: 5em;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgba(79, 140, 30, 1);
+}
+
+#logos img {
+    height: 4em;
+}
+
+#user_info {
+    padding-right: 1em;
+    padding-top: 0.4em;
+    position: absolute;
+    right: 0;
+}
+
+#nav {
+    font-size: 1.4em;
+}
+
+.nav-item {
+    float: left;
+    padding-left: 1em;
+}
+
+.nav-item:hover a {
+    color: #000;
+}
+
+/* content */
+#content {
     clear: both;
-    padding-top: 20px;
 }
 
 table.app_list {
@@ -44,62 +77,8 @@ div.status_line {
     font-size: smaller;
 }
 
-#wrapper {
-    width: 800px;
-}
-
-#navigation {
-    background-color: #fff;
-    border: #ddd 1px solid;
-    border-radius: 10px;
-    margin: 10px;
-    padding: 10px;
-}
-
-#navigation li {
-    margin: 2px 0;
-}
-
-label.error {
-    color: #ff0000;
-    margin-left: 10px;
-    position: relative;
-}
-
-.navigation {
-    border-top: #ddd 1px solid;
-    margin-top: 10px;
-    padding-top: 10px;
-}
-
-.navigation ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.navigation li {
-    float: left;
-    margin-right: 10px;
-}
-
-.clearfix:before, .clearfix:after {
-    content: "\0020";
-    display: block;
-    height: 0;
-    visibility: hidden;
-}
-
-.clearfix:after {
-    clear: both;
-}
-
 input {
     margin-top: 5px;
-}
-
-section {
-    padding-bottom: 10px;
 }
 
 #loginbox {
@@ -112,10 +91,6 @@ section {
     width: 100%;
 }
 
-fieldset {
-    border: 0;
-}
-
 textarea.logoutput {
     width: 100%;
     height: 40em;
@@ -124,14 +99,6 @@ textarea.logoutput {
     white-space: pre;
     overflow-x: auto;
     overflow-y: auto;
-}
-
-#userinfo {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding-right: 1em;
-    padding-top: 0.4em;
 }
 
 .readable_description {
