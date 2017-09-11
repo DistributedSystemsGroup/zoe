@@ -133,3 +133,7 @@ textarea.logoutput {
     padding-right: 1em;
     padding-top: 0.4em;
 }
+
+.readable_description {
+    display: none;
+}

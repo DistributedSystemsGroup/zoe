@@ -22,6 +22,7 @@ import tornado.web
 import zoe_api.web.start
 import zoe_api.web.websockets
 import zoe_api.web.executions
+import zoe_api.web.zapp_shop
 
 from zoe_lib.version import ZOE_API_VERSION, ZOE_VERSION
 
@@ -46,7 +47,11 @@ def web_init(api_endpoint) -> List[tornado.web.URLSpec]:
         tornado.web.url(r'/executions/inspect/([0-9]+)', zoe_api.web.executions.ExecutionInspectWeb, route_args, name='execution_inspect'),
         tornado.web.url(r'/service/logs/([0-9]+)', zoe_api.web.executions.ServiceLogsWeb, route_args, name='service_logs'),
 
-        tornado.web.url(r'/websocket', zoe_api.web.websockets.WebSocketEndpointWeb, route_args, name='websocket')
+        tornado.web.url(r'/websocket', zoe_api.web.websockets.WebSocketEndpointWeb, route_args, name='websocket'),
+
+        tornado.web.url(r'/zapp-shop', zoe_api.web.zapp_shop.ZAppShopHomeWeb, route_args, name='zappshop'),
+        tornado.web.url(r'/zapp-shop/logo/([a-z\-.]+)', zoe_api.web.zapp_shop.ZAppLogoWeb, route_args, name='zappshop_logo'),
+        tornado.web.url(r'/zapp-shop/start/([a-z\-.]+)', zoe_api.web.zapp_shop.ZAppStartWeb, route_args, name='zappshop_start')
     ]
 
     return web_routes

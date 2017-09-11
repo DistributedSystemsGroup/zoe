@@ -1,5 +1,18 @@
 {% extends "base_user.html" %}
 {% block title %}Home{% endblock %}
+
+{% block custom_head %}
+    <script src="/static/sorttable.js" type="application/javascript"></script>
+    <script src="/static/moment.min.js" type="application/javascript"></script>
+    <script>
+    moment.locale(window.navigator.userLanguage || window.navigator.language);
+
+    function format_timestamp(ts) {
+        document.write(moment(ts).calendar())
+    }
+    </script>
+{% endblock %}
+
 {% block content %}
     <h1>Zoe - Analytics on demand</h1>
 

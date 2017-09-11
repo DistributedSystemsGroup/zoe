@@ -100,6 +100,9 @@ class APIEndpoint:
 
     def execution_delete(self, uid, role, exec_id):
         """Delete an execution."""
+        if role != "admin":
+            raise zoe_api.exceptions.ZoeAuthException()
+
         e = self.sql.execution_list(id=exec_id, only_one=True)
         assert isinstance(e, zoe_lib.state.sql_manager.Execution)
         if e is None:

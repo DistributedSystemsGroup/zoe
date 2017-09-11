@@ -1,9 +1,14 @@
 {% extends "base.html" %}
 {% block title %}Login{% endblock %}
+
+{% block custom_head %}
+    <script src="/static/jquery.validate.min.js" type="application/javascript"></script>
+{% endblock %}
+
 {% block content %}
 
 <div id="loginbox">
-    <img alt="ZOE logo" src="{{ static_url("logo.svg") }}">
+    <img alt="ZOE logo" src="{{ static_url("logo.png") }}">
     <div id="login-form">
         <form action="/login" method="post" id="login_form">
             <fieldset>
@@ -20,5 +25,9 @@
         </form>
     </div>
 </div>
+
+<script>
+    $("#login_form").validate();
+</script>
 
 {% endblock %}

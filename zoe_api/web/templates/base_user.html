@@ -1,5 +1,13 @@
 {% extends "base.html" %}
 
+{% block content_header %}
+    {% if uid %}
+    <div id="userinfo">
+        {{ uid }} ({{ role }}) <a href="{{ reverse_url("logout") }}">logout</a>
+    </div>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
     {{ super() }}
 {% endblock %}
