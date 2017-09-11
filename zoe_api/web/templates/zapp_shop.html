@@ -8,13 +8,13 @@
 
 {% for zapp_category in zapps|sort %}
     <div class="zapp-category">
-    <h3>{{ zapp_category[0].category }}</h3>
-    {% for zapp in zapp_category %}
+    <h3>{{ zapp_category }}</h3>
+    {% for zapp in zapps[zapp_category] %}
     <div class="zapp">
         <img src="{{ reverse_url("zappshop_logo", zapp.id) }}" alt="logo">
         <p>{{ zapp.readable_name }}</p>
         <button class="zapp-details" value="rd-{{ zapp.id }}">Details</button>
-        <button class="zapp-start" value="{{ zapp.id }}">Start</button>
+        <button class="zapp-start" value="{{ zapp.id }}-{{ zapp.manifest_index }}">Start</button>
         <div class="readable_description" id="rd-{{ zapp.id }}">{{ zapp.readable_description|safe }}</div>
     </div>
     {% endfor %}

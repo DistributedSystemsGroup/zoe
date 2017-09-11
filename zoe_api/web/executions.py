@@ -108,27 +108,6 @@ class ExecutionTerminateWeb(ZoeRequestHandler):
         self.redirect(self.reverse_url('home_user'))
 
 
-class ExecutionDeleteWeb(ZoeRequestHandler):
-    """Handler class"""
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        super().initialize(**kwargs)
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-
-    @catch_exceptions
-    def get(self, execution_id: int):
-        """Delete an execution."""
-        uid, role = get_auth(self)
-        if uid is None:
-            return self.redirect(self.get_argument('next', u'/login'))
-
-        success, message = self.api_endpoint.execution_delete(uid, role, execution_id)
-        if not success:
-            raise zoe_api.exceptions.ZoeException(message)
-
-        self.redirect(self.reverse_url('home_user'))
-
-
 class ExecutionInspectWeb(ZoeRequestHandler):
     """Handler class"""
     def initialize(self, **kwargs):

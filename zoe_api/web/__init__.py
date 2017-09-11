@@ -43,7 +43,6 @@ def web_init(api_endpoint) -> List[tornado.web.URLSpec]:
         tornado.web.url(r'/executions/start', zoe_api.web.executions.ExecutionStartWeb, route_args, name='execution_start'),
         tornado.web.url(r'/executions/restart/([0-9]+)', zoe_api.web.executions.ExecutionRestartWeb, route_args, name='execution_restart'),
         tornado.web.url(r'/executions/terminate/([0-9]+)', zoe_api.web.executions.ExecutionTerminateWeb, route_args, name='execution_terminate'),
-        tornado.web.url(r'/executions/delete/([0-9]+)', zoe_api.web.executions.ExecutionDeleteWeb, route_args, name='execution_delete'),
         tornado.web.url(r'/executions/inspect/([0-9]+)', zoe_api.web.executions.ExecutionInspectWeb, route_args, name='execution_inspect'),
         tornado.web.url(r'/service/logs/([0-9]+)', zoe_api.web.executions.ServiceLogsWeb, route_args, name='service_logs'),
 
@@ -51,7 +50,7 @@ def web_init(api_endpoint) -> List[tornado.web.URLSpec]:
 
         tornado.web.url(r'/zapp-shop', zoe_api.web.zapp_shop.ZAppShopHomeWeb, route_args, name='zappshop'),
         tornado.web.url(r'/zapp-shop/logo/([a-z\-.]+)', zoe_api.web.zapp_shop.ZAppLogoWeb, route_args, name='zappshop_logo'),
-        tornado.web.url(r'/zapp-shop/start/([a-z\-.]+)', zoe_api.web.zapp_shop.ZAppStartWeb, route_args, name='zappshop_start')
+        tornado.web.url(r'/zapp-shop/start/([0-9a-z\-.]+)', zoe_api.web.zapp_shop.ZAppStartWeb, route_args, name='zappshop_start')
     ]
 
     return web_routes

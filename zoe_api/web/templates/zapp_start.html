@@ -1,0 +1,38 @@
+{% extends "base_user.html" %}
+
+{% block title %}ZApp Shop{% endblock %}
+
+{% block content %}
+
+    <h2>{{ zapp.readable_name }} start</h2>
+
+    <img src="{{ reverse_url("zappshop_logo", zapp.id) }}" alt="logo">
+
+    <div>{{ zapp.readable_description|safe }}</div>
+
+    <p>This ZApp is composed by the following services:</p>
+    <ul>
+    {% for service in zapp.zoe_description.services %}
+        <li>{{ service["total_count"] }} {{ service["name"] }} ({{ service["essential_count"] }} essentials)
+        <ul>
+            <li>memory: <script>format_bytes({{ service["resources"]["memory"]["max"] }}, 2) </script></li>
+            <li>cpu cores: {{ service["resources"]["cores"]["max"] }}</li>
+        </ul></li>
+    {% endfor %}
+    </ul>
+
+    <p>Parameters:</p>
+    <form action="{{ reverse_url("zappshop_start", "") }}{{ zapp.id }}-{{ zapp.manifest_index }}" method="post" id="zapp_start_form">
+    <input type="hidden" name="zapp-id" value="{{ zapp.id }}-{{ zapp.manifest_index }}">
+    <label>Execution name: <input type="text" name="exec_name"/></label><br/>
+    {% for param in zapp.parameters %}
+        <label>{{ param.readable_name }}
+        <input name="{{ param.name }}" value="{{ param.default if param.default != None }}" required title="{{ param.description }}"/></label><br/>
+    {% endfor %}
+    <input type="submit" value="Start"/>
+    </form>
+
+    <script>
+        $("#login_form").validate();
+    </script>
+{% endblock %}
