@@ -4,53 +4,53 @@
 {% block custom_head %}
     <script src="/static/sorttable.js" type="application/javascript"></script>
     <script src="/static/moment.min.js" type="application/javascript"></script>
+    <script src="/static/moment-timezone.min.js" type="application/javascript"></script>
     <script>
-    moment.locale(window.navigator.userLanguage || window.navigator.language);
-
     function format_timestamp(ts) {
-        document.write(moment(ts).calendar())
+        var m = moment.utc(ts);
+        m.local();
+        document.write(m.calendar());
     }
     </script>
 {% endblock %}
 
 {% block content %}
     <div id="my_executions">
-    <h3>Executions</h3>
-    <p><a href="{{ reverse_url('execution_define') }}">New execution</a></p>
+    <label class="filter">All executions <input class="filter" placeholder="Filter" /></label>
     <table id="exec_list" class="app_list sortable">
     <thead>
     <tr>
         <th>ID</th>
         <th>Execution name</th>
-        {% if is_admin %}
+        {% if role == "admin" %}
         <th>User</th>
         {% endif %}
         <th>Status</th>
         <th>Scheduled</th>
         <th>Started</th>
         <th>Finished</th>
-        <th>Actions</th>
+        <th class="sorttable_nosort">Actions</th>
     </tr>
     </thead>
-    <tbody>
+    <tbody class="list">
         {% for e in executions %}
-            <tr class="{{ loop.cycle('odd', 'even') }}">
+            <tr>
                 <td>{{ e.id }}</td>
-                <td><a href="/executions/inspect/{{ e.id }}">{{ e.name }}</a></td>
-                {% if is_admin %}
+                <td class="exec-name"><a href="/executions/inspect/{{ e.id }}">{{ e.name }}</a></td>
+                {% if role == "admin" %}
                 <td>{{ e.user_id }}</td>
                 {% endif %}
                 <td>{{ e.status }}</td>
-                <td><script>format_timestamp("{{ e.time_submit }}")</script></td>
+                <td sorttable_customkey="{{ e.time_submit }}"><script>format_timestamp("{{ e.time_submit }}")</script></td>
                 {% if e.time_start == None %}
-                <td>not yet</td>
+                <td sorttable_customkey="-1">not yet</td>
                 {% else %}
-                <td><script>format_timestamp("{{ e.time_start }}")</script></td>
+                <td sorttable_customkey="{{ e.time_start }}"><script>format_timestamp("{{ e.time_start }}")</script></td>
                 {% endif %}
                 {% if e.time_end == None %}
-                <td>not yet</td>
+                <td sorttable_customkey="-1">not yet</td>
                 {% else %}
-                <td><script>format_timestamp("{{ e.time_end }}")</script></td>
+                <td sorttable_customkey="{{ e.time_end }}"><script>format_timestamp("{{ e.time_end }}")</script></td>
                 {% endif %}
                 {% if e.is_active %}
                     <td><a href="/executions/terminate/{{ e.id }}">Terminate</a></td>
@@ -63,4 +63,17 @@
     </table>
     </div>
 
+    <script>
+    var $rows = $('#exec_list tbody tr');
+    $('input.filter').keyup(function() {
+        var val = '^(?=.*\\b' + $.trim($(this).val()).split(/\s+/).join('\\b)(?=.*\\b') + ').*$',
+            reg = RegExp(val, 'i'),
+            text;
+
+        $rows.show().filter(function() {
+            text = $(this).text().replace(/\s+/g, ' ');
+            return !reg.test(text);
+        }).hide();
+    });
+    </script>
 {% endblock %}

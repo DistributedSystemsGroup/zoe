@@ -120,6 +120,11 @@ class ZAppStartWeb(ZoeRequestHandler):
                     for env in service['environment']:
                         if env[0] == param.name:
                             env[1] = self.get_argument(param.name)
+            elif param.kind == 'command':
+                for service in app_descr['services']:
+                    if service['name'] == param.name:
+                        service['command'] = self.get_argument(param.name)
+                        break
             else:
                 log.warning('Unknown parameter kind: {}, ignoring...'.format(param.kind))
         return app_descr

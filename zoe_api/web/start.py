@@ -88,14 +88,44 @@ class HomeWeb(ZoeRequestHandler):
 
         filters = {
             "user_id": uid,
-            "limit": 5,
-
+            "limit": 5
         }
-        executions = self.api_endpoint.execution_list(uid, role, **filters)
+        last_executions = self.api_endpoint.execution_list(uid, role, **filters)
+
+        filters = {
+            "user_id": uid,
+            "status": "running"
+        }
+        last_running_executions = self.api_endpoint.execution_list(uid, role, **filters)
+
+        filters = {
+            "user_id": uid,
+            "status": "submitted"
+        }
+        last_running_executions += self.api_endpoint.execution_list(uid, role, **filters)
+
+        filters = {
+            "user_id": uid,
+            "status": "scheduled"
+        }
+        last_running_executions += self.api_endpoint.execution_list(uid, role, **filters)
+
+        filters = {
+            "user_id": uid,
+            "status": "starting"
+        }
+        last_running_executions += self.api_endpoint.execution_list(uid, role, **filters)
+
+        running_reservations = [e.total_reservations for e in last_running_executions]
+        total_memory = sum([r.memory.max for r in running_reservations])
+        total_cores = sum([r.cores.max for r in running_reservations])
 
         template_vars = {
             "uid": uid,
             "role": role,
-            'executions': sorted(executions, key=lambda e: e.id)
+            "total_memory": total_memory,
+            "total_cores": total_cores,
+            'last_executions': sorted(last_executions, key=lambda e: e.id),
+            'running_executions': sorted(last_running_executions, key=lambda e: e.id)
         }
         self.render('home_user.html', **template_vars)

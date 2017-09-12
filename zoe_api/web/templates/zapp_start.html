@@ -2,37 +2,48 @@
 
 {% block title %}ZApp Shop{% endblock %}
 
+{% block custom_head %}
+    <script src="/static/jquery.validate.min.js" type="application/javascript"></script>
+{% endblock %}
+
 {% block content %}
 
-    <h2>{{ zapp.readable_name }} start</h2>
+    <div class="zapp-description">
+        <img src="{{ reverse_url("zappshop_logo", zapp.id) }}" alt="logo">
+        {{ zapp.readable_description|safe }}
+    </div>
 
-    <img src="{{ reverse_url("zappshop_logo", zapp.id) }}" alt="logo">
-
-    <div>{{ zapp.readable_description|safe }}</div>
-
+    <h3 class="zapp-startup">ZApp details</h3>
     <p>This ZApp is composed by the following services:</p>
     <ul>
     {% for service in zapp.zoe_description.services %}
-        <li>{{ service["total_count"] }} {{ service["name"] }} ({{ service["essential_count"] }} essentials)
+        <li>{{ service["total_count"] }} {{ service["name"] }} ({{ service["essential_count"] }} essential{{ 's' if service["essential_count"] > 1 }})
         <ul>
-            <li>memory: <script>format_bytes({{ service["resources"]["memory"]["max"] }}, 2) </script></li>
-            <li>cpu cores: {{ service["resources"]["cores"]["max"] }}</li>
+            <li>memory: {% if service["resources"]["memory"]["max"] != None %}
+                <script>format_bytes({{ service["resources"]["memory"]["max"] }}, 2) </script></li>
+                        {% else %}
+                No limit
+                        {% endif %}
+            <li>cpu cores: {{ service["resources"]["cores"]["max"] if service["resources"]["cores"]["max"] != None else "No limit" }}</li>
         </ul></li>
     {% endfor %}
     </ul>
 
-    <p>Parameters:</p>
+    <h4>Start-up parameters:</h4>
     <form action="{{ reverse_url("zappshop_start", "") }}{{ zapp.id }}-{{ zapp.manifest_index }}" method="post" id="zapp_start_form">
     <input type="hidden" name="zapp-id" value="{{ zapp.id }}-{{ zapp.manifest_index }}">
-    <label>Execution name: <input type="text" name="exec_name"/></label><br/>
+    <label>Execution name:&nbsp;<input type="text" name="exec_name" placeholder="experiment3" maxlength="16" size="18" required/></label><br/>
     {% for param in zapp.parameters %}
-        <label>{{ param.readable_name }}
-        <input name="{{ param.name }}" value="{{ param.default if param.default != None }}" required title="{{ param.description }}"/></label><br/>
+        <label>{{ param.readable_name }}:&nbsp;
+        <input name="{{ param.name }}" value="{{ param.default if param.default != None }}" required title="{{ param.description }}" size="128"/></label><br/>
     {% endfor %}
-    <input type="submit" value="Start"/>
+        <button type="submit">Start</button>
     </form>
 
     <script>
-        $("#login_form").validate();
+        $("#zapp_start_form").validate();
     </script>
+
+    <p><a href="{{ reverse_url("zappshop") }}">Back to the ZApp shop</a></p>
+
 {% endblock %}

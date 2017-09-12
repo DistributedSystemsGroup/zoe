@@ -18,6 +18,7 @@
 import datetime
 import logging
 import threading
+import functools
 
 log = logging.getLogger(__name__)
 
@@ -202,7 +203,7 @@ class Execution:
     @property
     def total_reservations(self):
         """Return the union/sum of resources reserved by all services of this execution."""
-        return sum([s.resource_reservation for s in self.services])
+        return functools.reduce(lambda x, y: x + y, [s.resource_reservation for s in self.services])
 
     def __repr__(self):
         return str(self.id)

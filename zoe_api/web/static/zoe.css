@@ -1,16 +1,17 @@
 body {
-    font-family: sans-serif;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     max-width: 90%;
     margin-left: 20px;
+    font-size: 95%;
 }
 
 a:link {
-    color: rgba(79, 140, 30, 1);
+    color: rgb(53, 51, 144);
     text-decoration: none;
 }
 
 a:visited {
-    color: rgba(79, 140, 30, 1);
+    color: rgb(53, 51, 144);
     text-decoration: none;
 }
 
@@ -21,7 +22,7 @@ div.header {
     height: 5em;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid rgba(79, 140, 30, 1);
+    border-bottom: 1px solid rgb(0, 169, 225);
 }
 
 #logos img {
@@ -55,30 +56,48 @@ div.header {
 
 table.app_list {
     border-collapse: collapse;
+    width: 95%;
 }
 
 table.app_list tr {
-    border-top: 1px black solid;
+    border-top: 1px #bad5e1 solid;
+    text-align: left;
 }
 
-table.app_list td {
-    padding-right: 1.5em;
+table.app_list td, table.app_list th {
+    padding-right: 1em;
+    padding-bottom: 0.5em;
+    padding-top: 0.5em;
 }
 
-table.app_list tr.even {
+table.app_list tbody tr:nth-child(2n+1) {
     background-color: #F3FEEA;
 }
 
-div.status_line {
-    float: left;
+table.sortable th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_nosort):after {
+    content: "\00A0\2195";
+}
+table.sortable th::after, th.sorttable_sorted::after, th.sorttable_sorted_reverse::after {
+  content: " ";
+  display: inline-block;
 }
 
-#footer {
-    font-size: smaller;
+label.filter {
+    font-size: 1.4em;
+    font-weight: bold;
 }
 
 input {
     margin-top: 5px;
+}
+
+input.filter {
+    margin-top: 1.4em;
+    margin-bottom: 1.5em;
+}
+
+input.error input:invalid {
+    box-shadow: 0 0 4px red;
 }
 
 #loginbox {
@@ -104,3 +123,68 @@ textarea.logoutput {
 .readable_description {
     display: none;
 }
+
+div.zapp {
+    cursor: pointer;
+    width: 14em;
+    margin-left: 1em;
+}
+
+div.zapp p {
+    text-align: center;
+}
+
+div.zapp img {
+    width: 70%;
+    margin: 0 auto;
+    display: block;
+}
+
+div.zapp-list {
+    display: flex;
+    align-items: center;
+}
+
+div.zapp-category {
+    clear: both;
+}
+
+div.zapp-description {
+    font-size: smaller;
+    margin-bottom: 1em;
+    overflow: auto;
+}
+
+div.zapp-description img {
+    float: left;
+    height: 8em;
+    margin: 10px 10px 0 5px;
+}
+
+h3.zapp-startup {
+    clear: both;
+}
+
+form#zapp_start_form input, form#zapp_start_form label {
+    display: block;
+}
+
+form#zapp_start_form label {
+    font-variant: small-caps;
+}
+
+form#zapp_start_form input {
+    font-family: "Lucida Console", Monaco, monospace;
+}
+
+/* footer */
+
+div.status_line {
+    float: left;
+}
+
+#footer {
+    font-size: smaller;
+    clear: both;
+}
+

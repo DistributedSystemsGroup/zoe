@@ -11,13 +11,11 @@
     <img alt="ZOE logo" src="{{ static_url("logo.png") }}">
     <div id="login-form">
         <form action="/login" method="post" id="login_form">
-            <fieldset>
-                <label for="username">Username:</label>
-                <input autocapitalize="off" autocorrect="off" class="text-input" id="username" name="username" tabindex="1" type="text" value=""><br>
+            <label for="username">Username:</label>
+            <input autocapitalize="off" autocorrect="off" class="text-input" id="username" name="username" tabindex="1" type="text" value=""><br>
 
-                <label for="password">Password:</label>
-                <input class="text-input" id="password" name="password" tabindex="2" type="password" value="">
-            </fieldset>
+            <label for="password">Password:</label>
+            <input class="text-input" id="password" name="password" tabindex="2" type="password" value="">
 
             <div id="form_btn">
                 <input id="signin-btn" class="btn btn-blue" type="submit" value="Login" tabindex="3">

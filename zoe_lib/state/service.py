@@ -38,6 +38,11 @@ class ResourceLimits:
             raise TypeError
         self.unit = unit
 
+        if self.min is None:
+            self.min = 0
+        if self.max is None:
+            self.max = 0
+
     def __add__(self, other):
         if isinstance(other, ResourceLimits) and self.unit == other.unit:
             res = {
@@ -45,6 +50,8 @@ class ResourceLimits:
                 'max': self.max + other.max
             }
             return ResourceLimits(res, self.unit)
+        else:
+            raise NotImplemented
 
 
 class ResourceReservation:

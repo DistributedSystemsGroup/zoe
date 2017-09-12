@@ -9,26 +9,33 @@
 {% for zapp_category in zapps|sort %}
     <div class="zapp-category">
     <h3>{{ zapp_category }}</h3>
-    {% for zapp in zapps[zapp_category] %}
-    <div class="zapp">
-        <img src="{{ reverse_url("zappshop_logo", zapp.id) }}" alt="logo">
-        <p>{{ zapp.readable_name }}</p>
-        <button class="zapp-details" value="rd-{{ zapp.id }}">Details</button>
-        <button class="zapp-start" value="{{ zapp.id }}-{{ zapp.manifest_index }}">Start</button>
-        <div class="readable_description" id="rd-{{ zapp.id }}">{{ zapp.readable_description|safe }}</div>
-    </div>
-    {% endfor %}
+        <div class="zapp-list">
+            {% for zapp in zapps[zapp_category] %}
+            <div class="zapp" id="{{ zapp.id }}-{{ zapp.manifest_index }}">
+                <img src="{{ reverse_url("zappshop_logo", zapp.id) }}" alt="logo">
+                <p>{{ zapp.readable_name }}</p>
+                <div class="readable_description" id="rd-{{ zapp.id }}">{{ zapp.readable_description|safe }}</div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 {% endfor %}
 
     <script>
-    $("button.zapp-details").click(function () {
-        $('#'+$(this).attr('value')).toggle();
+    $("div.zapp").click(function () {
+        window.location.href = "{{ reverse_url('zappshop_start', '') }}" + $(this).attr('id');
     });
-    $("button.zapp-start").click(function () {
-        window.location.href = "{{ reverse_url('zappshop_start', '') }}" + $(this).attr('value');
-    });
-
     </script>
+
+    {% if role != "guest" %}
+    <div class="zapp-category">
+    <h3>Custom JSON upload</h3>
+    <form method="post" action="{{ reverse_url('execution_start') }}" enctype="multipart/form-data">
+    <label>Execution name: <input type="text" name="exec_name"></label><br>
+    <label>Application description: <input type="file" name="file"></label><br>
+    <input type="submit" value="Start!">
+    </form>
+    </div>
+    {% endif %}
 
 {% endblock %}

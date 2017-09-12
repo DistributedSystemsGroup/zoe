@@ -4,43 +4,44 @@
 {% block custom_head %}
     <script src="/static/sorttable.js" type="application/javascript"></script>
     <script src="/static/moment.min.js" type="application/javascript"></script>
+    <script src="/static/moment-timezone.min.js" type="application/javascript"></script>
     <script>
-    moment.locale(window.navigator.userLanguage || window.navigator.language);
-
     function format_timestamp(ts) {
-        document.write(moment(ts).calendar())
+        var m = moment.utc(ts);
+        m.local();
+        document.write(m.calendar());
     }
     </script>
 {% endblock %}
 
 {% block content %}
-    <div id="my_executions">
-    <h3>Executions</h3>
-    <table id="exec_list" class="app_list sortable">
+    <h2>Welcome to Zoe Analytics</h2>
+
+    <p>You have {{ running_executions|length }} execution{{ "s" if running_executions|length != 1 }} running{% if running_executions|length > 0 %}
+    with a total reservation of <script>format_bytes({{ total_memory }}, 2);</script> of memory and {{ total_cores }} cores.
+        {% else %}.{% endif %}
+    </p>
+
+    {% if running_executions|length > 0 %}
+    <div class="execution_table">
+    <h3>Running executions</h3>
+    <table id="exec_list" class="app_list">
     <thead>
     <tr>
         <th>ID</th>
         <th>Execution name</th>
-        {% if is_admin %}
-        <th>User</th>
-        {% endif %}
         <th>Status</th>
-        <th>Scheduled</th>
         <th>Started</th>
         <th>Finished</th>
         <th>Actions</th>
     </tr>
     </thead>
     <tbody>
-        {% for e in executions %}
-            <tr class="{{ loop.cycle('odd', 'even') }}">
+        {% for e in running_executions %}
+            <tr>
                 <td>{{ e.id }}</td>
                 <td><a href="/executions/inspect/{{ e.id }}">{{ e.name }}</a></td>
-                {% if is_admin %}
-                <td>{{ e.user_id }}</td>
-                {% endif %}
                 <td>{{ e.status }}</td>
-                <td><script>format_timestamp("{{ e.time_submit }}")</script></td>
                 {% if e.time_start == None %}
                 <td>not yet</td>
                 {% else %}
@@ -61,5 +62,48 @@
     </tbody>
     </table>
     </div>
+    {% endif %}
+
+    {% if last_executions|length > 0 %}
+    <div class="execution_table">
+    <h3>Most recent executions</h3>
+    <table id="exec_list" class="app_list">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Execution name</th>
+        <th>Status</th>
+        <th>Started</th>
+        <th>Finished</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+        {% for e in last_executions %}
+            <tr>
+                <td>{{ e.id }}</td>
+                <td><a href="/executions/inspect/{{ e.id }}">{{ e.name }}</a></td>
+                <td>{{ e.status }}</td>
+                {% if e.time_start == None %}
+                <td>not yet</td>
+                {% else %}
+                <td><script>format_timestamp("{{ e.time_start }}")</script></td>
+                {% endif %}
+                {% if e.time_end == None %}
+                <td>not yet</td>
+                {% else %}
+                <td><script>format_timestamp("{{ e.time_end }}")</script></td>
+                {% endif %}
+                {% if e.is_active %}
+                    <td><a href="/executions/terminate/{{ e.id }}">Terminate</a></td>
+                {% else %}
+                    <td><a href="/executions/restart/{{ e.id }}">Restart</a></td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+    </div>
+    {% endif %}
 
 {% endblock %}

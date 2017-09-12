@@ -23,27 +23,6 @@ from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 from zoe_api.web.custom_request_handler import ZoeRequestHandler
 
 
-class ExecutionDefineWeb(ZoeRequestHandler):
-    """Handler class"""
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        super().initialize(**kwargs)
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-
-    @catch_exceptions
-    def get(self):
-        """Define a new execution."""
-        uid, role = get_auth(self)
-        if uid is None:
-            return self.redirect(self.get_argument('next', u'/login'))
-
-        template_vars = {
-            "uid": uid,
-            "role": role,
-        }
-        self.render('execution_new.html', **template_vars)
-
-
 class ExecutionStartWeb(ZoeRequestHandler):
     """Handler class"""
     def initialize(self, **kwargs):
@@ -86,7 +65,7 @@ class ExecutionListWeb(ZoeRequestHandler):
         template_vars = {
             "uid": uid,
             "role": role,
-            'executions': sorted(executions, key=lambda e: e.id)
+            'executions': sorted(executions, key=lambda e: e.id, reverse=True)
         }
         self.render('execution_list.html', **template_vars)
 

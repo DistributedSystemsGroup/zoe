@@ -197,7 +197,7 @@ class APIEndpoint:
             for port in service.description['ports']:
                 port_key = str(port['port_number']) + "/" + port['protocol']
                 backend_port = self.sql.port_list(only_one=True, service_id=service.id, internal_name=port_key)
-                if backend_port.external_ip is not None:
+                if backend_port is not None and backend_port.external_ip is not None:
                     endpoint = port['url_template'].format(**{"ip_port": backend_port.external_ip + ":" + str(backend_port.external_port)})
                     endpoints.append((port['name'], endpoint))
 

@@ -40,7 +40,6 @@ def web_init(api_endpoint) -> List[tornado.web.URLSpec]:
         tornado.web.url(r'/logout', zoe_api.web.start.LogoutWeb, route_args, name='logout'),
 
         tornado.web.url(r'/executions', zoe_api.web.executions.ExecutionListWeb, route_args, name='execution_list'),
-        tornado.web.url(r'/executions/new', zoe_api.web.executions.ExecutionDefineWeb, route_args, name='execution_define'),
         tornado.web.url(r'/executions/start', zoe_api.web.executions.ExecutionStartWeb, route_args, name='execution_start'),
         tornado.web.url(r'/executions/restart/([0-9]+)', zoe_api.web.executions.ExecutionRestartWeb, route_args, name='execution_restart'),
         tornado.web.url(r'/executions/terminate/([0-9]+)', zoe_api.web.executions.ExecutionTerminateWeb, route_args, name='execution_terminate'),
