@@ -59,7 +59,7 @@ class ZAppLogoWeb(ZoeRequestHandler):
     @catch_exceptions
     def get(self, zapp_id):
         """Home page with authentication."""
-        uid, role = get_auth(self)
+        uid, role_ = get_auth(self)
         if uid is None:
             return self.redirect(self.get_argument('next', u'/login'))
 

@@ -79,8 +79,8 @@ def zshop_list_apps():
     dirs = [d for d in os.listdir(get_conf().zapp_shop_path) if os.path.isdir(os.path.join(get_conf().zapp_shop_path, d)) and os.path.exists(os.path.join(get_conf().zapp_shop_path, d, "manifest.json"))]
 
     zapps = []
-    for dir in dirs:
-        zapps += zshop_read_manifest(dir)
+    for adir in dirs:
+        zapps += zshop_read_manifest(adir)
 
     zapp_cat = {}
     for zapp in zapps:

@@ -51,7 +51,7 @@ class ResourceLimits:
             }
             return ResourceLimits(res, self.unit)
         else:
-            raise NotImplemented
+            raise NotImplementedError
 
 
 class ResourceReservation:
