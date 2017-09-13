@@ -195,6 +195,11 @@ class Service:
         self.sql_manager.service_update(self.id, status=self.STARTING_STATUS)
         self.status = self.STARTING_STATUS
 
+    def set_runnable(self):
+        """The service is elastic and can be started."""
+        self.sql_manager.service_update(self.id, status=self.RUNNABLE_STATUS)
+        self.status = self.RUNNABLE_STATUS
+
     def set_active(self, backend_id, ip_address):
         """The service is running and has a valid backend_id."""
         self.sql_manager.service_update(self.id, status=self.ACTIVE_STATUS, backend_id=backend_id, error_message=None, ip_address=ip_address)
