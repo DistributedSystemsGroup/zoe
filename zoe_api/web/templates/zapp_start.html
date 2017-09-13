@@ -32,7 +32,7 @@
     <h4>Start-up parameters:</h4>
     <form action="{{ reverse_url("zappshop_start", "") }}{{ zapp.id }}-{{ zapp.manifest_index }}" method="post" id="zapp_start_form">
     <input type="hidden" name="zapp-id" value="{{ zapp.id }}-{{ zapp.manifest_index }}">
-    <label>Execution name:&nbsp;<input type="text" name="exec_name" placeholder="experiment3" maxlength="16" size="18" required/></label><br/>
+    <label>Execution name:&nbsp;<input type="text" name="exec_name" value="{{ zapp.zoe_description.name }}" maxlength="16" size="18" required/></label><br/>
     {% for param in zapp.parameters %}
         <label>{{ param.readable_name }}:&nbsp;
         <input name="{{ param.name }}" value="{{ param.default if param.default != None }}" required title="{{ param.description }}" size="128"/></label><br/>
