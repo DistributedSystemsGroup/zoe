@@ -126,8 +126,7 @@ textarea.logoutput {
 
 div.zapp {
     cursor: pointer;
-    width: 14em;
-    margin-left: 1em;
+    width: 13em;
 }
 
 div.zapp p {
@@ -135,7 +134,7 @@ div.zapp p {
 }
 
 div.zapp img {
-    width: 70%;
+    width: 50%;
     margin: 0 auto;
     display: block;
 }
@@ -153,6 +152,7 @@ div.zapp-description {
     font-size: smaller;
     margin-bottom: 1em;
     overflow: auto;
+    width: 60%;
 }
 
 div.zapp-description img {
