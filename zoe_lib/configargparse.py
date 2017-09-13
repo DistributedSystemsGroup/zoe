@@ -304,7 +304,7 @@ class ArgumentParser(argparse.ArgumentParser):
 
         argparse.ArgumentParser.__init__(self, **kwargs_for_super)
 
-        # parse the additionial args
+        # parse the additional args
         if config_file_parser_class is None:
             self._config_file_parser = DefaultConfigFileParser()
         else:
@@ -687,7 +687,7 @@ class ArgumentParser(argparse.ArgumentParser):
 
     def format_values(self):
         """Returns a string with all args and settings and where they came from
-        (eg. commandline, config file, enviroment variable or default)
+        (eg. commandline, config file, environment variable or default)
         """
         source_key_to_display_value_map = {
             _COMMAND_LINE_SOURCE_KEY: "Command Line Args: ",
@@ -730,8 +730,7 @@ class ArgumentParser(argparse.ArgumentParser):
             config_path_actions = [a for a in
                                    self._actions if getattr(a, "is_config_file_arg", False)]
 
-            if config_settable_args and (default_config_files or
-                                             config_path_actions):
+            if config_settable_args and (default_config_files or config_path_actions):
                 self._add_config_file_help = False  # prevent duplication
                 added_config_file_help = True
 
