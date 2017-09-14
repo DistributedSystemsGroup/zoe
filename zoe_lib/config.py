@@ -62,22 +62,23 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--influxdb-dbname', help='Name of the InfluxDB database to use for storing metrics', default='zoe')
         argparser.add_argument('--influxdb-url', help='URL of the InfluxDB service (ex. http://localhost:8086)', default='http://localhost:8086')
         argparser.add_argument('--influxdb-enable', action="store_true", help='Enable metric output toward influxDB')
-        argparser.add_argument('--workspace-base-path', help='Path where user workspaces will be created by Zoe. Must be visible at this path on all Swarm hosts.', default='/mnt/zoe-workspaces')
+        argparser.add_argument('--workspace-base-path', help='Base directory where user workspaces will be created. Must be visible at this path on all hosts.', default='/mnt/zoe-workspaces')
         argparser.add_argument('--workspace-deployment-path', help='Path appended to the workspace path to distinguish this deployment. If unspecified is equal to the deployment name.', default='--default--')
         argparser.add_argument('--overlay-network-name', help='Name of the Swarm overlay network Zoe should use', default='zoe')
 
         # Service logs
         argparser.add_argument('--gelf-address', help='Enable Docker GELF log output to this destination (ex. udp://1.2.3.4:7896)', default='')
         argparser.add_argument('--gelf-listener', type=int, help='Enable the internal GELF log listener on this port, set to 0 to disable', default='7896')
-        argparser.add_argument('--service-logs-base-path', help='Path where service logs coming from the GELF listern will be stored', default='/var/lib/zoe/service-logs')
+        argparser.add_argument('--service-logs-base-path', help='Path where service logs coming from the GELF listener will be stored', default='/var/lib/zoe/service-logs')
 
         # API options
         argparser.add_argument('--listen-address', type=str, help='Address to listen to for incoming connections', default="0.0.0.0")
         argparser.add_argument('--listen-port', type=int, help='Port to listen to for incoming connections', default=5001)
         argparser.add_argument('--master-url', help='URL of the Zoe master process', default='tcp://127.0.0.1:4850')
+        argparser.add_argument('--cookie-secret', help='secret used to encrypt cookies', default='changeme')
 
         # API auth options
-        argparser.add_argument('--auth-type', help='Authentication type (text or ldap)', default='text')
+        argparser.add_argument('--auth-type', help='Authentication type (text, ldap or ldapsasl)', default='text')
 
         argparser.add_argument('--auth-file', help='Path to the CSV file containing user,pass,role lines for text authentication', default='zoepass.csv')
 
@@ -87,11 +88,10 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--ldap-user-gid', type=int, help='LDAP group ID for users', default=5001)
         argparser.add_argument('--ldap-guest-gid', type=int, help='LDAP group ID for guests', default=5002)
 
-        argparser.add_argument('--service-log-path', help='Save service logs in this directory', default='/tmp')
-
         # Proxy options
         argparser.add_argument('--proxy-path', help='Proxy base path', default='127.0.0.1')
 
+        # Scheduler
         argparser.add_argument('--scheduler-class', help='Scheduler class to use for scheduling ZApps', choices=['ZoeSimpleScheduler', 'ZoeElasticScheduler'], default='ZoeSimpleScheduler')
         argparser.add_argument('--scheduler-policy', help='Scheduler policy to use for scheduling ZApps', choices=['FIFO', 'SIZE'], default='FIFO')
 
@@ -110,7 +110,6 @@ def load_configuration(test_conf=None):
 
         # other options
         argparser.add_argument('--zapp-shop-path', help='Path where ZApp folders are stored', default='/var/lib/zoe-apps')
-        argparser.add_argument('--cookie-secret', help='secret used to encrypt cookies', default='changeme')
         argparser.add_argument('--log-file', help='output logs to a file', default='stderr')
 
         argparser.add_argument('--aml-ttl', help='TimeToLive in hours for AML executions', type=int, default=4)

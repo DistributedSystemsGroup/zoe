@@ -9,6 +9,12 @@ To better work together we have established some rules on how to contribute.
 
 If you need ideas on features that are waiting to be implemented, you can check the `roadmap <https://github.com/DistributedSystemsGroup/zoe/wiki/RoadMap>`_.
 
+Development repository
+----------------------
+Development happens at `Eurecom's GitLab repository <https://gitlab.eurecom.fr/zoe/main>`_. The GitHub repository is a read-only mirror.
+
+The choice of GitLab over GitHub is due to the CI pipeline that we set-up to test Zoe.
+
 Bug reports and feature requests
 --------------------------------
 

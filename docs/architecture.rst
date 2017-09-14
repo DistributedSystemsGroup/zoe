@@ -7,7 +7,7 @@ The main Zoe Components are:
 
 * zoe master: the core component that performs application scheduling and talks to Swarm
 * zoe api: the Zoe frontend, offering a web interface and a REST API
-* zoe: command-line client
+* command-line clients (zoe.py and zoe-admin.py)
 
 The Zoe master is the core component of Zoe and communicates with the clients by using an internal ZeroMQ-based protocol. This protocol is designed to be robust, using the best practices from ZeroMQ documentation. A crash of the Api or of the Master process will not leave the other component inoperable, and when the faulted process restarts, work will restart where it was left.
 

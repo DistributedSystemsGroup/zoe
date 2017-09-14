@@ -16,9 +16,11 @@
 """Layer in front of the scheduler to perform request pre-processing."""
 
 import logging
+import os
+import shutil
 
-import zoe_lib.exec_logs as exec_logs
 from zoe_lib.state import Execution, SQLManager
+from zoe_lib.config import get_conf
 from zoe_master.scheduler import ZoeBaseScheduler
 
 log = logging.getLogger(__name__)
@@ -85,4 +87,8 @@ def restart_resubmit_scheduler(state: SQLManager, scheduler: ZoeBaseScheduler):
 def execution_delete(execution: Execution):
     """Remove an execution, must only be called if the execution is NOT running."""
     assert not execution.is_active
-    exec_logs.delete(execution)
+    path = os.path.join(get_conf().service_logs_base_path, get_conf().deployment_name, str(execution.id))
+    if path is None:
+        return
+
+    shutil.rmtree(path, ignore_errors=True)
