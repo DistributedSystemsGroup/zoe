@@ -29,6 +29,8 @@ from zoe_lib.config import get_conf
 
 log = logging.getLogger(__name__)
 
+GUEST_QUOTA_MAX_EXECUTIONS = 1
+
 
 class APIEndpoint:
     """
@@ -71,10 +73,14 @@ class APIEndpoint:
         except zoe_lib.exceptions.InvalidApplicationDescription as e:
             raise zoe_api.exceptions.ZoeException('Invalid application description: ' + e.message)
 
-        if 3 > len(exec_name) > 128:
-            raise zoe_api.exceptions.ZoeException("Execution name must be between 4 and 128 characters long")
-        if not re.match(r'^[a-zA-Z0-9\-]+$', exec_name):
-            raise zoe_api.exceptions.ZoeException("Execution name can contain only letters, numbers and dashes. '{}' is not valid.".format(exec_name))
+        # quota check
+        if role == "guest":
+            running_execs = self.execution_list(uid, role, **{'status': 'running'})
+            running_execs += self.execution_list(uid, role, **{'status': 'starting'})
+            running_execs += self.execution_list(uid, role, **{'status': 'scheduled'})
+            running_execs += self.execution_list(uid, role, **{'status': 'submitted'})
+            if len(running_execs) > GUEST_QUOTA_MAX_EXECUTIONS:
+                raise zoe_api.exceptions.ZoeException('Guest users cannot run more than one execution at a time, quota exceeded.')
 
         new_id = self.sql.execution_new(exec_name, uid, application_description)
         success, message = self.master.execution_start(new_id)
