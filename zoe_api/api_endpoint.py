@@ -17,7 +17,6 @@
 
 from datetime import datetime, timedelta
 import logging
-import re
 import os
 
 import zoe_api.exceptions
