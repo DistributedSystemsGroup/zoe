@@ -79,7 +79,7 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
         'deployment_name': get_conf().deployment_name,
     }
 
-    for service in ordered_service_list:
+    for service in execution.services:
         env_subst_dict['dns_name#' + service.name] = service.dns_name
 
     for service in ordered_service_list:
