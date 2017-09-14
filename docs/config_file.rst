@@ -62,7 +62,7 @@ Master options:
 
 Authentication:
 
-* ``auth-type = text`` : Authentication type (text or ldap)
+* ``auth-type = text`` : Authentication type (text, ldap or ldapsasl)
 * ``auth-file = zoepass.csv`` : Path to the CSV file containing user,pass,role lines for text authentication
 * ``ldap-server-uri = ldap://localhost`` : LDAP server to use for user authentication
 * ``ldap-base-dn = ou=something,dc=any,dc=local`` : LDAP base DN for users
@@ -76,6 +76,10 @@ Scheduler options:
 * ``scheduler-policy = <FIFO | SIZE>`` : Scheduler policy to use for scheduling ZApps (default: FIFO)
 
 Default options for the scheduler enable the traditional Zoe scheduler that was already available in the previous releases.
+
+ZApp shop:
+
+* ``zapp-shop-path = /var/lib/zoe-apps`` : Path where ZApp folders are stored
 
 Backend choice:
 

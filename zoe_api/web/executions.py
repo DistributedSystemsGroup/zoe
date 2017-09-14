@@ -23,27 +23,6 @@ from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 from zoe_api.web.custom_request_handler import ZoeRequestHandler
 
 
-class ExecutionDefineWeb(ZoeRequestHandler):
-    """Handler class"""
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        super().initialize(**kwargs)
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-
-    @catch_exceptions
-    def get(self):
-        """Define a new execution."""
-        uid, role = get_auth(self)
-        if uid is None:
-            return self.redirect(self.get_argument('next', u'/login'))
-
-        template_vars = {
-            "uid": uid,
-            "role": role,
-        }
-        self.render('execution_new.html', **template_vars)
-
-
 class ExecutionStartWeb(ZoeRequestHandler):
     """Handler class"""
     def initialize(self, **kwargs):
@@ -65,6 +44,30 @@ class ExecutionStartWeb(ZoeRequestHandler):
         new_id = self.api_endpoint.execution_start(uid, role, exec_name, app_descr)
 
         self.redirect(self.reverse_url('execution_inspect', new_id))
+
+
+class ExecutionListWeb(ZoeRequestHandler):
+    """Handler class"""
+    def initialize(self, **kwargs):
+        """Initializes the request handler."""
+        super().initialize(**kwargs)
+        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
+
+    @catch_exceptions
+    def get(self):
+        """Home page with authentication."""
+        uid, role = get_auth(self)
+        if uid is None:
+            return self.redirect(self.get_argument('next', u'/login'))
+
+        executions = self.api_endpoint.execution_list(uid, role)
+
+        template_vars = {
+            "uid": uid,
+            "role": role,
+            'executions': sorted(executions, key=lambda e: e.id, reverse=True)
+        }
+        self.render('execution_list.html', **template_vars)
 
 
 class ExecutionRestartWeb(ZoeRequestHandler):
@@ -102,27 +105,6 @@ class ExecutionTerminateWeb(ZoeRequestHandler):
             return self.redirect(self.get_argument('next', u'/login'))
 
         success, message = self.api_endpoint.execution_terminate(uid, role, execution_id)
-        if not success:
-            raise zoe_api.exceptions.ZoeException(message)
-
-        self.redirect(self.reverse_url('home_user'))
-
-
-class ExecutionDeleteWeb(ZoeRequestHandler):
-    """Handler class"""
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        super().initialize(**kwargs)
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-
-    @catch_exceptions
-    def get(self, execution_id: int):
-        """Delete an execution."""
-        uid, role = get_auth(self)
-        if uid is None:
-            return self.redirect(self.get_argument('next', u'/login'))
-
-        success, message = self.api_endpoint.execution_delete(uid, role, execution_id)
         if not success:
             raise zoe_api.exceptions.ZoeException(message)
 

@@ -49,7 +49,7 @@ class GELFUDPHandler(socketserver.DatagramRequestHandler):
 
         log_file_path = os.path.join(get_conf().service_logs_base_path, get_conf().deployment_name, str(execution_id), service_name + '.txt')
         if not os.path.exists(log_file_path):
-            os.makedirs(os.path.join(get_conf().service_logs_base_path, get_conf().deployment_name, str(execution_id)))
+            os.makedirs(os.path.join(get_conf().service_logs_base_path, get_conf().deployment_name, str(execution_id)), exist_ok=True)
             open(log_file_path, 'w').write('ZOE HEADER: log file for service {} running on host {}\n'.format(service_name, host))
 
         with open(log_file_path, 'a') as logfile:

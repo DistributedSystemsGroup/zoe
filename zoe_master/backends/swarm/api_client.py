@@ -302,7 +302,10 @@ class SwarmClient:
 
         cont.stop(timeout=5)
         if delete:
-            cont.remove(force=True)
+            try:
+                cont.remove(force=True)
+            except docker.errors.APIError as e:
+                log.warning(str(e))
 
     def event_listener(self, callback: Callable[[str], bool]) -> None:
         """An infinite loop that listens for events from Swarm."""

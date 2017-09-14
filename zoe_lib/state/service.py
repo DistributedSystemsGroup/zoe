@@ -38,6 +38,11 @@ class ResourceLimits:
             raise TypeError
         self.unit = unit
 
+        if self.min is None:
+            self.min = 0
+        if self.max is None:
+            self.max = 0
+
     def __add__(self, other):
         if isinstance(other, ResourceLimits) and self.unit == other.unit:
             res = {
@@ -45,6 +50,8 @@ class ResourceLimits:
                 'max': self.max + other.max
             }
             return ResourceLimits(res, self.unit)
+        else:
+            raise NotImplementedError
 
 
 class ResourceReservation:
@@ -187,6 +194,11 @@ class Service:
         """The service is being created by Docker."""
         self.sql_manager.service_update(self.id, status=self.STARTING_STATUS)
         self.status = self.STARTING_STATUS
+
+    def set_runnable(self):
+        """The service is elastic and can be started."""
+        self.sql_manager.service_update(self.id, status=self.RUNNABLE_STATUS)
+        self.status = self.RUNNABLE_STATUS
 
     def set_active(self, backend_id, ip_address):
         """The service is running and has a valid backend_id."""

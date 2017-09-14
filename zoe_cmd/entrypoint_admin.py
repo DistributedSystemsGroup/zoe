@@ -80,6 +80,12 @@ def exec_list_cmd(auth, args):
     print(tabulate(tabular_data, headers))
 
 
+def exec_rm_cmd(auth, args):
+    """Delete an execution and kill it if necessary."""
+    exec_api = ZoeExecutionsAPI(auth['url'], auth['user'], auth['pass'])
+    exec_api.delete(args.id)
+
+
 ENV_HELP_TEXT = '''To authenticate with Zoe you need to define three environment variables:
 ZOE_URL: point to the URL of the Zoe Scheduler (ex.: http://localhost:5000/
 ZOE_USER: the username used for authentication
@@ -120,6 +126,10 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     argparser_app_list.add_argument('--later-than-start', help='Show only executions started later than this timestamp (seconds since UTC epoch)')
     argparser_app_list.add_argument('--later-than-end', help='Show only executions ended later than this timestamp (seconds since UTC epoch)')
     argparser_app_list.set_defaults(func=exec_list_cmd)
+
+    argparser_execution_rm = subparser.add_parser('exec-rm', help="Deletes an execution")
+    argparser_execution_rm.add_argument('id', type=int, help="Execution id")
+    argparser_execution_rm.set_defaults(func=exec_rm_cmd)
 
     return parser, parser.parse_args()
 

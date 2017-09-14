@@ -46,7 +46,7 @@ class ZoeElasticScheduler:
         self.additional_exec_state = {}
         self.async_threads = []
         self.loop_quit = False
-        self.loop_th = threading.Thread(target=self.loop_start_th, name='scheduler')
+        self.loop_th = threading.Thread(target=self._thread_wrapper, name='scheduler')
         self.loop_th.start()
         self.state = state
 
@@ -130,6 +130,16 @@ class ZoeElasticScheduler:
                 log.debug('While popping, throwing away execution {} that has the termination lock held'.format(job.id))
 
         return out_list
+
+    def _thread_wrapper(self):
+        while True:
+            try:
+                self.loop_start_th()
+            except BaseException:  # pylint: disable=broad-except
+                log.exception('Unmanaged exception in scheduler loop')
+            else:
+                log.debug('Scheduler thread terminated')
+                break
 
     def loop_start_th(self):
         """The Scheduler thread loop."""

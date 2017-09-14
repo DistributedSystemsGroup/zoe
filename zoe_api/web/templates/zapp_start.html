@@ -1,0 +1,49 @@
+{% extends "base_user.html" %}
+
+{% block title %}ZApp Shop{% endblock %}
+
+{% block custom_head %}
+    <script src="/static/jquery.validate.min.js" type="application/javascript"></script>
+{% endblock %}
+
+{% block content %}
+
+    <div class="zapp-description">
+        <img src="{{ reverse_url("zappshop_logo", zapp.id) }}" alt="logo">
+        {{ zapp.readable_description|safe }}
+    </div>
+
+    <h3 class="zapp-startup">ZApp details</h3>
+    <p>This ZApp is composed by the following services:</p>
+    <ul>
+    {% for service in zapp.zoe_description.services %}
+        <li>{{ service["total_count"] }} {{ service["name"] }} ({{ service["essential_count"] }} essential{{ 's' if service["essential_count"] > 1 }})
+        <ul>
+            <li>memory: {% if service["resources"]["memory"]["max"] != None %}
+                <script>format_bytes({{ service["resources"]["memory"]["max"] }}, 2) </script></li>
+                        {% else %}
+                No limit
+                        {% endif %}
+            <li>cpu cores: {{ service["resources"]["cores"]["max"] if service["resources"]["cores"]["max"] != None else "No limit" }}</li>
+        </ul></li>
+    {% endfor %}
+    </ul>
+
+    <h4>Start-up parameters:</h4>
+    <form action="{{ reverse_url("zappshop_start", "") }}{{ zapp.id }}-{{ zapp.manifest_index }}" method="post" id="zapp_start_form">
+    <input type="hidden" name="zapp-id" value="{{ zapp.id }}-{{ zapp.manifest_index }}">
+    <label>Execution name:&nbsp;<input type="text" name="exec_name" value="{{ zapp.zoe_description.name }}" maxlength="16" size="18" required/></label><br/>
+    {% for param in zapp.parameters %}
+        <label>{{ param.readable_name }}:&nbsp;
+        <input name="{{ param.name }}" value="{{ param.default if param.default != None }}" required title="{{ param.description }}" size="128"/></label><br/>
+    {% endfor %}
+        <button type="submit">Start</button>
+    </form>
+
+    <script>
+        $("#zapp_start_form").validate();
+    </script>
+
+    <p><a href="{{ reverse_url("zappshop") }}">Back to the ZApp shop</a></p>
+
+{% endblock %}

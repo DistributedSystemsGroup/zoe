@@ -78,7 +78,7 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--cookie-secret', help='secret used to encrypt cookies', default='changeme')
 
         # API auth options
-        argparser.add_argument('--auth-type', help='Authentication type (text or ldap)', default='text')
+        argparser.add_argument('--auth-type', help='Authentication type (text, ldap or ldapsasl)', default='text')
 
         argparser.add_argument('--auth-file', help='Path to the CSV file containing user,pass,role lines for text authentication', default='zoepass.csv')
 
@@ -108,6 +108,8 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--kube-config-file', help='Kubernetes configuration file', default='/opt/zoe/kube.conf')
         argparser.add_argument('--kube-namespace', help='The namespace that Zoe operates on', default='default')
 
+        # other options
+        argparser.add_argument('--zapp-shop-path', help='Path where ZApp folders are stored', default='/var/lib/zoe-apps')
         argparser.add_argument('--log-file', help='output logs to a file', default='stderr')
 
         argparser.add_argument('--aml-ttl', help='TimeToLive in hours for AML executions', type=int, default=4)
