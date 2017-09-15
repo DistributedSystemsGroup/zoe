@@ -17,6 +17,7 @@
 This module contains the entrypoint for the commandline Zoe client
 """
 
+import datetime
 import json
 import logging
 import os
@@ -30,6 +31,7 @@ from zoe_cmd import utils
 from zoe_lib.info import ZoeInfoAPI
 from zoe_lib.exceptions import ZoeAPIException, InvalidApplicationDescription
 from zoe_lib.executions import ZoeExecutionsAPI
+from zoe_lib.services import ZoeServiceAPI
 from zoe_lib.applications import app_validate
 from zoe_lib.version import ZOE_API_VERSION
 
@@ -80,6 +82,51 @@ def exec_list_cmd(auth, args):
     print(tabulate(tabular_data, headers))
 
 
+def exec_get_cmd(auth, args):
+    """Gather information about an execution."""
+    exec_api = ZoeExecutionsAPI(auth['url'], auth['user'], auth['pass'])
+    cont_api = ZoeServiceAPI(auth['url'], auth['user'], auth['pass'])
+    execution = exec_api.get(args.id)
+    if execution is None:
+        print('Execution not found')
+    else:
+        print('Execution {} (ID: {})'.format(execution['name'], execution['id']))
+        print('Application name: {}'.format(execution['description']['name']))
+        print('Status: {}'.format(execution['status']))
+        if execution['status'] == 'error':
+            print('Last error: {}'.format(execution['error_message']))
+        print()
+        print('Time submit: {}'.format(datetime.datetime.fromtimestamp(execution['time_submit'])))
+
+        if execution['time_start'] is None:
+            print('Time start: {}'.format('not yet'))
+        else:
+            print('Time start: {}'.format(datetime.datetime.fromtimestamp(execution['time_start'])))
+
+        if execution['time_end'] is None:
+            print('Time end: {}'.format('not yet'))
+        else:
+            print('Time end: {}'.format(datetime.datetime.fromtimestamp(execution['time_end'])))
+        print()
+
+        endpoints = exec_api.endpoints(execution['id'])
+        if endpoints is not None and len(endpoints) > 0:
+            print('Exposed endpoints:')
+            for endpoint in endpoints:
+                print(' - {}: {}'.format(endpoint[0], endpoint[1]))
+        else:
+            print('This ZApp does not expose any endpoint')
+
+        print()
+        tabular_data = []
+        for c_id in execution['services']:
+            service = cont_api.get(c_id)
+            service_data = [service['id'], service['name'], 'true' if service['essential'] else 'false', service['status'], service['backend_status'], service['error_message'] if service['error_message'] is not None else '']
+            tabular_data.append(service_data)
+        headers = ['ID', 'Name', 'Essential', 'Zoe status', 'Backend status', 'Error message']
+        print(tabulate(tabular_data, headers))
+
+
 def exec_rm_cmd(auth, args):
     """Delete an execution and kill it if necessary."""
     exec_api = ZoeExecutionsAPI(auth['url'], auth['user'], auth['pass'])
@@ -126,6 +173,10 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     argparser_app_list.add_argument('--later-than-start', help='Show only executions started later than this timestamp (seconds since UTC epoch)')
     argparser_app_list.add_argument('--later-than-end', help='Show only executions ended later than this timestamp (seconds since UTC epoch)')
     argparser_app_list.set_defaults(func=exec_list_cmd)
+
+    argparser_execution_get = subparser.add_parser('exec-get', help="Get execution status")
+    argparser_execution_get.add_argument('id', type=int, help="Execution id")
+    argparser_execution_get.set_defaults(func=exec_get_cmd)
 
     argparser_execution_rm = subparser.add_parser('exec-rm', help="Deletes an execution")
     argparser_execution_rm.add_argument('id', type=int, help="Execution id")
