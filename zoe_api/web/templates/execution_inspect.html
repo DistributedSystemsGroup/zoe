@@ -18,6 +18,7 @@
 <h2>Detailed information for execution {{ e.name }}</h2>
 <div id="contents">
 <ul>
+    <li>ID: {{ e.id }}</li>
     <li>Application name: {{ e.description['name'] }}</li>
     <li>Owner: {{ e.user_id }}</li>
     <li>Status: {{ e.status }}</li>
@@ -56,7 +57,7 @@
 {% endif %}
 <ul>
 {% for s in services_info %}
-    <li class="container_name">{{ s['name'] }}</li>
+    <li class="container_name">{{ s['name'] }} ({{ s['id'] }})</li>
     <ul>
     <li>Zoe status: {{ s['status'] }}</li>
     <li>Backend status: {{ s['backend_status'] }}</li>

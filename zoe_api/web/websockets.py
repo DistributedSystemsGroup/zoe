@@ -109,6 +109,9 @@ class WebSocketEndpointWeb(tornado.websocket.WebSocketHandler):
                     continue
 
                 self.write_message(log_line)
+        elif request['command'] == 'system_status':
+            stats = self.api_endpoint.statistics_scheduler(self.uid, self.role)
+            self.write_message(json.dumps(stats))
         else:
             response = {
                 'status': 'error',

@@ -43,6 +43,22 @@ class NodeStats(Stats):
         self.status = None
         self.error = ''
 
+    def serialize(self):
+        """Convert the object into a dict."""
+        return {
+            'name': self.name,
+            'container_count': self.container_count,
+            'cores_total': self.cores_total,
+            'cores_reserved': self.cores_reserved,
+            'cores_free': self.cores_free,
+            'memory_total': self.memory_total,
+            'memory_reserved': self.memory_reserved,
+            'memory_free': self.memory_free,
+            'labels': self.labels,
+            'status': self.status,
+            'error': self.error
+        }
+
 
 class ClusterStats(Stats):
     """Stats related to the whole cluster."""
@@ -53,10 +69,11 @@ class ClusterStats(Stats):
         self.cores_total = 0
         self.nodes = []
 
-
-class SchedulerStats(Stats):
-    """Stats related to the scheduler."""
-    def __init__(self):
-        super().__init__()
-        self.count_waiting = 0
-        self.waiting_list = []
+    def serialize(self):
+        """Convert the object into a dict."""
+        return {
+            'container_count': self.container_count,
+            'memory_total': self.memory_total,
+            'cores_total': self.cores_total,
+            'nodes': [x.serialize() for x in self.nodes]
+        }

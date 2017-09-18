@@ -49,6 +49,11 @@ class ZoeElasticScheduler:
         self.loop_th = threading.Thread(target=self._thread_wrapper, name='scheduler')
         self.loop_th.start()
         self.state = state
+        for execution in self.state.execution_list(status='running'):
+            if execution.all_services_running:
+                self.queue_running.append(execution)
+            else:
+                self.queue.append(execution)
 
     def trigger(self):
         """Trigger a scheduler run."""
@@ -255,8 +260,16 @@ class ZoeElasticScheduler:
 
     def stats(self):
         """Scheduler statistics."""
+        if self.policy == "SIZE":
+            queue = sorted(self.queue, key=lambda execution: execution.size)
+        else:
+            queue = self.queue
+
         return {
             'queue_length': len(self.queue),
             'running_length': len(self.queue_running),
-            'termination_threads_count': len(self.async_threads)
+            'termination_threads_count': len(self.async_threads),
+            'queue': [s.id for s in queue],
+            'running_queue': [s.id for s in self.queue_running],
+            'platform_stats': get_platform_state().serialize()
         }
