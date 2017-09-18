@@ -147,7 +147,7 @@ class Service:
             self.resource_reservation = ResourceReservation({'memory': self.description['required_resources']['memory'], 'cores': 0})  # ZApp description v2
 
         try:
-            self.volumes = [VolumeDescriptionHostPath(v['path'], v['name'], v['read_only']) for v in self.description['volumes']]
+            self.volumes = [VolumeDescriptionHostPath(v['name'], v['path'], v['read_only']) for v in self.description['volumes']]
         except KeyError:
             self.volumes = []
         except TypeError:
