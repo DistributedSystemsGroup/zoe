@@ -1,7 +1,11 @@
 """Classes to hold the system state and simulated container/service placements"""
 
+import logging
+
 from zoe_lib.state.sql_manager import Execution, Service
 from zoe_master.stats import ClusterStats, NodeStats
+
+log = logging.getLogger(__name__)
 
 
 class SimulatedNode:
@@ -72,6 +76,7 @@ class SimulatedPlatform:
                     candidate_nodes.append(node)
             if len(candidate_nodes) == 0:  # this service does not fit anywhere
                 self.deallocate_essential(execution)
+                log.debug('Cannot fit essential service {}, bailing out'.format(service.id))
                 return False
             candidate_nodes.sort(key=lambda n: n.container_count)  # smallest first
             candidate_nodes[0].service_add(service)

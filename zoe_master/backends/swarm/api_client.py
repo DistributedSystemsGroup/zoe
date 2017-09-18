@@ -338,6 +338,8 @@ class SwarmClient:
             ret = self.cli.containers.list(all=True)
         except docker.errors.APIError as ex:
             raise ZoeException(str(ex))
+        except requests.exceptions.RequestException as ex:
+            raise ZoeException(str(ex))
         conts = []
         for cont_info in ret:
             match = True
