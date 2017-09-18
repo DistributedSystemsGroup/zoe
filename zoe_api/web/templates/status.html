@@ -1,0 +1,103 @@
+{% extends "base_user.html" %}
+{% block title %}Zoe system status{% endblock %}
+
+{% block content %}
+<h2>Zoe system status</h2>
+
+    <h3>Scheduler</h3>
+
+    <ul>
+        <li>Queue length: <span id="sched_queue_len">{{ stats.queue_length }}</span></li>
+        <li>Running queue length: <span id="sched_running_queue_len">{{ stats.running_length }}</span></li>
+        <li>On-going clean-up threads: <span id="termination_threads_count">{{ stats.termination_threads_count }}</span></li>
+    </ul>
+
+    <h4>Queue</h4>
+    <p>Service border legend:</p>
+    <ul>
+        <li>Green/red: service is active/inactive. Active services have been scheduled and placed.</li>
+        <li>Solid/dashed: service is essential/elastic</li>
+    </ul>
+    <div class="scheduler_queue">
+    {% for id in stats['queue'] %}
+        <div class="queue_item" id="{{ id }}">
+            <a href="{{ reverse_url('execution_inspect', id) }}">{{ id }}</a>
+            {% for service in executions_in_queue[id].services %}
+                {% if service.essential %}
+                <div class="service essential {{ 'running' if service.status == service.ACTIVE_STATUS }}">
+                    {{ service['name'] }}<br/>
+                    M: <script>format_bytes({{ service['resource_reservation']['memory']['max'] }});</script><br/>
+                    C: {{ service['resource_reservation']['cores']['max'] }}
+                </div>
+                {% endif %}
+            {% endfor %}
+            {% for service in executions_in_queue[id].services %}
+                {% if not service.essential %}
+                <div class="service {{ 'running' if service.status == service.ACTIVE_STATUS }}">
+                    {{ service['name'] }}<br/>
+                    M: <script>format_bytes({{ service['resource_reservation']['memory']['max'] }});</script><br/>
+                    C: {{ service['resource_reservation']['cores']['max'] }}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endfor %}
+    {% if stats['queue']|length == 0 %}
+    <p>The queue is empty.</p>
+    {% endif %}
+    </div>
+
+    <h4>Running queue</h4>
+    <p>This queue is unsorted, all services here should be green.</p>
+    <div class="scheduler_queue">
+    {% for id in stats['running_queue'] %}
+                <div class="queue_item" id="{{ id }}">
+            <a href="{{ reverse_url('execution_inspect', id) }}">{{ id }}</a>
+            {% for service in executions_in_queue[id].services %}
+                {% if service.essential %}
+                <div class="service essential {{ 'running' if service.status == service.ACTIVE_STATUS }}">
+                    {{ service['name'] }}<br/>
+                    M: <script>format_bytes({{ service['resource_reservation']['memory']['max'] }});</script><br/>
+                    C: {{ service['resource_reservation']['cores']['max'] }}
+                </div>
+                {% endif %}
+            {% endfor %}
+            {% for service in executions_in_queue[id].services %}
+                {% if not service.essential %}
+                <div class="service {{ 'running' if service.status == service.ACTIVE_STATUS }}">
+                    {{ service['name'] }}<br/>
+                    M: <script>format_bytes({{ service['resource_reservation']['memory']['max'] }});</script><br/>
+                    C: {{ service['resource_reservation']['cores']['max'] }}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endfor %}
+    {% if stats['running_queue']|length == 0 %}
+    <p>The running queue is empty.</p>
+    {% endif %}
+    </div>
+
+    <h3>Platform</h3>
+    <ul>
+        <li>Total containers: {{ stats.platform_stats.container_count }}</li>
+        <li>Total memory: <script>format_bytes({{ stats.platform_stats.memory_total }}, 2) </script></li>
+        <li>Total cores: {{ stats.platform_stats.cores_total }}</li>
+    </ul>
+
+    <div class="platform_node_detail">
+    {% for node in stats.platform_stats.nodes %}
+        <div class="node_detail">
+        <div class="node_name">{{ node['name'] }}</div>
+        <div class="container_count">{{ node['container_count'] }} containers</div>
+        <div class="memory_total">
+            <div class="memory_reserved" style="width: {{ node['memory_reserved'] * 100 / node['memory_total'] }}%;">&nbsp;</div><span>{{ '%0.2f' % (node['memory_reserved'] * 100 / node['memory_total'],) }}% memory reserved</span>
+        </div>
+        <div class="cores_total">
+            <div class="cores_reserved" style="width: {{ node['cores_reserved'] * 100 / node['cores_total'] }}%;">&nbsp;</div><span>{{ '%0.2f' % (node['cores_reserved'] * 100 / node['cores_total'],) }}% cores reserved</span>
+        </div>
+        </div>
+    {% endfor %}
+    </div>
+
+{% endblock %}
