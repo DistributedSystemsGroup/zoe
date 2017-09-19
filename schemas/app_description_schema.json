@@ -142,6 +142,9 @@
             { "type": "string", "minLength": 1 },
             { "type": "null" }
           ]
+        },
+        "work_dir": {
+          "type": "string", "minLength": 1
         }
       },
       "additionalProperties": false,

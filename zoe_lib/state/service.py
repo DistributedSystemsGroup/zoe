@@ -142,6 +142,11 @@ class Service:
             self.command = None
 
         try:
+            self.work_dir = self.description['work_dir']
+        except KeyError:
+            self.work_dir = None
+
+        try:
             self.resource_reservation = ResourceReservation(self.description['resources'])
         except KeyError:
             self.resource_reservation = ResourceReservation({'memory': self.description['required_resources']['memory'], 'cores': 0})  # ZApp description v2

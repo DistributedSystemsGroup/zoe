@@ -60,6 +60,8 @@ class ServiceInstance:
 
         self.command = service.command
 
+        self.work_dir = service.work_dir
+
         self.image_name = service.image_name
 
         self.ports = []
