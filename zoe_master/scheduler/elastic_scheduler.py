@@ -54,6 +54,7 @@ class ZoeElasticScheduler:
                 self.queue_running.append(execution)
             else:
                 self.queue.append(execution)
+                self.additional_exec_state[execution.id] = ExecutionProgress(0, [])
 
     def trigger(self):
         """Trigger a scheduler run."""
