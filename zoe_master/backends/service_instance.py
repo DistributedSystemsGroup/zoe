@@ -17,7 +17,7 @@
 
 import collections
 
-from zoe_lib.state import Service, Execution
+from zoe_lib.state import Service, Execution, VolumeDescriptionHostPath
 from zoe_lib.config import get_conf
 import zoe_master.backends.common
 
@@ -59,6 +59,8 @@ class ServiceInstance:
         self.volumes = zoe_master.backends.common.gen_volumes(service, execution)
 
         self.command = service.command
+
+        self.work_dir = service.work_dir
 
         self.image_name = service.image_name
 

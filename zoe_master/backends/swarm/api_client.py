@@ -209,6 +209,7 @@ class SwarmClient:
                                            network_disabled=False,
                                            network_mode=get_conf().overlay_network_name,
                                            ports=port_bindings,
+                                           working_dir=service_instance.work_dir,
                                            volumes=volumes)
         except docker.errors.ImageNotFound:
             raise ZoeException(message='Image not found')

@@ -143,6 +143,20 @@ number
 
 Relative ordering for service startup. Zoe will start first services with a lower value. Note that Zoe will not wait for the service to be up and running before starting the next in the list.
 
+command
+^^^^^^^
+
+string or null
+
+Overrides the command to execute inside the service container. If set to null, the command set at image creation time will be executed.
+
+work_dir
+^^^^^^^^
+
+string
+
+This entry is optional. If set, its value will be used as the work directory where the command is executed.
+
 ports
 ^^^^^
 

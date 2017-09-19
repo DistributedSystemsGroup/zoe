@@ -21,7 +21,7 @@
     <div class="scheduler_queue">
     {% for id in stats['queue'] %}
         <div class="queue_item" id="{{ id }}">
-            <a href="{{ reverse_url('execution_inspect', id) }}">{{ id }}</a>
+            <a href="{{ reverse_url('execution_inspect', id) }}">{{ id }}</a> ({{ executions_in_queue[id].user_id }})
             {% for service in executions_in_queue[id].services %}
                 {% if service.essential %}
                 <div class="service essential {{ 'running' if service.status == service.ACTIVE_STATUS }}">
