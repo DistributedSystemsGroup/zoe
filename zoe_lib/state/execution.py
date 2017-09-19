@@ -51,17 +51,17 @@ class Execution:
         if isinstance(d['time_submit'], datetime.datetime):
             self.time_submit = d['time_submit']
         else:
-            self.time_submit = datetime.datetime.fromtimestamp(d['time_submit'])
+            self.time_submit = datetime.datetime.utcfromtimestamp(d['time_submit'])
 
         if isinstance(d['time_submit'], datetime.datetime):
             self.time_start = d['time_start']
         else:
-            self.time_start = datetime.datetime.fromtimestamp(d['time_start'])
+            self.time_start = datetime.datetime.utcfromtimestamp(d['time_start'])
 
         if isinstance(d['time_submit'], datetime.datetime):
             self.time_end = d['time_end']
         else:
-            self.time_submit = datetime.datetime.fromtimestamp(d['time_start'])
+            self.time_submit = datetime.datetime.utcfromtimestamp(d['time_start'])
 
         self._status = d['status']
         self.error_message = d['error_message']
@@ -104,7 +104,7 @@ class Execution:
     def set_running(self):
         """The execution is running and producing useful work."""
         self._status = self.RUNNING_STATUS
-        self.time_start = datetime.datetime.now()
+        self.time_start = datetime.datetime.utcnow()
         self.sql_manager.execution_update(self.id, status=self._status, time_start=self.time_start)
 
     def set_cleaning_up(self):
@@ -115,13 +115,13 @@ class Execution:
     def set_terminated(self):
         """The execution is not running."""
         self._status = self.TERMINATED_STATUS
-        self.time_end = datetime.datetime.now()
+        self.time_end = datetime.datetime.utcnow()
         self.sql_manager.execution_update(self.id, status=self._status, time_end=self.time_end)
 
     def set_error(self):
         """The scheduler encountered an error starting or running the execution."""
         self._status = self.ERROR_STATUS
-        self.time_end = datetime.datetime.now()
+        self.time_end = datetime.datetime.utcnow()
         self.sql_manager.execution_update(self.id, status=self._status, time_end=self.time_end)
 
     def set_error_message(self, message):

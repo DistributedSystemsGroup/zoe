@@ -44,7 +44,7 @@ class GELFUDPHandler(socketserver.DatagramRequestHandler):
         execution_id = data['_zoe_execution_id']
         service_name = data['_zoe_service_name']
         host = data['host']
-        timestamp = datetime.datetime.fromtimestamp(data['timestamp']).strftime('%Y-%m-%d %H:%M:%S')
+        timestamp = datetime.datetime.utcfromtimestamp(data['timestamp']).strftime('%Y-%m-%d %H:%M:%S')
         message = data['short_message']
 
         log_file_path = os.path.join(get_conf().service_logs_base_path, get_conf().deployment_name, str(execution_id), service_name + '.txt')

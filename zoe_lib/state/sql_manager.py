@@ -130,7 +130,7 @@ class SQLManager:
         """Create a new execution in the state."""
         cur = self._cursor()
         status = Execution.SUBMIT_STATUS
-        time_submit = datetime.datetime.now()
+        time_submit = datetime.datetime.utcnow()
         query = cur.mogrify('INSERT INTO execution (id, name, user_id, description, status, time_submit) VALUES (DEFAULT, %s,%s,%s,%s,%s) RETURNING id', (name, user_id, description, status, time_submit))
         cur.execute(query)
         self.conn.commit()
@@ -304,11 +304,11 @@ class SQLManager:
     def save_token(self, client_id, grant_type, token, data, expires_at, refresh_token, refresh_expires_at, scopes, user_id): #pylint: disable=too-many-arguments
         """ save token to db """
         cur = self._cursor()
-        expires_at = datetime.datetime.fromtimestamp(expires_at)
+        expires_at = datetime.datetime.utcfromtimestamp(expires_at)
         if refresh_expires_at is None:
             query = cur.mogrify('UPDATE oauth_token SET token = %s, expires_at = %s WHERE client_id=%s', (token, expires_at, client_id))
         else:
-            refresh_token_expires_at = datetime.datetime.fromtimestamp(refresh_expires_at)
+            refresh_token_expires_at = datetime.datetime.utcfromtimestamp(refresh_expires_at)
             query = cur.mogrify('INSERT INTO oauth_token (client_id, grant_type, token, data, expires_at, refresh_token, refresh_token_expires_at, scopes, user_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT (client_id) DO UPDATE SET token = %s, expires_at = %s, refresh_token = %s, refresh_token_expires_at = %s', (client_id, grant_type, token, data, expires_at, refresh_token, refresh_token_expires_at, scopes, user_id, token, expires_at, refresh_token, refresh_token_expires_at))
 
         cur.execute(query)

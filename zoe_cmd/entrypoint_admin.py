@@ -17,7 +17,7 @@
 This module contains the entrypoint for the commandline Zoe client
 """
 
-import datetime
+from datetime import datetime, timezone
 import json
 import logging
 import os
@@ -96,17 +96,17 @@ def exec_get_cmd(auth, args):
         if execution['status'] == 'error':
             print('Last error: {}'.format(execution['error_message']))
         print()
-        print('Time submit: {}'.format(datetime.datetime.fromtimestamp(execution['time_submit'])))
+        print('Time submit: {}'.format(datetime.fromtimestamp(execution['time_submit'], timezone.utc).astimezone()))
 
         if execution['time_start'] is None:
             print('Time start: {}'.format('not yet'))
         else:
-            print('Time start: {}'.format(datetime.datetime.fromtimestamp(execution['time_start'])))
+            print('Time start: {}'.format(datetime.fromtimestamp(execution['time_start'], timezone.utc).astimezone()))
 
         if execution['time_end'] is None:
             print('Time end: {}'.format('not yet'))
         else:
-            print('Time end: {}'.format(datetime.datetime.fromtimestamp(execution['time_end'])))
+            print('Time end: {}'.format(datetime.fromtimestamp(execution['time_end'], timezone.utc).astimezone()))
         print()
 
         endpoints = exec_api.endpoints(execution['id'])
