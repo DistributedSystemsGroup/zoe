@@ -15,7 +15,6 @@
 
 """The real API, exposed as web pages or REST API."""
 
-from datetime import datetime, timedelta
 import logging
 import os
 
@@ -175,21 +174,13 @@ class APIEndpoint:
     def cleanup_dead_executions(self):
         """Terminates all executions with dead "monitor" services."""
         log.debug('Starting dead execution cleanup task')
-        all_execs = self.sql.execution_list()
+        all_execs = self.sql.execution_list(status='running')
         for execution in all_execs:
-            if execution.is_running:
-                terminated = False
-                for service in execution.services:
-                    if service.description['monitor'] and service.is_dead():
-                        log.info("Service {} ({}) of execution {} died, terminating execution".format(service.id, service.name, execution.id))
-                        self.master.execution_terminate(execution.id)
-                        terminated = True
-                        break
-                if not terminated and execution.name == "aml-lab":
-                    log.debug('Looking at AML execution {}...'.format(execution.id))
-                    if datetime.now() - execution.time_start > timedelta(hours=get_conf().aml_ttl):
-                        log.info('Terminating AML-LAB execution for user {}, timer expired'.format(execution.user_id))
-                        self.master.execution_terminate(execution.id)
+            for service in execution.services:
+                if service.description['monitor'] and service.status == service.BACKEND_DIE_STATUS:
+                    log.info("Service {} ({}) of execution {} died, terminating execution".format(service.id, service.name, execution.id))
+                    self.master.execution_terminate(execution.id)
+                    break
 
         log.debug('Cleanup task finished')
 

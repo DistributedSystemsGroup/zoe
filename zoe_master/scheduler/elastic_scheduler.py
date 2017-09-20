@@ -24,6 +24,7 @@ import threading
 import time
 
 from zoe_lib.state import Execution, SQLManager
+from zoe_master.exceptions import ZoeException
 
 from zoe_master.backends.interface import terminate_execution, get_platform_state, start_elastic, start_essential
 from zoe_master.scheduler.simulated_platform import SimulatedPlatform
@@ -80,7 +81,11 @@ class ZoeElasticScheduler:
         def async_termination(e):
             """Actual termination runs in a thread."""
             with e.termination_lock:
-                terminate_execution(e)
+                try:
+                    terminate_execution(e)
+                except ZoeException as ex:
+                    log.error('Error in termination thread: {}'.format(ex))
+                    return
                 self.trigger()
             log.debug('Execution {} terminated successfully'.format(e.id))
 
@@ -184,7 +189,15 @@ class ZoeElasticScheduler:
                 for job in jobs_to_attempt_scheduling:
                     log.debug("-> {}".format(job))
 
-                platform_state = get_platform_state()
+                try:
+                    platform_state = get_platform_state()
+                except ZoeException:
+                    log.error('Cannot retrieve platform state, cannot schedule')
+                    for job in jobs_to_attempt_scheduling:
+                        job.termination_lock.release()
+                    self.queue = jobs_to_attempt_scheduling + self.queue
+                    break
+
                 cluster_status_snapshot = SimulatedPlatform(platform_state)
                 log.debug(str(cluster_status_snapshot))
 

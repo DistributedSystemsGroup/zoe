@@ -87,8 +87,13 @@ class APIManager:
                     zoe_master.preprocessing.execution_delete(execution)
                 self._reply_ok()
             elif message['command'] == 'scheduler_stats':
-                data = self.scheduler.stats()
-                self._reply_ok(data=data)
+                try:
+                    data = self.scheduler.stats()
+                except ZoeException as e:
+                    log.error(str(e))
+                    self._reply_error(str(e))
+                else:
+                    self._reply_ok(data=data)
             else:
                 log.error('Unknown command: {}'.format(message['command']))
                 self._reply_error('unknown command')

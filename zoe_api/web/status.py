@@ -18,6 +18,7 @@
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 from zoe_api.web.utils import get_auth, catch_exceptions
 from zoe_api.web.custom_request_handler import ZoeRequestHandler
+from zoe_api.exceptions import ZoeException
 
 
 class StatusEndpointWeb(ZoeRequestHandler):
@@ -35,6 +36,8 @@ class StatusEndpointWeb(ZoeRequestHandler):
             return self.redirect(self.get_argument('next', u'/login'))
 
         stats = self.api_endpoint.statistics_scheduler(uid, role)
+        if stats is None:
+            raise ZoeException('Cannot retrieve statistics from the Zoe master')
 
         executions_in_queue = {}
         for exec_id in stats['queue']:
