@@ -57,7 +57,12 @@ class SwarmStateSynchronizer(threading.Thread):
         """The thread loop."""
         log.info("Checker thread started")
         while not self.stop:
-            swarm = SwarmClient()
+            try:
+                swarm = SwarmClient()
+            except ZoeException as e:
+                log.error(str(e))
+                time.sleep(CHECK_INTERVAL)
+                continue
             service_list = self.state.service_list()
             try:
                 container_list = swarm.list(only_label={'zoe_deployment_name': get_conf().deployment_name})
