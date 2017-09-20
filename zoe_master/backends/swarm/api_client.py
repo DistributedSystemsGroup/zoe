@@ -104,7 +104,10 @@ class SwarmClient:
             manager = url
         else:
             raise ZoeException('Unsupported URL scheme for Swarm')
-        self.cli = docker.DockerClient(base_url=manager, version="auto", tls=tls)
+        try:
+            self.cli = docker.DockerClient(base_url=manager, version="auto", tls=tls)
+        except docker.errors.DockerException:
+            raise ZoeException("Cannot connect to Docker")
 
     def info(self) -> ClusterStats:
         """Retrieve Swarm statistics. The Docker API returns a mess difficult to parse."""
