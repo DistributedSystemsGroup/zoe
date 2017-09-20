@@ -15,7 +15,6 @@
 
 """The real API, exposed as web pages or REST API."""
 
-from datetime import datetime, timedelta
 import logging
 import os
 
