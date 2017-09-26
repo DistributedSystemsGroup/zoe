@@ -36,7 +36,7 @@ unittests:
     - pip install -U pip setuptools
     - pip install -r requirements.txt
     - pip install -r requirements_tests.txt
-    - pytest --ignore tests --tb=short
+    - pytest --ignore tests --tb=short --cov-report=term --cov zoe_api --cov zoe_lib --cov zoe_master
 
 docs-test:
   stage: static-test
