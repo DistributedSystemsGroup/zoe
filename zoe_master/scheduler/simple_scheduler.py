@@ -123,5 +123,9 @@ class ZoeSimpleScheduler(ZoeBaseScheduler):
         """Scheduler statistics."""
         return {
             'queue_length': len(self.fifo_queue),
-            'termination_threads_count': len(self.async_threads)
+            'running_length': 0,
+            'termination_threads_count': len(self.async_threads),
+            'queue': [s.id for s in self.fifo_queue],
+            'running_queue': [],
+            'platform_stats': {}
         }
