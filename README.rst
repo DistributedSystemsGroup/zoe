@@ -3,7 +3,7 @@ Zoe Analytics - Container-based Analytics as a Service
 
 Zoe Analytics provides a simple way to provision any kind of data analytics applications.
 
-This repository is used for day-to-day, open source development. Periodic releases containing third-party contributions are pushed to the github repository (see below).
+This repository is used for day-to-day, open source development, feel free to fork and contribute.
 
 Resources:
 
@@ -12,7 +12,7 @@ Resources:
 - Roadmap: https://github.com/DistributedSystemsGroup/zoe/wiki/RoadMap
 - Mailing list: http://www.freelists.org/list/zoe
 - Issue tracker: https://github.com/DistributedSystemsGroup/zoe/issues
-- Stable releases: https://github.com/DistributedSystemsGroup/zoe
+- Main repo: https://gitlab.eurecom.fr/zoe/main (GitHub is a read-only mirror)
 
 Zoe applications (ZApps):
 
