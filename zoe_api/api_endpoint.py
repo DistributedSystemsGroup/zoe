@@ -37,9 +37,9 @@ class APIEndpoint:
     :type master: zoe_api.master_api.APIManager
     :type sql: zoe_lib.sql_manager.SQLManager
     """
-    def __init__(self):
-        self.master = zoe_api.master_api.APIManager()
-        self.sql = zoe_lib.state.SQLManager(get_conf())
+    def __init__(self, master_api, sql_manager):
+        self.master = master_api
+        self.sql = sql_manager
 
     def execution_by_id(self, uid, role, execution_id) -> zoe_lib.state.sql_manager.Execution:
         """Lookup an execution by its ID."""

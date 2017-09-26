@@ -1,5 +1,15 @@
 # Zoe Changelog
 
+## Version 2017.09
+
+* Major web UI redesign
+* New app shop, users can choose applications from a catalog in the web interface
+* New status page for administrators to check on the elastic scheduler status
+* Split command-line tools for user and admin tasks
+* Provide an integrated way of managing ZApp logs, by receiving UDP GELF messages into a simple directory structure
+* The elastic scheduler is now fully tested and ready for production use 
+* Extensive documentation updates to the install procedure
+
 ## Version 2017.06
 
 * ZApp description format revision

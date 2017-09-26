@@ -171,7 +171,7 @@ Parameters can be of two kinds:
 * environment : the parameter is passed as an environment variable. The name of the environment variable is stored in the ``name`` field. The JSON description is modified by setting the user-defined value in the environment variable with the corresponding name. All services that have the variable defined are modified.
 * command : the service named ``name`` has its start-up command changed to the user-defined value
 
-To get you started, here there is an :download:`archive <figures/zapp-shop-demo.tar.gz>` containing some ZApps. Decompress it in your ZApp shop directory to have some Zapps to play with.
+To get started, in the ``contrib/zapp-shop-sample/`` directory there is a sample of the structure needed for a working zapp-shop, including some data science related ZApps. Copy it as-is in your ZApp shop directory to have some Zapps to play with.
 
 Example of distributed environment
 ----------------------------------

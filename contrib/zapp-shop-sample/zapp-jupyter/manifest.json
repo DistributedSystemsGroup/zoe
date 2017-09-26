@@ -1,0 +1,34 @@
+{
+    "version": 1,
+    "zapps": [
+        {
+            "category": "Jupyter notebooks",
+            "readable_descr": "README-datascience.md",
+            "name": "Data science notebook",
+            "description": "datasci-notebook.json",
+            "parameters": []
+        },
+        {
+            "category": "Jupyter notebooks",
+            "readable_descr": "README-r.md",
+            "name": "R notebook",
+            "description": "r-notebook.json",
+            "parameters": []
+        },
+        {
+            "category": "Jupyter notebooks",
+            "readable_descr": "README-scipy.md",
+            "name": "SciPy notebook",
+            "description": "scipy-notebook.json",
+            "parameters": []
+        },
+        {
+            "category": "Jupyter notebooks",
+            "readable_descr": "README-tensorflow.md",
+            "name": "TensorFlow notebook",
+            "description": "tf-notebook.json",
+            "parameters": []
+        }
+    ]
+}
+

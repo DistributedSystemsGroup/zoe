@@ -1,0 +1,42 @@
+{
+    "version": 1,
+    "zapps": [
+        {
+            "category": "TensorFlow",
+            "name": "Google TensorFlow notebook",
+            "description": "tf-google.json",
+            "readable_descr": "README-goog.md",
+            "parameters": []
+        },
+        {
+            "category": "TensorFlow",
+            "name": "Google TensorFlow batch",
+            "description": "tf-google.json",
+            "readable_descr": "README-batch.md",
+            "parameters": [
+                {
+                    "kind": "command",
+                    "name": "tf-jupyter",
+                    "readable_name": "Command",
+                    "description": "The Python script to run, relative to the workspace directory",
+                    "type": "string",
+                    "default": "./my-tf-app/main.py"
+                }
+            ]
+        },
+        {
+            "category": "TensorFlow",
+            "name": "DRAGNN SyntaxNet model",
+            "description": "stnet-google.json",
+            "readable_descr": "README-syntaxnet.md",
+            "parameters": []
+        },
+        {
+            "category": "TensorFlow",
+            "name": "Magenta model",
+            "description": "mag-google.json",
+            "readable_descr": "README-magenta.md",
+            "parameters": []
+        }
+    ]
+}

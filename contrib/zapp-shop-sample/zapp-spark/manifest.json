@@ -1,0 +1,45 @@
+{
+    "version": 1,
+    "zapps": [
+        {
+            "category": "Spark",
+            "name": "Distributed PySpark notebook",
+            "description": "spark-jupyter.json",
+            "readable_descr": "README-jupyter.md",
+            "parameters": [
+                {
+                    "kind": "environment",
+                    "name": "NAMENODE_HOST",
+                    "readable_name": "NameNode host",
+                    "description": "Hostname of the HDFS NameNode",
+                    "type": "string",
+                    "default": "hdfs-namenode.zoe"
+                }
+            ]
+        },
+        {
+            "category": "Spark",
+            "name": "Spark submit",
+            "description": "spark-submit.json",
+            "readable_descr": "README-submit.md",
+            "parameters": [
+                {
+                    "kind": "environment",
+                    "name": "NAMENODE_HOST",
+                    "readable_name": "NameNode host",
+                    "description": "Hostname of the HDFS NameNode",
+                    "type": "string",
+                    "default": "hdfs-namenode.zoe"
+                },
+                {
+                    "kind": "command",
+                    "name": "spark-submit",
+                    "readable_name": "Spark submit commandline",
+                    "description": "The Spark submit command line that tells Spark what to execute. Some options are already passed (like --master)",
+                    "type": "string",
+                    "default": "wordcount.py hdfs://192.168.45.157/datasets/gutenberg_big_2x.txt hdfs://192.168.45.157/tmp/wcount-out"
+                }
+            ]
+        }
+    ]
+}

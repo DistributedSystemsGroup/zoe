@@ -23,9 +23,11 @@ from tornado.ioloop import IOLoop, PeriodicCallback
 from tornado.web import Application
 
 import zoe_lib.config as config
+import zoe_lib.state
 import zoe_api.db_init
 import zoe_api.api_endpoint
 import zoe_api.rest_api
+import zoe_api.master_api
 import zoe_api.web
 import zoe_api.auth.ldap
 from zoe_api.web.custom_request_handler import JinjaApp
@@ -57,7 +59,9 @@ def zoe_web_main() -> int:
 
     zoe_api.db_init.init()
 
-    api_endpoint = zoe_api.api_endpoint.APIEndpoint()
+    master_api = zoe_api.master_api.APIManager()
+    sql_manager = zoe_lib.state.SQLManager(config.get_conf())
+    api_endpoint = zoe_api.api_endpoint.APIEndpoint(master_api, sql_manager)
 
     app_settings = {
         'static_path': os.path.join(os.path.dirname(__file__), "web", "static"),

@@ -49,7 +49,6 @@ Main documentation
   :maxdepth: 1
 
   install
-  zoe_fe
   kube_backend
   config_file
   logging
@@ -83,7 +82,6 @@ External resources
 ^^^^^^^^^^^^^^^^^^
 
 - `Zoe Homepage <http://zoe-analytics.eu>`_
-- `ZApp catalog <http://zoe-analytics.eu/zapps>`_
 - `Issue tracker <https://github.com/DistributedSystemsGroup/zoe/issues>`_
 
 Zoe is licensed under the terms of the Apache 2.0 license.
