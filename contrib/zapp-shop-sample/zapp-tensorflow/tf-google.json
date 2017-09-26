@@ -1,0 +1,44 @@
+{
+    "name": "tf-google",
+    "services": [
+        {
+            "command": null,
+            "environment": [],
+            "essential_count": 1,
+            "image": "gcr.io/tensorflow/tensorflow:1.3.0-py3",
+            "monitor": true,
+            "name": "tf-jupyter",
+            "ports": [
+                {
+                    "name": "Tensorboard web interface",
+                    "port_number": 6006,
+                    "protocol": "tcp",
+                    "url_template": "http://{ip_port}/"
+                },
+                {
+                    "name": "Notebook web interface",
+                    "port_number": 8888,
+                    "protocol": "tcp",
+                    "url_template": "http://{ip_port}/"
+                }
+            ],
+            "replicas": 1,
+            "resources": {
+                "cores": {
+                    "max": 4,
+                    "min": 4
+                },
+                "memory": {
+                    "max": 4294967296,
+                    "min": 4294967296
+                }
+            },
+            "startup_order": 0,
+            "total_count": 1,
+            "volumes": []
+        }
+    ],
+    "size": 512,
+    "version": 3,
+    "will_end": false
+}

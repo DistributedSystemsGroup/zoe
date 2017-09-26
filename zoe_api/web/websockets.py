@@ -65,20 +65,7 @@ class WebSocketEndpointWeb(tornado.websocket.WebSocketHandler):
 
         request = json.loads(message)
 
-        if request['command'] == 'start_zapp':
-            app_descr = json.load(open('contrib/zoeapps/eurecom_aml_lab.json', 'r'))
-            execution = self.api_endpoint.execution_list(self.uid, self.role, name='aml-lab')
-            if len(execution) == 0:
-                exec_id = self.api_endpoint.execution_start(self.uid, self.role, 'aml-lab', app_descr)
-            else:
-                execution = execution[0]
-                exec_id = execution.id
-            response = {
-                'status': 'ok',
-                'execution_id': exec_id
-            }
-            self.write_message(response)
-        elif request['command'] == 'query_status':
+        if request['command'] == 'query_status':
             try:
                 execution = self.api_endpoint.execution_by_id(self.uid, self.role, request['exec_id'])
             except zoe_api.exceptions.ZoeNotFoundException:

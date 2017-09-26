@@ -31,7 +31,7 @@ class TestApplicationsMethods:
 
     def test_pass_for_complex_zapp(self):
         """Test zapp validation code."""
-        zapp_fp = json.load(open('contrib/zoeapps/eurecom_aml_lab.json', 'r'))
+        zapp_fp = json.load(open('contrib/zoeapps/complex_zapp.json', 'r'))
         applications.app_validate(zapp_fp)
 
     def test_fails_for_zapp(self):
