@@ -229,12 +229,13 @@ class ZoeElasticScheduler:
                         break
                     free_resources = current_free_resources
 
-                log.debug('Allocation after simulation: {}'.format(cluster_status_snapshot.get_service_allocation()))
+                placements = cluster_status_snapshot.get_service_allocation()
+                log.debug('Allocation after simulation: {}'.format(placements))
 
                 # We port the results of the simulation into the real cluster
                 for job in jobs_to_launch:  # type: Execution
                     if not job.essential_services_running:
-                        ret = start_essential(job)
+                        ret = start_essential(job, placements)
                         if ret == "fatal":
                             jobs_to_attempt_scheduling.remove(job)
                             continue  # trow away the execution
@@ -245,7 +246,7 @@ class ZoeElasticScheduler:
                             job.set_running()
                         assert ret == "ok"
 
-                    start_elastic(job)
+                    start_elastic(job, placements)
 
                     if job.all_services_active:
                         log.debug('execution {}: all services are active'.format(job.id))

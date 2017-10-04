@@ -194,7 +194,7 @@ class SQLManager:
         """Adds a new service to the state."""
         cur = self._cursor()
         status = 'created'
-        query = cur.mogrify('INSERT INTO service (id, status, error_message, execution_id, name, service_group, description, essential) VALUES (DEFAULT, %s,NULL,%s,%s,%s,%s,%s) RETURNING id', (status, execution_id, name, service_group, description, is_essential))
+        query = cur.mogrify('INSERT INTO service (id, status, execution_id, name, service_group, description, essential) VALUES (DEFAULT,%s,%s,%s,%s,%s,%s) RETURNING id', (status, execution_id, name, service_group, description, is_essential))
         cur.execute(query)
         self.conn.commit()
         return cur.fetchone()[0]

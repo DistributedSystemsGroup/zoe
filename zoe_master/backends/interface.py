@@ -36,6 +36,11 @@ try:
 except ImportError:
     KubernetesBackend = None
 
+try:
+    from zoe_master.backends.docker.backend import DockerEngineBackend
+except ImportError:
+    DockerEngineBackend = None
+
 log = logging.getLogger(__name__)
 
 
@@ -50,6 +55,10 @@ def _get_backend() -> BaseBackend:
         if SwarmBackend is None:
             raise ZoeException('The Swarm backend requires docker python version >= 2.0.2')
         return SwarmBackend(get_conf())
+    elif backend_name == 'DockerEngine':
+        if DockerEngineBackend is None:
+            raise ZoeException('The Docker Engine backend requires docker python version >= 2.0.2')
+        return DockerEngineBackend(get_conf())
     else:
         log.error('Unknown backend selected')
         assert False
@@ -67,7 +76,7 @@ def shutdown_backend():
     backend.shutdown()
 
 
-def service_list_to_containers(execution: Execution, service_list: List[Service]) -> str:
+def service_list_to_containers(execution: Execution, service_list: List[Service], placement=None) -> str:
     """Given a subset of services from an execution, tries to start them, return one of 'ok', 'requeue' for temporary failures and 'fatal' for fatal failures."""
     backend = _get_backend()
 
@@ -85,6 +94,8 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
 
     for service in ordered_service_list:
         env_subst_dict['dns_name#self'] = service.dns_name
+        if placement is not None:
+            service.assign_backend_host(placement[service.id])
         service.set_starting()
         instance = ServiceInstance(execution, service, env_subst_dict)
         try:
@@ -127,18 +138,18 @@ def start_all(execution: Execution) -> str:
     return service_list_to_containers(execution, execution.services)
 
 
-def start_essential(execution) -> str:
+def start_essential(execution: Execution, placement) -> str:
     """Start the essential services for this execution"""
     log.debug('starting essential services for execution {}'.format(execution.id))
     execution.set_starting()
 
-    return service_list_to_containers(execution, execution.essential_services)
+    return service_list_to_containers(execution, execution.essential_services, placement)
 
 
-def start_elastic(execution) -> str:
+def start_elastic(execution: Execution, placement) -> str:
     """Start the runnable elastic services"""
     elastic_to_start = [s for s in execution.elastic_services if s.status == Service.RUNNABLE_STATUS]
-    return service_list_to_containers(execution, elastic_to_start)
+    return service_list_to_containers(execution, elastic_to_start, placement)
 
 
 def terminate_execution(execution: Execution) -> None:

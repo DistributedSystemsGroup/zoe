@@ -29,6 +29,7 @@ class ServiceInstance:
     def __init__(self, execution: Execution, service: Service, env_subst_dict):
         self.name = service.unique_name
         self.hostname = service.dns_name
+        self.backend_host = service.backend_host
 
         if service.resource_reservation.memory.min is None:
             self.memory_limit = None

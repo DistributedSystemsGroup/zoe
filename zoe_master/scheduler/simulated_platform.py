@@ -65,7 +65,8 @@ class SimulatedPlatform:
     def __init__(self, plastform_status: ClusterStats):
         self.nodes = {}
         for node in plastform_status.nodes:
-            self.nodes[node.name] = SimulatedNode(node)
+            if node.status == 'online':
+                self.nodes[node.name] = SimulatedNode(node)
 
     def allocate_essential(self, execution: Execution) -> bool:
         """Try to find an allocation for essential services"""

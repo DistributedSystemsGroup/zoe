@@ -115,6 +115,7 @@ class Service:
         self.service_group = d['service_group']
         self.backend_id = d['backend_id']
         self.backend_status = d['backend_status']
+        self.backend_host = d['backend_host']
 
         self.ip_address = d['ip_address']
         if self.ip_address is not None and ('/32' in self.ip_address or '/128' in self.ip_address):
@@ -176,6 +177,7 @@ class Service:
             'backend_id': self.backend_id,
             'ip_address': self.ip_address,
             'backend_status': self.backend_status,
+            'backend_host': self.backend_host,
             'essential': self.essential,
             'proxy_address': self.proxy_address
         }
@@ -190,10 +192,11 @@ class Service:
 
     def set_inactive(self):
         """The service is not running."""
-        self.sql_manager.service_update(self.id, status=self.INACTIVE_STATUS, backend_id=None, ip_address=None)
+        self.sql_manager.service_update(self.id, status=self.INACTIVE_STATUS, backend_id=None, ip_address=None, backend_host=None)
         self.status = self.INACTIVE_STATUS
         for port in self.ports:
             port.reset()
+        self.backend_host = None
 
     def set_starting(self):
         """The service is being created by Docker."""
@@ -224,6 +227,12 @@ class Service:
         self.sql_manager.service_update(self.id, backend_status=new_status)
         log.debug("service {}, backend status updated to {}".format(self.id, new_status))
         self.backend_status = new_status
+
+    def assign_backend_host(self, backend_host):
+        """Assign this service to a host in particular."""
+        self.sql_manager.service_update(self.id, backend_host=backend_host)
+        log.debug('service {} assigned to host {}'.format(self.id, backend_host))
+        self.backend_host = backend_host
 
     @property
     def dns_name(self):
