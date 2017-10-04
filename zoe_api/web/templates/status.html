@@ -1,6 +1,10 @@
 {% extends "base_user.html" %}
 {% block title %}Zoe system status{% endblock %}
 
+{% block custom_head %}
+    <script src="/static/Chart.min.js" type="application/javascript"></script>
+{% endblock %}
+
 {% block content %}
 <h2>Zoe system status</h2>
 
@@ -88,14 +92,107 @@
     <div class="platform_node_detail">
     {% for node in stats.platform_stats.nodes %}
         <div class="node_detail">
-        <div class="node_name">{{ node['name'] }}</div>
+        <div class="node_name">
+            {{ node['name'] }}
+            {% if node['status'] == 'offline' %}
+                (node is offline/unreachable)
+            {% endif %}
+        </div>
         <div class="container_count">{{ node['container_count'] }} containers</div>
-        <div class="memory_total">
-            <div class="memory_reserved" style="width: {{ node['memory_reserved'] * 100 / node['memory_total'] }}%;">&nbsp;</div><span>{{ '%0.2f' % (node['memory_reserved'] * 100 / node['memory_total'],) }}% memory reserved</span>
+
+        <div class="plot-container">
+            <p>Memory</p>
+            <div class="pie-plots">
+                <canvas class="node_status_canvas" id="{{ node.name }}-mem-res"></canvas>
+                <canvas class="node_status_canvas" id="{{ node.name }}-mem-use"></canvas>
+            </div>
         </div>
-        <div class="cores_total">
-            <div class="cores_reserved" style="width: {{ node['cores_reserved'] * 100 / node['cores_total'] }}%;">&nbsp;</div><span>{{ '%0.2f' % (node['cores_reserved'] * 100 / node['cores_total'],) }}% cores reserved</span>
+        <script>
+        data = {
+            datasets: [{
+                label: 'Reserved memory',
+                data: [{{ node['memory_reserved'] }}, {{ node['memory_total'] - node['memory_reserved'] }}],
+                backgroundColor: ['rgba(0, 169, 225, 1.0)', 'rgba(145, 192, 46, 1.0)']
+            }],
+            'labels': ['Reserved', 'Free']
+        };
+        ctx = document.getElementById("{{ node.name }}-mem-res").getContext('2d');
+        new Chart(ctx,{
+            type: 'pie',
+            data: data,
+            options: {
+                animation: {
+                    animateRotate: false
+                }
+            }
+        });
+
+        data = {
+            datasets: [{
+                label: 'Used memory',
+                data: [{{ node['memory_total'] - node['memory_free'] }}, {{ node['memory_free'] }}],
+                backgroundColor: ['rgba(0, 169, 225, 1.0)', 'rgba(145, 192, 46, 1.0)']
+            }],
+            'labels': ['In-use', 'Free']
+        };
+        ctx = document.getElementById("{{ node.name }}-mem-use").getContext('2d');
+        myPieChart = new Chart(ctx,{
+            type: 'pie',
+            data: data,
+            options: {
+                animation: {
+                    animateRotate: false
+                }
+            }
+        });
+        </script>
+
+        <div class="plot-container">
+            <p>Cores</p>
+            <div class="pie-plots">
+                <canvas class="node_status_canvas" id="{{ node.name }}-cpu-res"></canvas>
+                <canvas class="node_status_canvas" id="{{ node.name }}-cpu-use"></canvas>
+            </div>
         </div>
+        <script>
+        data = {
+            datasets: [{
+                label: 'Reserved cores',
+                data: [{{ node['cores_reserved'] }}, {{ node['cores_total'] - node['cores_reserved'] }}],
+                backgroundColor: ['rgba(0, 169, 225, 1.0)', 'rgba(145, 192, 46, 1.0)']
+            }],
+            'labels': ['Reserved', 'Free']
+        };
+        ctx = document.getElementById("{{ node.name }}-cpu-res").getContext('2d');
+        new Chart(ctx,{
+            type: 'pie',
+            data: data,
+            options: {
+                animation: {
+                    animateRotate: false
+                }
+            }
+        });
+
+        data = {
+            datasets: [{
+                label: 'Used memory',
+                data: [{{ node['cores_total'] - node['cores_free'] }}, {{ node['cores_free'] }}],
+                backgroundColor: ['rgba(0, 169, 225, 1.0)', 'rgba(145, 192, 46, 1.0)']
+            }],
+            'labels': ['In-use', 'Free']
+        };
+        ctx = document.getElementById("{{ node.name }}-cpu-use").getContext('2d');
+        myPieChart = new Chart(ctx,{
+            type: 'pie',
+            data: data,
+            options: {
+                animation: {
+                    animateRotate: false
+                }
+            }
+        });
+        </script>
         </div>
     {% endfor %}
     </div>

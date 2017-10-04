@@ -104,7 +104,7 @@ class DockerClient:
                 run_args['mem_reservation'] -= 1
 
         if service_instance.core_limit is not None:
-            run_args['cpu_quota'] = 100000 * service_instance.core_limit.max
+            run_args['cpu_quota'] = int(100000 * service_instance.core_limit.max)
 
         if get_conf().gelf_address != '':
             run_args['log_config'] = {
@@ -183,6 +183,9 @@ class DockerClient:
                     info['ports'][port] = mapping
                 else:
                     info['ports'][port] = None
+
+        info['cpu_period'] = container.attrs['HostConfig']['CpuPeriod']
+        info['cpu_quota'] = container.attrs['HostConfig']['CpuQuota']
 
         return info
 

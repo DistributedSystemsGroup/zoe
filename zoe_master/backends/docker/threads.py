@@ -19,6 +19,7 @@ import logging
 import threading
 import time
 from copy import deepcopy
+from datetime import datetime
 
 from zoe_lib.config import get_conf
 from zoe_lib.state import SQLManager, Service
@@ -71,6 +72,7 @@ class DockerStateSynchronizer(threading.Thread):
                 node_stats.status = 'offline'
                 time.sleep(CHECK_INTERVAL)
                 continue
+            node_stats.status = 'online'
 
             service_list = self.state.service_list(backend_host=host_config.name)
             try:
@@ -117,6 +119,20 @@ class DockerStateSynchronizer(threading.Thread):
         node_stats.memory_reserved = sum([stat['memory_stats']['limit'] for stat in stats.values() if 'limit' in stat['memory_stats'] and stat['memory_stats']['limit'] != node_stats.memory_total])
         memory_in_use = sum([stat['memory_stats']['usage'] for stat in stats.values() if 'usage' in stat['memory_stats']])
         node_stats.memory_free = node_stats.memory_total - memory_in_use
+
+        node_stats.cores_reserved = sum([cont['cpu_quota'] / cont['cpu_period'] for cont in container_list if cont['cpu_period'] != 0])
+
+        node_stats.cores_free = node_stats.cores_total - sum([self._get_core_usage(stat) for stat in stats.values()])
+
+    def _get_core_usage(self, stat):
+        try:
+            this_read_ts = datetime.strptime(stat['read'], '%Y-%m-%dT%H:%M:%S.%f')
+        except ValueError:
+            return 0
+        pre_read_ts = datetime.strptime(stat['preread'], '%Y-%m-%dT%H:%M:%S.%f')
+        cpu_time_now = stat['cpu_stats']['cpu_usage']['total_usage']
+        cpu_time_pre = stat['precpu_stats']['cpu_usage']['total_usage']
+        return (cpu_time_now - cpu_time_pre) / ((this_read_ts - pre_read_ts).total_seconds() * 1000000000)
 
     def _update_service_status(self, service: Service, container):
         """Update the service status."""
