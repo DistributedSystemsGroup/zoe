@@ -56,10 +56,13 @@ class DockerConfig:
                     host.tls_cert = config[section]['tls_cert']
                     host.tls_ca = config[section]['tls_ca']
                     host.tls_key = config[section]['tls_key']
-                host.labels = config[section]['labels'].split(',')
             except KeyError as e:
                 log.error('Error in Docker backend configuration, missing key {} in section {}'.format(e.args[0], section))
                 continue
+
+            if 'labels' in config[section]:  # labels are optional
+                host.labels = config[section]['labels'].split(',')
+
             hosts.append(host)
         if len(hosts) == 0:
             log.error('Host list is empty, verify your docker backend configuration!')
