@@ -33,6 +33,7 @@ from zoe_master.exceptions import UnsupportedSchedulerPolicyError
 log = logging.getLogger(__name__)
 
 ExecutionProgress = namedtuple('ExecutionProgress', ['last_time_scheduled', 'progress_sequence'])
+SELF_TRIGGER_TIMEOUT = 60  # the scheduler will trigger itself periodically in case platform resources have changed outside its control
 
 
 class ZoeElasticScheduler:
@@ -154,15 +155,14 @@ class ZoeElasticScheduler:
 
     def loop_start_th(self):
         """The Scheduler thread loop."""
-        auto_trigger_base = 60  # seconds
-        auto_trigger = auto_trigger_base
+        auto_trigger = SELF_TRIGGER_TIMEOUT
         while True:
             ret = self.trigger_semaphore.acquire(timeout=1)
             if not ret:  # Semaphore timeout, do some thread cleanup
                 self._cleanup_async_threads()
                 auto_trigger -= 1
                 if auto_trigger == 0:
-                    auto_trigger = auto_trigger_base
+                    auto_trigger = SELF_TRIGGER_TIMEOUT
                     self.trigger()
                 continue
             if self.loop_quit:

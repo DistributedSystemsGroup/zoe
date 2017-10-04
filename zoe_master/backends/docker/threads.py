@@ -152,7 +152,7 @@ class DockerStateSynchronizer(threading.Thread):
     def quit(self):
         """Stops the thread."""
         self.stop = True
-        for th, conf in self.host_checkers:
+        for th, conf_ in self.host_checkers:
             th.join()
         self.my_stop = True
 

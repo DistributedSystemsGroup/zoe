@@ -61,72 +61,63 @@ class DockerClient:
 
     def spawn_container(self, service_instance: ServiceInstance) -> Dict[str, Any]:
         """Create and start a new container."""
-        cont = None
-        port_bindings = {}  # type: Dict[str, Any]
+        run_args = {
+            'detach': True,
+            'ports': {},
+            'environment': {},
+            'volumes': {},
+            'working_dir': service_instance.work_dir,
+            'mem_limit': 0,
+            'mem_reservation': 0,
+            'memswap_limit': 0,
+            'name': service_instance.name,
+            'network_disabled': False,
+            'network_mode': get_conf().overlay_network_name,
+            'image': service_instance.image_name,
+            'command': service_instance.command,
+            'hostname': service_instance.hostname,
+            'labels': service_instance.labels,
+            'cpu_period': 100000,
+            'cpu_quota': 100000,
+            'log_config': {
+                "type": "json-file",
+                "config": {}
+            }
+        }
         for port in service_instance.ports:
-            port_bindings[str(port.number) + '/' + port.proto] = None
+            run_args['ports'][str(port.number) + '/' + port.proto] = None
 
-        environment = {}
         for name, value in service_instance.environment:
-            environment[name] = value
+            run_args['environment'][name] = value
 
-        volumes = {}
         for volume in service_instance.volumes:
             if volume.type == "host_directory":
                 assert isinstance(volume, VolumeDescriptionHostPath)
-                volumes[volume.path] = {'bind': volume.mount_point, 'mode': ("ro" if volume.readonly else "rw")}
+                run_args['volumes'][volume.path] = {'bind': volume.mount_point, 'mode': ("ro" if volume.readonly else "rw")}
             else:
                 log.error('Swarm backend does not support volume type {}'.format(volume.type))
 
         if service_instance.memory_limit is not None:
-            mem_limit = service_instance.memory_limit.max
-            mem_reservation = service_instance.memory_limit.min
-            if mem_reservation == mem_limit:
-                mem_reservation -= 1
-        else:
-            mem_limit = 0
-            mem_reservation = 0
+            run_args['mem_limit'] = service_instance.memory_limit.max
+            run_args['mem_reservation'] = service_instance.memory_limit.min
+            if service_instance.memory_limit.max == service_instance.memory_limit.min:
+                run_args['mem_reservation'] -= 1
 
         if service_instance.core_limit is not None:
-            cpu_period = 100000
-            cpu_quota = 100000 * service_instance.core_limit.max
-        else:
-            cpu_period = 100000
-            cpu_quota = 100000
+            run_args['cpu_quota'] = 100000 * service_instance.core_limit.max
 
         if get_conf().gelf_address != '':
-            log_config = {
+            run_args['log_config'] = {
                 "type": "gelf",
                 "config": {
                     'gelf-address': get_conf().gelf_address,
                     'labels': ",".join(service_instance.labels)
                 }
             }
-        else:
-            log_config = {
-                "type": "json-file",
-                "config": {}
-            }
 
+        cont = None
         try:
-            cont = self.cli.containers.run(image=service_instance.image_name,
-                                           command=service_instance.command,
-                                           detach=True,
-                                           environment=environment,
-                                           hostname=service_instance.hostname,
-                                           labels=service_instance.labels,
-                                           log_config=log_config,
-                                           cpu_period=cpu_period,
-                                           cpu_quota=cpu_quota,
-                                           mem_limit=mem_limit,
-                                           mem_reservation=mem_reservation,
-                                           memswap_limit=0,
-                                           name=service_instance.name,
-                                           network_disabled=False,
-                                           network_mode=get_conf().overlay_network_name,
-                                           ports=port_bindings,
-                                           working_dir=service_instance.work_dir,
-                                           volumes=volumes)
+            cont = self.cli.containers.run(**run_args)
         except docker.errors.ImageNotFound:
             raise ZoeException(message='Image not found')
         except docker.errors.APIError as e:

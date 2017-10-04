@@ -16,8 +16,8 @@
 """Parses Docker-specific configuration file."""
 
 import configparser
-from typing import List
 import logging
+from typing import List
 
 from zoe_lib.config import get_conf
 
