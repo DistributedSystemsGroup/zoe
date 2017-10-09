@@ -190,7 +190,7 @@ class ZoeElasticScheduler:
                     log.debug("-> {}".format(job))
 
                 try:
-                    platform_state = get_platform_state()
+                    platform_state = get_platform_state(self.state)
                 except ZoeException:
                     log.error('Cannot retrieve platform state, cannot schedule')
                     for job in jobs_to_attempt_scheduling:
@@ -286,5 +286,5 @@ class ZoeElasticScheduler:
             'termination_threads_count': len(self.async_threads),
             'queue': [s.id for s in queue],
             'running_queue': [s.id for s in self.queue_running],
-            'platform_stats': get_platform_state().serialize()
+            'platform_stats': get_platform_state(self.state).serialize()
         }

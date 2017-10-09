@@ -45,11 +45,14 @@ class StatusEndpointWeb(ZoeRequestHandler):
         for exec_id in stats['running_queue']:
             executions_in_queue[exec_id] = self.api_endpoint.execution_by_id(uid, role, exec_id)
 
+        max_service_count = max([len(node['services']) for node in stats['platform_stats']['nodes']])
+
         template_vars = {
             "uid": uid,
             "role": role,
             "stats": stats,
-            "executions_in_queue": executions_in_queue
+            "executions_in_queue": executions_in_queue,
+            "max_service_count": max_service_count
         }
 
         self.render('status.html', **template_vars)

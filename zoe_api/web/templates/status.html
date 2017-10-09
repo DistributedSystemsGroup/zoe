@@ -8,7 +8,16 @@
 {% block content %}
 <h2>Zoe system status</h2>
 
-    <h3>Scheduler</h3>
+    <div>
+    <h3 class="section">Index</h3>
+    <ul>
+        <li><a href="#scheduler">Scheduler</a></li>
+        <li><a href="#platform">Platform</a></li>
+        <li><a href="#service-distrib">Service distribution</a></li>
+    </ul>
+    </div>
+
+    <h3 class="section"><a name="scheduler">Scheduler</a></h3>
 
     <ul>
         <li>Queue length: <span id="sched_queue_len">{{ stats.queue_length }}</span></li>
@@ -82,7 +91,7 @@
     {% endif %}
     </div>
 
-    <h3>Platform</h3>
+    <h3 class="section"><a name="platform">Platform</a></h3>
     <ul>
         <li>Total containers: {{ stats.platform_stats.container_count }}</li>
         <li>Total memory: <script>format_bytes({{ stats.platform_stats.memory_total }}, 2) </script></li>
@@ -197,4 +206,30 @@
     {% endfor %}
     </div>
 
+    <h3 class="section"><a name="service-distrib">Service distribution</a></h3>
+    <table class="service-distrib">
+    <thead>
+    <tr>
+        <th class="cell-host">Host</th>
+        <th colspan="{{ max_service_count }}">Services and reserved resources</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for node in stats.platform_stats.nodes %}
+    <tr>
+        <td class="cell-host">{{ node.name }}</td>
+        {% for service in node.services %}
+            <td><a href="{{ reverse_url('execution_inspect', service['execution_id']) }}">{{ service['name'] }}</a> (M: <script>format_bytes({{ service['description']['resources']['memory']['max'] }});</script> C: {{ service['description']['resources']['cores']['max'] }})</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+
+    <script>
+    function refresh_page() {
+        document.location.reload();
+    }
+    setInterval(refresh_page, 15000);
+    </script>
 {% endblock %}

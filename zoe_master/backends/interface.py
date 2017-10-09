@@ -19,7 +19,7 @@ import logging
 from typing import List
 
 from zoe_lib.config import get_conf
-from zoe_lib.state import Execution, Service
+from zoe_lib.state import Execution, Service, SQLManager  # pylint: disable=unused-import
 
 from zoe_master.backends.base import BaseBackend
 from zoe_master.backends.service_instance import ServiceInstance
@@ -166,7 +166,10 @@ def terminate_execution(execution: Execution) -> None:
     execution.set_terminated()
 
 
-def get_platform_state() -> ClusterStats:
+def get_platform_state(state: SQLManager) -> ClusterStats:
     """Retrieves the state of the platform by querying the container backend. Platform state includes information on free/reserved resources for each node. This information is used for advanced scheduling."""
     backend = _get_backend()
-    return backend.platform_state()
+    platform_state = backend.platform_state()
+    for node in platform_state.nodes:
+        node.services = state.service_list(backend_host=node.name, backend_status=Service.BACKEND_START_STATUS)
+    return platform_state

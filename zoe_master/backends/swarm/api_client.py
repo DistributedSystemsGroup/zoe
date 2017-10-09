@@ -113,9 +113,6 @@ class SwarmClient:
         """Retrieve Swarm statistics. The Docker API returns a mess difficult to parse."""
         info = self.cli.info()
         pl_status = ClusterStats()
-        pl_status.container_count = info["Containers"]
-        pl_status.memory_total = info["MemTotal"]
-        pl_status.cores_total = info["NCPU"]
 
         # SystemStatus is a list...
         idx = 0  # Role, skip
@@ -135,7 +132,10 @@ class SwarmClient:
             node_stats.docker_endpoint = info["SystemStatus"][idx + node][1]
             idx2 += 1  # ID, skip
             idx2 += 1  # Status
-            node_stats.status = info["SystemStatus"][idx + node + idx2][1]
+            if info["SystemStatus"][idx + node + idx2][1] == 'Healthy':
+                node_stats.status = 'online'
+            else:
+                node_stats.status = 'offline'
             idx2 += 1  # Containers
             node_stats.container_count = int(info["SystemStatus"][idx + node + idx2][1].split(' ')[0])
             idx2 += 1  # CPUs

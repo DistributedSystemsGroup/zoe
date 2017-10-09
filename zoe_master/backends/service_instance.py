@@ -48,7 +48,8 @@ class ServiceInstance:
             'zoe.service.id': str(service.id),
             'zoe.owner': execution.user_id,
             'zoe.deployment_name': get_conf().deployment_name,
-            'zoe.type': 'app_service'
+            'zoe.type': 'service_{}'.format('essential' if service.essential else 'elastic'),
+            'zoe.zapp_size': execution.size
         }
         if service.is_monitor:
             self.labels['zoe_monitor'] = 'true'

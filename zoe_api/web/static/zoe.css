@@ -218,6 +218,15 @@ div.running {
     border-color: green;
 }
 
+div.node_detail {
+    width: 48%;
+    height: 28em;
+    float: left;
+    border: dashed darkgray 1px;
+    margin: 0.2em;
+    padding-left: 0.5em;
+}
+
 div.pie-plots {
     width: 20em;
     height: 22em;
@@ -229,4 +238,17 @@ div.plot-container {
 
 div.plot-container p {
     text-align: center;
+}
+
+h3.section {
+    clear: both;
+}
+
+table.service-distrib th {
+    border-bottom: 1px double black;
+}
+
+table.service-distrib {
+    border-spacing: 10px;
+    border-collapse: separate;
 }

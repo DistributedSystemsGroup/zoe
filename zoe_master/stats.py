@@ -42,10 +42,11 @@ class NodeStats(Stats):
         self.labels = {}
         self.status = None
         self.error = ''
+        self.services = []
 
     def serialize(self):
         """Convert the object into a dict."""
-        return {
+        ret = {
             'name': self.name,
             'container_count': self.container_count,
             'cores_total': self.cores_total,
@@ -56,8 +57,12 @@ class NodeStats(Stats):
             'memory_free': self.memory_free,
             'labels': self.labels,
             'status': self.status,
-            'error': self.error
+            'error': self.error,
+            'services': []
         }
+        for service in self.services:
+            ret['services'].append(service.serialize())
+        return ret
 
 
 class ClusterStats(Stats):
