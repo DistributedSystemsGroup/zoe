@@ -194,34 +194,6 @@ div.status_line {
     font-size: larger;
 }
 
-div.node_detail div.memory_total,
-div.node_detail div.cores_total {
-    border: 1px solid black;
-    background-color: green;
-    width: 100%;
-    position: relative;
-    z-index: 0;
-}
-
-div.node_detail div.memory_reserved,
-div.node_detail div.cores_reserved {
-    background-color: red;
-    display: inline-block;
-    left: 0;
-    z-index: 2;
-    position: relative;
-    float: left;
-}
-div.node_detail div.memory_total span,
-div.node_detail div.cores_total span {
-    text-align: end;
-    width: 100%;
-    position: relative;
-    left: 0;
-    display: block;
-    z-index: 1;
-}
-
 div.scheduler_queue {
     display: flex;
     overflow: auto;
@@ -244,4 +216,39 @@ div.essential {
 
 div.running {
     border-color: green;
+}
+
+div.node_detail {
+    width: 48%;
+    height: 28em;
+    float: left;
+    border: dashed darkgray 1px;
+    margin: 0.2em;
+    padding-left: 0.5em;
+}
+
+div.pie-plots {
+    width: 20em;
+    height: 22em;
+}
+
+div.plot-container {
+    float: left;
+}
+
+div.plot-container p {
+    text-align: center;
+}
+
+h3.section {
+    clear: both;
+}
+
+table.service-distrib th {
+    border-bottom: 1px double black;
+}
+
+table.service-distrib {
+    border-spacing: 10px;
+    border-collapse: separate;
 }

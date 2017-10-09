@@ -33,6 +33,7 @@ from zoe_master.exceptions import UnsupportedSchedulerPolicyError
 log = logging.getLogger(__name__)
 
 ExecutionProgress = namedtuple('ExecutionProgress', ['last_time_scheduled', 'progress_sequence'])
+SELF_TRIGGER_TIMEOUT = 60  # the scheduler will trigger itself periodically in case platform resources have changed outside its control
 
 
 class ZoeElasticScheduler:
@@ -154,15 +155,14 @@ class ZoeElasticScheduler:
 
     def loop_start_th(self):
         """The Scheduler thread loop."""
-        auto_trigger_base = 60  # seconds
-        auto_trigger = auto_trigger_base
+        auto_trigger = SELF_TRIGGER_TIMEOUT
         while True:
             ret = self.trigger_semaphore.acquire(timeout=1)
             if not ret:  # Semaphore timeout, do some thread cleanup
                 self._cleanup_async_threads()
                 auto_trigger -= 1
                 if auto_trigger == 0:
-                    auto_trigger = auto_trigger_base
+                    auto_trigger = SELF_TRIGGER_TIMEOUT
                     self.trigger()
                 continue
             if self.loop_quit:
@@ -190,7 +190,7 @@ class ZoeElasticScheduler:
                     log.debug("-> {}".format(job))
 
                 try:
-                    platform_state = get_platform_state()
+                    platform_state = get_platform_state(self.state)
                 except ZoeException:
                     log.error('Cannot retrieve platform state, cannot schedule')
                     for job in jobs_to_attempt_scheduling:
@@ -229,12 +229,13 @@ class ZoeElasticScheduler:
                         break
                     free_resources = current_free_resources
 
-                log.debug('Allocation after simulation: {}'.format(cluster_status_snapshot.get_service_allocation()))
+                placements = cluster_status_snapshot.get_service_allocation()
+                log.debug('Allocation after simulation: {}'.format(placements))
 
                 # We port the results of the simulation into the real cluster
                 for job in jobs_to_launch:  # type: Execution
                     if not job.essential_services_running:
-                        ret = start_essential(job)
+                        ret = start_essential(job, placements)
                         if ret == "fatal":
                             jobs_to_attempt_scheduling.remove(job)
                             continue  # trow away the execution
@@ -245,7 +246,7 @@ class ZoeElasticScheduler:
                             job.set_running()
                         assert ret == "ok"
 
-                    start_elastic(job)
+                    start_elastic(job, placements)
 
                     if job.all_services_active:
                         log.debug('execution {}: all services are active'.format(job.id))
@@ -285,5 +286,5 @@ class ZoeElasticScheduler:
             'termination_threads_count': len(self.async_threads),
             'queue': [s.id for s in queue],
             'running_queue': [s.id for s in self.queue_running],
-            'platform_stats': get_platform_state().serialize()
+            'platform_stats': get_platform_state(self.state).serialize()
         }

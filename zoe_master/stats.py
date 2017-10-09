@@ -42,10 +42,11 @@ class NodeStats(Stats):
         self.labels = {}
         self.status = None
         self.error = ''
+        self.services = []
 
     def serialize(self):
         """Convert the object into a dict."""
-        return {
+        ret = {
             'name': self.name,
             'container_count': self.container_count,
             'cores_total': self.cores_total,
@@ -56,17 +57,18 @@ class NodeStats(Stats):
             'memory_free': self.memory_free,
             'labels': self.labels,
             'status': self.status,
-            'error': self.error
+            'error': self.error,
+            'services': []
         }
+        for service in self.services:
+            ret['services'].append(service.serialize())
+        return ret
 
 
 class ClusterStats(Stats):
     """Stats related to the whole cluster."""
     def __init__(self):
         super().__init__()
-        self.container_count = 0
-        self.memory_total = 0
-        self.cores_total = 0
         self.nodes = []
 
     def serialize(self):
@@ -77,3 +79,18 @@ class ClusterStats(Stats):
             'cores_total': self.cores_total,
             'nodes': [x.serialize() for x in self.nodes]
         }
+
+    @property
+    def memory_total(self) -> int:
+        """Total memory installed in the whole platform."""
+        return sum([node.memory_total for node in self.nodes])
+
+    @property
+    def cores_total(self) -> int:
+        """Total number of cores installed."""
+        return sum([node.cores_total for node in self.nodes])
+
+    @property
+    def container_count(self) -> int:
+        """Total number of containers."""
+        return sum([node.container_count for node in self.nodes])

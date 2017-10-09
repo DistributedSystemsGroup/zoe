@@ -12,10 +12,12 @@ class SimulatedNode:
     """A simulated node where containers can be run"""
     def __init__(self, real_node: NodeStats):
         self.real_reservations = {
-            "memory": real_node.memory_reserved
+            "memory": real_node.memory_reserved,
+            "cores": real_node.cores_reserved
         }
         self.real_free_resources = {
-            "memory": real_node.memory_free
+            "memory": real_node.memory_free,
+            "cores": real_node.cores_free
         }
         self.real_active_containers = real_node.container_count
         self.services = []
@@ -23,7 +25,14 @@ class SimulatedNode:
 
     def service_fits(self, service: Service) -> bool:
         """Checks whether a service can fit in this node"""
-        return service.resource_reservation.memory.min < self.node_free_memory()
+        return service.resource_reservation.memory.min < self.node_free_memory() and service.resource_reservation.cores.min <= self.node_free_cores()
+
+    def service_why_unfit(self, service) -> str:
+        """Generate an explanation of why the service does not fit this node."""
+        if service.resource_reservation.memory.min < self.node_free_memory():
+            return 'needs {} bytes of memory'.format(self.node_free_memory() - service.resource_reservation.memory.min)
+        elif service.resource_reservation.cores.min <= self.node_free_cores():
+            return 'needs {} more cores'.format(self.node_free_cores() - service.resource_reservation.cores.min)
 
     def service_add(self, service):
         """Add a service in this node."""
@@ -52,20 +61,33 @@ class SimulatedNode:
         simulated_reservation = 0
         for service in self.services:  # type: Service
             simulated_reservation += service.resource_reservation.memory.min
-        assert (self.real_free_resources['memory'] - simulated_reservation) >= 0
-        return self.real_free_resources['memory'] - simulated_reservation
+        free = self.real_free_resources['memory'] - simulated_reservation
+        if free < 0:
+            log.warning('More memory reserved than there is free on node {}: {}'.format(self.name, free))
+        return free
+
+    def node_free_cores(self):
+        """Return the amount of free cores available in this node."""
+        simulated_reservation = 0
+        for service in self.services:  # type: Service
+            simulated_reservation += service.resource_reservation.cores.min
+        free = self.real_free_resources['cores'] - simulated_reservation
+        if free < 0:
+            log.warning('More cores reserved than there are free on node {}: {}'.format(self.name, free))
+        return free
 
     def __repr__(self):
-        out = 'SN {} | f {}'.format(self.name, self.node_free_memory())
+        out = 'SN {} | m {} | c {}'.format(self.name, self.node_free_memory(), self.node_free_cores())
         return out
 
 
 class SimulatedPlatform:
     """A simulated cluster, composed by simulated nodes"""
-    def __init__(self, plastform_status: ClusterStats):
+    def __init__(self, platform_status: ClusterStats):
         self.nodes = {}
-        for node in plastform_status.nodes:
-            self.nodes[node.name] = SimulatedNode(node)
+        for node in platform_status.nodes:
+            if node.status == 'online':
+                self.nodes[node.name] = SimulatedNode(node)
 
     def allocate_essential(self, execution: Execution) -> bool:
         """Try to find an allocation for essential services"""
@@ -74,9 +96,11 @@ class SimulatedPlatform:
             for node_id_, node in self.nodes.items():
                 if node.service_fits(service):
                     candidate_nodes.append(node)
+                else:
+                    log.debug('Cannot fit service {} on node {}: {}'.format(service.id, node.name, node.service_why_unfit(service)))
             if len(candidate_nodes) == 0:  # this service does not fit anywhere
                 self.deallocate_essential(execution)
-                log.debug('Cannot fit essential service {}, bailing out'.format(service.id))
+                log.debug('Cannot fit essential service {} anywhere, bailing out'.format(service.id))
                 return False
             candidate_nodes.sort(key=lambda n: n.container_count)  # smallest first
             candidate_nodes[0].service_add(service)

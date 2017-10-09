@@ -15,21 +15,8 @@
 
 """Interface to the low-level Docker API."""
 
-import time
 import logging
 from typing import Iterable, Callable, Dict, Any
-
-import humanfriendly
-
-try:
-    from consul import Consul
-except ImportError:
-    Consul = None
-
-try:
-    from kazoo.client import KazooClient
-except ImportError:
-    KazooClient = None
 
 import docker
 import docker.tls
@@ -41,8 +28,8 @@ import requests.exceptions
 
 from zoe_lib.config import get_conf
 from zoe_lib.state import Service, VolumeDescriptionHostPath
-from zoe_master.stats import ClusterStats, NodeStats
 from zoe_master.backends.service_instance import ServiceInstance
+from zoe_master.backends.docker.config import DockerHostConfig  # pylint: disable=unused-import
 from zoe_master.exceptions import ZoeException, ZoeNotEnoughResourcesException
 
 log = logging.getLogger(__name__)
@@ -54,166 +41,83 @@ except AttributeError:
     raise ImportError('Wrong Docker library version')
 
 
-def zookeeper_swarm(zk_server_list: str, path='/docker') -> str:
-    """
-    Given a Zookeeper server list, find the currently active Swarm master.
-    :param zk_server_list: Zookeeper server list
-    :param path: Swarm path in Zookeeper
-    :return: Swarm master connection string
-    """
-    path += '/docker/swarm/leader'
-    zk_client = KazooClient(hosts=zk_server_list)
-    zk_client.start()
-    master, stat_ = zk_client.get(path)
-    zk_client.stop()
-    return master.decode('utf-8')
-
-
-def consul_swarm(consul_ip: str) -> str:
-    """
-    Using consul as discovery service, find the currently active Swarm master.
-    :param consul_ip: consul ip address
-    :return: Swarm master connection string
-    """
-    leader_key = 'docker/swarm/leader'
-    consul_client = Consul(consul_ip)
-    key_val = consul_client.kv.get(leader_key)
-    master = key_val[1]['Value']
-    return master.decode('utf-8')
-
-
-class SwarmClient:
-    """The Swarm client class that wraps the Docker API."""
-    def __init__(self) -> None:
-        url = get_conf().backend_swarm_url
-        tls = False
-        if 'zk://' in url:
-            if KazooClient is None:
-                raise ZoeException('ZooKeeper URL for Swarm, but the kazoo package is not installed')
-            url = url[len('zk://'):]
-            manager = zookeeper_swarm(url, get_conf().backend_swarm_zk_path)
-        elif 'consul://' in url:
-            if Consul is None:
-                raise ZoeException('Consul URL for Swarm, but the consul package is not installed')
-            url = url[len('consul://'):]
-            manager = consul_swarm(url)
-        elif 'http://' in url:
-            manager = url
-        elif 'https://' in url:
-            tls = docker.tls.TLSConfig(client_cert=(get_conf().backend_swarm_tls_cert, get_conf().backend_swarm_tls_key), verify=get_conf().backend_swarm_tls_ca)
-            manager = url
+class DockerClient:
+    """The client class that wraps the Docker API."""
+    def __init__(self, docker_config: DockerHostConfig) -> None:
+        self.name = docker_config.name
+        if not docker_config.tls:
+            tls = None
         else:
-            raise ZoeException('Unsupported URL scheme for Swarm')
+            tls = docker.tls.TLSConfig(client_cert=(docker_config.tls_cert, docker_config.tls_key), verify=docker_config.tls_ca)
+
         try:
-            self.cli = docker.DockerClient(base_url=manager, version="auto", tls=tls)
-        except docker.errors.DockerException:
-            raise ZoeException("Cannot connect to Docker")
+            self.cli = docker.DockerClient(base_url=docker_config.address, version="auto", tls=tls)
+        except docker.errors.DockerException as e:
+            raise ZoeException("Cannot connect to Docker host {} at address {}: {}".format(docker_config.name, docker_config.address, str(e)))
 
-    def info(self) -> ClusterStats:
-        """Retrieve Swarm statistics. The Docker API returns a mess difficult to parse."""
-        info = self.cli.info()
-        pl_status = ClusterStats()
-
-        # SystemStatus is a list...
-        idx = 0  # Role, skip
-        idx += 1
-        assert 'Strategy' in info["SystemStatus"][idx][0]
-        pl_status.placement_strategy = info["SystemStatus"][idx][1]
-        idx += 1
-        assert 'Filters' in info["SystemStatus"][idx][0]
-        pl_status.active_filters = [x.strip() for x in info["SystemStatus"][idx][1].split(", ")]
-        idx += 1
-        assert 'Nodes' in info["SystemStatus"][idx][0]
-        node_count = int(info["SystemStatus"][idx][1])
-        idx += 1  # At index 4 the nodes begin
-        for node in range(node_count):
-            idx2 = 0
-            node_stats = NodeStats(info["SystemStatus"][idx + node][0].strip())
-            node_stats.docker_endpoint = info["SystemStatus"][idx + node][1]
-            idx2 += 1  # ID, skip
-            idx2 += 1  # Status
-            if info["SystemStatus"][idx + node + idx2][1] == 'Healthy':
-                node_stats.status = 'online'
-            else:
-                node_stats.status = 'offline'
-            idx2 += 1  # Containers
-            node_stats.container_count = int(info["SystemStatus"][idx + node + idx2][1].split(' ')[0])
-            idx2 += 1  # CPUs
-            node_stats.cores_reserved = int(info["SystemStatus"][idx + node + idx2][1].split(' / ')[0])
-            node_stats.cores_total = int(info["SystemStatus"][idx + node + idx2][1].split(' / ')[1])
-            idx2 += 1  # Memory
-            node_stats.memory_reserved = info["SystemStatus"][idx + node + idx2][1].split(' / ')[0]
-            node_stats.memory_total = info["SystemStatus"][idx + node + idx2][1].split(' / ')[1]
-            idx2 += 1  # Labels
-            node_stats.labels = info["SystemStatus"][idx + node + idx2][1].split(', ')
-            idx2 += 1  # Last update
-            node_stats.last_update = info["SystemStatus"][idx + node + idx2][1]
-            idx2 += 1  # Docker version
-            node_stats.server_version = info["SystemStatus"][idx + node + idx2][1]
-
-            node_stats.memory_reserved = humanfriendly.parse_size(node_stats.memory_reserved)
-            node_stats.memory_total = humanfriendly.parse_size(node_stats.memory_total)
-
-            pl_status.nodes.append(node_stats)
-            idx += idx2
-        pl_status.timestamp = time.time()
-        return pl_status
+    def info(self) -> Dict:
+        """Retrieve engine statistics."""
+        return self.cli.info()
 
     def spawn_container(self, service_instance: ServiceInstance) -> Dict[str, Any]:
         """Create and start a new container."""
-        cont = None
-        port_bindings = {}  # type: Dict[str, Any]
+        run_args = {
+            'detach': True,
+            'ports': {},
+            'environment': {},
+            'volumes': {},
+            'working_dir': service_instance.work_dir,
+            'mem_limit': 0,
+            'mem_reservation': 0,
+            'memswap_limit': 0,
+            'name': service_instance.name,
+            'network_disabled': False,
+            'network_mode': get_conf().overlay_network_name,
+            'image': service_instance.image_name,
+            'command': service_instance.command,
+            'hostname': service_instance.hostname,
+            'labels': service_instance.labels,
+            'cpu_period': 100000,
+            'cpu_quota': 100000,
+            'log_config': {
+                "type": "json-file",
+                "config": {}
+            }
+        }
         for port in service_instance.ports:
-            port_bindings[str(port.number) + '/' + port.proto] = None
+            run_args['ports'][str(port.number) + '/' + port.proto] = None
 
-        environment = {}
         for name, value in service_instance.environment:
-            environment[name] = value
+            run_args['environment'][name] = value
 
-        volumes = {}
         for volume in service_instance.volumes:
             if volume.type == "host_directory":
                 assert isinstance(volume, VolumeDescriptionHostPath)
-                volumes[volume.path] = {'bind': volume.mount_point, 'mode': ("ro" if volume.readonly else "rw")}
+                run_args['volumes'][volume.path] = {'bind': volume.mount_point, 'mode': ("ro" if volume.readonly else "rw")}
             else:
                 log.error('Swarm backend does not support volume type {}'.format(volume.type))
 
         if service_instance.memory_limit is not None:
-            mem_limit = service_instance.memory_limit.max
-        else:
-            mem_limit = 0
-        # Swarm backend does not support cores in a consistent way, see https://github.com/docker/swarm/issues/475
+            run_args['mem_limit'] = service_instance.memory_limit.max
+            run_args['mem_reservation'] = service_instance.memory_limit.min
+            if service_instance.memory_limit.max == service_instance.memory_limit.min:
+                run_args['mem_reservation'] -= 1
+
+        if service_instance.core_limit is not None:
+            run_args['cpu_quota'] = int(100000 * service_instance.core_limit.max)
 
         if get_conf().gelf_address != '':
-            log_config = {
+            run_args['log_config'] = {
                 "type": "gelf",
                 "config": {
                     'gelf-address': get_conf().gelf_address,
                     'labels': ",".join(service_instance.labels)
                 }
             }
-        else:
-            log_config = {
-                "type": "json-file",
-                "config": {}
-            }
 
+        cont = None
         try:
-            cont = self.cli.containers.run(image=service_instance.image_name,
-                                           command=service_instance.command,
-                                           detach=True,
-                                           environment=environment,
-                                           hostname=service_instance.hostname,
-                                           labels=service_instance.labels,
-                                           log_config=log_config,
-                                           mem_limit=mem_limit,
-                                           memswap_limit=0,
-                                           name=service_instance.name,
-                                           network_disabled=False,
-                                           network_mode=get_conf().overlay_network_name,
-                                           ports=port_bindings,
-                                           working_dir=service_instance.work_dir,
-                                           volumes=volumes)
+            cont = self.cli.containers.run(**run_args)
         except docker.errors.ImageNotFound:
             raise ZoeException(message='Image not found')
         except docker.errors.APIError as e:
@@ -244,11 +148,12 @@ class SwarmClient:
         except KeyError:
             info['host'] = 'N/A'
 
-        for net in container.attrs["NetworkSettings"]["Networks"]:
-            if len(container.attrs["NetworkSettings"]["Networks"][net]['IPAddress']) > 0:
-                info["ip_address"][net] = container.attrs["NetworkSettings"]["Networks"][net]['IPAddress']
-            else:
-                info["ip_address"][net] = None
+        if container.attrs["NetworkSettings"]["Networks"] is not None:
+            for net in container.attrs["NetworkSettings"]["Networks"]:
+                if len(container.attrs["NetworkSettings"]["Networks"][net]['IPAddress']) > 0:
+                    info["ip_address"][net] = container.attrs["NetworkSettings"]["Networks"][net]['IPAddress']
+                else:
+                    info["ip_address"][net] = None
 
         if container.status == 'running' or container.status == 'restarting':
             info["state"] = Service.BACKEND_START_STATUS
@@ -278,6 +183,9 @@ class SwarmClient:
                     info['ports'][port] = mapping
                 else:
                     info['ports'][port] = None
+
+        info['cpu_period'] = container.attrs['HostConfig']['CpuPeriod']
+        info['cpu_quota'] = container.attrs['HostConfig']['CpuQuota']
 
         return info
 
@@ -344,6 +252,8 @@ class SwarmClient:
             raise ZoeException(str(ex))
         except requests.exceptions.RequestException as ex:
             raise ZoeException(str(ex))
+        if only_label is None:
+            only_label = {}
         conts = []
         for cont_info in ret:
             match = True
@@ -358,6 +268,18 @@ class SwarmClient:
                 conts.append(self._container_summary(cont_info))
 
         return conts
+
+    def stats(self, docker_id: str, stream: bool):
+        """Retrieves container stats based on resource usage."""
+        try:
+            cont = self.cli.containers.get(docker_id)
+        except (docker.errors.NotFound, docker.errors.APIError):
+            return None
+
+        try:
+            return cont.stats(stream=stream)
+        except docker.errors.APIError:
+            return None
 
     def logs(self, docker_id: str, stream: bool, follow=None):
         """
@@ -374,6 +296,6 @@ class SwarmClient:
             return None
 
         try:
-            return cont.logs(docker_id, stdout=True, stderr=True, follow=follow, stream=stream, timestamps=True, tail='all')
+            return cont.logs(stdout=True, stderr=True, follow=follow, stream=stream, timestamps=True, tail='all')
         except docker.errors.APIError:
             return None
