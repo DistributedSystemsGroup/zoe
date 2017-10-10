@@ -177,7 +177,7 @@ class APIEndpoint:
         all_execs = self.sql.execution_list(status='running')
         for execution in all_execs:
             for service in execution.services:
-                if service.description['monitor'] and service.status == service.BACKEND_DIE_STATUS:
+                if service.description['monitor'] and service.backend_status == service.BACKEND_DIE_STATUS:
                     log.info("Service {} ({}) of execution {} died, terminating execution".format(service.id, service.name, execution.id))
                     self.master.execution_terminate(execution.id)
                     break
