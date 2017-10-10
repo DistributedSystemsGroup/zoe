@@ -32,7 +32,7 @@ class DockerHostConfig:
         self.tls_cert = None
         self.tls_key = None
         self.tls_ca = None
-        self.labels = []
+        self.labels = set()
 
 
 class DockerConfig:
@@ -61,7 +61,7 @@ class DockerConfig:
                 continue
 
             if 'labels' in config[section]:  # labels are optional
-                host.labels = config[section]['labels'].split(',')
+                host.labels = set(config[section]['labels'].split(','))
 
             hosts.append(host)
         if len(hosts) == 0:

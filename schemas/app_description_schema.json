@@ -145,10 +145,18 @@
         },
         "work_dir": {
           "type": "string", "minLength": 1
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 0,
+          "uniqueItems": true
         }
       },
       "additionalProperties": false,
-      "required": ["name", "image", "ports", "environment", "volumes", "monitor", "startup_order", "essential_count", "total_count", "resources", "command", "replicas"]
+      "required": ["name", "image", "ports", "environment", "volumes", "monitor", "startup_order", "essential_count", "total_count", "resources", "command"]
     },
     "port": {
       "type": "object",

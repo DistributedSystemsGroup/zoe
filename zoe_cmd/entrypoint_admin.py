@@ -121,9 +121,9 @@ def exec_get_cmd(auth, args):
         tabular_data = []
         for c_id in execution['services']:
             service = cont_api.get(c_id)
-            service_data = [service['id'], service['name'], 'true' if service['essential'] else 'false', service['status'], service['backend_status'], service['error_message'] if service['error_message'] is not None else '']
+            service_data = [service['id'], service['name'], 'true' if service['essential'] else 'false', service['status'], service['backend_status'], service['backend_host'], service['error_message'] if service['error_message'] is not None else '']
             tabular_data.append(service_data)
-        headers = ['ID', 'Name', 'Essential', 'Zoe status', 'Backend status', 'Error message']
+        headers = ['ID', 'Name', 'Essential', 'Zoe status', 'Backend status', 'Host', 'Error message']
         print(tabulate(tabular_data, headers))
 
 
