@@ -15,6 +15,8 @@
 
 """Unit tests"""
 
+import time
+
 import pytest
 
 from zoe_master.backends.docker import api_client
@@ -341,10 +343,12 @@ class MockContainer:
 
     def stop(self, timeout=5):
         """Stop method"""
-        return
+        time.sleep(timeout/10)
 
     def remove(self, force=False):
         """Remove method"""
+        if force:
+            return
         return
 
 
