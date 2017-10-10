@@ -16,8 +16,8 @@ class SimulatedNode:
             "cores": real_node.cores_reserved
         }
         self.real_free_resources = {
-            "memory": real_node.memory_free,
-            "cores": real_node.cores_free
+            "memory": real_node.memory_total - real_node.memory_reserved,
+            "cores": real_node.cores_total - real_node.cores_reserved
         }
         self.real_active_containers = real_node.container_count
         self.services = []

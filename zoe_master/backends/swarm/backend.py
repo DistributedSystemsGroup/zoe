@@ -68,8 +68,8 @@ class SwarmBackend(zoe_master.backends.base.BaseBackend):
         """Get the platform state."""
         info = self.swarm.info()
         for node in info.nodes:  # type: NodeStats
-            node.memory_free = node.memory_total - node.memory_reserved
-            node.cores_free = node.cores_total - node.cores_reserved
+            node.memory_in_use = node.memory_reserved
+            node.cores_in_use = node.cores_reserved
         return info
 
     def service_log(self, service: Service):

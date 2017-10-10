@@ -19,8 +19,6 @@ import configparser
 import logging
 from typing import List
 
-from zoe_lib.config import get_conf
-
 log = logging.getLogger(__name__)
 
 
@@ -29,6 +27,7 @@ class DockerHostConfig:
     def __init__(self):
         self.name = None
         self.address = None
+        self.external_address = None
         self.tls = False
         self.tls_cert = None
         self.tls_key = None
@@ -38,8 +37,8 @@ class DockerHostConfig:
 
 class DockerConfig:
     """A class that holds the configuration for the Docker Engine backend."""
-    def __init__(self):
-        self.conffile = get_conf().backend_docker_config_file
+    def __init__(self, config_file):
+        self.conffile = config_file
 
     def read_config(self) -> List[DockerHostConfig]:
         """Parse the configuration file."""
@@ -50,7 +49,8 @@ class DockerConfig:
             host = DockerHostConfig()
             host.name = section
             try:
-                host.address = config[section]['address']
+                host.address = config[section]['docker_address']
+                host.external_address = config[section]['external_address']
                 host.tls = config.getboolean(section, 'use_tls')
                 if host.tls:
                     host.tls_cert = config[section]['tls_cert']
