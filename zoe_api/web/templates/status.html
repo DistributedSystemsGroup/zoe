@@ -139,7 +139,7 @@
         data = {
             datasets: [{
                 label: 'Used memory',
-                data: [{{ node['memory_total'] - node['memory_free'] }}, {{ node['memory_free'] }}],
+                data: [{{ node['memory_in_use'] }}, {{ node['memory_total'] - node['memory_in_use'] }}],
                 backgroundColor: ['rgba(0, 169, 225, 1.0)', 'rgba(145, 192, 46, 1.0)']
             }],
             'labels': ['In-use', 'Free']
@@ -186,7 +186,7 @@
         data = {
             datasets: [{
                 label: 'Used memory',
-                data: [{{ node['cores_total'] - node['cores_free'] }}, {{ node['cores_free'] }}],
+                data: [{{ node['cores_in_use'] }}, {{ node['cores_total'] - node['cores_in_use'] }}],
                 backgroundColor: ['rgba(0, 169, 225, 1.0)', 'rgba(145, 192, 46, 1.0)']
             }],
             'labels': ['In-use', 'Free']
