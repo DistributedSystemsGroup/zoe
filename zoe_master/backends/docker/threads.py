@@ -90,7 +90,7 @@ class DockerStateSynchronizer(threading.Thread):
             for service in service_list:
                 assert isinstance(service, Service)
                 if service.backend_id in containers:
-                    self._update_service_status(service, containers[service.backend_id])
+                    self._update_service_status(service, containers[service.backend_id], host_config)
                 else:
                     if service.backend_status == service.BACKEND_DESTROY_STATUS:
                         continue
@@ -116,13 +116,12 @@ class DockerStateSynchronizer(threading.Thread):
         for cont in container_list:
             stats[cont['id']] = my_engine.stats(cont['id'], stream=False)
 
-        node_stats.memory_reserved = sum([stat['memory_stats']['limit'] for stat in stats.values() if 'limit' in stat['memory_stats'] and stat['memory_stats']['limit'] != node_stats.memory_total])
-        memory_in_use = sum([stat['memory_stats']['usage'] for stat in stats.values() if 'usage' in stat['memory_stats']])
-        node_stats.memory_free = node_stats.memory_total - memory_in_use
+        node_stats.memory_reserved = sum([cont['memory_soft_limit'] for cont in container_list if cont['memory_soft_limit'] != node_stats.memory_total])
+        node_stats.memory_in_use = sum([stat['memory_stats']['usage'] for stat in stats.values() if 'usage' in stat['memory_stats']])
 
         node_stats.cores_reserved = sum([cont['cpu_quota'] / cont['cpu_period'] for cont in container_list if cont['cpu_period'] != 0])
 
-        node_stats.cores_free = node_stats.cores_total - sum([self._get_core_usage(stat) for stat in stats.values()])
+        node_stats.cores_in_use = sum([self._get_core_usage(stat) for stat in stats.values()])
 
     def _get_core_usage(self, stat):
         try:
@@ -134,7 +133,7 @@ class DockerStateSynchronizer(threading.Thread):
         cpu_time_pre = stat['precpu_stats']['cpu_usage']['total_usage']
         return (cpu_time_now - cpu_time_pre) / ((this_read_ts - pre_read_ts).total_seconds() * 1000000000)
 
-    def _update_service_status(self, service: Service, container):
+    def _update_service_status(self, service: Service, container, host_config: DockerHostConfig):
         """Update the service status."""
         if service.backend_status != container['state']:
             old_status = service.backend_status
@@ -142,7 +141,7 @@ class DockerStateSynchronizer(threading.Thread):
             log.debug('Updated service status, {} from {} to {}'.format(service.name, old_status, container['state']))
         for port in service.ports:
             if port.internal_name in container['ports'] and container['ports'][port.internal_name] is not None:
-                port.activate(container['ports'][port.internal_name][0], container['ports'][port.internal_name][1])
+                port.activate(host_config.external_address, container['ports'][port.internal_name])
             else:
                 port.reset()
 

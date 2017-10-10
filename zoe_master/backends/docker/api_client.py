@@ -176,16 +176,14 @@ class DockerClient:
         if container.attrs['NetworkSettings']['Ports'] is not None:
             for port in container.attrs['NetworkSettings']['Ports']:
                 if container.attrs['NetworkSettings']['Ports'][port] is not None:
-                    mapping = (
-                        container.attrs['NetworkSettings']['Ports'][port][0]['HostIp'],
-                        container.attrs['NetworkSettings']['Ports'][port][0]['HostPort']
-                    )
-                    info['ports'][port] = mapping
+                    info['ports'][port] = container.attrs['NetworkSettings']['Ports'][port][0]['HostPort']
                 else:
                     info['ports'][port] = None
 
         info['cpu_period'] = container.attrs['HostConfig']['CpuPeriod']
         info['cpu_quota'] = container.attrs['HostConfig']['CpuQuota']
+        info['memory_hard_limit'] = container.attrs['HostConfig']['Memory']
+        info['memory_soft_limit'] = container.attrs['HostConfig']['MemoryReservation']
 
         return info
 
