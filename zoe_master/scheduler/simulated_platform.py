@@ -22,6 +22,7 @@ class SimulatedNode:
         self.real_active_containers = real_node.container_count
         self.services = []
         self.name = real_node.name
+        self.labels = real_node.labels
 
     def service_fits(self, service: Service) -> bool:
         """Checks whether a service can fit in this node"""

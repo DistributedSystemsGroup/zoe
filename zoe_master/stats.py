@@ -39,7 +39,7 @@ class NodeStats(Stats):
         self.memory_total = 0
         self.memory_reserved = 0
         self.memory_in_use = 0
-        self.labels = {}
+        self.labels = []
         self.status = None
         self.error = ''
         self.services = []

@@ -73,6 +73,7 @@ class DockerStateSynchronizer(threading.Thread):
                 time.sleep(CHECK_INTERVAL)
                 continue
             node_stats.status = 'online'
+            node_stats.labels = host_config.labels
 
             service_list = self.state.service_list(backend_host=host_config.name)
             try:
@@ -111,6 +112,7 @@ class DockerStateSynchronizer(threading.Thread):
         node_stats.container_count = info['Containers']
         node_stats.cores_total = info['NCPU']
         node_stats.memory_total = info['MemTotal']
+        node_stats.labels += info['Labels']
 
         stats = {}
         for cont in container_list:
