@@ -160,9 +160,9 @@ class Service:
             self.volumes = [VolumeDescriptionHostPath(v[0], v[1], v[2]) for v in self.description['volumes']]
 
         try:
-            self.replicas = self.description['replicas']
+            self.labels = self.description['labels']
         except KeyError:
-            self.replicas = 0
+            self.labels = []
 
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""

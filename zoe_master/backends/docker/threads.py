@@ -112,7 +112,8 @@ class DockerStateSynchronizer(threading.Thread):
         node_stats.container_count = info['Containers']
         node_stats.cores_total = info['NCPU']
         node_stats.memory_total = info['MemTotal']
-        node_stats.labels += info['Labels']
+        if info['Labels'] is not None:
+            node_stats.labels += set(info['Labels'])
 
         stats = {}
         for cont in container_list:

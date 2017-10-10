@@ -108,6 +108,15 @@
             {% endif %}
         </div>
         <div class="container_count">{{ node['container_count'] }} containers</div>
+        {% if node['labels']|length > 0 %}
+        <div class="container_count">Labels:
+            {% for label in node['labels'] %}
+            {{ label }}&nbsp;
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="container_count">No labels</div>
+        {% endif %}
 
         <div class="plot-container">
             <p>Memory</p>

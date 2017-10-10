@@ -242,7 +242,7 @@ class KubernetesClient:
 
         config.set_labels(ZOE_LABELS)
         config.set_labels({'service_name': service_instance.name})
-        config.set_replicas(service_instance.replicas_count)
+        config.set_replicas(1)
 
         config.set_spec_selector(ZOE_LABELS)
         config.set_spec_selector({'service_name': service_instance.name})

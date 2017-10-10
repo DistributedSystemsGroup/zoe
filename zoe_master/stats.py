@@ -55,7 +55,7 @@ class NodeStats(Stats):
             'memory_total': self.memory_total,
             'memory_reserved': self.memory_reserved,
             'memory_in_use': self.memory_in_use,
-            'labels': self.labels,
+            'labels': list(self.labels),
             'status': self.status,
             'error': self.error,
             'services': []

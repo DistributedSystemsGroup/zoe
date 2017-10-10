@@ -26,14 +26,16 @@ class SimulatedNode:
 
     def service_fits(self, service: Service) -> bool:
         """Checks whether a service can fit in this node"""
-        return service.resource_reservation.memory.min < self.node_free_memory() and service.resource_reservation.cores.min <= self.node_free_cores()
+        return set(service.labels).issubset(self.labels) and service.resource_reservation.memory.min < self.node_free_memory() and service.resource_reservation.cores.min <= self.node_free_cores()
 
     def service_why_unfit(self, service) -> str:
         """Generate an explanation of why the service does not fit this node."""
-        if service.resource_reservation.memory.min < self.node_free_memory():
+        if service.resource_reservation.memory.min >= self.node_free_memory():
             return 'needs {} bytes of memory'.format(self.node_free_memory() - service.resource_reservation.memory.min)
-        elif service.resource_reservation.cores.min <= self.node_free_cores():
+        elif service.resource_reservation.cores.min > self.node_free_cores():
             return 'needs {} more cores'.format(self.node_free_cores() - service.resource_reservation.cores.min)
+        elif not set(service.labels).issubset(self.labels):
+            return 'service required labels {} to be defined on the node'.format(service.labels)
 
     def service_add(self, service):
         """Add a service in this node."""

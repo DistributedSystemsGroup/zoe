@@ -69,5 +69,3 @@ class ServiceInstance:
         self.ports = []
         for port in service.ports:
             self.ports.append(BackendPort(port.internal_number, port.protocol))
-
-        self.replicas_count = service.replicas
