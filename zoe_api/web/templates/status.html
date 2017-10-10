@@ -112,45 +112,46 @@
         <div class="plot-container">
             <p>Memory</p>
             <div class="pie-plots">
-                <canvas class="node_status_canvas" id="{{ node.name }}-mem-res"></canvas>
-                <canvas class="node_status_canvas" id="{{ node.name }}-mem-use"></canvas>
+                <canvas class="node_status_canvas" id="{{ node.name }}-mem"></canvas>
             </div>
         </div>
         <script>
         data = {
             datasets: [{
-                label: 'Reserved memory',
-                data: [{{ node['memory_reserved'] }}, {{ node['memory_total'] - node['memory_reserved'] }}],
+                label: 'Memory',
+                data: [{{ node['memory_reserved'] }}, {{ node['memory_in_use'] }}],
                 backgroundColor: ['rgba(0, 169, 225, 1.0)', 'rgba(145, 192, 46, 1.0)']
             }],
-            'labels': ['Reserved', 'Free']
+            'labels': ['Reserved', 'In use']
         };
-        ctx = document.getElementById("{{ node.name }}-mem-res").getContext('2d');
+        ctx = document.getElementById("{{ node.name }}-mem").getContext('2d');
         new Chart(ctx,{
-            type: 'pie',
+            type: 'bar',
             data: data,
             options: {
                 animation: {
-                    animateRotate: false
-                }
-            }
-        });
-
-        data = {
-            datasets: [{
-                label: 'Used memory',
-                data: [{{ node['memory_in_use'] }}, {{ node['memory_total'] - node['memory_in_use'] }}],
-                backgroundColor: ['rgba(0, 169, 225, 1.0)', 'rgba(145, 192, 46, 1.0)']
-            }],
-            'labels': ['In-use', 'Free']
-        };
-        ctx = document.getElementById("{{ node.name }}-mem-use").getContext('2d');
-        myPieChart = new Chart(ctx,{
-            type: 'pie',
-            data: data,
-            options: {
-                animation: {
-                    animateRotate: false
+                    duration: 0
+                },
+                responsiveAnimationDuration: 0,
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            callback: function(value, index, values) {
+                                return format_bytes_ret(value);
+                            },
+                            max: {{ node['memory_total'] }}
+                        }
+                    }]
+                },
+                legend: {
+                    display: false
+                },
+                tooltips: {
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            return format_bytes_ret(tooltipItem.yLabel);
+                        }
+                    }
                 }
             }
         });
@@ -159,26 +160,37 @@
         <div class="plot-container">
             <p>Cores</p>
             <div class="pie-plots">
-                <canvas class="node_status_canvas" id="{{ node.name }}-cpu-res"></canvas>
-                <canvas class="node_status_canvas" id="{{ node.name }}-cpu-use"></canvas>
+                <canvas class="node_status_canvas" id="{{ node.name }}-cpu"></canvas>
             </div>
         </div>
         <script>
         data = {
             datasets: [{
                 label: 'Reserved cores',
-                data: [{{ node['cores_reserved'] }}, {{ node['cores_total'] - node['cores_reserved'] }}],
+                data: [{{ node['cores_reserved'] }}, {{ node['cores_in_use'] }}],
                 backgroundColor: ['rgba(0, 169, 225, 1.0)', 'rgba(145, 192, 46, 1.0)']
             }],
-            'labels': ['Reserved', 'Free']
+            'labels': ['Reserved', 'In use']
         };
-        ctx = document.getElementById("{{ node.name }}-cpu-res").getContext('2d');
+        ctx = document.getElementById("{{ node.name }}-cpu").getContext('2d');
         new Chart(ctx,{
-            type: 'pie',
+            type: 'bar',
             data: data,
             options: {
                 animation: {
-                    animateRotate: false
+                    duration: 0
+                },
+                responsiveAnimationDuration: 0,
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            max: {{ node['cores_total'] }},
+                            stepSize: 8
+                        }
+                    }]
+                },
+                legend: {
+                    display: false
                 }
             }
         });

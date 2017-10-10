@@ -220,7 +220,6 @@ div.running {
 
 div.node_detail {
     width: 48%;
-    height: 28em;
     float: left;
     border: dashed darkgray 1px;
     margin: 0.2em;
@@ -229,7 +228,6 @@ div.node_detail {
 
 div.pie-plots {
     width: 20em;
-    height: 22em;
 }
 
 div.plot-container {
