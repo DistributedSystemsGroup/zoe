@@ -19,8 +19,6 @@ import configparser
 import logging
 from typing import List
 
-from zoe_lib.config import get_conf
-
 log = logging.getLogger(__name__)
 
 
@@ -39,8 +37,8 @@ class DockerHostConfig:
 
 class DockerConfig:
     """A class that holds the configuration for the Docker Engine backend."""
-    def __init__(self):
-        self.conffile = get_conf().backend_docker_config_file
+    def __init__(self, config_file):
+        self.conffile = config_file
 
     def read_config(self) -> List[DockerHostConfig]:
         """Parse the configuration file."""

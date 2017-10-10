@@ -46,7 +46,7 @@ class DockerStateSynchronizer(threading.Thread):
         self.setDaemon(True)
         self._platform_stats = ClusterStats()
         self.host_checkers = []
-        for docker_host in DockerConfig().read_config():
+        for docker_host in DockerConfig(get_conf().backend_docker_config_file).read_config():
             th = threading.Thread(target=self._host_subthread, args=(docker_host,), name='synchro_' + docker_host.name, daemon=True)
             th.start()
             self.host_checkers.append((th, docker_host))

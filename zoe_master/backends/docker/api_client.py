@@ -43,12 +43,17 @@ except AttributeError:
 
 class DockerClient:
     """The client class that wraps the Docker API."""
-    def __init__(self, docker_config: DockerHostConfig) -> None:
+    def __init__(self, docker_config: DockerHostConfig, mock_client=None) -> None:
         self.name = docker_config.name
         if not docker_config.tls:
             tls = None
         else:
             tls = docker.tls.TLSConfig(client_cert=(docker_config.tls_cert, docker_config.tls_key), verify=docker_config.tls_ca)
+
+        # Simplify testing
+        if mock_client is not None:
+            self.cli = mock_client
+            return
 
         try:
             self.cli = docker.DockerClient(base_url=docker_config.address, version="auto", tls=tls)
@@ -173,7 +178,7 @@ class DockerClient:
             info["running"] = False
 
         info['ports'] = {}
-        if container.attrs['NetworkSettings']['Ports'] is not None:
+        if 'Ports' in container.attrs['NetworkSettings'] and container.attrs['NetworkSettings']['Ports'] is not None:
             for port in container.attrs['NetworkSettings']['Ports']:
                 if container.attrs['NetworkSettings']['Ports'][port] is not None:
                     info['ports'][port] = container.attrs['NetworkSettings']['Ports'][port][0]['HostPort']
@@ -190,7 +195,7 @@ class DockerClient:
     def inspect_container(self, docker_id: str) -> Dict[str, Any]:
         """Retrieve information about a running container."""
         try:
-            cont = self.cli.container.get(docker_id)
+            cont = self.cli.containers.get(docker_id)
         except Exception as e:
             raise ZoeException(str(e))
         return self._container_summary(cont)

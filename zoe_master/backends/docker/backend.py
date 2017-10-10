@@ -37,7 +37,7 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
     """Zoe backend implementation for old-style stand-alone Docker Swarm."""
     def __init__(self, opts):
         super().__init__(opts)
-        self.docker_config = DockerConfig().read_config()
+        self.docker_config = DockerConfig(get_conf().backend_docker_config_file).read_config()
 
     def _get_config(self, host) -> DockerHostConfig:
         for conf in self.docker_config:
