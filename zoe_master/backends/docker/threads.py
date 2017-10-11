@@ -134,6 +134,7 @@ class DockerStateSynchronizer(threading.Thread):
         node_stats.cores_in_use = sum([self._get_core_usage(stat) for stat in stats.values()])
 
         if get_conf().backend_image_management:
+            node_stats.image_list = []
             for dk_image in my_engine.list_images():
                 image = {
                     'id': dk_image.attrs['Id'],
