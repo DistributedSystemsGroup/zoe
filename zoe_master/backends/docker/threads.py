@@ -19,7 +19,6 @@ import logging
 import threading
 import time
 from copy import deepcopy
-from datetime import datetime
 
 from zoe_lib.config import get_conf
 from zoe_lib.state import SQLManager, Service
@@ -148,14 +147,9 @@ class DockerStateSynchronizer(threading.Thread):
                 node_stats.image_list.append(image)
 
     def _get_core_usage(self, stat):
-        try:
-            this_read_ts = datetime.strptime(stat['read'], '%Y-%m-%dT%H:%M:%S.%f')
-        except ValueError:
-            return 0
-        pre_read_ts = datetime.strptime(stat['preread'], '%Y-%m-%dT%H:%M:%S.%f')
         cpu_time_now = stat['cpu_stats']['cpu_usage']['total_usage']
         cpu_time_pre = stat['precpu_stats']['cpu_usage']['total_usage']
-        return (cpu_time_now - cpu_time_pre) / ((this_read_ts - pre_read_ts).total_seconds() * 1000000000)
+        return (cpu_time_now - cpu_time_pre) / 1000000000
 
     def _update_service_status(self, service: Service, container, host_config: DockerHostConfig):
         """Update the service status."""
