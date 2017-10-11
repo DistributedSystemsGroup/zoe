@@ -68,7 +68,6 @@ class APIManager:
                 if execution is None:
                     self._reply_error('Execution ID {} not found'.format(message['exec_id']))
                 else:
-                    execution.set_scheduled()
                     self._reply_ok()
                     zoe_master.preprocessing.execution_submit(self.state, self.scheduler, execution)
             elif message['command'] == 'execution_terminate':

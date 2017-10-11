@@ -75,3 +75,7 @@ class SwarmBackend(zoe_master.backends.base.BaseBackend):
     def service_log(self, service: Service):
         """Get the log."""
         return self.swarm.logs(service.backend_id, True, False)
+
+    def preload_image(self, image_name: str) -> None:
+        """Make a service image available."""
+        raise NotImplementedError

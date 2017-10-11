@@ -16,6 +16,7 @@
 """The high-level interface that Zoe uses to talk to the configured container backend."""
 
 import logging
+import time
 from typing import List
 
 from zoe_lib.config import get_conf
@@ -24,7 +25,7 @@ from zoe_lib.state import Execution, Service, SQLManager  # pylint: disable=unus
 from zoe_master.backends.base import BaseBackend
 from zoe_master.backends.service_instance import ServiceInstance
 from zoe_master.exceptions import ZoeStartExecutionFatalException, ZoeStartExecutionRetryException, ZoeException
-from zoe_master.stats import ClusterStats  # pylint: disable=unused-import
+from zoe_master.stats import ClusterStats, NodeStats  # pylint: disable=unused-import
 
 try:
     from zoe_master.backends.swarm.backend import SwarmBackend
@@ -166,10 +167,24 @@ def terminate_execution(execution: Execution) -> None:
     execution.set_terminated()
 
 
-def get_platform_state(state: SQLManager) -> ClusterStats:
+def get_platform_state(state: SQLManager, with_images=False) -> ClusterStats:
     """Retrieves the state of the platform by querying the container backend. Platform state includes information on free/reserved resources for each node. This information is used for advanced scheduling."""
     backend = _get_backend()
     platform_state = backend.platform_state()
-    for node in platform_state.nodes:
+    for node in platform_state.nodes:  # type: NodeStats
         node.services = state.service_list(backend_host=node.name, backend_status=Service.BACKEND_START_STATUS)
+        if not with_images:
+            node.image_list = []
     return platform_state
+
+
+def preload_image(image_name):
+    """Make a service image available on the cluster, according to the backend support."""
+    backend = _get_backend()
+    log.debug('Preloading image {}'.format(image_name))
+    time_start = time.time()
+    try:
+        backend.preload_image(image_name)
+        log.info('Image {} preloaded in {:.2f}s'.format(image_name, time.time() - time_start))
+    except NotImplementedError:
+        log.warning('Backend {} does not support image preloading'.format(get_conf().backend))

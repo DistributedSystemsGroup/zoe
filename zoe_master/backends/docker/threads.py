@@ -19,7 +19,6 @@ import logging
 import threading
 import time
 from copy import deepcopy
-from datetime import datetime
 
 from zoe_lib.config import get_conf
 from zoe_lib.state import SQLManager, Service
@@ -70,8 +69,11 @@ class DockerStateSynchronizer(threading.Thread):
             except ZoeException as e:
                 log.error(str(e))
                 node_stats.status = 'offline'
+                log.info('Node {} is offline'.format(host_config.name))
                 time.sleep(CHECK_INTERVAL)
                 continue
+            if node_stats.status == 'offline':
+                log.info('Node {} is back online'.format(host_config.name))
             node_stats.status = 'online'
             node_stats.labels = host_config.labels
 
@@ -98,11 +100,16 @@ class DockerStateSynchronizer(threading.Thread):
                     else:
                         service.set_backend_status(service.BACKEND_DESTROY_STATUS)
 
-            self._update_node_stats(my_engine, node_stats)
+            try:
+                self._update_node_stats(my_engine, node_stats)
+            except ZoeException as e:
+                log.error(str(e))
+                node_stats.status = 'offline'
+                log.warning('Node {} is offline'.format(host_config.name))
 
             time.sleep(CHECK_INTERVAL)
 
-    def _update_node_stats(self, my_engine, node_stats):
+    def _update_node_stats(self, my_engine, node_stats: NodeStats):
         try:
             container_list = my_engine.list()
             info = my_engine.info()
@@ -126,15 +133,24 @@ class DockerStateSynchronizer(threading.Thread):
 
         node_stats.cores_in_use = sum([self._get_core_usage(stat) for stat in stats.values()])
 
+        if get_conf().backend_image_management:
+            node_stats.image_list = []
+            for dk_image in my_engine.list_images():
+                image = {
+                    'id': dk_image.attrs['Id'],
+                    'size': dk_image.attrs['Size'],
+                    'names': dk_image.tags
+                }
+                for name in image['names']:
+                    if name[-7:] == ':latest':  # add an image with the name without 'latest' to fake Docker image lookup algorithm
+                        image['names'].append(name[:-7])
+                        break
+                node_stats.image_list.append(image)
+
     def _get_core_usage(self, stat):
-        try:
-            this_read_ts = datetime.strptime(stat['read'], '%Y-%m-%dT%H:%M:%S.%f')
-        except ValueError:
-            return 0
-        pre_read_ts = datetime.strptime(stat['preread'], '%Y-%m-%dT%H:%M:%S.%f')
         cpu_time_now = stat['cpu_stats']['cpu_usage']['total_usage']
         cpu_time_pre = stat['precpu_stats']['cpu_usage']['total_usage']
-        return (cpu_time_now - cpu_time_pre) / ((this_read_ts - pre_read_ts).total_seconds() * 1000000000)
+        return (cpu_time_now - cpu_time_pre) / 1000000000
 
     def _update_service_status(self, service: Service, container, host_config: DockerHostConfig):
         """Update the service status."""
