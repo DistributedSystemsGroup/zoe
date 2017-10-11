@@ -276,13 +276,19 @@ class DockerClient:
         """Retrieves container stats based on resource usage."""
         try:
             cont = self.cli.containers.get(docker_id)
-        except (docker.errors.NotFound, docker.errors.APIError):
-            return None
+        except docker.errors.NotFound:
+            raise ZoeException('Container not found')
+        except docker.errors.APIError as e:
+            raise ZoeException('Docker API error: {}'.format(e))
 
         try:
             return cont.stats(stream=stream)
-        except docker.errors.APIError:
-            return None
+        except docker.errors.APIError as e:
+            raise ZoeException('Docker API error: {}'.format(e))
+        except requests.exceptions.ReadTimeout:
+            raise ZoeException('Read timeout')
+        except ValueError:
+            raise ZoeException('Docker API decoding error')
 
     def logs(self, docker_id: str, stream: bool, follow=None):
         """
@@ -302,3 +308,17 @@ class DockerClient:
             return cont.logs(stdout=True, stderr=True, follow=follow, stream=stream, timestamps=True, tail='all')
         except docker.errors.APIError:
             return None
+
+    def list_images(self):
+        """Retrieve the list of images available on this node."""
+        try:
+            return self.cli.images.list()
+        except (docker.errors.NotFound, docker.errors.APIError):
+            return []
+
+    def pull_image(self, image_name):
+        """Pulls an image in the docker engine."""
+        try:
+            self.cli.images.pull(image_name)
+        except docker.errors.APIError as e:
+            log.error('Cannot download image {}: {}'.format(image_name, e))

@@ -43,6 +43,7 @@ class NodeStats(Stats):
         self.status = None
         self.error = ''
         self.services = []
+        self.image_list = []
 
     def serialize(self):
         """Convert the object into a dict."""

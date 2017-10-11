@@ -3,6 +3,7 @@
 import logging
 
 from zoe_lib.state.sql_manager import Execution, Service
+from zoe_lib.config import get_conf
 from zoe_master.stats import ClusterStats, NodeStats
 
 log = logging.getLogger(__name__)
@@ -23,10 +24,15 @@ class SimulatedNode:
         self.services = []
         self.name = real_node.name
         self.labels = real_node.labels
+        self.images = real_node.image_list
 
     def service_fits(self, service: Service) -> bool:
         """Checks whether a service can fit in this node"""
-        return set(service.labels).issubset(self.labels) and service.resource_reservation.memory.min < self.node_free_memory() and service.resource_reservation.cores.min <= self.node_free_cores()
+        ret = set(service.labels).issubset(self.labels)
+        ret = ret and service.resource_reservation.memory.min < self.node_free_memory()
+        ret = ret and service.resource_reservation.cores.min <= self.node_free_cores()
+        ret = ret and self._image_is_available(service.image_name)
+        return ret
 
     def service_why_unfit(self, service) -> str:
         """Generate an explanation of why the service does not fit this node."""
@@ -36,6 +42,16 @@ class SimulatedNode:
             return 'needs {} more cores'.format(self.node_free_cores() - service.resource_reservation.cores.min)
         elif not set(service.labels).issubset(self.labels):
             return 'service required labels {} to be defined on the node'.format(service.labels)
+        elif not self._image_is_available(service.image_name):
+            return 'image {} is not available on this node'.format(service.image_name)
+
+    def _image_is_available(self, image_name) -> bool:
+        if not get_conf().backend_image_management:
+            return True
+        for image in self.images:
+            if image_name in image['names']:
+                return True
+        return False
 
     def service_add(self, service):
         """Add a service in this node."""

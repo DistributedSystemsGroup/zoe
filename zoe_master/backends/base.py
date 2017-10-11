@@ -53,3 +53,7 @@ class BaseBackend:
     def platform_state(self) -> ClusterStats:
         """Get the platform state. This method should fill-in a new ClusterStats object at each call, with fresh statistics on the available nodes and resource availability. This information will be used for taking scheduling decisions."""
         raise NotImplementedError
+
+    def preload_image(self, image_name: str) -> None:
+        """Make a service image available."""
+        raise NotImplementedError

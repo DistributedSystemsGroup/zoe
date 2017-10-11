@@ -70,8 +70,11 @@ class DockerStateSynchronizer(threading.Thread):
             except ZoeException as e:
                 log.error(str(e))
                 node_stats.status = 'offline'
+                log.info('Node {} is offline'.format(host_config.name))
                 time.sleep(CHECK_INTERVAL)
                 continue
+            if node_stats.status == 'offline':
+                log.info('Node {} is back online'.format(host_config.name))
             node_stats.status = 'online'
             node_stats.labels = host_config.labels
 
@@ -98,11 +101,16 @@ class DockerStateSynchronizer(threading.Thread):
                     else:
                         service.set_backend_status(service.BACKEND_DESTROY_STATUS)
 
-            self._update_node_stats(my_engine, node_stats)
+            try:
+                self._update_node_stats(my_engine, node_stats)
+            except ZoeException as e:
+                log.error(str(e))
+                node_stats.status = 'offline'
+                log.warning('Node {} is offline'.format(host_config.name))
 
             time.sleep(CHECK_INTERVAL)
 
-    def _update_node_stats(self, my_engine, node_stats):
+    def _update_node_stats(self, my_engine, node_stats: NodeStats):
         try:
             container_list = my_engine.list()
             info = my_engine.info()
@@ -125,6 +133,19 @@ class DockerStateSynchronizer(threading.Thread):
         node_stats.cores_reserved = sum([cont['cpu_quota'] / cont['cpu_period'] for cont in container_list if cont['cpu_period'] != 0])
 
         node_stats.cores_in_use = sum([self._get_core_usage(stat) for stat in stats.values()])
+
+        if get_conf().backend_image_management:
+            for dk_image in my_engine.list_images():
+                image = {
+                    'id': dk_image.attrs['Id'],
+                    'size': dk_image.attrs['Size'],
+                    'names': dk_image.tags
+                }
+                for name in image['names']:
+                    if name[-7:] == ':latest':  # add an image with the name without 'latest' to fake Docker image lookup algorithm
+                        image['names'].append(name[:-7])
+                        break
+                node_stats.image_list.append(image)
 
     def _get_core_usage(self, stat):
         try:

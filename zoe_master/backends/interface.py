@@ -17,6 +17,7 @@
 
 import logging
 from typing import List
+import time
 
 from zoe_lib.config import get_conf
 from zoe_lib.state import Execution, Service, SQLManager  # pylint: disable=unused-import
@@ -173,3 +174,15 @@ def get_platform_state(state: SQLManager) -> ClusterStats:
     for node in platform_state.nodes:
         node.services = state.service_list(backend_host=node.name, backend_status=Service.BACKEND_START_STATUS)
     return platform_state
+
+
+def preload_image(image_name):
+    """Make a service image available on the cluster, according to the backend support."""
+    backend = _get_backend()
+    log.debug('Preloading image {}'.format(image_name))
+    time_start = time.time()
+    try:
+        backend.preload_image(image_name)
+        log.info('Image {} preloaded in {:.2f}s'.format(image_name, time.time() - time_start))
+    except NotImplementedError:
+        log.warning('Backend {} does not support image preloading'.format(get_conf().backend))

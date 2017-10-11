@@ -18,10 +18,12 @@
 import logging
 import os
 import shutil
+import threading
 
 from zoe_lib.state import Execution, SQLManager
 from zoe_lib.config import get_conf
 from zoe_master.scheduler import ZoeBaseScheduler
+from zoe_master.backends.interface import preload_image
 
 log = logging.getLogger(__name__)
 
@@ -55,6 +57,9 @@ def _digest_application_description(state: SQLManager, execution: Execution):
 
             counter += 1
         assert counter == total_count
+
+        if get_conf().backend_image_management:
+            threading.Thread(target=preload_image, args=(service_descr['image'],), name='image-downloader-{}'.format(service_descr['name']), daemon=True).start()
 
 
 def execution_submit(state: SQLManager, scheduler: ZoeBaseScheduler, execution: Execution):
