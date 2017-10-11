@@ -161,16 +161,6 @@ class APIEndpoint:
         if success:
             return message
 
-    def retry_submit_error_executions(self):
-        """Resubmit any execution forgotten by the master."""
-        waiting_execs = self.sql.execution_list(status=zoe_lib.state.sql_manager.Execution.SUBMIT_STATUS)
-        if waiting_execs is None or len(waiting_execs) == 0:
-            return
-        e = waiting_execs[0]
-        success, message = self.master.execution_start(e.id)
-        if not success:
-            log.warning('Zoe Master unavailable ({}), execution {} still waiting'.format(message, e.id))
-
     def cleanup_dead_executions(self):
         """Terminates all executions with dead "monitor" services."""
         log.debug('Starting dead execution cleanup task')

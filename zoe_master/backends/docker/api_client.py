@@ -322,3 +322,4 @@ class DockerClient:
             self.cli.images.pull(image_name)
         except docker.errors.APIError as e:
             log.error('Cannot download image {}: {}'.format(image_name, e))
+            raise ZoeException('Cannot download image {}: {}'.format(image_name, e))

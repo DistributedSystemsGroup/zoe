@@ -64,7 +64,7 @@ class ZoeElasticScheduler:
 
     def incoming(self, execution: Execution):
         """
-        This method adds the execution to the end of the FIFO queue and triggers the scheduler.
+        This method adds the execution to the end of the queue and triggers the scheduler.
         :param execution: The execution
         :return:
         """

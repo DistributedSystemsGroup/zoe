@@ -24,6 +24,7 @@ from zoe_lib.state import Execution, SQLManager
 from zoe_lib.config import get_conf
 from zoe_master.scheduler import ZoeBaseScheduler
 from zoe_master.backends.interface import preload_image
+from zoe_master.exceptions import ZoeException
 
 log = logging.getLogger(__name__)
 
@@ -59,13 +60,24 @@ def _digest_application_description(state: SQLManager, execution: Execution):
         assert counter == total_count
 
         if get_conf().backend_image_management:
-            threading.Thread(target=preload_image, args=(service_descr['image'],), name='image-downloader-{}'.format(service_descr['name']), daemon=True).start()
+            try:
+                preload_image(service_descr['image'])
+            except ZoeException as e:
+                execution.set_error_message('{}'.format(e))
+                execution.set_error()
+                return False
+        return True
+
+
+def _do_execution_submit(state: SQLManager, scheduler: ZoeBaseScheduler, execution: Execution):
+    if _digest_application_description(state, execution):
+        execution.set_scheduled()
+        scheduler.incoming(execution)
 
 
 def execution_submit(state: SQLManager, scheduler: ZoeBaseScheduler, execution: Execution):
     """Submit a new execution to the scheduler."""
-    _digest_application_description(state, execution)
-    scheduler.incoming(execution)
+    threading.Thread(target=_do_execution_submit, args=(state, scheduler, execution), name='submission_{}'.format(execution.id), daemon=True).start()
 
 
 def execution_terminate(scheduler: ZoeBaseScheduler, execution: Execution):
@@ -75,6 +87,10 @@ def execution_terminate(scheduler: ZoeBaseScheduler, execution: Execution):
 
 def restart_resubmit_scheduler(state: SQLManager, scheduler: ZoeBaseScheduler):
     """Restart work after a restart of the process."""
+    submitted_execs = state.execution_list(status=Execution.SUBMIT_STATUS)
+    for e in submitted_execs:
+        execution_submit(state, scheduler, e)
+
     sched_execs = state.execution_list(status=Execution.SCHEDULED_STATUS)
     for e in sched_execs:
         scheduler.incoming(e)

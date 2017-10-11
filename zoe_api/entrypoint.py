@@ -77,8 +77,6 @@ def zoe_web_main() -> int:
     http_server.bind(args.listen_port, args.listen_address)
     http_server.start(num_processes=1)
 
-    retry_cb = PeriodicCallback(api_endpoint.retry_submit_error_executions, 30000)
-    retry_cb.start()
     retry_cb = PeriodicCallback(api_endpoint.cleanup_dead_executions, 60000)
     retry_cb.start()
 

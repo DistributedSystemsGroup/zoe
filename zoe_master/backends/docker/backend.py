@@ -86,20 +86,20 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
         engine = DockerClient(conf)
         return engine.logs(service.backend_id, True, False)
 
-    def _real_preload(self, image_name, host_conf):
-        log.debug('Preloading image {} on host {}'.format(image_name, host_conf.name))
-        time_start = time.time()
-        my_engine = DockerClient(host_conf)
-        my_engine.pull_image(image_name)
-        log.debug('Image {} preloaded on host {} in {:.2f}s'.format(image_name, host_conf.name, time.time() - time_start))
-
     def preload_image(self, image_name):
         """Pull an image from a Docker registry into each host. We shuffle the list to prevent the scheduler to find always the first host in the list."""
-        th_list = []
-        for backend_host_conf in self.docker_config:
-            th = threading.Thread(target=self._real_preload, name='dk_image_preload_{}'.format(backend_host_conf.name), args=(image_name, backend_host_conf), daemon=True)
-            th.start()
-            th_list.append(th)
-
-        for th in th_list:
-            th.join()
+        one_success = False
+        for host_conf in self.docker_config:
+            log.debug('Pre-loading image {} on host {}'.format(image_name, host_conf.name))
+            time_start = time.time()
+            my_engine = DockerClient(host_conf)
+            try:
+                my_engine.pull_image(image_name)
+            except ZoeException:
+                log.error('Image {} pre-loading failed on host {}'.format(image_name, host_conf.name))
+                continue
+            else:
+                one_success = True
+            log.debug('Image {} pre-loaded on host {} in {:.2f}s'.format(image_name, host_conf.name, time.time() - time_start))
+        if not one_success:
+            raise ZoeException('Cannot pull image {}'.format(image_name))
