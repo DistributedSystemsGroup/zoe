@@ -16,8 +16,8 @@
 """The high-level interface that Zoe uses to talk to the configured container backend."""
 
 import logging
-from typing import List
 import time
+from typing import List
 
 from zoe_lib.config import get_conf
 from zoe_lib.state import Execution, Service, SQLManager  # pylint: disable=unused-import

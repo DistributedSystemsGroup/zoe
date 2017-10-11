@@ -74,3 +74,7 @@ class KubernetesBackend(zoe_master.backends.base.BaseBackend):
             node.memory_in_use = node.memory_reserved
             node.cores_in_use = node.cores_reserved
         return info
+
+    def preload_image(self, image_name: str) -> None:
+        """Make a service image available."""
+        raise NotImplementedError
