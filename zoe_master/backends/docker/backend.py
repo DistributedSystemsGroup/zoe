@@ -16,7 +16,7 @@
 """Zoe backend implementation for one or more Docker Engines."""
 
 import logging
-import threading
+import re
 import time
 
 from zoe_lib.state import Service
@@ -59,6 +59,9 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
 
     def spawn_service(self, service_instance: ServiceInstance):
         """Spawn a service, translating a Zoe Service into a Docker container."""
+        m = re.search(r'^(?:([^\/]+)\/)?(?:([^\/]+)\/)?([^@:\/]+)(?:[@:](.+))?$', service_instance.image_name)
+        if m.group(4) is None:
+            raise ZoeStartExecutionFatalException('Image {} does not have a version tag'.format(service_instance.image_name))
         conf = self._get_config(service_instance.backend_host)
         try:
             engine = DockerClient(conf)
@@ -88,6 +91,9 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
 
     def preload_image(self, image_name):
         """Pull an image from a Docker registry into each host. We shuffle the list to prevent the scheduler to find always the first host in the list."""
+        m = re.search(r'^(?:([^\/]+)\/)?(?:([^\/]+)\/)?([^@:\/]+)(?:[@:](.+))?$', image_name)
+        if m.group(4) is None:
+            raise ZoeException('Image {} does not have a version tag'.format(image_name))
         one_success = False
         for host_conf in self.docker_config:
             log.debug('Pre-loading image {} on host {}'.format(image_name, host_conf.name))
