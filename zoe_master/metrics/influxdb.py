@@ -15,23 +15,26 @@
 
 """InfluxDB implementation of the metrics system."""
 
-import time
 import logging
+import time
 
 import requests
 
-import zoe_lib.metrics.base
+import zoe_master.metrics.base
+from zoe_lib.config import get_conf
 
 log = logging.getLogger(__name__)
 
 
-class InfluxDBMetricSender(zoe_lib.metrics.base.BaseMetricSender):
+class InfluxDBMetricSender(zoe_master.metrics.base.BaseMetricSender):
     """Sends metrics to InfluxDB."""
 
     RETRIES = 5
 
-    def __init__(self, deployment_name, influxdb_url, influxdb_dbname):
-        super().__init__(deployment_name)
+    def __init__(self, state):
+        super().__init__(state)
+        influxdb_url = get_conf().influxdb_url
+        influxdb_dbname = get_conf().influxdb_dbname
         self._influxdb_endpoint = influxdb_url + '/write?precision=ms&db=' + influxdb_dbname
         self._retries = self.RETRIES
         self._start()
@@ -61,7 +64,7 @@ class InfluxDBMetricSender(zoe_lib.metrics.base.BaseMetricSender):
     def metric_api_call(self, time_start, action):
         """Compute and emit the run time of an API call."""
         time_end = time.time()
-        diff = zoe_lib.metrics.base.time_diff_ms(time_start, time_end)
+        diff = zoe_master.metrics.base.time_diff_ms(time_start, time_end)
 
         point_str = "api_latency"
         point_str += ",api_call=" + action

@@ -115,7 +115,7 @@ class ZoeElasticScheduler:
             th = self.async_threads.pop(0)
             th.join(0.1)
             if th.isAlive():  # join failed
-                log.debug('Thread {} join failed'.format(th.name))
+                # log.debug('Thread {} join failed'.format(th.name))
                 self.async_threads.append(th)
             counter -= 1
 
@@ -190,7 +190,7 @@ class ZoeElasticScheduler:
                     log.debug("-> {}".format(job))
 
                 try:
-                    platform_state = get_platform_state(self.state, with_images=True)
+                    platform_state = get_platform_state(self.state, force_update=True)
                 except ZoeException:
                     log.error('Cannot retrieve platform state, cannot schedule')
                     for job in jobs_to_attempt_scheduling:

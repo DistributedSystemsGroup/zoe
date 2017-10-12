@@ -21,16 +21,15 @@ import logging
 import os
 
 import zoe_lib.config as config
-from zoe_lib.metrics.influxdb import InfluxDBMetricSender
-from zoe_lib.metrics.logging import LogMetricSender
 from zoe_lib.state import SQLManager
-
-import zoe_master.scheduler
 import zoe_master.backends.interface
-from zoe_master.preprocessing import restart_resubmit_scheduler
-from zoe_master.master_api import APIManager
+import zoe_master.scheduler
 from zoe_master.exceptions import ZoeException
 from zoe_master.gelf_listener import GELFListener
+from zoe_master.master_api import APIManager
+from zoe_master.metrics.influxdb import InfluxDBMetricSender
+from zoe_master.metrics.logging import LogMetricSender
+from zoe_master.preprocessing import restart_resubmit_scheduler
 
 log = logging.getLogger("main")
 LOG_FORMAT = '%(asctime)-15s %(levelname)s %(threadName)s->%(name)s: %(message)s'
@@ -62,13 +61,13 @@ def main():
     if ret != 0:
         return ret
 
-    if config.get_conf().influxdb_enable:
-        metrics = InfluxDBMetricSender(config.get_conf().deployment_name, config.get_conf().influxdb_url, config.get_conf().influxdb_dbname)
-    else:
-        metrics = LogMetricSender(config.get_conf().deployment_name)
-
     log.info("Initializing DB manager")
     state = SQLManager(args)
+
+    if config.get_conf().influxdb_enable:
+        metrics = InfluxDBMetricSender(state)
+    else:
+        metrics = LogMetricSender(state)
 
     try:
         zoe_master.backends.interface.initialize_backend(state)

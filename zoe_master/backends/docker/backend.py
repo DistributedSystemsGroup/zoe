@@ -18,6 +18,7 @@
 import logging
 import re
 import time
+import threading
 
 from zoe_lib.state import Service
 from zoe_lib.config import get_conf
@@ -27,7 +28,7 @@ from zoe_master.backends.service_instance import ServiceInstance
 from zoe_master.backends.docker.threads import DockerStateSynchronizer
 from zoe_master.backends.docker.api_client import DockerClient
 from zoe_master.backends.docker.config import DockerConfig, DockerHostConfig  # pylint: disable=unused-import
-from zoe_master.stats import ClusterStats  # pylint: disable=unused-import
+from zoe_master.stats import ClusterStats, NodeStats
 
 log = logging.getLogger(__name__)
 
@@ -40,6 +41,7 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
     def __init__(self, opts):
         super().__init__(opts)
         self.docker_config = DockerConfig(get_conf().backend_docker_config_file).read_config()
+        self.cached_stats = None
 
     def _get_config(self, host) -> DockerHostConfig:
         for conf in self.docker_config:
@@ -82,7 +84,76 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
 
     def platform_state(self) -> ClusterStats:
         """Get the platform state."""
-        return _checker.get_platform_stats()
+        time_start = time.time()
+        platform_stats = ClusterStats()
+        th_list = []
+        for host_conf in self.docker_config:  # type: DockerHostConfig
+            node_stats = NodeStats(host_conf.name)
+
+            th = threading.Thread(target=self._update_node_stats, args=(host_conf, node_stats), name='stats_host_{}'.format(host_conf.name), daemon=True)
+            th.start()
+            th_list.append((th, node_stats))
+
+        for th, node_stats in th_list:
+            th.join()
+            platform_stats.nodes.append(node_stats)
+
+        log.debug('Time for platform stats: {:.2f}s'.format(time.time() - time_start))
+        return platform_stats
+
+    def _update_node_stats(self, host_conf: DockerHostConfig, node_stats: NodeStats):
+        node_stats.labels = host_conf.labels
+        try:
+            my_engine = DockerClient(host_conf)
+        except ZoeException as e:
+            log.error(str(e))
+            node_stats.status = 'offline'
+            log.info('Node {} is offline'.format(host_conf.name))
+            return
+        else:
+            node_stats.status = 'online'
+
+        try:
+            container_list = my_engine.list()
+            info = my_engine.info()
+        except ZoeException:
+            return
+
+        node_stats.container_count = info['Containers']
+        node_stats.cores_total = info['NCPU']
+        node_stats.memory_total = info['MemTotal']
+        if info['Labels'] is not None:
+            node_stats.labels += set(info['Labels'])
+
+        stats = {}
+        for cont in container_list:
+            stats[cont['id']] = my_engine.stats(cont['id'], stream=False)
+
+        node_stats.memory_reserved = sum([cont['memory_soft_limit'] for cont in container_list if cont['memory_soft_limit'] != node_stats.memory_total])
+        node_stats.memory_in_use = sum([stat['memory_stats']['usage'] for stat in stats.values() if 'usage' in stat['memory_stats']])
+
+        node_stats.cores_reserved = sum([cont['cpu_quota'] / cont['cpu_period'] for cont in container_list if cont['cpu_period'] != 0])
+
+        node_stats.cores_in_use = sum([self._get_core_usage(stat) for stat in stats.values()])
+
+        if get_conf().backend_image_management:
+            node_stats.image_list = []
+            for dk_image in my_engine.list_images():
+                image = {
+                    'id': dk_image.attrs['Id'],
+                    'size': dk_image.attrs['Size'],
+                    'names': dk_image.tags
+                }
+                for name in image['names']:
+                    if name[-7:] == ':latest':  # add an image with the name without 'latest' to fake Docker image lookup algorithm
+                        image['names'].append(name[:-7])
+                        break
+                node_stats.image_list.append(image)
+
+    def _get_core_usage(self, stat):
+        cpu_time_now = stat['cpu_stats']['cpu_usage']['total_usage']
+        cpu_time_pre = stat['precpu_stats']['cpu_usage']['total_usage']
+        return (cpu_time_now - cpu_time_pre) / 1000000000
 
     def service_log(self, service: Service):
         """Get the log."""

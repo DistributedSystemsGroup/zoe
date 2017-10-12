@@ -20,7 +20,12 @@ import logging
 import threading
 import queue
 
+from zoe_lib.config import get_conf
+from zoe_master.backends.interface import get_platform_state
+
 log = logging.getLogger(__name__)
+
+METRIC_INTERVAL = 20
 
 
 def time_diff_ms(start: float, end: float) -> int:
@@ -33,12 +38,13 @@ class BaseMetricSender:
 
     BUFFER_MAX_SIZE = 6
 
-    def __init__(self, deployment_name):
+    def __init__(self, state):
+        self.state = state
         self._queue = queue.Queue()
         self._buffer = []
         self._th = None
         self._th = threading.Thread(name='metrics', target=self._metrics_loop, daemon=True)
-        self.deployment_name = deployment_name
+        self.deployment_name = get_conf().deployment_name
 
     def _start(self):
         self._th.start()
@@ -64,19 +70,18 @@ class BaseMetricSender:
         self._th.join()
 
     def _metrics_loop(self):
-        while True:
-            try:
-                data = self._queue.get(timeout=1)
-            except queue.Empty:
-                self._send_buffer()
-                continue
+        stop = False
+        while not stop:
+            time_start = time.time()
+            get_platform_state(self.state, force_update=True)
+            while not self._queue.empty():
+                data = self._queue.get(block=False)
+                if data == 'quit':
+                    stop = True
+                else:
+                    self._buffer.append(data)
+            self._send_buffer()
 
-            if data == 'quit':
-                if len(self._buffer) > 0:
-                    self._send_buffer()
-                break
-
-            if data != 'quit':
-                self._buffer.append(data)
-                if len(self._buffer) > self.BUFFER_MAX_SIZE:
-                    self._send_buffer()
+            sleep_time = METRIC_INTERVAL - (time.time() - time_start)
+            if sleep_time > 0 and not stop:
+                time.sleep(sleep_time)

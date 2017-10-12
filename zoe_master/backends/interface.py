@@ -174,14 +174,22 @@ def terminate_execution(execution: Execution) -> None:
     execution.set_terminated()
 
 
-def get_platform_state(state: SQLManager, with_images=False) -> ClusterStats:
-    """Retrieves the state of the platform by querying the container backend. Platform state includes information on free/reserved resources for each node. This information is used for advanced scheduling."""
+CACHED_STATS = None  # type: ClusterStats
+
+
+def get_platform_state(state: SQLManager, force_update=False) -> ClusterStats:
+    """Retrieves the state of the platform by querying the container backend. Platform state includes information on free/reserved resources for each node. This information is used for advanced scheduling.
+    Since retrieving statistics can be slow, the we cache results and use the force_update parameter to know when fresh (and slow) values are absolutely needed."""
+    global CACHED_STATS
+
+    if CACHED_STATS is not None and not force_update:
+        return CACHED_STATS
+
     backend = _get_backend()
     platform_state = backend.platform_state()
     for node in platform_state.nodes:  # type: NodeStats
         node.services = state.service_list(backend_host=node.name, backend_status=Service.BACKEND_START_STATUS)
-        if not with_images:
-            node.image_list = []
+    CACHED_STATS = platform_state
     return platform_state
 
 

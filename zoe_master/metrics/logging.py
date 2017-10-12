@@ -17,15 +17,15 @@
 
 import logging
 
-import zoe_lib.metrics.base
+import zoe_master.metrics.base
 
 log = logging.getLogger(__name__)
 
 
-class LogMetricSender(zoe_lib.metrics.base.BaseMetricSender):
+class LogMetricSender(zoe_master.metrics.base.BaseMetricSender):
     """Send metrics to the configured logging sink."""
-    def __init__(self, deployment_name):
-        super().__init__(deployment_name)
+    def __init__(self, state):
+        super().__init__(state)
         self._start()
 
     def _send_buffer(self):
