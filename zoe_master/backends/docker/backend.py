@@ -127,7 +127,10 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
 
         stats = {}
         for cont in container_list:
-            stats[cont['id']] = my_engine.stats(cont['id'], stream=False)
+            try:
+                stats[cont['id']] = my_engine.stats(cont['id'], stream=False)
+            except ZoeException:
+                continue
 
         node_stats.memory_reserved = sum([cont['memory_soft_limit'] for cont in container_list if cont['memory_soft_limit'] != node_stats.memory_total])
         node_stats.memory_in_use = sum([stat['memory_stats']['usage'] for stat in stats.values() if 'usage' in stat['memory_stats']])

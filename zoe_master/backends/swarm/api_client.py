@@ -244,12 +244,6 @@ class SwarmClient:
         except KeyError:
             info['host'] = 'N/A'
 
-        for net in container.attrs["NetworkSettings"]["Networks"]:
-            if len(container.attrs["NetworkSettings"]["Networks"][net]['IPAddress']) > 0:
-                info["ip_address"][net] = container.attrs["NetworkSettings"]["Networks"][net]['IPAddress']
-            else:
-                info["ip_address"][net] = None
-
         if container.status == 'running' or container.status == 'restarting':
             info["state"] = Service.BACKEND_START_STATUS
             info["running"] = True
