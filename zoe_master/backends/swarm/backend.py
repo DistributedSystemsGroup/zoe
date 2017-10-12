@@ -58,7 +58,7 @@ class SwarmBackend(zoe_master.backends.base.BaseBackend):
         except ZoeException as e:
             raise ZoeStartExecutionFatalException(str(e))
 
-        return cont_info["id"], cont_info['ip_address'][get_conf().overlay_network_name]
+        return cont_info["id"], cont_info['ip_address'][get_conf().overlay_network_name], cont_info['ports']
 
     def terminate_service(self, service: Service) -> None:
         """Terminate and delete a container."""

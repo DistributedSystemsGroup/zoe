@@ -71,13 +71,14 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
         except ZoeException as e:
             raise ZoeStartExecutionFatalException(str(e))
 
-        return cont_info["id"], cont_info['ip_address'][get_conf().overlay_network_name]
+        return cont_info["id"], cont_info['external_address'], cont_info['ports']
 
     def terminate_service(self, service: Service) -> None:
         """Terminate and delete a container."""
         conf = self._get_config(service.backend_host)
         engine = DockerClient(conf)
         engine.terminate_container(service.backend_id, delete=True)
+        service.set_backend_status(service.BACKEND_DESTROY_STATUS)
 
     def platform_state(self) -> ClusterStats:
         """Get the platform state."""

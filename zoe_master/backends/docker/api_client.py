@@ -45,6 +45,7 @@ class DockerClient:
     """The client class that wraps the Docker API."""
     def __init__(self, docker_config: DockerHostConfig, mock_client=None) -> None:
         self.name = docker_config.name
+        self.docker_config = docker_config
         if not docker_config.tls:
             tls = None
         else:
@@ -146,19 +147,13 @@ class DockerClient:
             "id": container.id,
             "ip_address": {},
             "name": container.name,
-            'labels': container.attrs['Config']['Labels']
+            'labels': container.attrs['Config']['Labels'],
+            'external_address': self.docker_config.external_address
         }  # type: Dict[str, Any]
         try:
             info['host'] = container.attrs['Node']['Name'],
         except KeyError:
             info['host'] = 'N/A'
-
-        if container.attrs["NetworkSettings"]["Networks"] is not None:
-            for net in container.attrs["NetworkSettings"]["Networks"]:
-                if len(container.attrs["NetworkSettings"]["Networks"][net]['IPAddress']) > 0:
-                    info["ip_address"][net] = container.attrs["NetworkSettings"]["Networks"][net]['IPAddress']
-                else:
-                    info["ip_address"][net] = None
 
         if container.status == 'running' or container.status == 'restarting':
             info["state"] = Service.BACKEND_START_STATUS

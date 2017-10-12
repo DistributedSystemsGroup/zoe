@@ -61,7 +61,7 @@ class KubernetesBackend(zoe_master.backends.base.BaseBackend):
         except ZoeException as e:
             raise ZoeStartExecutionFatalException(str(e))
 
-        return rc_info["backend_id"], rc_info['ip_address']
+        return rc_info["backend_id"], rc_info['ip_address'], None
 
     def terminate_service(self, service: Service) -> None:
         """Terminate and delete a container."""

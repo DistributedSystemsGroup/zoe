@@ -42,7 +42,7 @@ class BaseBackend:
 
         * raise ``ZoeStartExecutionRetryException`` in case a temporary error is generated
         * raise ``ZoeStartExecutionFatalException`` in case a fatal error is generated
-        * return a backend-specific ID that will be used later by Zoe to interact with the running container
+        * return a tuple with three elements: backend-specific ID that will be used later by Zoe to interact with the running container, the externally-reachable ip address for the container and the port mapping
         """
         raise NotImplementedError
 

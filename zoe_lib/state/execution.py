@@ -33,6 +33,7 @@ class Execution:
     """
 
     SUBMIT_STATUS = "submitted"
+    IMAGE_DL_STATUS = "image download"
     SCHEDULED_STATUS = "scheduled"
     STARTING_STATUS = "starting"
     ERROR_STATUS = "error"
@@ -96,6 +97,11 @@ class Execution:
         self._status = self.SCHEDULED_STATUS
         self.sql_manager.execution_update(self.id, status=self._status)
 
+    def set_image_dl(self):
+        """The execution has been added to the scheduler queues."""
+        self._status = self.IMAGE_DL_STATUS
+        self.sql_manager.execution_update(self.id, status=self._status)
+
     def set_starting(self):
         """The services of the execution are being created in Swarm."""
         self._status = self.STARTING_STATUS
@@ -132,10 +138,10 @@ class Execution:
     @property
     def is_active(self):
         """
-        Returns True if the execution is in the scheduler
+        Returns False if the execution ended completely
         :return:
         """
-        return self._status == self.SCHEDULED_STATUS or self._status == self.RUNNING_STATUS or self._status == self.STARTING_STATUS or self._status == self.CLEANING_UP_STATUS
+        return self._status == self.SCHEDULED_STATUS or self._status == self.RUNNING_STATUS or self._status == self.STARTING_STATUS or self._status == self.CLEANING_UP_STATUS or self._status == self.IMAGE_DL_STATUS
 
     @property
     def is_running(self):
