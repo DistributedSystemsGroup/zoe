@@ -68,9 +68,9 @@ class ZoeElasticScheduler:
         :param execution: The execution
         :return:
         """
-        self.queue.append(execution)
         exec_data = ExecutionProgress(0, [])
         self.additional_exec_state[execution.id] = exec_data
+        self.queue.append(execution)
         self.trigger()
 
     def terminate(self, execution: Execution) -> None:
