@@ -71,6 +71,7 @@ def _digest_application_description(state: SQLManager, execution: Execution):
 
 
 def _do_execution_submit(state: SQLManager, scheduler: ZoeBaseScheduler, execution: Execution):
+    execution.set_image_dl()
     if _digest_application_description(state, execution):
         execution.set_scheduled()
         scheduler.incoming(execution)

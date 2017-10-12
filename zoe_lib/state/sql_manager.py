@@ -159,7 +159,10 @@ class SQLManager:
             filter_list = []
             args_list = []
             for key, value in kwargs.items():
-                filter_list.append('{} = %s'.format(key))
+                if key.startswith('not_'):
+                    filter_list.append('{} != %s'.format(key[4:]))
+                else:
+                    filter_list.append('{} = %s'.format(key))
                 args_list.append(value)
             q += ' AND '.join(filter_list)
             query = cur.mogrify(q, args_list)
@@ -193,7 +196,7 @@ class SQLManager:
     def service_new(self, execution_id, name, service_group, description, is_essential):
         """Adds a new service to the state."""
         cur = self._cursor()
-        status = 'created'
+        status = Service.CREATED_STATUS
         query = cur.mogrify('INSERT INTO service (id, status, execution_id, name, service_group, description, essential) VALUES (DEFAULT,%s,%s,%s,%s,%s,%s) RETURNING id', (status, execution_id, name, service_group, description, is_essential))
         cur.execute(query)
         self.conn.commit()

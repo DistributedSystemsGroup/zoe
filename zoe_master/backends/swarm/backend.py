@@ -18,7 +18,6 @@
 import logging
 
 from zoe_lib.state import Service
-from zoe_lib.config import get_conf
 from zoe_master.backends.swarm.api_client import SwarmClient
 from zoe_master.exceptions import ZoeStartExecutionRetryException, ZoeStartExecutionFatalException, ZoeException, ZoeNotEnoughResourcesException
 import zoe_master.backends.base
@@ -58,7 +57,14 @@ class SwarmBackend(zoe_master.backends.base.BaseBackend):
         except ZoeException as e:
             raise ZoeStartExecutionFatalException(str(e))
 
-        return cont_info["id"], cont_info['ip_address'][get_conf().overlay_network_name]
+        ip_address = None
+        ports = {}
+        for port_name, mapping in cont_info['ports'].items():
+            if mapping is None:
+                continue
+            ip_address = mapping[0]
+            ports[port_name] = mapping[1]
+        return cont_info["id"], ip_address, ports
 
     def terminate_service(self, service: Service) -> None:
         """Terminate and delete a container."""

@@ -37,7 +37,7 @@
             <a href="{{ reverse_url('execution_inspect', id) }}">{{ id }}</a> ({{ executions_in_queue[id].user_id }})
             {% for service in executions_in_queue[id].services %}
                 {% if service.essential %}
-                <div class="service essential {{ 'running' if service.status == service.ACTIVE_STATUS }}">
+                <div class="service essential {{ 'running' if not service.is_dead() }}">
                     {{ service['name'] }}<br/>
                     M: <script>format_bytes({{ service['resource_reservation']['memory']['max'] }});</script><br/>
                     C: {{ service['resource_reservation']['cores']['max'] }}
@@ -46,7 +46,7 @@
             {% endfor %}
             {% for service in executions_in_queue[id].services %}
                 {% if not service.essential %}
-                <div class="service {{ 'running' if service.status == service.ACTIVE_STATUS }}">
+                <div class="service {{ 'running' if not service.is_dead() }}">
                     {{ service['name'] }}<br/>
                     M: <script>format_bytes({{ service['resource_reservation']['memory']['max'] }});</script><br/>
                     C: {{ service['resource_reservation']['cores']['max'] }}

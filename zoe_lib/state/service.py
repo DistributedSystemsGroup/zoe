@@ -89,6 +89,7 @@ class VolumeDescriptionHostPath(VolumeDescription):
 class Service:
     """A Zoe Service."""
 
+    CREATED_STATUS = 'created'
     TERMINATING_STATUS = "terminating"
     INACTIVE_STATUS = "inactive"
     ACTIVE_STATUS = "active"
@@ -186,20 +187,17 @@ class Service:
         return self.id == other.id
 
     def set_terminating(self):
-        """The service is being killed."""
+        """The service is being terminated."""
         self.sql_manager.service_update(self.id, status=self.TERMINATING_STATUS)
         self.status = self.TERMINATING_STATUS
 
     def set_inactive(self):
-        """The service is not running."""
-        self.sql_manager.service_update(self.id, status=self.INACTIVE_STATUS, backend_id=None, ip_address=None, backend_host=None)
+        """The service must not run."""
+        self.sql_manager.service_update(self.id, status=self.INACTIVE_STATUS)
         self.status = self.INACTIVE_STATUS
-        for port in self.ports:
-            port.reset()
-        self.backend_host = None
 
     def set_starting(self):
-        """The service is being created by Docker."""
+        """The service is being started by the back-end."""
         self.sql_manager.service_update(self.id, status=self.STARTING_STATUS)
         self.status = self.STARTING_STATUS
 
@@ -208,13 +206,19 @@ class Service:
         self.sql_manager.service_update(self.id, status=self.RUNNABLE_STATUS)
         self.status = self.RUNNABLE_STATUS
 
-    def set_active(self, backend_id, ip_address):
+    def set_active(self, backend_id, ip_address, ports):
         """The service is running and has a valid backend_id."""
-        self.sql_manager.service_update(self.id, status=self.ACTIVE_STATUS, backend_id=backend_id, error_message=None, ip_address=ip_address)
+        self.sql_manager.service_update(self.id, status=self.ACTIVE_STATUS, backend_id=backend_id, error_message=None, ip_address=ip_address, backend_status=self.BACKEND_START_STATUS)
         self.error_message = None
         self.ip_address = ip_address
         self.backend_id = backend_id
         self.status = self.ACTIVE_STATUS
+        self.backend_status = self.BACKEND_START_STATUS
+        for port in self.ports:
+            if port.internal_name in ports and ports[port.internal_name] is not None:
+                port.activate(ip_address, ports[port.internal_name])
+            else:
+                port.reset()
 
     def set_error(self, error_message):
         """The service could not be created/started."""
@@ -223,10 +227,17 @@ class Service:
         self.error_message = error_message
 
     def set_backend_status(self, new_status):
-        """Docker has emitted an event related to this service."""
-        self.sql_manager.service_update(self.id, backend_status=new_status)
+        """The backend status of the service has changed."""
         log.debug("service {}, backend status updated to {}".format(self.id, new_status))
         self.backend_status = new_status
+        if self.is_dead():
+            for port in self.ports:
+                port.reset()
+            self.backend_id = None
+            self.ip_address = None
+            self.sql_manager.service_update(self.id, backend_status=new_status, ip_address=None, backend_id=None)
+        else:
+            self.sql_manager.service_update(self.id, backend_status=new_status)
 
     def assign_backend_host(self, backend_host):
         """Assign this service to a host in particular."""
@@ -260,7 +271,7 @@ class Service:
 
     def is_dead(self):
         """Returns True if this service is not running."""
-        return self.backend_status == self.BACKEND_DESTROY_STATUS or self.backend_status == self.BACKEND_OOM_STATUS or self.backend_status == self.BACKEND_DIE_STATUS or self.backend_status == self.BACKEND_UNDEFINED_STATUS
+        return self.backend_status != self.BACKEND_START_STATUS
 
     @property
     def unique_name(self):

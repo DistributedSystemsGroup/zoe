@@ -100,7 +100,7 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
         service.set_starting()
         instance = ServiceInstance(execution, service, env_subst_dict)
         try:
-            backend_id, ip_address = backend.spawn_service(instance)
+            backend_id, ip_address, ports = backend.spawn_service(instance)
         except ZoeStartExecutionRetryException as ex:
             log.warning('Temporary failure starting service {} of execution {}: {}'.format(service.id, execution.id, ex.message))
             service.set_error(ex.message)
@@ -124,7 +124,7 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
             return "fatal"
         else:
             log.debug('Service {} started'.format(instance.name))
-            service.set_active(backend_id, ip_address)
+            service.set_active(backend_id, ip_address, ports)
 
     return "ok"
 
@@ -157,24 +157,39 @@ def terminate_execution(execution: Execution) -> None:
     """Terminate an execution."""
     execution.set_cleaning_up()
     backend = _get_backend()
-    for service in execution.services:
-        assert isinstance(service, Service)
-        if service.backend_id is not None:
-            service.set_terminating()
-            backend.terminate_service(service)
-            service.set_inactive()
-            log.debug('Service {} terminated'.format(service.name))
+    for service in execution.services:  # type: Service
+        if service.status != Service.INACTIVE_STATUS:
+            if service.status == Service.ERROR_STATUS:
+                continue
+            elif service.status == Service.ACTIVE_STATUS or service.status == Service.TERMINATING_STATUS or service.status == Service.STARTING_STATUS:
+                service.set_terminating()
+                backend.terminate_service(service)
+                service.set_inactive()
+                log.debug('Service {} terminated'.format(service.name))
+            elif service.status == Service.CREATED_STATUS or service.status == Service.RUNNABLE_STATUS:
+                service.set_inactive()
+            else:
+                log.error('BUG: don\'t know how to terminate a service in status {}'.format(service.status))
+
     execution.set_terminated()
 
 
-def get_platform_state(state: SQLManager, with_images=False) -> ClusterStats:
-    """Retrieves the state of the platform by querying the container backend. Platform state includes information on free/reserved resources for each node. This information is used for advanced scheduling."""
+CACHED_STATS = None  # type: ClusterStats
+
+
+def get_platform_state(state: SQLManager, force_update=False) -> ClusterStats:
+    """Retrieves the state of the platform by querying the container backend. Platform state includes information on free/reserved resources for each node. This information is used for advanced scheduling.
+    Since retrieving statistics can be slow, the we cache results and use the force_update parameter to know when fresh (and slow) values are absolutely needed."""
+    global CACHED_STATS
+
+    if CACHED_STATS is not None and not force_update:
+        return CACHED_STATS
+
     backend = _get_backend()
     platform_state = backend.platform_state()
     for node in platform_state.nodes:  # type: NodeStats
         node.services = state.service_list(backend_host=node.name, backend_status=Service.BACKEND_START_STATUS)
-        if not with_images:
-            node.image_list = []
+    CACHED_STATS = platform_state
     return platform_state
 
 
