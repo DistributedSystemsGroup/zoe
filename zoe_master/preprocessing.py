@@ -90,7 +90,7 @@ def restart_resubmit_scheduler(state: SQLManager, scheduler: ZoeBaseScheduler):
     """Restart work after a restart of the process."""
     submitted_execs = state.execution_list(status=Execution.SUBMIT_STATUS)
     for e in submitted_execs:
-        execution_submit(state, scheduler)
+        execution_submit(state, scheduler, e)
 
     sched_execs = state.execution_list(status=Execution.SCHEDULED_STATUS)
     for e in sched_execs:
