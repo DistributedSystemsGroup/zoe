@@ -59,6 +59,7 @@ def _digest_application_description(state: SQLManager, execution: Execution):
             counter += 1
         assert counter == total_count
 
+    for service_descr in execution.description['services']:
         if get_conf().backend_image_management:
             try:
                 preload_image(service_descr['image'])
@@ -66,7 +67,7 @@ def _digest_application_description(state: SQLManager, execution: Execution):
                 execution.set_error_message('{}'.format(e))
                 execution.set_error()
                 return False
-        return True
+    return True
 
 
 def _do_execution_submit(state: SQLManager, scheduler: ZoeBaseScheduler, execution: Execution):
@@ -89,7 +90,7 @@ def restart_resubmit_scheduler(state: SQLManager, scheduler: ZoeBaseScheduler):
     """Restart work after a restart of the process."""
     submitted_execs = state.execution_list(status=Execution.SUBMIT_STATUS)
     for e in submitted_execs:
-        execution_submit(state, scheduler, e)
+        execution_submit(state, scheduler)
 
     sched_execs = state.execution_list(status=Execution.SCHEDULED_STATUS)
     for e in sched_execs:
