@@ -59,6 +59,7 @@ def _digest_application_description(state: SQLManager, execution: Execution):
             counter += 1
         assert counter == total_count
 
+    for service_descr in execution.description['services']:
         if get_conf().backend_image_management:
             try:
                 preload_image(service_descr['image'])
@@ -66,7 +67,7 @@ def _digest_application_description(state: SQLManager, execution: Execution):
                 execution.set_error_message('{}'.format(e))
                 execution.set_error()
                 return False
-        return True
+    return True
 
 
 def _do_execution_submit(state: SQLManager, scheduler: ZoeBaseScheduler, execution: Execution):
