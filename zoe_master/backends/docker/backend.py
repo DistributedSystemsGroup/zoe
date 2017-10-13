@@ -79,7 +79,10 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
         """Terminate and delete a container."""
         conf = self._get_config(service.backend_host)
         engine = DockerClient(conf)
-        engine.terminate_container(service.backend_id, delete=True)
+        if service.backend_id is not None:
+            engine.terminate_container(service.backend_id, delete=True)
+        else:
+            log.error('Cannot terminate service {}, since it has not backend ID'.format(service.name))
         service.set_backend_status(service.BACKEND_DESTROY_STATUS)
 
     def platform_state(self) -> ClusterStats:

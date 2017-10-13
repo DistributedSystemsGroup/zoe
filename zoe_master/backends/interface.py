@@ -155,7 +155,6 @@ def start_elastic(execution: Execution, placement) -> str:
 
 def terminate_execution(execution: Execution) -> None:
     """Terminate an execution."""
-    execution.set_cleaning_up()
     backend = _get_backend()
     for service in execution.services:  # type: Service
         if service.status != Service.INACTIVE_STATUS:
@@ -170,6 +169,12 @@ def terminate_execution(execution: Execution) -> None:
                 service.set_inactive()
             else:
                 log.error('BUG: don\'t know how to terminate a service in status {}'.format(service.status))
+        elif not service.is_dead():
+            log.warning('Service {} is inactive for Zoe, but running for the back-end, terminating and resetting state'.format(service.name))
+            service.set_terminating()
+            backend.terminate_service(service)
+            service.set_inactive()
+            log.debug('Service {} terminated'.format(service.name))
 
     execution.set_terminated()
 
