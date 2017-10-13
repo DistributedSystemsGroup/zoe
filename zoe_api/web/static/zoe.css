@@ -54,17 +54,20 @@ div.header {
     clear: both;
 }
 
-table.app_list {
+table.app_list,
+table.service-list{
     border-collapse: collapse;
     width: 95%;
 }
 
-table.app_list tr {
+table.app_list tr,
+table.service-list tr {
     border-top: 1px #bad5e1 solid;
     text-align: left;
 }
 
-table.app_list td, table.app_list th {
+table.app_list td, table.app_list th,
+table.service-list td, table.service-list th {
     padding-right: 1em;
     padding-bottom: 0.5em;
     padding-top: 0.5em;
@@ -186,6 +189,7 @@ div.status_line {
 #footer {
     font-size: smaller;
     clear: both;
+    margin-top: 2em;
 }
 
 /* stats page */
