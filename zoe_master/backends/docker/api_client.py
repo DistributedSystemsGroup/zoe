@@ -158,7 +158,7 @@ class DockerClient:
         if container.status == 'running' or container.status == 'restarting':
             info["state"] = Service.BACKEND_START_STATUS
             info["running"] = True
-        elif container.status == 'paused' or container.status == 'exited':
+        elif container.status == 'paused' or container.status == 'exited' or container.status == 'dead':
             info["state"] = Service.BACKEND_DIE_STATUS
             info["running"] = False
         elif container.status == 'OOMKilled':
