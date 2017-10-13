@@ -14,14 +14,13 @@
 {% endblock %}
 
 {% block content %}
-<h1>Zoe - Analytics on demand</h1>
-<h2>Detailed information for execution {{ e.name }}</h2>
+<h2>Detailed information for execution {{ e.name }} ({{ e.id }})</h2>
 <div id="contents">
 <ul>
-    <li>ID: {{ e.id }}</li>
     <li>Application name: {{ e.description['name'] }}</li>
+    {% if role == "admin" %}
     <li>Owner: {{ e.user_id }}</li>
-    <li>Status: {{ e.status }}</li>
+    {% endif %}
     <li>Time submitted: <script>format_timestamp("{{ e.time_submit }}")</script></li>
     {% if e.time_start == None %}
     <li>Time started: not yet</li>
@@ -33,6 +32,14 @@
     {% else %}
     <li>Time finished: <script>format_timestamp("{{ e.time_end }}")</script></li>
     {%  endif %}
+    <li>Status: <span style="font-weight: bold;">{{ e.status }}</span></li>
+    <li>Actions:
+        {% if e.is_active %}
+            <a href="/executions/terminate/{{ e.id }}">Terminate</a>
+        {% else %}
+            <a href="/executions/restart/{{ e.id }}">Restart</a>
+        {% endif %}
+    </li>
 </ul>
 {% if e.status == 'error' %}
 <p>Error message: <code>{{ e.error_message }}</code></p>
@@ -55,20 +62,40 @@
 {% if services_info|length > 0 %}
 <h3>Services:</h3>
 {% endif %}
-<ul>
-{% for s in services_info %}
-    <li class="container_name">{{ s['name'] }} ({{ s['id'] }})</li>
-    <ul>
-    <li>Zoe status: {{ s['status'] }}</li>
-    <li>Backend status: {{ s['backend_status'] }}</li>
-    {% if s['error_message'] is not none %}
-        <li>Error: {{ s['error_message'] }}</li>
-    {% endif %}
-    <li><a href="{{ reverse_url("service_logs", s['id']) }}">Log output</a></li>
-    </ul>
-{% endfor %}
-</ul>
+<table class="service-list">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Zoe status</th>
+        <th>Backend status</th>
+        <th>Host</th>
+        <th>Output logs</th>
+        <th>Errors</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for s in services_info %}
+        <tr>
+            <td>{{ s['id'] }}</td>
+            <td>{{ s['name'] }}</td>
+            <td>{{ s['status'] }}</td>
+            <td>{{ s['backend_status'] }}</td>
+            <td>{{ s['backend_host'] }}</td>
+            <td><a href="{{ reverse_url("service_logs", s['id']) }}">available</a></td>
+            <td>{{ s['error_message'] }}</td>
+        </tr>
+    {% endfor %}
+
+    </tbody>
+</table>
 </div>
 
 </div>
+<script>
+    function refresh_page() {
+        document.location.reload();
+    }
+    setInterval(refresh_page, 15000);
+</script>
 {% endblock %}
