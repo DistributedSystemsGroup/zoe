@@ -233,9 +233,13 @@ class Service:
         if self.is_dead():
             for port in self.ports:
                 port.reset()
-            self.backend_id = None
             self.ip_address = None
-            self.sql_manager.service_update(self.id, backend_status=new_status, ip_address=None, backend_id=None)
+            self.sql_manager.service_update(self.id, backend_status=new_status, ip_address=None)
+            if new_status == self.BACKEND_DESTROY_STATUS:
+                self.backend_id = None
+                self.sql_manager.service_update(self.id, backend_status=new_status, backend_id=None, ip_address=None)
+            else:
+                self.sql_manager.service_update(self.id, backend_status=new_status, ip_address=None)
         else:
             self.sql_manager.service_update(self.id, backend_status=new_status)
 

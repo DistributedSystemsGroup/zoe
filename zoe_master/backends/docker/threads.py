@@ -66,28 +66,17 @@ class DockerStateSynchronizer(threading.Thread):
                 log.info('Node {} is now online'.format(host_config.name))
             node_status = 'online'
 
-            service_list = self.state.service_list(backend_host=host_config.name, not_status=Service.INACTIVE_STATUS)
             try:
                 container_list = my_engine.list(only_label={'zoe_deployment_name': get_conf().deployment_name})
             except ZoeException:
                 continue
-            containers = {}
+
             for cont in container_list:
-                containers[cont['id']] = cont
-
-            services = {}
-            for service in service_list:
-                services[service.backend_id] = service
-
-            for service in service_list:
-                assert isinstance(service, Service)
-                if service.backend_id in containers:
-                    self._update_service_status(service, containers[service.backend_id])
-                else:
-                    if service.status == service.CREATED_STATUS or service.backend_status == service.BACKEND_DESTROY_STATUS:
-                        continue
-                    else:
-                        service.set_backend_status(service.BACKEND_DESTROY_STATUS)
+                service = self.state.service_list(only_one=True, backend_host=host_config.name, backend_id=cont['id'])
+                if service is None:
+                    log.warning('Container {} on host {} has no corresponding service'.format(cont['name'], host_config.name))
+                    continue
+                self._update_service_status(service, cont)
 
             time.sleep(CHECK_INTERVAL)
 
