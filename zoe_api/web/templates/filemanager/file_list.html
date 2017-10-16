@@ -1,0 +1,80 @@
+{% extends "base_user.html" %}
+{% block custom_head %}
+    <link rel="stylesheet" href="/static/filemanager/style.css" type="text/css">
+    <link rel="stylesheet" href="/static/jquery-ui-1.11.4/jquery-ui.css" />
+    <script src="/static/jquery-ui-1.11.4/jquery-ui.js"></script>
+{% endblock %}
+{% block title %}{% endblock %}
+{% block content %}
+    <script>
+        var ws = new WebSocket('ws://{{ server_address }}/ws/ws');
+    </script>
+    <script src='/static/filemanager/js/ws.js' type='text/javascript'></script>
+    <script src='/static/filemanager/js/dialog.js' type='text/javascript'></script>
+    <script src='/static/filemanager/js/init.js' type='text/javascript'></script>
+    <div class="wrapper">
+        <div class="menu">
+            <ul id="buttons">
+                <li id="button_up"><img src="/static/filemanager/img/icons/up.png" /><br/>Up</li>
+                <li id="button_newdir"><img src="/static/filemanager/img/icons/folder.png" /><br/>New directory</li>
+                <li id="button_cut"><img src="/static/filemanager/img/icons/cut.png" /><br/>Cut</li>
+                <li id="button_copy"><img src="/static/filemanager/img/icons/copy.png" /><br/>Copy</li>
+                <li id="button_paste" style="display: none"><img src="/static/filemanager/img/icons/paste.png" /><br/>
+                    Paste (<span id="buffer_count"></span>)</li>
+                <li id="button_delete"><img src="/static/filemanager/img/icons/delete.png" /><br/>Delete</li>
+                <li id="button_properties"><img src="/static/filemanager/img/icons/properties.png" /><br/>Properties</li>
+                <li id="button_upload"><img src="/static/filemanager/img/icons/upload.png" /><br/>Upload</li>
+                <li id="button_refresh"><img src="/static/filemanager/img/icons/refresh.png" /><br/>Refresh</li>
+                <li id="button_orderByName">Sort by name</li>
+                <li id="button_orderBySize">Sort by size</li>
+            </ul>
+        </div>
+        <div class="file_info">
+            <div><span id="info_file_name"></span></div>
+            <div><span id="info_file_size"></span></div>
+            <div><span id="info_file_mime"></span></div>
+        </div>
+        <div class="file_table">
+            <ul id="files">
+            </ul>
+            <div class="message"></div>
+        </div>
+
+        <div id="dialog_wait" title="Please wait..." style="display: none">
+            <span id="wait_message"></span>
+            <span id="wait_statusbar"><progress></progress></span>
+        </div>
+
+        <div id="dialog_newfile" title="Create new file" style="display: none">
+            <label>Name:<input type="text" name="newfilename" id="newfilename" /></label>
+            <span id="newfile_error"></span>
+        </div>
+        <div id="dialog_newdir" title="Create new directory" style="display: none">
+            <label>Name:<input type="text" name="newdirname" id="newdirname" /></label>
+            <span id="newdir_error"></span>
+        </div>
+        <div id="dialog_error" title="Error" style="display: none">
+        </div>
+        <div id="dialog_properties" title="Properties" style="display: none">
+            <p>Name: <span id="property_file_name"></span></p>
+            <p>Size: <span id="property_file_size"></span></p>
+            <p>Owner: <span id="property_file_owner"></span></p>
+            <p>Permissions: <span id="property_file_mode"></span></p>
+            <p>User:
+                <label>Read<input type="checkbox" name="permission_user_read"></label>
+                <label>Write<input type="checkbox" name="permission_user_write"></label>
+                <label>Execute<input type="checkbox" name="permission_user_execute"></label>
+            </p>
+            <p>Group:
+                <label>Read<input type="checkbox" name="permission_group_read"></label>
+                <label>Write<input type="checkbox" name="permission_group_write"></label>
+                <label>Execute<input type="checkbox" name="permission_group_execute"></label>
+            </p>
+            <p>Other:
+                <label>Read<input type="checkbox" name="permission_other_read"></label>
+                <label>Write<input type="checkbox" name="permission_other_write"></label>
+                <label>Execute<input type="checkbox" name="permission_other_execute"></label>
+            </p>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base_user.html" %}
+{% block custom_head %}
+    <link rel="stylesheet" href="/static/filemanager/style.css" type="text/css">
+    <link rel="stylesheet" href="/static/jquery-ui-1.11.4/jquery-ui.css" />
+    <script src="/static/jquery-ui-1.11.4/jquery-ui.js"></script>
+{% endblock %}
+{% block title %}Upload file{% endblock %}
+{% block content %}
+    {% try %}
+        {{ response }}
+    {% except %}
+    {% end %}
+    <form action="upload" method="post" id="uploadForm" enctype="multipart/form-data">
+        <label for="uploadForm_file">Select file:</label> <input type="file" name="uploadFile" id="uploadForm_file">
+        <input type="submit" value="Upload file" name="uploadButton" id="uploadForm_button">
+    </form>
+{% endblock %}

@@ -1,0 +1,65 @@
+.wrapper
+{
+    margin: 0 auto;
+    padding-bottom: 60px;
+    top: 10px;
+    left: 10px;
+    bottom: 10px;
+    width: 98%;
+}
+
+.file_table
+{
+    display: block;
+    overflow-y: scroll;
+    width: 82%;
+    height: 90%;
+}
+
+.file_info
+{
+    display: block;
+    float: right;
+    width: 16%;
+    padding-left: 5px;
+}
+
+.file_table ul
+{
+    padding: 0;
+    margin: 0;
+    color: #383a41;
+}
+
+.selected
+{
+    font-weight: bold;
+}
+
+.menu
+{
+    display: block;
+}
+
+#files li
+{
+    word-wrap: break-word;
+    overflow: auto;
+}
+
+#files li:hover
+{
+    background: #F3FEEA;
+}
+
+#buttons {
+    padding: 0;
+}
+
+#buttons li
+{
+    display: inline-block;
+    text-align: center;
+    list-style-type: none;
+    margin-right: 1em;
+}

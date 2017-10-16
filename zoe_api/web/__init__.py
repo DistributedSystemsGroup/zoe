@@ -25,6 +25,8 @@ import zoe_api.web.executions
 import zoe_api.web.zapp_shop
 import zoe_api.web.status
 
+from zoe_api.web.filemanager import FileListHandler, UploadHandler, MainWsHandler, DownloadHandler
+
 from zoe_lib.version import ZOE_API_VERSION, ZOE_VERSION
 
 
@@ -53,7 +55,12 @@ def web_init(api_endpoint) -> List[tornado.web.URLSpec]:
         tornado.web.url(r'/zapp-shop/logo/([a-z\-.]+)', zoe_api.web.zapp_shop.ZAppLogoWeb, route_args, name='zappshop_logo'),
         tornado.web.url(r'/zapp-shop/start/([0-9a-z\-.]+)', zoe_api.web.zapp_shop.ZAppStartWeb, route_args, name='zappshop_start'),
 
-        tornado.web.url(r'/status', zoe_api.web.status.StatusEndpointWeb, route_args, name='status')
+        tornado.web.url(r'/status', zoe_api.web.status.StatusEndpointWeb, route_args, name='status'),
+
+        tornado.web.url(r"/ws/", FileListHandler, name='filemanager'),
+        tornado.web.url(r"/ws/upload", UploadHandler, route_args),
+        tornado.web.url(r"/ws/ws", MainWsHandler, route_args),
+        tornado.web.url(r"/ws/download/(.*)", DownloadHandler, route_args)
     ]
 
     return web_routes

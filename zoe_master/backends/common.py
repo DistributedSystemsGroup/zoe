@@ -19,8 +19,8 @@ from typing import Dict, List
 
 from zoe_lib.config import get_conf
 from zoe_lib.state import Service, Execution, VolumeDescription
+from zoe_lib.workspace.filesystem import ZoeFSWorkspace
 from zoe_master.exceptions import ZoeStartExecutionFatalException
-from zoe_master.workspace.filesystem import ZoeFSWorkspace
 
 
 def gen_environment(execution: Execution, service: Service, env_subst_dict: Dict):

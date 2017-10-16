@@ -19,13 +19,13 @@ import logging
 import os.path
 
 import zoe_lib.config as config
+import zoe_lib.workspace.base
 from zoe_lib.state import VolumeDescriptionHostPath
-import zoe_master.workspace.base
 
 log = logging.getLogger(__name__)
 
 
-class ZoeFSWorkspace(zoe_master.workspace.base.ZoeWorkspaceBase):
+class ZoeFSWorkspace(zoe_lib.workspace.base.ZoeWorkspaceBase):
     """Filesystem workspace class."""
     def __init__(self):
         self.base_path = os.path.join(config.get_conf().workspace_base_path, config.get_conf().workspace_deployment_path)
@@ -36,7 +36,12 @@ class ZoeFSWorkspace(zoe_master.workspace.base.ZoeWorkspaceBase):
 
     def get_path(self, user_id):
         """Get the volume path of the workspace."""
+        if not self.exists(user_id):
+            self.mkdir(user_id)
         return os.path.join(self.base_path, user_id)
+
+    def mkdir(self, user_id):
+        os.makedirs(os.path.join(self.base_path, user_id), exist_ok=True)
 
     @classmethod
     def can_be_attached(cls):
