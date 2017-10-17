@@ -25,7 +25,7 @@ import time
 
 from zoe_lib.state import Execution, SQLManager
 from zoe_master.exceptions import ZoeException
-
+from zoe_master.scheduler.dynamic_allocation import DynamicReallocator
 from zoe_master.backends.interface import terminate_execution, get_platform_state, start_elastic, start_essential
 from zoe_master.scheduler.simulated_platform import SimulatedPlatform
 from zoe_master.exceptions import UnsupportedSchedulerPolicyError
@@ -33,7 +33,7 @@ from zoe_master.exceptions import UnsupportedSchedulerPolicyError
 log = logging.getLogger(__name__)
 
 ExecutionProgress = namedtuple('ExecutionProgress', ['last_time_scheduled', 'progress_sequence'])
-SELF_TRIGGER_TIMEOUT = 60  # the scheduler will trigger itself periodically in case platform resources have changed outside its control
+SELF_TRIGGER_TIMEOUT = 30  # the scheduler will trigger itself periodically in case platform resources have changed outside its control
 
 
 class ZoeElasticScheduler:
@@ -57,6 +57,8 @@ class ZoeElasticScheduler:
             else:
                 self.queue.append(execution)
                 self.additional_exec_state[execution.id] = ExecutionProgress(0, [])
+
+        self.dynamic_reallocator = DynamicReallocator(self)
 
     def trigger(self):
         """Trigger a scheduler run."""
@@ -167,6 +169,8 @@ class ZoeElasticScheduler:
                 continue
             if self.loop_quit:
                 break
+
+            self.dynamic_reallocator.do_dynamic_step()
 
             if len(self.queue) == 0:
                 log.debug("Scheduler loop has been triggered, but the queue is empty")

@@ -44,6 +44,7 @@ class NodeStats(Stats):
         self.error = ''
         self.services = []
         self.image_list = []
+        self.cont_stats = {}
 
     def serialize(self):
         """Convert the object into a dict."""
