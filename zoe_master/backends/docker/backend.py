@@ -187,3 +187,18 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
             log.debug('Image {} pre-loaded on host {} in {:.2f}s'.format(image_name, host_conf.name, time.time() - time_start))
         if not one_success:
             raise ZoeException('Cannot pull image {}'.format(image_name))
+
+    def update_service(self, service, cores=None, memory=None):
+        """Update a service reservation."""
+        conf = self._get_config(service.backend_host)
+        engine = DockerClient(conf)
+        if service.backend_id is not None:
+            info = engine.info()
+            if cores is not None and cores > info['NCPU']:
+                cores = info['NCPU']
+            if memory is not None and memory > info['MemTotal']:
+                memory = info['MemTotal']
+            cpu_quota = cores * 1000000
+            engine.update(service.backend_id, cpu_quota=cpu_quota, mem_reservation=memory)
+        else:
+            log.error('Cannot terminate service {}, since it has not backend ID'.format(service.name))

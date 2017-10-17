@@ -57,3 +57,7 @@ class BaseBackend:
     def preload_image(self, image_name: str) -> None:
         """Make a service image available."""
         raise NotImplementedError
+
+    def update_service(self, service, cores=None, memory=None):
+        """Update a service reservation."""
+        raise NotImplementedError

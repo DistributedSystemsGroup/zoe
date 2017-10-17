@@ -318,3 +318,23 @@ class DockerClient:
         except docker.errors.APIError as e:
             log.error('Cannot download image {}: {}'.format(image_name, e))
             raise ZoeException('Cannot download image {}: {}'.format(image_name, e))
+
+    def update(self, docker_id, cpu_quota=None, mem_reservation=None, mem_limit=None):
+        """Update the resource reservation for a container."""
+        kwargs = {}
+        if cpu_quota is not None:
+            kwargs['cpu_quota'] = cpu_quota
+        if mem_reservation is not None:
+            kwargs['mem_reservation'] = mem_reservation
+        if mem_limit is not None:
+            kwargs['mem_limit'] = mem_limit
+
+        try:
+            cont = self.cli.containers.get(docker_id)
+        except (docker.errors.NotFound, docker.errors.APIError):
+            return
+
+        try:
+            cont.update(**kwargs)
+        except docker.errors.APIError:
+            pass
