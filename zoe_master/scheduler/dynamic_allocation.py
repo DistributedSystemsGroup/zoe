@@ -57,13 +57,13 @@ class DynamicReallocator:
                 self.memory_history[rc.id].pop(0)
 
             if len(self.memory_history[rc.id]) < PREDICTION_MIN_POINTS:
-                predictions[rc.id] = self.memory_history[rc.id][-1]
+                predictions[rc.id] = self._get_component_memory_usage(rc, platform_stats)
                 continue
 
             predicted_allocation, variance = self.gp_predict(self.memory_history[rc.id], restarts=5)
             # Next we add the buffer to compensate for the prediction error
             # For now we use a static value and we do not change it depending on the variance
-            predictions[rc.id] = predicted_allocation + (1 + BUFFER_SIZE)  # + normalized_variance)
+            predictions[rc.id] = predicted_allocation * (1 + BUFFER_SIZE)  # + normalized_variance)
 
         # Here starts Algorithm 1 from the paper
 
@@ -84,14 +84,16 @@ class DynamicReallocator:
         executions_by_id = {}
         for node in platform_stats.nodes:
             node_executions = sorted([s.execution for s in node.services], key=lambda x: x.size)
+            host = []
             for execution in node_executions:  # type: Execution
-                hosts.append({
+                host.append({
                     execution.id: {
                         'core': sorted([s for s in execution.essential_services if s in node.services], key=lambda s: s.id),
                         'elastic': sorted([s for s in execution.elastic_services if s in node.services], key=lambda s: s.id)
                     }
                 })
                 executions_by_id[execution.id] = execution
+            hosts.append(host)
 
         executions_to_kill = []
         components_to_kill = []
@@ -147,7 +149,13 @@ class DynamicReallocator:
         for node in platform_stats.nodes:
             for cont_id, cont_stat in node.cont_stats.items():
                 if cont_id == component.backend_id:
-                    return cont_stat['memory_stats']['usage']
+                    return cont_stat['mem_usage']
+
+    def _get_component_memory_limit(self, component, platform_stats):
+        for node in platform_stats.nodes:
+            for cont_id, cont_stat in node.cont_stats.items():
+                if cont_id == component.backend_id:
+                    return cont_stat['mem_limit']
 
     def _generate_kernel(self, kernel_name, input_dim):
         if kernel_name == "RBF":

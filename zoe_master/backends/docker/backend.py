@@ -137,6 +137,7 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
             kdb = KairosDBInMetrics()
             for cont in container_list:
                 stats[cont['id']] = kdb.get_service_usage(cont['name'])
+            stats[cont['id']]['mem_limit'] = cont['memory_soft_limit']
 
             node_stats.memory_in_use = sum([stat['mem_usage'] for stat in stats.values()])
             node_stats.cores_in_use = sum([stat['cpu_usage'] for stat in stats.values()])
@@ -149,6 +150,7 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
 
             node_stats.memory_in_use = sum([stat['memory_stats']['usage'] for stat in stats.values() if 'usage' in stat['memory_stats']])
             node_stats.cores_in_use = sum([self._get_core_usage(stat) for stat in stats.values()])
+        node_stats.cont_stats = stats
 
         if get_conf().backend_image_management:
             node_stats.image_list = []
@@ -206,7 +208,10 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
                 cores = info['NCPU']
             if memory is not None and memory > info['MemTotal']:
                 memory = info['MemTotal']
-            cpu_quota = cores * 1000000
+            if cores is not None:
+                cpu_quota = cores * 1000000
+            else:
+                cpu_quota = None
             engine.update(service.backend_id, cpu_quota=cpu_quota, mem_reservation=memory)
         else:
             log.error('Cannot terminate service {}, since it has not backend ID'.format(service.name))
