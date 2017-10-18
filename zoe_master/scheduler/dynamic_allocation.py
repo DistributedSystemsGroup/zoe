@@ -58,6 +58,7 @@ class DynamicReallocator:
 
             if len(self.memory_history[rc.id]) < PREDICTION_MIN_POINTS:
                 predictions[rc.id] = self.memory_history[rc.id][-1]
+                continue
 
             predicted_allocation, variance = self.gp_predict(self.memory_history[rc.id], restarts=5)
             # Next we add the buffer to compensate for the prediction error
