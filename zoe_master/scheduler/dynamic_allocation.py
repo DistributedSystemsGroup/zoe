@@ -22,7 +22,8 @@ import logging
 import GPy
 import numpy as np
 
-from zoe_master.backends.interface import get_platform_state
+from zoe_lib.state import Execution
+from zoe_master.backends.interface import get_platform_state, update_service_resource_limits, terminate_execution, terminate_service
 
 log = logging.getLogger(__name__)
 
@@ -42,8 +43,6 @@ class DynamicReallocator:
     def do_dynamic_step(self):
         """Drive the entire dynamic allocation algorithm."""
 
-        next_allocation = {}
-
         running_components = self.state.service_list(backend_status="started")
         platform_stats = get_platform_state(self.state, force_update=True)
         for rc in running_components:
@@ -52,80 +51,96 @@ class DynamicReallocator:
             else:
                 self.memory_history[rc.id] = [self._get_component_memory_usage(rc, platform_stats)]
 
+        predictions = {}
         for rc in running_components:
             while len(self.memory_history[rc.id]) > MEMORY_HISTORY_POINT_COUNT_MAX:
                 self.memory_history[rc.id].pop(0)
 
             if len(self.memory_history[rc.id]) < PREDICTION_MIN_POINTS:
-                continue
+                predictions[rc.id] = self.memory_history[rc.id][-1]
 
             predicted_allocation, variance = self.gp_predict(self.memory_history[rc.id], restarts=5)
             # Next we add the buffer to compensate for the prediction error
             # For now we use a static value and we do not change it depending on the variance
-            next_allocation[rc.id] = predicted_allocation + (1 + BUFFER_SIZE)  # + normalized_variance)
+            predictions[rc.id] = predicted_allocation + (1 + BUFFER_SIZE)  # + normalized_variance)
+
+        # Here starts Algorithm 1 from the paper
 
         # Before performing the simulation we have to sort the components per host.
-        hosts = {}
-        # TODO-Daniele: Group the components per host and per execution.
-        # TODO-Daniele: The data structure is as follows:
-        # TODO-Daniele: hosts = [
-        # TODO-Daniele:     {
-        # TODO-Daniele:         'execution_id': {
-        # TODO-Daniele:             'core' : [list of running core components on the host bf_X],
-        # TODO-Daniele:             'elastic' : [list of running elastic components on the host bf_X]
-        # TODO-Daniele:          }
-        # TODO-Daniele:      }
-        # TODO-Daniele: ]
-        # TODO-Daniele: In addition the list of running components must be sorted in ascending order by starting time
+        # The data structure is as follows:
+        # hosts = [
+        #   [
+        #       'execution_id': {
+        #           'core' : [list of running core components on the host bf_X],
+        #            'elastic' : [list of running elastic components on the host bf_X]
+        #       }
+        #   ],
+        #   [...]
+        # ]
+        # In addition the list of running components must be sorted in ascending order by starting time
+        # We use the ID for sorting since we do not have the starting time for each service/component
+        hosts = []
+        executions_by_id = {}
+        for node in platform_stats.nodes:
+            node_executions = sorted([s.execution for s in node.services], key=lambda x: x.size)
+            for execution in node_executions:  # type: Execution
+                hosts.append({
+                    execution.id: {
+                        'core': sorted([s for s in execution.essential_services if s in node.services], key=lambda s: s.id),
+                        'elastic': sorted([s for s in execution.elastic_services if s in node.services], key=lambda s: s.id)
+                    }
+                })
+                executions_by_id[execution.id] = execution
 
         executions_to_kill = []
         components_to_kill = []
-
         components_to_resize = []
 
         for host in hosts:
-            mem_free = platform_stats.current_mem_free  # FIXME: Daniele
-            for execution_id in host:
+            mem_free = platform_stats.memory_total - sum([node.memory_reserved for node in platform_stats.nodes])
+            for execution_id in host.keys():
                 execution = host[execution_id]
 
                 tmp_mem_free = mem_free
-                tmp_ids = []
+                tmp_components = []
                 for core in execution['core']:
-                    tmp_mem_free -= next_allocation[core.id]
-                    tmp_ids.append(core.id)
+                    tmp_mem_free -= predictions[core.id]
+                    tmp_components.append(core)
                 if tmp_mem_free < 0:
                     executions_to_kill.append(execution_id)
                 else:
-                    components_to_resize.extend(tmp_ids)
+                    components_to_resize.extend(tmp_components)
                     mem_free = tmp_mem_free
 
                     for elastic in execution['elastic']:
-                        tmp_mem_free = mem_free - next_allocation[elastic.id]
+                        tmp_mem_free = mem_free - predictions[elastic.id]
                         if tmp_mem_free < 0:
-                            components_to_kill.append(elastic.id)
+                            components_to_kill.append(elastic)
                         else:
-                            components_to_resize.append(elastic.id)
+                            components_to_resize.append(elastic)
                             mem_free = tmp_mem_free
 
-            # TODO-Daniele: From this point forward the code can be executed per host, or once all hosts have been processed. Your call.
             for execution_id in executions_to_kill:
-                # TODO-Daniele: Kill the execution and put it back in the queue with the same priority.
-                # TODO-Daniele: There is no need to cleaning up stuff here. A brute kill is sufficient.
-                # TODO-Daniele: The call will be synchronous.
-                # TODO-Daniele: I am assuming that killing a components does not take ages.
-                pass
-            for component_id in components_to_kill:
-                # TODO-Daniele: Kill the component.
-                # TODO-Daniele: Same argument as before
-                pass
+                execution = executions_by_id[execution_id]
+                terminate_execution(execution)
+                try:
+                    self.scheduler.queue.remove(execution)
+                except ValueError:
+                    try:
+                        self.scheduler.queue_running.remove(execution)
+                    except ValueError:
+                        log.error('Terminating execution {} that is not in any queue'.format(execution.id))
 
-            for component_id in components_to_resize:
-                new_allocation = next_allocation[component_id]
-                # TODO-Daniele: Change the allocation of the component
-                pass
+                self.scheduler.incoming(execution)
+            for component in components_to_kill:
+                terminate_service(component)
+                if component.execution not in self.scheduler.queue:
+                    assert component.execution in self.scheduler.queue_running
+                    self.scheduler.queue_running.remove(component.execution)
+                    self.scheduler.queue.append(component.execution)
 
-
-            # TODO-Daniele: Trigger scheduler!
+            for component in components_to_resize:
+                update_service_resource_limits(component, memory=predictions[component.id])
 
     def _get_component_memory_usage(self, component, platform_stats):
         for node in platform_stats.nodes:

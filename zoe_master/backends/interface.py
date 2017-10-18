@@ -153,29 +153,33 @@ def start_elastic(execution: Execution, placement) -> str:
     return service_list_to_containers(execution, elastic_to_start, placement)
 
 
-def terminate_execution(execution: Execution) -> None:
-    """Terminate an execution."""
+def terminate_service(service: Service) -> None:
+    """Terminate a single service."""
     backend = _get_backend()
-    for service in execution.services:  # type: Service
-        if service.status != Service.INACTIVE_STATUS:
-            if service.status == Service.ERROR_STATUS:
-                continue
-            elif service.status == Service.ACTIVE_STATUS or service.status == Service.TERMINATING_STATUS or service.status == Service.STARTING_STATUS:
-                service.set_terminating()
-                backend.terminate_service(service)
-                service.set_inactive()
-                log.debug('Service {} terminated'.format(service.name))
-            elif service.status == Service.CREATED_STATUS or service.status == Service.RUNNABLE_STATUS:
-                service.set_inactive()
-            else:
-                log.error('BUG: don\'t know how to terminate a service in status {}'.format(service.status))
-        elif not service.is_dead():
-            log.warning('Service {} is inactive for Zoe, but running for the back-end, terminating and resetting state'.format(service.name))
+    if service.status != Service.INACTIVE_STATUS:
+        if service.status == Service.ERROR_STATUS:
+            return
+        elif service.status == Service.ACTIVE_STATUS or service.status == Service.TERMINATING_STATUS or service.status == Service.STARTING_STATUS:
             service.set_terminating()
             backend.terminate_service(service)
             service.set_inactive()
             log.debug('Service {} terminated'.format(service.name))
+        elif service.status == Service.CREATED_STATUS or service.status == Service.RUNNABLE_STATUS:
+            service.set_inactive()
+        else:
+            log.error('BUG: don\'t know how to terminate a service in status {}'.format(service.status))
+    elif not service.is_dead():
+        log.warning('Service {} is inactive for Zoe, but running for the back-end, terminating and resetting state'.format(service.name))
+        service.set_terminating()
+        backend.terminate_service(service)
+        service.set_inactive()
+        log.debug('Service {} terminated'.format(service.name))
 
+
+def terminate_execution(execution: Execution) -> None:
+    """Terminate an execution."""
+    for service in execution.services:  # type: Service
+        terminate_service(service)
     execution.set_terminated()
 
 
@@ -208,3 +212,10 @@ def preload_image(image_name):
         log.info('Image {} preloaded in {:.2f}s'.format(image_name, time.time() - time_start))
     except NotImplementedError:
         log.warning('Backend {} does not support image preloading'.format(get_conf().backend))
+
+
+def update_service_resource_limits(service, cores=None, memory=None):
+    """Update a service reservation."""
+    backend = _get_backend()
+    log.debug('Updating resources for service {}'.format(service.id))
+    backend.update_service(service, cores, memory)
