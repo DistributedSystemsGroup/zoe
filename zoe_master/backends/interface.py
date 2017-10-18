@@ -191,7 +191,7 @@ def get_platform_state(state: SQLManager, force_update=False) -> ClusterStats:
         return CACHED_STATS
 
     backend = _get_backend()
-    platform_state = backend.platform_state()
+    platform_state = backend.platform_state(state)
     for node in platform_state.nodes:  # type: NodeStats
         node.services = state.service_list(backend_host=node.name, backend_status=Service.BACKEND_START_STATUS)
     CACHED_STATS = platform_state

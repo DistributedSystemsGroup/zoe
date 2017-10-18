@@ -29,6 +29,7 @@ from zoe_master.backends.docker.threads import DockerStateSynchronizer
 from zoe_master.backends.docker.api_client import DockerClient
 from zoe_master.backends.docker.config import DockerConfig, DockerHostConfig  # pylint: disable=unused-import
 from zoe_master.stats import ClusterStats, NodeStats
+from zoe_master.metrics.incoming.kairosdb import KairosDBInMetrics
 
 log = logging.getLogger(__name__)
 
@@ -85,7 +86,7 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
             log.error('Cannot terminate service {}, since it has not backend ID'.format(service.name))
         service.set_backend_status(service.BACKEND_DESTROY_STATUS)
 
-    def platform_state(self) -> ClusterStats:
+    def platform_state(self, state=None) -> ClusterStats:
         """Get the platform state."""
         time_start = time.time()
         platform_stats = ClusterStats()
@@ -93,7 +94,7 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
         for host_conf in self.docker_config:  # type: DockerHostConfig
             node_stats = NodeStats(host_conf.name)
 
-            th = threading.Thread(target=self._update_node_stats, args=(host_conf, node_stats), name='stats_host_{}'.format(host_conf.name), daemon=True)
+            th = threading.Thread(target=self._update_node_stats, args=(host_conf, node_stats, state), name='stats_host_{}'.format(host_conf.name), daemon=True)
             th.start()
             th_list.append((th, node_stats))
 
@@ -104,7 +105,7 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
         log.debug('Time for platform stats: {:.2f}s'.format(time.time() - time_start))
         return platform_stats
 
-    def _update_node_stats(self, host_conf: DockerHostConfig, node_stats: NodeStats):
+    def _update_node_stats(self, host_conf: DockerHostConfig, node_stats: NodeStats, state):
         node_stats.labels = host_conf.labels
         try:
             my_engine = DockerClient(host_conf)
@@ -128,19 +129,26 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
         if info['Labels'] is not None:
             node_stats.labels += set(info['Labels'])
 
-        stats = {}
-        for cont in container_list:
-            try:
-                stats[cont['id']] = my_engine.stats(cont['id'], stream=False)
-            except ZoeException:
-                continue
-
         node_stats.memory_reserved = sum([cont['memory_soft_limit'] for cont in container_list if cont['memory_soft_limit'] != node_stats.memory_total])
-        node_stats.memory_in_use = sum([stat['memory_stats']['usage'] for stat in stats.values() if 'usage' in stat['memory_stats']])
-
         node_stats.cores_reserved = sum([cont['cpu_quota'] / cont['cpu_period'] for cont in container_list if cont['cpu_period'] != 0])
 
-        node_stats.cores_in_use = sum([self._get_core_usage(stat) for stat in stats.values()])
+        stats = {}
+        if get_conf().kairosdb_enable:
+            kdb = KairosDBInMetrics()
+            for cont in container_list:
+                stats[cont['id']] = kdb.get_service_usage(cont['name'])
+
+            node_stats.memory_in_use = sum([stat['mem_usage'] for stat in stats.values()])
+            node_stats.cores_in_use = sum([stat['cpu_usage'] for stat in stats.values()])
+        else:
+            for cont in container_list:
+                try:
+                    stats[cont['id']] = my_engine.stats(cont['id'], stream=False)
+                except ZoeException:
+                    continue
+
+            node_stats.memory_in_use = sum([stat['memory_stats']['usage'] for stat in stats.values() if 'usage' in stat['memory_stats']])
+            node_stats.cores_in_use = sum([self._get_core_usage(stat) for stat in stats.values()])
 
         if get_conf().backend_image_management:
             node_stats.image_list = []

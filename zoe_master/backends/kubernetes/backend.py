@@ -67,7 +67,7 @@ class KubernetesBackend(zoe_master.backends.base.BaseBackend):
         """Terminate and delete a container."""
         self.kube.terminate(service.dns_name)
 
-    def platform_state(self) -> ClusterStats:
+    def platform_state(self, state=None) -> ClusterStats:
         """Get the platform state."""
         info = self.kube.info()
         for node in info.nodes:  # type: NodeStats
