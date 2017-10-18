@@ -29,6 +29,8 @@ log = logging.getLogger(__name__)
 MEMORY_HISTORY_POINT_COUNT_MAX = 400
 PREDICTION_MIN_POINTS = 10
 
+BUFFER_SIZE = 0.20
+
 
 class DynamicReallocator:
     """The Dynamic reallocator with the predictor."""
@@ -39,6 +41,9 @@ class DynamicReallocator:
 
     def do_dynamic_step(self):
         """Drive the entire dynamic allocation algorithm."""
+
+        next_allocation = {}
+
         running_components = self.state.service_list(backend_status="started")
         platform_stats = get_platform_state(self.state, force_update=True)
         for rc in running_components:
@@ -55,6 +60,72 @@ class DynamicReallocator:
                 continue
 
             predicted_allocation, variance = self.gp_predict(self.memory_history[rc.id], restarts=5)
+            # Next we add the buffer to compensate for the prediction error
+            # For now we use a static value and we do not change it depending on the variance
+            next_allocation[rc.id] = predicted_allocation + (1 + BUFFER_SIZE)  # + normalized_variance)
+
+        # Before performing the simulation we have to sort the components per host.
+        hosts = {}
+        # TODO-Daniele: Group the components per host and per execution.
+        # TODO-Daniele: The data structure is as follows:
+        # TODO-Daniele: hosts = [
+        # TODO-Daniele:     {
+        # TODO-Daniele:         'execution_id': {
+        # TODO-Daniele:             'core' : [list of running core components on the host bf_X],
+        # TODO-Daniele:             'elastic' : [list of running elastic components on the host bf_X]
+        # TODO-Daniele:          }
+        # TODO-Daniele:      }
+        # TODO-Daniele: ]
+        # TODO-Daniele: In addition the list of running components must be sorted in ascending order by starting time
+
+        executions_to_kill = []
+        components_to_kill = []
+
+        components_to_resize = []
+
+        for host in hosts:
+            mem_free = platform_stats.current_mem_free  # FIXME: Daniele
+            for execution_id in host:
+                execution = host[execution_id]
+
+                tmp_mem_free = mem_free
+                tmp_ids = []
+                for core in execution['core']:
+                    tmp_mem_free -= next_allocation[core.id]
+                    tmp_ids.append(core.id)
+                if tmp_mem_free < 0:
+                    executions_to_kill.append(execution_id)
+                else:
+                    components_to_resize.extend(tmp_ids)
+                    mem_free = tmp_mem_free
+
+                    for elastic in execution['elastic']:
+                        tmp_mem_free = mem_free - next_allocation[elastic.id]
+                        if tmp_mem_free < 0:
+                            components_to_kill.append(elastic.id)
+                        else:
+                            components_to_resize.append(elastic.id)
+                            mem_free = tmp_mem_free
+
+            # TODO-Daniele: From this point forward the code can be executed per host, or once all hosts have been processed. Your call.
+            for execution_id in executions_to_kill:
+                # TODO-Daniele: Kill the execution and put it back in the queue with the same priority.
+                # TODO-Daniele: There is no need to cleaning up stuff here. A brute kill is sufficient.
+                # TODO-Daniele: The call will be synchronous.
+                # TODO-Daniele: I am assuming that killing a components does not take ages.
+                pass
+            for component_id in components_to_kill:
+                # TODO-Daniele: Kill the component.
+                # TODO-Daniele: Same argument as before
+                pass
+
+            for component_id in components_to_resize:
+                new_allocation = next_allocation[component_id]
+                # TODO-Daniele: Change the allocation of the component
+                pass
+
+
+            # TODO-Daniele: Trigger scheduler!
 
     def _get_component_memory_usage(self, component, platform_stats):
         for node in platform_stats.nodes:
