@@ -142,6 +142,7 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
             for cont in container_list:
                 try:
                     aux = my_engine.stats(cont['id'], stream=False)
+                    stats[cont['id']] = {}
                     stats[cont['id']]['mem_usage'] = aux['memory_stats']['usage']
                     stats[cont['id']]['cpu_usage'] = self._get_core_usage(aux)
                     stats[cont['id']]['mem_limit'] = cont['memory_soft_limit']
