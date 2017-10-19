@@ -137,7 +137,7 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
             kdb = KairosDBInMetrics()
             for cont in container_list:
                 stats[cont['id']] = kdb.get_service_usage(cont['name'])
-            stats[cont['id']]['mem_limit'] = cont['memory_soft_limit']
+                stats[cont['id']]['mem_limit'] = cont['memory_soft_limit']
 
             node_stats.memory_in_use = sum([stat['mem_usage'] for stat in stats.values()])
             node_stats.cores_in_use = sum([stat['cpu_usage'] for stat in stats.values()])
