@@ -70,7 +70,7 @@ class SwarmBackend(zoe_master.backends.base.BaseBackend):
         """Terminate and delete a container."""
         self.swarm.terminate_container(service.backend_id, delete=True)
 
-    def platform_state(self, state=None) -> ClusterStats:
+    def platform_state(self, usage_stats=False) -> ClusterStats:
         """Get the platform state."""
         info = self.swarm.info()
         for node in info.nodes:  # type: NodeStats

@@ -16,7 +16,7 @@
 """Interface to the low-level Docker API."""
 
 import logging
-from typing import Iterable, Callable, Dict, Any
+from typing import List, Callable, Dict, Any
 
 import docker
 import docker.tls
@@ -110,7 +110,7 @@ class DockerClient:
                 run_args['mem_reservation'] -= 1
 
         if service_instance.core_limit is not None:
-            run_args['cpu_quota'] = int(100000 * service_instance.core_limit.max)
+            run_args['cpu_quota'] = int(100000 * service_instance.core_limit.min)
 
         if get_conf().gelf_address != '':
             run_args['log_config'] = {
@@ -237,7 +237,7 @@ class DockerClient:
             if not res:
                 break
 
-    def list(self, only_label=None) -> Iterable[dict]:
+    def list(self, only_label=None) -> List[dict]:
         """
         List running or defined containers.
 

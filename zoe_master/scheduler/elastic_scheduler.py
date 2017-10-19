@@ -23,12 +23,13 @@ import logging
 import threading
 import time
 
-from zoe_lib.state import Execution, SQLManager
+from zoe_lib.state import Execution, SQLManager, Service
 from zoe_master.exceptions import ZoeException
 
-from zoe_master.backends.interface import terminate_execution, get_platform_state, start_elastic, start_essential
+from zoe_master.backends.interface import terminate_execution, get_platform_state, start_elastic, start_essential, update_service_resource_limits
 from zoe_master.scheduler.simulated_platform import SimulatedPlatform
 from zoe_master.exceptions import UnsupportedSchedulerPolicyError
+from zoe_master.stats import NodeStats
 
 log = logging.getLogger(__name__)
 
@@ -88,6 +89,7 @@ class ZoeElasticScheduler:
                     log.error('Error in termination thread: {}'.format(ex))
                     return
                 self.trigger()
+            self._adjust_core_limits()
             log.debug('Execution {} terminated successfully'.format(e.id))
 
         try:
@@ -190,7 +192,7 @@ class ZoeElasticScheduler:
                     log.debug("-> {}".format(job))
 
                 try:
-                    platform_state = get_platform_state(self.state, force_update=True)
+                    platform_state = get_platform_state(self.state)
                 except ZoeException:
                     log.error('Cannot retrieve platform state, cannot schedule')
                     for job in jobs_to_attempt_scheduling:
@@ -244,6 +246,7 @@ class ZoeElasticScheduler:
                             continue
                         elif ret == "ok":
                             job.set_running()
+
                         assert ret == "ok"
 
                     start_elastic(job, placements)
@@ -253,6 +256,8 @@ class ZoeElasticScheduler:
                         job.termination_lock.release()
                         jobs_to_attempt_scheduling.remove(job)
                         self.queue_running.append(job)
+
+                    self._adjust_core_limits()
 
                 for job in jobs_to_attempt_scheduling:
                     job.termination_lock.release()
@@ -286,5 +291,23 @@ class ZoeElasticScheduler:
             'termination_threads_count': len(self.async_threads),
             'queue': [s.id for s in queue],
             'running_queue': [s.id for s in self.queue_running],
-            'platform_stats': get_platform_state(self.state).serialize()
+            'platform_stats': get_platform_state(self.state, with_usage_stats=True).serialize()
         }
+
+    def _adjust_core_limits(self):
+        stats = get_platform_state(self.state)
+        for node in stats.nodes:  # type: NodeStats
+            new_core_allocations = {}
+            core_sum = 0
+            for service in node.services:  # type: Service
+                new_core_allocations[service.id] = service.resource_reservation.cores.min
+                core_sum += service.resource_reservation.cores.min
+
+            if core_sum < node.cores_total:
+                cores_free = node.cores_total - core_sum
+                cores_to_add = cores_free / len(node.services)
+            else:
+                cores_to_add = 0
+
+            for service in node.services:  # type: Service
+                update_service_resource_limits(service, cores=new_core_allocations[service.id] + cores_to_add)

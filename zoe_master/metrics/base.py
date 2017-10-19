@@ -21,7 +21,6 @@ import threading
 import queue
 
 from zoe_lib.config import get_conf
-from zoe_master.backends.interface import get_platform_state
 
 log = logging.getLogger(__name__)
 
@@ -73,7 +72,6 @@ class BaseMetricSender:
         stop = False
         while not stop:
             time_start = time.time()
-            get_platform_state(self.state, force_update=True)
             while not self._queue.empty():
                 data = self._queue.get(block=False)
                 if data == 'quit':
