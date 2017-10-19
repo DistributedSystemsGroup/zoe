@@ -138,18 +138,17 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
             for cont in container_list:
                 stats[cont['id']] = kdb.get_service_usage(cont['name'])
                 stats[cont['id']]['mem_limit'] = cont['memory_soft_limit']
-
-            node_stats.memory_in_use = sum([stat['mem_usage'] for stat in stats.values()])
-            node_stats.cores_in_use = sum([stat['cpu_usage'] for stat in stats.values()])
         else:
             for cont in container_list:
                 try:
-                    stats[cont['id']] = my_engine.stats(cont['id'], stream=False)
+                    aux = my_engine.stats(cont['id'], stream=False)
+                    stats[cont['id']]['mem_usage'] = aux['memory_stats']['usage']
+                    stats[cont['id']]['cpu_usage'] = self._get_core_usage(aux)
+                    stats[cont['id']]['mem_limit'] = cont['memory_soft_limit']
                 except ZoeException:
                     continue
-
-            node_stats.memory_in_use = sum([stat['memory_stats']['usage'] for stat in stats.values() if 'usage' in stat['memory_stats']])
-            node_stats.cores_in_use = sum([self._get_core_usage(stat) for stat in stats.values()])
+        node_stats.memory_in_use = sum([stat['mem_usage'] for stat in stats.values()])
+        node_stats.cores_in_use = sum([stat['cpu_usage'] for stat in stats.values()])
         node_stats.cont_stats = stats
 
         if get_conf().backend_image_management:
