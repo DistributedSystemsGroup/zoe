@@ -70,12 +70,12 @@ class DynamicReallocator:
         # Before performing the simulation we have to sort the components per host.
         # The data structure is as follows:
         # hosts = [
-        #   [
+        #   {
         #       'execution_id': {
         #           'core' : [list of running core components on the host bf_X],
         #            'elastic' : [list of running elastic components on the host bf_X]
         #       }
-        #   ],
+        #   },
         #   [...]
         # ]
         # In addition the list of running components must be sorted in ascending order by starting time
@@ -84,22 +84,20 @@ class DynamicReallocator:
         executions_by_id = {}
         for node in platform_stats.nodes:
             node_executions = sorted([s.execution for s in node.services], key=lambda x: x.size)
-            host = []
+            host = {}
             for execution in node_executions:  # type: Execution
-                host.append({
-                    execution.id: {
-                        'core': sorted([s for s in execution.essential_services if s in node.services], key=lambda s: s.id),
-                        'elastic': sorted([s for s in execution.elastic_services if s in node.services], key=lambda s: s.id)
-                    }
-                })
+                host[execution.id] = {
+                    'core': sorted([s for s in execution.essential_services if s in node.services], key=lambda s: s.id),
+                    'elastic': sorted([s for s in execution.elastic_services if s in node.services], key=lambda s: s.id)
+                }
                 executions_by_id[execution.id] = execution
             hosts.append(host)
 
-        executions_to_kill = []
-        components_to_kill = []
-        components_to_resize = []
-
         for host in hosts:
+            executions_to_kill = []
+            components_to_kill = []
+            components_to_resize = []
+
             mem_free = platform_stats.memory_total - sum([node.memory_reserved for node in platform_stats.nodes])
             for execution_id in host.keys():
                 execution = host[execution_id]
