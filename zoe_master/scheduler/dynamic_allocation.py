@@ -57,7 +57,7 @@ class DynamicReallocator:
                 self.memory_history[rc.id].pop(0)
 
             if len(self.memory_history[rc.id]) < PREDICTION_MIN_POINTS:
-                predictions[rc.id] = self._get_component_memory_usage(rc, platform_stats)
+                predictions[rc.id] = self._get_component_memory_limit(rc, platform_stats)
                 continue
 
             predicted_allocation, variance = self.gp_predict(self.memory_history[rc.id], restarts=5)
