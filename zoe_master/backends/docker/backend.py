@@ -93,8 +93,7 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
         th_list = []
         for host_conf in self.docker_config:  # type: DockerHostConfig
             node_stats = NodeStats(host_conf.name)
-
-            th = threading.Thread(target=self._update_node_stats, args=(host_conf, node_stats, usage_stats), name='stats_host_{}'.format(host_conf.name), daemon=True)
+            th = threading.Thread(target=self._update_node_state, args=(host_conf, node_stats, usage_stats), name='stats_host_{}'.format(host_conf.name), daemon=True)
             th.start()
             th_list.append((th, node_stats))
 
@@ -105,7 +104,20 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
         log.debug('Time for platform stats: {:.2f}s'.format(time.time() - time_start))
         return platform_stats
 
-    def _update_node_stats(self, host_conf: DockerHostConfig, node_stats: NodeStats, get_usage_stats: bool):
+    def node_state(self, node_name: str, get_usage_stats: bool):
+        """Get the state of a single node."""
+        host_conf = None
+        for host_conf in self.docker_config:
+            if host_conf.name == node_name:
+                break
+        if host_conf is None:
+            return None
+
+        node_stats = NodeStats(host_conf.name)
+        self._update_node_state(host_conf, node_stats, get_usage_stats)
+        return node_stats
+
+    def _update_node_state(self, host_conf: DockerHostConfig, node_stats: NodeStats, get_usage_stats: bool):
         node_stats.labels = host_conf.labels
         try:
             my_engine = DockerClient(host_conf)

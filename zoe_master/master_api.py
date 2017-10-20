@@ -87,7 +87,10 @@ class APIManager:
             elif message['command'] == 'scheduler_stats':
                 try:
                     data = self.scheduler.stats()
-                    data['platform_stats'] = self.metrics.current_platform_stats.serialize()
+                    if self.metrics.current_platform_stats is None:
+                        data['platform_stats'] = None
+                    else:
+                        data['platform_stats'] = self.metrics.current_platform_stats.serialize()
                 except ZoeException as e:
                     log.error(str(e))
                     self._reply_error(str(e))
