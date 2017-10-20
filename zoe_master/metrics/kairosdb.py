@@ -43,7 +43,7 @@ class KairosDBInMetrics:
         return query
 
     def _add_time_range(self, query, minutes_from_now=10):
-        end = datetime.utcnow()
+        end = datetime.now()
         start = end - timedelta(minutes=minutes_from_now)
         query['start_absolute'] = int(start.timestamp() * 1000)
         query['end_absolute'] = int(end.timestamp() * 1000)
