@@ -59,9 +59,6 @@ def load_configuration(test_conf=None):
 
         # Master options
         argparser.add_argument('--api-listen-uri', help='ZMQ API listen address', default='tcp://*:4850')
-        argparser.add_argument('--influxdb-dbname', help='Name of the InfluxDB database to use for storing metrics', default='zoe')
-        argparser.add_argument('--influxdb-url', help='URL of the InfluxDB service (ex. http://localhost:8086)', default='http://localhost:8086')
-        argparser.add_argument('--influxdb-enable', action="store_true", help='Enable metric output toward influxDB')
 
         argparser.add_argument('--kairosdb-enable', action="store_true", help='Enable metric input from KairosDB')
         argparser.add_argument('--kairosdb-url', help='URL of the KairosDB service (ex. http://localhost:8086)', default='http://localhost:8090')

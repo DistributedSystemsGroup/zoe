@@ -84,8 +84,8 @@ class KairosDBInMetrics:
         ]
         self._add_metric(query, "docker_container_mem", tags_memory, aggregators_memory, limit=0)
 
-        r = requests.post(self.metrics_url, json=query)
-        return self._extract_data(r)
+        req = requests.post(self.metrics_url, json=query)
+        return self._extract_data(req)
 
     def _extract_data(self, response):
         if response.status_code != 200:

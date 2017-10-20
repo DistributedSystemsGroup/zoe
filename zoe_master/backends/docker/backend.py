@@ -20,9 +20,9 @@ import re
 import threading
 import time
 
-import zoe_master.backends.base
 from zoe_lib.config import get_conf
 from zoe_lib.state import Service
+import zoe_master.backends.base
 from zoe_master.backends.docker.api_client import DockerClient
 from zoe_master.backends.docker.config import DockerConfig, DockerHostConfig  # pylint: disable=unused-import
 from zoe_master.backends.docker.threads import DockerStateSynchronizer
