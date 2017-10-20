@@ -23,13 +23,13 @@ import logging
 import threading
 import time
 
-from zoe_lib.state import Execution, SQLManager, Service
+from zoe_lib.state import Execution, SQLManager, Service  # pylint: disable=unused-import
 from zoe_master.exceptions import ZoeException
 
 from zoe_master.backends.interface import terminate_execution, get_platform_state, start_elastic, start_essential, update_service_resource_limits
 from zoe_master.scheduler.simulated_platform import SimulatedPlatform
 from zoe_master.exceptions import UnsupportedSchedulerPolicyError
-from zoe_master.stats import NodeStats
+from zoe_master.stats import NodeStats  # pylint: disable=unused-import
 
 log = logging.getLogger(__name__)
 
