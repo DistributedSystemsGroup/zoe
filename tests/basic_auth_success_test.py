@@ -61,13 +61,13 @@ class ZoeRestTestSuccess(unittest.TestCase):
         req = requests.get(self.__class__.uri + 'execution', auth=self.__class__.auth)
         self.assertEqual(req.status_code, 200)
 
-    def test_7_delete_execution(self):
-        """Test delete execution api endpoint."""
-        print('Test delete execution api endpoint')
-        req = requests.delete(self.__class__.uri + 'execution/delete/' + self.__class__.id, auth=self.__class__.auth)
-        if req.status_code != 204:
-            print('error message: {}'.format(req.json()['message']))
-        self.assertEqual(req.status_code, 204)
+#    def test_7_delete_execution(self):
+#        """Test delete execution api endpoint."""
+#        print('Test delete execution api endpoint')
+#       req = requests.delete(self.__class__.uri + 'execution/delete/' + self.__class__.id, auth=self.__class__.auth)
+#        if req.status_code != 204:
+#            print('error message: {}'.format(req.json()['message']))
+#        self.assertEqual(req.status_code, 204)
 
     def test_2_start_execution(self):
         """Test start execution api endpoint."""
