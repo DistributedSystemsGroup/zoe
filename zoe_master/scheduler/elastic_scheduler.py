@@ -290,13 +290,14 @@ class ZoeElasticScheduler:
             'running_length': len(self.queue_running),
             'termination_threads_count': len(self.async_threads),
             'queue': [s.id for s in queue],
-            'running_queue': [s.id for s in self.queue_running],
-            'platform_stats': get_platform_state(self.state, with_usage_stats=True).serialize()
+            'running_queue': [s.id for s in self.queue_running]
         }
 
     def _adjust_core_limits(self):
         stats = get_platform_state(self.state)
         for node in stats.nodes:  # type: NodeStats
+            if len(node.services) == 0:
+                continue
             new_core_allocations = {}
             core_sum = 0
             for service in node.services:  # type: Service

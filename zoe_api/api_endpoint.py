@@ -17,7 +17,6 @@
 
 import logging
 import os
-from time import time
 
 import zoe_api.exceptions
 import zoe_api.master_api
@@ -41,8 +40,6 @@ class APIEndpoint:
     def __init__(self, master_api, sql_manager):
         self.master = master_api
         self.sql = sql_manager
-        self.cached_statistics = None
-        self.cached_statistics_time = time()
 
     def execution_by_id(self, uid, role, execution_id) -> zoe_lib.state.sql_manager.Execution:
         """Lookup an execution by its ID."""
@@ -160,12 +157,9 @@ class APIEndpoint:
 
     def statistics_scheduler(self, uid_, role_):
         """Retrieve statistics about the scheduler."""
-        if self.cached_statistics is None or time() - self.cached_statistics_time > 60:
-            success, message = self.master.scheduler_statistics()
-            if success:
-                self.cached_statistics_time = time()
-                self.cached_statistics = message
-        return self.cached_statistics
+        success, message = self.master.scheduler_statistics()
+        if success:
+            return message
 
     def cleanup_dead_executions(self):
         """Terminates all executions with dead "monitor" services."""

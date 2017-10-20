@@ -24,7 +24,7 @@ import zoe_lib.config as config
 from zoe_lib.state import SQLManager
 import zoe_master.preprocessing
 from zoe_master.exceptions import ZoeException
-from zoe_master.metrics.base import BaseMetricSender
+from zoe_master.metrics.base import StatsManager
 from zoe_master.scheduler import ZoeBaseScheduler
 
 log = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ log = logging.getLogger(__name__)
 
 class APIManager:
     """The API Manager."""
-    def __init__(self, metrics: BaseMetricSender, scheduler: ZoeBaseScheduler, state: SQLManager) -> None:
+    def __init__(self, metrics: StatsManager, scheduler: ZoeBaseScheduler, state: SQLManager) -> None:
         self.context = zmq.Context()
         self.zmq_s = self.context.socket(zmq.REP)
         self.listen_uri = config.get_conf().api_listen_uri
@@ -87,6 +87,7 @@ class APIManager:
             elif message['command'] == 'scheduler_stats':
                 try:
                     data = self.scheduler.stats()
+                    data['platform_stats'] = self.metrics.current_platform_stats.serialize()
                 except ZoeException as e:
                     log.error(str(e))
                     self._reply_error(str(e))
@@ -100,7 +101,7 @@ class APIManager:
                 self._reply_error('bug')
                 raise ZoeException('BUG: command {} does not fill a reply')
 
-            self.metrics.metric_api_call(start_time, message['command'])
+            log.debug('API call {} took {:.2f}s'.format(message['command'], time.time() - start_time))
 
     def quit(self) -> None:
         """Cleanly close the ZMQ resources."""

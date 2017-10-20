@@ -27,8 +27,7 @@ import zoe_master.scheduler
 from zoe_master.exceptions import ZoeException
 from zoe_master.gelf_listener import GELFListener
 from zoe_master.master_api import APIManager
-from zoe_master.metrics.influxdb import InfluxDBMetricSender
-from zoe_master.metrics.logging import LogMetricSender
+from zoe_master.metrics.base import StatsManager
 from zoe_master.preprocessing import restart_resubmit_scheduler
 
 log = logging.getLogger("main")
@@ -64,10 +63,8 @@ def main():
     log.info("Initializing DB manager")
     state = SQLManager(args)
 
-    if config.get_conf().influxdb_enable:
-        metrics = InfluxDBMetricSender(state)
-    else:
-        metrics = LogMetricSender(state)
+    metrics = StatsManager(state)
+    metrics.start()
 
     try:
         zoe_master.backends.interface.initialize_backend(state)
@@ -93,7 +90,7 @@ def main():
     except KeyboardInterrupt:
         pass
     except Exception:
-        log.exception('fatal error')
+        log.exception('Fatal error in API loop')
     finally:
         scheduler.quit()
         api_server.quit()
