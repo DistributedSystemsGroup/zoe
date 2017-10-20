@@ -281,3 +281,8 @@ class Service:
     def unique_name(self):
         """Returns a name for this service that is unique across multiple Zoe instances running on the same backend."""
         return self.name + '-' + str(self.execution_id) + '-' + get_conf().deployment_name
+
+    @property
+    def execution(self):
+        """Return the parent execution."""
+        return self.sql_manager.execution_list(only_one=True, id=self.execution_id)

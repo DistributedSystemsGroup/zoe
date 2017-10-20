@@ -15,6 +15,8 @@
 
 """The base class that all backends should implement."""
 
+from typing import List
+
 from zoe_lib.state import Service
 from zoe_master.stats import ClusterStats
 from zoe_master.backends.service_instance import ServiceInstance
@@ -50,10 +52,26 @@ class BaseBackend:
         """Terminate the container corresponding to a service."""
         raise NotImplementedError
 
-    def platform_state(self) -> ClusterStats:
+    def platform_state(self, usage_stats=False) -> ClusterStats:
         """Get the platform state. This method should fill-in a new ClusterStats object at each call, with fresh statistics on the available nodes and resource availability. This information will be used for taking scheduling decisions."""
+        raise NotImplementedError
+
+    def node_state(self, node_name: str, get_usage_stats: bool):
+        """Get the state of a single node."""
         raise NotImplementedError
 
     def preload_image(self, image_name: str) -> None:
         """Make a service image available."""
+        raise NotImplementedError
+
+    def update_service(self, service, cores=None, memory=None):
+        """Update a service reservation."""
+        raise NotImplementedError
+
+    def node_list(self) -> List[str]:
+        """List node names configured in the back-end."""
+        raise NotImplementedError
+
+    def list_available_images(self, node_name):
+        """List the images available on the specified node."""
         raise NotImplementedError

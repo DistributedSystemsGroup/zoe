@@ -16,7 +16,7 @@
 """Interface to the low-level Docker API."""
 
 import logging
-from typing import Iterable, Callable, Dict, Any
+from typing import List, Callable, Dict, Any
 
 import docker
 import docker.tls
@@ -110,7 +110,7 @@ class DockerClient:
                 run_args['mem_reservation'] -= 1
 
         if service_instance.core_limit is not None:
-            run_args['cpu_quota'] = int(100000 * service_instance.core_limit.max)
+            run_args['cpu_quota'] = int(100000 * service_instance.core_limit.min)
 
         if get_conf().gelf_address != '':
             run_args['log_config'] = {
@@ -237,7 +237,7 @@ class DockerClient:
             if not res:
                 break
 
-    def list(self, only_label=None) -> Iterable[dict]:
+    def list(self, only_label=None) -> List[dict]:
         """
         List running or defined containers.
 
@@ -318,3 +318,23 @@ class DockerClient:
         except docker.errors.APIError as e:
             log.error('Cannot download image {}: {}'.format(image_name, e))
             raise ZoeException('Cannot download image {}: {}'.format(image_name, e))
+
+    def update(self, docker_id, cpu_quota=None, mem_reservation=None, mem_limit=None):
+        """Update the resource reservation for a container."""
+        kwargs = {}
+        if cpu_quota is not None:
+            kwargs['cpu_quota'] = cpu_quota
+        if mem_reservation is not None:
+            kwargs['mem_reservation'] = mem_reservation
+        if mem_limit is not None:
+            kwargs['mem_limit'] = mem_limit
+
+        try:
+            cont = self.cli.containers.get(docker_id)
+        except (docker.errors.NotFound, docker.errors.APIError):
+            return
+
+        try:
+            cont.update(**kwargs)
+        except docker.errors.APIError:
+            pass

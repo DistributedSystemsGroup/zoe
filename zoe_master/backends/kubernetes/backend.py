@@ -67,7 +67,7 @@ class KubernetesBackend(zoe_master.backends.base.BaseBackend):
         """Terminate and delete a container."""
         self.kube.terminate(service.dns_name)
 
-    def platform_state(self) -> ClusterStats:
+    def platform_state(self, usage_stats=False) -> ClusterStats:
         """Get the platform state."""
         info = self.kube.info()
         for node in info.nodes:  # type: NodeStats
@@ -78,3 +78,7 @@ class KubernetesBackend(zoe_master.backends.base.BaseBackend):
     def preload_image(self, image_name: str) -> None:
         """Make a service image available."""
         raise NotImplementedError
+
+    def update_service(self, service, cores=None, memory=None):
+        """Update a service reservation."""
+        log.error('Reservation update not implemented in the Swarm back-end')

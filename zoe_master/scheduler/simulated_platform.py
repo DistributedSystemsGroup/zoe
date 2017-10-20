@@ -5,6 +5,8 @@ import logging
 from zoe_lib.state.sql_manager import Execution, Service
 from zoe_lib.config import get_conf
 from zoe_master.stats import ClusterStats, NodeStats
+from zoe_master.backends.interface import list_available_images
+
 
 log = logging.getLogger(__name__)
 
@@ -12,19 +14,20 @@ log = logging.getLogger(__name__)
 class SimulatedNode:
     """A simulated node where containers can be run"""
     def __init__(self, real_node: NodeStats):
+        min_cores_reserved = sum([s.resource_reservation.cores.min for s in real_node.services if s.resource_reservation.cores is not None])
         self.real_reservations = {
             "memory": real_node.memory_reserved,
-            "cores": real_node.cores_reserved
+            "cores": min_cores_reserved
         }
         self.real_free_resources = {
             "memory": real_node.memory_total - real_node.memory_reserved,
-            "cores": real_node.cores_total - real_node.cores_reserved
+            "cores": real_node.cores_total - min_cores_reserved
         }
         self.real_active_containers = real_node.container_count
         self.services = []
         self.name = real_node.name
         self.labels = real_node.labels
-        self.images = real_node.image_list
+        self.images = list_available_images(self.name)
 
     def service_fits(self, service: Service) -> bool:
         """Checks whether a service can fit in this node"""

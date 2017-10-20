@@ -18,7 +18,6 @@
 import time
 import logging
 import threading
-import queue
 
 from zoe_lib.config import get_conf
 from zoe_master.backends.interface import get_platform_state
@@ -33,55 +32,28 @@ def time_diff_ms(start: float, end: float) -> int:
     return int((end - start) * 1000)
 
 
-class BaseMetricSender:
-    """Base class for collecting and sending out metrics."""
-
-    BUFFER_MAX_SIZE = 6
+class StatsManager(threading.Thread):
+    """Class for collecting and sending out metrics and statistics."""
 
     def __init__(self, state):
+        super().__init__(name='metrics', daemon=True)
         self.state = state
-        self._queue = queue.Queue()
-        self._buffer = []
-        self._th = None
-        self._th = threading.Thread(name='metrics', target=self._metrics_loop, daemon=True)
         self.deployment_name = get_conf().deployment_name
-
-    def _start(self):
-        self._th.start()
-
-    def metric_api_call(self, time_start, action):
-        """Compute and pass the metric point of an API call to the sender thread."""
-        time_end = time.time()
-        diff = time_diff_ms(time_start, time_end)
-        point = "api latency: {} took {} ms".format(action, diff)
-        self._queue.put(point)
-
-    def _send_buffer(self):
-        """
-        Sends the buffered data.
-
-        Needs to be redefined in child classes to support other metrics databases. Is called in thread context.
-        """
-        raise NotImplementedError
+        self.stop = False
+        self.current_platform_stats = None
 
     def quit(self):
         """Terminates the sender thread."""
-        self._queue.put("quit")
-        self._th.join()
+        self.stop = True
+        self.join()
 
-    def _metrics_loop(self):
-        stop = False
-        while not stop:
+    def run(self):
+        """The thread loop."""
+        while not self.stop:
             time_start = time.time()
-            get_platform_state(self.state, force_update=True)
-            while not self._queue.empty():
-                data = self._queue.get(block=False)
-                if data == 'quit':
-                    stop = True
-                else:
-                    self._buffer.append(data)
-            self._send_buffer()
+
+            self.current_platform_stats = get_platform_state(self.state, with_usage_stats=True)
 
             sleep_time = METRIC_INTERVAL - (time.time() - time_start)
-            if sleep_time > 0 and not stop:
+            if sleep_time > 0 and not self.stop:
                 time.sleep(sleep_time)

@@ -125,6 +125,7 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
         else:
             log.debug('Service {} started'.format(instance.name))
             service.set_active(backend_id, ip_address, ports)
+            _adjust_core_limits(service.backend_host)
 
     return "ok"
 
@@ -153,48 +154,45 @@ def start_elastic(execution: Execution, placement) -> str:
     return service_list_to_containers(execution, elastic_to_start, placement)
 
 
-def terminate_execution(execution: Execution) -> None:
-    """Terminate an execution."""
+def terminate_service(service: Service) -> None:
+    """Terminate a single service."""
     backend = _get_backend()
-    for service in execution.services:  # type: Service
-        if service.status != Service.INACTIVE_STATUS:
-            if service.status == Service.ERROR_STATUS:
-                continue
-            elif service.status == Service.ACTIVE_STATUS or service.status == Service.TERMINATING_STATUS or service.status == Service.STARTING_STATUS:
-                service.set_terminating()
-                backend.terminate_service(service)
-                service.set_inactive()
-                log.debug('Service {} terminated'.format(service.name))
-            elif service.status == Service.CREATED_STATUS or service.status == Service.RUNNABLE_STATUS:
-                service.set_inactive()
-            else:
-                log.error('BUG: don\'t know how to terminate a service in status {}'.format(service.status))
-        elif not service.is_dead():
-            log.warning('Service {} is inactive for Zoe, but running for the back-end, terminating and resetting state'.format(service.name))
+    if service.status != Service.INACTIVE_STATUS:
+        if service.status == Service.ERROR_STATUS:
+            return
+        elif service.status == Service.ACTIVE_STATUS or service.status == Service.TERMINATING_STATUS or service.status == Service.STARTING_STATUS:
             service.set_terminating()
             backend.terminate_service(service)
             service.set_inactive()
             log.debug('Service {} terminated'.format(service.name))
+            _adjust_core_limits(service.backend_host)
+        elif service.status == Service.CREATED_STATUS or service.status == Service.RUNNABLE_STATUS:
+            service.set_inactive()
+        else:
+            log.error('BUG: don\'t know how to terminate a service in status {}'.format(service.status))
+    elif not service.is_dead():
+        log.warning('Service {} is inactive for Zoe, but running for the back-end, terminating and resetting state'.format(service.name))
+        service.set_terminating()
+        backend.terminate_service(service)
+        service.set_inactive()
+        log.debug('Service {} terminated'.format(service.name))
+        _adjust_core_limits(service.backend_host)
 
+
+def terminate_execution(execution: Execution) -> None:
+    """Terminate an execution."""
+    for service in execution.services:  # type: Service
+        terminate_service(service)
     execution.set_terminated()
 
 
-CACHED_STATS = None  # type: ClusterStats
-
-
-def get_platform_state(state: SQLManager, force_update=False) -> ClusterStats:
+def get_platform_state(state: SQLManager, with_usage_stats=False) -> ClusterStats:
     """Retrieves the state of the platform by querying the container backend. Platform state includes information on free/reserved resources for each node. This information is used for advanced scheduling.
-    Since retrieving statistics can be slow, the we cache results and use the force_update parameter to know when fresh (and slow) values are absolutely needed."""
-    global CACHED_STATS
-
-    if CACHED_STATS is not None and not force_update:
-        return CACHED_STATS
-
+    Since retrieving usage statistics is slow, you need to ask for them explicitly."""
     backend = _get_backend()
-    platform_state = backend.platform_state()
+    platform_state = backend.platform_state(with_usage_stats)
     for node in platform_state.nodes:  # type: NodeStats
         node.services = state.service_list(backend_host=node.name, backend_status=Service.BACKEND_START_STATUS)
-    CACHED_STATS = platform_state
     return platform_state
 
 
@@ -208,3 +206,54 @@ def preload_image(image_name):
         log.info('Image {} preloaded in {:.2f}s'.format(image_name, time.time() - time_start))
     except NotImplementedError:
         log.warning('Backend {} does not support image preloading'.format(get_conf().backend))
+
+
+def update_service_resource_limits(service, cores=None, memory=None):
+    """Update a service reservation."""
+    backend = _get_backend()
+    if cores is not None:
+        log.debug('Setting core limit to {} for service {}'.format(cores, service.id))
+    if memory is not None:
+        log.debug('Setting memory limit to {} for service {}'.format(memory, service.id))
+    backend.update_service(service, cores, memory)
+
+
+def node_list():
+    """List node names configured in the back-end."""
+    backend = _get_backend()
+    return backend.node_list()
+
+
+def node_state(node_name: str, get_usage_stats: bool) -> NodeStats:
+    """Get the state of a single node."""
+    backend = _get_backend()
+    state = SQLManager(get_conf())
+    node = backend.node_state(node_name, get_usage_stats)
+    node.services = state.service_list(backend_host=node_name, backend_status=Service.BACKEND_START_STATUS)
+    return node
+
+
+def list_available_images(node_name):
+    """List the images available on the specified node."""
+    backend = _get_backend()
+    return backend.list_available_images(node_name)
+
+
+def _adjust_core_limits(node_name):
+    node = node_state(node_name, False)
+    if len(node.services) == 0:
+        return
+    new_core_allocations = {}
+    core_sum = 0
+    for service in node.services:  # type: Service
+        new_core_allocations[service.id] = service.resource_reservation.cores.min
+        core_sum += service.resource_reservation.cores.min
+
+    if core_sum < node.cores_total:
+        cores_free = node.cores_total - core_sum
+        cores_to_add = cores_free / len(node.services)
+    else:
+        cores_to_add = 0
+
+    for service in node.services:  # type: Service
+        update_service_resource_limits(service, cores=new_core_allocations[service.id] + cores_to_add)

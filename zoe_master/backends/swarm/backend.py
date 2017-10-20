@@ -70,7 +70,7 @@ class SwarmBackend(zoe_master.backends.base.BaseBackend):
         """Terminate and delete a container."""
         self.swarm.terminate_container(service.backend_id, delete=True)
 
-    def platform_state(self) -> ClusterStats:
+    def platform_state(self, usage_stats=False) -> ClusterStats:
         """Get the platform state."""
         info = self.swarm.info()
         for node in info.nodes:  # type: NodeStats
@@ -85,3 +85,7 @@ class SwarmBackend(zoe_master.backends.base.BaseBackend):
     def preload_image(self, image_name: str) -> None:
         """Make a service image available."""
         raise NotImplementedError
+
+    def update_service(self, service, cores=None, memory=None):
+        """Update a service reservation."""
+        log.error('Reservation update not implemented in the Swarm back-end')

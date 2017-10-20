@@ -58,6 +58,10 @@ class ZApp:
         self.zoe_description = self.parse_json_description()
         self.parameters = []
         self.parse_parameters(zapp)
+        if 'guest_access' in zapp:
+            self.guest_access = zapp['guest_access']
+        else:
+            self.guest_access = False
 
     def parse_parameters(self, zapp_manifest):
         """Translates the parameters from the manifest into objects."""
@@ -74,7 +78,7 @@ class ZApp:
         return json.load(open(os.path.join(get_conf().zapp_shop_path, self.id, self.json_file), 'r'))
 
 
-def zshop_list_apps():
+def zshop_list_apps(role):
     """List the ZApp repos."""
     dirs = [d for d in os.listdir(get_conf().zapp_shop_path) if os.path.isdir(os.path.join(get_conf().zapp_shop_path, d)) and os.path.exists(os.path.join(get_conf().zapp_shop_path, d, "manifest.json"))]
 
@@ -84,6 +88,8 @@ def zshop_list_apps():
 
     zapp_cat = {}
     for zapp in zapps:
+        if role == 'guest' and not zapp.guest_access:
+            continue
         if zapp.category in zapp_cat:
             zapp_cat[zapp.category].append(zapp)
         else:

@@ -125,7 +125,8 @@ The ``manifest.json`` file drives the ZApp Shop. Its format is as follows::
                         "type": "string",
                         "default": "./my-tf-app/main.py"
                     }
-                ]
+                ],
+                "guest_access": true
             },
             {
                 "category": "TensorFlow",
@@ -154,6 +155,7 @@ For each ZApp:
 * description : the name of the json file with the Zoe description
 * readable_descr : the name of the markdown file containing user documentation for the ZApp
 * parameters : a list of parameters the user can set to tune the ZApp before starting it
+* guest_access (optional) : if true the ZApp is visible to guest users, default is false
 
 Parameters:
 
