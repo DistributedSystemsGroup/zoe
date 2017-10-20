@@ -76,8 +76,9 @@ class APIEndpoint:
             running_execs = self.execution_list(uid, role, **{'status': 'running'})
             running_execs += self.execution_list(uid, role, **{'status': 'starting'})
             running_execs += self.execution_list(uid, role, **{'status': 'scheduled'})
+            running_execs += self.execution_list(uid, role, **{'status': 'image download'})
             running_execs += self.execution_list(uid, role, **{'status': 'submitted'})
-            if len(running_execs) > GUEST_QUOTA_MAX_EXECUTIONS:
+            if len(running_execs) >= GUEST_QUOTA_MAX_EXECUTIONS:
                 raise zoe_api.exceptions.ZoeException('Guest users cannot run more than one execution at a time, quota exceeded.')
 
         new_id = self.sql.execution_new(exec_name, uid, application_description)

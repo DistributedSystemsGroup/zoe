@@ -35,7 +35,10 @@ class GELFUDPHandler(socketserver.DatagramRequestHandler):
     def handle(self):
         """Handle one UDP packet (one GELF log line in JSON format)."""
         data = self.rfile.read()
-        data = gzip.decompress(data)
+        try:
+            data = gzip.decompress(data)
+        except OSError:
+            return
         data = json.loads(data.decode('utf-8'))
         deployment_name = data['_zoe_deployment_name']
         if deployment_name != get_conf().deployment_name:
