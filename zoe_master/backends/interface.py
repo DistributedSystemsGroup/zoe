@@ -125,7 +125,6 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
         else:
             log.debug('Service {} started'.format(instance.name))
             service.set_active(backend_id, ip_address, ports)
-            _adjust_core_limits(service.backend_host)
 
     return "ok"
 
@@ -165,7 +164,6 @@ def terminate_service(service: Service) -> None:
             backend.terminate_service(service)
             service.set_inactive()
             log.debug('Service {} terminated'.format(service.name))
-            _adjust_core_limits(service.backend_host)
         elif service.status == Service.CREATED_STATUS or service.status == Service.RUNNABLE_STATUS:
             service.set_inactive()
         else:
@@ -176,7 +174,6 @@ def terminate_service(service: Service) -> None:
         backend.terminate_service(service)
         service.set_inactive()
         log.debug('Service {} terminated'.format(service.name))
-        _adjust_core_limits(service.backend_host)
 
 
 def terminate_execution(execution: Execution) -> None:
@@ -237,23 +234,3 @@ def list_available_images(node_name):
     """List the images available on the specified node."""
     backend = _get_backend()
     return backend.list_available_images(node_name)
-
-
-def _adjust_core_limits(node_name):
-    node = node_state(node_name, False)
-    if len(node.services) == 0:
-        return
-    new_core_allocations = {}
-    core_sum = 0
-    for service in node.services:  # type: Service
-        new_core_allocations[service.id] = service.resource_reservation.cores.min
-        core_sum += service.resource_reservation.cores.min
-
-    if core_sum < node.cores_total:
-        cores_free = node.cores_total - core_sum
-        cores_to_add = cores_free / len(node.services)
-    else:
-        cores_to_add = 0
-
-    for service in node.services:  # type: Service
-        update_service_resource_limits(service, cores=new_core_allocations[service.id] + cores_to_add)
