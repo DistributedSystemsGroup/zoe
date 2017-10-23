@@ -110,3 +110,4 @@ class APIManager:
         """Cleanly close the ZMQ resources."""
         self.zmq_s.close()
         self.context.term()
+        log.info('ZeroMQ API server stopped')

@@ -39,21 +39,21 @@ class StatsManager(threading.Thread):
         super().__init__(name='metrics', daemon=True)
         self.state = state
         self.deployment_name = get_conf().deployment_name
-        self.stop = False
+        self.stop = threading.Event()
         self.current_platform_stats = None
 
     def quit(self):
         """Terminates the sender thread."""
-        self.stop = True
+        self.stop.set()
         self.join()
 
     def run(self):
         """The thread loop."""
-        while not self.stop:
+        while True:
             time_start = time.time()
 
             self.current_platform_stats = get_platform_state(self.state, with_usage_stats=True)
 
             sleep_time = METRIC_INTERVAL - (time.time() - time_start)
-            if sleep_time > 0 and not self.stop:
-                time.sleep(sleep_time)
+            if sleep_time > 0 and self.stop.wait(timeout=sleep_time):
+                break

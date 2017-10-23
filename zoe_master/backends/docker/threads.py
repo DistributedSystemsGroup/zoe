@@ -28,7 +28,6 @@ from zoe_master.exceptions import ZoeException
 log = logging.getLogger(__name__)
 
 CHECK_INTERVAL = 10
-THREAD_POOL_SIZE = 10
 
 
 class DockerStateSynchronizer(threading.Thread):
@@ -37,8 +36,8 @@ class DockerStateSynchronizer(threading.Thread):
     def __init__(self, state: SQLManager) -> None:
         super().__init__()
         self.setName('checker')
-        self.stop = False
-        self.my_stop = False
+        self.stop = threading.Event()
+        self.my_stop = threading.Event()
         self.state = state
         self.setDaemon(True)
         self.host_checkers = []
@@ -50,10 +49,13 @@ class DockerStateSynchronizer(threading.Thread):
         self.start()
 
     def _host_subthread(self, host_config: DockerHostConfig):
-        log.info("Checker thread started")
+        log.info("Synchro thread for host {} started".format(host_config.name))
 
         node_status = 'offline'
-        while not self.stop:
+        while True:
+            ret = self.stop.wait(timeout=CHECK_INTERVAL)
+            if ret:
+                break
             try:
                 my_engine = DockerClient(host_config)
             except ZoeException as e:
@@ -77,8 +79,7 @@ class DockerStateSynchronizer(threading.Thread):
                     log.warning('Container {} on host {} has no corresponding service'.format(cont['name'], host_config.name))
                     continue
                 self._update_service_status(service, cont)
-
-            time.sleep(CHECK_INTERVAL)
+        log.info("Synchro thread for host {} stopped".format(host_config.name))
 
     def _update_service_status(self, service: Service, container):
         """Update the service status."""
@@ -90,7 +91,10 @@ class DockerStateSynchronizer(threading.Thread):
     def run(self):
         """The thread loop."""
         log.info("Checker thread started")
-        while not self.my_stop:
+        while True:
+            ret = self.my_stop.wait(timeout=CHECK_INTERVAL)
+            if ret:
+                break
             to_remove = []
             to_add = []
             for th, conf in self.host_checkers:
@@ -104,11 +108,12 @@ class DockerStateSynchronizer(threading.Thread):
                 self.host_checkers.remove(dead_th)
             for new_th in to_add:
                 self.host_checkers.append(new_th)
-            time.sleep(CHECK_INTERVAL)
+        log.info("Checker thread stopped")
 
     def quit(self):
         """Stops the thread."""
-        self.stop = True
+        self.stop.set()
         for th, conf_ in self.host_checkers:
             th.join()
-        self.my_stop = True
+        self.my_stop.set()
+        self.join()

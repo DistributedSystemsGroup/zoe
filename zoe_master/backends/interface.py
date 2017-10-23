@@ -208,10 +208,6 @@ def preload_image(image_name):
 def update_service_resource_limits(service, cores=None, memory=None):
     """Update a service reservation."""
     backend = _get_backend()
-    if cores is not None:
-        log.debug('Setting core limit to {} for service {}'.format(cores, service.id))
-    if memory is not None:
-        log.debug('Setting memory limit to {} for service {}'.format(memory, service.id))
     backend.update_service(service, cores, memory)
 
 

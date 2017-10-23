@@ -255,4 +255,4 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
             cpu_quota = int(cores * 100000)
             engine.update(service.backend_id, cpu_quota=cpu_quota, mem_reservation=memory)
         else:
-            log.error('Cannot update service {}, since it has no backend ID'.format(service.name))
+            log.error('Cannot update service {} ({}), since it has no backend ID'.format(service.name, service.id))
