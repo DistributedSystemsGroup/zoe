@@ -135,6 +135,20 @@ def exec_rm_cmd(auth, args):
     exec_api.delete(args.id)
 
 
+def exec_kill_user_cmd(auth, args):
+    """Terminates all executions for the given user."""
+    exec_api = ZoeExecutionsAPI(auth['url'], auth['user'], auth['pass'])
+    filters = {
+        'status': 'running',
+        'user_id': args.user_id
+    }
+    data = exec_api.list(**filters)
+    print('Terminating {} executions belonging to user {}'.format(len(data), args.user_id))
+    for execution in data:
+        exec_api.terminate(execution)
+        print('Execution {} terminated'.format(execution))
+
+
 ENV_HELP_TEXT = '''To authenticate with Zoe you need to define three environment variables:
 ZOE_URL: point to the URL of the Zoe Scheduler (ex.: http://localhost:5000/
 ZOE_USER: the username used for authentication
@@ -183,6 +197,10 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     argparser_execution_rm = subparser.add_parser('exec-rm', help="Deletes an execution")
     argparser_execution_rm.add_argument('id', type=int, help="Execution id")
     argparser_execution_rm.set_defaults(func=exec_rm_cmd)
+
+    argparser_execution_kill_user = subparser.add_parser('user-terminate', help="Terminate all executions of a user")
+    argparser_execution_kill_user.add_argument('user_id', help="User name")
+    argparser_execution_kill_user.set_defaults(func=exec_kill_user_cmd)
 
     return parser, parser.parse_args()
 
