@@ -106,6 +106,8 @@ def exec_list_cmd(auth, args):
         if key in filter_names:
             filters[key] = value
     data = exec_api.list(**filters)
+    if len(data) == 0:
+        return
     tabular_data = [[e['id'], e['name'], e['user_id'], e['status']] for e in sorted(data.values(), key=lambda x: x['id'])]
     headers = ['ID', 'Name', 'User ID', 'Status']
     print(tabulate(tabular_data, headers))
