@@ -50,7 +50,8 @@ class ZoeElasticScheduler:
         self.async_threads = []
         self.loop_quit = False
         self.loop_th = threading.Thread(target=self._thread_wrapper, name='scheduler')
-        self.loop_th.start()
+        self.core_limit_recalc_trigger = threading.Event()
+        self.core_limit_th = threading.Thread(target=self._adjust_core_limits, name='adjust_core_limits')
         self.state = state
         for execution in self.state.execution_list(status='running'):
             if execution.all_services_running:
@@ -58,6 +59,8 @@ class ZoeElasticScheduler:
             else:
                 self.queue.append(execution)
                 self.additional_exec_state[execution.id] = ExecutionProgress(0, [])
+        self.loop_th.start()
+        self.core_limit_th.start()
 
     def trigger(self):
         """Trigger a scheduler run."""
@@ -89,7 +92,6 @@ class ZoeElasticScheduler:
                     log.error('Error in termination thread: {}'.format(ex))
                     return
                 self.trigger()
-            self._adjust_core_limits()
             log.debug('Execution {} terminated successfully'.format(e.id))
 
         try:
@@ -98,12 +100,14 @@ class ZoeElasticScheduler:
             try:
                 self.queue_running.remove(execution)
             except ValueError:
-                log.error('Terminating execution {} that is not in any queue'.format(execution.id))
+                log.error('Cannot terminate execution {}, it is not in any queue'.format(execution.id))
+                return
 
         try:
             del self.additional_exec_state[execution.id]
         except KeyError:
             pass
+        self.core_limit_recalc_trigger.set()
 
         th = threading.Thread(target=async_termination, name='termination_{}'.format(execution.id), args=(execution,))
         th.start()
@@ -172,6 +176,7 @@ class ZoeElasticScheduler:
 
             if len(self.queue) == 0:
                 log.debug("Scheduler loop has been triggered, but the queue is empty")
+                self.core_limit_recalc_trigger.set()
                 continue
             log.debug("Scheduler loop has been triggered")
 
@@ -257,7 +262,7 @@ class ZoeElasticScheduler:
                         jobs_to_attempt_scheduling.remove(job)
                         self.queue_running.append(job)
 
-                self._adjust_core_limits()
+                self.core_limit_recalc_trigger.set()
 
                 for job in jobs_to_attempt_scheduling:
                     job.termination_lock.release()
@@ -276,7 +281,9 @@ class ZoeElasticScheduler:
         """Stop the scheduler thread."""
         self.loop_quit = True
         self.trigger()
+        self.core_limit_recalc_trigger.set()
         self.loop_th.join()
+        self.core_limit_th.join()
 
     def stats(self):
         """Scheduler statistics."""
@@ -294,21 +301,30 @@ class ZoeElasticScheduler:
         }
 
     def _adjust_core_limits(self):
-        stats = get_platform_state(self.state)
-        for node in stats.nodes:  # type: NodeStats
-            if len(node.services) == 0:
-                continue
-            new_core_allocations = {}
-            core_sum = 0
-            for service in node.services:  # type: Service
-                new_core_allocations[service.id] = service.resource_reservation.cores.min
-                core_sum += service.resource_reservation.cores.min
+        while not self.loop_quit:
+            self.core_limit_recalc_trigger.wait()
+            if self.loop_quit:
+                break
+            log.debug('Updating core limits')
+            time_start = time.time()
+            stats = get_platform_state(self.state)
+            for node in stats.nodes:  # type: NodeStats
+                if len(node.services) == 0:
+                    continue
+                new_core_allocations = {}
+                core_sum = 0
+                for service in node.services:  # type: Service
+                    new_core_allocations[service.id] = service.resource_reservation.cores.min
+                    core_sum += service.resource_reservation.cores.min
 
-            if core_sum < node.cores_total:
-                cores_free = node.cores_total - core_sum
-                cores_to_add = cores_free / len(node.services)
-            else:
-                cores_to_add = 0
+                if core_sum < node.cores_total:
+                    cores_free = node.cores_total - core_sum
+                    cores_to_add = cores_free / len(node.services)
+                else:
+                    cores_to_add = 0
 
-            for service in node.services:  # type: Service
-                update_service_resource_limits(service, cores=new_core_allocations[service.id] + cores_to_add)
+                for service in node.services:  # type: Service
+                    update_service_resource_limits(service, cores=new_core_allocations[service.id] + cores_to_add)
+
+            log.debug('Update core limits took {:.2f}s'.format(time.time() - time_start))
+            self.core_limit_recalc_trigger.clear()
