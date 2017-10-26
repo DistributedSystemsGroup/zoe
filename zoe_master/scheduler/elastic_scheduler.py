@@ -49,7 +49,6 @@ class ZoeElasticScheduler:
         self.async_threads = []
         self.loop_quit = False
         self.loop_th = threading.Thread(target=self._thread_wrapper, name='scheduler')
-        self.loop_th.start()
         self.state = state
         for execution in self.state.execution_list(status='running'):
             if execution.all_services_running:
@@ -59,6 +58,7 @@ class ZoeElasticScheduler:
                 self.additional_exec_state[execution.id] = ExecutionProgress(0, [])
 
         self.dynamic_reallocator = DynamicReallocator(self)
+        self.loop_th.start()
 
     def trigger(self):
         """Trigger a scheduler run."""
