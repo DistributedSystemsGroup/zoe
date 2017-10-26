@@ -146,7 +146,7 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
                     stats[cont['id']]['mem_usage'] = aux['memory_stats']['usage']
                     stats[cont['id']]['cpu_usage'] = self._get_core_usage(aux)
                     stats[cont['id']]['mem_limit'] = cont['memory_soft_limit']
-                except ZoeException:
+                except (ZoeException, KeyError):
                     continue
         node_stats.memory_in_use = sum([stat['mem_usage'] for stat in stats.values()])
         node_stats.cores_in_use = sum([stat['cpu_usage'] for stat in stats.values()])

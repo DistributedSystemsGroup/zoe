@@ -136,21 +136,38 @@ def start_all(execution: Execution) -> str:
     """
     log.debug('starting all services for execution {}'.format(execution.id))
     execution.set_starting()
-    return service_list_to_containers(execution, execution.services)
+    try:
+        ret = service_list_to_containers(execution, execution.services)
+    except BaseException:
+        log.exception('Unexpected exception while starting execution {}'.format(execution.id))
+        return 'requeue'
+    else:
+        return ret
 
 
 def start_essential(execution: Execution, placement) -> str:
     """Start the essential services for this execution"""
     log.debug('starting essential services for execution {}'.format(execution.id))
     execution.set_starting()
-
-    return service_list_to_containers(execution, execution.essential_services, placement)
+    try:
+        ret = service_list_to_containers(execution, execution.essential_services, placement)
+    except BaseException:
+        log.exception('Unexpected exception while starting execution {}'.format(execution.id))
+        return 'requeue'
+    else:
+        return ret
 
 
 def start_elastic(execution: Execution, placement) -> str:
     """Start the runnable elastic services"""
     elastic_to_start = [s for s in execution.elastic_services if s.status == Service.RUNNABLE_STATUS]
-    return service_list_to_containers(execution, elastic_to_start, placement)
+    try:
+        ret = service_list_to_containers(execution, elastic_to_start, placement)
+    except BaseException:
+        log.exception('Unexpected exception while starting execution {}'.format(execution.id))
+        return 'requeue'
+    else:
+        return ret
 
 
 def terminate_service(service: Service) -> None:
