@@ -208,7 +208,8 @@ def preload_image(image_name):
 def update_service_resource_limits(service, cores=None, memory=None):
     """Update a service reservation."""
     backend = _get_backend()
-    backend.update_service(service, cores, memory)
+    if 'gpu' not in service.labels:  # see https://github.com/NVIDIA/nvidia-docker/issues/515
+        backend.update_service(service, cores, memory)
 
 
 def node_list():
