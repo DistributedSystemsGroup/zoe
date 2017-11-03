@@ -21,6 +21,7 @@ from zoe_api import zapp_shop
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 from zoe_api.web.utils import get_auth, catch_exceptions
 from zoe_api.web.custom_request_handler import ZoeRequestHandler
+from zoe_lib.config import get_conf
 
 log = logging.getLogger(__name__)
 
@@ -64,7 +65,12 @@ class ZAppLogoWeb(ZoeRequestHandler):
             return self.redirect(self.get_argument('next', u'/login'))
 
         self.set_header("Content-type", "image/png")
-        self.write(zapp_shop.get_logo(zapp_id))
+
+        manifest_index = int(zapp_id.split('-')[-1])
+        zapp_id = "-".join(zapp_id.split('-')[:-1])
+        zapps = zapp_shop.zshop_read_manifest(zapp_id)
+        zapp = zapps[manifest_index]
+        self.write(zapp_shop.get_logo(zapp))
 
 
 class ZAppStartWeb(ZoeRequestHandler):
@@ -89,7 +95,10 @@ class ZAppStartWeb(ZoeRequestHandler):
         template_vars = {
             "uid": uid,
             "role": role,
-            'zapp': zapp
+            'zapp': zapp,
+            'max_core_limit': get_conf().max_core_limit,
+            'max_memory_limit': get_conf().max_memory_limit,
+            'resources_are_customizable': role == "admin" or (role != "guest" and (role == "user" and not get_conf().no_user_edit_limits_web))
         }
         self.render('zapp_start.html', **template_vars)
 
@@ -107,23 +116,50 @@ class ZAppStartWeb(ZoeRequestHandler):
 
         exec_name = self.get_argument('exec_name')
 
-        app_descr = self._set_parameters(zapp.zoe_description, zapp.parameters)
+        app_descr = self._set_parameters(zapp.zoe_description, zapp.parameters, role)
 
-        new_id = self.api_endpoint.execution_start(uid, role, exec_name, app_descr)
+        download_json = self.get_argument('download_json')
+        if download_json:
+            self.set_header('Content-Type', 'application/json')
+            self.set_header('Content-Disposition', 'attachment; filename={}.json'.format(zapp_id))
+            self.write(app_descr)
+            self.finish()
+            return
+        else:
+            new_id = self.api_endpoint.execution_start(uid, role, exec_name, app_descr)
 
         self.redirect(self.reverse_url('execution_inspect', new_id))
 
-    def _set_parameters(self, app_descr, params):
+    def _set_parameters(self, app_descr, params, role):
         for param in params:
+            argument_name = param.name + '-' + param.kind
             if param.kind == 'environment':
                 for service in app_descr['services']:
                     for env in service['environment']:
                         if env[0] == param.name:
-                            env[1] = self.get_argument(param.name)
+                            env[1] = self.get_argument(argument_name)
             elif param.kind == 'command':
                 for service in app_descr['services']:
                     if service['name'] == param.name:
-                        service['command'] = self.get_argument(param.name)
+                        service['command'] = self.get_argument(argument_name)
+                        break
+            elif param.kind == 'resource_memory_min' and role == "admin" or (role != "guest" and (role == "user" and not get_conf().no_user_edit_limits_web)):
+                for service in app_descr['services']:
+                    if service['name'] == param.name:
+                        if self.get_argument(argument_name) >= get_conf().max_memory_limit * (1024 ** 3):
+                            val = get_conf().max_memory_limit * (1024 ** 3)
+                        else:
+                            val = self.get_argument(argument_name)
+                        service["resources"]["memory"]["min"] = val
+                        break
+            elif param.kind == 'resource_cores_min' and role == "admin" or (role != "guest" and (role == "user" and not get_conf().no_user_edit_limits_web)):
+                for service in app_descr['services']:
+                    if service['name'] == param.name:
+                        if self.get_argument(argument_name) >= get_conf().max_core_limit:
+                            val = get_conf().max_core_limit
+                        else:
+                            val = self.get_argument(argument_name)
+                        service["resources"]["cores"]["min"] = val
                         break
             else:
                 log.warning('Unknown parameter kind: {}, ignoring...'.format(param.kind))

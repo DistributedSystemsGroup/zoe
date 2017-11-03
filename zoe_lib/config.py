@@ -116,6 +116,9 @@ def load_configuration(test_conf=None):
         # other options
         argparser.add_argument('--zapp-shop-path', help='Path where ZApp folders are stored', default='/var/lib/zoe-apps')
         argparser.add_argument('--log-file', help='output logs to a file', default='stderr')
+        argparser.add_argument('--max-core-limit', help='Maximum amount of cores users are able to reserve', type=int, default=16)
+        argparser.add_argument('--max-memory-limit', help='Maximum amount of memory services can use (in GiB)', type=int, default=64)
+        argparser.add_argument('--no-user-edit-limits-web', action='store_true', help='Disable editing ZApp resource limits from the web interface (only admins will able to)')
 
         argparser.add_argument('--aml-ttl', help='TimeToLive in hours for AML executions', type=int, default=4)
 

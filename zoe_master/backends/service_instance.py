@@ -35,11 +35,15 @@ class ServiceInstance:
             self.memory_limit = None
         else:
             self.memory_limit = service.resource_reservation.memory
+            if self.memory_limit.max > get_conf().max_memory_limit * (1024 ** 3):
+                self.memory_limit.max = get_conf().max_memory_limit * (1024 ** 3)
 
         if service.resource_reservation.cores.min is None:
             self.core_limit = None
         else:
             self.core_limit = service.resource_reservation.cores
+            if self.core_limit.max > get_conf().max_core_limit:
+                self.core_limit = get_conf().max_core_limit
 
         self.labels = {
             'zoe.execution.name': execution.name,

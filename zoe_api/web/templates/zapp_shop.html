@@ -12,7 +12,7 @@
         <div class="zapp-list">
             {% for zapp in zapps[zapp_category] %}
             <div class="zapp" id="{{ zapp.id }}-{{ zapp.manifest_index }}">
-                <img src="{{ reverse_url("zappshop_logo", zapp.id) }}" alt="logo">
+                <img src="{{ reverse_url("zappshop_logo", zapp.id + "-" + zapp.manifest_index|string) }}" alt="logo">
                 <p>{{ zapp.readable_name }}</p>
                 <div class="readable_description" id="rd-{{ zapp.id }}">{{ zapp.readable_description|safe }}</div>
             </div>

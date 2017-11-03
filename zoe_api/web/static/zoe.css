@@ -180,6 +180,27 @@ form#zapp_start_form input {
     font-family: "Lucida Console", Monaco, monospace;
 }
 
+form#zapp_start_form label.label-inline,
+form#zapp_start_form label.label-inline input {
+    font-variant: normal;
+    display: inline;
+}
+
+.resource-form label {
+    float: left;
+    padding-bottom: 1.5em;
+    padding-right: 2em;
+
+}
+
+form#zapp_start_form h5,
+form#zapp_start_form hr {
+    clear: both;
+    border: 0;
+    padding-bottom: 0;
+    margin-bottom: 10px;
+}
+
 /* footer */
 
 div.status_line {

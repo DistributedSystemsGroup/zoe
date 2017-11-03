@@ -9,7 +9,7 @@
 {% block content %}
 
     <div class="zapp-description">
-        <img src="{{ reverse_url("zappshop_logo", zapp.id) }}" alt="logo">
+        <img src="{{ reverse_url("zappshop_logo", zapp.id + '-' + zapp.manifest_index|string) }}" alt="logo">
         {{ zapp.readable_description|safe }}
     </div>
 
@@ -17,14 +17,13 @@
     <p>This ZApp is composed by the following services:</p>
     <ul>
     {% for service in zapp.zoe_description.services %}
-        <li>{{ service["total_count"] }} {{ service["name"] }} ({{ service["essential_count"] }} essential{{ 's' if service["essential_count"] > 1 }})
-        <ul>
-            <li>memory: {% if service["resources"]["memory"]["max"] != None %}
-                <script>format_bytes({{ service["resources"]["memory"]["max"] }}, 2) </script></li>
+        <li>{{ service["total_count"] }} {{ service["name"] }} ({{ service["essential_count"] }} essential{{ 's' if service["essential_count"] > 1 }})        <ul>
+            <li>Suggested memory allocation: {% if service["resources"]["memory"]["min"] != None %}
+                <script>format_bytes({{ service["resources"]["memory"]["min"] }}, 2) </script>
                         {% else %}
                 No limit
-                        {% endif %}
-            <li>cpu cores: {{ service["resources"]["cores"]["max"] if service["resources"]["cores"]["max"] != None else "No limit" }}</li>
+                        {% endif %}</li>
+            <li>Suggested CPU core allocation limit: {{ service["resources"]["cores"]["min"] if service["resources"]["cores"]["min"] != None else "No limit" }}</li>
         </ul></li>
     {% endfor %}
     </ul>
@@ -34,14 +33,54 @@
     <input type="hidden" name="zapp-id" value="{{ zapp.id }}-{{ zapp.manifest_index }}">
     <label>Execution name:&nbsp;<input type="text" name="exec_name" value="{{ zapp.zoe_description.name }}" maxlength="16" size="18" required/></label><br/>
     {% for param in zapp.parameters %}
-        <label>{{ param.readable_name }}:&nbsp;
-        <input name="{{ param.name }}" value="{{ param.default if param.default != None }}" required title="{{ param.description }}" size="128"/></label><br/>
+        <label>{{ param.readable_name }}
+            {% if param.type == "number" and "memory" in param.kind %}
+        (GiB) <input name="{{ param.name }}-{{ param.kind }}" value="{{ param.default }}" required size="5" title="{{ param.description }}" type="{{ param.type }}" min="{{ param.min }}" max="{{ param.max }}" step="{{ param.step }}"/>
+            {% elif param.type == "number" %}
+        <input name="{{ param.name }}-{{ param.kind }}" value="{{ param.default }}" required size="5" title="{{ param.description }}" type="{{ param.type }}" min="{{ param.min }}" max="{{ param.max }}" step="{{ param.step }}"/>
+            {% else %}
+        <input name="{{ param.name }}-{{ param.kind }}" value="{{ param.default if param.default != None }}" required title="{{ param.description }}" size="128" type="{{ param.type }}" />
+            {% endif %}
+        </label><br/>
     {% endfor %}
-        <button type="submit">Start</button>
+    {% if resources_are_customizable %}
+        {% for service in zapp.zoe_description.services %}
+        <div class="resource-form">
+        <h5>{{ service.name }}</h5>
+        <label>Memory allocation (GiB)
+            <input name="{{ service.name }}-resource_memory_min" value="{{ service["resources"]["memory"]["min"] / (1024 ** 3) }}" required title="Memory soft limit, service can use more memory if there is no contention" type="number" min="0.5" max="{{ max_memory_limit }}" step="0.5"/></label>
+        <label>Minimum core allocation:
+            <input name="{{ service.name }}-resource_cores_min" value="{{ service["resources"]["cores"]["min"] }}" required title="No less than this amount of cores will be allocated to this service" type="number" min="0.1" max="{{ max_core_limit }}" step="0.1"/></label>
+        </div>
+        {%  endfor %}
+    {% endif %}
+    <hr>
+    {%  if role != "guest" %}
+        <label class="label-inline"><input type="checkbox" onchange="set_submit_text(this)" name="download_json"> Download JSON with these parameters for command-line execution</label>
+        <br><br>
+    {% endif %}
+        <button id="submit" type="submit">Start</button>
+        <button type="reset">Reset</button>
     </form>
 
     <script>
         $("#zapp_start_form").validate();
+
+        function set_submit_text(elem) {
+            if (elem.checked) {
+                $("#submit").text("Download JSON");
+            } else {
+                $("#submit").text("Start");
+            }
+        }
+
+        function update_range_value(value, id, bytes) {
+            if (bytes) {
+                $('#' + id).text(format_bytes_ret(value, 2));
+            } else {
+                $('#' + id).text(value);
+            }
+        }
     </script>
 
     <p><a href="{{ reverse_url("zappshop") }}">Back to the ZApp shop</a></p>
