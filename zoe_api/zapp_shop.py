@@ -62,6 +62,10 @@ class ZApp:
             self.guest_access = zapp['guest_access']
         else:
             self.guest_access = False
+        if 'logo' in zapp:
+            self.logo = zapp['logo']
+        else:
+            self.logo = 'logo.png'
 
     def parse_parameters(self, zapp_manifest):
         """Translates the parameters from the manifest into objects."""
@@ -110,7 +114,7 @@ def zshop_read_manifest(zapp_id):
     return zapps
 
 
-def get_logo(zapp_id):
+def get_logo(zapp: ZApp):
     """Return the ZApp PNG logo image file contents."""
-    logo_path = os.path.join(get_conf().zapp_shop_path, zapp_id, 'logo.png')
+    logo_path = os.path.join(get_conf().zapp_shop_path, zapp.id, zapp.logo)
     return open(logo_path, "rb").read()
