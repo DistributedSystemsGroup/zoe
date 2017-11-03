@@ -37,11 +37,21 @@
         <label>{{ param.readable_name }}:&nbsp;
         <input name="{{ param.name }}" value="{{ param.default if param.default != None }}" required title="{{ param.description }}" size="128"/></label><br/>
     {% endfor %}
-        <button type="submit">Start</button>
+        <label class="label-inline"><input type="checkbox" onchange="set_submit_text(this)" name="download_json"> Download JSON with these parameters for command-line execution</label>
+        <br><br>
+        <button id="submit" type="submit">Start</button>
     </form>
 
     <script>
         $("#zapp_start_form").validate();
+
+        function set_submit_text(elem) {
+            if (elem.checked) {
+                $("#submit").text("Download JSON");
+            } else {
+                $("#submit").text("Start");
+            }
+        }
     </script>
 
     <p><a href="{{ reverse_url("zappshop") }}">Back to the ZApp shop</a></p>

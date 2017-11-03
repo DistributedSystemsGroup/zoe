@@ -109,7 +109,15 @@ class ZAppStartWeb(ZoeRequestHandler):
 
         app_descr = self._set_parameters(zapp.zoe_description, zapp.parameters)
 
-        new_id = self.api_endpoint.execution_start(uid, role, exec_name, app_descr)
+        download_json = self.get_argument('download_json')
+        if download_json:
+            self.set_header('Content-Type', 'application/json')
+            self.set_header('Content-Disposition', 'attachment; filename={}.json'.format(zapp_id))
+            self.write(app_descr)
+            self.finish()
+            return
+        else:
+            new_id = self.api_endpoint.execution_start(uid, role, exec_name, app_descr)
 
         self.redirect(self.reverse_url('execution_inspect', new_id))
 
