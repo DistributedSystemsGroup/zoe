@@ -9,7 +9,7 @@
 {% block content %}
 
     <div class="zapp-description">
-        <img src="{{ reverse_url("zappshop_logo", zapp.id) }}" alt="logo">
+        <img src="{{ reverse_url("zappshop_logo", zapp.id + '-' + zapp.manifest_index|string) }}" alt="logo">
         {{ zapp.readable_description|safe }}
     </div>
 
