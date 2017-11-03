@@ -55,8 +55,10 @@
         {%  endfor %}
     {% endif %}
     <hr>
+    {%  if role != "guest" %}
         <label class="label-inline"><input type="checkbox" onchange="set_submit_text(this)" name="download_json"> Download JSON with these parameters for command-line execution</label>
         <br><br>
+    {% endif %}
         <button id="submit" type="submit">Start</button>
         <button type="reset">Reset</button>
     </form>
