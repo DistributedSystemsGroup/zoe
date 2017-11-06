@@ -15,7 +15,6 @@
 
 """Ajax API for the Zoe web interface."""
 
-import datetime
 import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
@@ -24,7 +23,6 @@ import tornado.websocket
 import tornado.iostream
 import tornado.gen
 
-from zoe_lib.config import get_conf
 import zoe_api.exceptions
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 from zoe_api.web.utils import get_auth, catch_exceptions
