@@ -17,6 +17,8 @@
 
 import logging
 
+from tornado.web import MissingArgumentError
+
 from zoe_api import zapp_shop
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 from zoe_api.web.utils import get_auth, catch_exceptions
@@ -98,7 +100,8 @@ class ZAppStartWeb(ZoeRequestHandler):
             'zapp': zapp,
             'max_core_limit': get_conf().max_core_limit,
             'max_memory_limit': get_conf().max_memory_limit,
-            'resources_are_customizable': role == "admin" or (role != "guest" and (role == "user" and not get_conf().no_user_edit_limits_web))
+            'resources_are_customizable': role == "admin" or (role != "guest" and (role == "user" and not get_conf().no_user_edit_limits_web)),
+            'additional_volumes': get_conf().additional_volumes
         }
         self.render('zapp_start.html', **template_vars)
 
@@ -118,14 +121,14 @@ class ZAppStartWeb(ZoeRequestHandler):
 
         app_descr = self._set_parameters(zapp.zoe_description, zapp.parameters, role)
 
-        download_json = self.get_argument('download_json')
-        if download_json:
+        try:
+            self.get_argument('download_json')
             self.set_header('Content-Type', 'application/json')
             self.set_header('Content-Disposition', 'attachment; filename={}.json'.format(zapp_id))
             self.write(app_descr)
             self.finish()
             return
-        else:
+        except MissingArgumentError:
             new_id = self.api_endpoint.execution_start(uid, role, exec_name, app_descr)
 
         self.redirect(self.reverse_url('execution_inspect', new_id))

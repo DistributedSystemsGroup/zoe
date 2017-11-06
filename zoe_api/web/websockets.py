@@ -15,7 +15,6 @@
 
 """Ajax API for the Zoe web interface."""
 
-import datetime
 import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
@@ -24,7 +23,6 @@ import tornado.websocket
 import tornado.iostream
 import tornado.gen
 
-from zoe_lib.config import get_conf
 import zoe_api.exceptions
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 from zoe_api.web.utils import get_auth, catch_exceptions
@@ -79,7 +77,6 @@ class WebSocketEndpointWeb(tornado.websocket.WebSocketHandler):
                     'exec_status': execution.status
                 }
                 if execution.status == execution.RUNNING_STATUS:
-                    response['ttl'] = ((execution.time_start + datetime.timedelta(hours=get_conf().aml_ttl)) - datetime.datetime.now()).total_seconds()
                     services_info_, endpoints = self.api_endpoint.execution_endpoints(self.uid, self.role, execution)
                     response['endpoints'] = endpoints
                 elif execution.status == execution.ERROR_STATUS or execution.status == execution.TERMINATED_STATUS:

@@ -18,7 +18,7 @@
 from typing import Dict, List
 
 from zoe_lib.config import get_conf
-from zoe_lib.state import Service, Execution, VolumeDescription
+from zoe_lib.state import Service, Execution, VolumeDescription, VolumeDescriptionHostPath
 from zoe_master.exceptions import ZoeStartExecutionFatalException
 from zoe_master.workspace.filesystem import ZoeFSWorkspace
 
@@ -56,6 +56,9 @@ def gen_volumes(service: Service, execution: Execution) -> List[VolumeDescriptio
     wk_vol = fswk.get(execution.user_id)
 
     vol_list.append(wk_vol)
+
+    for volume_path, name in get_conf().additional_volumes:
+        vol_list.append(VolumeDescriptionHostPath(path=volume_path, name=name, readonly=True))
 
     return vol_list
 
