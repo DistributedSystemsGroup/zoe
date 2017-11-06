@@ -24,6 +24,8 @@ logging.getLogger('requests').setLevel(logging.WARNING)
 logging.getLogger('urllib3').setLevel(logging.WARNING)
 logging.getLogger('docker').setLevel(logging.INFO)
 
+log = logging.getLogger(__name__)
+
 _CONFIG_PATHS = [
     'zoe.conf',
     '/etc/zoe/zoe.conf'
@@ -119,8 +121,7 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--max-core-limit', help='Maximum amount of cores users are able to reserve', type=int, default=16)
         argparser.add_argument('--max-memory-limit', help='Maximum amount of memory services can use (in GiB)', type=int, default=64)
         argparser.add_argument('--no-user-edit-limits-web', action='store_true', help='Disable editing ZApp resource limits from the web interface (only admins will able to)')
-
-        argparser.add_argument('--aml-ttl', help='TimeToLive in hours for AML executions', type=int, default=4)
+        argparser.add_argument('--additional-volumes', help='Additional volumes to mount in services filesystems. (ex: /mnt/data:data,/mnt/data_n:data_n)', default='')
 
         opts = argparser.parse_args()
         if opts.debug:
@@ -128,6 +129,15 @@ def load_configuration(test_conf=None):
 
         if opts.workspace_deployment_path == '--default--':
             opts.workspace_deployment_path = opts.deployment_name
+
+        if len(opts.additional_volumes) > 0:
+            vols = str(opts.additional_volumes).split(',')
+            opts.additional_volumes = [v.split(':') for v in vols]
+            log.info('Additional volumes:')
+            for path, mountpoint in opts.additional_volumes:
+                log.info('  - {} -> {}'.format(path, mountpoint))
+        else:
+            opts.additional_volumes = []
 
         _CONF = opts
     else:

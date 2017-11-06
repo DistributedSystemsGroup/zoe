@@ -28,6 +28,14 @@
     {% endfor %}
     </ul>
 
+    <p>The following persistent volumes will be available:</p>
+    <ul>
+    <li><code>/mnt/workspace</code>: User workspace (RW)</li>
+    {% for volume in additional_volumes %}
+        <li><code>/mnt/{{ volume[1] }}</code> (RO)</li>
+    {% endfor %}
+    </ul>
+
     <h4>Start-up parameters:</h4>
     <form action="{{ reverse_url("zappshop_start", "") }}{{ zapp.id }}-{{ zapp.manifest_index }}" method="post" id="zapp_start_form">
     <input type="hidden" name="zapp-id" value="{{ zapp.id }}-{{ zapp.manifest_index }}">
@@ -71,14 +79,6 @@
                 $("#submit").text("Download JSON");
             } else {
                 $("#submit").text("Start");
-            }
-        }
-
-        function update_range_value(value, id, bytes) {
-            if (bytes) {
-                $('#' + id).text(format_bytes_ret(value, 2));
-            } else {
-                $('#' + id).text(value);
             }
         }
     </script>

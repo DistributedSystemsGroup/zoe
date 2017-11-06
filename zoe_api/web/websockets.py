@@ -79,7 +79,6 @@ class WebSocketEndpointWeb(tornado.websocket.WebSocketHandler):
                     'exec_status': execution.status
                 }
                 if execution.status == execution.RUNNING_STATUS:
-                    response['ttl'] = ((execution.time_start + datetime.timedelta(hours=get_conf().aml_ttl)) - datetime.datetime.now()).total_seconds()
                     services_info_, endpoints = self.api_endpoint.execution_endpoints(self.uid, self.role, execution)
                     response['endpoints'] = endpoints
                 elif execution.status == execution.ERROR_STATUS or execution.status == execution.TERMINATED_STATUS:
