@@ -5,10 +5,13 @@
     <script src="/static/moment.min.js" type="application/javascript"></script>
     <script src="/static/moment-timezone.min.js" type="application/javascript"></script>
     <script>
+    var locale = window.navigator.userLanguage || window.navigator.language;
+    moment.locale(locale);
+
     function format_timestamp(ts) {
         var m = moment.utc(ts);
         m.local();
-        document.write(m.calendar());
+        document.write(m.format("L, LTS"));
     }
     </script>
 {% endblock %}
