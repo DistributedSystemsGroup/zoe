@@ -81,9 +81,9 @@ class Execution:
             'user_id': self.user_id,
             'name': self.name,
             'description': self.description,
-            'time_submit': self.time_submit.timestamp(),
-            'time_start': None if self.time_start is None else self.time_start.timestamp(),
-            'time_end': None if self.time_end is None else self.time_end.timestamp(),
+            'time_submit': (self.time_submit - datetime.datetime(1970, 1, 1)) / datetime.timedelta(seconds=1),
+            'time_start': None if self.time_start is None else (self.time_start - datetime.datetime(1970, 1, 1)) / datetime.timedelta(seconds=1),
+            'time_end': None if self.time_end is None else (self.time_end - datetime.datetime(1970, 1, 1)) / datetime.timedelta(seconds=1),
             'status': self._status,
             'error_message': self.error_message,
             'services': [s.id for s in self.services]
