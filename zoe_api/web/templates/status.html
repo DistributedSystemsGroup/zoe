@@ -39,8 +39,8 @@
                 {% if service.essential %}
                 <div class="service essential {{ 'running' if not service.is_dead() }}">
                     {{ service['name'] }}<br/>
-                    M: <script>format_bytes({{ service['resource_reservation']['memory']['max'] }});</script><br/>
-                    C: {{ service['resource_reservation']['cores']['max'] }}
+                    M: <script>format_bytes({{ service['resource_reservation']['memory']['min'] }});</script><br/>
+                    C: {{ service['resource_reservation']['cores']['min'] }}
                 </div>
                 {% endif %}
             {% endfor %}
@@ -48,8 +48,8 @@
                 {% if not service.essential %}
                 <div class="service {{ 'running' if not service.is_dead() }}">
                     {{ service['name'] }}<br/>
-                    M: <script>format_bytes({{ service['resource_reservation']['memory']['max'] }});</script><br/>
-                    C: {{ service['resource_reservation']['cores']['max'] }}
+                    M: <script>format_bytes({{ service['resource_reservation']['memory']['min'] }});</script><br/>
+                    C: {{ service['resource_reservation']['cores']['min'] }}
                 </div>
                 {% endif %}
             {% endfor %}
@@ -70,8 +70,8 @@
                 {% if service.essential %}
                 <div class="service essential {{ 'running' if service.status == service.ACTIVE_STATUS }}">
                     {{ service['name'] }}<br/>
-                    M: <script>format_bytes({{ service['resource_reservation']['memory']['max'] }});</script><br/>
-                    C: {{ service['resource_reservation']['cores']['max'] }}
+                    M: <script>format_bytes({{ service['resource_reservation']['memory']['min'] }});</script><br/>
+                    C: {{ service['resource_reservation']['cores']['min'] }}
                 </div>
                 {% endif %}
             {% endfor %}
@@ -79,8 +79,8 @@
                 {% if not service.essential %}
                 <div class="service {{ 'running' if service.status == service.ACTIVE_STATUS }}">
                     {{ service['name'] }}<br/>
-                    M: <script>format_bytes({{ service['resource_reservation']['memory']['max'] }});</script><br/>
-                    C: {{ service['resource_reservation']['cores']['max'] }}
+                    M: <script>format_bytes({{ service['resource_reservation']['memory']['min'] }});</script><br/>
+                    C: {{ service['resource_reservation']['cores']['min'] }}
                 </div>
                 {% endif %}
             {% endfor %}
