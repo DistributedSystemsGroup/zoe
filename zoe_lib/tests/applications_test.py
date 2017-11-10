@@ -16,8 +16,9 @@
 """Unit tests for zoe_lib/applications.py"""
 
 import json
-import pytest
 from collections import namedtuple
+
+import pytest
 
 from zoe_lib import applications
 
@@ -34,6 +35,7 @@ class TestApplicationsMethods:
 
     @pytest.fixture(autouse=True)
     def mock_config(self, monkeypatch):
+        """Fixture for mock config method."""
         monkeypatch.setattr('zoe_lib.config.get_conf', fake_get_conf)
 
     def test_pass_for_zapp(self):
