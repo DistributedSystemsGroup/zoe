@@ -24,6 +24,7 @@ import jsonschema
 
 from zoe_lib.exceptions import InvalidApplicationDescription, ZoeLibException
 import zoe_lib.version
+import zoe_lib.config
 
 log = logging.getLogger(__name__)
 
@@ -56,11 +57,12 @@ def app_validate(data):
         if service['monitor']:
             found_monitor = True
 
+        service['resources']['memory']['max'] = zoe_lib.config.get_conf().max_memory_limit * (1024 ** 3)
         if service['resources']['memory']['min'] is not None and service['resources']['memory']['min'] > service['resources']['memory']['max']:
-            raise InvalidApplicationDescription(msg='service {} has mismatching min and max memory limits'.format(service['name']))
+            raise InvalidApplicationDescription(msg='service {} tries to reserve more memory than the administrative limit'.format(service['name']))
 
-        if service['resources']['cores']['min'] is not None and service['resources']['cores']['min'] > service['resources']['cores']['max']:
-            raise InvalidApplicationDescription(msg='service {} has mismatching min and max memory limits'.format(service['name']))
+        if service['resources']['cores']['min'] is None:
+            service['resources']['cores']['min'] = 0.1
 
     if not found_monitor:
         raise InvalidApplicationDescription(msg="at least one process should have the monitor property set to true")
