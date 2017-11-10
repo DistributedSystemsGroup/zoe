@@ -17,12 +17,24 @@
 
 import json
 import pytest
+from collections import namedtuple
 
 from zoe_lib import applications
+
+ConfigMockup = namedtuple('ConfigMockup', ['max_core_limit', 'max_memory_limit'])
+
+
+def fake_get_conf():
+    """Mock-up for the config.get_conf() method."""
+    return ConfigMockup(16, 64)
 
 
 class TestApplicationsMethods:
     """Application validation tests."""
+
+    @pytest.fixture(autouse=True)
+    def mock_config(self, monkeypatch):
+        monkeypatch.setattr('zoe_lib.config.get_conf', fake_get_conf)
 
     def test_pass_for_zapp(self):
         """Test zapp validation code."""

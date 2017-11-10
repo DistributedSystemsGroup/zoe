@@ -24,7 +24,7 @@ import jsonschema
 
 from zoe_lib.exceptions import InvalidApplicationDescription, ZoeLibException
 import zoe_lib.version
-from zoe_lib.config import get_conf
+import zoe_lib.config
 
 log = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ def app_validate(data):
         if service['monitor']:
             found_monitor = True
 
-        service['resources']['memory']['max'] = get_conf().max_memory_limit * (1024 ** 3)
+        service['resources']['memory']['max'] = zoe_lib.config.get_conf().max_memory_limit * (1024 ** 3)
         if service['resources']['memory']['min'] is not None and service['resources']['memory']['min'] > service['resources']['memory']['max']:
             raise InvalidApplicationDescription(msg='service {} tries to reserve more memory than the administrative limit'.format(service['name']))
 
