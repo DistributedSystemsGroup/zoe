@@ -34,7 +34,6 @@ from zoe_lib.services import ZoeServiceAPI
 from zoe_lib.statistics import ZoeStatisticsAPI
 from zoe_lib.exceptions import ZoeAPIException
 from zoe_lib.executions import ZoeExecutionsAPI
-from zoe_lib.applications import app_validate
 from zoe_lib.version import ZOE_VERSION
 
 
