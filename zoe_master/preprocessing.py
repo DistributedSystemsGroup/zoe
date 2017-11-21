@@ -38,23 +38,23 @@ def _digest_application_description(state: SQLManager, execution: Execution):
         counter = 0
         for service_n_ in range(essential_count):
             name = "{}{}".format(service_descr['name'], counter)
-            sid = state.service_new(execution.id, name, service_descr['name'], service_descr, True)
+            sid = state.services.insert(execution.id, name, service_descr['name'], service_descr, True)
 
             # Ports
             for port_descr in service_descr['ports']:
                 port_internal = str(port_descr['port_number']) + '/' + port_descr['protocol']
-                state.port_new(sid, port_internal, port_descr)
+                state.ports.insert(sid, port_internal, port_descr)
 
             counter += 1
 
         for service_n_ in range(elastic_count):
             name = "{}{}".format(service_descr['name'], counter)
-            sid = state.service_new(execution.id, name, service_descr['name'], service_descr, False)
+            sid = state.services.insert(execution.id, name, service_descr['name'], service_descr, False)
 
             # Ports
             for port_descr in service_descr['ports']:
                 port_internal = str(port_descr['port_number']) + '/' + port_descr['protocol']
-                state.port_new(sid, port_internal, port_descr)
+                state.ports.insert(sid, port_internal, port_descr)
 
             counter += 1
         assert counter == total_count
@@ -89,19 +89,19 @@ def execution_terminate(scheduler: ZoeBaseScheduler, execution: Execution):
 
 def restart_resubmit_scheduler(state: SQLManager, scheduler: ZoeBaseScheduler):
     """Restart work after a restart of the process."""
-    submitted_execs = state.execution_list(status=Execution.SUBMIT_STATUS)
+    submitted_execs = state.executions.select(status=Execution.SUBMIT_STATUS)
     for e in submitted_execs:
         execution_submit(state, scheduler, e)
 
-    sched_execs = state.execution_list(status=Execution.SCHEDULED_STATUS)
+    sched_execs = state.executions.select(status=Execution.SCHEDULED_STATUS)
     for e in sched_execs:
         scheduler.incoming(e)
 
-    clean_up_execs = state.execution_list(status=Execution.CLEANING_UP_STATUS)
+    clean_up_execs = state.executions.select(status=Execution.CLEANING_UP_STATUS)
     for e in clean_up_execs:
         scheduler.terminate(e)
 
-    starting_execs = state.execution_list(status=Execution.STARTING_STATUS)
+    starting_execs = state.executions.select(status=Execution.STARTING_STATUS)
     for e in starting_execs:
         scheduler.terminate(e)
         scheduler.incoming(e)

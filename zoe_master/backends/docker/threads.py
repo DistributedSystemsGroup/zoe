@@ -24,6 +24,7 @@ from zoe_lib.state import SQLManager, Service
 from zoe_master.backends.docker.api_client import DockerClient
 from zoe_master.backends.docker.config import DockerConfig, DockerHostConfig  # pylint: disable=unused-import
 from zoe_master.exceptions import ZoeException
+from zoe_master.stats import NodeStats
 
 log = logging.getLogger(__name__)
 
@@ -41,6 +42,7 @@ class DockerStateSynchronizer(threading.Thread):
         self.state = state
         self.setDaemon(True)
         self.host_checkers = []
+        self.host_stats = {}
         for docker_host in DockerConfig(get_conf().backend_docker_config_file).read_config():
             th = threading.Thread(target=self._host_subthread, args=(docker_host,), name='synchro_' + docker_host.name, daemon=True)
             th.start()
@@ -51,34 +53,56 @@ class DockerStateSynchronizer(threading.Thread):
     def _host_subthread(self, host_config: DockerHostConfig):
         log.info("Synchro thread for host {} started".format(host_config.name))
 
-        node_status = 'offline'
+        self.host_stats[host_config.name] = NodeStats(host_config.name)
+
         while True:
-            ret = self.stop.wait(timeout=CHECK_INTERVAL)
-            if ret:
-                break
+            time_start = time.time()
             try:
                 my_engine = DockerClient(host_config)
+                container_list = my_engine.list(only_label={'zoe_deployment_name': get_conf().deployment_name})
+                info = my_engine.info()
             except ZoeException as e:
-                node_status = 'offline'
+                self.host_stats[host_config.name].status = 'offline'
                 log.error(str(e))
                 log.info('Node {} is offline'.format(host_config.name))
-                time.sleep(CHECK_INTERVAL)
-                continue
-            if node_status == 'offline':
-                log.info('Node {} is now online'.format(host_config.name))
-            node_status = 'online'
+            else:
+                if self.host_stats[host_config.name].status == 'offline':
+                    log.info('Node {} is now online'.format(host_config.name))
+                    self.host_stats[host_config.name].status = 'online'
 
-            try:
-                container_list = my_engine.list(only_label={'zoe_deployment_name': get_conf().deployment_name})
-            except ZoeException:
-                continue
+                self.host_stats[host_config.name].container_count = info['Containers']
+                self.host_stats[host_config.name].cores_total = info['NCPU']
+                self.host_stats[host_config.name].memory_total = info['MemTotal']
+                if info['Labels'] is not None:
+                    self.host_stats[host_config.name].labels = host_config.labels + set(info['Labels'])
 
-            for cont in container_list:
-                service = self.state.service_list(only_one=True, backend_host=host_config.name, backend_id=cont['id'])
-                if service is None:
-                    log.warning('Container {} on host {} has no corresponding service'.format(cont['name'], host_config.name))
-                    continue
-                self._update_service_status(service, cont)
+                self.host_stats[host_config.name].memory_allocated = sum([cont['memory_soft_limit'] for cont in container_list if cont['memory_soft_limit'] != info['MemTotal']])
+                self.host_stats[host_config.name].cores_allocated = sum([cont['cpu_quota'] / cont['cpu_period'] for cont in container_list if cont['cpu_period'] != 0])
+
+                stats = {}
+                self.host_stats[host_config.name].memory_reserved = 0
+                self.host_stats[host_config.name].cores_reserved = 0
+                for cont in container_list:
+                    service = self.state.services.select(only_one=True, backend_host=host_config.name, backend_id=cont['id'])
+                    if service is None:
+                        log.warning('Container {} on host {} has no corresponding service'.format(cont['name'], host_config.name))
+                        continue
+                    self._update_service_status(service, cont)
+                    self.host_stats[host_config.name].memory_reserved += service.resource_reservation.memory.min
+                    self.host_stats[host_config.name].cores_reserved += service.resource_reservation.cores.min
+                    stats[service.id] = {
+                        'core_limit': cont['cpu_quota'] / cont['cpu_period'],
+                        'mem_limit': cont['memory_soft_limit']
+                    }
+                self.host_stats[host_config.name].service_stats = stats
+
+            sleep_time = CHECK_INTERVAL - (time.time() - time_start)
+            if sleep_time <= 0:
+                log.warning('synchro thread for host {} is late of {:.2f} seconds'.format(host_config.name, sleep_time * -1))
+                sleep_time = 0
+            if self.stop.wait(timeout=sleep_time):
+                break
+
         log.info("Synchro thread for host {} stopped".format(host_config.name))
 
     def _update_service_status(self, service: Service, container):

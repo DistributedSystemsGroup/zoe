@@ -37,23 +37,23 @@ class APIEndpoint:
     :type master: zoe_api.master_api.APIManager
     :type sql: zoe_lib.sql_manager.SQLManager
     """
-    def __init__(self, master_api, sql_manager):
+    def __init__(self, master_api, sql_manager: zoe_lib.state.SQLManager):
         self.master = master_api
         self.sql = sql_manager
 
-    def execution_by_id(self, uid, role, execution_id) -> zoe_lib.state.sql_manager.Execution:
+    def execution_by_id(self, uid, role, execution_id) -> zoe_lib.state.Execution:
         """Lookup an execution by its ID."""
-        e = self.sql.execution_list(id=execution_id, only_one=True)
+        e = self.sql.executions.select(id=execution_id, only_one=True)
         if e is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
-        assert isinstance(e, zoe_lib.state.sql_manager.Execution)
+        assert isinstance(e, zoe_lib.state.Execution)
         if e.user_id != uid and role != 'admin':
             raise zoe_api.exceptions.ZoeAuthException()
         return e
 
     def execution_list(self, uid, role, **filters):
         """Generate a optionally filtered list of executions."""
-        execs = self.sql.execution_list(**filters)
+        execs = self.sql.executions.select(**filters)
         ret = [e for e in execs if e.user_id == uid or role == 'admin']
         return ret
 
@@ -64,7 +64,7 @@ class APIEndpoint:
         except zoe_lib.exceptions.InvalidApplicationDescription as e:
             raise zoe_api.exceptions.ZoeException('Invalid application description: ' + e.message)
 
-    def execution_start(self, uid, role, exec_name, application_description): # pylint: disable=unused-argument
+    def execution_start(self, uid, role, exec_name, application_description):  # pylint: disable=unused-argument
         """Start an execution."""
         try:
             zoe_lib.applications.app_validate(application_description)
@@ -81,7 +81,7 @@ class APIEndpoint:
             if len(running_execs) >= GUEST_QUOTA_MAX_EXECUTIONS:
                 raise zoe_api.exceptions.ZoeException('Guest users cannot run more than one execution at a time, quota exceeded.')
 
-        new_id = self.sql.execution_new(exec_name, uid, application_description)
+        new_id = self.sql.executions.insert(exec_name, uid, application_description)
         success, message = self.master.execution_start(new_id)
         if not success:
             raise zoe_api.exceptions.ZoeException('The Zoe master is unavailable, execution will be submitted automatically when the master is back up ({}).'.format(message))
@@ -90,8 +90,8 @@ class APIEndpoint:
 
     def execution_terminate(self, uid, role, exec_id):
         """Terminate an execution."""
-        e = self.sql.execution_list(id=exec_id, only_one=True)
-        assert isinstance(e, zoe_lib.state.sql_manager.Execution)
+        e = self.sql.executions.select(id=exec_id, only_one=True)
+        assert isinstance(e, zoe_lib.state.Execution)
         if e is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
 
@@ -108,8 +108,8 @@ class APIEndpoint:
         if role != "admin":
             raise zoe_api.exceptions.ZoeAuthException()
 
-        e = self.sql.execution_list(id=exec_id, only_one=True)
-        assert isinstance(e, zoe_lib.state.sql_manager.Execution)
+        e = self.sql.executions.select(id=exec_id, only_one=True)
+        assert isinstance(e, zoe_lib.state.Execution)
         if e is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
 
@@ -121,14 +121,14 @@ class APIEndpoint:
 
         status, message = self.master.execution_delete(exec_id)
         if status:
-            self.sql.execution_delete(exec_id)
+            self.sql.executions.delete(exec_id)
             return True, ''
         else:
             raise zoe_api.exceptions.ZoeException(message)
 
-    def service_by_id(self, uid, role, service_id) -> zoe_lib.state.sql_manager.Service:
+    def service_by_id(self, uid, role, service_id) -> zoe_lib.state.Service:
         """Lookup a service by its ID."""
-        service = self.sql.service_list(id=service_id, only_one=True)
+        service = self.sql.services.select(id=service_id, only_one=True)
         if service is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
         if service.user_id != uid and role != 'admin':
@@ -137,7 +137,7 @@ class APIEndpoint:
 
     def service_list(self, uid, role, **filters):
         """Generate a optionally filtered list of services."""
-        services = self.sql.service_list(**filters)
+        services = self.sql.services.select(**filters)
         ret = [s for s in services if s.user_id == uid or role == 'admin']
         return ret
 
@@ -145,7 +145,7 @@ class APIEndpoint:
         """Retrieve the logs for the given service.
         If stream is True, a file object is returned, otherwise the log contents as a str object.
         """
-        service = self.sql.service_list(id=service_id, only_one=True)
+        service = self.sql.services.select(id=service_id, only_one=True)
         if service is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such service')
         if service.user_id != uid and role != 'admin':
@@ -165,7 +165,7 @@ class APIEndpoint:
     def cleanup_dead_executions(self):
         """Terminates all executions with dead "monitor" services."""
         log.debug('Starting dead execution cleanup task')
-        all_execs = self.sql.execution_list(status='running')
+        all_execs = self.sql.executions.select(status='running')
         for execution in all_execs:
             for service in execution.services:
                 if service.description['monitor'] and service.backend_status == service.BACKEND_DIE_STATUS:
@@ -183,7 +183,7 @@ class APIEndpoint:
             services_info.append(self.service_by_id(uid, role, service.id))
             for port in service.description['ports']:
                 port_key = str(port['port_number']) + "/" + port['protocol']
-                backend_port = self.sql.port_list(only_one=True, service_id=service.id, internal_name=port_key)
+                backend_port = self.sql.ports.select(only_one=True, service_id=service.id, internal_name=port_key)
                 if backend_port is not None and backend_port.external_ip is not None:
                     endpoint = port['url_template'].format(**{"ip_port": backend_port.external_ip + ":" + str(backend_port.external_port)})
                     endpoints.append((port['name'], endpoint))

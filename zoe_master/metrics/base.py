@@ -52,7 +52,7 @@ class StatsManager(threading.Thread):
         while True:
             time_start = time.time()
 
-            self.current_platform_stats = get_platform_state(self.state, with_usage_stats=True)
+            self.current_platform_stats = get_platform_state()
 
             sleep_time = METRIC_INTERVAL - (time.time() - time_start)
             if sleep_time > 0 and self.stop.wait(timeout=sleep_time):

@@ -52,7 +52,7 @@ class BaseBackend:
         """Terminate the container corresponding to a service."""
         raise NotImplementedError
 
-    def platform_state(self, usage_stats=False) -> ClusterStats:
+    def platform_state(self) -> ClusterStats:
         """Get the platform state. This method should fill-in a new ClusterStats object at each call, with fresh statistics on the available nodes and resource availability. This information will be used for taking scheduling decisions."""
         raise NotImplementedError
 

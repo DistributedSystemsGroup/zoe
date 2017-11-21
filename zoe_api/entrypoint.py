@@ -24,7 +24,6 @@ from tornado.web import Application
 
 import zoe_lib.config as config
 import zoe_lib.state
-import zoe_api.db_init
 import zoe_api.api_endpoint
 import zoe_api.rest_api
 import zoe_api.master_api
@@ -57,10 +56,10 @@ def zoe_web_main() -> int:
         log.error("LDAP authentication requested, but 'pyldap' module not installed.")
         return 1
 
-    zoe_api.db_init.init()
+    sql_manager = zoe_lib.state.SQLManager(config.get_conf())
+    sql_manager.init_db()
 
     master_api = zoe_api.master_api.APIManager()
-    sql_manager = zoe_lib.state.SQLManager(config.get_conf())
     api_endpoint = zoe_api.api_endpoint.APIEndpoint(master_api, sql_manager)
 
     app_settings = {

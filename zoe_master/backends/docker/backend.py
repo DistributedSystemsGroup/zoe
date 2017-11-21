@@ -17,7 +17,6 @@
 
 import logging
 import re
-import threading
 import time
 
 from zoe_lib.config import get_conf
@@ -33,7 +32,7 @@ from zoe_master.stats import ClusterStats, NodeStats
 
 log = logging.getLogger(__name__)
 
-# These two module-level variables hold the references to the monitor and checker threads
+# This module-level variable holds the references to the synchro threads
 _checker = None
 
 
@@ -42,7 +41,6 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
     def __init__(self, opts):
         super().__init__(opts)
         self.docker_config = DockerConfig(get_conf().backend_docker_config_file).read_config()
-        self.cached_stats = None
 
     def _get_config(self, host) -> DockerHostConfig:
         for conf in self.docker_config:
@@ -86,36 +84,14 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
             log.error('Cannot terminate service {}, since it has not backend ID'.format(service.name))
         service.set_backend_status(service.BACKEND_DESTROY_STATUS)
 
-    def platform_state(self, usage_stats=False) -> ClusterStats:
+    def platform_state(self) -> ClusterStats:
         """Get the platform state."""
-        time_start = time.time()
         platform_stats = ClusterStats()
-        th_list = []
         for host_conf in self.docker_config:  # type: DockerHostConfig
-            node_stats = NodeStats(host_conf.name)
-            th = threading.Thread(target=self._update_node_state, args=(host_conf, node_stats, usage_stats), name='stats_host_{}'.format(host_conf.name), daemon=True)
-            th.start()
-            th_list.append((th, node_stats))
-
-        for th, node_stats in th_list:
-            th.join()
+            node_stats = _checker.host_stats[host_conf.name]
             platform_stats.nodes.append(node_stats)
 
-        log.debug('Time for platform stats: {:.2f}s'.format(time.time() - time_start))
         return platform_stats
-
-    def node_state(self, node_name: str, get_usage_stats: bool):
-        """Get the state of a single node."""
-        host_conf = None
-        for host_conf in self.docker_config:
-            if host_conf.name == node_name:
-                break
-        if host_conf is None:
-            return None
-
-        node_stats = NodeStats(host_conf.name)
-        self._update_node_state(host_conf, node_stats, get_usage_stats)
-        return node_stats
 
     def _update_node_state(self, host_conf: DockerHostConfig, node_stats: NodeStats, get_usage_stats: bool):
         node_stats.labels = host_conf.labels

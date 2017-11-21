@@ -18,7 +18,7 @@
 import time
 
 import zoe_lib.config as config
-import zoe_api.db_init
+import zoe_lib.state.sql_manager
 
 config.load_configuration()
 
@@ -26,4 +26,5 @@ print("Warning, this script will delete the database tables for the deployment '
 print("Sleeping 5 seconds before continuing, hit CTRL-C to stop and think.")
 time.sleep(5)
 
-zoe_api.db_init.init(force=True)
+state = zoe_lib.state.sql_manager.SQLManager(config.get_conf())
+state.init_db(force=True)

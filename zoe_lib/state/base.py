@@ -20,7 +20,7 @@ import logging
 log = logging.getLogger(__name__)
 
 
-class Base:
+class BaseRecord:
     """
     :type sql_manager: SQLManager
     """
@@ -34,3 +34,44 @@ class Base:
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""
         raise NotImplementedError
+
+
+class BaseTable:
+    """Common abstraction for all tables."""
+    def __init__(self, connection, cursor, table_name):
+        self.table_name = table_name
+        self.connection = connection
+        self.cursor = cursor
+
+    def create(self):
+        """Create this table."""
+        raise NotImplementedError
+
+    def insert(self, **kwargs):
+        """Create a new record."""
+        raise NotImplementedError
+
+    def delete(self, record_id):
+        """Delete a record from this table."""
+        query = "DELETE FROM {} WHERE id = %s".format(self.table_name)
+        self.cursor.execute(query, (record_id,))
+        self.connection.commit()
+
+    def update(self, record_id, **kwargs):
+        """Update the state of an execution."""
+        arg_list = []
+        value_list = []
+        for key, value in kwargs.items():
+            arg_list.append('{} = %s'.format(key))
+            value_list.append(value)
+        set_q = ", ".join(arg_list)
+        value_list.append(record_id)
+        q_base = 'UPDATE {} SET '.format(self.table_name) + set_q + ' WHERE id=%s'
+        query = self.cursor.mogrify(q_base, value_list)
+        self.cursor.execute(query)
+        self.connection.commit()
+
+    def select(self, only_one=False, limit=-1, **kwargs):
+        """Select records."""
+        raise NotImplementedError
+

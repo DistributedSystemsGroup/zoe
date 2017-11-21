@@ -183,20 +183,10 @@ def terminate_execution(execution: Execution) -> None:
     execution.set_terminated()
 
 
-def get_platform_state(state: SQLManager, with_usage_stats=False) -> ClusterStats:
-    """Retrieves the state of the platform by querying the container backend. Platform state includes information on free/reserved resources for each node. This information is used for advanced scheduling.
-    Since retrieving usage statistics is slow, you need to ask for them explicitly."""
+def get_platform_state() -> ClusterStats:
+    """Retrieves the state of the platform by querying the container backend. Platform state includes information on free/reserved resources for each node."""
     backend = _get_backend()
-    platform_state = backend.platform_state(with_usage_stats)
-    for node in platform_state.nodes:  # type: NodeStats
-        node.services = state.service_list(backend_host=node.name, backend_status=Service.BACKEND_START_STATUS)
-        for k, v in node.service_stats.items():
-            for service in node.services:
-                if service.backend_id == k:
-                    node.service_stats[service.id] = v
-                    del node.service_stats[k]
-                    break
-    return platform_state
+    return backend.platform_state()
 
 
 def preload_image(image_name):
@@ -229,7 +219,7 @@ def node_state(node_name: str, get_usage_stats: bool) -> NodeStats:
     backend = _get_backend()
     state = SQLManager(get_conf())
     node = backend.node_state(node_name, get_usage_stats)
-    node.services = state.service_list(backend_host=node_name, backend_status=Service.BACKEND_START_STATUS)
+    node.services = state.services.select(backend_host=node_name, backend_status=Service.BACKEND_START_STATUS)
     return node
 
 

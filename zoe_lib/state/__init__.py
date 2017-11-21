@@ -15,7 +15,7 @@
 
 """Zoe state management and database classes"""
 
-from zoe_lib.state.base import Base
+from zoe_lib.state.base import BaseRecord
 from zoe_lib.state.execution import Execution
 from zoe_lib.state.sql_manager import SQLManager
 from zoe_lib.state.service import Service, VolumeDescription, VolumeDescriptionHostPath

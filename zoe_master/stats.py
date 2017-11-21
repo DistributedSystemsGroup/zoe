@@ -56,14 +56,14 @@ class NodeStats(Stats):
         self.container_count = 0
         self.cores_total = 0
         self.cores_reserved = 0
+        self.cores_allocated = 0
         self.cores_in_use = 0
         self.memory_total = 0
+        self.memory_allocated = 0
         self.memory_reserved = 0
         self.memory_in_use = 0
         self.labels = []
-        self.status = None
-        self.error = ''
-        self.services = []
+        self.status = 'offline'
         self.service_stats = {}
 
     def serialize(self):
@@ -79,12 +79,8 @@ class NodeStats(Stats):
             'memory_in_use': self.memory_in_use,
             'labels': list(self.labels),
             'status': self.status,
-            'error': self.error,
-            'services': [],
             'service_stats': self.service_stats
         }
-        for service in self.services:
-            ret['services'].append(service.serialize())
         return ret
 
 

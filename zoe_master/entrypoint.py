@@ -63,14 +63,14 @@ def main():
     log.info("Initializing DB manager")
     state = SQLManager(args)
 
-    metrics = StatsManager(state)
-    metrics.start()
-
     try:
         zoe_master.backends.interface.initialize_backend(state)
     except ZoeException as e:
         log.error('Cannot initialize backend: {}'.format(e.message))
         return 1
+
+    metrics = StatsManager(state)
+    metrics.start()
 
     log.info("Initializing scheduler")
     scheduler = getattr(zoe_master.scheduler, config.get_conf().scheduler_class)(state, config.get_conf().scheduler_policy)

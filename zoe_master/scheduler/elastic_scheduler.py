@@ -53,7 +53,7 @@ class ZoeElasticScheduler:
         self.core_limit_recalc_trigger = threading.Event()
         self.core_limit_th = threading.Thread(target=self._adjust_core_limits, name='adjust_core_limits')
         self.state = state
-        for execution in self.state.execution_list(status='running'):
+        for execution in self.state.executions.select(status='running'):
             if execution.all_services_running:
                 self.queue_running.append(execution)
             else:
@@ -197,7 +197,7 @@ class ZoeElasticScheduler:
                     log.debug("-> {}".format(job))
 
                 try:
-                    platform_state = get_platform_state(self.state)
+                    platform_state = get_platform_state()
                 except ZoeException:
                     log.error('Cannot retrieve platform state, cannot schedule')
                     for job in jobs_to_attempt_scheduling:
@@ -307,23 +307,23 @@ class ZoeElasticScheduler:
                 break
             log.debug('Updating core limits')
             time_start = time.time()
-            stats = get_platform_state(self.state)
+            stats = get_platform_state()
             for node in stats.nodes:  # type: NodeStats
-                if len(node.services) == 0:
-                    continue
                 new_core_allocations = {}
-                core_sum = 0
-                for service in node.services:  # type: Service
-                    new_core_allocations[service.id] = service.resource_reservation.cores.min
-                    core_sum += service.resource_reservation.cores.min
+                node_services = self.state.services.select(backend_host=node.name, backend_status=Service.BACKEND_START_STATUS)
+                if len(node_services) == 0:
+                    continue
 
-                if core_sum < node.cores_total:
-                    cores_free = node.cores_total - core_sum
-                    cores_to_add = cores_free / len(node.services)
+                for service in node_services:
+                    new_core_allocations[service.id] = service.resource_reservation.cores.min
+
+                if node.cores_reserved < node.cores_total:
+                    cores_free = node.cores_total - node.cores_reserved
+                    cores_to_add = cores_free / len(node_services)
                 else:
                     cores_to_add = 0
 
-                for service in node.services:  # type: Service
+                for service in node_services:
                     update_service_resource_limits(service, cores=new_core_allocations[service.id] + cores_to_add)
 
             log.debug('Update core limits took {:.2f}s'.format(time.time() - time_start))
