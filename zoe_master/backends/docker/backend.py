@@ -149,6 +149,7 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
             stats[cont['id']] = {}
             stats[cont['id']]['core_limit'] = cont['cpu_quota'] / cont['cpu_period']
             stats[cont['id']]['mem_limit'] = cont['memory_soft_limit']
+        node_stats.service_stats = stats
 
         if get_usage_stats:
             if get_conf().kairosdb_enable:

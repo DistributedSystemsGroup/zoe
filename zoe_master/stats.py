@@ -64,6 +64,7 @@ class NodeStats(Stats):
         self.status = None
         self.error = ''
         self.services = []
+        self.service_stats = {}
 
     def serialize(self):
         """Convert the object into a dict."""
@@ -79,7 +80,8 @@ class NodeStats(Stats):
             'labels': list(self.labels),
             'status': self.status,
             'error': self.error,
-            'services': []
+            'services': [],
+            'service_stats': self.service_stats
         }
         for service in self.services:
             ret['services'].append(service.serialize())

@@ -240,7 +240,7 @@
     <tr>
         <td class="cell-host">{{ node.name }}</td>
         {% for service in node.services %}
-            <td><a href="{{ reverse_url('execution_inspect', service['execution_id']) }}">{{ service['name'] }}</a> (M: <script>format_bytes({{ service['description']['resources']['memory']['max'] }});</script> C: {{ service['description']['resources']['cores']['max'] }})</td>
+            <td><a href="{{ reverse_url('execution_inspect', service['execution_id']) }}">{{ service['name'] }}</a> (M: <script>format_bytes({{ node.service_stats[service['id']|string]['mem_limit'] }});</script> C: {{ node.service_stats[service['id']|string]['core_limit'] }})</td>
         {% endfor %}
     </tr>
     {% endfor %}

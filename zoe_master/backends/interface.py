@@ -190,6 +190,12 @@ def get_platform_state(state: SQLManager, with_usage_stats=False) -> ClusterStat
     platform_state = backend.platform_state(with_usage_stats)
     for node in platform_state.nodes:  # type: NodeStats
         node.services = state.service_list(backend_host=node.name, backend_status=Service.BACKEND_START_STATUS)
+        for k, v in node.service_stats.items():
+            for service in node.services:
+                if service.backend_id == k:
+                    node.service_stats[service.id] = v
+                    del node.service_stats[k]
+                    break
     return platform_state
 
 
