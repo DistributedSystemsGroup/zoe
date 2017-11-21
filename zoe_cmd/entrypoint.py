@@ -116,7 +116,6 @@ def exec_list_cmd(auth, args):
 def exec_start_cmd(auth, args):
     """Submit an execution."""
     app_descr = json.load(args.jsonfile)
-    app_validate(app_descr)
     exec_api = ZoeExecutionsAPI(auth['url'], auth['user'], auth['pass'])
     exec_id = exec_api.start(args.name, app_descr)
     if not args.synchronous:
