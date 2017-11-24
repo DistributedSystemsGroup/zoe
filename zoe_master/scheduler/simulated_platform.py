@@ -14,12 +14,12 @@ class SimulatedNode:
     """A simulated node where containers can be run"""
     def __init__(self, real_node: NodeStats):
         self.real_reservations = {
-            "memory": real_node.memory_allocated,
-            "cores": real_node.cores_allocated
+            "memory": real_node.memory_reserved,
+            "cores": real_node.cores_reserved
         }
         self.real_free_resources = {
-            "memory": real_node.memory_total - real_node.memory_allocated,
-            "cores": real_node.cores_total - real_node.cores_allocated
+            "memory": real_node.memory_total - real_node.memory_reserved,
+            "cores": real_node.cores_total - real_node.cores_reserved
         }
         self.real_active_containers = real_node.container_count
         self.services = []
