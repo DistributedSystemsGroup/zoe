@@ -73,7 +73,7 @@ def main():
     metrics.start()
 
     log.info("Initializing scheduler")
-    scheduler = getattr(zoe_master.scheduler, config.get_conf().scheduler_class)(state, config.get_conf().scheduler_policy)
+    scheduler = getattr(zoe_master.scheduler, args.scheduler_class)(state, args.scheduler_policy, metrics)
 
     restart_resubmit_scheduler(state, scheduler)
 

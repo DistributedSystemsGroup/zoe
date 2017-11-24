@@ -28,8 +28,9 @@ log = logging.getLogger(__name__)
 
 class ZoeSimpleScheduler(ZoeBaseScheduler):
     """The Scheduler class."""
-    def __init__(self, state, policy):
+    def __init__(self, state, policy, metrics):
         super().__init__(state)
+        self.metrics = metrics
         if policy != 'FIFO':
             raise UnsupportedSchedulerPolicyError
         self.fifo_queue = []
@@ -38,6 +39,7 @@ class ZoeSimpleScheduler(ZoeBaseScheduler):
         self.loop_quit = False
         self.loop_th = threading.Thread(target=self.loop_start_th, name='scheduler')
         self.loop_th.start()
+        log.warning('This scheduler is deprecated and will me removed in version 2018.03, please switch to the elastic scheduler.')
 
     def trigger(self):
         """Trigger a scheduler run."""

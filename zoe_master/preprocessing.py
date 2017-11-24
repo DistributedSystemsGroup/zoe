@@ -18,13 +18,11 @@
 import logging
 import os
 import shutil
-import threading
 
 from zoe_lib.state import Execution, SQLManager
 from zoe_lib.config import get_conf
 from zoe_master.scheduler import ZoeBaseScheduler
-from zoe_master.backends.interface import preload_image
-from zoe_master.exceptions import ZoeException
+from zoe_master.backends.interface import terminate_execution
 
 log = logging.getLogger(__name__)
 
@@ -59,32 +57,27 @@ def _digest_application_description(state: SQLManager, execution: Execution):
             counter += 1
         assert counter == total_count
 
-    for service_descr in execution.description['services']:
-        if get_conf().backend_image_management:
-            try:
-                preload_image(service_descr['image'])
-            except ZoeException as e:
-                execution.set_error_message('{}'.format(e))
-                execution.set_error()
-                return False
     return True
 
 
-def _do_execution_submit(state: SQLManager, scheduler: ZoeBaseScheduler, execution: Execution):
-    execution.set_image_dl()
+def execution_submit(state: SQLManager, scheduler: ZoeBaseScheduler, execution: Execution):
+    """Submit a new execution to the scheduler."""
     if _digest_application_description(state, execution):
         execution.set_scheduled()
         scheduler.incoming(execution)
 
 
-def execution_submit(state: SQLManager, scheduler: ZoeBaseScheduler, execution: Execution):
-    """Submit a new execution to the scheduler."""
-    threading.Thread(target=_do_execution_submit, args=(state, scheduler, execution), name='submission_{}'.format(execution.id), daemon=True).start()
-
-
 def execution_terminate(scheduler: ZoeBaseScheduler, execution: Execution):
     """Remove an execution form the scheduler."""
-    scheduler.terminate(execution)
+    if execution.is_running or execution.status == execution.SCHEDULED_STATUS:
+        execution.set_cleaning_up()
+        scheduler.terminate(execution)
+    elif execution.status == execution.SUBMIT_STATUS or execution.status == execution.STARTING_STATUS:
+        return  # It is unsafe to terminate executions in these statuses
+    elif execution.status == execution.ERROR_STATUS or execution.status == execution.CLEANING_UP_STATUS:
+        terminate_execution(execution)
+    elif execution.status == execution.TERMINATED_STATUS:
+        return
 
 
 def restart_resubmit_scheduler(state: SQLManager, scheduler: ZoeBaseScheduler):

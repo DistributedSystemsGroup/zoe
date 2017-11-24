@@ -45,13 +45,18 @@ class StatusEndpointWeb(ZoeRequestHandler):
         for exec_id in stats['running_queue']:
             executions_in_queue[exec_id] = self.api_endpoint.execution_by_id(uid, role, exec_id)
 
-        max_service_count = max([len(node['services']) for node in stats['platform_stats']['nodes']])
+        services_per_node = {}
+        for node in stats['platform_stats']['nodes']:
+            services_per_node[node['name']] = self.api_endpoint.sql.services.select(backend_host=node['name'], backend_status='started')
+
+        max_service_count = max([len(services_per_node[name]) for name in services_per_node])
 
         template_vars = {
             "uid": uid,
             "role": role,
             "stats": stats,
             "executions_in_queue": executions_in_queue,
+            "services_per_node": services_per_node,
             "max_service_count": max_service_count
         }
 

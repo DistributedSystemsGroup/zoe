@@ -15,6 +15,7 @@
 
 """Create the DB tables needed by Zoe. This script is used in the CI pipeline to prevent race conditions with zoe-api automatically creating the tables while zoe-master is starting at the same time."""
 
+import sys
 import time
 
 import zoe_lib.config as config
@@ -23,8 +24,13 @@ import zoe_lib.state.sql_manager
 config.load_configuration()
 
 print("Warning, this script will delete the database tables for the deployment '{}' before creating new ones".format(config.get_conf().deployment_name))
+print("If you are installing Zoe for the first time, you have nothing to worry about")
 print("Sleeping 5 seconds before continuing, hit CTRL-C to stop and think.")
-time.sleep(5)
 
-state = zoe_lib.state.sql_manager.SQLManager(config.get_conf())
-state.init_db(force=True)
+try:
+    time.sleep(5)
+except KeyboardInterrupt:
+    print("Aborted.")
+    sys.exit(1)
+
+zoe_lib.state.sql_manager.SQLManager(config.get_conf()).init_db(force=True)

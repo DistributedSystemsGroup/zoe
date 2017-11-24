@@ -60,13 +60,13 @@ class KairosDBInMetrics:
             metric['limit'] = limit
         query['metrics'].append(metric)
 
-    def get_service_usage(self, container_name):
+    def get_service_usage(self, service_id):
         """Query the DB for the current usage metrics."""
         query = self._prepare_query()
 
         tags_cpu = {
             "field": ["usage_percent"],
-            "container_name": container_name
+            "zoe_service_id": service_id
         }
         aggregators_cpu = [
             {"name": "scale", "factor": "0.01"},
@@ -76,7 +76,7 @@ class KairosDBInMetrics:
 
         tags_memory = {
             "field": ["usage"],
-            "container_name": container_name
+            "zoe_service_id": service_id
         }
 
         aggregators_memory = [

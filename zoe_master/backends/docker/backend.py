@@ -191,9 +191,6 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
 
     def list_available_images(self, node_name):
         """List the images available on the specified node."""
-        if not get_conf().backend_image_management:
-            return []
-
         host_conf = None
         for conf in self.docker_config:
             if conf.name == node_name:

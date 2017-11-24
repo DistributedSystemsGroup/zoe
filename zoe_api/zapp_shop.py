@@ -40,6 +40,9 @@ class ZAppParameter:
             self.type = "text"
         elif param_manifest['type'] == 'int':
             self.type = "number"
+            self.max = param_manifest['max']
+            self.min = param_manifest['min']
+            self.step = param_manifest['step']
         else:
             self.type = "text"
 

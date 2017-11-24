@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""The base class that all backends should implement."""
+"""The base class that all back-ends should implement."""
 
 from typing import List
 
@@ -23,7 +23,7 @@ from zoe_master.backends.service_instance import ServiceInstance
 
 
 class BaseBackend:
-    """The base class that all backends should implement."""
+    """The base class that all back-ends should implement."""
     def __init__(self, conf):
         pass
 
@@ -54,10 +54,6 @@ class BaseBackend:
 
     def platform_state(self) -> ClusterStats:
         """Get the platform state. This method should fill-in a new ClusterStats object at each call, with fresh statistics on the available nodes and resource availability. This information will be used for taking scheduling decisions."""
-        raise NotImplementedError
-
-    def node_state(self, node_name: str, get_usage_stats: bool):
-        """Get the state of a single node."""
         raise NotImplementedError
 
     def preload_image(self, image_name: str) -> None:

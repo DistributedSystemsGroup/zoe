@@ -75,7 +75,6 @@ class APIManager:
                 if execution is None:
                     self._reply_error('Execution ID {} not found'.format(message['exec_id']))
                 else:
-                    execution.set_cleaning_up()
                     self._reply_ok()
                     zoe_master.preprocessing.execution_terminate(self.scheduler, execution)
             elif message['command'] == 'execution_delete':
@@ -87,10 +86,10 @@ class APIManager:
             elif message['command'] == 'scheduler_stats':
                 try:
                     data = self.scheduler.stats()
-                    if self.metrics.current_platform_stats is None:
-                        data['platform_stats'] = None
+                    if self.metrics.current_stats is None:
+                        data['platform_stats'] = {}
                     else:
-                        data['platform_stats'] = self.metrics.current_platform_stats.serialize()
+                        data['platform_stats'] = self.metrics.current_stats.serialize()
                 except ZoeException as e:
                     log.error(str(e))
                     self._reply_error(str(e))

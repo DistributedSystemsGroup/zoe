@@ -20,13 +20,13 @@ import logging
 import psycopg2
 import psycopg2.extras
 
-from .service import ServiceTable
-from .execution import ExecutionTable
-from .port import PortTable
-
 from zoe_lib.config import get_conf
 from zoe_lib.version import SQL_SCHEMA_VERSION
 import zoe_lib.exceptions
+
+from .service import ServiceTable
+from .execution import ExecutionTable
+from .port import PortTable
 
 log = logging.getLogger(__name__)
 
@@ -54,7 +54,8 @@ class SQLManager:
 
         self.conn = psycopg2.connect(dsn)
 
-    def _cursor(self):
+    def cursor(self):
+        """Get a cursor, making sure the connection to the database is established."""
         try:
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         except psycopg2.InterfaceError:
@@ -63,23 +64,24 @@ class SQLManager:
         cur.execute('SET search_path TO {},public'.format(self.schema))
         return cur
 
+    def commit(self):
+        """Commit a transaction."""
+        self.conn.commit()
+
     @property
     def executions(self) -> ExecutionTable:
         """Access the execution state."""
-        cur = self._cursor()
-        return ExecutionTable(self.conn, cur)
+        return ExecutionTable(self)
 
     @property
     def services(self) -> ServiceTable:
         """Access the service state."""
-        cur = self._cursor()
-        return ServiceTable(self.conn, cur)
+        return ServiceTable(self)
 
     @property
     def ports(self) -> PortTable:
         """Access the port state."""
-        cur = self._cursor()
-        return PortTable(self.conn, cur)
+        return PortTable(self)
 
     def _create_tables(self):
         self.executions.create()
@@ -101,7 +103,7 @@ class SQLManager:
         if not self._check_schema_version(cur, get_conf().deployment_name):
             self._create_tables()
 
-        self.conn.commit()
+        self.commit()
         cur.close()
 
     def _check_schema_version(self, cur, deployment_name):

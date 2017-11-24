@@ -65,8 +65,8 @@ class Port(BaseRecord):
 
 class PortTable(BaseTable):
     """Abstraction for the port table in the database."""
-    def __init__(self, connection, cursor):
-        super().__init__(connection, cursor, "port")
+    def __init__(self, sql_manager):
+        super().__init__(sql_manager, "port")
 
     def create(self):
         """Create the Port table."""
@@ -83,7 +83,7 @@ class PortTable(BaseTable):
         """Adds a new port to the state."""
         query = self.cursor.mogrify('INSERT INTO port (id, service_id, internal_name, external_ip, external_port, description) VALUES (DEFAULT, %s, %s, NULL, NULL, %s) RETURNING id', (service_id, internal_name, description))
         self.cursor.execute(query)
-        self.connection.commit()
+        self.sql_manager.commit()
         return self.cursor.fetchone()[0]
 
     def select(self, only_one=False, limit=-1, **kwargs):
@@ -119,6 +119,6 @@ class PortTable(BaseTable):
             row = self.cursor.fetchone()
             if row is None:
                 return None
-            return Port(row, self)
+            return Port(row, self.sql_manager)
         else:
-            return [Port(x, self) for x in self.cursor]
+            return [Port(x, self.sql_manager) for x in self.cursor]

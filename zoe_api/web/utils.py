@@ -91,7 +91,7 @@ def get_auth(handler: ZoeRequestHandler):
     if handler.get_secure_cookie('zoe'):
         cookie_val = str(handler.get_secure_cookie('zoe'))
         uid, role = cookie_val[2:-1].split('.')
-        log.debug('Authentication done using cookie')
+        log.debug('Authentication done using cookie (user {} from {} for {})'.format(uid, handler.request.remote_ip, handler.request.path))
         return uid, role
     else:
         return None, None

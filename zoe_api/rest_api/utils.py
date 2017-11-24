@@ -15,7 +15,6 @@
 
 """Utility functions needed by the Zoe REST API."""
 
-import time
 import base64
 import logging
 import functools

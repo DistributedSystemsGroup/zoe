@@ -26,10 +26,11 @@ import time
 from zoe_lib.state import Execution, SQLManager, Service  # pylint: disable=unused-import
 from zoe_master.exceptions import ZoeException
 
-from zoe_master.backends.interface import terminate_execution, get_platform_state, start_elastic, start_essential, update_service_resource_limits
+from zoe_master.backends.interface import terminate_execution, start_elastic, start_essential, update_service_resource_limits
 from zoe_master.scheduler.simulated_platform import SimulatedPlatform
 from zoe_master.exceptions import UnsupportedSchedulerPolicyError
 from zoe_master.stats import NodeStats  # pylint: disable=unused-import
+from zoe_master.metrics.base import StatsManager  # pylint: disable=unused-import
 
 log = logging.getLogger(__name__)
 
@@ -37,11 +38,27 @@ ExecutionProgress = namedtuple('ExecutionProgress', ['last_time_scheduled', 'pro
 SELF_TRIGGER_TIMEOUT = 60  # the scheduler will trigger itself periodically in case platform resources have changed outside its control
 
 
+def catch_exceptions_and_retry(func):
+    """Decorator to catch exceptions in threaded functions."""
+    def wrapper(self):
+        """The wrapper."""
+        while True:
+            try:
+                func(self)
+            except BaseException:  # pylint: disable=broad-except
+                log.exception('Unmanaged exception in thread loop')
+            else:
+                log.debug('Thread terminated')
+                break
+    return wrapper
+
+
 class ZoeElasticScheduler:
     """The Scheduler class for size-based scheduling. Policy can be "FIFO" or "SIZE"."""
-    def __init__(self, state: SQLManager, policy):
+    def __init__(self, state: SQLManager, policy, metrics: StatsManager):
         if policy != 'FIFO' and policy != 'SIZE':
             raise UnsupportedSchedulerPolicyError
+        self.metrics = metrics
         self.trigger_semaphore = threading.Semaphore(0)
         self.policy = policy
         self.queue = []
@@ -49,7 +66,7 @@ class ZoeElasticScheduler:
         self.additional_exec_state = {}
         self.async_threads = []
         self.loop_quit = False
-        self.loop_th = threading.Thread(target=self._thread_wrapper, name='scheduler')
+        self.loop_th = threading.Thread(target=self.loop_start_th, name='scheduler')
         self.core_limit_recalc_trigger = threading.Event()
         self.core_limit_th = threading.Thread(target=self._adjust_core_limits, name='adjust_core_limits')
         self.state = state
@@ -149,16 +166,7 @@ class ZoeElasticScheduler:
 
         return out_list
 
-    def _thread_wrapper(self):
-        while True:
-            try:
-                self.loop_start_th()
-            except BaseException:  # pylint: disable=broad-except
-                log.exception('Unmanaged exception in scheduler loop')
-            else:
-                log.debug('Scheduler thread terminated')
-                break
-
+    @catch_exceptions_and_retry
     def loop_start_th(self):
         """The Scheduler thread loop."""
         auto_trigger = SELF_TRIGGER_TIMEOUT
@@ -197,7 +205,7 @@ class ZoeElasticScheduler:
                     log.debug("-> {}".format(job))
 
                 try:
-                    platform_state = get_platform_state()
+                    platform_state = self.metrics.current_stats
                 except ZoeException:
                     log.error('Cannot retrieve platform state, cannot schedule')
                     for job in jobs_to_attempt_scheduling:
@@ -300,14 +308,14 @@ class ZoeElasticScheduler:
             'running_queue': [s.id for s in self.queue_running]
         }
 
+    @catch_exceptions_and_retry
     def _adjust_core_limits(self):
+        self.core_limit_recalc_trigger.clear()
         while not self.loop_quit:
             self.core_limit_recalc_trigger.wait()
             if self.loop_quit:
                 break
-            log.debug('Updating core limits')
-            time_start = time.time()
-            stats = get_platform_state()
+            stats = self.metrics.current_stats
             for node in stats.nodes:  # type: NodeStats
                 new_core_allocations = {}
                 node_services = self.state.services.select(backend_host=node.name, backend_status=Service.BACKEND_START_STATUS)
@@ -326,5 +334,4 @@ class ZoeElasticScheduler:
                 for service in node_services:
                     update_service_resource_limits(service, cores=new_core_allocations[service.id] + cores_to_add)
 
-            log.debug('Update core limits took {:.2f}s'.format(time.time() - time_start))
             self.core_limit_recalc_trigger.clear()

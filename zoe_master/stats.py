@@ -27,27 +27,6 @@ class Stats:
         self.timestamp = time.time()
 
 
-class ServiceStats(Stats):
-    """Stats related to a service."""
-    def __init__(self, service):
-        super().__init__()
-        self.service = service
-        self.cores_in_use = 0
-        self.cores_limit = 0
-        self.memory_in_use = 0
-        self.memory_limit = 0
-
-    def serialize(self):
-        """Convert the object into a dict."""
-        return {
-            'service': self.service.serialize(),
-            'cores_in_use': self.cores_in_use,
-            'cores_limit': self.cores_limit,
-            'memory_in_use': self.memory_in_use,
-            'memory_limit': self.memory_limit
-        }
-
-
 class NodeStats(Stats):
     """Stats related to a single node."""
     def __init__(self, name):
@@ -73,9 +52,11 @@ class NodeStats(Stats):
             'container_count': self.container_count,
             'cores_total': self.cores_total,
             'cores_reserved': self.cores_reserved,
+            'cores_allocated': self.cores_allocated,
             'cores_in_use': self.cores_in_use,
             'memory_total': self.memory_total,
             'memory_reserved': self.memory_reserved,
+            'memory_allocated': self.memory_allocated,
             'memory_in_use': self.memory_in_use,
             'labels': list(self.labels),
             'status': self.status,

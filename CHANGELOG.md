@@ -1,5 +1,10 @@
 # Zoe Changelog
 
+## Version 2017.12
+
+* Status page for the administrator
+* More information about authentications in the log output of zoe-api
+
 ## Version 2017.09
 
 * Major web UI redesign

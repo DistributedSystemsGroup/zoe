@@ -3,7 +3,6 @@
 import logging
 
 from zoe_lib.state import Execution, Service
-from zoe_lib.config import get_conf
 from zoe_master.stats import ClusterStats, NodeStats
 from zoe_master.backends.interface import list_available_images
 
@@ -48,8 +47,6 @@ class SimulatedNode:
             return 'image {} is not available on this node'.format(service.image_name)
 
     def _image_is_available(self, image_name) -> bool:
-        if not get_conf().backend_image_management:
-            return True
         for image in self.images:
             if image_name in image['names']:
                 return True

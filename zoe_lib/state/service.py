@@ -270,8 +270,8 @@ class Service(BaseRecord):
 
 class ServiceTable(BaseTable):
     """Abstraction for the service table in the database."""
-    def __init__(self, connection, cursor):
-        super().__init__(connection, cursor, "service")
+    def __init__(self, sql_manager):
+        super().__init__(sql_manager, "service")
 
     def create(self):
         """Create the service table."""
@@ -295,7 +295,7 @@ class ServiceTable(BaseTable):
         status = Service.CREATED_STATUS
         query = self.cursor.mogrify('INSERT INTO service (id, status, execution_id, name, service_group, description, essential) VALUES (DEFAULT,%s,%s,%s,%s,%s,%s) RETURNING id', (status, execution_id, name, service_group, description, is_essential))
         self.cursor.execute(query)
-        self.connection.commit()
+        self.sql_manager.commit()
         return self.cursor.fetchone()[0]
 
     def select(self, only_one=False, limit=-1, **kwargs):
@@ -334,6 +334,6 @@ class ServiceTable(BaseTable):
             row = self.cursor.fetchone()
             if row is None:
                 return None
-            return Service(row, self)
+            return Service(row, self.sql_manager)
         else:
-            return [Service(x, self) for x in self.cursor]
+            return [Service(x, self.sql_manager) for x in self.cursor]

@@ -38,10 +38,10 @@ class BaseRecord:
 
 class BaseTable:
     """Common abstraction for all tables."""
-    def __init__(self, connection, cursor, table_name):
+    def __init__(self, sql_manager, table_name):
         self.table_name = table_name
-        self.connection = connection
-        self.cursor = cursor
+        self.sql_manager = sql_manager
+        self.cursor = self.sql_manager.cursor()
 
     def create(self):
         """Create this table."""
@@ -55,7 +55,7 @@ class BaseTable:
         """Delete a record from this table."""
         query = "DELETE FROM {} WHERE id = %s".format(self.table_name)
         self.cursor.execute(query, (record_id,))
-        self.connection.commit()
+        self.sql_manager.commit()
 
     def update(self, record_id, **kwargs):
         """Update the state of an execution."""
@@ -69,9 +69,8 @@ class BaseTable:
         q_base = 'UPDATE {} SET '.format(self.table_name) + set_q + ' WHERE id=%s'
         query = self.cursor.mogrify(q_base, value_list)
         self.cursor.execute(query)
-        self.connection.commit()
+        self.sql_manager.commit()
 
     def select(self, only_one=False, limit=-1, **kwargs):
         """Select records."""
         raise NotImplementedError
-

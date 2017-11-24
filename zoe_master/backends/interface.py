@@ -214,15 +214,6 @@ def node_list():
     return backend.node_list()
 
 
-def node_state(node_name: str, get_usage_stats: bool) -> NodeStats:
-    """Get the state of a single node."""
-    backend = _get_backend()
-    state = SQLManager(get_conf())
-    node = backend.node_state(node_name, get_usage_stats)
-    node.services = state.services.select(backend_host=node_name, backend_status=Service.BACKEND_START_STATUS)
-    return node
-
-
 def list_available_images(node_name):
     """List the images available on the specified node."""
     backend = _get_backend()

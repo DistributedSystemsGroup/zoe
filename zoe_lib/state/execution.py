@@ -35,7 +35,6 @@ class Execution(BaseRecord):
     """
 
     SUBMIT_STATUS = "submitted"
-    IMAGE_DL_STATUS = "image download"
     SCHEDULED_STATUS = "scheduled"
     STARTING_STATUS = "starting"
     ERROR_STATUS = "error"
@@ -98,11 +97,6 @@ class Execution(BaseRecord):
         self._status = self.SCHEDULED_STATUS
         self.sql_manager.executions.update(self.id, status=self._status)
 
-    def set_image_dl(self):
-        """The execution has been added to the scheduler queues."""
-        self._status = self.IMAGE_DL_STATUS
-        self.sql_manager.executions.update(self.id, status=self._status)
-
     def set_starting(self):
         """The services of the execution are being created in Swarm."""
         self._status = self.STARTING_STATUS
@@ -142,7 +136,7 @@ class Execution(BaseRecord):
         Returns False if the execution ended completely
         :return:
         """
-        return self._status == self.SCHEDULED_STATUS or self._status == self.RUNNING_STATUS or self._status == self.STARTING_STATUS or self._status == self.CLEANING_UP_STATUS or self._status == self.IMAGE_DL_STATUS
+        return self._status == self.SUBMIT_STATUS and self._status == self.SCHEDULED_STATUS or self._status == self.RUNNING_STATUS or self._status == self.STARTING_STATUS or self._status == self.CLEANING_UP_STATUS
 
     @property
     def is_running(self):
@@ -218,8 +212,8 @@ class Execution(BaseRecord):
 
 class ExecutionTable(BaseTable):
     """Abstraction for the execution table in the database."""
-    def __init__(self, connection, cursor):
-        super().__init__(connection, cursor, "execution")
+    def __init__(self, sql_manager):
+        super().__init__(sql_manager, "execution")
 
     def create(self):
         """Create the execution table."""
@@ -242,7 +236,7 @@ class ExecutionTable(BaseTable):
         time_submit = datetime.datetime.utcnow()
         query = self.cursor.mogrify('INSERT INTO execution (id, name, user_id, description, status, time_submit) VALUES (DEFAULT, %s,%s,%s,%s,%s) RETURNING id', (name, user_id, description, status, time_submit))
         self.cursor.execute(query)
-        self.connection.commit()
+        self.sql_manager.commit()
         return self.cursor.fetchone()[0]
 
     def select(self, only_one=False, limit=-1, **kwargs):
@@ -291,6 +285,6 @@ class ExecutionTable(BaseTable):
             row = self.cursor.fetchone()
             if row is None:
                 return None
-            return Execution(row, self)
+            return Execution(row, self.sql_manager)
         else:
-            return [Execution(x, self) for x in self.cursor]
+            return [Execution(x, self.sql_manager) for x in self.cursor]
