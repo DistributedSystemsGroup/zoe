@@ -222,7 +222,7 @@
         <td class="cell-host">{{ node.name }}</td>
         {% for service in services_per_node[node.name] %}
             {% if service.backend_status == "started" %}
-            <td><a href="{{ reverse_url('execution_inspect', service['execution_id']) }}">{{ service['name'] }}</a> (M: <script>format_bytes({{ node.service_stats[service['id']|string]['mem_limit'] }});</script> C: {{ '%0.2f'|format(node.service_stats[service['id']|string]['core_limit']|float) }})</td>
+            <td><a href="{{ reverse_url('execution_inspect', service['execution_id']) }}">{{ service['name'] }}</a> (M: <script>format_bytes({{ node.service_stats[service['id']]['mem_limit'] }});</script> C: {{ '%0.2f'|format(node.service_stats[service['id']]['core_limit']|float) }})</td>
             {% endif %}
         {% endfor %}
     </tr>

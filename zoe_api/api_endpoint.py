@@ -160,6 +160,10 @@ class APIEndpoint:
         """Retrieve statistics about the scheduler."""
         success, message = self.master.scheduler_statistics()
         if success:
+            for node in message['platform_stats']['nodes']:  # JSON does not like hash keys to be integers, so we need to convert manually
+                for str_service_id in list(node['service_stats'].keys()):
+                    node['service_stats'][int(str_service_id)] = node['service_stats'][str_service_id]
+                    del node['service_stats'][str_service_id]
             return message
 
     def cleanup_dead_executions(self):
