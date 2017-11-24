@@ -48,6 +48,12 @@ class StatusEndpointWeb(ZoeRequestHandler):
         services_per_node = {}
         for node in stats['platform_stats']['nodes']:
             services_per_node[node['name']] = self.api_endpoint.sql.services.select(backend_host=node['name'], backend_status='started')
+            for service in services_per_node[node['name']]:
+                if service.id not in node['service_stats']:
+                    node['service_stats'][service.id] = {
+                        'mem_limit': 0,
+                        'core_limit': 0
+                    }
 
         max_service_count = max([len(services_per_node[name]) for name in services_per_node])
 
