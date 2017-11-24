@@ -15,15 +15,18 @@
 
 """Interface to PostgresQL for Zoe state."""
 
-import datetime
 import logging
 
 import psycopg2
 import psycopg2.extras
 
-from .service import Service
-from .execution import Execution
-from .port import Port
+from zoe_lib.config import get_conf
+from zoe_lib.version import SQL_SCHEMA_VERSION
+import zoe_lib.exceptions
+
+from .service import ServiceTable
+from .execution import ExecutionTable
+from .port import PortTable
 
 log = logging.getLogger(__name__)
 
@@ -51,7 +54,8 @@ class SQLManager:
 
         self.conn = psycopg2.connect(dsn)
 
-    def _cursor(self):
+    def cursor(self):
+        """Get a cursor, making sure the connection to the database is established."""
         try:
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         except psycopg2.InterfaceError:
@@ -60,274 +64,60 @@ class SQLManager:
         cur.execute('SET search_path TO {},public'.format(self.schema))
         return cur
 
-    def execution_list(self, only_one=False, limit=-1, **kwargs):
-        """
-        Return a list of executions.
+    def commit(self):
+        """Commit a transaction."""
+        self.conn.commit()
 
-        :param only_one: only one result is expected
-        :type only_one: bool
-        :param limit: limit the result to this number of entries
-        :type limit: int
-        :param kwargs: filter executions based on their fields/columns
-        :return: one or more executions
-        """
-        cur = self._cursor()
-        q_base = 'SELECT * FROM execution'
-        if len(kwargs) > 0:
-            q = q_base + " WHERE "
-            filter_list = []
-            args_list = []
-            for key, value in kwargs.items():
-                if key == 'earlier_than_submit':
-                    filter_list.append('"time_submit" <= to_timestamp(%s)')
-                elif key == 'earlier_than_start':
-                    filter_list.append('"time_start" <= to_timestamp(%s)')
-                elif key == 'earlier_than_end':
-                    filter_list.append('"time_end" <= to_timestamp(%s)')
-                elif key == 'later_than_submit':
-                    filter_list.append('"time_submit" >= to_timestamp(%s)')
-                elif key == 'later_than_start':
-                    filter_list.append('"time_start" >= to_timestamp(%s)')
-                elif key == 'later_than_end':
-                    filter_list.append('"time_end" >= to_timestamp(%s)')
-                else:
-                    filter_list.append('{} = %s'.format(key))
-                args_list.append(value)
-            q += ' AND '.join(filter_list)
-            if limit > 0:
-                q += ' ORDER BY id DESC LIMIT {}'.format(limit)
-            query = cur.mogrify(q, args_list)
+    @property
+    def executions(self) -> ExecutionTable:
+        """Access the execution state."""
+        return ExecutionTable(self)
+
+    @property
+    def services(self) -> ServiceTable:
+        """Access the service state."""
+        return ServiceTable(self)
+
+    @property
+    def ports(self) -> PortTable:
+        """Access the port state."""
+        return PortTable(self)
+
+    def _create_tables(self):
+        self.executions.create()
+        self.services.create()
+        self.ports.create()
+
+    def init_db(self, force=False):
+        """DB init entrypoint."""
+        cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        cur.execute("CREATE TABLE IF NOT EXISTS public.versions (deployment text, version integer)")
+
+        cur.execute('SET search_path TO {},public'.format(get_conf().deployment_name))
+
+        if force:
+            cur.execute("DELETE FROM public.versions WHERE deployment = %s", (get_conf().deployment_name,))
+            cur.execute('DROP SCHEMA IF EXISTS {} CASCADE'.format(get_conf().deployment_name))
+
+        if not self._check_schema_version(cur, get_conf().deployment_name):
+            self._create_tables()
+
+        self.commit()
+        cur.close()
+
+    def _check_schema_version(self, cur, deployment_name):
+        """Check if the schema version matches this source code version."""
+        cur.execute("SELECT version FROM public.versions WHERE deployment = %s", (deployment_name,))
+        row = cur.fetchone()
+        if row is None:
+            cur.execute("INSERT INTO public.versions (deployment, version) VALUES (%s, %s)", (deployment_name, SQL_SCHEMA_VERSION))
+            cur.execute("SELECT EXISTS(SELECT 1 FROM pg_catalog.pg_namespace WHERE nspname = %s)", (deployment_name,))
+            if not cur.fetchone()[0]:
+                cur.execute('CREATE SCHEMA {}'.format(deployment_name))
+            return False  # Tables need to be created
         else:
-            if limit > 0:
-                q_base += ' ORDER BY id DESC LIMIT {}'.format(limit)
-            query = cur.mogrify(q_base)
-
-        cur.execute(query)
-        if only_one:
-            row = cur.fetchone()
-            if row is None:
-                return None
-            return Execution(row, self)
-        else:
-            return [Execution(x, self) for x in cur]
-
-    def execution_update(self, exec_id, **kwargs):
-        """Update the state of an execution."""
-        cur = self._cursor()
-        arg_list = []
-        value_list = []
-        for key, value in kwargs.items():
-            arg_list.append('{} = %s'.format(key))
-            value_list.append(value)
-        set_q = ", ".join(arg_list)
-        value_list.append(exec_id)
-        q_base = 'UPDATE execution SET ' + set_q + ' WHERE id=%s'
-        query = cur.mogrify(q_base, value_list)
-        cur.execute(query)
-        self.conn.commit()
-
-    def execution_new(self, name, user_id, description):
-        """Create a new execution in the state."""
-        cur = self._cursor()
-        status = Execution.SUBMIT_STATUS
-        time_submit = datetime.datetime.utcnow()
-        query = cur.mogrify('INSERT INTO execution (id, name, user_id, description, status, time_submit) VALUES (DEFAULT, %s,%s,%s,%s,%s) RETURNING id', (name, user_id, description, status, time_submit))
-        cur.execute(query)
-        self.conn.commit()
-        return cur.fetchone()[0]
-
-    def execution_delete(self, execution_id):
-        """Delete an execution and its services from the state."""
-        cur = self._cursor()
-        query = "DELETE FROM execution WHERE id = %s"
-        cur.execute(query, (execution_id,))
-        self.conn.commit()
-
-    def service_list(self, only_one=False, **kwargs):
-        """
-        Return a list of services.
-
-        :param only_one: only one result is expected
-        :type only_one: bool
-        :param kwargs: filter services based on their fields/columns
-        :return: one or more services
-        """
-        cur = self._cursor()
-        q_base = 'SELECT * FROM service'
-        if len(kwargs) > 0:
-            q = q_base + " WHERE "
-            filter_list = []
-            args_list = []
-            for key, value in kwargs.items():
-                if key.startswith('not_'):
-                    filter_list.append('{} != %s'.format(key[4:]))
-                else:
-                    filter_list.append('{} = %s'.format(key))
-                args_list.append(value)
-            q += ' AND '.join(filter_list)
-            query = cur.mogrify(q, args_list)
-        else:
-            query = cur.mogrify(q_base)
-
-        cur.execute(query)
-        if only_one:
-            row = cur.fetchone()
-            if row is None:
-                return None
-            return Service(row, self)
-        else:
-            return [Service(x, self) for x in cur]
-
-    def service_update(self, service_id, **kwargs):
-        """Update the state of an existing service."""
-        cur = self._cursor()
-        arg_list = []
-        value_list = []
-        for key, value in kwargs.items():
-            arg_list.append('{} = %s'.format(key))
-            value_list.append(value)
-        set_q = ", ".join(arg_list)
-        value_list.append(service_id)
-        q_base = 'UPDATE service SET ' + set_q + ' WHERE id=%s'
-        query = cur.mogrify(q_base, value_list)
-        cur.execute(query)
-        self.conn.commit()
-
-    def service_new(self, execution_id, name, service_group, description, is_essential):
-        """Adds a new service to the state."""
-        cur = self._cursor()
-        status = Service.CREATED_STATUS
-        query = cur.mogrify('INSERT INTO service (id, status, execution_id, name, service_group, description, essential) VALUES (DEFAULT,%s,%s,%s,%s,%s,%s) RETURNING id', (status, execution_id, name, service_group, description, is_essential))
-        cur.execute(query)
-        self.conn.commit()
-        return cur.fetchone()[0]
-
-    def port_list(self, only_one=False, **kwargs):
-        """
-        Return a list of ports.
-
-        :param only_one: only one result is expected
-        :type only_one: bool
-        :param kwargs: filter services based on their fields/columns
-        :return: one or more ports
-        """
-        cur = self._cursor()
-        q_base = 'SELECT * FROM port'
-        if len(kwargs) > 0:
-            q = q_base + " WHERE "
-            filter_list = []
-            args_list = []
-            for key, value in kwargs.items():
-                filter_list.append('{} = %s'.format(key))
-                args_list.append(value)
-            q += ' AND '.join(filter_list)
-            query = cur.mogrify(q, args_list)
-        else:
-            query = cur.mogrify(q_base)
-
-        cur.execute(query)
-        if only_one:
-            row = cur.fetchone()
-            if row is None:
-                return None
-            return Port(row, self)
-        else:
-            return [Port(x, self) for x in cur]
-
-    def port_update(self, port_id, **kwargs):
-        """Update the state of an existing port."""
-        cur = self._cursor()
-        arg_list = []
-        value_list = []
-        for key, value in kwargs.items():
-            arg_list.append('{} = %s'.format(key))
-            value_list.append(value)
-        set_q = ", ".join(arg_list)
-        value_list.append(port_id)
-        q_base = 'UPDATE port SET ' + set_q + ' WHERE id=%s'
-        query = cur.mogrify(q_base, value_list)
-        cur.execute(query)
-        self.conn.commit()
-
-    def port_new(self, service_id, internal_name, description):
-        """Adds a new port to the state."""
-        cur = self._cursor()
-        query = cur.mogrify('INSERT INTO port (id, service_id, internal_name, external_ip, external_port, description) VALUES (DEFAULT, %s, %s, NULL, NULL, %s) RETURNING id', (service_id, internal_name, description))
-        cur.execute(query)
-        self.conn.commit()
-        return cur.fetchone()[0]
-
-    # The section below is used for Oauth2 authentication mechanism
-
-    def fetch_by_refresh_token(self, refresh_token):
-        """ get info from refreshtoken """
-        cur = self._cursor()
-        query = 'SELECT * FROM oauth_token WHERE refresh_token = %s'
-        cur.execute(query, (refresh_token,))
-
-        return cur.fetchone()
-
-    def delete_refresh_token(self, refresh_token):
-        """ delete info by refreshtoken """
-        cur = self._cursor()
-        check_exists = 'SELECT * FROM oauth_token WHERE refresh_token = %s OR token = %s'
-        cur.execute(check_exists, (refresh_token, refresh_token))
-        res = 0
-        if cur.fetchone():
-            res = 1
-        query = 'DELETE FROM oauth_token WHERE refresh_token = %s OR token = %s'
-        cur.execute(query, (refresh_token, refresh_token))
-        self.conn.commit()
-        return res
-
-    def fetch_existing_token_of_user(self, client_id, grant_type, user_id):
-        """ get info from clientid granttype userid """
-        cur = self._cursor()
-        query = 'SELECT * FROM oauth_token WHERE client_id = %s AND grant_type = %s AND user_id = %s'
-        cur.execute(query, (client_id, grant_type, user_id,))
-
-        return cur.fetchone()
-
-    def get_client_id_by_access_token(self, access_token):
-        """ get clientid from accesstoken """
-        cur = self._cursor()
-        query = 'SELECT * FROM oauth_token WHERE token = %s'
-        cur.execute(query, (access_token,))
-
-        return cur.fetchone()
-
-    def get_client_id_by_refresh_token(self, refresh_token):
-        """ get clientid from refreshtoken """
-        cur = self._cursor()
-        query = 'SELECT * FROM oauth_token WHERE refresh_token = %s'
-        cur.execute(query, (refresh_token,))
-
-        return cur.fetchone()
-
-    def save_token(self, client_id, grant_type, token, data, expires_at, refresh_token, refresh_expires_at, scopes, user_id): #pylint: disable=too-many-arguments
-        """ save token to db """
-        cur = self._cursor()
-        expires_at = datetime.datetime.utcfromtimestamp(expires_at)
-        if refresh_expires_at is None:
-            query = cur.mogrify('UPDATE oauth_token SET token = %s, expires_at = %s WHERE client_id=%s', (token, expires_at, client_id))
-        else:
-            refresh_token_expires_at = datetime.datetime.utcfromtimestamp(refresh_expires_at)
-            query = cur.mogrify('INSERT INTO oauth_token (client_id, grant_type, token, data, expires_at, refresh_token, refresh_token_expires_at, scopes, user_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT (client_id) DO UPDATE SET token = %s, expires_at = %s, refresh_token = %s, refresh_token_expires_at = %s', (client_id, grant_type, token, data, expires_at, refresh_token, refresh_token_expires_at, scopes, user_id, token, expires_at, refresh_token, refresh_token_expires_at))
-
-        cur.execute(query)
-        self.conn.commit()
-
-    def save_client(self, identifier, secret, role, redirect_uris, authorized_grants, authorized_response_types):
-        """ save clientinfo to db """
-        cur = self._cursor()
-        query = cur.mogrify('INSERT INTO oauth_client (identifier, secret, role, redirect_uris, authorized_grants, authorized_response_types) VALUES (%s,%s,%s,%s,%s,%s)', (identifier, secret, role, redirect_uris, authorized_grants, authorized_response_types))
-        cur.execute(query)
-        self.conn.commit()
-
-    def fetch_by_client_id(self, client_id):
-        """ get info from clientid """
-        cur = self._cursor()
-        query = 'SELECT * FROM oauth_client WHERE identifier = %s'
-        cur.execute(query, (client_id,))
-
-        return cur.fetchone()
+            if row[0] == SQL_SCHEMA_VERSION:
+                return True
+            else:
+                raise zoe_lib.exceptions.ZoeLibException('SQL database schema version mismatch: need {}, found {}'.format(SQL_SCHEMA_VERSION, row[0]))

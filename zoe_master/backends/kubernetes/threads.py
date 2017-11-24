@@ -53,7 +53,7 @@ class KubernetesMonitor(threading.Thread):
                         rc_info = self.kube.inspect_replication_controller(event.object.name)
                         if rc_info:
                             rc_uid = rc_info['backend_id']
-                            service = self.state.service_list(only_one=True, backend_id=rc_uid)
+                            service = self.state.services.select(only_one=True, backend_id=rc_uid)
                             if event.object.name not in self.service_id:
                                 self.service_id[event.object.name] = service.id
                             if service is not None:
@@ -73,7 +73,7 @@ class KubernetesMonitor(threading.Thread):
                             if event.object.name in self.service_id:
                                 sid = self.service_id[event.object.name]
                                 self.service_id.pop(event.object.name)
-                                service = self.state.service_list(only_one=True, id=sid)
+                                service = self.state.services.select(only_one=True, id=sid)
                                 if service is not None:
                                     log.info('Destroyed all replicas')
                                     service.set_backend_status(service.BACKEND_DESTROY_STATUS)
@@ -120,7 +120,7 @@ class KubernetesStateSynchronizer(threading.Thread):
         """The thread loop."""
         log.info("Checker thread started")
         while not self.stop:
-            service_list = self.state.service_list()
+            service_list = self.state.services.select()
             repcon_list = self.kube.replication_controller_list()
             for service in service_list:
                 assert isinstance(service, Service)

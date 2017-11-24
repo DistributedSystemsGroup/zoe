@@ -20,10 +20,12 @@ import logging
 import threading
 import functools
 
+from zoe_lib.state.base import BaseRecord, BaseTable
+
 log = logging.getLogger(__name__)
 
 
-class Execution:
+class Execution(BaseRecord):
     """
     A Zoe execution.
 
@@ -33,7 +35,6 @@ class Execution:
     """
 
     SUBMIT_STATUS = "submitted"
-    IMAGE_DL_STATUS = "image download"
     SCHEDULED_STATUS = "scheduled"
     STARTING_STATUS = "starting"
     ERROR_STATUS = "error"
@@ -42,8 +43,7 @@ class Execution:
     TERMINATED_STATUS = "terminated"
 
     def __init__(self, d, sql_manager):
-        self.sql_manager = sql_manager
-        self.id = d['id']
+        super().__init__(d, sql_manager)
 
         self.user_id = d['user_id']
         self.name = d['name']
@@ -95,45 +95,40 @@ class Execution:
     def set_scheduled(self):
         """The execution has been added to the scheduler queues."""
         self._status = self.SCHEDULED_STATUS
-        self.sql_manager.execution_update(self.id, status=self._status)
-
-    def set_image_dl(self):
-        """The execution has been added to the scheduler queues."""
-        self._status = self.IMAGE_DL_STATUS
-        self.sql_manager.execution_update(self.id, status=self._status)
+        self.sql_manager.executions.update(self.id, status=self._status)
 
     def set_starting(self):
         """The services of the execution are being created in Swarm."""
         self._status = self.STARTING_STATUS
-        self.sql_manager.execution_update(self.id, status=self._status)
+        self.sql_manager.executions.update(self.id, status=self._status)
 
     def set_running(self):
         """The execution is running and producing useful work."""
         self._status = self.RUNNING_STATUS
         self.time_start = datetime.datetime.utcnow()
-        self.sql_manager.execution_update(self.id, status=self._status, time_start=self.time_start)
+        self.sql_manager.executions.update(self.id, status=self._status, time_start=self.time_start)
 
     def set_cleaning_up(self):
         """The services of the execution are being terminated."""
         self._status = self.CLEANING_UP_STATUS
-        self.sql_manager.execution_update(self.id, status=self._status)
+        self.sql_manager.executions.update(self.id, status=self._status)
 
     def set_terminated(self):
         """The execution is not running."""
         self._status = self.TERMINATED_STATUS
         self.time_end = datetime.datetime.utcnow()
-        self.sql_manager.execution_update(self.id, status=self._status, time_end=self.time_end)
+        self.sql_manager.executions.update(self.id, status=self._status, time_end=self.time_end)
 
     def set_error(self):
         """The scheduler encountered an error starting or running the execution."""
         self._status = self.ERROR_STATUS
         self.time_end = datetime.datetime.utcnow()
-        self.sql_manager.execution_update(self.id, status=self._status, time_end=self.time_end)
+        self.sql_manager.executions.update(self.id, status=self._status, time_end=self.time_end)
 
     def set_error_message(self, message):
         """Contains an error message in case the status is 'error'."""
         self.error_message = message
-        self.sql_manager.execution_update(self.id, error_message=self.error_message)
+        self.sql_manager.executions.update(self.id, error_message=self.error_message)
 
     @property
     def is_active(self):
@@ -141,7 +136,7 @@ class Execution:
         Returns False if the execution ended completely
         :return:
         """
-        return self._status == self.SCHEDULED_STATUS or self._status == self.RUNNING_STATUS or self._status == self.STARTING_STATUS or self._status == self.CLEANING_UP_STATUS or self._status == self.IMAGE_DL_STATUS
+        return self._status == self.SUBMIT_STATUS and self._status == self.SCHEDULED_STATUS or self._status == self.RUNNING_STATUS or self._status == self.STARTING_STATUS or self._status == self.CLEANING_UP_STATUS
 
     @property
     def is_running(self):
@@ -156,17 +151,17 @@ class Execution:
     @property
     def services(self):
         """Getter for this execution service list."""
-        return self.sql_manager.service_list(execution_id=self.id)
+        return self.sql_manager.services.select(execution_id=self.id)
 
     @property
     def essential_services(self):
         """Getter for this execution essential service list."""
-        return self.sql_manager.service_list(execution_id=self.id, essential=True)
+        return self.sql_manager.services.select(execution_id=self.id, essential=True)
 
     @property
     def elastic_services(self):
         """Getter for this execution elastic service list."""
-        return self.sql_manager.service_list(execution_id=self.id, essential=False)
+        return self.sql_manager.services.select(execution_id=self.id, essential=False)
 
     @property
     def essential_services_running(self) -> bool:
@@ -213,3 +208,83 @@ class Execution:
 
     def __repr__(self):
         return str(self.id)
+
+
+class ExecutionTable(BaseTable):
+    """Abstraction for the execution table in the database."""
+    def __init__(self, sql_manager):
+        super().__init__(sql_manager, "execution")
+
+    def create(self):
+        """Create the execution table."""
+        self.cursor.execute('''CREATE TABLE execution (
+            id SERIAL PRIMARY KEY,
+            name TEXT NOT NULL,
+            user_id TEXT NOT NULL,
+            description JSON NOT NULL,
+            status TEXT NOT NULL,
+            execution_manager_id TEXT NULL,
+            time_submit TIMESTAMP NOT NULL,
+            time_start TIMESTAMP NULL,
+            time_end TIMESTAMP NULL,
+            error_message TEXT NULL
+            )''')
+
+    def insert(self, name, user_id, description):
+        """Create a new execution in the state."""
+        status = Execution.SUBMIT_STATUS
+        time_submit = datetime.datetime.utcnow()
+        query = self.cursor.mogrify('INSERT INTO execution (id, name, user_id, description, status, time_submit) VALUES (DEFAULT, %s,%s,%s,%s,%s) RETURNING id', (name, user_id, description, status, time_submit))
+        self.cursor.execute(query)
+        self.sql_manager.commit()
+        return self.cursor.fetchone()[0]
+
+    def select(self, only_one=False, limit=-1, **kwargs):
+        """
+        Return a list of executions.
+
+        :param only_one: only one result is expected
+        :type only_one: bool
+        :param limit: limit the result to this number of entries
+        :type limit: int
+        :param kwargs: filter executions based on their fields/columns
+        :return: one or more executions
+        """
+        q_base = 'SELECT * FROM execution'
+        if len(kwargs) > 0:
+            q = q_base + " WHERE "
+            filter_list = []
+            args_list = []
+            for key, value in kwargs.items():
+                if key == 'earlier_than_submit':
+                    filter_list.append('"time_submit" <= to_timestamp(%s)')
+                elif key == 'earlier_than_start':
+                    filter_list.append('"time_start" <= to_timestamp(%s)')
+                elif key == 'earlier_than_end':
+                    filter_list.append('"time_end" <= to_timestamp(%s)')
+                elif key == 'later_than_submit':
+                    filter_list.append('"time_submit" >= to_timestamp(%s)')
+                elif key == 'later_than_start':
+                    filter_list.append('"time_start" >= to_timestamp(%s)')
+                elif key == 'later_than_end':
+                    filter_list.append('"time_end" >= to_timestamp(%s)')
+                else:
+                    filter_list.append('{} = %s'.format(key))
+                args_list.append(value)
+            q += ' AND '.join(filter_list)
+            if limit > 0:
+                q += ' ORDER BY id DESC LIMIT {}'.format(limit)
+            query = self.cursor.mogrify(q, args_list)
+        else:
+            if limit > 0:
+                q_base += ' ORDER BY id DESC LIMIT {}'.format(limit)
+            query = self.cursor.mogrify(q_base)
+
+        self.cursor.execute(query)
+        if only_one:
+            row = self.cursor.fetchone()
+            if row is None:
+                return None
+            return Execution(row, self.sql_manager)
+        else:
+            return [Execution(x, self.sql_manager) for x in self.cursor]

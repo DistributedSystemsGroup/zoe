@@ -36,6 +36,7 @@ class SwarmBackend(zoe_master.backends.base.BaseBackend):
     def __init__(self, opts):
         super().__init__(opts)
         self.swarm = SwarmClient()
+        log.warning('The Docker Swarm back-end is deprecated and will be removed in 2018.03, please upgrade to the Docker Engine back-end.')
 
     @classmethod
     def init(cls, state):
@@ -70,7 +71,7 @@ class SwarmBackend(zoe_master.backends.base.BaseBackend):
         """Terminate and delete a container."""
         self.swarm.terminate_container(service.backend_id, delete=True)
 
-    def platform_state(self, usage_stats=False) -> ClusterStats:
+    def platform_state(self) -> ClusterStats:
         """Get the platform state."""
         info = self.swarm.info()
         for node in info.nodes:  # type: NodeStats

@@ -21,6 +21,7 @@
 
 import json
 import datetime
+import logging
 
 from jinja2 import Environment, FileSystemLoader, Markup, TemplateSyntaxError
 
@@ -29,6 +30,8 @@ import tornado.web
 
 import zoe_lib.version
 import zoe_api.web.utils
+
+log = logging.getLogger(__name__)
 
 
 class JinjaApp(object):
@@ -125,6 +128,7 @@ class ZoeRequestHandler(tornado.web.RequestHandler):
             zoe_api.web.utils.error_page(self, 'Template syntax error at {}:{}:<br> {}'.format(e.name, e.lineno, e.message), 500)
             return
         except Exception as e:
+            log.exception('Jinja2 exception while rendering the template {}'.format(template_name))
             zoe_api.web.utils.error_page(self, 'Jinja2 template exception: {}'.format(e), 500)
             return
         self.finish(html)

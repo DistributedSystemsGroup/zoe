@@ -18,13 +18,11 @@
 import logging
 import os
 import shutil
-import threading
 
 from zoe_lib.state import Execution, SQLManager
 from zoe_lib.config import get_conf
 from zoe_master.scheduler import ZoeBaseScheduler
-from zoe_master.backends.interface import preload_image
-from zoe_master.exceptions import ZoeException
+from zoe_master.backends.interface import terminate_execution
 
 log = logging.getLogger(__name__)
 
@@ -38,70 +36,65 @@ def _digest_application_description(state: SQLManager, execution: Execution):
         counter = 0
         for service_n_ in range(essential_count):
             name = "{}{}".format(service_descr['name'], counter)
-            sid = state.service_new(execution.id, name, service_descr['name'], service_descr, True)
+            sid = state.services.insert(execution.id, name, service_descr['name'], service_descr, True)
 
             # Ports
             for port_descr in service_descr['ports']:
                 port_internal = str(port_descr['port_number']) + '/' + port_descr['protocol']
-                state.port_new(sid, port_internal, port_descr)
+                state.ports.insert(sid, port_internal, port_descr)
 
             counter += 1
 
         for service_n_ in range(elastic_count):
             name = "{}{}".format(service_descr['name'], counter)
-            sid = state.service_new(execution.id, name, service_descr['name'], service_descr, False)
+            sid = state.services.insert(execution.id, name, service_descr['name'], service_descr, False)
 
             # Ports
             for port_descr in service_descr['ports']:
                 port_internal = str(port_descr['port_number']) + '/' + port_descr['protocol']
-                state.port_new(sid, port_internal, port_descr)
+                state.ports.insert(sid, port_internal, port_descr)
 
             counter += 1
         assert counter == total_count
 
-    for service_descr in execution.description['services']:
-        if get_conf().backend_image_management:
-            try:
-                preload_image(service_descr['image'])
-            except ZoeException as e:
-                execution.set_error_message('{}'.format(e))
-                execution.set_error()
-                return False
     return True
 
 
-def _do_execution_submit(state: SQLManager, scheduler: ZoeBaseScheduler, execution: Execution):
-    execution.set_image_dl()
+def execution_submit(state: SQLManager, scheduler: ZoeBaseScheduler, execution: Execution):
+    """Submit a new execution to the scheduler."""
     if _digest_application_description(state, execution):
         execution.set_scheduled()
         scheduler.incoming(execution)
 
 
-def execution_submit(state: SQLManager, scheduler: ZoeBaseScheduler, execution: Execution):
-    """Submit a new execution to the scheduler."""
-    threading.Thread(target=_do_execution_submit, args=(state, scheduler, execution), name='submission_{}'.format(execution.id), daemon=True).start()
-
-
 def execution_terminate(scheduler: ZoeBaseScheduler, execution: Execution):
     """Remove an execution form the scheduler."""
-    scheduler.terminate(execution)
+    if execution.is_running or execution.status == execution.SCHEDULED_STATUS:
+        execution.set_cleaning_up()
+        scheduler.terminate(execution)
+    elif execution.status == execution.SUBMIT_STATUS or execution.status == execution.STARTING_STATUS:
+        return  # It is unsafe to terminate executions in these statuses
+    elif execution.status == execution.ERROR_STATUS or execution.status == execution.CLEANING_UP_STATUS:
+        terminate_execution(execution)
+    elif execution.status == execution.TERMINATED_STATUS:
+        return
 
 
 def restart_resubmit_scheduler(state: SQLManager, scheduler: ZoeBaseScheduler):
     """Restart work after a restart of the process."""
-    submitted_execs = state.execution_list(status=Execution.SUBMIT_STATUS)
+    submitted_execs = state.executions.select(status=Execution.SUBMIT_STATUS)
     for e in submitted_execs:
         execution_submit(state, scheduler, e)
 
-    sched_execs = state.execution_list(status=Execution.SCHEDULED_STATUS)
+    sched_execs = state.executions.select(status=Execution.SCHEDULED_STATUS)
     for e in sched_execs:
         scheduler.incoming(e)
 
-    clean_up_execs = state.execution_list(status=Execution.CLEANING_UP_STATUS)
+    clean_up_execs = state.executions.select(status=Execution.CLEANING_UP_STATUS)
     for e in clean_up_execs:
         scheduler.terminate(e)
 
-    starting_execs = state.execution_list(status=Execution.STARTING_STATUS)
+    starting_execs = state.executions.select(status=Execution.STARTING_STATUS)
     for e in starting_execs:
         scheduler.terminate(e)
         scheduler.incoming(e)

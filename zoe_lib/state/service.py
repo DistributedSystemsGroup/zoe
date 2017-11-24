@@ -19,6 +19,8 @@ import logging
 
 from zoe_lib.config import get_conf
 
+from zoe_lib.state.base import BaseTable, BaseRecord
+
 log = logging.getLogger(__name__)
 
 
@@ -86,7 +88,7 @@ class VolumeDescriptionHostPath(VolumeDescription):
         self.readonly = readonly
 
 
-class Service:
+class Service(BaseRecord):
     """A Zoe Service."""
 
     CREATED_STATUS = 'created'
@@ -105,8 +107,7 @@ class Service:
     BACKEND_OOM_STATUS = 'oom-killed'
 
     def __init__(self, d, sql_manager):
-        self.sql_manager = sql_manager
-        self.id = d['id']
+        super().__init__(d, sql_manager)
 
         self.name = d['name']
         self.status = d['status']
@@ -125,40 +126,19 @@ class Service:
         self.essential = d['essential']
 
         # Fields parsed from the JSON description
-        try:
-            self.image_name = self.description['image']
-        except KeyError:
-            self.image_name = self.description['docker_image']  # zapp description v2
-
+        self.image_name = self.description['image']
         self.is_monitor = self.description['monitor']
         self.startup_order = self.description['startup_order']
+        self.environment = self.description['environment']
+        self.command = self.description['command']
+        self.resource_reservation = ResourceReservation(self.description['resources'])
+        self.volumes = [VolumeDescriptionHostPath(v['name'], v['path'], v['read_only']) for v in self.description['volumes']]
 
-        try:
-            self.environment = self.description['environment']
-        except KeyError:
-            self.environment = []
-
-        try:
-            self.command = self.description['command']
-        except KeyError:
-            self.command = None
-
+        # Optional zapp fields
         try:
             self.work_dir = self.description['work_dir']
         except KeyError:
             self.work_dir = None
-
-        try:
-            self.resource_reservation = ResourceReservation(self.description['resources'])
-        except KeyError:
-            self.resource_reservation = ResourceReservation({'memory': self.description['required_resources']['memory'], 'cores': 0})  # ZApp description v2
-
-        try:
-            self.volumes = [VolumeDescriptionHostPath(v['name'], v['path'], v['read_only']) for v in self.description['volumes']]
-        except KeyError:
-            self.volumes = []
-        except TypeError:
-            self.volumes = [VolumeDescriptionHostPath(v[0], v[1], v[2]) for v in self.description['volumes']]
 
         try:
             self.labels = self.description['labels']
@@ -188,27 +168,27 @@ class Service:
 
     def set_terminating(self):
         """The service is being terminated."""
-        self.sql_manager.service_update(self.id, status=self.TERMINATING_STATUS)
+        self.sql_manager.services.update(self.id, status=self.TERMINATING_STATUS)
         self.status = self.TERMINATING_STATUS
 
     def set_inactive(self):
         """The service must not run."""
-        self.sql_manager.service_update(self.id, status=self.INACTIVE_STATUS)
+        self.sql_manager.services.update(self.id, status=self.INACTIVE_STATUS)
         self.status = self.INACTIVE_STATUS
 
     def set_starting(self):
         """The service is being started by the back-end."""
-        self.sql_manager.service_update(self.id, status=self.STARTING_STATUS)
+        self.sql_manager.services.update(self.id, status=self.STARTING_STATUS)
         self.status = self.STARTING_STATUS
 
     def set_runnable(self):
         """The service is elastic and can be started."""
-        self.sql_manager.service_update(self.id, status=self.RUNNABLE_STATUS)
+        self.sql_manager.services.update(self.id, status=self.RUNNABLE_STATUS)
         self.status = self.RUNNABLE_STATUS
 
     def set_active(self, backend_id, ip_address, ports):
         """The service is running and has a valid backend_id."""
-        self.sql_manager.service_update(self.id, status=self.ACTIVE_STATUS, backend_id=backend_id, error_message=None, ip_address=ip_address, backend_status=self.BACKEND_START_STATUS)
+        self.sql_manager.services.update(self.id, status=self.ACTIVE_STATUS, backend_id=backend_id, error_message=None, ip_address=ip_address, backend_status=self.BACKEND_START_STATUS)
         self.error_message = None
         self.ip_address = ip_address
         self.backend_id = backend_id
@@ -222,7 +202,7 @@ class Service:
 
     def set_error(self, error_message):
         """The service could not be created/started."""
-        self.sql_manager.service_update(self.id, status=self.ERROR_STATUS, error_message=error_message)
+        self.sql_manager.services.update(self.id, status=self.ERROR_STATUS, error_message=error_message)
         self.status = self.ERROR_STATUS
         self.error_message = error_message
 
@@ -234,18 +214,18 @@ class Service:
             for port in self.ports:
                 port.reset()
             self.ip_address = None
-            self.sql_manager.service_update(self.id, backend_status=new_status, ip_address=None)
+            self.sql_manager.services.update(self.id, backend_status=new_status, ip_address=None)
             if new_status == self.BACKEND_DESTROY_STATUS:
                 self.backend_id = None
-                self.sql_manager.service_update(self.id, backend_status=new_status, backend_id=None, ip_address=None)
+                self.sql_manager.services.update(self.id, backend_status=new_status, backend_id=None, ip_address=None)
             else:
-                self.sql_manager.service_update(self.id, backend_status=new_status, ip_address=None)
+                self.sql_manager.services.update(self.id, backend_status=new_status, ip_address=None)
         else:
-            self.sql_manager.service_update(self.id, backend_status=new_status)
+            self.sql_manager.services.update(self.id, backend_status=new_status)
 
     def assign_backend_host(self, backend_host):
         """Assign this service to a host in particular."""
-        self.sql_manager.service_update(self.id, backend_host=backend_host)
+        self.sql_manager.services.update(self.id, backend_host=backend_host)
         log.debug('service {} assigned to host {}'.format(self.id, backend_host))
         self.backend_host = backend_host
 
@@ -257,13 +237,13 @@ class Service:
     @property
     def user_id(self):
         """Getter for the user_id, that is actually taken from the parent execution."""
-        execution = self.sql_manager.execution_list(only_one=True, id=self.execution_id)
+        execution = self.sql_manager.executions.select(only_one=True, id=self.execution_id)
         return execution.user_id
 
     @property
     def ports(self):
         """Getter for the ports exposed by this service."""
-        return self.sql_manager.port_list(service_id=self.id)
+        return self.sql_manager.ports.select(service_id=self.id)
 
     @property
     def proxy_address(self):
@@ -285,4 +265,75 @@ class Service:
     @property
     def execution(self):
         """Return the parent execution."""
-        return self.sql_manager.execution_list(only_one=True, id=self.execution_id)
+        return self.sql_manager.executions.select(only_one=True, id=self.execution_id)
+
+
+class ServiceTable(BaseTable):
+    """Abstraction for the service table in the database."""
+    def __init__(self, sql_manager):
+        super().__init__(sql_manager, "service")
+
+    def create(self):
+        """Create the service table."""
+        self.cursor.execute('''CREATE TABLE service (
+            id SERIAL PRIMARY KEY,
+            status TEXT NOT NULL,
+            error_message TEXT NULL DEFAULT NULL,
+            description JSON NOT NULL,
+            execution_id INT REFERENCES execution ON DELETE CASCADE,
+            service_group TEXT NOT NULL,
+            name TEXT NOT NULL,
+            backend_id TEXT NULL DEFAULT NULL,
+            backend_status TEXT NOT NULL DEFAULT 'undefined',
+            backend_host TEXT NULL DEFAULT NULL,
+            ip_address CIDR NULL DEFAULT NULL,
+            essential BOOLEAN NOT NULL DEFAULT FALSE
+            )''')
+
+    def insert(self, execution_id, name, service_group, description, is_essential):
+        """Adds a new service to the state."""
+        status = Service.CREATED_STATUS
+        query = self.cursor.mogrify('INSERT INTO service (id, status, execution_id, name, service_group, description, essential) VALUES (DEFAULT,%s,%s,%s,%s,%s,%s) RETURNING id', (status, execution_id, name, service_group, description, is_essential))
+        self.cursor.execute(query)
+        self.sql_manager.commit()
+        return self.cursor.fetchone()[0]
+
+    def select(self, only_one=False, limit=-1, **kwargs):
+        """
+        Return a list of services.
+
+        :param only_one: only one result is expected
+        :type only_one: bool
+        :param limit: limit the result to this number of entries
+        :type limit: int
+        :param kwargs: filter services based on their fields/columns
+        :return: one or more services
+        """
+        q_base = 'SELECT * FROM service'
+        if len(kwargs) > 0:
+            q = q_base + " WHERE "
+            filter_list = []
+            args_list = []
+            for key, value in kwargs.items():
+                if key.startswith('not_'):
+                    filter_list.append('{} != %s'.format(key[4:]))
+                else:
+                    filter_list.append('{} = %s'.format(key))
+                args_list.append(value)
+            q += ' AND '.join(filter_list)
+            if limit > 0:
+                q += ' ORDER BY id DESC LIMIT {}'.format(limit)
+            query = self.cursor.mogrify(q, args_list)
+        else:
+            if limit > 0:
+                q_base += ' ORDER BY id DESC LIMIT {}'.format(limit)
+            query = self.cursor.mogrify(q_base)
+
+        self.cursor.execute(query)
+        if only_one:
+            row = self.cursor.fetchone()
+            if row is None:
+                return None
+            return Service(row, self.sql_manager)
+        else:
+            return [Service(x, self.sql_manager) for x in self.cursor]

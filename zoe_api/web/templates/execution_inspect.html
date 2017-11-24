@@ -36,13 +36,15 @@
     <li>Time finished: <script>format_timestamp("{{ e.time_end }}")</script></li>
     {%  endif %}
     <li>Status: <span style="font-weight: bold;">{{ e.status }}</span></li>
+    {% if e.is_running %}
     <li>Actions:
-        {% if e.is_active %}
-            <a href="/executions/terminate/{{ e.id }}">Terminate</a>
-        {% else %}
-            <a href="/executions/restart/{{ e.id }}">Restart</a>
-        {% endif %}
+        <a href="/executions/terminate/{{ e.id }}">Terminate</a>
     </li>
+    {% elif e.status == "terminated" %}
+    <li>Actions:
+        <a href="/executions/restart/{{ e.id }}">Restart</a>
+    </li>
+    {% endif %}
 </ul>
 {% if e.status == 'error' %}
 <p>Error message: <code>{{ e.error_message }}</code></p>
@@ -57,7 +59,13 @@
 {% endfor %}
 </ul>
 {% else %}
-<p>This execution does not have any active endpoint</p>
+    {% if e.status == "running" %}
+        <p>This execution does not have any active endpoint</p>
+    {% elif e.status == "submitted" or e.status == "starting" or e.status == "scheduled" %}
+        <p>Please wait, the execution is starting up. This page will refresh automatically.</p>
+    {% else %}
+        <p>No endpoints are available</p>
+    {% endif %}
 {% endif %}
 </div>
 
@@ -85,7 +93,11 @@
             <td>{{ s['status'] }}</td>
             <td>{{ s['backend_status'] }}</td>
             <td>{{ s['backend_host'] }}</td>
-            <td><a href="{{ reverse_url("service_logs", s['id']) }}">available</a></td>
+            {% if s['status'] != 'created' %}
+            <td><a href="{{ reverse_url("service_logs", s['id']) }}">open</a></td>
+            {% else %}
+            <td></td>
+            {% endif %}
             <td>{{ s['error_message'] }}</td>
         </tr>
     {% endfor %}
@@ -95,10 +107,12 @@
 </div>
 
 </div>
+{% if e.status != 'terminated' %}
 <script>
     function refresh_page() {
         document.location.reload();
     }
     setInterval(refresh_page, 15000);
 </script>
+{% endif %}
 {% endblock %}

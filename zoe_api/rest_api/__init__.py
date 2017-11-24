@@ -25,7 +25,6 @@ from zoe_api.rest_api.userinfo import UserInfoAPI
 from zoe_api.rest_api.service import ServiceAPI, ServiceLogsAPI
 from zoe_api.rest_api.discovery import DiscoveryAPI
 from zoe_api.rest_api.statistics import SchedulerStatsAPI
-from zoe_api.rest_api.oauth import OAuthGetAPI, OAuthRevokeAPI
 from zoe_api.rest_api.login import LoginAPI
 from zoe_api.rest_api.validation import ZAppValidateAPI
 
@@ -56,10 +55,7 @@ def api_init(api_endpoint) -> List[tornado.web.URLSpec]:
 
         tornado.web.url(API_PATH + r'/discovery/by_group/([0-9]+)/([a-z0-9A-Z\-]+)', DiscoveryAPI, route_args),
 
-        tornado.web.url(API_PATH + r'/statistics/scheduler', SchedulerStatsAPI, route_args),
-
-        tornado.web.url(API_PATH + r'/oauth/token', OAuthGetAPI, route_args),
-        tornado.web.url(API_PATH + r'/oauth/revoke/([a-z0-9A-Z\-]+)', OAuthRevokeAPI, route_args)
+        tornado.web.url(API_PATH + r'/statistics/scheduler', SchedulerStatsAPI, route_args)
     ]
 
     return api_routes

@@ -128,10 +128,10 @@
         data = {
             datasets: [{
                 label: 'Memory',
-                data: [{{ node['memory_reserved'] }}, {{ node['memory_in_use'] }}],
-                backgroundColor: ['rgba(0, 169, 225, 1.0)', 'rgba(145, 192, 46, 1.0)']
+                data: [{{ node['memory_reserved'] }}, {{ node['memory_allocated'] }}, {{ node['memory_in_use'] }}],
+                backgroundColor: ['rgba(0, 169, 225, 1.0)', 'rgba(53, 51, 144, 1.0)', 'rgba(145, 192, 46, 1.0)']
             }],
-            'labels': ['Reserved', 'In use']
+            'labels': ['Reserved', 'Allocated', 'In use']
         };
         ctx = document.getElementById("{{ node.name }}-mem").getContext('2d');
         new Chart(ctx,{
@@ -175,11 +175,11 @@
         <script>
         data = {
             datasets: [{
-                label: 'Reserved cores',
-                data: [{{ node['cores_reserved'] }}, {{ node['cores_in_use'] }}],
-                backgroundColor: ['rgba(0, 169, 225, 1.0)', 'rgba(145, 192, 46, 1.0)']
+                label: 'Cores',
+                data: [{{ node['cores_reserved'] }}, {{ node['cores_allocated'] }}, {{ node['cores_in_use'] }}],
+                backgroundColor: ['rgba(0, 169, 225, 1.0)', 'rgba(53, 51, 144, 1.0)', 'rgba(145, 192, 46, 1.0)']
             }],
-            'labels': ['Reserved', 'In use']
+            'labels': ['Reserved', 'Allocated', 'In use']
         };
         ctx = document.getElementById("{{ node.name }}-cpu").getContext('2d');
         new Chart(ctx,{
@@ -203,25 +203,6 @@
                 }
             }
         });
-
-        data = {
-            datasets: [{
-                label: 'Used memory',
-                data: [{{ node['cores_in_use'] }}, {{ node['cores_total'] - node['cores_in_use'] }}],
-                backgroundColor: ['rgba(0, 169, 225, 1.0)', 'rgba(145, 192, 46, 1.0)']
-            }],
-            'labels': ['In-use', 'Free']
-        };
-        ctx = document.getElementById("{{ node.name }}-cpu-use").getContext('2d');
-        myPieChart = new Chart(ctx,{
-            type: 'pie',
-            data: data,
-            options: {
-                animation: {
-                    animateRotate: false
-                }
-            }
-        });
         </script>
         </div>
     {% endfor %}
@@ -232,15 +213,15 @@
     <thead>
     <tr>
         <th class="cell-host">Host</th>
-        <th colspan="{{ max_service_count }}">Services and reserved resources</th>
+        <th colspan="{{ max_service_count }}">Services and allocated resources</th>
     </tr>
     </thead>
     <tbody>
     {% for node in stats.platform_stats.nodes %}
     <tr>
         <td class="cell-host">{{ node.name }}</td>
-        {% for service in node.services %}
-            <td><a href="{{ reverse_url('execution_inspect', service['execution_id']) }}">{{ service['name'] }}</a> (M: <script>format_bytes({{ service['description']['resources']['memory']['max'] }});</script> C: {{ service['description']['resources']['cores']['max'] }})</td>
+        {% for service in services_per_node[node.name] %}
+            <td><a href="{{ reverse_url('execution_inspect', service['execution_id']) }}">{{ service['name'] }}</a> (M: <script>format_bytes({{ node.service_stats[service['id']|string]['mem_limit'] }});</script> C: {{ node.service_stats[service['id']|string]['core_limit'] }})</td>
         {% endfor %}
     </tr>
     {% endfor %}

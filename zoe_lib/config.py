@@ -62,7 +62,7 @@ def load_configuration(test_conf=None):
         # Master options
         argparser.add_argument('--api-listen-uri', help='ZMQ API listen address', default='tcp://*:4850')
 
-        argparser.add_argument('--kairosdb-enable', action="store_true", help='Enable metric input from KairosDB')
+        argparser.add_argument('--kairosdb-enable', action="store_true", help='Enable usage metric input from KairosDB')
         argparser.add_argument('--kairosdb-url', help='URL of the KairosDB service (ex. http://localhost:8086)', default='http://localhost:8090')
 
         argparser.add_argument('--workspace-base-path', help='Base directory where user workspaces will be created. Must be visible at this path on all hosts.', default='/mnt/zoe-workspaces')
@@ -99,7 +99,6 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--scheduler-policy', help='Scheduler policy to use for scheduling ZApps', choices=['FIFO', 'SIZE'], default='FIFO')
 
         argparser.add_argument('--backend', choices=['Swarm', 'Kubernetes', 'DockerEngine'], default='Swarm', help='Which backend to enable')
-        argparser.add_argument('--backend-image-management', action='store_true', help='Enable image management (not implemented for all backends, check the documentation')
 
         # Docker Swarm backend options
         argparser.add_argument('--backend-swarm-url', help='Swarm/Docker API endpoint (ex.: zk://zk1:2181,zk2:2181 or http://swarm:2380)', default='http://localhost:2375')
