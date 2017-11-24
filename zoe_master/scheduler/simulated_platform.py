@@ -135,7 +135,7 @@ class SimulatedPlatform:
         """Try to find an allocation for elastic services"""
         at_least_one_allocated = False
         for service in execution.elastic_services:
-            if service.status == service.ACTIVE_STATUS:
+            if service.status == service.ACTIVE_STATUS and service.backend_status != service.BACKEND_DIE_STATUS:
                 continue
             candidate_nodes = []
             for node_id_, node in self.nodes.items():

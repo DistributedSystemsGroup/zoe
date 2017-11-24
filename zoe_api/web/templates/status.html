@@ -176,7 +176,7 @@
         data = {
             datasets: [{
                 label: 'Cores',
-                data: [{{ node['cores_reserved'] }}, {{ node['cores_allocated'] }}, {{ node['cores_in_use'] }}],
+                data: [{{ '%0.2f'|format(node['cores_reserved']|float) }}, {{ '%0.2f'|format(node['cores_allocated']|float) }}, {{ '%0.2f'|format(node['cores_in_use']|float) }}],
                 backgroundColor: ['rgba(0, 169, 225, 1.0)', 'rgba(53, 51, 144, 1.0)', 'rgba(145, 192, 46, 1.0)']
             }],
             'labels': ['Reserved', 'Allocated', 'In use']
@@ -221,7 +221,9 @@
     <tr>
         <td class="cell-host">{{ node.name }}</td>
         {% for service in services_per_node[node.name] %}
-            <td><a href="{{ reverse_url('execution_inspect', service['execution_id']) }}">{{ service['name'] }}</a> (M: <script>format_bytes({{ node.service_stats[service['id']|string]['mem_limit'] }});</script> C: {{ node.service_stats[service['id']|string]['core_limit'] }})</td>
+            {% if service.backend_status == "started" %}
+            <td><a href="{{ reverse_url('execution_inspect', service['execution_id']) }}">{{ service['name'] }}</a> (M: <script>format_bytes({{ node.service_stats[service['id']|string]['mem_limit'] }});</script> C: {{ '%0.2f'|format(node.service_stats[service['id']|string]['core_limit']|float) }})</td>
+            {% endif %}
         {% endfor %}
     </tr>
     {% endfor %}
