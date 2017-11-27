@@ -136,7 +136,7 @@ class Execution(BaseRecord):
         Returns False if the execution ended completely
         :return:
         """
-        return self._status == self.SUBMIT_STATUS and self._status == self.SCHEDULED_STATUS or self._status == self.RUNNING_STATUS or self._status == self.STARTING_STATUS or self._status == self.CLEANING_UP_STATUS
+        return self._status == self.SUBMIT_STATUS or self._status == self.SCHEDULED_STATUS or self._status == self.RUNNING_STATUS or self._status == self.STARTING_STATUS or self._status == self.CLEANING_UP_STATUS
 
     @property
     def is_running(self):
