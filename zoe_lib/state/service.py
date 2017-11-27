@@ -226,7 +226,6 @@ class Service(BaseRecord):
     def assign_backend_host(self, backend_host):
         """Assign this service to a host in particular."""
         self.sql_manager.services.update(self.id, backend_host=backend_host)
-        log.debug('service {} assigned to host {}'.format(self.id, backend_host))
         self.backend_host = backend_host
 
     @property

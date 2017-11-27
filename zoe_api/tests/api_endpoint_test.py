@@ -18,6 +18,7 @@
 import pytest
 
 from zoe_api.api_endpoint import APIEndpoint
+from zoe_api.exceptions import ZoeException
 from zoe_api.tests.mock_master_api import MockAPIManager
 from zoe_lib.state.tests.mock_sql_manager import MockSQLManager
 
@@ -40,5 +41,9 @@ class TestAPIEndpoint:
     def test_statistics_scheduler(self, master_api, sql_manager):
         """Test the scheduler statistics API."""
         api = APIEndpoint(master_api, sql_manager)
-        ret = api.statistics_scheduler('nouser', 'norole')
-        assert ret == 'No error message' or ret is None
+        if master_api.fails:
+            with pytest.raises(ZoeException):
+                api.statistics_scheduler('nouser', 'norole')
+        else:
+            ret = api.statistics_scheduler('nouser', 'norole')
+            assert isinstance(ret, dict)

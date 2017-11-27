@@ -16,11 +16,11 @@
 """Mock master API for unit testing."""
 
 import logging
-from typing import Tuple
+from typing import Tuple, Union
 
 log = logging.getLogger(__name__)
 
-APIReturnType = Tuple[bool, str]
+APIReturnType = Tuple[bool, Union[str, dict]]
 
 
 class MockAPIManager:
@@ -55,4 +55,11 @@ class MockAPIManager:
 
     def scheduler_statistics(self) -> APIReturnType:
         """Query scheduler statistics."""
-        return self._request_reply()
+        if self.fails:
+            return False, "Fake error message"
+        else:
+            return True, {
+                'platform_stats': {
+                    'nodes': []
+                }
+            }
