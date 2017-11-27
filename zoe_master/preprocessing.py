@@ -22,13 +22,24 @@ import shutil
 from zoe_lib.state import Execution, SQLManager
 from zoe_lib.config import get_conf
 from zoe_master.scheduler import ZoeBaseScheduler
-from zoe_master.backends.interface import terminate_execution
+from zoe_master.backends.interface import terminate_execution, node_list, list_available_images
 
 log = logging.getLogger(__name__)
 
 
 def _digest_application_description(state: SQLManager, execution: Execution):
     """Read an application description and expand it into services that can be deployed."""
+    nodes = node_list()
+    images = []
+    for node in nodes:
+        images += list_available_images(node)
+
+    for service_descr in execution.description['services']:
+        if service_descr['image'] not in images:
+            execution.set_error()
+            execution.set_error_message('image {} is not available'.format(service_descr['image']))
+            return False
+
     for service_descr in execution.description['services']:
         essential_count = service_descr['essential_count']
         total_count = service_descr['total_count']
