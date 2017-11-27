@@ -165,6 +165,8 @@ class APIEndpoint:
                     node['service_stats'][int(str_service_id)] = node['service_stats'][str_service_id]
                     del node['service_stats'][str_service_id]
             return message
+        else:
+            raise zoe_api.exceptions.ZoeException(message=message)
 
     def cleanup_dead_executions(self):
         """Terminates all executions with dead "monitor" services."""
