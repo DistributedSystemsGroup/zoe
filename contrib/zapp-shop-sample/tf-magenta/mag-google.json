@@ -1,25 +1,22 @@
 {
-    "name": "datasci-notebook", 
+    "name": "mag-google", 
     "services": [
         {
             "command": null, 
-            "environment": [
-                [
-                    "NB_UID", 
-                    "1000"
-                ], 
-                [
-                    "HOME", 
-                    "/mnt/workspace"
-                ]
-            ], 
+            "environment": [], 
             "essential_count": 1, 
-            "image": "jupyter/datascience-notebook:latest", 
+            "image": "tensorflow/magenta", 
             "monitor": true, 
-            "name": "jupyter", 
+            "name": "tf-jupyter", 
             "ports": [
                 {
-                    "name": "Jupyter Notebook interface", 
+                    "name": "Tensorboard web interface", 
+                    "port_number": 6006, 
+                    "protocol": "tcp", 
+                    "url_template": "http://{ip_port}/"
+                }, 
+                {
+                    "name": "Notebook web interface", 
                     "port_number": 8888, 
                     "protocol": "tcp", 
                     "url_template": "http://{ip_port}/"
@@ -32,14 +29,13 @@
                     "min": 4
                 }, 
                 "memory": {
-                    "max": 4294967296, 
-                    "min": 4294967296
+                    "max": 34359738368, 
+                    "min": 34359738368
                 }
             }, 
             "startup_order": 0, 
             "total_count": 1, 
-            "volumes": [], 
-            "work_dir": "/mnt/workspace"
+            "volumes": []
         }
     ], 
     "size": 512, 

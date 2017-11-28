@@ -18,7 +18,7 @@
                 ]
             ],
             "essential_count": 1,
-            "image": "zapps/spark2-master:4764",
+            "image": "zapps/spark2-master-openblas:4784",
             "monitor": false,
             "name": "spark-master",
             "ports": [
@@ -73,7 +73,7 @@
                 ]
             ],
             "essential_count": 1,
-            "image": "zapps/spark2-worker:4764",
+            "image": "zapps/spark2-worker-openblas:4784",
             "monitor": false,
             "name": "spark-worker",
             "ports": [],
@@ -121,7 +121,7 @@
                 ]
             ],
             "essential_count": 1,
-            "image": "zapps/spark2-submit:4764",
+            "image": "zapps/spark2-submit-openblas:4784",
             "monitor": true,
             "name": "spark-submit",
             "ports": [],

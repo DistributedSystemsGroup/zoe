@@ -3,15 +3,15 @@
     "zapps": [
         {
             "category": "Machine learning",
-            "name": "Google TensorFlow notebook",
-            "description": "tf-google.json",
+            "name": "Google TensorFlow notebook with GPU",
+            "description": "tf-google-gpu.json",
             "readable_descr": "README-goog.md",
             "parameters": []
         },
         {
             "category": "Non-interactive",
-            "name": "Google TensorFlow batch",
-            "description": "tf-google.json",
+            "name": "Google TensorFlow batch with GPU",
+            "description": "tf-google-gpu.json",
             "readable_descr": "README-batch.md",
             "parameters": [
                 {

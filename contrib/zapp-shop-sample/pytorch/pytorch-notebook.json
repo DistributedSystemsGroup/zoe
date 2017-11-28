@@ -1,5 +1,5 @@
 {
-    "name": "datasci-notebook", 
+    "name": "pytorch-notebook", 
     "services": [
         {
             "command": null, 
@@ -14,7 +14,7 @@
                 ]
             ], 
             "essential_count": 1, 
-            "image": "jupyter/datascience-notebook:latest", 
+            "image": "zapps/pytorch:latest", 
             "monitor": true, 
             "name": "jupyter", 
             "ports": [

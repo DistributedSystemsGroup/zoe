@@ -3,7 +3,7 @@
     "zapps": [
         {
             "category": "Data science",
-            "name": "Distributed PySpark notebook",
+            "name": "Distributed PySpark notebook with OpenBLAS",
             "description": "spark-jupyter.json",
             "readable_descr": "README-jupyter.md",
             "parameters": [
@@ -63,7 +63,7 @@
         },
         {
             "category": "Non-interactive",
-            "name": "Spark submit",
+            "name": "Spark submit with OpenBLAS",
             "description": "spark-submit.json",
             "readable_descr": "README-submit.md",
             "parameters": [

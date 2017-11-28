@@ -1,5 +1,5 @@
 {
-    "name": "datasci-notebook", 
+    "name": "r-notebook", 
     "services": [
         {
             "command": null, 
@@ -14,7 +14,7 @@
                 ]
             ], 
             "essential_count": 1, 
-            "image": "jupyter/datascience-notebook:latest", 
+            "image": "jupyter/r-notebook:latest", 
             "monitor": true, 
             "name": "jupyter", 
             "ports": [

@@ -1,25 +1,21 @@
 {
-    "name": "r-notebook",
+    "name": "microsoft-mls",
     "services": [
         {
             "command": null,
             "environment": [
                 [
-                    "NB_UID",
-                    "1000"
-                ],
-                [
-                    "HOME",
-                    "/mnt/workspace"
+                    "ACCEPT_EULA",
+                    "yes"
                 ]
             ],
             "essential_count": 1,
-            "image": "jupyter/r-notebook:latest",
+            "image": "microsoft/mmlspark:0.10",
             "monitor": true,
-            "name": "jupyter",
+            "name": "mls-notebook",
             "ports": [
                 {
-                    "name": "Jupyter Notebook interface",
+                    "name": "Notebook web interface",
                     "port_number": 8888,
                     "protocol": "tcp",
                     "url_template": "http://{ip_port}/"
@@ -32,14 +28,13 @@
                     "min": 4
                 },
                 "memory": {
-                    "max": 4294967296,
-                    "min": 4294967296
+                    "max": 6442450944,
+                    "min": 6442450944
                 }
             },
             "startup_order": 0,
             "total_count": 1,
-            "volumes": [],
-            "work_dir": "/mnt/workspace"
+            "volumes": []
         }
     ],
     "size": 512,
