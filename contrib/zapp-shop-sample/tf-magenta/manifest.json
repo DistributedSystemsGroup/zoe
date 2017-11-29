@@ -1,0 +1,12 @@
+{
+    "version": 1,
+    "zapps": [
+        {
+            "category": "Tutorials and examples",
+            "name": "Magenta model",
+            "description": "mag-google.json",
+            "readable_descr": "README-magenta.md",
+            "parameters": []
+        }
+    ]
+}

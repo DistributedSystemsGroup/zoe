@@ -73,8 +73,9 @@ class DockerStateSynchronizer(threading.Thread):
                 self.host_stats[host_config.name].container_count = info['Containers']
                 self.host_stats[host_config.name].cores_total = info['NCPU']
                 self.host_stats[host_config.name].memory_total = info['MemTotal']
+                self.host_stats[host_config.name].labels = host_config.labels
                 if info['Labels'] is not None:
-                    self.host_stats[host_config.name].labels = host_config.labels + set(info['Labels'])
+                    self.host_stats[host_config.name].labels += set(info['Labels'])
 
                 self.host_stats[host_config.name].memory_allocated = sum([cont['memory_soft_limit'] for cont in container_list if cont['memory_soft_limit'] != info['MemTotal']])
                 self.host_stats[host_config.name].cores_allocated = sum([cont['cpu_quota'] / cont['cpu_period'] for cont in container_list if cont['cpu_period'] != 0])

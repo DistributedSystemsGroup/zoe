@@ -7,7 +7,6 @@ humanfriendly
 psycopg2>=2.6.1
 pyzmq>=15.2.0
 typing
-python-oauth2
 python-consul
 pykube>=0.14.0
 sphinx

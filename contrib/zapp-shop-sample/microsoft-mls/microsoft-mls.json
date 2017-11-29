@@ -1,0 +1,43 @@
+{
+    "name": "microsoft-mls",
+    "services": [
+        {
+            "command": null,
+            "environment": [
+                [
+                    "ACCEPT_EULA",
+                    "yes"
+                ]
+            ],
+            "essential_count": 1,
+            "image": "microsoft/mmlspark:0.10",
+            "monitor": true,
+            "name": "mls-notebook",
+            "ports": [
+                {
+                    "name": "Notebook web interface",
+                    "port_number": 8888,
+                    "protocol": "tcp",
+                    "url_template": "http://{ip_port}/"
+                }
+            ],
+            "replicas": 1,
+            "resources": {
+                "cores": {
+                    "max": 4,
+                    "min": 4
+                },
+                "memory": {
+                    "max": 6442450944,
+                    "min": 6442450944
+                }
+            },
+            "startup_order": 0,
+            "total_count": 1,
+            "volumes": []
+        }
+    ],
+    "size": 512,
+    "version": 3,
+    "will_end": false
+}

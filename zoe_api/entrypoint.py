@@ -35,13 +35,14 @@ log = logging.getLogger("zoe_api")
 LOG_FORMAT = '%(asctime)-15s %(levelname)s %(threadName)s->%(name)s: %(message)s'
 
 
-def zoe_web_main() -> int:
+def zoe_web_main(test_conf=None) -> int:
     """
     This is the entry point for the Zoe Web script.
     :return: int
     """
-    config.load_configuration()
+    config.load_configuration(test_conf)
     args = config.get_conf()
+
     log_args = {
         'level': logging.DEBUG if args.debug else logging.INFO,
         'format': LOG_FORMAT
