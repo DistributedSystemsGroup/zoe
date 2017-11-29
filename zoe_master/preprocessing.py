@@ -34,6 +34,7 @@ def _digest_application_description(state: SQLManager, execution: Execution):
     for node in nodes:
         images += list_available_images(node)
 
+    images = [name for image in images for name in image['names']]
     for service_descr in execution.description['services']:
         if service_descr['image'] not in images:
             execution.set_error()
