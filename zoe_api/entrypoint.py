@@ -77,9 +77,6 @@ def zoe_web_main(test_conf=None) -> int:
     http_server.bind(args.listen_port, args.listen_address)
     http_server.start(num_processes=1)
 
-    retry_cb = PeriodicCallback(api_endpoint.cleanup_dead_executions, 60000)
-    retry_cb.start()
-
     try:
         IOLoop.current().start()
     except KeyboardInterrupt:

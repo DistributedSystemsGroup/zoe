@@ -168,19 +168,6 @@ class APIEndpoint:
         else:
             raise zoe_api.exceptions.ZoeException(message=message)
 
-    def cleanup_dead_executions(self):
-        """Terminates all executions with dead "monitor" services."""
-        log.debug('Starting dead execution cleanup task')
-        all_execs = self.sql.executions.select(status='running')
-        for execution in all_execs:
-            for service in execution.services:
-                if service.description['monitor'] and service.backend_status == service.BACKEND_DIE_STATUS:
-                    log.info("Service {} ({}) of execution {} died, terminating execution".format(service.id, service.name, execution.id))
-                    self.master.execution_terminate(execution.id)
-                    break
-
-        log.debug('Cleanup task finished')
-
     def execution_endpoints(self, uid: str, role: str, execution: zoe_lib.state.Execution):
         """Return a list of the services and public endpoints available for a certain execution."""
         services_info = []
