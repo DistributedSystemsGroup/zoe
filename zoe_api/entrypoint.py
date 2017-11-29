@@ -19,7 +19,7 @@ import logging
 import os
 
 from tornado.httpserver import HTTPServer
-from tornado.ioloop import IOLoop, PeriodicCallback
+from tornado.ioloop import IOLoop
 from tornado.web import Application
 
 import zoe_lib.config as config
