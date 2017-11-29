@@ -66,11 +66,10 @@ api-test:
     - postgres:9.3
   image: zoerepo/${ZOE_TEST_IMAGE}
   script:
-    - sh ./run_integration_tests.sh
-  artifacts:
-    paths:
-      - integration_tests
-    when: always
+    - echo 'admin,admin,admin' > zoepass.csv
+    - pwd
+    - ls
+    - bash ./run_integration_tests.sh
 
 mirror-github:
   stage: deploy

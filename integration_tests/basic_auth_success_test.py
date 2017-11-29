@@ -74,6 +74,7 @@ class TestZoeRest:
         print('Test terminate execution api endpoint')
         req = requests.delete(ZOE_API_URI + 'execution/' + exec_id, auth=ZOE_AUTH, timeout=TIMEOUT)
         assert req.status_code == 204
+        time.sleep(4)
 
     def test_zapp_validate(self, zoe_api_process):
         """Test ZApp validation endpoint"""
