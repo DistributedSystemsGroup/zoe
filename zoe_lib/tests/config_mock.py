@@ -46,7 +46,7 @@ def zoe_configuration():
     zoe_api_args.scheduler_class = 'ZoeElasticScheduler'
     zoe_api_args.scheduler_policy = 'FIFO'
     zoe_api_args.backend = 'DockerEngine'
-    zoe_api_args.backend_docker_config_file = 'tests/sample_docker.conf'
+    zoe_api_args.backend_docker_config_file = 'integration_tests/sample_docker.conf'
     zoe_api_args.zapp_shop_path = 'contrib/zapp-shop-sample'
     zoe_api_args.log_file = 'stderr'
     zoe_api_args.max_core_limit = 1
