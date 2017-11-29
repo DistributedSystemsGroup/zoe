@@ -65,6 +65,7 @@ api-test:
   services:
     - postgres:9.3
   image: zoerepo/${ZOE_TEST_IMAGE}
+  script:
     - run_integration_tests.sh
   artifacts:
     paths:
