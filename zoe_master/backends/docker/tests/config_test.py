@@ -27,5 +27,5 @@ class TestDockerEngineBackendConfig:
 
     def test_parsing_config_file(self):
         """Test Docker backend config parsing."""
-        hosts = config.DockerConfig(config_file='tests/sample_docker.conf').read_config()
+        hosts = config.DockerConfig(config_file='integration_tests/sample_docker.conf').read_config()
         assert len(hosts) == 1
