@@ -118,6 +118,7 @@ class Service(BaseRecord):
         self.backend_id = d['backend_id']
         self.backend_status = d['backend_status']
         self.backend_host = d['backend_host']
+        self.restart_count = d['restart_count']
 
         self.ip_address = d['ip_address']
         if self.ip_address is not None and ('/32' in self.ip_address or '/128' in self.ip_address):
@@ -160,7 +161,8 @@ class Service(BaseRecord):
             'backend_status': self.backend_status,
             'backend_host': self.backend_host,
             'essential': self.essential,
-            'proxy_address': self.proxy_address
+            'proxy_address': self.proxy_address,
+            'restart_count': self.restart_count
         }
 
     def __eq__(self, other):
@@ -266,6 +268,11 @@ class Service(BaseRecord):
         """Return the parent execution."""
         return self.sql_manager.executions.select(only_one=True, id=self.execution_id)
 
+    def restarted(self):
+        """The service has restarted, keep track in the database."""
+        self.restart_count += 1
+        self.sql_manager.services.update(self.id, restart_count=self.restart_count)
+
 
 class ServiceTable(BaseTable):
     """Abstraction for the service table in the database."""
@@ -286,7 +293,8 @@ class ServiceTable(BaseTable):
             backend_status TEXT NOT NULL DEFAULT 'undefined',
             backend_host TEXT NULL DEFAULT NULL,
             ip_address CIDR NULL DEFAULT NULL,
-            essential BOOLEAN NOT NULL DEFAULT FALSE
+            essential BOOLEAN NOT NULL DEFAULT FALSE,
+            restart_count INT DEFAULT 0
             )''')
 
     def insert(self, execution_id, name, service_group, description, is_essential):

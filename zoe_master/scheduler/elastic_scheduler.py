@@ -157,12 +157,12 @@ class ZoeElasticScheduler:
     def _pop_all_with_same_size(self):
         out_list = []
         while len(self.queue) > 0:
-            job = self.queue.pop(0)  # type: Execution
-            ret = job.termination_lock.acquire(blocking=False)
-            if ret and job.status != Execution.TERMINATED_STATUS:
-                out_list.append(job)
+            execution = self.queue.pop(0)  # type: Execution
+            ret = execution.termination_lock.acquire(blocking=False)
+            if ret and execution.status != Execution.TERMINATED_STATUS:
+                out_list.append(execution)
             else:
-                log.debug('While popping, throwing away execution {} that has the termination lock held'.format(job.id))
+                log.debug('While popping, throwing away execution {} that has the termination lock held'.format(execution.id))
 
         return out_list
 
@@ -185,6 +185,7 @@ class ZoeElasticScheduler:
             if len(self.queue) == 0:
                 log.debug("Scheduler loop has been triggered, but the queue is empty")
                 self.core_limit_recalc_trigger.set()
+                self._check_dead_services()
                 continue
             log.debug("Scheduler loop has been triggered")
 
@@ -335,3 +336,24 @@ class ZoeElasticScheduler:
                     update_service_resource_limits(service, cores=new_core_allocations[service.id] + cores_to_add)
 
             self.core_limit_recalc_trigger.clear()
+
+    def _check_dead_services(self):
+        # Check for executions that are no longer viable since an essential service died
+        for execution in self.queue_running:
+            for service in execution.services:
+                if service.essential and service.backend_status == service.BACKEND_DIE_STATUS:
+                    log.info("Essential service {} ({}) of execution {} died, terminating execution".format(service.id, service.name, execution.id))
+                    service.restarted()
+                    execution.set_cleaning_up()
+                    self.terminate(execution)
+                    break
+        # Check for executions that need to be rescheduled because one of the elastic components died
+        # Do it in two loops to prevent rescheduling executions that need to be terminated
+        for execution in self.queue_running:
+            for service in execution.services:
+                if not service.essential and service.backend_status == service.BACKEND_DIE_STATUS:
+                    log.info("Elastic service {} ({}) of execution {} died, rescheduling".format(service.id, service.name, execution.id))
+                    service.restarted()
+                    self.queue_running.remove(execution)
+                    self.queue.append(execution)
+                    break
