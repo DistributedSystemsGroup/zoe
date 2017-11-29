@@ -1,7 +1,7 @@
 stages:
   - static-test
-  - integration-test
   - build
+  - integration-test
   - deploy
   - cleanup
 
@@ -10,7 +10,7 @@ variables:
   POSTGRES_DB: zoe
   POSTGRES_USER: zoeuser
   POSTGRES_PASSWORD: zoepass
-  ZOE_TEST_IMAGE: zoe:$CI_PIPELINE_ID
+  ZOE_TEST_IMAGE: zoe-test:$CI_PIPELINE_ID
   ZOE_COMMON_OPTIONS: --debug --backend-swarm-url ${SWARM_URL} --deployment-name test${CI_BUILD_REF} --dbuser ${POSTGRES_USER} --dbhost postgres --dbport 5432 --dbname ${POSTGRES_DB} --dbpass ${POSTGRES_PASSWORD} --master-url tcp://localhost:4850 --auth-type text --listen-port 5100 --workspace-base-path /tmp
 
 cache:
@@ -25,7 +25,7 @@ pylint:
     - pip install -U pip setuptools
     - pip install -r requirements.txt
     - pip install -r requirements_tests.txt
-    - pylint *.py zoe_* tests/*.py
+    - pylint *.py zoe_*
 
 unittests:
   stage: static-test
@@ -36,7 +36,7 @@ unittests:
     - pip install -U pip setuptools
     - pip install -r requirements.txt
     - pip install -r requirements_tests.txt
-    - pytest --ignore tests --tb=short --cov-report=term --cov zoe_api --cov zoe_lib --cov zoe_master
+    - pytest --ignore integration_tests --tb=short --cov-report=term --cov zoe_api --cov zoe_lib --cov zoe_master
 
 docs-test:
   stage: static-test
@@ -48,35 +48,6 @@ docs-test:
     - doc8 docs/
     - sh ./build_docs.sh
 
-#api-test:
-#  stage: integration-test
-#  services:
-#    - postgres:9.3
-#  image: python:3.4
-#  before_script:
-#    - pip install -U pip setuptools
-#    - pip install -r requirements.txt
-#    - pip install -r requirements_tests.txt
-#    - echo "admin,admin,admin" > zoepass.csv
-#    - mkdir /tmp/test${CI_BUILD_REF}
-#    - python3 create_db_tables.py ${ZOE_COMMON_OPTIONS}
-#    - python3 zoe-api.py ${ZOE_COMMON_OPTIONS} --log-file zoe-api-${CI_BUILD_REF}.log &
-#    - sleep 1
-#    - python3 zoe-master.py ${ZOE_COMMON_OPTIONS} --log-file zoe-master-${CI_BUILD_REF}.log &
-#    - sleep 1
-#  script:
-#    - cd tests
-#    - coverage run -p basic_auth_success_test.py localhost:5100
-#    - coverage run -p cookie_auth_success_test.py localhost:5100
-#    - coverage combine
-#    - coverage report
-#  artifacts:
-#    paths:
-#      - zoe-api-${CI_BUILD_REF}.log
-#      - zoe-master-${CI_BUILD_REF}.log
-#      - tests
-#    when: always
-
 images:
   image: docker:latest
   stage: build
@@ -86,10 +57,19 @@ images:
     - mkdir -p $HOME/.docker
     - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
   script:
-    - docker build --pull -t ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE} .
-    - docker push ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE}
-  only:
-    - master
+    - docker build --pull -t zoerepo/${ZOE_TEST_IMAGE} -f Dockerfile.test .
+    - docker push zoerepo/${ZOE_TEST_IMAGE}
+
+api-test:
+  stage: integration-test
+  services:
+    - postgres:9.3
+  image: zoerepo/${ZOE_TEST_IMAGE}
+    - run_integration_tests.sh
+  artifacts:
+    paths:
+      - integration_tests
+    when: always
 
 mirror-github:
   stage: deploy

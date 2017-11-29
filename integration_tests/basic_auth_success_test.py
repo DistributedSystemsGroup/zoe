@@ -1,53 +1,13 @@
 """Test script for successful basic authentication."""
 
-import subprocess
 import time
 import json
-import sys
-import os
 
-import pytest
 import requests
 
 ZOE_API_URI = 'http://127.0.0.1:5100/api/0.7/'
 ZOE_AUTH = ('admin', 'admin')
 TIMEOUT = 5
-
-ARGS = [
-    '--debug',
-    '--deployment-name', 'integration_test',
-    '--dbuser', 'zoeuser',
-    '--dbhost', 'postgres',
-    '--dbport', '5432',
-    '--dbname', 'zoe',
-    '--dbpass', 'zoepass',
-    '--master-url', 'tcp://localhost:4850',
-    '--auth-type', 'text',
-    '--listen-port', '5100',
-    '--workspace-base-path', '/tmp',
-    '--workspace-deployment-path', 'integration_test',
-    '--auth-file', 'zoepass.csv',
-    '--backend', 'DockerEngine',
-    '--backend-docker-config-file', 'tests/sample_docker.conf',
-    '--zapp-shop-path', 'contrib/zapp-shop-sample'
-]
-
-
-@pytest.fixture(scope="session")
-def zoe_api_process(request):
-    """Fixture that starts the Zoe API process."""
-    proc = subprocess.Popen(["python", "zoe-api.py"] + ARGS, stderr=sys.stderr, stdout=sys.stdout)
-    request.addfinalizer(proc.terminate)
-    time.sleep(2)
-
-
-@pytest.fixture(scope="session")
-def zoe_master_process(request):
-    """Fixture that starts the Zoe Master process."""
-    os.mkdir('/tmp/integration_test')
-    proc = subprocess.Popen(["python", "zoe-master.py"] + ARGS, stderr=sys.stderr, stdout=sys.stdout)
-    request.addfinalizer(proc.terminate)
-    time.sleep(4)
 
 
 class TestZoeRest:
@@ -85,7 +45,7 @@ class TestZoeRest:
         """Test start execution api endpoint."""
         print('Test start execution api endpoint')
 
-        with open('tests/zapp.json', encoding='utf-8') as data_file:
+        with open('integration_tests/zapp.json', encoding='utf-8') as data_file:
             data = json.loads(data_file.read())
 
         req = requests.post(ZOE_API_URI + 'execution', auth=ZOE_AUTH, json={"application": data, "name": "requests"}, timeout=TIMEOUT)
@@ -118,7 +78,7 @@ class TestZoeRest:
     def test_zapp_validate(self, zoe_api_process):
         """Test ZApp validation endpoint"""
         print("Test ZApp validation endpoint")
-        with open('tests/zapp.json', encoding='utf-8') as data_file:
+        with open('integration_tests/zapp.json', encoding='utf-8') as data_file:
             data = json.loads(data_file.read())
 
         req = requests.post(ZOE_API_URI + 'zapp_validate', json={"application": data}, timeout=TIMEOUT)
@@ -127,7 +87,7 @@ class TestZoeRest:
     def test_zapp_validate_fail(self, zoe_api_process):
         """Test ZApp validation endpoint"""
         print("Test ZApp validation endpoint")
-        with open('tests/zapp.json', encoding='utf-8') as data_file:
+        with open('integration_tests/zapp.json', encoding='utf-8') as data_file:
             data = json.loads(data_file.read())
 
         del data['version']
