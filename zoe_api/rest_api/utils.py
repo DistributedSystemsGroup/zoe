@@ -27,7 +27,6 @@ from zoe_api.exceptions import ZoeRestAPIException, ZoeNotFoundException, ZoeAut
 from zoe_api.auth.base import BaseAuthenticator  # pylint-bug #1063 pylint: disable=unused-import
 from zoe_api.auth.ldap import LDAPAuthenticator
 from zoe_api.auth.file import PlainTextAuthenticator
-from zoe_api.auth.ldapsasl import LDAPSASLAuthenticator
 
 log = logging.getLogger(__name__)
 
@@ -88,9 +87,9 @@ def get_auth(handler: tornado.web.RequestHandler):
     if get_conf().auth_type == 'text':
         authenticator = PlainTextAuthenticator()  # type: BaseAuthenticator
     elif get_conf().auth_type == 'ldap':
-        authenticator = LDAPAuthenticator()  # type: BaseAuthenticator
+        authenticator = LDAPAuthenticator(sasl=False)  # type: BaseAuthenticator
     elif get_conf().auth_type == 'ldapsasl':
-        authenticator = LDAPSASLAuthenticator()  # type: BaseAuthenticator
+        authenticator = LDAPAuthenticator(sasl=True)  # type: BaseAuthenticator
     else:
         raise ZoeException('Configuration error, unknown authentication method: {}'.format(get_conf().auth_type))
     uid, role = authenticator.auth(username, password)

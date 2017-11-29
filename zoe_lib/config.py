@@ -86,10 +86,13 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--auth-file', help='Path to the CSV file containing user,pass,role lines for text authentication', default='zoepass.csv')
 
         argparser.add_argument('--ldap-server-uri', help='LDAP server to use for authentication', default='ldap://localhost')
+        argparser.add_argument('--ldap-bind-user', help='Full LDAP user to use for binding', default='ou=something,dc=any,dc=local')
+        argparser.add_argument('--ldap-bind-password', help='Password for the bind user', default='mysecretpassword')
         argparser.add_argument('--ldap-base-dn', help='LDAP base DN for users', default='ou=something,dc=any,dc=local')
-        argparser.add_argument('--ldap-admin-gid', type=int, help='LDAP group ID for admins', default=5000)
-        argparser.add_argument('--ldap-user-gid', type=int, help='LDAP group ID for users', default=5001)
-        argparser.add_argument('--ldap-guest-gid', type=int, help='LDAP group ID for guests', default=5002)
+        argparser.add_argument('--ldap-admin-gid', help='LDAP group ID for admins', default='5000')
+        argparser.add_argument('--ldap-user-gid', help='LDAP group ID for users', default='5001')
+        argparser.add_argument('--ldap-guest-gid', help='LDAP group ID for guests', default='5002')
+        argparser.add_argument('--ldap-group-name', help='LDAP user field containing group names/IDs', default='gidNumber')
 
         # Proxy options
         argparser.add_argument('--proxy-path', help='Proxy base path', default='127.0.0.1')
