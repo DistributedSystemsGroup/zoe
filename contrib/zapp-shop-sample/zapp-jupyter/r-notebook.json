@@ -3,9 +3,18 @@
     "services": [
         {
             "command": null,
-            "environment": [],
+            "environment": [
+                [
+                    "NB_UID",
+                    "1000"
+                ],
+                [
+                    "HOME",
+                    "/mnt/workspace"
+                ]
+            ],
             "essential_count": 1,
-            "image": "jupyter/r-notebook",
+            "image": "jupyter/r-notebook:latest",
             "monitor": true,
             "name": "jupyter",
             "ports": [
@@ -29,7 +38,8 @@
             },
             "startup_order": 0,
             "total_count": 1,
-            "volumes": []
+            "volumes": [],
+            "work_dir": "/mnt/workspace"
         }
     ],
     "size": 512,

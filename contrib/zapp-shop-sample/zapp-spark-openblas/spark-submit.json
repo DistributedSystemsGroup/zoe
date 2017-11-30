@@ -1,0 +1,147 @@
+{
+    "name": "spark-jupyter",
+    "services": [
+        {
+            "command": null,
+            "environment": [
+                [
+                    "SPARK_MASTER_IP",
+                    "{dns_name#self}"
+                ],
+                [
+                    "HADOOP_USER_NAME",
+                    "{user_name}"
+                ],
+                [
+                    "PYTHONHASHSEED",
+                    "42"
+                ]
+            ],
+            "essential_count": 1,
+            "image": "zapps/spark2-master-openblas:4784",
+            "monitor": false,
+            "name": "spark-master",
+            "ports": [
+                {
+                    "name": "Spark master web interface",
+                    "port_number": 8080,
+                    "protocol": "tcp",
+                    "url_template": "http://{ip_port}/"
+                }
+            ],
+            "replicas": 1,
+            "resources": {
+                "cores": {
+                    "max": 1,
+                    "min": 1
+                },
+                "memory": {
+                    "max": 536870912,
+                    "min": 536870912
+                }
+            },
+            "startup_order": 0,
+            "total_count": 1,
+            "volumes": []
+        },
+        {
+            "command": null,
+            "environment": [
+                [
+                    "SPARK_WORKER_CORES",
+                    "6"
+                ],
+                [
+                    "SPARK_WORKER_RAM",
+                    "11273240064"
+                ],
+                [
+                    "SPARK_MASTER_IP",
+                    "{dns_name#spark-master0}"
+                ],
+                [
+                    "SPARK_LOCAL_IP",
+                    "{dns_name#self}"
+                ],
+                [
+                    "PYTHONHASHSEED",
+                    "42"
+                ],
+                [
+                    "HADOOP_USER_NAME",
+                    "{user_name}"
+                ]
+            ],
+            "essential_count": 1,
+            "image": "zapps/spark2-worker-openblas:4784",
+            "monitor": false,
+            "name": "spark-worker",
+            "ports": [],
+            "replicas": 1,
+            "resources": {
+                "cores": {
+                    "max": 6,
+                    "min": 6
+                },
+                "memory": {
+                    "max": 12884901888,
+                    "min": 12884901888
+                }
+            },
+            "startup_order": 1,
+            "total_count": 2,
+            "volumes": []
+        },
+        {
+            "command": "wordcount.py hdfs://192.168.45.157/datasets/gutenberg_big_2x.txt hdfs://192.168.45.157/tmp/wcount-out",
+            "environment": [
+                [
+                    "SPARK_MASTER_IP",
+                    "{dns_name#spark-master0}"
+                ],
+                [
+                    "SPARK_EXECUTOR_RAM",
+                    "11273240064"
+                ],
+                [
+                    "SPARK_DRIVER_RAM",
+                    "2147483648"
+                ],
+                [
+                    "HADOOP_USER_NAME",
+                    "{user_name}"
+                ],
+                [
+                    "PYTHONHASHSEED",
+                    "42"
+                ],
+                [
+                    "NAMENODE_HOST",
+                    "hdfs-namenode.zoe"
+                ]
+            ],
+            "essential_count": 1,
+            "image": "zapps/spark2-submit-openblas:4784",
+            "monitor": true,
+            "name": "spark-submit",
+            "ports": [],
+            "replicas": 1,
+            "resources": {
+                "cores": {
+                    "max": 2,
+                    "min": 2
+                },
+                "memory": {
+                    "max": 12884901888,
+                    "min": 12884901888
+                }
+            },
+            "startup_order": 2,
+            "total_count": 1,
+            "volumes": []
+        }
+    ],
+    "size": 512,
+    "version": 3,
+    "will_end": false
+}

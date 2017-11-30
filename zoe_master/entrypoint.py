@@ -41,13 +41,14 @@ def _check_configuration_sanity():
     return 0
 
 
-def main():
+def main(test_conf=None):
     """
     The entrypoint for the zoe-master script.
     :return: int
     """
-    config.load_configuration()
+    config.load_configuration(test_conf)
     args = config.get_conf()
+
     log_args = {
         'level': logging.DEBUG if args.debug else logging.INFO,
         'format': LOG_FORMAT

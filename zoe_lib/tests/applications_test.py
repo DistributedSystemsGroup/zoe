@@ -16,36 +16,32 @@
 """Unit tests for zoe_lib/applications.py"""
 
 import json
-from collections import namedtuple
 
 import pytest
 
 from zoe_lib import applications
-
-ConfigMockup = namedtuple('ConfigMockup', ['max_core_limit', 'max_memory_limit'])
-
-
-def fake_get_conf():
-    """Mock-up for the config.get_conf() method."""
-    return ConfigMockup(16, 64)
+from zoe_lib.tests.config_mock import zoe_configuration  # pylint: disable=unused-import
+from zoe_lib.config import load_configuration
 
 
 class TestApplicationsMethods:
     """Application validation tests."""
 
     @pytest.fixture(autouse=True)
-    def mock_config(self, monkeypatch):
+    def mock_config(self, zoe_configuration): # pylint: disable=redefined-outer-name
         """Fixture for mock config method."""
-        monkeypatch.setattr('zoe_lib.config.get_conf', fake_get_conf)
+        zoe_configuration.max_core_limit = 32
+        zoe_configuration.max_memory_limit = 64
+        load_configuration(zoe_configuration)
 
     def test_pass_for_zapp(self):
         """Test zapp validation code."""
-        zapp_fp = json.load(open('tests/zapp.json', 'r'))
+        zapp_fp = json.load(open('integration_tests/zapp.json', 'r'))
         applications.app_validate(zapp_fp)
 
     def test_pass_for_complex_zapp(self):
         """Test zapp validation code."""
-        zapp_fp = json.load(open('tests/complex_zapp.json', 'r'))
+        zapp_fp = json.load(open('integration_tests/complex_zapp.json', 'r'))
         applications.app_validate(zapp_fp)
 
     def test_fails_for_zapp(self):

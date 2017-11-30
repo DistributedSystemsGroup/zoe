@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "zapps": [
+        {
+            "category": "Machine learning",
+            "readable_descr": "README-pytorch.md",
+            "name": "PyTorch notebook",
+            "description": "pytorch-notebook.json",
+            "parameters": [],
+            "logo": "pytorch.png"
+        }
+    ]
+}
+

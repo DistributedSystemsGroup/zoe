@@ -1,0 +1,48 @@
+{
+    "name": "r-notebook", 
+    "services": [
+        {
+            "command": null, 
+            "environment": [
+                [
+                    "NB_UID", 
+                    "1000"
+                ], 
+                [
+                    "HOME", 
+                    "/mnt/workspace"
+                ]
+            ], 
+            "essential_count": 1, 
+            "image": "jupyter/r-notebook:latest", 
+            "monitor": true, 
+            "name": "jupyter", 
+            "ports": [
+                {
+                    "name": "Jupyter Notebook interface", 
+                    "port_number": 8888, 
+                    "protocol": "tcp", 
+                    "url_template": "http://{ip_port}/"
+                }
+            ], 
+            "replicas": 1, 
+            "resources": {
+                "cores": {
+                    "max": 4, 
+                    "min": 4
+                }, 
+                "memory": {
+                    "max": 4294967296, 
+                    "min": 4294967296
+                }
+            }, 
+            "startup_order": 0, 
+            "total_count": 1, 
+            "volumes": [], 
+            "work_dir": "/mnt/workspace"
+        }
+    ], 
+    "size": 512, 
+    "version": 3, 
+    "will_end": false
+}

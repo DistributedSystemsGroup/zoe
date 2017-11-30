@@ -14,7 +14,7 @@
                 ]
             ],
             "essential_count": 1,
-            "image": "docker-registry:5000/zapps/boinc:4503",
+            "image": "zapps/boinc:4759",
             "monitor": true,
             "name": "boinc-client",
             "ports": [],

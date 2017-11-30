@@ -19,7 +19,7 @@ import logging
 import os
 
 from tornado.httpserver import HTTPServer
-from tornado.ioloop import IOLoop, PeriodicCallback
+from tornado.ioloop import IOLoop
 from tornado.web import Application
 
 import zoe_lib.config as config
@@ -35,13 +35,14 @@ log = logging.getLogger("zoe_api")
 LOG_FORMAT = '%(asctime)-15s %(levelname)s %(threadName)s->%(name)s: %(message)s'
 
 
-def zoe_web_main() -> int:
+def zoe_web_main(test_conf=None) -> int:
     """
     This is the entry point for the Zoe Web script.
     :return: int
     """
-    config.load_configuration()
+    config.load_configuration(test_conf)
     args = config.get_conf()
+
     log_args = {
         'level': logging.DEBUG if args.debug else logging.INFO,
         'format': LOG_FORMAT
@@ -75,9 +76,6 @@ def zoe_web_main() -> int:
     http_server = HTTPServer(app)
     http_server.bind(args.listen_port, args.listen_address)
     http_server.start(num_processes=1)
-
-    retry_cb = PeriodicCallback(api_endpoint.cleanup_dead_executions, 60000)
-    retry_cb.start()
 
     try:
         IOLoop.current().start()
