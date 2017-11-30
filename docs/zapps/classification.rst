@@ -3,9 +3,9 @@
 Classification
 ==============
 
-Zoe runs processes inside containers and the Zoe application description is very generic, allowing any kind of application to be described in Zoe and submitted for execution. While the main focus of Zoe are so-called "analytic applications", there are many other tools that can be run on the same cluster, for monitoring, storage, log management, history servers, etc. These applications can be described in Zoe and executed, but they have quite different scheduling constraint.
+Zoe runs processes inside containers and the Zoe application description is very generic, allowing any kind of application to be described in Zoe and submitted for execution. While the main focus of Zoe are so-called "analytic applications", there are many other tools that can be run on the same cluster, for monitoring, storage, log management, history servers, etc. These applications can be described in Zoe and executed, but they have quite different scheduling constraints. Zoe is not a generic application deployment solution and lacks, by design, features like automatic migration, rolling upgrades, etc.
 
-Please note that in this context an "elastic" service is a service that "can be automatically resized". HDFS can be resized, but it is done as an administrative operation that requires setting up partitions and managing the network and disk load caused by rebalancing. For this reason we do not consider it as "elastic".
+Please note that in this context an "elastic" service is a service that "can be automatically killed or started".
 
 - Long running: potentially will never terminate
 

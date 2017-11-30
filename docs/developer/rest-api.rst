@@ -28,7 +28,7 @@ This endpoint does not need authentication. It returns general, static, informat
 Will return a JSON document, like this::
 
     {
-        "version" : "2017.06",
+        "version" : "2017.12",
         "deployment_name" : "prod",
         "application_format_version" : 3,
         "api_version" : "0.7"
@@ -215,6 +215,26 @@ Where:
 
 * ``execution_id`` is the ID of the new execution just created.
 
+Execution endpoints
+^^^^^^^^^^^^^^^^^^^
+
+Request (GET)::
+
+    curl -X GET -u 'username:password' http://bf5:8080/api/<api_version>/execution/endpoints/<execution_id>
+
+
+Will return a JSON list like this::
+
+    [
+        ['Jupyter Notebook interface', 'http://192.168.47.19:32920/'],
+        [...]
+    ]
+
+Where each item of the list is a tuple containing:
+
+* The endpoint name
+* The endpoint URL
+
 Service endpoint
 ----------------
 
@@ -311,7 +331,8 @@ Will return a JSON document, like this::
 
     {
        "termination_threads_count" : 0,
-       "queue_length" : 0
+       "queue_length" : 0,
+       [...]
     }
 
 Where:
@@ -319,77 +340,7 @@ Where:
 * ``termination_threads_count`` is the number of executions that are pending for termination and cleanup
 * ``queue_length`` is the number of executions in the queue waiting to be started
 
-OAuth2 endpoint
----------------
-
-This endpoint aims to help users authenticate/authorize via an access token instead of raw username/password. It does need authentication when users require new access token. You can refresh an access token by a refresh token.
-
-Request new access token
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-Request::
-
-    curl -u 'username:password' http://bf5:8080/api/<api_version>/oauth/token -X POST -H 'Content-Type: application/json' -d '{"grant_type": "password"}'
-
-Will return a JSON document, like this::
-
-    {
-        "token_type": "Bearer",
-        "access_token": "3ddbe9ba-6a21-4e4d-993b-70556390c5d3",
-        "refresh_token": "9bab190f-e211-42aa-917e-20ce987e355e",
-        "expires_in": 36000
-    }
-
-Where:
-
-* ``token_type`` is the type of the token, **Bearer** is used as default
-* ``access_token`` is the token used for further authentication/authorization with others api endpoints
-* ``refresh_token`` is the token used to get new access token when the current one has expired
-* ``expires_in`` is the duration of time (second) when the access_token would be expired
-
-Refresh an access token
-^^^^^^^^^^^^^^^^^^^^^^^
-
-Request::
-
-    curl  -H 'Authorization: Bearer 9bab190f-e211-42aa-917e-20ce987e355e' http://bf5:8080/api/<api_version>/oauth/token -X POST -H 'Content-Type: application/json' -d '{"grant_type": "refresh_token"}'
-
-Will return a JSON document, like this::
-
-    {
-        "token_type": "Bearer",
-        "access_token": "378f8d5f-2eb5-4181-b632-ad23c4534d32",
-        "expires_in": 36000
-    }
-
-Where:
-
-* ``access_token`` is the new access token after users issue a refresh
-
-Revoke an access/refresh token
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Request::
-
-    curl -u 'usernam:password' -X DELETE http://bf5:8080/api/<api_version>/oauth/revoke/<token>
-
-Where:
-
-* ``token`` is the access token or refresh token needs to be revoked
-
-Will return a JSON document, like this::
-
-    {
-        "ret": "Revoked token."
-    }
-
-Authenticate other api endpoint
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Instead of sending raw username, password to request results from other api endpoints which require authentication, use an access token with header ``Authorization: Bearer <token>``
-
-Example::
-
-    curl -H 'Authorization: Bearer 378f8d5f-2eb5-4181-b632-ad23c4534d32' http://bf5:8080/api/<api_version>/execution
+The actual content of the response may vary between different Zoe releases.
 
 Login endpoint
 --------------
@@ -406,7 +357,7 @@ Will return a JSON document, like this::
         "uid": "admin"
     }
 
-And a file named zoe_cookie.txt contains the cookie information.
+And a file named ``zoe_cookie.txt`` contains the cookie information.
 
 Pass this cookie on each api request which requires authentication.
 
@@ -417,5 +368,5 @@ Example::
 Note:
 
 - For zoe web interface, we require cookie_based mechanism for authentication/authorization.
-- Every unauthorized request will be redirected to **http://bf5:8080/login**
-- After successfully login, a cookie will be saved at browser for further authentication/authorization purpose.
+- Every unauthorized request will be redirected to **http://<hostname>:8080/login**
+- After a successful login, a cookie will be saved in the browser for further authentication/authorization purpose.
