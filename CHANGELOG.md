@@ -17,7 +17,8 @@
 * Update unit and integration testing
 * Elastic services that die are rescheduled on a new node
 * Optional support for gathering usage metrics via KairosDB, for now these metrics are only used in the status page plots
-* Fix UTC and timezone bugs for execution timestamps 
+* Fix UTC and timezone bugs for execution timestamps
+* More configuration options for LDAP authentication
 
 ## Version 2017.09
 
