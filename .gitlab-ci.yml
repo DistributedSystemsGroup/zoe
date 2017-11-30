@@ -52,8 +52,6 @@ images:
   image: docker:latest
   stage: build
   before_script:
-    - mkdir -p /etc/docker/certs.d/$DOCKER_REGISTRY
-    - cp /registry-ca.crt /etc/docker/certs.d/$DOCKER_REGISTRY/ca.crt
     - mkdir -p $HOME/.docker
     - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
   script:
@@ -85,7 +83,7 @@ mirror-github:
 
 docs:
   stage: deploy
-  image: ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE}
+  image: zoerepo/${ZOE_TEST_IMAGE}
   before_script:
     - which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )
     - eval $(ssh-agent -s)
@@ -103,7 +101,7 @@ docs:
 
 zoe:
   stage: deploy
-  image: ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE}
+  image: zoerepo/${ZOE_TEST_IMAGE}
   before_script:
     - which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )
     - eval $(ssh-agent -s)
@@ -120,18 +118,5 @@ zoe:
     - ssh ubuntu@${STAGING_IP} sudo supervisorctl restart zoe-master
   environment:
     name: staging
-  only:
-    - master
-
-cleanup-images:
-  image: docker:latest
-  stage: cleanup
-  before_script:
-    - mkdir -p /etc/docker/certs.d/$DOCKER_REGISTRY
-    - cp /registry-ca.crt /etc/docker/certs.d/$DOCKER_REGISTRY/ca.crt
-    - mkdir -p $HOME/.docker
-    - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
-  script:
-    - docker rmi ${DOCKER_REGISTRY}/ci/${ZOE_TEST_IMAGE}
   only:
     - master

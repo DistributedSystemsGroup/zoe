@@ -20,12 +20,12 @@ import time
 from typing import List
 
 from zoe_lib.config import get_conf
-from zoe_lib.state import Execution, Service, SQLManager  # pylint: disable=unused-import
+from zoe_lib.state import Execution, Service  # pylint: disable=unused-import
 
 from zoe_master.backends.base import BaseBackend
 from zoe_master.backends.service_instance import ServiceInstance
 from zoe_master.exceptions import ZoeStartExecutionFatalException, ZoeStartExecutionRetryException, ZoeException
-from zoe_master.stats import ClusterStats, NodeStats  # pylint: disable=unused-import
+from zoe_master.stats import ClusterStats  # pylint: disable=unused-import
 
 try:
     from zoe_master.backends.swarm.backend import SwarmBackend
@@ -158,7 +158,8 @@ def terminate_service(service: Service) -> None:
     backend = _get_backend()
     if service.status != Service.INACTIVE_STATUS:
         if service.status == Service.ERROR_STATUS:
-            return
+            backend.terminate_service(service)
+            log.debug('Service {} terminated'.format(service.name))
         elif service.status == Service.ACTIVE_STATUS or service.status == Service.TERMINATING_STATUS or service.status == Service.STARTING_STATUS:
             service.set_terminating()
             backend.terminate_service(service)

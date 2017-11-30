@@ -21,7 +21,6 @@ from zoe_lib.config import get_conf
 
 from zoe_api.auth.base import BaseAuthenticator  # pylint: disable=unused-import
 from zoe_api.auth.ldap import LDAPAuthenticator
-from zoe_api.auth.ldapsasl import LDAPSASLAuthenticator
 from zoe_api.auth.file import PlainTextAuthenticator
 import zoe_api.exceptions
 from zoe_api.web.custom_request_handler import ZoeRequestHandler
@@ -73,9 +72,9 @@ def get_auth_login(username, password):
 
     # It it fails, continue with the normal authentication
     if get_conf().auth_type == 'ldap':
-        authenticator = LDAPAuthenticator()  # type: BaseAuthenticator
+        authenticator = LDAPAuthenticator(sasl=False)  # type: BaseAuthenticator
     elif get_conf().auth_type == 'ldapsasl':
-        authenticator = LDAPSASLAuthenticator()  # type: BaseAuthenticator
+        authenticator = LDAPAuthenticator(sasl=True)  # type: BaseAuthenticator
     else:
         raise zoe_api.exceptions.ZoeException('Configuration error, unknown authentication method: {}'.format(get_conf().auth_type))
     uid, role = authenticator.auth(username, password)
