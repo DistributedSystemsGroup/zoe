@@ -2,8 +2,22 @@
 
 ## Version 2017.12
 
-* Status page for the administrator
+* New Docker Engine back-end, the Swarm back-end is now deprecated
+* Nodes and ZApps can be labelled for constraining execution placement, for example to run ZApps only on nodes with GPUs
+* Use non-reserved memory, cores, labels and image availability to take placement decisions
+* The elastic scheduler is considered stable, the simple scheduler is now deprecated
+* Expand the status page for the administrator
 * More information about authentications in the log output of zoe-api
+* Endpoint links in the web interface open in new windows
+* Distinguish between reserved, allocated and in-use resources
+* Allocate cores automatically, respecting the minimum configured in the ZApp
+* Small graphic updates to the execution inspect web page
+* Allow for more options and resource limits to be customized on the web interface (users or admins, not for guests), maximum limits are set in the zoe.conf file
+* Additional volumes can be mounted by specifying them in the zoe.conf file
+* Update unit and integration testing
+* Elastic services that die are rescheduled on a new node
+* Optional support for gathering usage metrics via KairosDB, for now these metrics are only used in the status page plots
+* Fix UTC and timezone bugs for execution timestamps 
 
 ## Version 2017.09
 

@@ -39,7 +39,7 @@ class ZoeSimpleScheduler(ZoeBaseScheduler):
         self.loop_quit = False
         self.loop_th = threading.Thread(target=self.loop_start_th, name='scheduler')
         self.loop_th.start()
-        log.warning('This scheduler is deprecated and will me removed in version 2018.03, please switch to the elastic scheduler.')
+        log.warning('This scheduler class is deprecated and will be removed in version 2018.03, please switch to the elastic scheduler.')
 
     def trigger(self):
         """Trigger a scheduler run."""
