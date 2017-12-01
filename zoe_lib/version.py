@@ -15,7 +15,7 @@
 
 """Versions."""
 
-ZOE_VERSION = '2017.12-beta'
+ZOE_VERSION = '2017.12'
 ZOE_API_VERSION = '0.7'
 ZOE_APPLICATION_FORMAT_VERSION = 3
 SQL_SCHEMA_VERSION = 6  # ---> Increment this value every time the SQL schema changes !!! <---

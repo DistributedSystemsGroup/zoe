@@ -5,13 +5,13 @@ Architecture
 
 The main Zoe Components are:
 
-* zoe master: the core component that performs application scheduling and talks to Swarm
+* zoe master: the core component that performs application scheduling and talks to the container back-end
 * zoe api: the Zoe frontend, offering a web interface and a REST API
 * command-line clients (zoe.py and zoe-admin.py)
 
 The Zoe master is the core component of Zoe and communicates with the clients by using an internal ZeroMQ-based protocol. This protocol is designed to be robust, using the best practices from ZeroMQ documentation. A crash of the Api or of the Master process will not leave the other component inoperable, and when the faulted process restarts, work will restart where it was left.
 
-In this architecture all state is kept in a Postgres database. With Zoe we try very hard not to reinvent the wheel and the internal state system we had in the previous architecture iteration was starting to show its limits.
+In this architecture all application state is kept in a Postgres database. Platform state is kept in-memory and rebuilt at start time. A lot of care and tuning has been spent in keeping the vision Zoe has of the system and the real back-end state synchronised. In a few cases containers may be left orphaned: when Zoe deems it safe, they will be automatically cleaned-up, otherwise a warning in the logs will generated and the administrator has to examine the situation as, usually, it points to a bug hidden somewhere in the back-end code.
 
 Users submit *execution requests*, composed by a name and an *application description*. The frontend process (Zoe api) informs the Zoe Master that a new execution request is available for execution.
 Inside the Master, a scheduler keeps track of available resources and execution requests, and applies a

@@ -13,7 +13,7 @@ Development repository
 ----------------------
 Development happens at `Eurecom's GitLab repository <https://gitlab.eurecom.fr/zoe/main>`_. The GitHub repository is a read-only mirror.
 
-The choice of GitLab over GitHub is due to the CI pipeline that we set-up to test Zoe.
+The choice of GitLab over GitHub is due to the CI pipeline that we set-up to test Zoe. Please note the issue tracking happens on GitHub.
 
 Bug reports and feature requests
 --------------------------------
@@ -22,10 +22,10 @@ Bug reports and feature requests are handled through the GitHub issue system at:
 
 The issue system should be used for only for bug reports or feature requests. If you have more general questions, you need help setting up Zoe or running some application, please use the mailing list.
 
-The mailing list
-----------------
+Mailing list
+------------
 
-The first step is to subscribe to the mailing list: `http://www.freelists.org/list/zoe <http://www.freelists.org/list/zoe>`_
+The mailing list: `http://www.freelists.org/list/zoe <http://www.freelists.org/list/zoe>`_
 
 Use the mailing list to stay up-to-date with what other developers are working on, to discuss and propose your ideas. We prefer small and incremental contributions, so it is important to keep in touch with the rest of the community to receive feedback. This way your contribution will be much more easily accepted.
 

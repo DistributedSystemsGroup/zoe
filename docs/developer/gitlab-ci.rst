@@ -39,17 +39,7 @@ Variables
 To run the tests a number of variables need to be set from the GitLab interface:
 
 * REGISTRY_PASSWORD: the password used for authenticating with the registry via docker login
-* SONARQUBE_SERVER_URL: the URL of the SonarQube server
-* SONARQUBE_USER: the SonarQube user
 * SSH_PRIVATE_KEY: private key to be used to deploy via rsync the staging build
 * STAGING_IP: IP/hostname of the staging server
 * WEB_STAGING_PATH: path for the web interface on the staging server
 * ZOE_STAGING_PATH: path for Zoe on the staging server
-* SWARM_URL: URL of a docker engine/swarm to run integration tests
-
-SonarQube
----------
-
-To run SonarQube against Zoe we use a special Docker image, `available on the Docker Hub <https://hub.docker.com/r/zoerepo/sonar-scanner/>`_.
-
-You can also build it from the Dockerfile available at ``ci/gitlab-sonar-scanner/``, relative to the repository root.

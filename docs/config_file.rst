@@ -55,24 +55,35 @@ API options:
 * ``listen-port`` : port Zoe will use to listen for incoming connections to the web interface
 * ``master-url = tcp://127.0.0.1:4850`` : address of the Zoe Master ZeroMQ API
 * ``cookie-secret = changeme``: secret used to encrypt cookies
+* ``zapp-shop-path = /var/lib/zoe-apps`` : path to the directory containing the ZApp Shop files
 
 Master options:
 
 * ``api-listen-uri = tcp://*:4850`` : ZeroMQ server connection string, used for the master listening endpoint
+* ``kairosdb-enable = false`` : Enable gathering of usage metrics recorded in KairosDB
+* ``kairosdb-url = http://localhost:8090`` : URL of KairosDB REST API
+* ``overlay-network-name = zoe`` : name of the pre-configured Docker overlay network Zoe should use (Swarm backend)
+* ``max-core-limit = 16`` : maximum amount of cores a user is able to reserve
+* ``max-memory-limit = 64`` : maximum amount of memory a user is able to reserve
+* ``no-user-edit-limits-web = False`` : if set to true, users are NOT allowed to modify ZApp reservations via the web interface
+* ``additional-volumes = <none>`` : list of additional volumes to mount in every service, for every ZApp (ex. /mnt/data:data,/mnt/data_n:data_n)
 
 Authentication:
 
 * ``auth-type = text`` : Authentication type (text, ldap or ldapsasl)
 * ``auth-file = zoepass.csv`` : Path to the CSV file containing user,pass,role lines for text authentication
 * ``ldap-server-uri = ldap://localhost`` : LDAP server to use for user authentication
+* ``ldap-bind-user = ou=something,dc=any,dc=local`` : LDAP user for binding to the server
+* ``ldap-bind-password = mysecretpassword`` : Password for the bind user
 * ``ldap-base-dn = ou=something,dc=any,dc=local`` : LDAP base DN for users
 * ``ldap-admin-gid = 5000`` : LDAP group ID for admins
 * ``ldap-user-gid = 5001`` : LDAP group ID for users
 * ``ldap-guest-gid = 5002`` : LDAP group ID for guests
+* ``ldap-group-name = gidNumber`` : LDAP user attribute that contains the group names/IDs
 
 Scheduler options:
 
-* ``scheduler-class = <ZoeSimpleScheduler | ZoeElasticScheduler>`` : Scheduler class to use for scheduling ZApps (default: simple scheduler)
+* ``scheduler-class = <ZoeSimpleScheduler | ZoeElasticScheduler>`` : Scheduler class to use for scheduling ZApps (default: elastic scheduler)
 * ``scheduler-policy = <FIFO | SIZE>`` : Scheduler policy to use for scheduling ZApps (default: FIFO)
 
 Default options for the scheduler enable the traditional Zoe scheduler that was already available in the previous releases.
@@ -81,22 +92,25 @@ ZApp shop:
 
 * ``zapp-shop-path = /var/lib/zoe-apps`` : Path where ZApp folders are stored
 
-Backend choice:
+Back-end choice:
 
-* ``backend = <Swarm|Kubernetes>`` : cluster back-end to use to run ZApps
+* ``backend = <DockerEngine|Swarm|Kubernetes>`` : cluster back-end to use to run ZApps, default is DockerEngine
 
-Swarm backend options:
+Swarm back-end options:
 
 * ``backend-swarm-url = zk://zk1:2181,zk2:2181,zk3:2181`` : connection string to the Swarm API endpoint. Can be expressed by a plain http URL or as a zookeeper node list in case Swarm is configured for HA.
 * ``backend-swarm-zk-path = /docker`` : ZooKeeper path used by Docker Swarm
 * ``backend-swarm-tls-cert = cert.pem`` : Docker TLS certificate file
 * ``backend-swarm-tls-key = key.pem`` : Docker TLS private key file
 * ``backend-swarm-tls-ca = ca.pem`` : Docker TLS CA certificate file
-* ``overlay-network-name = zoe`` : name of the pre-configured Docker overlay network Zoe should use (Swarm backend)
 
-Kubernetes backend:
+Kubernetes back-end:
 
 * ``kube-config-file = /opt/zoe/kube.conf`` : the configuration file of Kubernetes cluster that zoe works with. Specified if ``backend`` is ``Kubernetes``.
+
+DockerEngine back-end:
+
+* ``backend-docker-config-file = docker.conf`` : name of the DockerEngine back-end configuration file
 
 Proxy options:
 

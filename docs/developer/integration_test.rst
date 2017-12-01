@@ -3,65 +3,36 @@
 Zoe Integration Tests
 =====================
 
-* Overview
+Overview
+--------
 
-  - Testing the zoe rest api in action.
-  - The backend could be swarm or kubernetes
+The objective of integration testing is to run Zoe through a simple workflow to test basic functionality in an automated manner.
 
-* What will it do
+How it works
+------------
 
-  - Launch two containers for zoe-api and zoe-master, one for postgresql
-  - Connect to the backend (kubernetes/swarm) and test the rest API of zoe.
-  - The authentication type is ``text`` for simplicity.
-  - The test would be described in a Jenkins job
-  - The whole process could be described in below steps:
-  - Build the container image for zoe. The tag is the $BUILD_ID from jenkins
-  - Deploy zoe with the new image, base on the docker-compose-test.yml
-  - Start the test for all api
-  - Generate coverage report
-  - Push the built image to the private registry
-  - Deploy zoe with the new image, base on the docker-compose-prod.yml
+The integration tests are sun by GitLab CI, but can also be run by hand. Docker is used to guarantee reproducibility and a clean environment for each test run.
 
-The job stops whenever one of the step above fails.
+Two containers are used:
 
-The last two steps could be optional if there’s no need to deploy zoe everytime.
+* Standard Postgres 9.3
+* Python 3.4 container with the Zoe code under test
 
-* How to do it
+Pytest will start a zoe-api and a zoe-master, then proceed querying the REST API via HTTP calls.
 
-  - Requirements:
+* The DockerEngine back-end is used
+* The authentication type is ``text`` for simplicity.
 
-    - A workable cluster. It could be Kubernetes or Swarm
-    - A private registry to push the built images.
-    - The runner for the integration test is contained in zoeci.py file
-    - Arguments explanation:
+The code is under the ``integration_tests`` directory.
 
-      - argv[1]: 0: deploy, 1: build, 2: push
-      - args[2]: address for docker sock
-      - For build case:
-          - args[3]: private_registry_address/zoe:$BUILD_ID
-      - For deploy case:
-          - args[3]: docker-compose file location
-          - args[4]: private_registry_address/zoe:$BUILD_ID
+What is being tested
+--------------------
 
-  - Explanation on script for Jenkins job can be found on the document of continuous integration of Zoe.
+The following endpoints are tested, with good and bad authentication information. Return status codes are checked for correctness.
 
-* How to expand it?
+* info
+* userinfo
+* execution start, list, terminate
+* service list
 
-  - The initial infrastructure could be reused.
-  - Current tests of zoe use the unittest built-in library of Python, new library could be used based on the need.
-  - Current tests of zoe focus on testing the behaviors of the rest api:
-
-    - info
-    - userinfo
-    - execution
-    - service
-  - with two types of authentication:
-
-    - text
-    - cookie
-  - and two scenarios:
-
-    - success
-    - failure
-
-  - The new tests could be added into ``tests`` folder
+A simple ZApp with an nginx web server is used for testing the execution start API.

@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Zoe backend implementation for old-style stand-alone Docker Swarm."""
+"""Zoe back-end implementation for old-style stand-alone Docker Swarm."""
 
 import logging
 

@@ -7,8 +7,8 @@ If you are looking for the five-minutes install procedure, just for testing, che
 
 When installing Zoe for production you should, first of all, look at the following requirements and take a decision about each of them:
 
-* Container back-end
-* Shared filesystem: we know of NFS or CephFS, but anything similar should work
+* Container back-end: Kubernetes or DockerEngine
+* Shared filesystem: we have deployments on NFS and CephFS, but anything similar should work
 * Network: how your users will connect to the containers
 * Authentication back-end: how your users will authenticate to Zoe (LDAP or text file)
 * How to manage Zoe Applications (ZApps)
@@ -21,9 +21,64 @@ Choosing the container back-end
 
 At this time Zoe supports three back-ends:
 
-* Docker engine: useful for running Zoe on a single PC, it is the simplest to setup.
-* Legacy Docker Swarm: simple to install, additional features like SSL, high-availability and dynamic host discovery can be added as needed. Please note that Zoe does not support the new Swarm Mode of Docker Engine as the API is too limited.
+* DockerEngine: uses one or more Docker Engines. It is simple to install and to scale.
 * Kubernetes: the most complex to setup, we suggest using it only if you already have (or need) a Kubernetes setup for running other software.
+* Legacy Docker Swarm (deprecated): simple to install, additional features like SSL, high-availability and dynamic host discovery can be added as needed. Please note that Zoe does not support the new Swarm Mode of Docker Engine as the API is too limited.
+
+DockerEngine
+^^^^^^^^^^^^
+
+The DockerEngine back-end uses one or more nodes with Docker Engine installed and configured to listen to network requests.
+
+The Docker Engines must be configured to enable `multi host networking <https://docs.docker.com/engine/userguide/networking/overlay-standalone-swarm/>`_.
+
+This sample config file, usually found in ``/etc/docker/daemon.conf`` may help to get you started::
+
+   {
+      "dns": ["192.168.46.1"],
+      "dns-search": ["bigfoot.eurecom.fr"],
+      "tlsverify": true,
+      "tlscacert": "/mnt/certs/cacert.pem"
+      "tlscert": "/mnt/certs/cert.pem",
+      "tlskey": "/mnt/certs/key.pem",
+      "hosts": ["tcp://bf11.bigfoot.eurecom.fr:2375", "unix:///var/run/docker.sock"]
+    }
+
+Once you have your docker hosts up and running, to tell the back-end which nodes are available and how to connect to them, you need to create a file with this format::
+
+    [DEFAULT]
+    use_tls: no
+    tls_cert: /mnt/cephfs/admin/cert-authority/container-router/cert.pem
+    tls_key: /mnt/cephfs/admin/cert-authority/container-router/key.pem
+    tls_ca: /mnt/cephfs/admin/cert-authority/ca.pem
+
+    [foo]
+    address: localhost:2375
+    external_address: 192.168.45.42
+
+    [bar]
+    docker_address: 192.168.47.5:2375
+    external_address: 192.168.47.5
+    use_tls: yes
+
+    [baz]
+    docker_address: 192.168.47.50:2375
+    external_address: 192.168.47.50
+    use_tls: yes
+    labels: gpu,ssd
+
+This sample configuration describes three hosts. The DEFAULT section contains items that are common to all hosts, in any case  these entries can be overwritten in the host definition.
+
+Host ``foo`` does not use TLS (from the default config item), Zoe needs to connect to localhost on port 2375 to talk to it and users connecting to containers running on this host need to use the ``192.168.45.42`` address to connect. This ``external_address`` will be used by Zoe to generate links in the web interface.
+
+Host ``bar`` uses TLS and host ``baz`` has also two labels that can be matched when starting services with the corresponding label. Labels are comma separated.
+
+You tell Zoe the location of this file using the ``backend-docker-config-file`` option in zoe.conf.
+
+Kubernetes
+^^^^^^^^^^
+
+See :ref:`kube-backend` for configuration details.
 
 Shared filesystem
 -----------------
@@ -39,7 +94,7 @@ At Eurecom we use CephFS, but we know of successful Zoe deployments based on NFS
 Networking
 ----------
 
-Most of the ZApps expose a number of interfaces (web, REST and others) to the user. Zoe configures the active back-end to expose these ports, but does not perform any additional action to configure routing or DNS to make the ports accessible. Keeping in mind that the back-end network configuration is outside Zoe's competence area, here there a non-exhaustive list of the possible configurations:
+Most of the ZApps expose a number of interfaces (web, REST and others) to the user. Zoe configures the active back-end to expose these ports, but does not perform any additional action to configure routing or DNS to make the ports accessible. Keeping in mind that the back-end network configuration is outside Zoe's competence area, here there is non-exhaustive list of the possible configurations:
 
 * expose the hosts running the containers by using public IP addresses
 * use a proxy, like the one developed for Zoe: :ref:`proxy`
@@ -56,8 +111,8 @@ Zoe has a simple user model: users are authenticated against an external source 
 
 Zoe supports two authentication back-ends:
 
-* LDAP and LDAP+SASL
-* Text file
+* LDAP and LDAP+SASL (``auth-type=ldap`` ot ``auth-type=ldapsasl``)
+* Text file (``auth-type=text``)
 
 As most of Zoe, the authentication back-end is pluggable and others can be easily implemented.
 
@@ -65,9 +120,16 @@ LDAP
 ^^^^
 Plain LDAP or LDAP+SASL GSSAPI are available.
 
-The implementation will use the ``uid`` as the user_id and ``gidNumber`` to decide the role.
+In Zoe configuration you need to specify the following options:
 
-In Zoe configuration you need to specify the mapping between group IDs and roles.
+* ``ldap-server-uri``
+* ``ldap-bind-user``
+* ``ldap-bind-password``
+* ``ldap-base-dn``
+* ``ldap-admin-gid``
+* ``ldap-user-gid``
+* ``ldap-guest-gid``
+* ``ldap-group-name``
 
 Text file
 ^^^^^^^^^
@@ -82,7 +144,7 @@ The file location can be specified in the ``zoe.conf`` file and it needs to be r
 Managing Zoe applications
 -------------------------
 
-At the very base, ZApps are composed of a container image and a JSON description. The container image can be stored in a local, private, registry, or in a public one, accessible via the Internet.
+At the very base, ZApps are composed of a container image and a JSON description. The container image can be stored on the Docker nodes,  in a local private registry, or in a public one, accessible via the Internet.
 
 Zoe does not provide a way to automatically build images, push them to a local registry, or pull them to the hosts when needed. At Eurecom we provide an automated environment based on GItLab's CI features: users are able to customize their applications (JSON and Dockerfiles) by working on git repositories. Images are rebuilt and pushed on commit and JSON files are generated and copied to the ZApp shop directory. You can check out how we do it here:
 https://gitlab.eurecom.fr/zoe-apps
@@ -99,7 +161,7 @@ The shop is managed locally. It looks for ZApps in a configured directory (optio
 * one or more text files in markdown format with ZApp information and documentation
 * one or more JSON Zoe application descriptions
 
-The ``manifest.json`` file drives the ZApp Shop. Its format is as follows::
+The ``manifest.json`` file gather all this information together for the ZApp Shop interface. Its format is as follows::
 
     {
         "version": 1,
@@ -127,30 +189,16 @@ The ``manifest.json`` file drives the ZApp Shop. Its format is as follows::
                     }
                 ],
                 "guest_access": true
-            },
-            {
-                "category": "TensorFlow",
-                "name": "DRAGNN SyntaxNet model",
-                "description": "stnet-google.json",
-                "readable_descr": "README-syntaxnet.md",
-                "parameters": []
-            },
-            {
-                "category": "TensorFlow",
-                "name": "Magenta model",
-                "description": "mag-google.json",
-                "readable_descr": "README-magenta.md",
-                "parameters": []
             }
         ]
     }
 
 * version : a internal version, used by Zoe to recognize the manifest format. For now only 1 is supported.
-* zapps : a list of related ZApps that have to be shown in the shop
+* zapps : a list of ZApps that have to be shown in the shop
 
 For each ZApp:
 
-* category : the category this ZApp belongs to, it is used to group ZApps in the web interfaces
+* category : the category this ZApp belongs to, it is used to group ZApps in the web interfaces. There are no pre-defined categories and you are free to put anything you want in here
 * name : the human-readable name
 * description : the name of the json file with the Zoe description
 * readable_descr : the name of the markdown file containing user documentation for the ZApp
@@ -167,46 +215,41 @@ Parameters are values of the JSON description that are modified at run time.
 * description : an helpful description
 * type : string or integer, used for basic for validation
 * default : the default value
+* max : if ``type`` is integer, this is required and is the maximum value the user can set
+* min : if ``type`` is integer, this is required and is the minimum value the user can set
+* step : if ``type`` is integer, this is required and is the step for moving between values
 
 Parameters can be of two kinds:
 
 * environment : the parameter is passed as an environment variable. The name of the environment variable is stored in the ``name`` field. The JSON description is modified by setting the user-defined value in the environment variable with the corresponding name. All services that have the variable defined are modified.
 * command : the service named ``name`` has its start-up command changed to the user-defined value
 
+By default users with the ``user`` and ``admin`` roles have access also to resource parameters via the web interface. They can set the amount of memory and cores to reserve before starting their execution. The configuration option ``no-user-edit-limits-web`` can be used to disable access to this feature.
+
 To get started, in the ``contrib/zapp-shop-sample/`` directory there is a sample of the structure needed for a working zapp-shop, including some data science related ZApps. Copy it as-is in your ZApp shop directory to have some Zapps to play with.
 
 Example of distributed environment
 ----------------------------------
 
-For running heavier workloads and distributed applications, you need a real container cluster. In this example we will use Docker Swarm, as it is simpler to setup than Kubernetes.
+For running heavier workloads and distributed applications, you need a real container cluster. In this example we will use the DockerEngine back-end, as it is simpler to setup than Kubernetes.
 
 Software:
 
-* Docker Swarm
-* Optional: ZooKeeper for Docker Engine discovery by Swarm (etcd and consul are also supported by Swarm)
+* One or more Docker Engines
 * Zoe
 * NFS (or another distributed filesystem like CephFS)
-
-Swarm supports several discovery mechanisms and you should select the most appropriate for your environment. An explicit host list is the most simple to setup, while ZooKeeper provides a resilient and dynamic way of attaching Docker Engines to Swarm.
+* A Postgresql server
 
 Topology:
 
-* On node running Zoe, a Docker Engine and the following containers:
+* One node running Zoe. Depending on how your users will access the workspaces you may want to add `gateway containers <https://github.com/DistributedSystemsGroup/gateway-containers>`_ for SSH and/or SOCKS proxies on this node.
+* At least one worker node with a Docker Engine
+* A file server running NFS: depending on the workload it can be co-located with Zoe
+* A Postgresql server, again it can be colocated depending on your expected load
 
-  * Swarm manager
-  * Docker registry (Optional, but strongly suggested)
-  * Optional `gateway containers <https://github.com/DistributedSystemsGroup/gateway-containers>`_ for SSH and/or SOCKS proxies
+To configure container networking, we suggest the standard Docker multi-host networking.
 
-* Three nodes for ZooKeeper: if used only for Swarm the load will be very low and ZooKeeper can be co-located with Zoe and the Docker Engines
-* At least one more node with a Docker Engine
-* A file server running NFS: depending on the workload it can be co-located with Zoe and the Swarm manager
-* Another node running a Swarm manager, if you want to enable HA for Swarm
-
-To configure Swarm and the Registry, please refer to the documentation available on the Docker website.
-
-To configure container networking, we suggest the standard Swarm overlay network.
-
-In this configuration Zoe expects the network filesystem to be mounted in the same location on all hosts registered in Swarm. This location is specified in the ``workspace-base-path`` Zoe configuration item. Zoe will create a directory under it named as ``deployment-name`` by default or ``workspace-deployment-path`` if specified. Under it a new directory will be created for each user accessing Zoe.
+In this configuration Zoe expects the network filesystem to be mounted in the same location on all worker nodes. This location is specified in the ``workspace-base-path`` Zoe configuration item. Zoe will create a directory under it named as ``deployment-name`` by default or ``workspace-deployment-path`` if specified. Under it a new directory will be created for each user accessing Zoe.
 
 .. _test-install-label:
 
@@ -218,18 +261,9 @@ A simple deployment for development and testing is possible with just:
 * A Docker Engine
 * Zoe
 
-Please note: since Zoe will use the Swarm API to talk to the Docker Engine, the addresses of the exposed ports for running ZApp may be ``0.0.0.0``, causing the links generated by the web interface and the command line tool to be wrong. ZApps can be accessed by using ``127.0.0.1`` instead.
-
-Docker compose
-^^^^^^^^^^^^^^
-
 In the root of the repository you can find a ``docker-compose.yml`` file that should help get you started.
-Look also at the deployment scripts below, as they provide an option for a simple, zoe-on-a-laptop, install.
 
-Deployment scripts
-^^^^^^^^^^^^^^^^^^
-
-Refer to `zoe-deploy <https://github.com/DistributedSystemsGroup/zoe-deploy>`_ repository for automated deployment scripts for configurations with Swarm or Kubernetes back-ends.
+You will need to create a ``/etc/zoe`` directory containing the ``docker.conf`` file that lists the Docker engine nodes available to Zoe.
 
 .. _manual-install-label:
 
@@ -241,22 +275,20 @@ This section shows how to install the components outlined in the distributed env
 Requirements
 ^^^^^^^^^^^^
 
-* Python 3. Development happens on Python 3.4 and 3.5.
-* Docker Swarm
-* A shared filesystem, mounted on all hosts part of the Swarm.
+* Python 3.4 or later
+* One or more Docker engine
+* A shared filesystem, mounted on all Docker hosts.
 
 Optional:
 
-* A Docker registry containing Zoe images for faster container startup times
 * A logging pipeline able to receive GELF-formatted logs, or a Kafka broker
 
-Swarm/Docker
-^^^^^^^^^^^^
+Docker Engine
+^^^^^^^^^^^^^
 
-Install Docker and the Swarm container:
+Install Docker:
 
 * https://docs.docker.com/installation/ubuntulinux/
-* https://docs.docker.com/swarm/install-manual/
 
 Network configuration
 ^^^^^^^^^^^^^^^^^^^^^
@@ -270,7 +302,9 @@ This means that you will also need a key-value store supported by Docker. We use
 Images: Docker Hub Vs local Docker registry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A few sample ZApps have their images available on the Docker Hub. We strongly suggest setting up a private registry, containing your customized Zoe Service images.
+A few sample ZApps have their images available on the Docker Hub. Images can be manually (or via a CI pipeline) pulled on all the worker nodes.
+
+A Docker Registry becomes interesting to have if you have lot of image build activity and you need to keep track of who builds what, establish ACLs, etc.
 
 Zoe
 ^^^
