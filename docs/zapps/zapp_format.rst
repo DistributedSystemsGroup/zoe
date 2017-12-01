@@ -136,6 +136,12 @@ Resources that need to be reserved for this service. Each resource is specified 
 
 Support for this feature depends on the scheduler and back-end in use.
 
+The Elastic scheduler together with the DockerEngine back-end will behave in the following way:
+
+* the "max" limits are ignored in the JSON description, the ones set in the Zoe configuration file are used instead
+* for memory, a soft limit will be set at the "min" resource level and an hard limit to the amount set in the ``max-memory-limit`` option. See Docker documentation about the exact definitions of soft and hard limits
+* for cores, they will be allocated dynamically and automatically: a service that has cores.min set to 4 will have at least cores. If more are available on the node it is running on, more will be given
+
 startup_order
 ^^^^^^^^^^^^^
 
@@ -156,6 +162,13 @@ work_dir
 string
 
 This entry is optional. If set, its value will be used as the work directory where the command is executed.
+
+labels
+^^^^^^
+
+array of strings
+
+This entry is optional. Labels will be used by the scheduler to take placement decisions for services. Services that have labels "ssd" and "gpu" will be placed only on hosts declared with both labels. If no hosts with "ssd" and "gpu" are available, the ZApp is left in the queue.
 
 ports
 ^^^^^
