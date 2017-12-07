@@ -70,7 +70,7 @@ def get_auth(handler: tornado.web.RequestHandler):
     if handler.get_secure_cookie('zoe'):
         cookie_val = str(handler.get_secure_cookie('zoe'))
         uid, role = cookie_val[2:-1].split('.')
-        log.debug('Authentication done using cookie')
+        log.debug('Authentication done using cookie (user {} from {} for {})'.format(uid, handler.request.remote_ip, handler.request.path))
         if role == "guest":
             raise ZoeRestAPIException('Guest users cannot use the API, ask for a role upgrade', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
         return uid, role
@@ -95,7 +95,7 @@ def get_auth(handler: tornado.web.RequestHandler):
     uid, role = authenticator.auth(username, password)
     if uid is None:
         raise ZoeRestAPIException('missing or wrong authentication information', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
-    log.debug('Authentication done using auth-mechanism')
+    log.debug('Authentication done using auth-mechanism (user {} from {} for {})'.format(uid, handler.request.remote_ip, handler.request.path))
 
     if role == "guest":
         raise ZoeRestAPIException('Guest users cannot use the API, ask for a role upgrade', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
