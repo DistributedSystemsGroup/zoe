@@ -115,10 +115,10 @@ class SimulatedPlatform:
                 if node.service_fits(service):
                     candidate_nodes.append(node)
                 else:
-                    log.debug('Cannot fit service {} on node {}: {}'.format(service.id, node.name, node.service_why_unfit(service)))
+                    log.debug('Cannot fit essential service {} on node {}: {}'.format(service.id, node.name, node.service_why_unfit(service)))
             if len(candidate_nodes) == 0:  # this service does not fit anywhere
                 self.deallocate_essential(execution)
-                log.debug('Cannot fit essential service {} anywhere, bailing out'.format(service.id))
+                log.info('Cannot fit essential service {} anywhere, bailing out'.format(service.id))
                 return False
             candidate_nodes.sort(key=lambda n: n.container_count)  # smallest first
             candidate_nodes[0].service_add(service)
@@ -141,7 +141,10 @@ class SimulatedPlatform:
             for node_id_, node in self.nodes.items():
                 if node.service_fits(service):
                     candidate_nodes.append(node)
+                else:
+                    log.debug('Cannot fit elastic service {} on node {}: {}'.format(service.id, node.name, node.service_why_unfit(service)))
             if len(candidate_nodes) == 0:  # this service does not fit anywhere
+                log.info('Cannot fit elastic service {} anywhere'.format(service.id))
                 continue
             candidate_nodes.sort(key=lambda n: n.container_count)  # smallest first
             candidate_nodes[0].service_add(service)

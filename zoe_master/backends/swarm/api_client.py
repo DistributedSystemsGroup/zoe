@@ -240,7 +240,7 @@ class SwarmClient:
             'labels': container.attrs['Config']['Labels']
         }  # type: Dict[str, Any]
         try:
-            info['host'] = container.attrs['Node']['Name'],
+            info['host'] = container.attrs['Node']['Name']
         except KeyError:
             info['host'] = 'N/A'
 
