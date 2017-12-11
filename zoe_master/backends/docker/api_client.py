@@ -151,7 +151,7 @@ class DockerClient:
             'external_address': self.docker_config.external_address
         }  # type: Dict[str, Any]
         try:
-            info['host'] = container.attrs['Node']['Name'],
+            info['host'] = container.attrs['Node']['Name']
         except KeyError:
             info['host'] = 'N/A'
 
