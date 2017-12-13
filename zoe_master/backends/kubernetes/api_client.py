@@ -15,8 +15,6 @@
 
 """Interface to the low-level Kubernetes API."""
 import logging
-import json
-import time
 from argparse import Namespace
 
 from typing import Dict, Any, List
@@ -34,15 +32,8 @@ log = logging.getLogger(__name__)
 ZOE_LABELS = {
     "app": "zoe",
     "version": ZOE_VERSION,
-    "auto-ingress/enabled" : "enabled"
+    "auto-ingress/enabled": "enabled"
 }
-
-class KubernetesConf:
-    """Kubeconfig class"""
-    def __init__(self, jsonfile):
-        self.config = {}
-        with open(jsonfile, 'r') as inp:
-            self.config = json.load(inp)
 
 
 class KubernetesServiceConf:
@@ -230,10 +221,7 @@ class KubernetesReplicationControllerConf:
 class KubernetesClient:
     """The Kubernetes client class that wraps the Kubernetes API."""
     def __init__(self, opts: Namespace) -> None:
-        #try:
         self.api = pykube.HTTPClient(pykube.KubeConfig.from_file(opts.kube_config_file))
-        #except Exception as e:
-        #    log.error(e)
 
     def spawn_replication_controller(self, service_instance: ServiceInstance):
         """Create and start a new replication controller."""
@@ -449,19 +437,7 @@ class KubernetesClient:
                             cpu_float = int(cpu_splitted[0])
                         nss.cores_reserved = round(nss.cores_reserved + cpu_float, 3)
 
-        cont_total = 0
-        mem_total = 0
-        cpu_total = 0
-
         for node_ip in node_dict:
             pl_status.nodes.append(node_dict[node_ip])
-            cont_total = cont_total + node_dict[node_ip].container_count
-            mem_total = mem_total + node_dict[node_ip].memory_total
-            cpu_total = cpu_total + node_dict[node_ip].cores_total
-
-        pl_status.container_count = cont_total
-        pl_status.memory_total = mem_total
-        pl_status.cores_total = cpu_total
-        pl_status.timestamp = time.time()
 
         return pl_status
