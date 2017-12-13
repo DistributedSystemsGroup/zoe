@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Daniele Venzano
+# Copyright (c) 2017, Daniele Venzano
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,11 @@
 
 """Web pages and functions related to executions."""
 
+import datetime
 import json
+import time
+
+from zoe_lib.config import get_conf
 
 import zoe_api.exceptions
 from zoe_api.web.utils import get_auth, catch_exceptions
@@ -138,6 +142,16 @@ class ExecutionInspectWeb(ZoeRequestHandler):
             "services_info": services_info,
             "endpoints": endpoints,
         }
+
+        if get_conf().enable_plots:
+            grafana_url_template = 'http://bigfoot-m2.eurecom.fr/grafana/dashboard/db/zoe-executions?orgId=1&from={}&to={}&var-execution_id={}&refresh=1y'
+            if e.time_end is None:
+                e_time_end = int(time.time() * 1000)
+            else:
+                e_time_end = int((e.time_end - datetime.datetime(1970, 1, 1)) / datetime.timedelta(seconds=1) * 1000)
+            e_time_start = int((e.time_start - datetime.datetime(1970, 1, 1)) / datetime.timedelta(seconds=1) * 1000)
+            template_vars['grafana_url'] = grafana_url_template.format(e_time_start, e_time_end, execution_id)
+
         self.render('execution_inspect.html', **template_vars)
 
 

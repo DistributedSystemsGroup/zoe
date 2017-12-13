@@ -45,6 +45,11 @@
         <a href="/executions/restart/{{ e.id }}">Restart</a>
     </li>
     {% endif %}
+    {% if grafana_url is defined %}
+    <li>
+        <a href="{{ grafana_url }}">Resource usage plots</a>
+    </li>
+    {% endif %}
 </ul>
 {% if e.status == 'error' %}
 <p>Error message: <code>{{ e.error_message }}</code></p>
