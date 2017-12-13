@@ -16,8 +16,9 @@
 """Interface to the low-level Kubernetes API."""
 import logging
 from argparse import Namespace
-
+import socket
 from typing import Dict, Any, List
+
 import humanfriendly
 import pykube
 
@@ -413,7 +414,7 @@ class KubernetesClient:
             nss.cores_total = float(node.obj['status']['allocatable']['cpu'])
             nss.memory_total = humanfriendly.parse_size(node.obj['status']['allocatable']['memory'])
             nss.labels = node.obj['metadata']['labels']
-            node_dict[node.name] = nss
+            node_dict[str(socket.gethostbyname(node.name))] = nss
 
         # Get information from all running pods, then accumulate to nodes
         pod_list = pykube.Pod.objects(self.api).filter(namespace=pykube.all).iterator()
