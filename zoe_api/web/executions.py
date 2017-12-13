@@ -143,7 +143,7 @@ class ExecutionInspectWeb(ZoeRequestHandler):
             "endpoints": endpoints,
         }
 
-        if get_conf().enable_plots:
+        if get_conf().enable_plots and e.time_start is not None:
             grafana_url_template = 'http://bigfoot-m2.eurecom.fr/grafana/dashboard/db/zoe-executions?orgId=1&from={}&to={}&var-execution_id={}&refresh=1y'
             if e.time_end is None:
                 e_time_end = int(time.time() * 1000)
