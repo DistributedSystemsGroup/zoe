@@ -124,6 +124,7 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--max-memory-limit', help='Maximum amount of memory services can use (in GiB)', type=int, default=64)
         argparser.add_argument('--no-user-edit-limits-web', action='store_true', help='Disable editing ZApp resource limits from the web interface (only admins will able to)')
         argparser.add_argument('--additional-volumes', help='Additional volumes to mount in services filesystems. (ex: /mnt/data:data,/mnt/data_n:data_n)', default='')
+        argparser.add_argument('--enable-plots', action='store_true', help='Enable generation of URLs to Grafana')
 
         opts = argparser.parse_args()
         if opts.debug:
