@@ -182,10 +182,10 @@ class ZoeElasticScheduler:
             if self.loop_quit:
                 break
 
+            self._check_dead_services()
             if len(self.queue) == 0:
                 log.debug("Scheduler loop has been triggered, but the queue is empty")
                 self.core_limit_recalc_trigger.set()
-                self._check_dead_services()
                 continue
             log.debug("Scheduler loop has been triggered")
 
