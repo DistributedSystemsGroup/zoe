@@ -75,7 +75,7 @@ class DockerStateSynchronizer(threading.Thread):
                 self.host_stats[host_config.name].memory_total = info['MemTotal']
                 self.host_stats[host_config.name].labels = host_config.labels
                 if info['Labels'] is not None:
-                    self.host_stats[host_config.name].labels += set(info['Labels'])
+                    self.host_stats[host_config.name].labels.union(set(info['Labels']))
 
                 self.host_stats[host_config.name].memory_allocated = sum([cont['memory_soft_limit'] for cont in container_list if cont['memory_soft_limit'] != info['MemTotal']])
                 self.host_stats[host_config.name].cores_allocated = sum([cont['cpu_quota'] / cont['cpu_period'] for cont in container_list if cont['cpu_period'] != 0])
@@ -102,7 +102,7 @@ class DockerStateSynchronizer(threading.Thread):
 
             sleep_time = CHECK_INTERVAL - (time.time() - time_start)
             if sleep_time <= 0:
-                log.warning('synchro thread for host {} is late of {:.2f} seconds'.format(host_config.name, sleep_time * -1))
+                log.warning('synchro thread for host {} is late by {:.2f} seconds'.format(host_config.name, sleep_time * -1))
                 sleep_time = 0
             if self.stop.wait(timeout=sleep_time):
                 break
