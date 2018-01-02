@@ -167,7 +167,7 @@ class ZoeElasticScheduler:
         return out_list
 
     @catch_exceptions_and_retry
-    def loop_start_th(self):
+    def loop_start_th(self):  # pylint: disable=too-many-locals
         """The Scheduler thread loop."""
         auto_trigger = SELF_TRIGGER_TIMEOUT
         while True:

@@ -33,7 +33,8 @@ class StatusEndpointWeb(ZoeRequestHandler):
         """Status and statistics page."""
         uid, role = get_auth(self)
         if uid is None or role != 'admin':
-            return self.redirect(self.get_argument('next', u'/login'))
+            self.redirect(self.get_argument('next', u'/login'))
+            return
 
         stats = self.api_endpoint.statistics_scheduler(uid, role)
         if stats is None:

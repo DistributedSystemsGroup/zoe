@@ -84,7 +84,8 @@ class HomeWeb(ZoeRequestHandler):
         """Home page with authentication."""
         uid, role = get_auth(self)
         if uid is None:
-            return self.redirect(self.get_argument('next', u'/login'))
+            self.redirect(self.get_argument('next', u'/login'))
+            return
 
         filters = {
             "user_id": uid,

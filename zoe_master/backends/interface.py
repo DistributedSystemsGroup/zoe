@@ -17,7 +17,7 @@
 
 import logging
 import time
-from typing import List
+from typing import List, Union
 
 from zoe_lib.config import get_conf
 from zoe_lib.state import Execution, Service  # pylint: disable=unused-import
@@ -45,9 +45,10 @@ except ImportError:
 log = logging.getLogger(__name__)
 
 
-def _get_backend() -> BaseBackend:
+def _get_backend() -> Union[BaseBackend, None]:
     """Return the right backend instance by reading the global configuration."""
     backend_name = get_conf().backend
+    assert backend_name in ['Kubernetes', 'Swarm', 'DockerEngine']
     if backend_name == 'Kubernetes':
         if KubernetesBackend is None:
             raise ZoeException('The Kubernetes backend requires the pykube module')
@@ -62,7 +63,7 @@ def _get_backend() -> BaseBackend:
         return DockerEngineBackend(get_conf())
     else:
         log.error('Unknown backend selected')
-        assert False
+        return None
 
 
 def initialize_backend(state):

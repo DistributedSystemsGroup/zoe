@@ -99,3 +99,4 @@ def main(test_conf=None):
         metrics.quit()
         if gelf_listener is not None:
             gelf_listener.quit()
+    return 0

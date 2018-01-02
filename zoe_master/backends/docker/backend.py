@@ -18,6 +18,7 @@
 import logging
 import re
 import time
+from typing import Union
 
 from zoe_lib.config import get_conf
 from zoe_lib.state import Service
@@ -42,10 +43,11 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
         super().__init__(opts)
         self.docker_config = DockerConfig(get_conf().backend_docker_config_file).read_config()
 
-    def _get_config(self, host) -> DockerHostConfig:
+    def _get_config(self, host) -> Union[DockerHostConfig, None]:
         for conf in self.docker_config:
             if conf.name == host:
                 return conf
+        return None
 
     @classmethod
     def init(cls, state):

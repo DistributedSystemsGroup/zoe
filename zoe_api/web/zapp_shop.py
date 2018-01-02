@@ -40,7 +40,8 @@ class ZAppShopHomeWeb(ZoeRequestHandler):
         """Home page with authentication."""
         uid, role = get_auth(self)
         if uid is None:
-            return self.redirect(self.get_argument('next', u'/login'))
+            self.redirect(self.get_argument('next', u'/login'))
+            return
 
         zapps = zapp_shop.zshop_list_apps(role)
 
@@ -64,7 +65,8 @@ class ZAppLogoWeb(ZoeRequestHandler):
         """Home page with authentication."""
         uid, role_ = get_auth(self)
         if uid is None:
-            return self.redirect(self.get_argument('next', u'/login'))
+            self.redirect(self.get_argument('next', u'/login'))
+            return
 
         self.set_header("Content-type", "image/png")
 
@@ -87,7 +89,8 @@ class ZAppStartWeb(ZoeRequestHandler):
         """Home page with authentication."""
         uid, role = get_auth(self)
         if uid is None:
-            return self.redirect(self.get_argument('next', u'/login'))
+            self.redirect(self.get_argument('next', u'/login'))
+            return
 
         manifest_index = int(zapp_id.split('-')[-1])
         zapp_id = "-".join(zapp_id.split('-')[:-1])
@@ -110,7 +113,8 @@ class ZAppStartWeb(ZoeRequestHandler):
         """Write the parameters in the description and start the ZApp."""
         uid, role = get_auth(self)
         if uid is None:
-            return self.redirect(self.get_argument('next', u'/login'))
+            self.redirect(self.get_argument('next', u'/login'))
+            return
 
         manifest_index = int(zapp_id.split('-')[-1])
         zapp_id = "-".join(zapp_id.split('-')[:-1])

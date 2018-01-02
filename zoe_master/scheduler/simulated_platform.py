@@ -45,6 +45,8 @@ class SimulatedNode:
             return 'service required labels {} to be defined on the node'.format(service.labels)
         elif not self._image_is_available(service.image_name):
             return 'image {} is not available on this node'.format(service.image_name)
+        else:
+            return 'unknown reason'
 
     def _image_is_available(self, image_name) -> bool:
         for image in self.images:

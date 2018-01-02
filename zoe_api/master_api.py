@@ -76,6 +76,7 @@ class APIManager:
                     return False, 'Master is unreachable, abandoning API request'
                 log.warning('Reconnecting and retrying request...')
                 self._connect()
+        return False, 'Master is unreachable, abandoning API request'
 
     def execution_start(self, exec_id: int) -> APIReturnType:
         """Start an execution."""
