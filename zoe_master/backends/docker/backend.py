@@ -60,7 +60,7 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
 
     def spawn_service(self, service_instance: ServiceInstance):
         """Spawn a service, translating a Zoe Service into a Docker container."""
-        parsed_name = re.search(r'^(?:([^\/]+)\/)?(?:([^\/]+)\/)?([^@:\/]+)(?:[@:](.+))?$', service_instance.image_name)
+        parsed_name = re.search(r'^(?:([^/]+)/)?(?:([^/]+)/)?([^@:/]+)(?:[@:](.+))?$', service_instance.image_name)
         if parsed_name.group(4) is None:
             raise ZoeStartExecutionFatalException('Image {} does not have a version tag'.format(service_instance.image_name))
         conf = self._get_config(service_instance.backend_host)
@@ -170,7 +170,7 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
 
     def preload_image(self, image_name):
         """Pull an image from a Docker registry into each host. We shuffle the list to prevent the scheduler to find always the first host in the list."""
-        parsed_name = re.search(r'^(?:([^\/]+)\/)?(?:([^\/]+)\/)?([^@:\/]+)(?:[@:](.+))?$', image_name)
+        parsed_name = re.search(r'^(?:([^/]+)/)?(?:([^/]+)/)?([^@:/]+)(?:[@:](.+))?$', image_name)
         if parsed_name.group(4) is None:
             raise ZoeException('Image {} does not have a version tag'.format(image_name))
         one_success = False
@@ -200,7 +200,11 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
             log.error('Unknown node {}, returning empty image list'.format(node_name))
             return []
 
-        my_engine = DockerClient(host_conf)
+        try:
+            my_engine = DockerClient(host_conf)
+        except ZoeException as e:
+            log.error(str(e))
+            return []
 
         image_list = []
         for dk_image in my_engine.list_images():
