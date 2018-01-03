@@ -209,6 +209,7 @@
     </div>
 
     <h3 class="section"><a name="service-distrib">Service distribution</a></h3>
+    <p>Services marked with a green border are essential, elastic ones have no border.</p>
     <table class="service-distrib">
     <thead>
     <tr>
@@ -222,7 +223,7 @@
         <td class="cell-host">{{ node.name }}</td>
         {% for service in services_per_node[node.name] %}
             {% if service.backend_status == "started" %}
-            <td><a href="{{ reverse_url('execution_inspect', service['execution_id']) }}">{{ service['name'] }}</a> (M: <script>format_bytes({{ node.service_stats[service['id']]['mem_limit'] }});</script> C: {{ '%0.2f'|format(node.service_stats[service['id']]['core_limit']|float) }})</td>
+            <td class="{{ 'running' if service.essential }}"><a href="{{ reverse_url('execution_inspect', service['execution_id']) }}">{{ service['name'] }}</a> (M: <script>format_bytes({{ node.service_stats[service['id']]['mem_limit'] }});</script> C: {{ '%0.2f'|format(node.service_stats[service['id']]['core_limit']|float) }})</td>
             {% endif %}
         {% endfor %}
     </tr>

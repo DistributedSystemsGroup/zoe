@@ -213,7 +213,7 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
             image = {
                 'id': dk_image.attrs['Id'],
                 'size': dk_image.attrs['Size'],
-                'names': dk_image.tags
+                'names': dk_image.tags  # type: list
             }
             for name in image['names']:
                 if name[-7:] == ':latest':  # add an image with the name without 'latest' to fake Docker image lookup algorithm
@@ -225,7 +225,11 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
     def update_service(self, service, cores=None, memory=None):
         """Update a service reservation."""
         conf = self._get_config(service.backend_host)
-        engine = DockerClient(conf)
+        try:
+            engine = DockerClient(conf)
+        except ZoeException as e:
+            log.error(str(e))
+            return
         if service.backend_id is not None:
             info = engine.info()
             if cores is not None and cores > info['NCPU']:
