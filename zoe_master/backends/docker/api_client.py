@@ -155,7 +155,7 @@ class DockerClient:
         except KeyError:
             info['host'] = 'N/A'
 
-        if container.status == 'running' or container.status == 'restarting':
+        if container.status == 'running' or container.status == 'restarting' or container.status == 'removing':
             info["state"] = Service.BACKEND_START_STATUS
             info["running"] = True
         elif container.status == 'paused' or container.status == 'exited' or container.status == 'dead':

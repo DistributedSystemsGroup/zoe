@@ -25,6 +25,7 @@
                         {% endif %}</li>
             <li>Suggested CPU core allocation limit: {{ service["resources"]["cores"]["min"] if service["resources"]["cores"]["min"] != None else "No limit" }}</li>
         </ul></li>
+        <li>Image: <code>{{ service["image"] }}</code></li>
     {% endfor %}
     </ul>
 

@@ -243,6 +243,10 @@ div.running {
     border-color: green;
 }
 
+td.running {
+    border: 1px solid green;
+}
+
 div.node_detail {
     width: 48%;
     float: left;

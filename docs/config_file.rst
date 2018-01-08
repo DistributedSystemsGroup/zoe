@@ -83,10 +83,8 @@ Authentication:
 
 Scheduler options:
 
-* ``scheduler-class = <ZoeSimpleScheduler | ZoeElasticScheduler>`` : Scheduler class to use for scheduling ZApps (default: elastic scheduler)
+* ``scheduler-class = <ZoeElasticScheduler>`` : Scheduler class to use for scheduling ZApps (default: elastic scheduler)
 * ``scheduler-policy = <FIFO | SIZE>`` : Scheduler policy to use for scheduling ZApps (default: FIFO)
-
-Default options for the scheduler enable the traditional Zoe scheduler that was already available in the previous releases.
 
 ZApp shop:
 
