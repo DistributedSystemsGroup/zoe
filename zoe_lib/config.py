@@ -19,7 +19,6 @@ import logging
 
 from zoe_lib.configargparse import ArgumentParser, Namespace
 
-logging.getLogger('kazoo').setLevel(logging.WARNING)
 logging.getLogger('requests').setLevel(logging.WARNING)
 logging.getLogger('urllib3').setLevel(logging.WARNING)
 logging.getLogger('docker').setLevel(logging.INFO)
@@ -101,14 +100,7 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--scheduler-class', help='Scheduler class to use for scheduling ZApps', choices=['ZoeElasticScheduler'], default='ZoeElasticScheduler')
         argparser.add_argument('--scheduler-policy', help='Scheduler policy to use for scheduling ZApps', choices=['FIFO', 'SIZE'], default='FIFO')
 
-        argparser.add_argument('--backend', choices=['Swarm', 'Kubernetes', 'DockerEngine'], default='DockerEngine', help='Which backend to enable')
-
-        # Docker Swarm backend options
-        argparser.add_argument('--backend-swarm-url', help='Swarm/Docker API endpoint (ex.: zk://zk1:2181,zk2:2181 or http://swarm:2380)', default='http://localhost:2375')
-        argparser.add_argument('--backend-swarm-zk-path', help='Swarm/Docker optional ZooKeeper path for Swarm Znodes', default='/docker')
-        argparser.add_argument('--backend-swarm-tls-cert', help='Docker TLS certificate file', default='cert.pem')
-        argparser.add_argument('--backend-swarm-tls-key', help='Docker TLS private key file', default='key.pem')
-        argparser.add_argument('--backend-swarm-tls-ca', help='Docker TLS CA certificate file', default='ca.pem')
+        argparser.add_argument('--backend', choices=['Kubernetes', 'DockerEngine'], default='DockerEngine', help='Which backend to enable')
 
         # Docker Engine backend options
         argparser.add_argument('--backend-docker-config-file', help='Location of the Docker Engine config file', default='docker.conf')
