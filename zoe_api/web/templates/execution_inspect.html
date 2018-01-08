@@ -86,6 +86,7 @@
         <th>Zoe status</th>
         <th>Backend status</th>
         <th>Host</th>
+        <th>Labels</th>
         <th>Output logs</th>
         <th>Errors</th>
     </tr>
@@ -98,6 +99,7 @@
             <td>{{ s['status'] }}</td>
             <td>{{ s['backend_status'] }}</td>
             <td>{{ s['backend_host'] }}</td>
+            <td>{% for l in s['labels'] %}{{ l }} {% endfor %}</td>
             {% if s['status'] != 'created' %}
             <td><a href="{{ reverse_url("service_logs", s['id']) }}">open</a></td>
             {% else %}
