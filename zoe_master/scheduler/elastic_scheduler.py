@@ -158,7 +158,7 @@ class ZoeElasticScheduler:
                 if execution.size == 0 or exec_data.last_time_scheduled == 0:
                     continue
                 elif execution.size < 0:
-                    execution.size = 0
+                    execution.set_size(0)
                 new_size = execution.size - (time.time() - exec_data.last_time_scheduled) * (32 * 1024 ** 2)  # to be tuned
                 execution.set_size(new_size)
 
