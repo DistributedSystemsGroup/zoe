@@ -3,6 +3,13 @@
 
 {% block custom_head %}
     <script src="/static/Chart.min.js" type="application/javascript"></script>
+    <script>
+    Chart.scaleService.updateScaleDefaults('linear', {
+        ticks: {
+            min: 0
+        }
+    });
+    </script>
 {% endblock %}
 
 {% block content %}
