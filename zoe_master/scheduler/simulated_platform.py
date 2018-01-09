@@ -122,6 +122,9 @@ class SimulatedPlatform:
         elif get_conf().placement_policy == "average":
             node_list.sort(key=lambda n: n.container_count)  # smallest first
             return node_list[0]
+        else:
+            log.error('Unknown placement policy: {}'.format(get_conf().placement_policy))
+            return node_list[0]
 
     def allocate_essential(self, execution: Execution) -> bool:
         """Try to find an allocation for essential services"""
