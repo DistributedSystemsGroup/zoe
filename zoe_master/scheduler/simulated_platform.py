@@ -1,8 +1,11 @@
 """Classes to hold the system state and simulated container/service placements"""
 
 import logging
+import random
+from typing import List
 
 from zoe_lib.state import Execution, Service
+from zoe_lib.config import get_conf
 from zoe_master.stats import ClusterStats, NodeStats
 from zoe_master.backends.interface import list_available_images
 
@@ -109,6 +112,16 @@ class SimulatedPlatform:
             if node.status == 'online':
                 self.nodes[node.name] = SimulatedNode(node)
 
+    def _select_node_policy(self, node_list: List[SimulatedNode]) -> SimulatedNode:
+        if get_conf().placement_policy == "random":
+            return random.choice(node_list)
+        elif get_conf().placement_policy == "waterfill":
+            node_list.sort(key=lambda n: n.container_count, reverse=True)  # biggest first
+            return node_list[0]
+        elif get_conf().placement_policy == "average":
+            node_list.sort(key=lambda n: n.container_count)  # smallest first
+            return node_list[0]
+
     def allocate_essential(self, execution: Execution) -> bool:
         """Try to find an allocation for essential services"""
         for service in execution.essential_services:
@@ -122,8 +135,8 @@ class SimulatedPlatform:
                 self.deallocate_essential(execution)
                 log.info('Cannot fit essential service {} anywhere, bailing out'.format(service.id))
                 return False
-            candidate_nodes.sort(key=lambda n: n.container_count)  # smallest first
-            candidate_nodes[0].service_add(service)
+            selected_node = self._select_node_policy(candidate_nodes)
+            selected_node.service_add(service)
         return True
 
     def deallocate_essential(self, execution: Execution):
@@ -148,8 +161,8 @@ class SimulatedPlatform:
             if len(candidate_nodes) == 0:  # this service does not fit anywhere
                 log.info('Cannot fit elastic service {} anywhere'.format(service.id))
                 continue
-            candidate_nodes.sort(key=lambda n: n.container_count)  # smallest first
-            candidate_nodes[0].service_add(service)
+            selected_node = self._select_node_policy(candidate_nodes)
+            selected_node.service_add(service)
             service.set_runnable()
             at_least_one_allocated = True
         return at_least_one_allocated

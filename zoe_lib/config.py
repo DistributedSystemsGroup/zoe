@@ -99,6 +99,7 @@ def load_configuration(test_conf=None):
         # Scheduler
         argparser.add_argument('--scheduler-class', help='Scheduler class to use for scheduling ZApps', choices=['ZoeElasticScheduler'], default='ZoeElasticScheduler')
         argparser.add_argument('--scheduler-policy', help='Scheduler policy to use for scheduling ZApps', choices=['FIFO', 'SIZE'], default='FIFO')
+        argparser.add_argument('--placement-policy', help='Placement policy', choices=['waterfill', 'random', 'average'], default='average')
 
         argparser.add_argument('--backend', choices=['Kubernetes', 'DockerEngine'], default='DockerEngine', help='Which backend to enable')
 

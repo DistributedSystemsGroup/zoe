@@ -173,8 +173,7 @@ class ZoeElasticScheduler:
     def _requeue(self, execution: Execution):
         execution.termination_lock.release()
         if execution not in self.queue:  # make sure the execution is in the queue
-            log.warning("Execution {} re-queued, but it was not in the queue".format(execution.id))
-            self.queue.append(execution)
+            log.warning("Execution {} wants to be re-queued, but it was not in the queue".format(execution.id))
 
     @catch_exceptions_and_retry
     def loop_start_th(self):  # pylint: disable=too-many-locals
