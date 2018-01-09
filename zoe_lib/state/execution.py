@@ -67,10 +67,13 @@ class Execution(BaseRecord):
         self._status = d['status']
         self.error_message = d['error_message']
 
-        try:
-            self.size = self.description['size']
-        except KeyError:
-            self.size = self.description['priority']  # zapp format v2
+        if d['size'] is not None:
+            self.size = float(d['size'])
+        else:
+            try:
+                self.size = self.description['size']
+            except KeyError:
+                self.size = self.description['priority']  # zapp format v2
 
         self.termination_lock = threading.Lock()
 
@@ -86,7 +89,8 @@ class Execution(BaseRecord):
             'time_end': None if self.time_end is None else (self.time_end - datetime.datetime(1970, 1, 1)) / datetime.timedelta(seconds=1),
             'status': self._status,
             'error_message': self.error_message,
-            'services': [s.id for s in self.services]
+            'services': [s.id for s in self.services],
+            'size': self.size
         }
 
     def __eq__(self, other):
@@ -129,6 +133,11 @@ class Execution(BaseRecord):
         """Contains an error message in case the status is 'error'."""
         self.error_message = message
         self.sql_manager.executions.update(self.id, error_message=self.error_message)
+
+    def set_size(self, new_size):
+        """Changes the size of the execution, for policies that calculate the size automatically."""
+        self.size = new_size
+        self.sql_manager.executions.update(self.id, size=new_size)
 
     @property
     def is_active(self):
@@ -225,6 +234,7 @@ class ExecutionTable(BaseTable):
             user_id TEXT NOT NULL,
             description JSON NOT NULL,
             status TEXT NOT NULL,
+            size NUMERIC NOT NULL,
             execution_manager_id TEXT NULL,
             time_submit TIMESTAMP NOT NULL,
             time_start TIMESTAMP NULL,
@@ -236,7 +246,7 @@ class ExecutionTable(BaseTable):
         """Create a new execution in the state."""
         status = Execution.SUBMIT_STATUS
         time_submit = datetime.datetime.utcnow()
-        query = self.cursor.mogrify('INSERT INTO execution (id, name, user_id, description, status, time_submit) VALUES (DEFAULT, %s,%s,%s,%s,%s) RETURNING id', (name, user_id, description, status, time_submit))
+        query = self.cursor.mogrify('INSERT INTO execution (id, name, user_id, description, status, size, time_submit) VALUES (DEFAULT, %s,%s,%s,%s,%s,%s) RETURNING id', (name, user_id, description, status, description['size'], time_submit))
         self.cursor.execute(query)
         self.sql_manager.commit()
         return self.cursor.fetchone()[0]

@@ -28,11 +28,6 @@ from zoe_master.exceptions import ZoeStartExecutionFatalException, ZoeStartExecu
 from zoe_master.stats import ClusterStats  # pylint: disable=unused-import
 
 try:
-    from zoe_master.backends.swarm.backend import SwarmBackend
-except ImportError as ex:
-    SwarmBackend = None
-
-try:
     from zoe_master.backends.kubernetes.backend import KubernetesBackend
 except ImportError:
     KubernetesBackend = None
@@ -53,10 +48,6 @@ def _get_backend() -> Union[BaseBackend, None]:
         if KubernetesBackend is None:
             raise ZoeException('The Kubernetes backend requires the pykube module')
         return KubernetesBackend(get_conf())
-    elif backend_name == 'Swarm':
-        if SwarmBackend is None:
-            raise ZoeException('The Swarm backend requires docker python version >= 2.0.2')
-        return SwarmBackend(get_conf())
     elif backend_name == 'DockerEngine':
         if DockerEngineBackend is None:
             raise ZoeException('The Docker Engine backend requires docker python version >= 2.0.2')

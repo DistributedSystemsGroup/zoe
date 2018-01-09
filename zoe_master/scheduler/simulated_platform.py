@@ -1,8 +1,11 @@
 """Classes to hold the system state and simulated container/service placements"""
 
 import logging
+import random
+from typing import List
 
 from zoe_lib.state import Execution, Service
+from zoe_lib.config import get_conf
 from zoe_master.stats import ClusterStats, NodeStats
 from zoe_master.backends.interface import list_available_images
 
@@ -26,6 +29,7 @@ class SimulatedNode:
         self.name = real_node.name
         self.labels = real_node.labels
         self.images = list_available_images(self.name)
+        log.debug('Node {}: m {} | c {} | l {}'.format(self.name, self.node_free_memory() / (1024 ** 2), self.node_free_cores(), list(self.labels)))
 
     def service_fits(self, service: Service) -> bool:
         """Checks whether a service can fit in this node"""
@@ -97,7 +101,7 @@ class SimulatedNode:
         return free
 
     def __repr__(self):
-        out = 'SN {} | m {} | c {}'.format(self.name, self.node_free_memory(), self.node_free_cores())
+        out = 'SN {} | m {} | c {}'.format(self.name, self.node_free_memory() / (1024 ** 2), self.node_free_cores())
         return out
 
 
@@ -108,6 +112,19 @@ class SimulatedPlatform:
         for node in platform_status.nodes:
             if node.status == 'online':
                 self.nodes[node.name] = SimulatedNode(node)
+
+    def _select_node_policy(self, node_list: List[SimulatedNode]) -> SimulatedNode:
+        if get_conf().placement_policy == "random":
+            return random.choice(node_list)
+        elif get_conf().placement_policy == "waterfill":
+            node_list.sort(key=lambda n: n.container_count, reverse=True)  # biggest first
+            return node_list[0]
+        elif get_conf().placement_policy == "average":
+            node_list.sort(key=lambda n: n.container_count)  # smallest first
+            return node_list[0]
+        else:
+            log.error('Unknown placement policy: {}'.format(get_conf().placement_policy))
+            return node_list[0]
 
     def allocate_essential(self, execution: Execution) -> bool:
         """Try to find an allocation for essential services"""
@@ -122,8 +139,8 @@ class SimulatedPlatform:
                 self.deallocate_essential(execution)
                 log.info('Cannot fit essential service {} anywhere, bailing out'.format(service.id))
                 return False
-            candidate_nodes.sort(key=lambda n: n.container_count)  # smallest first
-            candidate_nodes[0].service_add(service)
+            selected_node = self._select_node_policy(candidate_nodes)
+            selected_node.service_add(service)
         return True
 
     def deallocate_essential(self, execution: Execution):
@@ -148,8 +165,8 @@ class SimulatedPlatform:
             if len(candidate_nodes) == 0:  # this service does not fit anywhere
                 log.info('Cannot fit elastic service {} anywhere'.format(service.id))
                 continue
-            candidate_nodes.sort(key=lambda n: n.container_count)  # smallest first
-            candidate_nodes[0].service_add(service)
+            selected_node = self._select_node_policy(candidate_nodes)
+            selected_node.service_add(service)
             service.set_runnable()
             at_least_one_allocated = True
         return at_least_one_allocated

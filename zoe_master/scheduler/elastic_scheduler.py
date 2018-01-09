@@ -61,7 +61,7 @@ class ExecutionProgress:
 class ZoeElasticScheduler:
     """The Scheduler class for size-based scheduling. Policy can be "FIFO" or "SIZE"."""
     def __init__(self, state: SQLManager, policy, metrics: StatsManager):
-        if policy != 'FIFO' and policy != 'SIZE':
+        if policy != 'FIFO' and policy != 'SIZE' and policy != 'DYNSIZE':
             raise UnsupportedSchedulerPolicyError
         self.metrics = metrics
         self.trigger_semaphore = threading.Semaphore(0)
@@ -148,16 +148,19 @@ class ZoeElasticScheduler:
             counter -= 1
 
     def _refresh_execution_sizes(self):
-        for execution in self.queue:  # type: Execution
-            exec_data = self.additional_exec_state[execution.id]
-            if exec_data.last_time_scheduled == 0:
-                progress = 0
-            else:
-                last_progress = (time.time() - exec_data.last_time_scheduled) / ((execution.services_count / execution.running_services_count) * execution.size)
-                exec_data.progress_sequence.append(last_progress)
-                progress = sum(exec_data.progress_sequence)
-            remaining_execution_time = (1 - progress) * execution.size
-            execution.size = remaining_execution_time * execution.services_count
+        if self.policy == "FIFO":
+            return
+        elif self.policy == "SIZE":
+            return
+        elif self.policy == "DYNSIZE":
+            for execution in self.queue:  # type: Execution
+                exec_data = self.additional_exec_state[execution.id]
+                if execution.size == 0 or exec_data.last_time_scheduled == 0:
+                    continue
+                elif execution.size < 0:
+                    execution.size = 0
+                new_size = execution.size - (time.time() - exec_data.last_time_scheduled) * (32 * 1024 ** 2)  # to be tuned
+                execution.set_size(new_size)
 
     def _pop_all(self):
         out_list = []
@@ -172,9 +175,9 @@ class ZoeElasticScheduler:
 
     def _requeue(self, execution: Execution):
         execution.termination_lock.release()
-        if execution not in self.queue:  # make sure the execution is in the queue
-            log.warning("Execution {} re-queued, but it was not in the queue".format(execution.id))
-            self.queue.append(execution)
+        self.additional_exec_state[execution.id].last_time_scheduled = time.time()
+        if execution not in self.queue:  # sanity check: the execution should be in the queue
+            log.warning("Execution {} wants to be re-queued, but it is not in the queue".format(execution.id))
 
     @catch_exceptions_and_retry
     def loop_start_th(self):  # pylint: disable=too-many-locals
@@ -202,7 +205,7 @@ class ZoeElasticScheduler:
             while True:  # Inner loop will run until no new executions can be started or the queue is empty
                 self._refresh_execution_sizes()
 
-                if self.policy == "SIZE":
+                if self.policy == "SIZE" or self.policy == "DYNSIZE":
                     self.queue.sort(key=lambda execution: execution.size)
 
                 jobs_to_attempt_scheduling = self._pop_all()
@@ -219,7 +222,6 @@ class ZoeElasticScheduler:
                     break
 
                 cluster_status_snapshot = SimulatedPlatform(platform_state)
-                log.debug(str(cluster_status_snapshot))
 
                 jobs_to_launch = []
                 free_resources = cluster_status_snapshot.aggregated_free_memory()
@@ -275,7 +277,6 @@ class ZoeElasticScheduler:
                         jobs_to_attempt_scheduling.remove(job)
                         self.queue.remove(job)
                         self.queue_running.append(job)
-                    self.additional_exec_state[job.id].last_time_scheduled = time.time()
 
                 self.core_limit_recalc_trigger.set()
 

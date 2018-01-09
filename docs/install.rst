@@ -23,7 +23,6 @@ At this time Zoe supports three back-ends:
 
 * DockerEngine: uses one or more Docker Engines. It is simple to install and to scale.
 * Kubernetes: the most complex to setup, we suggest using it only if you already have (or need) a Kubernetes setup for running other software.
-* Legacy Docker Swarm (deprecated): simple to install, additional features like SSL, high-availability and dynamic host discovery can be added as needed. Please note that Zoe does not support the new Swarm Mode of Docker Engine as the API is too limited.
 
 DockerEngine
 ^^^^^^^^^^^^
@@ -309,7 +308,7 @@ A Docker Registry becomes interesting to have if you have lot of image build act
 Zoe
 ^^^
 
-Zoe is written in Python and uses the ``requirements.txt`` file to list the package dependencies needed for all components of Zoe. Not all of them are needed in all cases, for example you need the ``kazoo`` library only if you use Zookeeper to manage Swarm high availability.
+Zoe is written in Python and uses the ``requirements.txt`` file to list the package dependencies needed for all components of Zoe. Not all of them are needed in all cases, for example you need the ``pykube`` library only if you use the Kubernetes back-end.
 
 Currently this is the recommended procedure, once the initial Swarm setup has been done:
 
