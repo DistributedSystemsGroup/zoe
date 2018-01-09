@@ -29,6 +29,7 @@ class SimulatedNode:
         self.name = real_node.name
         self.labels = real_node.labels
         self.images = list_available_images(self.name)
+        log.debug('Node {}: m {} | c {} | l {}'.format(self.name, self.node_free_memory() / (1024 ** 2), self.node_free_cores(), list(self.labels)))
 
     def service_fits(self, service: Service) -> bool:
         """Checks whether a service can fit in this node"""
@@ -100,7 +101,7 @@ class SimulatedNode:
         return free
 
     def __repr__(self):
-        out = 'SN {} | m {} | c {}'.format(self.name, self.node_free_memory(), self.node_free_cores())
+        out = 'SN {} | m {} | c {}'.format(self.name, self.node_free_memory() / (1024 ** 2), self.node_free_cores())
         return out
 
 
