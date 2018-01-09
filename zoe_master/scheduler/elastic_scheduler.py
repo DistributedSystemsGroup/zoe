@@ -159,6 +159,7 @@ class ZoeElasticScheduler:
                     continue
                 elif execution.size < 0:
                     execution.set_size(0)
+                    continue
                 new_size = execution.size - (time.time() - exec_data.last_time_scheduled) * (32 * 1024 ** 2)  # to be tuned
                 execution.set_size(new_size)
 
