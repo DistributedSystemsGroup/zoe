@@ -118,9 +118,15 @@ class SimulatedPlatform:
             return random.choice(node_list)
         elif get_conf().placement_policy == "waterfill":
             node_list.sort(key=lambda n: n.container_count, reverse=True)  # biggest first
+            for node in node_list:
+                if len(node.labels) == 0:
+                    return node
             return node_list[0]
         elif get_conf().placement_policy == "average":
             node_list.sort(key=lambda n: n.container_count)  # smallest first
+            for node in node_list:
+                if len(node.labels) == 0:
+                    return node
             return node_list[0]
         else:
             log.error('Unknown placement policy: {}'.format(get_conf().placement_policy))
