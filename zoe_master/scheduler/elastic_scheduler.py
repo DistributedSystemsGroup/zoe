@@ -155,10 +155,10 @@ class ZoeElasticScheduler:
         elif self.policy == "DYNSIZE":
             for execution in self.queue:  # type: Execution
                 exec_data = self.additional_exec_state[execution.id]
-                if execution.size == 0 or exec_data.last_time_scheduled == 0:
+                if exec_data.last_time_scheduled == 0:
                     continue
-                elif execution.size < 0:
-                    execution.set_size(0)
+                elif execution.size <= 0:
+                    execution.set_size(execution.total_reservations.cores.min * execution.total_reservations.memory.min)
                     continue
                 new_size = execution.size - (time.time() - exec_data.last_time_scheduled) * (32 * 1024 ** 2)  # to be tuned
                 execution.set_size(new_size)
