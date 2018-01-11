@@ -101,7 +101,7 @@ class SimulatedNode:
         return free
 
     def __repr__(self):
-        out = 'SN {} | m {} | c {}'.format(self.name, self.node_free_memory() / (1024 ** 2), self.node_free_cores())
+        out = 'SN {} | m {:.2f}GB | c {}'.format(self.name, self.node_free_memory() / (1024 ** 3), self.node_free_cores())
         return out
 
 
@@ -114,23 +114,35 @@ class SimulatedPlatform:
                 self.nodes[node.name] = SimulatedNode(node)
 
     def _select_node_policy(self, node_list: List[SimulatedNode]) -> SimulatedNode:
+        log.debug('Node selection with {} policy'.format(get_conf().placement_policy))
+        selected = None
+
         if get_conf().placement_policy == "random":
-            return random.choice(node_list)
+            selected = random.choice(node_list)
         elif get_conf().placement_policy == "waterfill":
-            node_list.sort(key=lambda n: n.container_count, reverse=True)  # biggest first
+            node_list.sort(key=lambda n: (len(n.labels), -n.container_count))  # biggest container_count first, lowest label count first
             for node in node_list:
                 if len(node.labels) == 0:
-                    return node
-            return node_list[0]
+                    selected = node
+                    break
+            if selected is None:
+                selected = node_list[0]
         elif get_conf().placement_policy == "average":
-            node_list.sort(key=lambda n: n.container_count)  # smallest first
+            node_list.sort(key=lambda n: (len(n.labels), n.container_count))  # smallest container_count first, lowest label count first
             for node in node_list:
                 if len(node.labels) == 0:
-                    return node
-            return node_list[0]
+                    selected = node
+                    break
+                if selected is None:
+                    selected = node_list[0]
         else:
             log.error('Unknown placement policy: {}'.format(get_conf().placement_policy))
-            return node_list[0]
+            selected = node_list[0]
+
+        for node in node_list:
+            log.debug(' -> {}: {} {}'.format(node.name, node.container_count, len(node.labels)))
+        log.debug('Selected node {}'.format(selected.name))
+        return selected
 
     def allocate_essential(self, execution: Execution) -> bool:
         """Try to find an allocation for essential services"""
