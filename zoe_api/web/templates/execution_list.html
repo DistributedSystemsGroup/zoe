@@ -17,6 +17,17 @@
 {% block content %}
     <div id="my_executions">
     <label class="filter">All executions <input class="filter" placeholder="Filter" /></label>
+    {% if max_page > 0 %}
+        <p>Pages:
+            {% for page_n in range(0, max_page) %}
+            {% if page_n == current_page %}
+            {{ page_n + 1 }}&nbsp;
+            {% else %}
+            <a href="/executions/{{ page_n }}">{{ page_n + 1 }}</a>&nbsp;
+            {% endif %}
+            {% endfor %}
+        </p>
+    {% endif %}
     <table id="exec_list" class="app_list sortable">
     <thead>
     <tr>
@@ -61,6 +72,17 @@
         {% endfor %}
     </tbody>
     </table>
+    {% if max_page > 0 %}
+        <p>Pages:
+            {% for page_n in range(0, max_page) %}
+            {% if page_n == current_page %}
+            {{ page_n + 1 }}&nbsp;
+            {% else %}
+            <a href="/executions/{{ page_n }}">{{ page_n + 1 }}</a>&nbsp;
+            {% endif %}
+            {% endfor %}
+        </p>
+    {% endif %}
     </div>
 
     <script>

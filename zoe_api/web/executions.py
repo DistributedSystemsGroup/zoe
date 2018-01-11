@@ -17,6 +17,7 @@
 
 import datetime
 import json
+import math
 import time
 
 from zoe_lib.config import get_conf
@@ -53,25 +54,32 @@ class ExecutionStartWeb(ZoeRequestHandler):
 
 class ExecutionListWeb(ZoeRequestHandler):
     """Handler class"""
+    PAGINATION_ITEM_COUNT = 50
+
     def initialize(self, **kwargs):
         """Initializes the request handler."""
         super().initialize(**kwargs)
         self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
     @catch_exceptions
-    def get(self):
+    def get(self, page=0):
         """Home page with authentication."""
         uid, role = get_auth(self)
         if uid is None:
             self.redirect(self.get_argument('next', u'/login'))
             return
 
-        executions = self.api_endpoint.execution_list(uid, role)
+        page = int(page)
+        executions_count = self.api_endpoint.execution_count(uid, role)
+        executions = self.api_endpoint.execution_list(uid, role, base=page*self.PAGINATION_ITEM_COUNT, limit=self.PAGINATION_ITEM_COUNT)
 
         template_vars = {
             "uid": uid,
             "role": role,
-            'executions': sorted(executions, key=lambda e: e.id, reverse=True)
+            'executions': sorted(executions, key=lambda e: e.id, reverse=True),
+            'current_page': page,
+            'max_page': math.ceil(executions_count / self.PAGINATION_ITEM_COUNT),
+            'last_page': len(executions) < self.PAGINATION_ITEM_COUNT
         }
         self.render('execution_list.html', **template_vars)
 
