@@ -193,34 +193,8 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
 
     def list_available_images(self, node_name):
         """List the images available on the specified node."""
-        host_conf = None
-        for conf in self.docker_config:
-            if conf.name == node_name:
-                host_conf = conf
-                break
-        if host_conf is None:
-            log.error('Unknown node {}, returning empty image list'.format(node_name))
-            return []
-
-        try:
-            my_engine = DockerClient(host_conf)
-        except ZoeException as e:
-            log.error(str(e))
-            return []
-
-        image_list = []
-        for dk_image in my_engine.list_images():
-            image = {
-                'id': dk_image.attrs['Id'],
-                'size': dk_image.attrs['Size'],
-                'names': dk_image.tags  # type: list
-            }
-            for name in image['names']:
-                if name[-7:] == ':latest':  # add an image with the name without 'latest' to fake Docker image lookup algorithm
-                    image['names'].append(name[:-7])
-                    break
-            image_list.append(image)
-        return image_list
+        node_stats = _checker.host_stats[node_name]
+        return node_stats.images
 
     def update_service(self, service, cores=None, memory=None):
         """Update a service reservation."""

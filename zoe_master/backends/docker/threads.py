@@ -100,6 +100,19 @@ class DockerStateSynchronizer(threading.Thread):
                     }
                 self.host_stats[host_config.name].service_stats = stats
 
+                self.host_stats[host_config.name].images = []
+                for dk_image in my_engine.list_images():
+                    image = {
+                        'id': dk_image.attrs['Id'],
+                        'size': dk_image.attrs['Size'],
+                        'names': dk_image.tags  # type: list
+                    }
+                    for name in image['names']:
+                        if name[-7:] == ':latest':  # add an image with the name without 'latest' to fake Docker image lookup algorithm
+                            image['names'].append(name[:-7])
+                            break
+                    self.host_stats[host_config.name].images.append(image)
+
             sleep_time = CHECK_INTERVAL - (time.time() - time_start)
             if sleep_time <= 0:
                 log.warning('synchro thread for host {} is late by {:.2f} seconds'.format(host_config.name, sleep_time * -1))
