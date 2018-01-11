@@ -139,7 +139,7 @@ class SimulatedPlatform:
                 if node.service_fits(service):
                     candidate_nodes.append(node)
                 else:
-                    reasons += 'node {}: {} ## '.format(service.id, node.name, node.service_why_unfit(service))
+                    reasons += 'node {}: {} ## '.format(node.name, node.service_why_unfit(service))
             if len(candidate_nodes) == 0:  # this service does not fit anywhere
                 self.deallocate_essential(execution)
                 log.info('Cannot fit essential service {} anywhere, reasons: {}'.format(service.id, reasons))
@@ -168,7 +168,7 @@ class SimulatedPlatform:
                 if node.service_fits(service):
                     candidate_nodes.append(node)
                 else:
-                    reasons += 'node {}: {} ## '.format(service.id, node.name, node.service_why_unfit(service))
+                    reasons += 'node {}: {} ## '.format(node.name, node.service_why_unfit(service))
             if len(candidate_nodes) == 0:  # this service does not fit anywhere
                 log.info('Cannot fit elastic service {} anywhere, reasons: {}'.format(service.id, reasons))
                 continue
