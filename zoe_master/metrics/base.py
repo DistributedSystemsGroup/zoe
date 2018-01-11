@@ -81,6 +81,8 @@ class StatsManager(threading.Thread):
                             node.service_stats[service_id]['memory_in_use'] = usage['mem_usage']
                         except KeyError:  # happens while a service is being terminated
                             continue
+                        except TypeError:  # happens while KairosDB cannot be reached
+                            continue
                         node_cores += usage['cpu_usage']
                         node_memory += usage['mem_usage']
 
