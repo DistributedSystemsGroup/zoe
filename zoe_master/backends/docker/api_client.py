@@ -210,12 +210,15 @@ class DockerClient:
         except docker.errors.NotFound:
             return
 
-        cont.stop(timeout=5)
-        if delete:
-            try:
+        try:
+            if delete:
                 cont.remove(force=True)
-            except docker.errors.APIError as e:
-                log.warning(str(e))
+            else:
+                cont.stop(timeout=5)
+        except docker.errors.NotFound:
+            pass
+        except docker.errors.APIError as e:
+            log.warning(str(e))
 
     def event_listener(self, callback: Callable[[str], bool]) -> None:
         """An infinite loop that listens for events from Swarm."""

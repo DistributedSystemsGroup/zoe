@@ -93,10 +93,15 @@ def main(test_conf=None):
     except Exception:
         log.exception('Fatal error in API loop')
     finally:
+        log.info('Terminating scheduler thread')
         scheduler.quit()
+        log.info('Terminating api server thread')
         api_server.quit()
+        log.info('Terminating back-end threads')
         zoe_master.backends.interface.shutdown_backend()
+        log.info('Terminating metric thread')
         metrics.quit()
         if gelf_listener is not None:
+            log.info('Terminating GELF listener thread')
             gelf_listener.quit()
     return 0
