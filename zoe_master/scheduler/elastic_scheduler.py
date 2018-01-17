@@ -261,6 +261,8 @@ class ZoeElasticScheduler:
                         ret = start_essential(job, placements)
                         if ret == "fatal":
                             jobs_to_attempt_scheduling.remove(job)
+                            self.queue.remove(job)
+                            job.termination_lock.release()
                             continue  # trow away the execution
                         elif ret == "requeue":
                             self._requeue(job)
