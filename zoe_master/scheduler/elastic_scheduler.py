@@ -160,7 +160,7 @@ class ZoeElasticScheduler:
                 elif execution.size <= 0:
                     execution.set_size(execution.total_reservations.cores.min * execution.total_reservations.memory.min)
                     continue
-                new_size = execution.size - (time.time() - exec_data.last_time_scheduled) * (32 * 1024 ** 2)  # to be tuned
+                new_size = execution.size - (time.time() - exec_data.last_time_scheduled) * (256 * 1024 ** 2)  # to be tuned
                 execution.set_size(new_size)
 
     def _pop_all(self):
