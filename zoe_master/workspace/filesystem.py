@@ -30,13 +30,13 @@ class ZoeFSWorkspace(zoe_master.workspace.base.ZoeWorkspaceBase):
     def __init__(self):
         self.base_path = os.path.join(config.get_conf().workspace_base_path, config.get_conf().workspace_deployment_path)
 
-    def exists(self, user_id):
+    def exists(self, username):
         """Check if the workspace for user_id exists."""
-        return os.path.exists(os.path.join(self.base_path, user_id))
+        return os.path.exists(os.path.join(self.base_path, username))
 
-    def get_path(self, user_id):
+    def get_path(self, username):
         """Get the volume path of the workspace."""
-        return os.path.join(self.base_path, user_id)
+        return os.path.join(self.base_path, username)
 
     @classmethod
     def can_be_attached(cls):
@@ -48,6 +48,6 @@ class ZoeFSWorkspace(zoe_master.workspace.base.ZoeWorkspaceBase):
         """Get the volume mount point."""
         return 'workspace'
 
-    def get(self, user_id):
+    def get(self, username):
         """Return a VolumeDescription for the user workspace."""
-        return VolumeDescriptionHostPath(path=self.get_path(user_id), name=self.get_mountpoint(), readonly=False)
+        return VolumeDescriptionHostPath(path=self.get_path(username), name=self.get_mountpoint(), readonly=False)

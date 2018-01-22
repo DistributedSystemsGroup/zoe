@@ -217,6 +217,11 @@ class Execution(BaseRecord):
             return 0
         return functools.reduce(lambda x, y: x + y, [s.resource_reservation for s in self.services])
 
+    @property
+    def owner(self):
+        """Returns the full user object that owns this execution."""
+        return self.sql_manager.user.select(only_one=True, **{'id': self.user_id})
+
     def __repr__(self):
         return str(self.id)
 
@@ -231,7 +236,7 @@ class ExecutionTable(BaseTable):
         self.cursor.execute('''CREATE TABLE execution (
             id SERIAL PRIMARY KEY,
             name TEXT NOT NULL,
-            user_id TEXT NOT NULL,
+            user_id INT REFERENCES "user",
             description JSON NOT NULL,
             status TEXT NOT NULL,
             size NUMERIC NOT NULL,

@@ -77,8 +77,8 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
 
     env_subst_dict = {
         'execution_id': execution.id,
-        "execution_name": execution.name,
-        'user_name': execution.user_id,
+        'execution_name': execution.name,
+        'user_name': execution.owner.username,
         'deployment_name': get_conf().deployment_name,
     }
 

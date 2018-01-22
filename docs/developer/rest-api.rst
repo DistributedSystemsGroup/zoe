@@ -90,7 +90,7 @@ Will return a JSON document like this::
        "error_message" : null,
        "time_start" : 1473337160.16264,
        "id" : 25158,
-       "user_id" : "venzano",
+       "user_id" : 1,
        "time_end" : null,
        "name" : "boinc-loader",
        "services" : [
@@ -160,7 +160,7 @@ Will return a JSON document like this::
        "25086" : {
           "time_start" : 1473337123.30892,
           "status" : "running",
-          "user_id" : "venzano",
+          "user_id" : 1,
     [..]
 
 It is a map with the execution IDs as keys and the full execution details as values.
