@@ -20,52 +20,35 @@ import logging
 from tornado.web import MissingArgumentError
 
 from zoe_api import zapp_shop
-from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
-from zoe_api.web.utils import get_auth, catch_exceptions
-from zoe_api.web.custom_request_handler import ZoeRequestHandler
+from zoe_api.web.request_handler import ZoeWebRequestHandler
 from zoe_lib.config import get_conf
 
 log = logging.getLogger(__name__)
 
 
-class ZAppShopHomeWeb(ZoeRequestHandler):
+class ZAppShopHomeWeb(ZoeWebRequestHandler):
     """Handler class"""
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        super().initialize(**kwargs)
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
-    @catch_exceptions
     def get(self):
         """Home page with authentication."""
-        uid, role = get_auth(self)
-        if uid is None:
-            self.redirect(self.get_argument('next', u'/login'))
+        if self.current_user is None:
             return
 
-        zapps = zapp_shop.zshop_list_apps(role)
+        zapps = zapp_shop.zshop_list_apps(self.current_user.role)
 
         template_vars = {
-            "uid": uid,
-            "role": role,
+            "user": self.current_user,
             'zapps': zapps,
         }
         self.render('zapp_shop.html', **template_vars)
 
 
-class ZAppLogoWeb(ZoeRequestHandler):
+class ZAppLogoWeb(ZoeWebRequestHandler):
     """Handler class"""
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        super().initialize(**kwargs)
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
-    @catch_exceptions
     def get(self, zapp_id):
         """Home page with authentication."""
-        uid, role_ = get_auth(self)
-        if uid is None:
-            self.redirect(self.get_argument('next', u'/login'))
+        if self.current_user is None:
             return
 
         self.set_header("Content-type", "image/png")
@@ -77,19 +60,12 @@ class ZAppLogoWeb(ZoeRequestHandler):
         self.write(zapp_shop.get_logo(zapp))
 
 
-class ZAppStartWeb(ZoeRequestHandler):
+class ZAppStartWeb(ZoeWebRequestHandler):
     """Handler class"""
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        super().initialize(**kwargs)
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
-    @catch_exceptions
     def get(self, zapp_id):
         """Home page with authentication."""
-        uid, role = get_auth(self)
-        if uid is None:
-            self.redirect(self.get_argument('next', u'/login'))
+        if self.current_user is None:
             return
 
         manifest_index = int(zapp_id.split('-')[-1])
@@ -98,22 +74,18 @@ class ZAppStartWeb(ZoeRequestHandler):
         zapp = zapps[manifest_index]
 
         template_vars = {
-            "uid": uid,
-            "role": role,
+            "user": self.current_user,
             'zapp': zapp,
             'max_core_limit': get_conf().max_core_limit,
             'max_memory_limit': get_conf().max_memory_limit,
-            'resources_are_customizable': role == "admin" or (role != "guest" and (role == "user" and not get_conf().no_user_edit_limits_web)),
+            'resources_are_customizable': self.current_user.role.can_customize_resources,
             'additional_volumes': get_conf().additional_volumes
         }
         self.render('zapp_start.html', **template_vars)
 
-    @catch_exceptions
     def post(self, zapp_id):
         """Write the parameters in the description and start the ZApp."""
-        uid, role = get_auth(self)
-        if uid is None:
-            self.redirect(self.get_argument('next', u'/login'))
+        if self.current_user is None:
             return
 
         manifest_index = int(zapp_id.split('-')[-1])
@@ -123,7 +95,7 @@ class ZAppStartWeb(ZoeRequestHandler):
 
         exec_name = self.get_argument('exec_name')
 
-        app_descr = self._set_parameters(zapp.zoe_description, zapp.parameters, role)
+        app_descr = self._set_parameters(zapp.zoe_description, zapp.parameters, self.current_user.role)
 
         try:
             self.get_argument('download_json')
@@ -133,7 +105,7 @@ class ZAppStartWeb(ZoeRequestHandler):
             self.finish()
             return
         except MissingArgumentError:
-            new_id = self.api_endpoint.execution_start(uid, role, exec_name, app_descr)
+            new_id = self.api_endpoint.execution_start(self.current_user, exec_name, app_descr)
 
         self.redirect(self.reverse_url('execution_inspect', new_id))
 

@@ -30,10 +30,11 @@ class User(BaseRecord):
 
         self.username = d['username']
         self.fs_uid = d['fs_uid']
-        self.role = d['role']
         self.email = d['email']
         self.priority = d['priority']
         self.enabled = d['enabled']
+        self.auth_source = d['auth_source']
+        self.role_id = d['role_id']
         self.quota_id = d['quota_id']
 
     def serialize(self):
@@ -42,41 +43,48 @@ class User(BaseRecord):
             'id': self.id,
             'username': self.username,
             'fs_uid': self.fs_uid,
-            'role': self.role,
             'email': self.email,
             'priority': self.priority,
             'enabled': self.enabled,
-            'quota_id': self.quota_id
+            'auth_source': self.auth_source,
+            'quota_id': self.quota_id,
+            'role_id': self.role_id
         }
 
     def set_email(self, new_email: str):
         """Update the email address for this user."""
         self.email = new_email
-        self.sql_manager.user_update(self.id, email=new_email)
+        self.sql_manager.user.update(self.id, email=new_email)
 
     def set_priority(self, new_priority: int):
         """Update the priority for this user."""
         self.priority = new_priority
-        self.sql_manager.user_update(self.id, priority=new_priority)
+        self.sql_manager.user.update(self.id, priority=new_priority)
 
     def set_enabled(self, enable: bool):
         """Enable or disable a user."""
         self.enabled = enable
-        self.sql_manager.user_update(self.id, enabled=enable)
+        self.sql_manager.user.update(self.id, enabled=enable)
 
-    def get_quota(self):
-        """Get the quota for this user."""
-        return self.sql_manager.quota_list(only_one=True, id=self.quota_id)
-
-    def set_quota(self, quota_id):
+    def set_quota_id(self, quota_id):
         """Set a different quota for this user."""
         self.quota_id = quota_id
-        self.sql_manager.user_update(self.id, quota_id=quota_id)
+        self.sql_manager.user.update(self.id, quota_id=quota_id)
 
-    def set_role(self, role):
+    def set_role_id(self, role_id):
         """Set a new role for this user."""
-        self.role = role
-        self.sql_manager.user_update(self.id, role=role)
+        self.role_id = role_id
+        self.sql_manager.user.update(self.id, role_id=role_id)
+
+    @property
+    def role(self):
+        """Get the role from the DB."""
+        return self.sql_manager.role.select(only_one=True, id=self.role_id)
+
+    @property
+    def quota(self):
+        """Get the quota for this user."""
+        return self.sql_manager.quota.select(only_one=True, id=self.quota_id)
 
 
 class UserTable(BaseTable):

@@ -26,10 +26,10 @@ from zoe_lib.config import get_conf
 log = logging.getLogger(__name__)
 
 
-class PlainTextAuthenticator(zoe_api.auth.base.BaseAuthenticator):
+class PlainTextAuthenticator:
     """A basic plain text file authenticator."""
-    def __init__(self):
-        self.passwd_file = get_conf().auth_file
+    def __init__(self, filename):
+        self.passwd_file = filename
         if not os.access(self.passwd_file, os.R_OK):
             raise zoe_api.exceptions.ZoeNotFoundException('Password file not found at: {}'.format(self.passwd_file))
 

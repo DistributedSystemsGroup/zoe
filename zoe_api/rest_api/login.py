@@ -15,44 +15,23 @@
 
 """The Info API endpoint."""
 
-from tornado.web import RequestHandler
-from zoe_api.rest_api.utils import get_auth, catch_exceptions, manage_cors_headers
-from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
+from zoe_api.rest_api.request_handler import ZoeAPIRequestHandler
 
 
-class LoginAPI(RequestHandler):
+class LoginAPI(ZoeAPIRequestHandler):
     """The Login API endpoint."""
 
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-
-    def set_default_headers(self):
-        """Set up the headers for enabling CORS."""
-        manage_cors_headers(self)
-
-    @catch_exceptions
-    def options(self):
-        """Needed for CORS."""
-        self.set_status(204)
-        self.finish()
-
-    @catch_exceptions
     def get(self):
         """HTTP GET method."""
-        uid, role = get_auth(self)
+        if self.current_user is None:
+            return
 
-        cookie_val = uid + '.' + role
+        cookie_val = self.current_user.username
 
         self.set_secure_cookie('zoe', cookie_val)
 
         ret = {
-            'uid': uid,
-            'role': role
+            'user': self.current_user,
         }
 
         self.write(ret)
-
-    def data_received(self, chunk):
-        """Not implemented as we do not use stream uploads"""
-        pass

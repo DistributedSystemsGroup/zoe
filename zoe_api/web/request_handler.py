@@ -26,10 +26,10 @@ import logging
 from jinja2 import Environment, FileSystemLoader, Markup, TemplateSyntaxError
 
 from tornado.escape import squeeze, linkify, url_escape, xhtml_escape
-import tornado.web
 
 import zoe_lib.version
-import zoe_api.web.utils
+from zoe_api.custom_request_handler import ZoeRequestHandler
+from zoe_api.exceptions import ZoeAuthException
 
 log = logging.getLogger(__name__)
 
@@ -84,15 +84,12 @@ def tojson_filter(obj, **kwargs):
     return Markup(dumps(obj, **kwargs))
 
 
-class ZoeRequestHandler(tornado.web.RequestHandler):
-    """usage:
-        class JinjaPoweredHandler(JinjaTemplateMixin, tornado.web.RequestHandler):
-            pass
-    """
+class ZoeWebRequestHandler(ZoeRequestHandler):
+    """RequestHandler class for Zoe Web interface."""
 
-    def initialize(self, *args_, **kwargs_):
+    def initialize(self, **kwargs):
         """Initialize the Jinja template system."""
-        # jinja environment is shared among an application
+        super().initialize(**kwargs)
         if 'jinja_environment' not in self.application.settings:
             raise RuntimeError("Needs jinja2 Environment. Initialize with JinjaApp.init_app first")
         else:
@@ -125,11 +122,11 @@ class ZoeRequestHandler(tornado.web.RequestHandler):
         try:
             html = self._render(template, **kwargs)
         except TemplateSyntaxError as e:
-            zoe_api.web.utils.error_page(self, 'Template syntax error at {}:{}:<br> {}'.format(e.name, e.lineno, e.message), 500)
+            self.error_page('Template syntax error at {}:{}:<br> {}'.format(e.name, e.lineno, e.message), 500)
             return
         except Exception as e:
             log.exception('Jinja2 exception while rendering the template {}'.format(template_name))
-            zoe_api.web.utils.error_page(self, 'Jinja2 template exception: {}'.format(e), 500)
+            self.error_page('Jinja2 template exception: {}'.format(e), 500)
             return
         self.finish(html)
 
@@ -138,6 +135,16 @@ class ZoeRequestHandler(tornado.web.RequestHandler):
         template = self._jinja_env.from_string(source)
         return self._render(template, **kwargs)
 
-    def data_received(self, chunk):
-        """Not implemented as we do not use stream uploads"""
-        pass
+    def get_current_user(self):
+        """In case auth fails, redirect to login page."""
+        try:
+            user = super().get_current_user()
+        except ZoeAuthException as e:
+            self.render('login.html', error=e.message)
+            return None
+        return user
+
+    def error_page(self, error_message: str, status: int=400):
+        """Generate an error page."""
+        self.set_status(status)
+        self.render('error.html', error=error_message)

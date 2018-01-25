@@ -29,7 +29,7 @@ import zoe_api.rest_api
 import zoe_api.master_api
 import zoe_api.web
 import zoe_api.auth.ldap
-from zoe_api.web.custom_request_handler import JinjaApp
+from zoe_api.web.request_handler import JinjaApp
 
 log = logging.getLogger("zoe_api")
 LOG_FORMAT = '%(asctime)-15s %(levelname)s %(threadName)s->%(name)s: %(message)s'
@@ -67,6 +67,7 @@ def zoe_web_main(test_conf=None) -> int:
         'static_path': os.path.join(os.path.dirname(__file__), "web", "static"),
         'template_path': os.path.join(os.path.dirname(__file__), "web", "templates"),
         'cookie_secret': config.get_conf().cookie_secret,
+        'login_url': '/login',
         'debug': args.debug
     }
     app = Application(zoe_api.web.web_init(api_endpoint) + zoe_api.rest_api.api_init(api_endpoint), **app_settings)

@@ -15,32 +15,16 @@
 
 """The Info API endpoint."""
 
-from tornado.web import RequestHandler
 
-from zoe_api.rest_api.utils import catch_exceptions, manage_cors_headers
-from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
+from zoe_api.rest_api.request_handler import ZoeAPIRequestHandler
 
 from zoe_lib.config import get_conf
 from zoe_lib.version import ZOE_API_VERSION, ZOE_APPLICATION_FORMAT_VERSION, ZOE_VERSION
 
 
-class InfoAPI(RequestHandler):
+class InfoAPI(ZoeAPIRequestHandler):
     """The Info API endpoint."""
 
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-
-    def set_default_headers(self):
-        """Set up the headers for enabling CORS."""
-        manage_cors_headers(self)
-
-    def options(self):
-        """Needed for CORS."""
-        self.set_status(204)
-        self.finish()
-
-    @catch_exceptions
     def get(self):
         """HTTP GET method."""
         ret = {
@@ -51,7 +35,3 @@ class InfoAPI(RequestHandler):
         }
 
         self.write(ret)
-
-    def data_received(self, chunk):
-        """Not implemented as we do not use stream uploads"""
-        pass

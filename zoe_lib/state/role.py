@@ -33,6 +33,8 @@ class Role(BaseRecord):
         self.can_change_config = d['can_change_config']
         self.can_operate_others = d['can_operate_others']
         self.can_delete_executions = d['can_delete_executions']
+        self.can_access_api = d['can_access_api']
+        self.can_customize_resources = d['can_customize_resources']
 
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""
@@ -42,7 +44,9 @@ class Role(BaseRecord):
             'can_see_status': self.can_see_status,
             'can_change_config': self.can_change_config,
             'can_operate_others': self.can_operate_others,
-            'can_delete_executions': self.can_delete_executions
+            'can_delete_executions': self.can_delete_executions,
+            'can_access_api': self.can_access_api,
+            'can_customize_resources': self.can_customize_resources
         }
 
 
@@ -59,11 +63,13 @@ class RoleTable(BaseTable):
             can_see_status BOOLEAN NOT NULL DEFAULT FALSE,
             can_change_config BOOLEAN NOT NULL DEFAULT FALSE,
             can_operate_others BOOLEAN NOT NULL DEFAULT FALSE,
-            can_delete_executions BOOLEAN NOT NULL DEFAULT FALSE
+            can_delete_executions BOOLEAN NOT NULL DEFAULT FALSE,
+            can_access_api BOOLEAN NOT NULL DEFAULT FALSE,
+            can_customize_resource BOOLEAN NOT NULL DEFAULT FALSE
         )''')
-        self.cursor.execute('''INSERT INTO role (id, name, can_see_status, can_change_config, can_operate_others, can_delete_executions) VALUES (DEFAULT, 'admin', TRUE, TRUE, TRUE, TRUE)''')
-        self.cursor.execute('''INSERT INTO role (id, name, can_see_status, can_change_config, can_operate_others, can_delete_executions) VALUES (DEFAULT, 'superuser', TRUE, FALSE, FALSE, FALSE)''')
-        self.cursor.execute('''INSERT INTO role (id, name, can_see_status, can_change_config, can_operate_others, can_delete_executions) VALUES (DEFAULT, 'user', FALSE , FALSE, FALSE, FALSE)''')
+        self.cursor.execute('''INSERT INTO role (id, name, can_see_status, can_change_config, can_operate_others, can_delete_executions, can_access_api, can_customize_resources) VALUES (DEFAULT, 'admin', TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)''')
+        self.cursor.execute('''INSERT INTO role (id, name, can_see_status, can_access_api, can_customize_resources) VALUES (DEFAULT, 'superuser', TRUE, TRUE, TRUE)''')
+        self.cursor.execute('''INSERT INTO role (id, name) VALUES (DEFAULT, 'user')''')
 
     def select(self, only_one=False, **kwargs):
         """

@@ -15,115 +15,90 @@
 
 """Main points of entry for the Zoe web interface."""
 
-from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
-from zoe_api.web.utils import get_auth_login, get_auth, catch_exceptions
-from zoe_api.web.custom_request_handler import ZoeRequestHandler
+from zoe_api.web.request_handler import ZoeWebRequestHandler
+from zoe_api.auth.base import BaseAuthenticator
 
 
-class RootWeb(ZoeRequestHandler):
+class RootWeb(ZoeWebRequestHandler):
     """Handler class"""
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        super().initialize(**kwargs)
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
-    @catch_exceptions
     def get(self):
         """Home page without authentication."""
         self.redirect("/user")
 
 
-class LoginWeb(ZoeRequestHandler):
+class LoginWeb(ZoeWebRequestHandler):
     """The login web page."""
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        super().initialize(**kwargs)
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
-    @catch_exceptions
     def get(self):
         """Login page."""
         self.render('login.html')
 
-    @catch_exceptions
     def post(self):
         """Try to authenticate."""
         username = self.get_argument("username", "")
         password = self.get_argument("password", "")
-        uid, role = get_auth_login(username, password)
+        user = BaseAuthenticator().full_auth(username, password)
 
         if not self.get_secure_cookie('zoe'):
-            cookie_val = uid + '.' + role
+            cookie_val = user.username
             self.set_secure_cookie('zoe', cookie_val)
         self.redirect(self.get_argument("next", u"/user"))
 
 
-class LogoutWeb(ZoeRequestHandler):
+class LogoutWeb(ZoeWebRequestHandler):
     """The logout web page."""
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        super().initialize(**kwargs)
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
-    @catch_exceptions
     def get(self):
         """Login page."""
         self.clear_cookie('zoe')
         self.redirect(self.get_argument("next", u"/login"))
 
 
-class HomeWeb(ZoeRequestHandler):
+class HomeWeb(ZoeWebRequestHandler):
     """Handler class"""
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        super().initialize(**kwargs)
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
-    @catch_exceptions
     def get(self):
         """Home page with authentication."""
-        uid, role = get_auth(self)
-        if uid is None:
-            self.redirect(self.get_argument('next', u'/login'))
+        if self.current_user is None:
             return
 
         filters = {
-            "user_id": uid,
+            "user_id": self.current_user,
             "limit": 5
         }
-        last_executions = self.api_endpoint.execution_list(uid, role, **filters)
+        last_executions = self.api_endpoint.execution_list(self.current_user, **filters)
 
         filters = {
-            "user_id": uid,
+            "user_id": self.current_user,
             "status": "running"
         }
-        last_running_executions = self.api_endpoint.execution_list(uid, role, **filters)
+        last_running_executions = self.api_endpoint.execution_list(self.current_user, **filters)
 
         filters = {
-            "user_id": uid,
+            "user_id": self.current_user,
             "status": "submitted"
         }
-        last_running_executions += self.api_endpoint.execution_list(uid, role, **filters)
+        last_running_executions += self.api_endpoint.execution_list(self.current_user, **filters)
 
         filters = {
-            "user_id": uid,
+            "user_id": self.current_user,
             "status": "scheduled"
         }
-        last_running_executions += self.api_endpoint.execution_list(uid, role, **filters)
+        last_running_executions += self.api_endpoint.execution_list(self.current_user, **filters)
 
         filters = {
-            "user_id": uid,
+            "user_id": self.current_user,
             "status": "starting"
         }
-        last_running_executions += self.api_endpoint.execution_list(uid, role, **filters)
+        last_running_executions += self.api_endpoint.execution_list(self.current_user, **filters)
 
         running_reservations = [e.total_reservations for e in last_running_executions]
         total_memory = sum([r.memory.max for r in running_reservations])
         total_cores = sum([r.cores.max for r in running_reservations])
 
         template_vars = {
-            "uid": uid,
-            "role": role,
+            "user": self.current_user,
             "total_memory": total_memory,
             "total_cores": total_cores,
             'last_executions': sorted(last_executions, key=lambda e: e.id),

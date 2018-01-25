@@ -23,59 +23,45 @@ import time
 from zoe_lib.config import get_conf
 
 import zoe_api.exceptions
-from zoe_api.web.utils import get_auth, catch_exceptions
-from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
-from zoe_api.web.custom_request_handler import ZoeRequestHandler
+from zoe_api.web.request_handler import ZoeWebRequestHandler
 
 
-class ExecutionStartWeb(ZoeRequestHandler):
+class ExecutionStartWeb(ZoeWebRequestHandler):
     """Handler class"""
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        super().initialize(**kwargs)
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
-    @catch_exceptions
     def post(self):
         """Start an execution."""
-        uid, role = get_auth(self)
-        if uid is None:
-            self.redirect(self.get_argument('next', u'/login'))
+        if self.current_user is None:
             return
 
         app_descr_json = self.request.files['file'][0]['body'].decode('utf-8')
         app_descr = json.loads(app_descr_json)
         exec_name = self.get_argument('exec_name')
 
-        new_id = self.api_endpoint.execution_start(uid, role, exec_name, app_descr)
+        try:
+            new_id = self.api_endpoint.execution_start(self.current_user, exec_name, app_descr)
+        except zoe_api.exceptions.ZoeException as e:
+            self.error_page(error_message=e.message)
+            return
 
         self.redirect(self.reverse_url('execution_inspect', new_id))
 
 
-class ExecutionListWeb(ZoeRequestHandler):
+class ExecutionListWeb(ZoeWebRequestHandler):
     """Handler class"""
     PAGINATION_ITEM_COUNT = 50
 
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        super().initialize(**kwargs)
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-
-    @catch_exceptions
     def get(self, page=0):
         """Home page with authentication."""
-        uid, role = get_auth(self)
-        if uid is None:
-            self.redirect(self.get_argument('next', u'/login'))
+        if self.current_user is None:
             return
 
         page = int(page)
-        executions_count = self.api_endpoint.execution_count(uid, role)
-        executions = self.api_endpoint.execution_list(uid, role, base=page*self.PAGINATION_ITEM_COUNT, limit=self.PAGINATION_ITEM_COUNT)
+        executions_count = self.api_endpoint.execution_count(self.current_user)
+        executions = self.api_endpoint.execution_list(self.current_user, base=page*self.PAGINATION_ITEM_COUNT, limit=self.PAGINATION_ITEM_COUNT)
 
         template_vars = {
-            "uid": uid,
-            "role": role,
+            "user": self.current_user,
             'executions': sorted(executions, key=lambda e: e.id, reverse=True),
             'current_page': page,
             'max_page': math.ceil(executions_count / self.PAGINATION_ITEM_COUNT),
@@ -84,73 +70,54 @@ class ExecutionListWeb(ZoeRequestHandler):
         self.render('execution_list.html', **template_vars)
 
 
-class ExecutionRestartWeb(ZoeRequestHandler):
+class ExecutionRestartWeb(ZoeWebRequestHandler):
     """Handler class"""
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        super().initialize(**kwargs)
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
-    @catch_exceptions
     def get(self, execution_id: int):
         """Restart an already defined (and not running) execution."""
-        uid, role = get_auth(self)
-        if uid is None:
-            self.redirect(self.get_argument('next', u'/login'))
+        if self.current_user is None:
             return
 
-        e = self.api_endpoint.execution_by_id(uid, role, execution_id)
-        new_id = self.api_endpoint.execution_start(uid, role, e.name, e.description)
+        try:
+            e = self.api_endpoint.execution_by_id(self.current_user, execution_id)
+            new_id = self.api_endpoint.execution_start(self.current_user, e.name, e.description)
+        except zoe_api.exceptions.ZoeException as e:
+            self.error_page(error_message=e.message)
+            return
 
         self.redirect(self.reverse_url('execution_inspect', new_id))
 
 
-class ExecutionTerminateWeb(ZoeRequestHandler):
+class ExecutionTerminateWeb(ZoeWebRequestHandler):
     """Handler class"""
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        super().initialize(**kwargs)
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
-    @catch_exceptions
     def get(self, execution_id: int):
         """Terminate an execution."""
-        uid, role = get_auth(self)
-        if uid is None:
-            self.redirect(self.get_argument('next', u'/login'))
+        if self.current_user is None:
             return
 
-        success, message = self.api_endpoint.execution_terminate(uid, role, execution_id)
+        success, message = self.api_endpoint.execution_terminate(self.current_user, execution_id)
         if not success:
-            raise zoe_api.exceptions.ZoeException(message)
+            self.error_page(error_message=message)
+            return
 
         self.redirect(self.reverse_url('home_user'))
 
 
-class ExecutionInspectWeb(ZoeRequestHandler):
+class ExecutionInspectWeb(ZoeWebRequestHandler):
     """Handler class"""
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        super().initialize(**kwargs)
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
-    @catch_exceptions
     def get(self, execution_id):
         """Gather details about an execution."""
-        uid, role = get_auth(self)
-        if uid is None:
-            self.redirect(self.get_argument('next', u'/login'))
+        if self.current_user is None:
             return
 
-        e = self.api_endpoint.execution_by_id(uid, role, execution_id)
+        e = self.api_endpoint.execution_by_id(self.current_user, execution_id)
 
-        services_info, endpoints = self.api_endpoint.execution_endpoints(uid, role, e)
-
-        endpoints = self.api_endpoint.execution_endpoints(uid, role, e)[1]
+        services_info, endpoints = self.api_endpoint.execution_endpoints(self.current_user, e)
 
         template_vars = {
-            "uid": uid,
-            "role": role,
+            "user": self.current_user,
             "e": e,
             "services_info": services_info,
             "endpoints": endpoints,
@@ -168,26 +135,18 @@ class ExecutionInspectWeb(ZoeRequestHandler):
         self.render('execution_inspect.html', **template_vars)
 
 
-class ServiceLogsWeb(ZoeRequestHandler):
+class ServiceLogsWeb(ZoeWebRequestHandler):
     """Handler class"""
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        super().initialize(**kwargs)
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
 
-    @catch_exceptions
     def get(self, service_id):
         """Gather details about an execution."""
-        uid, role = get_auth(self)
-        if uid is None:
-            self.redirect(self.get_argument('next', u'/login'))
+        if self.current_user is None:
             return
 
-        service = self.api_endpoint.service_by_id(uid, role, service_id)
+        service = self.api_endpoint.service_by_id(self.current_user, service_id)
 
         template_vars = {
-            "uid": uid,
-            "role": role,
+            "user": self.current_user,
             "service": service,
         }
         self.render('service_logs.html', **template_vars)

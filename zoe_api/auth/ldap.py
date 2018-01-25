@@ -34,12 +34,12 @@ from zoe_lib.config import get_conf
 log = logging.getLogger(__name__)
 
 
-class LDAPAuthenticator(zoe_api.auth.base.BaseAuthenticator):
+class LDAPAuthenticator:
     """A simple LDAP authenticator."""
 
-    def __init__(self, sasl):
-        self.connection = ldap.initialize(get_conf().ldap_server_uri)
-        self.base_dn = get_conf().ldap_base_dn
+    def __init__(self, conf, sasl):
+        self.connection = ldap.initialize(conf.ldap_server_uri)
+        self.base_dn = conf.ldap_base_dn
         self.sasl = sasl
         self.connection.protocol_version = ldap.VERSION3
         if self.sasl:

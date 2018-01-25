@@ -25,7 +25,6 @@ import tornado.gen
 
 import zoe_api.exceptions
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
-from zoe_api.web.utils import get_auth, catch_exceptions
 
 log = logging.getLogger(__name__)
 
@@ -42,18 +41,12 @@ class WebSocketEndpointWeb(tornado.websocket.WebSocketHandler):
         self.role = None
         self.connection_closed = None
 
-    @catch_exceptions
     def open(self, *args, **kwargs):
         """Invoked when a new WebSocket is opened."""
         log.debug('WebSocket opened')
-        uid, role = get_auth(self)
-        if uid is None:
+        if self.current_user is None:
             self.close(401, "Unauthorized")
-        else:
-            self.uid = uid
-            self.role = role
 
-    @catch_exceptions
     @tornado.gen.coroutine
     def on_message(self, message):
         """WebSocket message handler."""
@@ -65,7 +58,7 @@ class WebSocketEndpointWeb(tornado.websocket.WebSocketHandler):
 
         if request['command'] == 'query_status':
             try:
-                execution = self.api_endpoint.execution_by_id(self.uid, self.role, request['exec_id'])
+                execution = self.api_endpoint.execution_by_id(self.current_user, request['exec_id'])
             except zoe_api.exceptions.ZoeNotFoundException:
                 response = {
                     'status': 'ok',
@@ -77,13 +70,11 @@ class WebSocketEndpointWeb(tornado.websocket.WebSocketHandler):
                     'exec_status': execution.status
                 }
                 if execution.status == execution.RUNNING_STATUS:
-                    services_info_, endpoints = self.api_endpoint.execution_endpoints(self.uid, self.role, execution)
+                    services_info_, endpoints = self.api_endpoint.execution_endpoints(self.current_user, execution)
                     response['endpoints'] = endpoints
-                elif execution.status == execution.ERROR_STATUS or execution.status == execution.TERMINATED_STATUS:
-                    self.api_endpoint.execution_delete(self.uid, self.role, execution.id)
             self.write_message(response)
         elif request['command'] == 'service_logs':
-            log_obj = self.api_endpoint.service_logs(self.uid, self.role, request['service_id'])
+            log_obj = self.api_endpoint.service_logs(self.current_user, request['service_id'])
 
             while not self.connection_closed:
                 try:
@@ -94,7 +85,7 @@ class WebSocketEndpointWeb(tornado.websocket.WebSocketHandler):
 
                 self.write_message(log_line)
         elif request['command'] == 'system_status':
-            stats = self.api_endpoint.statistics_scheduler(self.uid, self.role)
+            stats = self.api_endpoint.statistics_scheduler()
             self.write_message(json.dumps(stats))
         else:
             response = {
