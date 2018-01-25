@@ -64,31 +64,31 @@ class HomeWeb(ZoeWebRequestHandler):
             return
 
         filters = {
-            "user_id": self.current_user,
+            "user_id": self.current_user.id,
             "limit": 5
         }
         last_executions = self.api_endpoint.execution_list(self.current_user, **filters)
 
         filters = {
-            "user_id": self.current_user,
+            "user_id": self.current_user.id,
             "status": "running"
         }
         last_running_executions = self.api_endpoint.execution_list(self.current_user, **filters)
 
         filters = {
-            "user_id": self.current_user,
+            "user_id": self.current_user.id,
             "status": "submitted"
         }
         last_running_executions += self.api_endpoint.execution_list(self.current_user, **filters)
 
         filters = {
-            "user_id": self.current_user,
+            "user_id": self.current_user.id,
             "status": "scheduled"
         }
         last_running_executions += self.api_endpoint.execution_list(self.current_user, **filters)
 
         filters = {
-            "user_id": self.current_user,
+            "user_id": self.current_user.id,
             "status": "starting"
         }
         last_running_executions += self.api_endpoint.execution_list(self.current_user, **filters)

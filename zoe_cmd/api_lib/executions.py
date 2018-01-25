@@ -19,7 +19,7 @@ This module contains all execution-related API calls for Zoe clients.
 
 import logging
 
-from zoe_lib.api_base import ZoeAPIBase
+from zoe_cmd.api_lib.api_base import ZoeAPIBase
 from zoe_lib.exceptions import ZoeAPIException
 
 log = logging.getLogger(__name__)

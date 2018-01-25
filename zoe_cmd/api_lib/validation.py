@@ -19,26 +19,26 @@ This module contains the Zoe Info API.
 
 import logging
 
-from zoe_lib.api_base import ZoeAPIBase
-from zoe_lib.exceptions import ZoeAPIException
+from zoe_cmd.api_lib.api_base import ZoeAPIBase
 
 log = logging.getLogger(__name__)
 
 
-class ZoeInfoAPI(ZoeAPIBase):
+class ZoeValidationAPI(ZoeAPIBase):
     """
     The Info API class. This API exports static information about Zoe, versions and configuration.
     """
-    def info(self):
+    def validate(self, application_description):
         """
         Queries Zoe for versions and local configuration parameters.
 
         :return:
         """
-        data, status_code = self._rest_get('/info')
+        zapp = {
+            "application": application_description,
+        }
+        data_, status_code = self._rest_post('/zapp_validate', zapp)
         if status_code != 200:
-            if status_code == 404:
-                raise ZoeAPIException('API endpoint not found')
-            raise ZoeAPIException(data['message'])
+            return False
         else:
-            return data
+            return True

@@ -98,9 +98,9 @@ class RoleTable(BaseTable):
             row = self.cursor.fetchone()
             if row is None:
                 return None
-            return Role(row, self)
+            return Role(row, self.sql_manager)
         else:
-            return [Role(x, self) for x in self.cursor]
+            return [Role(x, self.sql_manager) for x in self.cursor]
 
     def update(self, record_id, **kwargs):
         """Update the state of an existing role."""

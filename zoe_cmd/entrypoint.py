@@ -29,31 +29,13 @@ from typing import Tuple
 from tabulate import tabulate
 
 from zoe_cmd import utils
-from zoe_lib.info import ZoeInfoAPI
-from zoe_lib.services import ZoeServiceAPI
-from zoe_lib.statistics import ZoeStatisticsAPI
+from zoe_cmd.api_lib import ZoeAPI
 from zoe_lib.exceptions import ZoeAPIException
-from zoe_lib.executions import ZoeExecutionsAPI
-from zoe_lib.version import ZOE_VERSION
 
 
-def _check_api_version(auth):
-    """Checks if there is a version mismatch between server and client."""
-    info_api = ZoeInfoAPI(auth['url'], auth['user'], auth['pass'])
+def _log_stream_stdout(service_id, timestamps, api: ZoeAPI):
     try:
-        info_api.info()
-        return True
-    except ZoeAPIException:
-        print('Error: this client can talk to ZOE v. {}, but server is reporting an error'.format(ZOE_VERSION,))
-        print('Error: your client is too old (or too new) to speak with the configured server')
-        print('Error: check the version this server is running at the bottom of this web page: {}'.format(auth['url']))
-        return False
-
-
-def _log_stream_stdout(service_id, timestamps, auth):
-    service_api = ZoeServiceAPI(auth['url'], auth['user'], auth['pass'])
-    try:
-        for line in service_api.get_logs(service_id):
+        for line in api.services.get_logs(service_id):
             if timestamps:
                 print(line[0], line[1])
             else:
@@ -64,29 +46,27 @@ def _log_stream_stdout(service_id, timestamps, auth):
     return 'stream_end'
 
 
-def info_cmd(auth, args_):
+def info_cmd(api: ZoeAPI, args_):
     """Queries the info endpoint."""
-    info_api = ZoeInfoAPI(auth['url'], auth['user'], auth['pass'])
-    info = info_api.info()
+    info = api.info.info()
     print("Zoe version: ", info['version'])
     print("Zoe API version: ", info['api_version'])
     print("ZApp format version: ", info['application_format_version'])
     print("Deployment name: ", info['deployment_name'])
 
 
-def app_get_cmd(auth, args):
+def app_get_cmd(api: ZoeAPI, args):
     """Extract an application description from an execution."""
-    exec_api = ZoeExecutionsAPI(auth['url'], auth['user'], auth['pass'])
-    execution = exec_api.get(args.id)
+    execution = api.executions.get(args.id)
     if execution is None:
         print("no such execution")
     else:
         json.dump(execution['description'], sys.stdout, sort_keys=True, indent=4)
 
 
-def exec_list_cmd(auth, args):
+def exec_list_cmd(api: ZoeAPI, args):
     """List executions"""
-    exec_api = ZoeExecutionsAPI(auth['url'], auth['user'], auth['pass'])
+    print(api.auth_user)
     filter_names = [
         'status',
         'name',
@@ -99,12 +79,12 @@ def exec_list_cmd(auth, args):
         'later_than_end'
     ]
     filters = {
-        'user_id': auth['user']
+        'user_id': api.auth_user['id']
     }
     for key, value in vars(args).items():
         if key in filter_names:
             filters[key] = value
-    data = exec_api.list(**filters)
+    data = api.executions.list(**filters)
     if len(data) == 0:
         return
     tabular_data = [[e['id'], e['name'], e['user_id'], e['status']] for e in sorted(data.values(), key=lambda x: x['id'])]
@@ -112,18 +92,17 @@ def exec_list_cmd(auth, args):
     print(tabulate(tabular_data, headers))
 
 
-def exec_start_cmd(auth, args):
+def exec_start_cmd(api: ZoeAPI, args):
     """Submit an execution."""
     app_descr = json.load(args.jsonfile)
-    exec_api = ZoeExecutionsAPI(auth['url'], auth['user'], auth['pass'])
-    exec_id = exec_api.start(args.name, app_descr)
+    exec_id = api.executions.start(args.name, app_descr)
     if not args.synchronous:
         print("Application scheduled successfully with ID {}, use the exec-get command to check its status".format(exec_id))
     else:
         print("Application scheduled successfully with ID {}, waiting for status change".format(exec_id))
         old_status = 'submitted'
         while True:
-            execution = exec_api.get(exec_id)
+            execution = api.executions.get(exec_id)
             current_status = execution['status']
             if old_status != current_status:
                 print('Execution is now {}'.format(current_status))
@@ -132,15 +111,14 @@ def exec_start_cmd(auth, args):
                 break
             time.sleep(1)
         monitor_service_id = None
-        service_api = ZoeServiceAPI(auth['url'], auth['user'], auth['pass'])
         for service_id in execution['services']:
-            service = service_api.get(service_id)
+            service = api.services.get(service_id)
             if service['description']['monitor']:
                 monitor_service_id = service['id']
                 break
 
         print('\n>------ start of log streaming -------<\n')
-        why_stop = _log_stream_stdout(monitor_service_id, False, auth)
+        why_stop = _log_stream_stdout(monitor_service_id, False, api)
         print('\n>------ end of log streaming -------<\n')
         if why_stop == 'stream_end':
             print('Execution finished')
@@ -150,11 +128,9 @@ def exec_start_cmd(auth, args):
             exit(1)
 
 
-def exec_get_cmd(auth, args):
+def exec_get_cmd(api: ZoeAPI, args):
     """Gather information about an execution."""
-    exec_api = ZoeExecutionsAPI(auth['url'], auth['user'], auth['pass'])
-    cont_api = ZoeServiceAPI(auth['url'], auth['user'], auth['pass'])
-    execution = exec_api.get(args.id)
+    execution = api.executions.get(args.id)
     if execution is None:
         print('Execution not found')
     else:
@@ -177,7 +153,7 @@ def exec_get_cmd(auth, args):
             print('Time end: {}'.format(datetime.fromtimestamp(execution['time_end'], timezone.utc).astimezone()))
         print()
 
-        endpoints = exec_api.endpoints(execution['id'])
+        endpoints = api.executions.endpoints(execution['id'])
         if endpoints is not None and len(endpoints) > 0:
             print('Exposed endpoints:')
             for endpoint in endpoints:
@@ -188,38 +164,37 @@ def exec_get_cmd(auth, args):
         print()
         tabular_data = []
         for c_id in execution['services']:
-            service = cont_api.get(c_id)
+            service = api.services.get(c_id)
             service_data = [service['id'], service['name'], 'true' if service['essential'] else 'false', service['status'], service['backend_status'], service['error_message'] if service['error_message'] is not None else '']
             tabular_data.append(service_data)
         headers = ['ID', 'Name', 'Essential', 'Zoe status', 'Backend status', 'Error message']
         print(tabulate(tabular_data, headers))
 
 
-def exec_kill_cmd(auth, args):
+def exec_kill_cmd(api: ZoeAPI, args):
     """Kill an execution."""
-    exec_api = ZoeExecutionsAPI(auth['url'], auth['user'], auth['pass'])
-    exec_api.terminate(args.id)
+    api.executions.terminate(args.id)
 
 
-def logs_cmd(auth, args):
+def logs_cmd(api: ZoeAPI, args):
     """Retrieves and streams the logs of a service."""
-    _log_stream_stdout(args.service_id, args.timestamps, auth)
+    _log_stream_stdout(args.service_id, args.timestamps, api)
 
 
-def stats_cmd(auth, args_):
+def stats_cmd(api: ZoeAPI, args_):
     """Prints statistics on Zoe internals."""
-    stats_api = ZoeStatisticsAPI(auth['url'], auth['user'], auth['pass'])
-    sched = stats_api.scheduler()
+    sched = api.statistics.scheduler()
     print('Scheduler queue length: {}'.format(sched['queue_length']))
     print('Scheduler running queue length: {}'.format(sched['running_length']))
     print('Termination threads count: {}'.format(sched['termination_threads_count']))
+
 
 ENV_HELP_TEXT = '''To authenticate with Zoe you need to define three environment variables:
 ZOE_URL: point to the URL of the Zoe Scheduler (ex.: http://localhost:5000/
 ZOE_USER: the username used for authentication
 ZOE_PASS: the password used for authentication
 
-or create a ~/.zoerc file (another location can be specified with --auth-file) like this:
+or create a ~/.zoerc file (another location can be specified with --api-file) like this:
 url = xxx
 user = yyy
 pass = zzz
@@ -299,10 +274,8 @@ def zoe():
         sys.exit(1)
 
     try:
-        ret = _check_api_version(auth)
-        if not ret:
-            sys.exit(0)
-        args.func(auth, args)
+        api = ZoeAPI(auth['url'], auth['user'], auth['pass'])
+        args.func(api, args)
     except ZoeAPIException as e:
         print(e.message)
     except KeyboardInterrupt:

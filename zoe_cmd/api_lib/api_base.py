@@ -1,3 +1,17 @@
+# Copyright (c) 2016, Daniele Venzano
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 """
 This package contains the Zoe library, with modules used by more than one of the Zoe components. This library can also be used to write new clients for Zoe.
 """
@@ -55,10 +69,9 @@ def retry(exception_to_check, tries=4, delay=3, backoff=2):
 
 class ZoeAPIBase:
     """Base class for the Zoe Client API."""
-    def __init__(self, url, user, password):
+    def __init__(self, url, token):
         self.url = url
-        self.user = user
-        self.password = password
+        self.token = token
 
     @retry(ZoeAPIException)
     def _rest_get_stream(self, path):
@@ -68,7 +81,7 @@ class ZoeAPIBase:
         """
         url = self.url + '/api/' + ZOE_API_VERSION + path
         try:
-            req = requests.get(url, auth=(self.user, self.password), stream=True)
+            req = requests.get(url, stream=True, headers={'Cookie': self.token})
         except requests.exceptions.Timeout:
             raise ZoeAPIException('HTTP connection timeout')
         except requests.exceptions.HTTPError:
@@ -87,7 +100,7 @@ class ZoeAPIBase:
         """
         url = self.url + '/api/' + ZOE_API_VERSION + path
         try:
-            req = requests.get(url, auth=(self.user, self.password), params=payload)
+            req = requests.get(url, params=payload, headers={'Cookie': self.token})
         except requests.exceptions.Timeout:
             raise ZoeAPIException('HTTP connection timeout')
         except requests.exceptions.HTTPError:
@@ -109,7 +122,7 @@ class ZoeAPIBase:
         """
         url = self.url + '/api/' + ZOE_API_VERSION + path
         try:
-            req = requests.post(url, auth=(self.user, self.password), json=payload)
+            req = requests.post(url, json=payload, headers={'Cookie': self.token})
         except requests.exceptions.Timeout:
             raise ZoeAPIException('HTTP connection timeout')
         except requests.exceptions.HTTPError:
@@ -131,7 +144,7 @@ class ZoeAPIBase:
         """
         url = self.url + '/api/' + ZOE_API_VERSION + path
         try:
-            req = requests.delete(url, auth=(self.user, self.password))
+            req = requests.delete(url, headers={'Cookie': self.token})
         except requests.exceptions.Timeout:
             raise ZoeAPIException('HTTP connection timeout')
         except requests.exceptions.HTTPError:

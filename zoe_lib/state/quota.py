@@ -102,9 +102,9 @@ class QuotaTable(BaseTable):
             row = self.cursor.fetchone()
             if row is None:
                 return None
-            return Quota(row, self)
+            return Quota(row, self.sql_manager)
         else:
-            return [Quota(x, self) for x in self.cursor]
+            return [Quota(x, self.sql_manager) for x in self.cursor]
 
     def update(self, record_id, **kwargs):
         """Update the state of an existing quota."""

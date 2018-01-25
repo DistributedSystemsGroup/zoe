@@ -20,6 +20,8 @@ import logging
 import threading
 import functools
 
+import psycopg2
+
 from zoe_lib.state.base import BaseRecord, BaseTable
 
 log = logging.getLogger(__name__)
@@ -299,7 +301,15 @@ class ExecutionTable(BaseTable):
                 q_base += ' ORDER BY id DESC LIMIT {} OFFSET {}'.format(limit, base)
             query = self.cursor.mogrify(q_base)
 
-        self.cursor.execute(query)
+        try:
+            self.cursor.execute(query)
+        except psycopg2.Error as e:
+            log.error('db error: {}'.format(e))
+            if only_one:
+                return None
+            else:
+                return []
+
         if only_one:
             row = self.cursor.fetchone()
             if row is None:
@@ -341,6 +351,11 @@ class ExecutionTable(BaseTable):
         else:
             query = self.cursor.mogrify(q_base)
 
-        self.cursor.execute(query)
+        try:
+            self.cursor.execute(query)
+        except psycopg2.Error as e:
+            log.error('db error: {}'.format(e))
+            return 0
+
         row = self.cursor.fetchone()
         return row[0]

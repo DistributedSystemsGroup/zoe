@@ -31,7 +31,7 @@ class LoginAPI(ZoeAPIRequestHandler):
         self.set_secure_cookie('zoe', cookie_val)
 
         ret = {
-            'user': self.current_user,
+            'user': self.current_user.serialize(),
         }
 
         self.write(ret)

@@ -28,25 +28,22 @@ from typing import Tuple
 from tabulate import tabulate
 
 from zoe_cmd import utils
-from zoe_lib.info import ZoeInfoAPI
+from zoe_cmd.api_lib import ZoeAPI
 from zoe_lib.exceptions import ZoeAPIException, InvalidApplicationDescription
-from zoe_lib.executions import ZoeExecutionsAPI
-from zoe_lib.services import ZoeServiceAPI
 from zoe_lib.applications import app_validate
 from zoe_lib.version import ZOE_API_VERSION
 
 
-def _check_api_version(auth):
+def _check_api_version(api: ZoeAPI):
     """Checks if there is a version mismatch between server and client."""
-    info_api = ZoeInfoAPI(auth['url'], auth['user'], auth['pass'])
-    info = info_api.info()
+    info = api.info.info()
     if info['api_version'] != ZOE_API_VERSION:
         print('Warning: this client understands ZOE API v. {}, but server talks v. {}'.format(ZOE_API_VERSION, info['api_version']))
         print('Warning: certain commands may not work correctly')
         print('Warning: please upgrade or downgrade your client to match the server version')
 
 
-def app_validate_cmd(auth_, args):
+def app_validate_cmd(api_: ZoeAPI, args):
     """Validate an application description."""
     app_descr = json.load(args.jsonfile)
     try:
@@ -57,9 +54,8 @@ def app_validate_cmd(auth_, args):
         print("Static validation OK")
 
 
-def exec_list_cmd(auth, args):
+def exec_list_cmd(api: ZoeAPI, args):
     """List executions"""
-    exec_api = ZoeExecutionsAPI(auth['url'], auth['user'], auth['pass'])
     filter_names = [
         'status',
         'name',
@@ -76,7 +72,7 @@ def exec_list_cmd(auth, args):
     for key, value in vars(args).items():
         if key in filter_names:
             filters[key] = value
-    data = exec_api.list(**filters)
+    data = api.executions.list(**filters)
     if len(data) == 0:
         return
     tabular_data = [[e['id'], e['name'], e['user_id'], e['status']] for e in sorted(data.values(), key=lambda x: x['id'])]
@@ -84,11 +80,9 @@ def exec_list_cmd(auth, args):
     print(tabulate(tabular_data, headers))
 
 
-def exec_get_cmd(auth, args):
+def exec_get_cmd(api: ZoeAPI, args):
     """Gather information about an execution."""
-    exec_api = ZoeExecutionsAPI(auth['url'], auth['user'], auth['pass'])
-    cont_api = ZoeServiceAPI(auth['url'], auth['user'], auth['pass'])
-    execution = exec_api.get(args.id)
+    execution = api.executions.get(args.id)
     if execution is None:
         print('Execution not found')
     else:
@@ -111,7 +105,7 @@ def exec_get_cmd(auth, args):
             print('Time end: {}'.format(datetime.fromtimestamp(execution['time_end'], timezone.utc).astimezone()))
         print()
 
-        endpoints = exec_api.endpoints(execution['id'])
+        endpoints = api.executions.endpoints(execution['id'])
         if endpoints is not None and len(endpoints) > 0:
             print('Exposed endpoints:')
             for endpoint in endpoints:
@@ -122,30 +116,28 @@ def exec_get_cmd(auth, args):
         print()
         tabular_data = []
         for c_id in execution['services']:
-            service = cont_api.get(c_id)
+            service = api.services.get(c_id)
             service_data = [service['id'], service['name'], 'true' if service['essential'] else 'false', service['status'], service['backend_status'], service['backend_host'], service['error_message'] if service['error_message'] is not None else '']
             tabular_data.append(service_data)
         headers = ['ID', 'Name', 'Essential', 'Zoe status', 'Backend status', 'Host', 'Error message']
         print(tabulate(tabular_data, headers))
 
 
-def exec_rm_cmd(auth, args):
+def exec_rm_cmd(api: ZoeAPI, args):
     """Delete an execution and kill it if necessary."""
-    exec_api = ZoeExecutionsAPI(auth['url'], auth['user'], auth['pass'])
-    exec_api.delete(args.id)
+    api.executions.delete(args.id)
 
 
-def exec_kill_user_cmd(auth, args):
+def exec_kill_user_cmd(api: ZoeAPI, args):
     """Terminates all executions for the given user."""
-    exec_api = ZoeExecutionsAPI(auth['url'], auth['user'], auth['pass'])
     filters = {
         'status': 'running',
         'user_id': args.user_id
     }
-    data = exec_api.list(**filters)
+    data = api.executions.list(**filters)
     print('Terminating {} executions belonging to user {}'.format(len(data), args.user_id))
     for execution in data:
-        exec_api.terminate(execution)
+        api.executions.terminate(execution)
         print('Execution {} terminated'.format(execution))
 
 
@@ -223,8 +215,8 @@ def zoe():
         sys.exit(1)
 
     try:
-        _check_api_version(auth)
-        args.func(auth, args)
+        api = ZoeAPI(auth['url'], auth['user'], auth['pass'])
+        args.func(api, args)
     except ZoeAPIException as e:
         print(e.message)
     except KeyboardInterrupt:

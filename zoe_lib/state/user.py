@@ -134,9 +134,9 @@ class UserTable(BaseTable):
             row = self.cursor.fetchone()
             if row is None:
                 return None
-            return User(row, self)
+            return User(row, self.sql_manager)
         else:
-            return [User(x, self) for x in self.cursor]
+            return [User(x, self.sql_manager) for x in self.cursor]
 
     def update(self, port_id, **kwargs):
         """Update the state of an user port."""

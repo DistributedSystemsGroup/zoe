@@ -18,7 +18,7 @@ This module contains all service-related API calls that a Zoe client can use.
 """
 import logging
 
-from zoe_lib.api_base import ZoeAPIBase
+from zoe_cmd.api_lib.api_base import ZoeAPIBase
 from zoe_lib.exceptions import ZoeAPIException
 
 log = logging.getLogger(__name__)
