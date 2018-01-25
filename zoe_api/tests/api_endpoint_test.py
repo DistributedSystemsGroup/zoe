@@ -43,7 +43,7 @@ class TestAPIEndpoint:
         api = APIEndpoint(master_api, sql_manager)
         if master_api.fails:
             with pytest.raises(ZoeException):
-                api.statistics_scheduler('nouser', 'norole')
+                api.statistics_scheduler()
         else:
-            ret = api.statistics_scheduler('nouser', 'norole')
+            ret = api.statistics_scheduler()
             assert isinstance(ret, dict)

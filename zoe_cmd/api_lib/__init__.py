@@ -18,13 +18,13 @@ This package contains the Zoe library, with modules used by more than one of the
 
 import requests
 
+from zoe_lib.version import ZOE_VERSION, ZOE_API_VERSION
+from zoe_lib.exceptions import ZoeAPIException
 from .info import ZoeInfoAPI
 from .validation import ZoeValidationAPI
 from .executions import ZoeExecutionsAPI
 from .services import ZoeServiceAPI
 from .statistics import ZoeStatisticsAPI
-from zoe_lib.version import ZOE_VERSION, ZOE_API_VERSION
-from zoe_lib.exceptions import ZoeAPIException
 
 
 class ZoeAPI:

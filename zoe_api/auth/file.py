@@ -21,7 +21,6 @@ import os
 
 import zoe_api.auth.base
 import zoe_api.exceptions
-from zoe_lib.config import get_conf
 
 log = logging.getLogger(__name__)
 

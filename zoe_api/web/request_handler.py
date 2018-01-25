@@ -145,7 +145,7 @@ class ZoeWebRequestHandler(ZoeRequestHandler):
             return None
         return user
 
-    def error_page(self, error_message: str, status: int=400):
+    def error_page(self, error_message: str, status: int = 400):
         """Generate an error page."""
         self.set_status(status)
         self.render('error.jinja2', error=error_message)

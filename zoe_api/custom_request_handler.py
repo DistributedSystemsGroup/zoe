@@ -21,7 +21,7 @@ import logging
 import tornado.web
 import tornado.escape
 
-from zoe_api.api_endpoint import APIEndpoint
+from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
 from zoe_api.auth.base import BaseAuthenticator
 from zoe_api.exceptions import ZoeAuthException
 
