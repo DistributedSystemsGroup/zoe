@@ -110,7 +110,8 @@ class ZoeWebRequestHandler(ZoeRequestHandler):
             'locale': self.locale,
             'handler': self,
             'zoe_version': zoe_lib.version.ZOE_VERSION,
-            'server_address': self.request.host
+            'server_address': self.request.host,
+            'user': self.current_user
         }
 
         ctx.update(kwargs)
@@ -140,11 +141,11 @@ class ZoeWebRequestHandler(ZoeRequestHandler):
         try:
             user = super().get_current_user()
         except ZoeAuthException as e:
-            self.render('login.html', error=e.message)
+            self.render('login.jinja2', error=e.message)
             return None
         return user
 
     def error_page(self, error_message: str, status: int=400):
         """Generate an error page."""
         self.set_status(status)
-        self.render('error.html', error=error_message)
+        self.render('error.jinja2', error=error_message)

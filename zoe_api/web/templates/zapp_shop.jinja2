@@ -1,4 +1,4 @@
-{% extends "base_user.html" %}
+{% extends "base_user.jinja2" %}
 
 {% block title %}ZApp Shop{% endblock %}
 
@@ -27,7 +27,7 @@
     });
     </script>
 
-    {% if role != "guest" %}
+    {% if user.role.can_access_api %}
     <div class="zapp-category">
     <h3>Custom JSON upload</h3>
     <form method="post" action="{{ reverse_url('execution_start') }}" enctype="multipart/form-data">

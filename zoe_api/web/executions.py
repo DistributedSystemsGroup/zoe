@@ -67,7 +67,7 @@ class ExecutionListWeb(ZoeWebRequestHandler):
             'max_page': math.ceil(executions_count / self.PAGINATION_ITEM_COUNT),
             'last_page': len(executions) < self.PAGINATION_ITEM_COUNT
         }
-        self.render('execution_list.html', **template_vars)
+        self.render('execution_list.jinja2', **template_vars)
 
 
 class ExecutionRestartWeb(ZoeWebRequestHandler):
@@ -117,7 +117,6 @@ class ExecutionInspectWeb(ZoeWebRequestHandler):
         services_info, endpoints = self.api_endpoint.execution_endpoints(self.current_user, e)
 
         template_vars = {
-            "user": self.current_user,
             "e": e,
             "services_info": services_info,
             "endpoints": endpoints,
@@ -132,7 +131,7 @@ class ExecutionInspectWeb(ZoeWebRequestHandler):
             e_time_start = int((e.time_start - datetime.datetime(1970, 1, 1)) / datetime.timedelta(seconds=1) * 1000)
             template_vars['grafana_url'] = grafana_url_template.format(e_time_start, e_time_end, execution_id)
 
-        self.render('execution_inspect.html', **template_vars)
+        self.render('execution_inspect.jinja2', **template_vars)
 
 
 class ServiceLogsWeb(ZoeWebRequestHandler):
@@ -146,7 +145,6 @@ class ServiceLogsWeb(ZoeWebRequestHandler):
         service = self.api_endpoint.service_by_id(self.current_user, service_id)
 
         template_vars = {
-            "user": self.current_user,
             "service": service,
         }
-        self.render('service_logs.html', **template_vars)
+        self.render('service_logs.jinja2', **template_vars)

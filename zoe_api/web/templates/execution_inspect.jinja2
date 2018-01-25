@@ -1,11 +1,11 @@
-{% extends "base_user.html" %}
+{% extends "base_user.jinja2" %}
 {% block title %}Inspect execution {{ e.name }}{% endblock %}
 
 {% block custom_head %}
     <script src="/static/moment.min.js" type="application/javascript"></script>
     <script src="/static/moment-timezone.min.js" type="application/javascript"></script>
     <script>
-    var locale = window.navigator.userLanguage || window.navigator.language;
+    let locale = window.navigator.userLanguage || window.navigator.language;
     moment.locale(locale);
 
     function format_timestamp(ts) {
@@ -21,7 +21,7 @@
 <div id="contents">
 <ul>
     <li>Application name: {{ e.description['name'] }}</li>
-    {% if role == "admin" %}
+    {% if user.role.can_operate_others %}
     <li>Owner: {{ e.user_id }}</li>
     {% endif %}
     <li>Time submitted: <script>format_timestamp("{{ e.time_submit }}")</script></li>

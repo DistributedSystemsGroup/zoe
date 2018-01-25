@@ -50,11 +50,10 @@ class StatusEndpointWeb(ZoeWebRequestHandler):
         max_service_count = max([len(services_per_node[name]) for name in services_per_node])
 
         template_vars = {
-            "user": self.current_user,
             "stats": stats,
             "executions_in_queue": executions_in_queue,
             "services_per_node": services_per_node,
             "max_service_count": max_service_count
         }
 
-        self.render('status.html', **template_vars)
+        self.render('status.jinja2', **template_vars)

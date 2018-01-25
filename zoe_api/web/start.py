@@ -32,7 +32,7 @@ class LoginWeb(ZoeWebRequestHandler):
 
     def get(self):
         """Login page."""
-        self.render('login.html')
+        self.render('login.jinja2')
 
     def post(self):
         """Try to authenticate."""
@@ -98,10 +98,9 @@ class HomeWeb(ZoeWebRequestHandler):
         total_cores = sum([r.cores.max for r in running_reservations])
 
         template_vars = {
-            "user": self.current_user,
             "total_memory": total_memory,
             "total_cores": total_cores,
             'last_executions': sorted(last_executions, key=lambda e: e.id),
             'running_executions': sorted(last_running_executions, key=lambda e: e.id)
         }
-        self.render('home_user.html', **template_vars)
+        self.render('home_user.jinja2', **template_vars)

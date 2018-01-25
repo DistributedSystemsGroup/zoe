@@ -21,6 +21,7 @@ from tornado.web import MissingArgumentError
 
 from zoe_api import zapp_shop
 from zoe_api.web.request_handler import ZoeWebRequestHandler
+from zoe_api.exceptions import ZoeException
 from zoe_lib.config import get_conf
 
 log = logging.getLogger(__name__)
@@ -37,10 +38,9 @@ class ZAppShopHomeWeb(ZoeWebRequestHandler):
         zapps = zapp_shop.zshop_list_apps(self.current_user.role)
 
         template_vars = {
-            "user": self.current_user,
             'zapps': zapps,
         }
-        self.render('zapp_shop.html', **template_vars)
+        self.render('zapp_shop.jinja2', **template_vars)
 
 
 class ZAppLogoWeb(ZoeWebRequestHandler):
@@ -52,6 +52,7 @@ class ZAppLogoWeb(ZoeWebRequestHandler):
             return
 
         self.set_header("Content-type", "image/png")
+        self.set_header("Cache-Control", "public,max-age=1209600")
 
         manifest_index = int(zapp_id.split('-')[-1])
         zapp_id = "-".join(zapp_id.split('-')[:-1])
@@ -74,14 +75,13 @@ class ZAppStartWeb(ZoeWebRequestHandler):
         zapp = zapps[manifest_index]
 
         template_vars = {
-            "user": self.current_user,
             'zapp': zapp,
             'max_core_limit': get_conf().max_core_limit,
             'max_memory_limit': get_conf().max_memory_limit,
             'resources_are_customizable': self.current_user.role.can_customize_resources,
             'additional_volumes': get_conf().additional_volumes
         }
-        self.render('zapp_start.html', **template_vars)
+        self.render('zapp_start.jinja2', **template_vars)
 
     def post(self, zapp_id):
         """Write the parameters in the description and start the ZApp."""
@@ -105,7 +105,11 @@ class ZAppStartWeb(ZoeWebRequestHandler):
             self.finish()
             return
         except MissingArgumentError:
-            new_id = self.api_endpoint.execution_start(self.current_user, exec_name, app_descr)
+            try:
+                new_id = self.api_endpoint.execution_start(self.current_user, exec_name, app_descr)
+            except ZoeException as e:
+                self.error_page(e.message, 500)
+                return
 
         self.redirect(self.reverse_url('execution_inspect', new_id))
 
@@ -125,7 +129,7 @@ class ZAppStartWeb(ZoeWebRequestHandler):
             else:
                 log.warning('Unknown parameter kind: {}, ignoring...'.format(param.kind))
 
-        if role == "admin" or (role != "guest" and (role == "user" and not get_conf().no_user_edit_limits_web)):
+        if role.can_customize_resources:
             for service in app_descr['services']:
                 argument_name = service['name'] + '-resource_memory_min'
                 try:
