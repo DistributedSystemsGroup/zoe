@@ -138,23 +138,17 @@ class UserTable(BaseTable):
         else:
             return [User(x, self.sql_manager) for x in self.cursor]
 
-    def update(self, port_id, **kwargs):
-        """Update the state of an user port."""
-        arg_list = []
-        value_list = []
-        for key, value in kwargs.items():
-            arg_list.append('{} = %s'.format(key))
-            value_list.append(value)
-        set_q = ", ".join(arg_list)
-        value_list.append(port_id)
-        q_base = 'UPDATE "user" SET ' + set_q + ' WHERE id=%s'
-        query = self.cursor.mogrify(q_base, value_list)
-        self.cursor.execute(query)
-        self.sql_manager.commit()
-
     def insert(self, username, fs_uid, role, auth_source):
         """Adds a new user to the state."""
         query = self.cursor.mogrify('INSERT INTO "user" (id, username, fs_uid, email, priority, enabled, auth_source, role_id, quota_id) VALUES (DEFAULT, %s, %s, NULL, DEFAULT, DEFAULT, %s, (SELECT id FROM role WHERE name=%s), (SELECT id FROM quota WHERE name=\'default\')) RETURNING id', (username, fs_uid, auth_source, role))
         self.cursor.execute(query)
         self.sql_manager.commit()
         return self.cursor.fetchone()[0]
+
+    def delete(self, user_id):
+        """Delete a user from the state."""
+        query = 'DELETE FROM execution WHERE user_id=%s'
+        self.cursor.execute(query, (user_id,))
+        query = 'DELETE FROM "user" WHERE id = %s'
+        self.cursor.execute(query, (user_id,))
+        self.sql_manager.commit()

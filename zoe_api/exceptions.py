@@ -30,7 +30,12 @@ class ZoeException(Exception):
 
 class ZoeAuthException(ZoeException):
     """An authentication error."""
-    pass
+    def __init__(self, message=None):
+        super().__init__()
+        if message is None:
+            self.message = 'Unauthorized'
+        else:
+            self.message = message
 
 
 class ZoeNotFoundException(ZoeException):

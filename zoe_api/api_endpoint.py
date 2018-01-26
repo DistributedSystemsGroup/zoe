@@ -194,6 +194,22 @@ class APIEndpoint:
 
         return services_info, endpoints
 
-    def user_by_name(self, username):
+    def user_by_name(self, username) -> zoe_lib.state.User:
         """Finds a user in the database looking it up by its username."""
         return self.sql.user.select(only_one=True, **{'username': username})
+
+    def user_by_id(self, user: zoe_lib.state.User, user_id: int) -> zoe_lib.state.User:
+        """Finds a user in the database looking it up by its username."""
+        if user.id == user_id:
+            return user
+        if not user.role.can_operate_others:
+            raise zoe_api.exceptions.ZoeAuthException()
+
+        return self.sql.user.select(only_one=True, id=user_id)
+
+    def user_delete(self, user: zoe_lib.state.User, user_id: int):
+        """Deletes the user identified by the ID."""
+        if not user.role.can_change_config:
+            raise zoe_api.exceptions.ZoeAuthException()
+
+        self.sql.user.delete(user_id)

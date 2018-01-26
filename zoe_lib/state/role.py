@@ -102,20 +102,6 @@ class RoleTable(BaseTable):
         else:
             return [Role(x, self.sql_manager) for x in self.cursor]
 
-    def update(self, record_id, **kwargs):
-        """Update the state of an existing role."""
-        arg_list = []
-        value_list = []
-        for key, value in kwargs.items():
-            arg_list.append('{} = %s'.format(key))
-            value_list.append(value)
-        set_q = ", ".join(arg_list)
-        value_list.append(record_id)
-        q_base = 'UPDATE role SET ' + set_q + ' WHERE id=%s'
-        query = self.cursor.mogrify(q_base, value_list)
-        self.cursor.execute(query)
-        self.sql_manager.commit()
-
     def insert(self, name):
         """Adds a new role to the state."""
         query = self.cursor.mogrify('INSERT INTO role (id, name) VALUES (DEFAULT, %s) RETURNING id', (name,))
