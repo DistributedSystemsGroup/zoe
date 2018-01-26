@@ -102,12 +102,12 @@ class SQLManager:
         return UserTable(self)
 
     def _create_tables(self):
-        self.executions.create()
-        self.services.create()
-        self.ports.create()
         self.quota.create()
         self.role.create()
         self.user.create()
+        self.executions.create()
+        self.services.create()
+        self.ports.create()
 
     def init_db(self, force=False):
         """DB init entrypoint."""

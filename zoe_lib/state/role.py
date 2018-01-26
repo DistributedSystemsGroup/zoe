@@ -65,7 +65,7 @@ class RoleTable(BaseTable):
             can_operate_others BOOLEAN NOT NULL DEFAULT FALSE,
             can_delete_executions BOOLEAN NOT NULL DEFAULT FALSE,
             can_access_api BOOLEAN NOT NULL DEFAULT FALSE,
-            can_customize_resource BOOLEAN NOT NULL DEFAULT FALSE
+            can_customize_resources BOOLEAN NOT NULL DEFAULT FALSE
         )''')
         self.cursor.execute('''INSERT INTO role (id, name, can_see_status, can_change_config, can_operate_others, can_delete_executions, can_access_api, can_customize_resources) VALUES (DEFAULT, 'admin', TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)''')
         self.cursor.execute('''INSERT INTO role (id, name, can_see_status, can_access_api, can_customize_resources) VALUES (DEFAULT, 'superuser', TRUE, TRUE, TRUE)''')
