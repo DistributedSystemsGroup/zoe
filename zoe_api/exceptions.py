@@ -39,7 +39,7 @@ class ZoeAuthException(ZoeException):
 
 
 class ZoeNotFoundException(ZoeException):
-    """Th euser is looking for an object that does not exist."""
+    """The user is looking for an object that does not exist."""
     pass
 
 

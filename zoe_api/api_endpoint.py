@@ -17,6 +17,7 @@
 
 import logging
 import os
+from typing import List
 
 import zoe_api.exceptions
 import zoe_api.master_api
@@ -202,7 +203,7 @@ class APIEndpoint:
         """Finds a user in the database looking it up by its username."""
         if user.id == user_id:
             return user
-        if not user.role.can_operate_others:
+        if not user.role.can_change_config:
             raise zoe_api.exceptions.ZoeAuthException()
 
         return self.sql.user.select(only_one=True, id=user_id)
@@ -213,3 +214,59 @@ class APIEndpoint:
             raise zoe_api.exceptions.ZoeAuthException()
 
         self.sql.user.delete(user_id)
+
+    def user_list(self, user: zoe_lib.state.User, **filters) -> List[zoe_lib.state.User]:
+        """Generate a optionally filtered list of executions."""
+        if not user.role.can_change_config:
+            raise zoe_api.exceptions.ZoeAuthException()
+        users = self.sql.user.select(**filters)
+        return users
+
+    def user_new(self, user: zoe_lib.state.User, username: str, fs_uid: int, role: str, quota: str, auth_source: str) -> int:
+        """Creates a new user."""
+        if not user.role.can_change_config:
+            raise zoe_api.exceptions.ZoeAuthException()
+
+        return self.sql.user.insert(username, fs_uid, role, quota, auth_source)
+
+    def user_update(self, user: zoe_lib.state.User, **user_data):
+        """Update a user."""
+
+        if 'id' not in user_data:
+            raise KeyError
+        self.user_by_id(user, user_data['id'])
+
+        update_fields = {}
+
+        if not user.role.can_change_config:
+            if 'email' in user_data:
+                update_fields['email'] = user_data['email']
+        else:
+            if 'email' in user_data:
+                update_fields['email'] = user_data['email']
+            if 'priority' in user_data:
+                update_fields['priority'] = user_data['priority']
+            if 'enabled' in user_data:
+                update_fields['enabled'] = user_data['enabled']
+            if 'auth_source' in user_data:
+                update_fields['auth_source'] = user_data['auth_source']
+            if 'quota' in user_data:
+                quota = self.quota_by_name(user_data['quota'])
+                if quota is None:
+                    raise zoe_api.exceptions.ZoeRestAPIException('No quota called {}'.format(user_data['quota']))
+                update_fields['quota_id'] = quota.id
+            if 'role' in user_data:
+                role = self.role_by_name(user_data['role'])
+                if role is None:
+                    raise zoe_api.exceptions.ZoeRestAPIException('No role called {}'.format(user_data['role']))
+                update_fields['role_id'] = role.id
+
+        self.sql.user.update(user_data['id'], **update_fields)
+
+    def quota_by_name(self, quota) -> zoe_lib.state.Quota:
+        """Finds a quota in the database looking it up by its name."""
+        return self.sql.quota.select(only_one=True, **{'name': quota})
+
+    def role_by_name(self, role) -> zoe_lib.state.Role:
+        """Finds a role in the database looking it up by its name."""
+        return self.sql.role.select(only_one=True, **{'name': role})
