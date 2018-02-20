@@ -216,7 +216,7 @@ class APIEndpoint:
         self.sql.user.delete(user_id)
 
     def user_list(self, user: zoe_lib.state.User, **filters) -> List[zoe_lib.state.User]:
-        """Generate a optionally filtered list of executions."""
+        """Generate a optionally filtered list of users."""
         if not user.role.can_change_config:
             raise zoe_api.exceptions.ZoeAuthException()
         users = self.sql.user.select(**filters)
@@ -229,7 +229,7 @@ class APIEndpoint:
 
         return self.sql.user.insert(username, fs_uid, role, quota, auth_source)
 
-    def user_update(self, user: zoe_lib.state.User, **user_data):
+    def user_update(self, user: zoe_lib.state.User, user_data):
         """Update a user."""
 
         if 'id' not in user_data:
@@ -267,6 +267,81 @@ class APIEndpoint:
         """Finds a quota in the database looking it up by its name."""
         return self.sql.quota.select(only_one=True, **{'name': quota})
 
+    def quota_by_id(self, quota_id) -> zoe_lib.state.Quota:
+        """Finds a quota in the database looking it up by its id."""
+        return self.sql.quota.select(only_one=True, **{'id': quota_id})
+
     def role_by_name(self, role) -> zoe_lib.state.Role:
         """Finds a role in the database looking it up by its name."""
         return self.sql.role.select(only_one=True, **{'name': role})
+
+    def role_by_id(self, role_id) -> zoe_lib.state.Role:
+        """Finds a role in the database looking it up by its id."""
+        return self.sql.role.select(only_one=True, **{'id': role_id})
+
+    def role_new(self, user: zoe_lib.state.User, role_data) -> int:
+        """Creates a new role."""
+        if not user.role.can_change_config:
+            raise zoe_api.exceptions.ZoeAuthException()
+
+        role_id = self.sql.role.insert(role_data['name'])
+        self.sql.role.update(role_id, **role_data)
+        return role_id
+
+    def role_list(self, user: zoe_lib.state.User, **filters) -> List[zoe_lib.state.Role]:
+        """Generate a optionally filtered list of roles."""
+        if not user.role.can_change_config:
+            raise zoe_api.exceptions.ZoeAuthException()
+        users = self.sql.role.select(**filters)
+        return users
+
+    def role_delete(self, user: zoe_lib.state.User, role_id: int):
+        """Deletes the role identified by the ID."""
+        if not user.role.can_change_config:
+            raise zoe_api.exceptions.ZoeAuthException()
+
+        self.sql.role.delete(role_id)
+
+    def role_update(self, user: zoe_lib.state.User, role_data):
+        """Update a role."""
+        if not user.role.can_change_config:
+            raise zoe_api.exceptions.ZoeAuthException()
+
+        if 'id' not in role_data:
+            raise KeyError
+        self.role_by_id(role_data['id'])
+
+        self.sql.role.update(role_data['id'], **role_data)
+
+    def quota_new(self, user: zoe_lib.state.User, quota_data) -> int:
+        """Creates a new quota."""
+        if not user.role.can_change_config:
+            raise zoe_api.exceptions.ZoeAuthException()
+
+        role_id = self.sql.quota.insert(quota_data['name'], quota_data['concurrent_executions'], quota_data['memory'], quota_data['cores'])
+        return role_id
+
+    def quota_list(self, user: zoe_lib.state.User, **filters) -> List[zoe_lib.state.Quota]:
+        """Generate a optionally filtered list of quotas."""
+        if not user.role.can_change_config:
+            raise zoe_api.exceptions.ZoeAuthException()
+        users = self.sql.quota.select(**filters)
+        return users
+
+    def quota_delete(self, user: zoe_lib.state.User, quota_id: int):
+        """Deletes the quota identified by the ID."""
+        if not user.role.can_change_config:
+            raise zoe_api.exceptions.ZoeAuthException()
+
+        self.sql.quota.delete(quota_id)
+
+    def quota_update(self, user: zoe_lib.state.User, quota_data):
+        """Update a quota."""
+        if not user.role.can_change_config:
+            raise zoe_api.exceptions.ZoeAuthException()
+
+        if 'id' not in quota_data:
+            raise KeyError
+        self.role_by_id(quota_data['id'])
+
+        self.sql.role.update(quota_data['id'], **quota_data)

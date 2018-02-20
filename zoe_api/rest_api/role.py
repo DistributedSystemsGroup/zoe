@@ -13,36 +13,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""The User API endpoints."""
+"""The Role API endpoints."""
 
 import tornado.escape
 
 from zoe_api.rest_api.request_handler import ZoeAPIRequestHandler
-from zoe_api.exceptions import ZoeAuthException, ZoeRestAPIException
+from zoe_api.exceptions import ZoeAuthException
 
 
-class UserAPI(ZoeAPIRequestHandler):
-    """The User API endpoint. Ops on a single user."""
+class RoleAPI(ZoeAPIRequestHandler):
+    """The Role API endpoint. Ops on a single role."""
 
-    def get(self, user_id):
+    def get(self, role_id):
         """HTTP GET method."""
         if self.current_user is None:
             return
 
-        if user_id == self.current_user.id:
-            ret = {
-                'user': self.current_user.serialize()
-            }
-        else:
-            user = self.api_endpoint.user_by_id(self.current_user, user_id)
-            ret = {
-                'user': user.serialize()
-            }
+        role = self.api_endpoint.role_by_id(role_id)
+        ret = {
+            'role': role.serialize()
+        }
 
         self.write(ret)
 
-    def post(self, user_id):
-        """HTTP POST method, to edit a user."""
+    def post(self, role_id):
+        """HTTP POST method, to edit a role."""
         if self.current_user is None:
             return
 
@@ -53,7 +48,7 @@ class UserAPI(ZoeAPIRequestHandler):
             return
 
         try:
-            self.api_endpoint.user_update(self.current_user, data)
+            self.api_endpoint.role_update(self.current_user, **data)
         except KeyError:
             self.set_status(400, 'Error decoding JSON data')
             return
@@ -63,21 +58,21 @@ class UserAPI(ZoeAPIRequestHandler):
 
         self.set_status(201)
 
-    def delete(self, user_id: int):
+    def delete(self, role_id: int):
         """HTTP DELETE method."""
         if self.current_user is None:
             return
 
         try:
-            self.api_endpoint.user_delete(self.current_user, user_id)
+            self.api_endpoint.role_delete(self.current_user, role_id)
         except ZoeAuthException as e:
             self.set_status(401, e.message)
             return
         self.set_status(204)
 
 
-class UserCollectionAPI(ZoeAPIRequestHandler):
-    """The UserCollection API. Ops that interact with the User collection."""
+class RoleCollectionAPI(ZoeAPIRequestHandler):
+    """The RoleCollection API. Ops that interact with the Role collection."""
 
     def get(self):
         """HTTP GET method"""
@@ -87,13 +82,7 @@ class UserCollectionAPI(ZoeAPIRequestHandler):
         filter_dict = {}
 
         filters = [
-            ('username', str),
-            ('email', str),
-            ('priority', int),
-            ('enabled', bool),
-            ('auth_source', str),
-            ('role_id', int),
-            ('quota_id', int)
+            ('name', str)
         ]
         for filter in filters:
             if filter[0] in self.request.arguments:
@@ -103,12 +92,12 @@ class UserCollectionAPI(ZoeAPIRequestHandler):
                     filter_dict[filter[0]] = filter[1](self.request.arguments[filter[0]][0])
 
         try:
-            users = self.api_endpoint.user_list(self.current_user, **filter_dict)
+            role = self.api_endpoint.role_list(self.current_user, **filter_dict)
         except ZoeAuthException as e:
             self.set_status(401, e.message)
             return
 
-        self.write(dict([(u.id, u.serialize()) for u in users]))
+        self.write(dict([(r.id, r.serialize()) for r in role]))
 
     def post(self):
         """HTTP POST method."""
@@ -122,7 +111,7 @@ class UserCollectionAPI(ZoeAPIRequestHandler):
             return
 
         try:
-            new_id = self.api_endpoint.user_new(self.current_user, data['username'], data['fs_uid'], data['role'], data['quota'], data['auth_source'])
+            new_id = self.api_endpoint.role_new(self.current_user, data)
         except KeyError:
             self.set_status(400, 'Error decoding JSON data')
             return
@@ -131,4 +120,4 @@ class UserCollectionAPI(ZoeAPIRequestHandler):
             return
 
         self.set_status(201)
-        self.write({'user_id': new_id})
+        self.write({'role_id': new_id})
