@@ -147,7 +147,7 @@ def quota_ls_cmd(api: ZoeAPI, args):
     if 'name' in args:
         filters['name'] = args.name
     quotas = api.quota.list(filters)
-    tabular_data = [[q['id'], q['name'], q['concurrent_executions'], q['memory'], q['cores']] for q_id, q in quotas.items()]
+    tabular_data = [[q['id'], q['name'], q['concurrent_executions'], q['memory'], q['cores']] for q_id, q in sorted(quotas.items())]
     headers = ['ID', 'Name', 'Conc. Executions', 'Memory', 'Cores']
     print(tabulate(tabular_data, headers))
 
@@ -189,6 +189,78 @@ def quota_update_cmd(api: ZoeAPI, args):
     if args.cores is not None:
         quota_update['cores'] = args.cores
     api.quota.update(args.id, quota_update)
+
+
+def role_ls_cmd(api: ZoeAPI, args):
+    """List available roles."""
+    def b2t(val):
+        if val:
+            return "Yes"
+        else:
+            return "No"
+
+    filters = {}
+    if 'name' in args:
+        filters['name'] = args.name
+    roles = api.role.list(filters)
+    tabular_data = [[r['id'], r['name'], b2t(r['can_see_status']), b2t(r['can_change_config']), b2t(r['can_operate_others']), b2t(r['can_delete_executions']), b2t(r['can_access_api']), b2t(r['can_customize_resources'])] for r_id, r in sorted(roles.items())]
+    headers = ['ID', 'Name', 'See status', 'Change config', 'Operate others', 'Delete execs', 'API access', 'Customize resources']
+    print(tabulate(tabular_data, headers))
+
+
+def role_get_cmd(api: ZoeAPI, args):
+    """Get a role by its ID."""
+    def b2t(val):
+        if val:
+            return "Yes"
+        else:
+            return "No"
+
+    role = api.role.get(args.id)
+    tabular_data = [[role['id'], role['name'], b2t(role['can_see_status']), b2t(role['can_change_config']), b2t(role['can_operate_others']), b2t(role['can_delete_executions']), b2t(role['can_access_api']), b2t(role['can_customize_resources'])]]
+    headers = ['ID', 'Name', 'See status', 'Change config', 'Operate others', 'Delete execs', 'API access', 'Customize resources']
+    print(tabulate(tabular_data, headers))
+
+
+def role_create_cmd(api: ZoeAPI, args):
+    """Create a new role."""
+    print(args)
+    role = {
+        'name': args.name,
+        'can_see_status': True if args.can_see_status else False,
+        'can_change_config': True if args.can_change_config else False,
+        'can_operate_others': True if args.can_operate_others else False,
+        'can_delete_executions': True if args.can_delete_executions else False,
+        'can_access_api': True if args.can_access_api else False,
+        'can_customize_resources': True if args.can_customize_resources else False
+    }
+    new_id = api.role.create(role)
+    print('New role created with ID: {}'.format(new_id))
+
+
+def role_delete_cmd(api: ZoeAPI, args):
+    """Delete a role given its ID."""
+    api.role.delete(args.id)
+
+
+def role_update_cmd(api: ZoeAPI, args):
+    """Updates an existing quota."""
+    role_update = {}
+    if args.name is not None:
+        role_update['name'] = args.name
+    if args.can_see_status is not None:
+        role_update['can_see_status'] = True if args.can_see_status else False
+    if args.can_change_config is not None:
+        role_update['can_change_config'] = True if args.can_change_config else False
+    if args.can_operate_others is not None:
+        role_update['can_operate_others'] = True if args.can_operate_others else False
+    if args.can_delete_executions is not None:
+        role_update['can_delete_executions'] = True if args.can_delete_executions else False
+    if args.can_access_api is not None:
+        role_update['can_access_api'] = True if args.can_access_api else False
+    if args.can_customize_resources is not None:
+        role_update['can_customize_resources'] = True if args.can_customize_resources else False
+    api.role.update(args.id, role_update)
 
 
 ENV_HELP_TEXT = '''To authenticate with Zoe you need to define three environment variables:
@@ -249,7 +321,7 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     sub_parser.add_argument('--name', help="Filter by name")
     sub_parser.set_defaults(func=quota_ls_cmd)
 
-    sub_parser = subparser.add_parser('quota-get', help="List existing quotas")
+    sub_parser = subparser.add_parser('quota-get', help="Get a quota by its ID")
     sub_parser.add_argument('id', type=int, help="Quota ID")
     sub_parser.set_defaults(func=quota_get_cmd)
 
@@ -271,6 +343,40 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     sub_parser.add_argument('--memory', type=int, help="Maximum memory in bytes across all running executions")
     sub_parser.add_argument('--cores', type=int, help="Maximum number of cores across all running executions")
     sub_parser.set_defaults(func=quota_update_cmd)
+
+    # Roles
+    sub_parser = subparser.add_parser('role-ls', help="List existing roles")
+    sub_parser.add_argument('--name', help="Filter by name")
+    sub_parser.set_defaults(func=role_ls_cmd)
+
+    sub_parser = subparser.add_parser('role-get', help="Get a role by its ID")
+    sub_parser.add_argument('id', type=int, help="Role ID")
+    sub_parser.set_defaults(func=role_get_cmd)
+
+    sub_parser = subparser.add_parser('role-create', help="Create a new role")
+    sub_parser.add_argument('name', help="Role name")
+    sub_parser.add_argument('can_see_status', choices=[0, 1], type=int, help="Can access the status web page")
+    sub_parser.add_argument('can_change_config', choices=[0, 1], type=int, help="Can change Zoe configuration")
+    sub_parser.add_argument('can_operate_others', choices=[0, 1], type=int, help="Can operate on other users' executions")
+    sub_parser.add_argument('can_delete_executions', choices=[0, 1], type=int, help="Can delete executions permanently")
+    sub_parser.add_argument('can_access_api', choices=[0, 1], type=int, help="Can access the REST API")
+    sub_parser.add_argument('can_customize_resources', choices=[0, 1], type=int, help="Can customize resource reservations before starting executions")
+    sub_parser.set_defaults(func=role_create_cmd)
+
+    sub_parser = subparser.add_parser('role-delete', help="Delete a role")
+    sub_parser.add_argument('id', type=int, help="Role ID")
+    sub_parser.set_defaults(func=role_delete_cmd)
+
+    sub_parser = subparser.add_parser('role-update', help="Update an existing role")
+    sub_parser.add_argument('id', type=int, help="ID of the role to update")
+    sub_parser.add_argument('--name', help="Role name")
+    sub_parser.add_argument('--can_see_status', choices=[0, 1], type=int, help="Can access the status web page")
+    sub_parser.add_argument('--can_change_config', choices=[0, 1], type=int, help="Can change Zoe configuration")
+    sub_parser.add_argument('--can_operate_others', choices=[0, 1], type=int, help="Can operate on other users' executions")
+    sub_parser.add_argument('--can_delete_executions', choices=[0, 1], type=int, help="Can delete executions permanently")
+    sub_parser.add_argument('--can_access_api', choices=[0, 1], type=int, help="Can access the REST API")
+    sub_parser.add_argument('--can_customize_resources', choices=[0, 1], type=int, help="Can customize resource reservations before starting executions")
+    sub_parser.set_defaults(func=role_update_cmd)
 
     return parser, parser.parse_args()
 

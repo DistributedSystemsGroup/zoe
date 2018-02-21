@@ -308,8 +308,8 @@ class APIEndpoint:
             raise zoe_api.exceptions.ZoeAuthException()
 
         role = self.role_by_id(role_id)
-        if role.name == "default":
-            raise zoe_api.exceptions.ZoeRestAPIException('Cannot delete default role')
+        if role.name == "admin":
+            raise zoe_api.exceptions.ZoeRestAPIException('Cannot delete admin role')
 
         self.sql.role.delete(role_id)
 
@@ -320,8 +320,8 @@ class APIEndpoint:
 
         role = self.role_by_id(role_id)
 
-        if role.name == "default" and "name" in role_data:
-            raise zoe_api.exceptions.ZoeRestAPIException('Cannot rename default role')
+        if role.name == "admin":
+            raise zoe_api.exceptions.ZoeRestAPIException('Cannot edit the admin role')
 
         self.sql.role.update(role_id, **role_data)
 
