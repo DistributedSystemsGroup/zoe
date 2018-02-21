@@ -194,6 +194,7 @@ def quota_update_cmd(api: ZoeAPI, args):
 def role_ls_cmd(api: ZoeAPI, args):
     """List available roles."""
     def b2t(val):
+        """Boolean to text."""
         if val:
             return "Yes"
         else:
@@ -211,6 +212,7 @@ def role_ls_cmd(api: ZoeAPI, args):
 def role_get_cmd(api: ZoeAPI, args):
     """Get a role by its ID."""
     def b2t(val):
+        """Boolean to text."""
         if val:
             return "Yes"
         else:

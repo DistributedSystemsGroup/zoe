@@ -17,7 +17,6 @@
 
 import tornado.escape
 
-import zoe_api.exceptions
 from zoe_api.rest_api.request_handler import ZoeAPIRequestHandler
 
 

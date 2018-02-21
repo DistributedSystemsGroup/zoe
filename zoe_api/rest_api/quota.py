@@ -84,12 +84,12 @@ class QuotaCollectionAPI(ZoeAPIRequestHandler):
         filters = [
             ('name', str)
         ]
-        for filter in filters:
-            if filter[0] in self.request.arguments:
-                if filter[1] == str:
-                    filter_dict[filter[0]] = self.request.arguments[filter[0]][0].decode('utf-8')
+        for filt in filters:
+            if filt[0] in self.request.arguments:
+                if filt[1] == str:
+                    filter_dict[filt[0]] = self.request.arguments[filt[0]][0].decode('utf-8')
                 else:
-                    filter_dict[filter[0]] = filter[1](self.request.arguments[filter[0]][0])
+                    filter_dict[filt[0]] = filt[1](self.request.arguments[filt[0]][0])
 
         try:
             quota = self.api_endpoint.quota_list(self.current_user, **filter_dict)
