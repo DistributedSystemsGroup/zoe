@@ -37,6 +37,6 @@ class ZoeStatisticsAPI(ZoeAPIBase):
         """
         data, status_code = self._rest_get('/statistics/scheduler')
         if status_code != 200:
-            raise ZoeAPIException(data['message'])
+            raise ZoeAPIException(data)
         else:
             return data

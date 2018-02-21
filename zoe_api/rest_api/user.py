@@ -18,7 +18,7 @@
 import tornado.escape
 
 from zoe_api.rest_api.request_handler import ZoeAPIRequestHandler
-from zoe_api.exceptions import ZoeAuthException, ZoeRestAPIException
+from zoe_api.exceptions import ZoeException
 
 
 class UserAPI(ZoeAPIRequestHandler):
@@ -35,6 +35,9 @@ class UserAPI(ZoeAPIRequestHandler):
             }
         else:
             user = self.api_endpoint.user_by_id(self.current_user, user_id)
+            if user is None:
+                self.set_status(404, "No such user")
+                return
             ret = {
                 'user': user.serialize()
             }
@@ -53,12 +56,12 @@ class UserAPI(ZoeAPIRequestHandler):
             return
 
         try:
-            self.api_endpoint.user_update(self.current_user, data)
+            self.api_endpoint.user_update(self.current_user, user_id, data)
         except KeyError:
             self.set_status(400, 'Error decoding JSON data')
             return
-        except ZoeAuthException as e:
-            self.set_status(401, e.message)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
             return
 
         self.set_status(201)
@@ -70,8 +73,8 @@ class UserAPI(ZoeAPIRequestHandler):
 
         try:
             self.api_endpoint.user_delete(self.current_user, user_id)
-        except ZoeAuthException as e:
-            self.set_status(401, e.message)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
             return
         self.set_status(204)
 
@@ -104,8 +107,8 @@ class UserCollectionAPI(ZoeAPIRequestHandler):
 
         try:
             users = self.api_endpoint.user_list(self.current_user, **filter_dict)
-        except ZoeAuthException as e:
-            self.set_status(401, e.message)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
             return
 
         self.write(dict([(u.id, u.serialize()) for u in users]))
@@ -122,12 +125,12 @@ class UserCollectionAPI(ZoeAPIRequestHandler):
             return
 
         try:
-            new_id = self.api_endpoint.user_new(self.current_user, data['username'], data['fs_uid'], data['role'], data['quota'], data['auth_source'])
+            new_id = self.api_endpoint.user_new(self.current_user, data['username'], data['fs_uid'], data['role_id'], data['quota_id'], data['auth_source'])
         except KeyError:
             self.set_status(400, 'Error decoding JSON data')
             return
-        except ZoeAuthException as e:
-            self.set_status(401, e.message)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
             return
 
         self.set_status(201)

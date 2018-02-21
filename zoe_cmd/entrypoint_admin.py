@@ -141,6 +141,56 @@ def exec_kill_user_cmd(api: ZoeAPI, args):
         print('Execution {} terminated'.format(execution))
 
 
+def quota_ls_cmd(api: ZoeAPI, args):
+    """List available quotas."""
+    filters = {}
+    if 'name' in args:
+        filters['name'] = args.name
+    quotas = api.quota.list(filters)
+    tabular_data = [[q['id'], q['name'], q['concurrent_executions'], q['memory'], q['cores']] for q_id, q in quotas.items()]
+    headers = ['ID', 'Name', 'Conc. Executions', 'Memory', 'Cores']
+    print(tabulate(tabular_data, headers))
+
+
+def quota_get_cmd(api: ZoeAPI, args):
+    """Get a quota by its ID."""
+    quota = api.quota.get(args.id)
+    tabular_data = [[quota['id'], quota['name'], quota['concurrent_executions'], quota['memory'], quota['cores']]]
+    headers = ['ID', 'Name', 'Conc. Executions', 'Memory', 'Cores']
+    print(tabulate(tabular_data, headers))
+
+
+def quota_create_cmd(api: ZoeAPI, args):
+    """Create a new quota."""
+    quota = {
+        'name': args.name,
+        'concurrent_executions': args.concurrent_executions,
+        'memory': args.memory,
+        'cores': args.cores
+    }
+    new_id = api.quota.create(quota)
+    print('New quota created with ID: {}'.format(new_id))
+
+
+def quota_delete_cmd(api: ZoeAPI, args):
+    """Delete a quota given its ID."""
+    api.quota.delete(args.id)
+
+
+def quota_update_cmd(api: ZoeAPI, args):
+    """Updates an existing quota."""
+    quota_update = {}
+    if args.name is not None:
+        quota_update['name'] = args.name
+    if args.concurrent_executions is not None:
+        quota_update['concurrent_executions'] = args.concurrent_executions
+    if args.memory is not None:
+        quota_update['memory'] = args.memory
+    if args.cores is not None:
+        quota_update['cores'] = args.cores
+    api.quota.update(args.id, quota_update)
+
+
 ENV_HELP_TEXT = '''To authenticate with Zoe you need to define three environment variables:
 ZOE_URL: point to the URL of the Zoe Scheduler (ex.: http://localhost:5000/
 ZOE_USER: the username used for authentication
@@ -193,6 +243,34 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     argparser_execution_kill_user = subparser.add_parser('user-terminate', help="Terminate all executions of a user")
     argparser_execution_kill_user.add_argument('user_id', help="User name")
     argparser_execution_kill_user.set_defaults(func=exec_kill_user_cmd)
+
+    # Quotas
+    sub_parser = subparser.add_parser('quota-ls', help="List existing quotas")
+    sub_parser.add_argument('--name', help="Filter by name")
+    sub_parser.set_defaults(func=quota_ls_cmd)
+
+    sub_parser = subparser.add_parser('quota-get', help="List existing quotas")
+    sub_parser.add_argument('id', type=int, help="Quota ID")
+    sub_parser.set_defaults(func=quota_get_cmd)
+
+    sub_parser = subparser.add_parser('quota-create', help="Create a new quota")
+    sub_parser.add_argument('name', help="Quota name")
+    sub_parser.add_argument('concurrent_executions', type=int, help="Maximum number of concurrent executions")
+    sub_parser.add_argument('memory', type=int, help="Maximum memory in bytes across all running executions")
+    sub_parser.add_argument('cores', type=int, help="Maximum number of cores across all running executions")
+    sub_parser.set_defaults(func=quota_create_cmd)
+
+    sub_parser = subparser.add_parser('quota-delete', help="Delete a quota")
+    sub_parser.add_argument('id', type=int, help="Quota ID")
+    sub_parser.set_defaults(func=quota_delete_cmd)
+
+    sub_parser = subparser.add_parser('quota-update', help="Update an existing quota")
+    sub_parser.add_argument('id', type=int, help="ID of the quota to update")
+    sub_parser.add_argument('--name', help="Quota name")
+    sub_parser.add_argument('--concurrent_executions', type=int, help="Maximum number of concurrent executions")
+    sub_parser.add_argument('--memory', type=int, help="Maximum memory in bytes across all running executions")
+    sub_parser.add_argument('--cores', type=int, help="Maximum number of cores across all running executions")
+    sub_parser.set_defaults(func=quota_update_cmd)
 
     return parser, parser.parse_args()
 

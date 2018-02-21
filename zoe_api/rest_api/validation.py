@@ -29,7 +29,8 @@ class ZAppValidateAPI(ZoeAPIRequestHandler):
         try:
             data = tornado.escape.json_decode(self.request.body)
         except ValueError:
-            raise zoe_api.exceptions.ZoeRestAPIException('Error decoding JSON data')
+            self.set_status(400, 'Error decoding JSON data')
+            return
 
         application_description = data['application']
 

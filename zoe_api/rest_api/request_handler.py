@@ -18,7 +18,7 @@
 import logging
 
 from zoe_api.custom_request_handler import ZoeRequestHandler
-from zoe_api.exceptions import ZoeAuthException
+from zoe_api.exceptions import ZoeException
 
 log = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ class ZoeAPIRequestHandler(ZoeRequestHandler):
         """In case auth fails, redirect to login page."""
         try:
             user = super().get_current_user()
-        except ZoeAuthException as e:
-            self.set_status(401, "Unauthorized access: {}".format(e))
+        except ZoeException as e:
+            self.set_status(e.status_code, "Unauthorized access: {}".format(e))
             return None
         return user

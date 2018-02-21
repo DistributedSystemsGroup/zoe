@@ -1,4 +1,4 @@
-# Copyright (c) 2016, Daniele Venzano
+# Copyright (c) 2018, Daniele Venzano
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,6 +25,9 @@ from .validation import ZoeValidationAPI
 from .executions import ZoeExecutionsAPI
 from .services import ZoeServiceAPI
 from .statistics import ZoeStatisticsAPI
+from .user import ZoeUserAPI
+from .role import ZoeRoleAPI
+from .quota import ZoeQuotaAPI
 
 
 class ZoeAPI:
@@ -37,6 +40,9 @@ class ZoeAPI:
         self.executions = ZoeExecutionsAPI(url, self.token)
         self.services = ZoeServiceAPI(url, self.token)
         self.statistics = ZoeStatisticsAPI(url, self.token)
+        self.user = ZoeUserAPI(url, self.token)
+        self.role = ZoeRoleAPI(url, self.token)
+        self.quota = ZoeQuotaAPI(url, self.token)
         self._check_api_version()
 
     def _check_api_version(self):
@@ -61,4 +67,7 @@ class ZoeAPI:
         except requests.exceptions.ConnectionError as e:
             raise ZoeAPIException('Connection error: {}'.format(e))
 
-        return req.headers['Set-Cookie'], req.json()['user']
+        if req.status_code == 200:
+            return req.headers['Set-Cookie'], req.json()['user']
+        else:
+            raise ZoeAPIException('Authentication error: {}'.format(req.reason))

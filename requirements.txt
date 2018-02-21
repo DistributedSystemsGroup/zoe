@@ -12,3 +12,4 @@ sphinx
 jsonschema
 tabulate
 markdown
+passlib

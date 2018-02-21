@@ -27,7 +27,6 @@ class LoginAPI(ZoeAPIRequestHandler):
             return
 
         cookie_val = self.current_user.username
-
         self.set_secure_cookie('zoe', cookie_val)
 
         ret = {

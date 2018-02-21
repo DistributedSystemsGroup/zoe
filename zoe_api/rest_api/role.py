@@ -18,7 +18,7 @@
 import tornado.escape
 
 from zoe_api.rest_api.request_handler import ZoeAPIRequestHandler
-from zoe_api.exceptions import ZoeAuthException
+from zoe_api.exceptions import ZoeException
 
 
 class RoleAPI(ZoeAPIRequestHandler):
@@ -48,12 +48,12 @@ class RoleAPI(ZoeAPIRequestHandler):
             return
 
         try:
-            self.api_endpoint.role_update(self.current_user, **data)
+            self.api_endpoint.role_update(self.current_user, role_id, data)
         except KeyError:
             self.set_status(400, 'Error decoding JSON data')
             return
-        except ZoeAuthException as e:
-            self.set_status(401, e.message)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
             return
 
         self.set_status(201)
@@ -65,8 +65,8 @@ class RoleAPI(ZoeAPIRequestHandler):
 
         try:
             self.api_endpoint.role_delete(self.current_user, role_id)
-        except ZoeAuthException as e:
-            self.set_status(401, e.message)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
             return
         self.set_status(204)
 
@@ -93,8 +93,8 @@ class RoleCollectionAPI(ZoeAPIRequestHandler):
 
         try:
             role = self.api_endpoint.role_list(self.current_user, **filter_dict)
-        except ZoeAuthException as e:
-            self.set_status(401, e.message)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
             return
 
         self.write(dict([(r.id, r.serialize()) for r in role]))
@@ -115,8 +115,8 @@ class RoleCollectionAPI(ZoeAPIRequestHandler):
         except KeyError:
             self.set_status(400, 'Error decoding JSON data')
             return
-        except ZoeAuthException as e:
-            self.set_status(401, e.message)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
             return
 
         self.set_status(201)

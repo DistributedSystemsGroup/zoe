@@ -37,8 +37,6 @@ class ZoeInfoAPI(ZoeAPIBase):
         """
         data, status_code = self._rest_get('/info')
         if status_code != 200:
-            if status_code == 404:
-                raise ZoeAPIException('API endpoint not found')
-            raise ZoeAPIException(data['message'])
+            raise ZoeAPIException(data)
         else:
             return data

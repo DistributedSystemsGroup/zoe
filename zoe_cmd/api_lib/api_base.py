@@ -108,10 +108,10 @@ class ZoeAPIBase:
         except requests.exceptions.ConnectionError as e:
             raise ZoeAPIException('Connection error: {}'.format(e))
 
-        try:
+        if not req.ok:
+            data = req.reason
+        else:
             data = req.json()
-        except ValueError:
-            data = None
         return data, req.status_code
 
     @retry(ZoeAPIException)
@@ -130,10 +130,13 @@ class ZoeAPIBase:
         except requests.exceptions.ConnectionError as e:
             raise ZoeAPIException('Connection error: {}'.format(e))
 
-        try:
-            data = req.json()
-        except ValueError:
-            data = None
+        if not req.ok:
+            data = req.reason
+        else:
+            try:
+                data = req.json()
+            except ValueError:
+                data = None
         return data, req.status_code
 
     @retry(ZoeAPIException)
@@ -152,8 +155,8 @@ class ZoeAPIBase:
         except requests.exceptions.ConnectionError as e:
             raise ZoeAPIException('Connection error: {}'.format(e))
 
-        try:
-            data = req.json()
-        except ValueError:
+        if not req.ok:
+            data = req.reason
+        else:
             data = None
         return data, req.status_code

@@ -44,7 +44,7 @@ class ZoeServiceAPI(ZoeAPIBase):
         elif status_code == 404:
             raise ZoeAPIException('service "{}" not found'.format(container_id))
         else:
-            raise ZoeAPIException('error retrieving service {}'.format(container_id))
+            raise ZoeAPIException('error retrieving service {}: {}'.format(container_id, cont))
 
     def get_logs(self, container_id):
         """

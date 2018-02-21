@@ -17,6 +17,8 @@
 
 import logging
 
+from passlib.hash import pbkdf2_sha256 as hash_algo
+
 from zoe_lib.state.base import BaseRecord, BaseTable
 
 log = logging.getLogger(__name__)
@@ -29,6 +31,7 @@ class User(BaseRecord):
         super().__init__(d, sql_manager)
 
         self.username = d['username']
+        self.password = d['password']
         self.fs_uid = d['fs_uid']
         self.email = d['email']
         self.priority = d['priority']
@@ -55,6 +58,18 @@ class User(BaseRecord):
         """Update the email address for this user."""
         self.email = new_email
         self.sql_manager.user.update(self.id, email=new_email)
+
+    def set_password(self, new_password: str):
+        """Update the password."""
+        hashed_password = hash_algo.hash(new_password)
+        self.password = hashed_password
+        self.sql_manager.user.update(self.id, password=hashed_password)
+
+    def check_password(self, candidate_pw: str) -> bool:
+        """Checks if the password is correct."""
+        if self.auth_source != "internal" or self.password is None:
+            return False
+        return hash_algo.verify(candidate_pw, self.password)
 
     def set_priority(self, new_priority: int):
         """Update the priority for this user."""
@@ -97,6 +112,7 @@ class UserTable(BaseTable):
         self.cursor.execute('''CREATE TABLE "user" (
             id SERIAL PRIMARY KEY,
             username TEXT NOT NULL,
+            password TEXT DEFAULT NULL,
             fs_uid INT NOT NULL,
             email TEXT,
             priority SMALLINT NOT NULL DEFAULT 0,
@@ -106,6 +122,10 @@ class UserTable(BaseTable):
             quota_id INT REFERENCES quota
         )''')
         self.cursor.execute('CREATE UNIQUE INDEX users_username_uindex ON "user" (username)')
+        hashed_default_pw = hash_algo.hash('admin')
+        query = self.cursor.mogrify('INSERT INTO "user" (id, username, password, fs_uid, email, priority, enabled, auth_source, role_id, quota_id) VALUES (DEFAULT, %s, %s, 0, NULL, DEFAULT, DEFAULT, %s, 1, 1)', ('admin', hashed_default_pw, 'internal'))
+        self.cursor.execute(query)
+        self.sql_manager.commit()
 
     def select(self, only_one=False, **kwargs):
         """
@@ -138,9 +158,9 @@ class UserTable(BaseTable):
         else:
             return [User(x, self.sql_manager) for x in self.cursor]
 
-    def insert(self, username, fs_uid, role, quota, auth_source):
+    def insert(self, username, fs_uid, role_id, quota_id, auth_source):
         """Adds a new user to the state."""
-        query = self.cursor.mogrify('INSERT INTO "user" (id, username, fs_uid, email, priority, enabled, auth_source, role_id, quota_id) VALUES (DEFAULT, %s, %s, NULL, DEFAULT, DEFAULT, %s, (SELECT id FROM role WHERE name=%s), (SELECT id FROM quota WHERE name=%s)) RETURNING id', (username, fs_uid, auth_source, role, quota))
+        query = self.cursor.mogrify('INSERT INTO "user" (id, username, fs_uid, email, priority, enabled, auth_source, role_id, quota_id) VALUES (DEFAULT, %s, %s, NULL, DEFAULT, DEFAULT, %s, %s, %s) RETURNING id', (username, fs_uid, auth_source, role_id, quota_id))
         self.cursor.execute(query)
         self.sql_manager.commit()
         return self.cursor.fetchone()[0]

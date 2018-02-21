@@ -213,6 +213,10 @@ class APIEndpoint:
         if not user.role.can_change_config:
             raise zoe_api.exceptions.ZoeAuthException()
 
+        user_to_del = self.user_by_id(user, user_id)
+        if user_to_del.username == "admin":
+            raise zoe_api.exceptions.ZoeRestAPIException('The admin user cannot be deleted, but it can be disabled')
+
         self.sql.user.delete(user_id)
 
     def user_list(self, user: zoe_lib.state.User, **filters) -> List[zoe_lib.state.User]:
@@ -222,19 +226,22 @@ class APIEndpoint:
         users = self.sql.user.select(**filters)
         return users
 
-    def user_new(self, user: zoe_lib.state.User, username: str, fs_uid: int, role: str, quota: str, auth_source: str) -> int:
+    def user_new(self, user: zoe_lib.state.User, username: str, fs_uid: int, role_id: int, quota_id: int, auth_source: str) -> int:
         """Creates a new user."""
         if not user.role.can_change_config:
             raise zoe_api.exceptions.ZoeAuthException()
 
-        return self.sql.user.insert(username, fs_uid, role, quota, auth_source)
+        if self.role_by_id(role_id) is None:
+            raise zoe_api.exceptions.ZoeNotFoundException("Role {} does not exist".format(role_id))
+        if self.quota_by_id(quota_id) is None:
+            raise zoe_api.exceptions.ZoeNotFoundException("Quota {} does not exist".format(quota_id))
 
-    def user_update(self, user: zoe_lib.state.User, user_data):
+        return self.sql.user.insert(username, fs_uid, role_id, quota_id, auth_source)
+
+    def user_update(self, user: zoe_lib.state.User, user_id, user_data):
         """Update a user."""
 
-        if 'id' not in user_data:
-            raise KeyError
-        self.user_by_id(user, user_data['id'])
+        self.user_by_id(user, user_id)
 
         update_fields = {}
 
@@ -261,7 +268,7 @@ class APIEndpoint:
                     raise zoe_api.exceptions.ZoeRestAPIException('No role called {}'.format(user_data['role']))
                 update_fields['role_id'] = role.id
 
-        self.sql.user.update(user_data['id'], **update_fields)
+        self.sql.user.update(user_id, **update_fields)
 
     def quota_by_name(self, quota) -> zoe_lib.state.Quota:
         """Finds a quota in the database looking it up by its name."""
@@ -300,18 +307,23 @@ class APIEndpoint:
         if not user.role.can_change_config:
             raise zoe_api.exceptions.ZoeAuthException()
 
+        role = self.role_by_id(role_id)
+        if role.name == "default":
+            raise zoe_api.exceptions.ZoeRestAPIException('Cannot delete default role')
+
         self.sql.role.delete(role_id)
 
-    def role_update(self, user: zoe_lib.state.User, role_data):
+    def role_update(self, user: zoe_lib.state.User, role_id: int, role_data):
         """Update a role."""
         if not user.role.can_change_config:
             raise zoe_api.exceptions.ZoeAuthException()
 
-        if 'id' not in role_data:
-            raise KeyError
-        self.role_by_id(role_data['id'])
+        role = self.role_by_id(role_id)
 
-        self.sql.role.update(role_data['id'], **role_data)
+        if role.name == "default" and "name" in role_data:
+            raise zoe_api.exceptions.ZoeRestAPIException('Cannot rename default role')
+
+        self.sql.role.update(role_id, **role_data)
 
     def quota_new(self, user: zoe_lib.state.User, quota_data) -> int:
         """Creates a new quota."""
@@ -333,15 +345,21 @@ class APIEndpoint:
         if not user.role.can_change_config:
             raise zoe_api.exceptions.ZoeAuthException()
 
+        quota = self.quota_by_id(quota_id)
+        if quota is None:
+            raise zoe_api.exceptions.ZoeNotFoundException('No such quota')
+        if quota.name == "default":
+            raise zoe_api.exceptions.ZoeRestAPIException('Cannot delete default quota')
+
         self.sql.quota.delete(quota_id)
 
-    def quota_update(self, user: zoe_lib.state.User, quota_data):
+    def quota_update(self, user: zoe_lib.state.User, quota_id, quota_data):
         """Update a quota."""
         if not user.role.can_change_config:
             raise zoe_api.exceptions.ZoeAuthException()
 
-        if 'id' not in quota_data:
-            raise KeyError
-        self.role_by_id(quota_data['id'])
+        quota = self.quota_by_id(quota_id)
+        if quota.name == "default" and "name" in quota_data:
+            raise zoe_api.exceptions.ZoeRestAPIException('Cannot rename default quota')
 
-        self.sql.role.update(quota_data['id'], **quota_data)
+        self.sql.quota.update(quota_id, **quota_data)

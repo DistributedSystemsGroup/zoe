@@ -35,7 +35,7 @@ class BaseAuthenticator:
     def full_auth(self, username, password) -> Union[None, User]:
         """This method verifies the username and the password against one of the external auth sources."""
         user = self.state.user.select(only_one=True, **{"username": username})
-        if not user.enabled:
+        if user is None or not user.enabled:
             return None
 
         if user.auth_source == "textfile" and PlainTextAuthenticator(get_conf().auth_file).auth(username, password):
@@ -43,6 +43,8 @@ class BaseAuthenticator:
         elif user.auth_source == "ldap" and LDAPAuthenticator(get_conf(), sasl=False).auth(username, password):
             return user
         elif user.auth_source == "ldap+sasl" and LDAPAuthenticator(get_conf(), sasl=True).auth(username, password):
+            return user
+        elif user.auth_source == "internal" and user.check_password(password):
             return user
         else:
             log.error('Unknown auth source {} for user {}, cannot authenticate'.format(user.auth_source, user.username))

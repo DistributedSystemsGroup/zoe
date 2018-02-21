@@ -44,9 +44,9 @@ class ExecutionAPI(ZoeAPIRequestHandler):
 
         success, message = self.api_endpoint.execution_terminate(self.current_user, execution_id)
         if not success:
-            raise zoe_api.exceptions.ZoeRestAPIException(message, 400)
-
-        self.set_status(204)
+            self.set_status(400, message)
+        else:
+            self.set_status(204)
 
 
 class ExecutionDeleteAPI(ZoeAPIRequestHandler):
@@ -63,9 +63,9 @@ class ExecutionDeleteAPI(ZoeAPIRequestHandler):
 
         success, message = self.api_endpoint.execution_delete(self.current_user, execution_id)
         if not success:
-            raise zoe_api.exceptions.ZoeRestAPIException(message, 400)
-
-        self.set_status(204)
+            self.set_status(400, message)
+        else:
+            self.set_status(204)
 
 
 class ExecutionCollectionAPI(ZoeAPIRequestHandler):
@@ -134,7 +134,8 @@ class ExecutionCollectionAPI(ZoeAPIRequestHandler):
         try:
             data = tornado.escape.json_decode(self.request.body)
         except ValueError:
-            raise zoe_api.exceptions.ZoeRestAPIException('Error decoding JSON data')
+            self.set_status(400, 'Error decoding JSON data')
+            return
 
         application_description = data['application']
         exec_name = data['name']

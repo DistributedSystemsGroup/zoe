@@ -43,7 +43,7 @@ class ZoeExecutionsAPI(ZoeAPIBase):
         if status_code == 204:
             return
         else:
-            raise ZoeAPIException(data['message'])
+            raise ZoeAPIException(data)
 
     def delete(self, execution_id):
         """
@@ -59,7 +59,7 @@ class ZoeExecutionsAPI(ZoeAPIBase):
         if status_code == 204:
             return
         else:
-            raise ZoeAPIException(data['message'])
+            raise ZoeAPIException(data)
 
     def list(self, **kwargs):
         """
@@ -84,7 +84,7 @@ class ZoeExecutionsAPI(ZoeAPIBase):
         if status_code == 200:
             return data
         else:
-            raise ZoeAPIException(data['message'])
+            raise ZoeAPIException(data)
 
     def get(self, execution_id):
         """
@@ -99,8 +99,10 @@ class ZoeExecutionsAPI(ZoeAPIBase):
         data, status_code = self._rest_get('/execution/' + str(execution_id))
         if status_code == 200:
             return data
-        else:
+        elif status_code == 404:
             return None
+        else:
+            raise ZoeAPIException(data)
 
     def start(self, name, application_description):
         """
@@ -120,7 +122,7 @@ class ZoeExecutionsAPI(ZoeAPIBase):
         }
         data, status_code = self._rest_post('/execution', execution)
         if status_code != 201:
-            raise ZoeAPIException(data['message'])
+            raise ZoeAPIException(data)
         else:
             return data['execution_id']
 

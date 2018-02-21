@@ -18,7 +18,7 @@
 import tornado.escape
 
 from zoe_api.rest_api.request_handler import ZoeAPIRequestHandler
-from zoe_api.exceptions import ZoeAuthException
+from zoe_api.exceptions import ZoeException
 
 
 class QuotaAPI(ZoeAPIRequestHandler):
@@ -48,12 +48,12 @@ class QuotaAPI(ZoeAPIRequestHandler):
             return
 
         try:
-            self.api_endpoint.quota_update(self.current_user, **data)
+            self.api_endpoint.quota_update(self.current_user, quota_id, data)
         except KeyError:
             self.set_status(400, 'Error decoding JSON data')
             return
-        except ZoeAuthException as e:
-            self.set_status(401, e.message)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
             return
 
         self.set_status(201)
@@ -65,8 +65,8 @@ class QuotaAPI(ZoeAPIRequestHandler):
 
         try:
             self.api_endpoint.quota_delete(self.current_user, quota_id)
-        except ZoeAuthException as e:
-            self.set_status(401, e.message)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
             return
         self.set_status(204)
 
@@ -93,8 +93,8 @@ class QuotaCollectionAPI(ZoeAPIRequestHandler):
 
         try:
             quota = self.api_endpoint.quota_list(self.current_user, **filter_dict)
-        except ZoeAuthException as e:
-            self.set_status(401, e.message)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
             return
 
         self.write(dict([(r.id, r.serialize()) for r in quota]))
@@ -115,8 +115,8 @@ class QuotaCollectionAPI(ZoeAPIRequestHandler):
         except KeyError:
             self.set_status(400, 'Error decoding JSON data')
             return
-        except ZoeAuthException as e:
-            self.set_status(401, e.message)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
             return
 
         self.set_status(201)
