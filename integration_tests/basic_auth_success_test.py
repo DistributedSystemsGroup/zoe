@@ -21,10 +21,10 @@ class TestZoeRest:
         req = requests.get(ZOE_API_URI + 'info', timeout=TIMEOUT)
         assert req.status_code == 200
 
-    def test_userinfo(self, zoe_api_process):
-        """Test userinfo api endpoint."""
-        print('Test userinfo api endpoint')
-        req = requests.get(ZOE_API_URI + 'userinfo', auth=ZOE_AUTH, timeout=TIMEOUT)
+    def test_user(self, zoe_api_process):
+        """Test user api endpoint."""
+        print('Test user api endpoint')
+        req = requests.get(ZOE_API_URI + 'user', auth=ZOE_AUTH, timeout=TIMEOUT)
         assert req.status_code == 200
 
     def test_list_all_executions(self, zoe_api_process):
