@@ -20,7 +20,8 @@ ARGS = [
     '--auth-file', 'zoepass.csv',
     '--backend', 'DockerEngine',
     '--backend-docker-config-file', 'integration_tests/sample_docker.conf',
-    '--zapp-shop-path', 'contrib/zapp-shop-sample'
+    '--zapp-shop-path', 'contrib/zapp-shop-sample',
+    '--overlay-network-name', 'bridge'
 ]
 
 
