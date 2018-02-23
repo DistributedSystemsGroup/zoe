@@ -348,7 +348,7 @@ def user_delete_cmd(api: ZoeAPI, args):
 
 def user_update_cmd(api: ZoeAPI, args):
     """Updates a user."""
-    pass
+    api.user.update(args.id, {})  # FIXME
 
 
 ENV_HELP_TEXT = '''To authenticate with Zoe you need to define three environment variables:
