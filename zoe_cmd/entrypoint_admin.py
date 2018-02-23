@@ -75,7 +75,7 @@ def exec_list_cmd(api: ZoeAPI, args):
     data = api.executions.list(**filters)
     if len(data) == 0:
         return
-    tabular_data = [[e['id'], e['name'], e['user_id'], e['status']] for e in sorted(data.values(), key=lambda x: x['id'])]
+    tabular_data = [[e['id'], e['name'], e['user_id'], e['status']] for e in sorted(data, key=lambda x: x['id'])]
     headers = ['ID', 'Name', 'User ID', 'Status']
     print(tabulate(tabular_data, headers))
 
@@ -147,7 +147,7 @@ def quota_ls_cmd(api: ZoeAPI, args):
     if 'name' in args:
         filters['name'] = args.name
     quotas = api.quota.list(filters)
-    tabular_data = [[q['id'], q['name'], q['concurrent_executions'], q['memory'], q['cores']] for q_id, q in sorted(quotas.items())]
+    tabular_data = [[q['id'], q['name'], q['concurrent_executions'], q['memory'], q['cores']] for q in sorted(quotas)]
     headers = ['ID', 'Name', 'Conc. Executions', 'Memory', 'Cores']
     print(tabulate(tabular_data, headers))
 
@@ -201,10 +201,10 @@ def role_ls_cmd(api: ZoeAPI, args):
             return "No"
 
     filters = {}
-    if 'name' in args:
+    if args.name is not None:
         filters['name'] = args.name
     roles = api.role.list(filters)
-    tabular_data = [[r['id'], r['name'], b2t(r['can_see_status']), b2t(r['can_change_config']), b2t(r['can_operate_others']), b2t(r['can_delete_executions']), b2t(r['can_access_api']), b2t(r['can_customize_resources'])] for r_id, r in sorted(roles.items())]
+    tabular_data = [[r['id'], r['name'], b2t(r['can_see_status']), b2t(r['can_change_config']), b2t(r['can_operate_others']), b2t(r['can_delete_executions']), b2t(r['can_access_api']), b2t(r['can_customize_resources'])] for r in sorted(roles)]
     headers = ['ID', 'Name', 'See status', 'Change config', 'Operate others', 'Delete execs', 'API access', 'Customize resources']
     print(tabulate(tabular_data, headers))
 
@@ -263,6 +263,92 @@ def role_update_cmd(api: ZoeAPI, args):
     if args.can_customize_resources is not None:
         role_update['can_customize_resources'] = True if args.can_customize_resources else False
     api.role.update(args.id, role_update)
+
+
+def user_ls_cmd(api: ZoeAPI, args):
+    """List defined users."""
+    filters = {}
+    if args.username is not None:
+        filters['username'] = args.username
+    if args.enabled is not None:
+        filters['enabled'] = True if args.enabled == 1 else False
+    if args.auth_source is not None:
+        filters['auth_source'] = args.auth_source
+    if args.role is not None:
+        role = api.role.list({'name': args.role})[0]
+        if role is None:
+            print('Unknown role specified')
+            return
+        filters['role_id'] = role['id']
+    if args.quota is not None:
+        quota = api.quota.list({'name': args.quota})[0]
+        if quota is None:
+            print('Unknown quota specified')
+            return
+        filters['quota_id'] = quota['id']
+
+    users = api.user.list(filters)
+    tabular_data = []
+    role_cache = {}
+    quota_cache = {}
+    for user in sorted(users, key=lambda u: u['id']):
+        if user['role_id'] in role_cache:
+            role = role_cache[user['role_id']]
+        else:
+            role = api.role.get(user['role_id'])
+            role_cache[user['role_id']] = role
+
+        if user['quota_id'] in quota_cache:
+            quota = quota_cache[user['quota_id']]
+        else:
+            quota = api.quota.get(user['quota_id'])
+            quota_cache[user['quota_id']] = quota
+
+        tabular_data.append([user['id'], user['username'], user['email'], user['fs_uid'], user['priority'], user['enabled'], user['auth_source'], role['name'], quota['name']])
+
+    headers = ['ID', 'Username', 'Email', 'FS UID', 'Priority', 'Enabled', 'Auth source', 'Role', 'Quota']
+    print(tabulate(tabular_data, headers))
+
+
+def user_get_cmd(api: ZoeAPI, args):
+    """Get a user by its ID."""
+    user = api.user.get(args.id)
+    role = api.role.get(user['role_id'])
+    quota = api.quota.get(role['quota_id'])
+    tabular_data = [[user['id'], user['username'], user['email'], user['fs_uid'], user['priority'], user['enabled'], user['auth_source'], role['name'], quota['name']]]
+    headers = ['ID', 'Username', 'Email', 'FS UID', 'Priority', 'Enabled', 'Auth source', 'Role', 'Quota']
+    print(tabulate(tabular_data, headers))
+
+
+def user_create_cmd(api: ZoeAPI, args):
+    """Creates a user."""
+    user = {
+        'username': args.username,
+        'email': args.email,
+        'auth_source': args.auth_source,
+    }
+    quota = api.quota.list({'name': args.quota})[0]
+    if quota is None:
+        print('Unknown quota')
+        return
+    user['quota_id'] = quota['id']
+    role = api.role.list({'name': args.role})[0]
+    if role is None:
+        print('Unknown role')
+        return
+    user['role_id'] = role['id']
+    new_id = api.user.create(user)
+    print('New user created with ID: {}'.format(new_id))
+
+
+def user_delete_cmd(api: ZoeAPI, args):
+    """Delete a user."""
+    api.user.delete(args.id)
+
+
+def user_update_cmd(api: ZoeAPI, args):
+    """Updates a user."""
+    pass
 
 
 ENV_HELP_TEXT = '''To authenticate with Zoe you need to define three environment variables:
@@ -379,6 +465,43 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     sub_parser.add_argument('--can_access_api', choices=[0, 1], type=int, help="Can access the REST API")
     sub_parser.add_argument('--can_customize_resources', choices=[0, 1], type=int, help="Can customize resource reservations before starting executions")
     sub_parser.set_defaults(func=role_update_cmd)
+
+    # Users
+    sub_parser = subparser.add_parser('user-ls', help="List existing users")
+    sub_parser.add_argument('--username', help="Filter by user name")
+    sub_parser.add_argument('--enabled', type=int, choices=[0, 1], help="Filter by enabled status")
+    sub_parser.add_argument('--auth_source', choices=['internal', 'ldap', 'ldap+ssl', 'textfile'], help="Filter by auth source")
+    sub_parser.add_argument('--role', help="Filter by role name")
+    sub_parser.add_argument('--quota', help="Filter by quota name")
+    sub_parser.set_defaults(func=user_ls_cmd)
+
+    sub_parser = subparser.add_parser('user-get', help="Get a user by its ID")
+    sub_parser.add_argument('id', type=int, help="User ID")
+    sub_parser.set_defaults(func=user_get_cmd)
+
+    sub_parser = subparser.add_parser('user-create', help="Create a new user")
+    sub_parser.add_argument('username', help="Username")
+    sub_parser.add_argument('email', help="Email")
+    sub_parser.add_argument('auth_source', choices=['internal', 'ldap', 'ldap+ssl', 'textfile'], help="Authentication method")
+    sub_parser.add_argument('role', help="Role name")
+    sub_parser.add_argument('quota', help="Quota name")
+    sub_parser.set_defaults(func=user_create_cmd)
+
+    sub_parser = subparser.add_parser('user-delete', help="Delete a user")
+    sub_parser.add_argument('id', type=int, help="User ID")
+    sub_parser.set_defaults(func=user_delete_cmd)
+
+    sub_parser = subparser.add_parser('user-update', help="Update an existing role")
+    sub_parser.add_argument('id', type=int, help="ID of the user to update")
+    sub_parser.add_argument('--email', help="Change the email")
+    sub_parser.add_argument('--fs_uid', type=int, help="Filesystem UID")
+    sub_parser.add_argument('--password', help="Change or set the password for internal authentication")
+    sub_parser.add_argument('--enabled', type=int, choices=[0, 1], help="Enable or disable the user")
+    sub_parser.add_argument('--auth_source', choices=['internal', 'ldap', 'ldap+ssl', 'textfile'], help="Change the authentication source")
+    sub_parser.add_argument('--priority', type=int, help="Change priority")
+    sub_parser.add_argument('--role_id', help="Change role")
+    sub_parser.add_argument('--quota_id', help="Change quota")
+    sub_parser.set_defaults(func=user_update_cmd)
 
     return parser, parser.parse_args()
 

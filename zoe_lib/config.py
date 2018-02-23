@@ -79,9 +79,6 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--master-url', help='URL of the Zoe master process', default='tcp://127.0.0.1:4850')
         argparser.add_argument('--cookie-secret', help='secret used to encrypt cookies', default='changeme')
 
-        # API auth options
-        argparser.add_argument('--auth-type', help='Authentication type (text, ldap or ldapsasl)', default='text')
-
         argparser.add_argument('--auth-file', help='Path to the CSV file containing user,pass,role lines for text authentication', default='zoepass.csv')
 
         argparser.add_argument('--ldap-server-uri', help='LDAP server to use for authentication', default='ldap://localhost')

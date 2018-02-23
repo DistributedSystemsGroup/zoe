@@ -53,10 +53,6 @@ def zoe_web_main(test_conf=None) -> int:
     logging.getLogger("MARKDOWN").setLevel(logging.WARNING)
     logging.getLogger("tornado").setLevel(logging.WARNING)
 
-    if config.get_conf().auth_type == 'ldap' and not zoe_api.auth.ldap.LDAP_AVAILABLE:
-        log.error("LDAP authentication requested, but 'pyldap' module not installed.")
-        return 1
-
     sql_manager = zoe_lib.state.SQLManager(config.get_conf())
     sql_manager.init_db()
 

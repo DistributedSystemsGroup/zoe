@@ -102,6 +102,12 @@ class UserCollectionAPI(ZoeAPIRequestHandler):
             if filt[0] in self.request.arguments:
                 if filt[1] == str:
                     filter_dict[filt[0]] = self.request.arguments[filt[0]][0].decode('utf-8')
+                if filt[1] == bool:
+                    text_val = self.request.arguments[filt[0]][0].decode('utf-8')
+                    if text_val == 'False':
+                        filter_dict[filt[0]] = False
+                    elif text_val == 'True':
+                        filter_dict[filt[0]] = True
                 else:
                     filter_dict[filt[0]] = filt[1](self.request.arguments[filt[0]][0])
 
@@ -125,7 +131,7 @@ class UserCollectionAPI(ZoeAPIRequestHandler):
             return
 
         try:
-            new_id = self.api_endpoint.user_new(self.current_user, data['username'], data['fs_uid'], data['role_id'], data['quota_id'], data['auth_source'])
+            new_id = self.api_endpoint.user_new(self.current_user, data['username'], data['email'], data['role_id'], data['quota_id'], data['auth_source'])
         except KeyError:
             self.set_status(400, 'Error decoding JSON data')
             return

@@ -82,7 +82,7 @@ class ZoeExecutionsAPI(ZoeAPIBase):
         """
         data, status_code = self._rest_get('/execution', kwargs)
         if status_code == 200:
-            return data
+            return list(data.values())
         else:
             raise ZoeAPIException(data)
 

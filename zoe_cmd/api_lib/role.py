@@ -82,7 +82,7 @@ class ZoeRoleAPI(ZoeAPIBase):
         data, status_code = self._rest_get('/role', filters)
         if status_code != 200:
             raise ZoeAPIException(data)
-        return data
+        return list(data.values())
 
     def update(self, role_id: int, entries: dict) -> None:
         """

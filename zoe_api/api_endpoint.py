@@ -226,7 +226,7 @@ class APIEndpoint:
         users = self.sql.user.select(**filters)
         return users
 
-    def user_new(self, user: zoe_lib.state.User, username: str, fs_uid: int, role_id: int, quota_id: int, auth_source: str) -> int:
+    def user_new(self, user: zoe_lib.state.User, username: str, email: str, role_id: int, quota_id: int, auth_source: str) -> int:
         """Creates a new user."""
         if not user.role.can_change_config:
             raise zoe_api.exceptions.ZoeAuthException()
@@ -236,7 +236,7 @@ class APIEndpoint:
         if self.quota_by_id(quota_id) is None:
             raise zoe_api.exceptions.ZoeNotFoundException("Quota {} does not exist".format(quota_id))
 
-        return self.sql.user.insert(username, fs_uid, role_id, quota_id, auth_source)
+        return self.sql.user.insert(username, email, auth_source, role_id, quota_id)
 
     def user_update(self, user: zoe_lib.state.User, user_id, user_data):
         """Update a user."""
@@ -257,16 +257,21 @@ class APIEndpoint:
                 update_fields['enabled'] = user_data['enabled']
             if 'auth_source' in user_data:
                 update_fields['auth_source'] = user_data['auth_source']
-            if 'quota' in user_data:
-                quota = self.quota_by_name(user_data['quota'])
+                if user_data['auth_source'] != 'internal':
+                    user_data['password'] = None
+            if 'quota_id' in user_data:
+                quota = self.quota_by_id(user_data['quota_id'])
                 if quota is None:
-                    raise zoe_api.exceptions.ZoeRestAPIException('No quota called {}'.format(user_data['quota']))
+                    raise zoe_api.exceptions.ZoeRestAPIException('No quota with ID {}'.format(user_data['quota_id']))
                 update_fields['quota_id'] = quota.id
             if 'role' in user_data:
-                role = self.role_by_name(user_data['role'])
+                role = self.role_by_id(user_data['role_id'])
                 if role is None:
-                    raise zoe_api.exceptions.ZoeRestAPIException('No role called {}'.format(user_data['role']))
+                    raise zoe_api.exceptions.ZoeRestAPIException('No role with ID {}'.format(user_data['role_id']))
                 update_fields['role_id'] = role.id
+            if 'password' in user_data:
+                update_fields['password'] = user_data['password']
+                update_fields['auth_source'] = 'internal'
 
         self.sql.user.update(user_id, **update_fields)
 

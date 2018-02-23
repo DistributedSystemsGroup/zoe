@@ -82,7 +82,7 @@ class ZoeQuotaAPI(ZoeAPIBase):
         data, status_code = self._rest_get('/quota', filters)
         if status_code != 200:
             raise ZoeAPIException(data)
-        return data
+        return list(data.values())
 
     def update(self, quota_id: int, entries: dict) -> None:
         """

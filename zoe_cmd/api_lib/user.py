@@ -82,7 +82,7 @@ class ZoeUserAPI(ZoeAPIBase):
         data, status_code = self._rest_get('/user', filters)
         if status_code != 200:
             raise ZoeAPIException(data)
-        return data
+        return list(data.values())
 
     def update(self, user_id: int, entries) -> None:
         """

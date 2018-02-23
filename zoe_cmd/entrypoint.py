@@ -87,7 +87,7 @@ def exec_list_cmd(api: ZoeAPI, args):
     data = api.executions.list(**filters)
     if len(data) == 0:
         return
-    tabular_data = [[e['id'], e['name'], e['user_id'], e['status']] for e in sorted(data.values(), key=lambda x: x['id'])]
+    tabular_data = [[e['id'], e['name'], e['user_id'], e['status']] for e in sorted(data, key=lambda x: x['id'])]
     headers = ['ID', 'Name', 'User ID', 'Status']
     print(tabulate(tabular_data, headers))
 

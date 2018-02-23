@@ -158,9 +158,9 @@ class UserTable(BaseTable):
         else:
             return [User(x, self.sql_manager) for x in self.cursor]
 
-    def insert(self, username, fs_uid, role_id, quota_id, auth_source):
+    def insert(self, username: str, email: str, auth_source: str, role_id: int, quota_id: int):
         """Adds a new user to the state."""
-        query = self.cursor.mogrify('INSERT INTO "user" (id, username, fs_uid, email, priority, enabled, auth_source, role_id, quota_id) VALUES (DEFAULT, %s, %s, NULL, DEFAULT, DEFAULT, %s, %s, %s) RETURNING id', (username, fs_uid, auth_source, role_id, quota_id))
+        query = self.cursor.mogrify('INSERT INTO "user" (id, username, fs_uid, email, priority, enabled, auth_source, role_id, quota_id) VALUES (DEFAULT, %s, (SELECT MAX("user".fs_uid)+1 FROM "user"), %s, DEFAULT, TRUE, %s, %s, %s) RETURNING id', (username, email, auth_source, role_id, quota_id))
         self.cursor.execute(query)
         self.sql_manager.commit()
         return self.cursor.fetchone()[0]
