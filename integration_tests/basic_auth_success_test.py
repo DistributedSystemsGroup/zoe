@@ -82,9 +82,9 @@ class TestZoeRest:
         with open('integration_tests/zapp.json', encoding='utf-8') as data_file:
             data = json.loads(data_file.read())
 
-        req = requests.post(ZOE_API_URI + 'zapp_validate', json={"application": data}, timeout=TIMEOUT)
+        req = requests.post(ZOE_API_URI + 'zapp_validate', json=data, timeout=TIMEOUT)
         if req.status_code != 200:
-            print('Error reason: {}'.format(req.reason))
+            print('Error reason: {}, {}'.format(req.reason, req.text))
         assert req.status_code == 200
 
     def test_zapp_validate_fail(self, zoe_api_process):
@@ -94,5 +94,5 @@ class TestZoeRest:
             data = json.loads(data_file.read())
 
         del data['version']
-        req = requests.post(ZOE_API_URI + 'zapp_validate', json={"application": data}, timeout=TIMEOUT)
+        req = requests.post(ZOE_API_URI + 'zapp_validate', json=data, timeout=TIMEOUT)
         assert req.status_code == 400
