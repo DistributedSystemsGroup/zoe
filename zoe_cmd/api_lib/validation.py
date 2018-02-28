@@ -34,10 +34,7 @@ class ZoeValidationAPI(ZoeAPIBase):
 
         :return:
         """
-        zapp = {
-            "application": application_description,
-        }
-        data_, status_code = self._rest_post('/zapp_validate', zapp)
+        data_, status_code = self._rest_post('/zapp_validate', application_description)
         if status_code != 200:
             return False
         else:

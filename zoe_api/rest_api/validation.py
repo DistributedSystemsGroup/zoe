@@ -27,17 +27,16 @@ class ZAppValidateAPI(ZoeAPIRequestHandler):
     def post(self):
         """HTTP GET method."""
         try:
-            data = tornado.escape.json_decode(self.request.body)
+            application_description = tornado.escape.json_decode(self.request.body)
         except ValueError:
             self.set_status(400, 'Error decoding JSON data')
             return
 
-        application_description = data['application']
-
         try:
             self.api_endpoint.zapp_validate(application_description)
         except ZoeException as e:
-            self.set_status(e.status_code, e.message)
+            self.set_status(e.status_code, "Invalid application description")
+            self.write(e.message)
             return
 
         self.write({'validation': 'ok'})

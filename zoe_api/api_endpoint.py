@@ -68,7 +68,7 @@ class APIEndpoint:
         try:
             zoe_lib.applications.app_validate(application_description)
         except zoe_lib.exceptions.InvalidApplicationDescription as e:
-            raise zoe_api.exceptions.ZoeRestAPIException('Invalid application description: ' + e.message)
+            raise zoe_api.exceptions.ZoeRestAPIException('Invalid application description: {}'.format(e.message), status_code=400)
 
     def _check_quota(self, user: zoe_lib.state.User, application_description):  # pylint: disable=unused-argument
         """Check quota for given user and execution."""

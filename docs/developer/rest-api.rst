@@ -50,15 +50,7 @@ Usage::
 
     curl -X POST --data-urlencode @filename http://bf5:8080/api/<api_version>/zapp_validate
 
-Needs a JSON document passed as the request body::
-
-    {
-        "application": <zapp json>,
-    }
-
-Where:
-
-* ``application`` is the full ZApp JSON document, the application description
+The full ZApp JSON document, the application description document, is expected as the body of the request.
 
 Will return a 200 HTTP status in case the JSON document passes validation, 400 otherwise.
 
