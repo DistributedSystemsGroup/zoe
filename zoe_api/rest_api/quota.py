@@ -29,7 +29,12 @@ class QuotaAPI(ZoeAPIRequestHandler):
         if self.current_user is None:
             return
 
-        quota = self.api_endpoint.quota_by_id(quota_id)
+        try:
+            quota = self.api_endpoint.quota_by_id(quota_id)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
+            return
+
         ret = {
             'quota': quota.serialize()
         }

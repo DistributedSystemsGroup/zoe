@@ -18,6 +18,7 @@
 import tornado.escape
 
 from zoe_api.rest_api.request_handler import ZoeAPIRequestHandler
+from zoe_api.exceptions import ZoeException
 
 
 class ZAppValidateAPI(ZoeAPIRequestHandler):
@@ -33,6 +34,10 @@ class ZAppValidateAPI(ZoeAPIRequestHandler):
 
         application_description = data['application']
 
-        self.api_endpoint.zapp_validate(application_description)
+        try:
+            self.api_endpoint.zapp_validate(application_description)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
+            return
 
         self.write({'validation': 'ok'})

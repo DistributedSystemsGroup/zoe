@@ -34,9 +34,10 @@ class UserAPI(ZoeAPIRequestHandler):
                 'user': self.current_user.serialize()
             }
         else:
-            user = self.api_endpoint.user_by_id(self.current_user, user_id)
-            if user is None:
-                self.set_status(404, "No such user")
+            try:
+                user = self.api_endpoint.user_by_id(self.current_user, user_id)
+            except ZoeException as e:
+                self.set_status(e.status_code, e.message)
                 return
             ret = {
                 'user': user.serialize()

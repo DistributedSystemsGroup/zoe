@@ -80,7 +80,7 @@ class APIEndpoint:
         running_execs += self.sql.executions.select(**{'status': 'image download', 'user_id': user.id})
         running_execs += self.sql.executions.select(**{'status': 'submitted', 'user_id': user.id})
         if len(running_execs) >= quota.concurrent_executions:
-            raise zoe_api.exceptions.ZoeException('You cannot run more than {} executions at a time, quota exceeded.'.format(quota.concurrent_executions))
+            raise zoe_api.exceptions.ZoeQuotaException('You cannot run more than {} executions at a time, quota exceeded.'.format(quota.concurrent_executions))
 
         # TODO: implement core and memory quotas
 
@@ -89,14 +89,14 @@ class APIEndpoint:
         try:
             zoe_lib.applications.app_validate(application_description)
         except zoe_lib.exceptions.InvalidApplicationDescription as e:
-            raise zoe_api.exceptions.ZoeException('Invalid application description: ' + e.message)
+            raise zoe_api.exceptions.ZoeRestAPIException('Invalid application description: ' + e.message)
 
         self._check_quota(user, application_description)
 
         new_id = self.sql.executions.insert(exec_name, user.id, application_description)
         success, message = self.master.execution_start(new_id)
         if not success:
-            raise zoe_api.exceptions.ZoeException('The Zoe master is unavailable, execution will be submitted automatically when the master is back up ({}).'.format(message))
+            raise zoe_api.exceptions.ZoeRestAPIException('The Zoe master is unavailable, execution will be submitted automatically when the master is back up ({}).'.format(message), status_code=503)
 
         return new_id
 
@@ -108,12 +108,14 @@ class APIEndpoint:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
 
         if e.user_id != user.id and not user.role.can_operate_others:
-            raise zoe_api.exceptions.ZoeException('You are not authorized to terminate this execution')
+            raise zoe_api.exceptions.ZoeAuthException('You are not authorized to terminate this execution')
 
         if e.is_active:
-            return self.master.execution_terminate(exec_id)
+            success, message = self.master.execution_terminate(exec_id)
+            if not success:
+                raise zoe_api.exceptions.ZoeRestAPIException(message)
         else:
-            raise zoe_api.exceptions.ZoeException('Execution is not running')
+            raise zoe_api.exceptions.ZoeRestAPIException('Execution is not running')
 
     def execution_delete(self, user: zoe_lib.state.User, exec_id: int):
         """Delete an execution."""
@@ -126,17 +128,16 @@ class APIEndpoint:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
 
         if e.user_id != user.id and not user.role.can_operate_others:
-            raise zoe_api.exceptions.ZoeException('You are not authorized to terminate this execution')
+            raise zoe_api.exceptions.ZoeAuthException('You are not authorized to terminate this execution')
 
         if e.is_active:
-            raise zoe_api.exceptions.ZoeException('Cannot delete an active execution')
+            raise zoe_api.exceptions.ZoeRestAPIException('Cannot delete an active execution')
 
         status, message = self.master.execution_delete(exec_id)
         if status:
             self.sql.executions.delete(exec_id)
-            return True, ''
         else:
-            raise zoe_api.exceptions.ZoeException(message)
+            raise zoe_api.exceptions.ZoeRestAPIException(message)
 
     def service_by_id(self, user: zoe_lib.state.User, service_id: int) -> zoe_lib.state.Service:
         """Lookup a service by its ID."""
@@ -206,7 +207,11 @@ class APIEndpoint:
         if not user.role.can_change_config:
             raise zoe_api.exceptions.ZoeAuthException()
 
-        return self.sql.user.select(only_one=True, id=user_id)
+        ret = self.sql.user.select(only_one=True, id=user_id)
+        if ret is None:
+            raise zoe_api.exceptions.ZoeNotFoundException("No such user")
+        else:
+            return ret
 
     def user_delete(self, user: zoe_lib.state.User, user_id: int):
         """Deletes the user identified by the ID."""
@@ -281,7 +286,11 @@ class APIEndpoint:
 
     def quota_by_id(self, quota_id) -> zoe_lib.state.Quota:
         """Finds a quota in the database looking it up by its id."""
-        return self.sql.quota.select(only_one=True, **{'id': quota_id})
+        quota = self.sql.quota.select(only_one=True, **{'id': quota_id})
+        if quota is None:
+            raise zoe_api.exceptions.ZoeNotFoundException('No such quota')
+        else:
+            return quota
 
     def role_by_name(self, role) -> zoe_lib.state.Role:
         """Finds a role in the database looking it up by its name."""
@@ -289,7 +298,11 @@ class APIEndpoint:
 
     def role_by_id(self, role_id) -> zoe_lib.state.Role:
         """Finds a role in the database looking it up by its id."""
-        return self.sql.role.select(only_one=True, **{'id': role_id})
+        role = self.sql.role.select(only_one=True, **{'id': role_id})
+        if role is None:
+            raise zoe_api.exceptions.ZoeNotFoundException('No such role')
+        else:
+            return role
 
     def role_new(self, user: zoe_lib.state.User, role_data) -> int:
         """Creates a new role."""

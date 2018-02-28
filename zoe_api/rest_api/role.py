@@ -29,7 +29,12 @@ class RoleAPI(ZoeAPIRequestHandler):
         if self.current_user is None:
             return
 
-        role = self.api_endpoint.role_by_id(role_id)
+        try:
+            role = self.api_endpoint.role_by_id(role_id)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
+            return
+
         ret = {
             'role': role.serialize()
         }

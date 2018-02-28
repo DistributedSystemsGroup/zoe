@@ -18,6 +18,7 @@
 import tornado.escape
 
 from zoe_api.rest_api.request_handler import ZoeAPIRequestHandler
+from zoe_api.exceptions import ZoeException
 
 
 class ExecutionAPI(ZoeAPIRequestHandler):
@@ -28,7 +29,11 @@ class ExecutionAPI(ZoeAPIRequestHandler):
         if self.current_user is None:
             return
 
-        e = self.api_endpoint.execution_by_id(self.current_user, execution_id)
+        try:
+            e = self.api_endpoint.execution_by_id(self.current_user, execution_id)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
+            return
 
         self.write(e.serialize())
 
@@ -41,9 +46,10 @@ class ExecutionAPI(ZoeAPIRequestHandler):
         if self.current_user is None:
             return
 
-        success, message = self.api_endpoint.execution_terminate(self.current_user, execution_id)
-        if not success:
-            self.set_status(400, message)
+        try:
+            self.api_endpoint.execution_terminate(self.current_user, execution_id)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
         else:
             self.set_status(204)
 
@@ -60,9 +66,10 @@ class ExecutionDeleteAPI(ZoeAPIRequestHandler):
         if self.current_user is None:
             return
 
-        success, message = self.api_endpoint.execution_delete(self.current_user, execution_id)
-        if not success:
-            self.set_status(400, message)
+        try:
+            self.api_endpoint.execution_delete(self.current_user, execution_id)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
         else:
             self.set_status(204)
 
@@ -117,7 +124,11 @@ class ExecutionCollectionAPI(ZoeAPIRequestHandler):
                 else:
                     filt_dict[filt[0]] = filt[1](self.request.arguments[filt[0]][0])
 
-        execs = self.api_endpoint.execution_list(self.current_user, **filt_dict)
+        try:
+            execs = self.api_endpoint.execution_list(self.current_user, **filt_dict)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
+            return
 
         self.write(dict([(e.id, e.serialize()) for e in execs]))
 
@@ -139,7 +150,11 @@ class ExecutionCollectionAPI(ZoeAPIRequestHandler):
         application_description = data['application']
         exec_name = data['name']
 
-        new_id = self.api_endpoint.execution_start(self.current_user, exec_name, application_description)
+        try:
+            new_id = self.api_endpoint.execution_start(self.current_user, exec_name, application_description)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
+            return
 
         self.set_status(201)
         self.write({'execution_id': new_id})
@@ -157,7 +172,11 @@ class ExecutionEndpointsAPI(ZoeAPIRequestHandler):
         if self.current_user is None:
             return
 
-        execution = self.api_endpoint.execution_by_id(self.current_user, execution_id)
-        services_, endpoints = self.api_endpoint.execution_endpoints(self.current_user, execution)
+        try:
+            execution = self.api_endpoint.execution_by_id(self.current_user, execution_id)
+            services_, endpoints = self.api_endpoint.execution_endpoints(self.current_user, execution)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
+            return
 
         self.write({'endpoints': endpoints})

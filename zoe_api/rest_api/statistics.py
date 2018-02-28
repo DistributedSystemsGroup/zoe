@@ -16,6 +16,7 @@
 """The Scheduler Statistics API endpoint."""
 
 from zoe_api.rest_api.request_handler import ZoeAPIRequestHandler
+from zoe_api.exceptions import ZoeException
 
 
 class SchedulerStatsAPI(ZoeAPIRequestHandler):
@@ -23,5 +24,9 @@ class SchedulerStatsAPI(ZoeAPIRequestHandler):
 
     def get(self):
         """HTTP GET method."""
-        statistics = self.api_endpoint.statistics_scheduler()
+        try:
+            statistics = self.api_endpoint.statistics_scheduler()
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
+            return
         self.write(statistics)

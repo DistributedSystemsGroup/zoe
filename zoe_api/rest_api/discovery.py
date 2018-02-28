@@ -16,6 +16,7 @@
 """The Discovery API endpoint."""
 
 from zoe_api.rest_api.request_handler import ZoeAPIRequestHandler
+from zoe_api.exceptions import ZoeException
 
 
 class DiscoveryAPI(ZoeAPIRequestHandler):
@@ -26,11 +27,16 @@ class DiscoveryAPI(ZoeAPIRequestHandler):
         if self.current_user is None:
             return
 
-        self.api_endpoint.execution_by_id(self.current_user, execution_id)
-        if service_group != 'all':
-            services = self.api_endpoint.service_list(self.current_user, service_group=service_group, execution_id=execution_id)
-        else:
-            services = self.api_endpoint.service_list(self.current_user, execution_id=execution_id)
+        try:
+            self.api_endpoint.execution_by_id(self.current_user, execution_id)
+            if service_group != 'all':
+                services = self.api_endpoint.service_list(self.current_user, service_group=service_group, execution_id=execution_id)
+            else:
+                services = self.api_endpoint.service_list(self.current_user, execution_id=execution_id)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
+            return
+
         ret = {
             'service_type': service_group,
             'execution_id': execution_id,

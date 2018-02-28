@@ -22,6 +22,7 @@ import tornado.gen
 import tornado.iostream
 
 from zoe_api.rest_api.request_handler import ZoeAPIRequestHandler
+from zoe_api.exceptions import ZoeException
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +37,11 @@ class ServiceAPI(ZoeAPIRequestHandler):
         if self.current_user is None:
             return
 
-        service = self.api_endpoint.service_by_id(self.current_user, service_id)
+        try:
+            service = self.api_endpoint.service_by_id(self.current_user, service_id)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
+            return
 
         self.write(service.serialize())
 
@@ -64,7 +69,11 @@ class ServiceLogsAPI(ZoeAPIRequestHandler):
         if self.current_user is None:
             return
 
-        log_obj = self.api_endpoint.service_logs(self.current_user, service_id)
+        try:
+            log_obj = self.api_endpoint.service_logs(self.current_user, service_id)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
+            return
 
         while not self.connection_closed:
             try:
