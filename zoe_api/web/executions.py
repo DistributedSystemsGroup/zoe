@@ -96,9 +96,10 @@ class ExecutionTerminateWeb(ZoeWebRequestHandler):
         if self.current_user is None:
             return
 
-        success, message = self.api_endpoint.execution_terminate(self.current_user, execution_id)
-        if not success:
-            self.error_page(error_message=message)
+        try:
+            self.api_endpoint.execution_terminate(self.current_user, execution_id)
+        except zoe_api.exceptions.ZoeException as e:
+            self.set_status(e.status_code, e.message)
             return
 
         self.redirect(self.reverse_url('home_user'))
@@ -112,7 +113,11 @@ class ExecutionInspectWeb(ZoeWebRequestHandler):
         if self.current_user is None:
             return
 
-        e = self.api_endpoint.execution_by_id(self.current_user, execution_id)
+        try:
+            e = self.api_endpoint.execution_by_id(self.current_user, execution_id)
+        except zoe_api.exceptions.ZoeException as e:
+            self.set_status(e.status_code, e.message)
+            return
 
         services_info, endpoints = self.api_endpoint.execution_endpoints(self.current_user, e)
 
@@ -142,7 +147,11 @@ class ServiceLogsWeb(ZoeWebRequestHandler):
         if self.current_user is None:
             return
 
-        service = self.api_endpoint.service_by_id(self.current_user, service_id)
+        try:
+            service = self.api_endpoint.service_by_id(self.current_user, service_id)
+        except zoe_api.exceptions.ZoeException as e:
+            self.set_status(e.status_code, e.message)
+            return
 
         template_vars = {
             "service": service,

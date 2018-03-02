@@ -41,7 +41,6 @@ class PlainTextAuthenticator:
                     continue
                 file_username = row[0]
                 file_password = row[1]
-                file_role = row[2]
                 if file_username == username and file_password == password:
-                    return username, file_role
+                    return True
             raise zoe_api.exceptions.ZoeAuthException('Unknown user or password.')

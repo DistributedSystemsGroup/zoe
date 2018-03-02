@@ -60,7 +60,7 @@
 {% if endpoints|length > 0 %}
 <ul>
 {% for endp in endpoints|sort %}
-    <li><a href="{{ endp[1] }}" target="_blank">{{ endp[0] }}</a></li>
+    <li><a href="{{ endp[1] }}" target="_blank">{{ endp[0] }}</a> ({{ endp[1] }})</li>
 {% endfor %}
 </ul>
 {% else %}

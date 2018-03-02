@@ -111,8 +111,12 @@ class ZoeWebRequestHandler(ZoeRequestHandler):
             'handler': self,
             'zoe_version': zoe_lib.version.ZOE_VERSION,
             'server_address': self.request.host,
-            'user': self.current_user
         }
+
+        try:
+            ctx['user'] = super().get_current_user()
+        except ZoeAuthException:
+            pass
 
         ctx.update(kwargs)
         return template.render(ctx)

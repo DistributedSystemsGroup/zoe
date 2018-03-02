@@ -64,7 +64,7 @@
         {%  endfor %}
     {% endif %}
     <hr>
-    {%  if can_access_api %}
+    {%  if user.role.can_access_api %}
         <label class="label-inline"><input type="checkbox" onchange="set_submit_text(this)" name="download_json"> Download JSON with these parameters for command-line execution</label>
         <br><br>
     {% endif %}

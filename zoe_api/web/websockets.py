@@ -19,26 +19,24 @@ import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
 
-import tornado.websocket
 import tornado.iostream
 import tornado.gen
 
 import zoe_api.exceptions
 from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
+from zoe_api.custom_request_handler import ZoeWSRequestHandler
 
 log = logging.getLogger(__name__)
 
 THREAD_POOL = ThreadPoolExecutor(20)
 
 
-class WebSocketEndpointWeb(tornado.websocket.WebSocketHandler):
+class WebSocketEndpointWeb(ZoeWSRequestHandler):
     """Handler class"""
     def initialize(self, **kwargs):
         """Initializes the request handler."""
-        super().initialize()
+        super().initialize(**kwargs)
         self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-        self.uid = None
-        self.role = None
         self.connection_closed = None
 
     def open(self, *args, **kwargs):
