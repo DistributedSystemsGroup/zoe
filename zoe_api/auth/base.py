@@ -16,6 +16,7 @@
 """Base authenticator class."""
 
 import logging
+import pexpect
 from typing import Union
 
 from zoe_api.auth.file import PlainTextAuthenticator
@@ -46,6 +47,26 @@ class BaseAuthenticator:
             return user
         elif user.auth_source == "internal" and user.check_password(password):
             return user
+        elif user.auth_source == "pam" and pam_authenticate(username, password):
+            return user
         else:
             log.error('Unknown auth source {} for user {}, cannot authenticate'.format(user.auth_source, user.username))
             return None
+
+
+def pam_authenticate(username, password):
+    """Use su for testing credentials. Using directly the PAM library would be more performant, but would also require Zoe to run as root."""
+
+    try:
+        child = pexpect.spawn('/bin/su', ['-', username])
+        child.expect('Password:')
+        child.sendline(password)
+        result = child.expect(['su: Authentication failure', username])
+        child.close()
+    except pexpect.TIMEOUT as err:
+        log.error("Error authenticating. Reason: {}".format(err))
+        return False
+    if result == 0:
+        return False
+    else:
+        return True

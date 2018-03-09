@@ -16,6 +16,7 @@
 """Interface to PostgresQL for Zoe state."""
 
 import logging
+import pwd
 
 from passlib.hash import pbkdf2_sha256 as hash_algo
 
@@ -39,6 +40,9 @@ class User(BaseRecord):
         self.auth_source = d['auth_source']
         self.role_id = d['role_id']
         self.quota_id = d['quota_id']
+
+        if self.auth_source == "pam":
+            self.fs_uid = pwd.getpwnam(self.username).pw_uid
 
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""

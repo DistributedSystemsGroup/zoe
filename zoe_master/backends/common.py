@@ -44,7 +44,7 @@ def gen_environment(execution: Execution, service: Service, env_subst_dict: Dict
     env_list.append(('USER', execution.owner.username))
     env_list.append(('SERVICE_NAME', service.name))
 
-    wk_vol = ZoeFSWorkspace().get(execution.owner.username)
+    wk_vol = ZoeFSWorkspace().get(execution.owner)
     env_list.append(('ZOE_WORKSPACE', wk_vol.mount_point))
     env_list.append(('HOME', wk_vol.mount_point))
     return env_list
@@ -54,8 +54,7 @@ def gen_volumes(service: Service, execution: Execution) -> List[VolumeDescriptio
     """Return the list of default volumes to be added to all containers."""
     vol_list = service.volumes
 
-    fswk = ZoeFSWorkspace()
-    wk_vol = fswk.get(execution.owner.username)
+    wk_vol = ZoeFSWorkspace().get(execution.owner)
 
     vol_list.append(wk_vol)
 

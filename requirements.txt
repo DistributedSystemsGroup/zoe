@@ -13,3 +13,4 @@ jsonschema
 tabulate
 markdown
 passlib
+pexpect

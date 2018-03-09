@@ -39,6 +39,9 @@ class LoginWeb(ZoeWebRequestHandler):
         username = self.get_argument("username", "")
         password = self.get_argument("password", "")
         user = BaseAuthenticator().full_auth(username, password)
+        if user is None:
+            self.redirect(self.get_argument("next", u"/login"))
+            return
 
         if not self.get_secure_cookie('zoe'):
             cookie_val = user.username

@@ -16,10 +16,10 @@
 """Filesystem implementation for Zoe workspaces."""
 
 import logging
-import os.path
+import os
 
 import zoe_lib.config as config
-from zoe_lib.state import VolumeDescriptionHostPath
+from zoe_lib.state import VolumeDescriptionHostPath, User
 import zoe_master.workspace.base
 
 log = logging.getLogger(__name__)
@@ -48,6 +48,15 @@ class ZoeFSWorkspace(zoe_master.workspace.base.ZoeWorkspaceBase):
         """Get the volume mount point."""
         return 'workspace'
 
-    def get(self, username):
+    def get(self, user: User):
         """Return a VolumeDescription for the user workspace."""
-        return VolumeDescriptionHostPath(path=self.get_path(username), name=self.get_mountpoint(), readonly=False)
+        if not self.exists(user.username):
+            try:
+                os.makedirs(self.get_path(user.username), 0x700)
+                os.chown(self.get_path(user.username), user.fs_uid, config.get_conf().fs_group_id)
+            except OSError as e:
+                log.warning("Cannot create user workspace automatically: {}".format(str(e)))
+        else:
+            if os.stat(self.get_path(user.username)).st_uid != user.fs_uid:
+                log.warning('The user fs_uid in the database does not match the workspace owner for user {}'.format(user.username))
+        return VolumeDescriptionHostPath(path=self.get_path(user.username), name=self.get_mountpoint(), readonly=False)
