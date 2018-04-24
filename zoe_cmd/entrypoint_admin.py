@@ -226,7 +226,6 @@ def role_get_cmd(api: ZoeAPI, args):
 
 def role_create_cmd(api: ZoeAPI, args):
     """Create a new role."""
-    print(args)
     role = {
         'name': args.name,
         'can_see_status': True if args.can_see_status else False,
@@ -234,7 +233,8 @@ def role_create_cmd(api: ZoeAPI, args):
         'can_operate_others': True if args.can_operate_others else False,
         'can_delete_executions': True if args.can_delete_executions else False,
         'can_access_api': True if args.can_access_api else False,
-        'can_customize_resources': True if args.can_customize_resources else False
+        'can_customize_resources': True if args.can_customize_resources else False,
+        'can_access_full_zapp_shop': True if args.can_access_full_zapp_shop else False
     }
     new_id = api.role.create(role)
     print('New role created with ID: {}'.format(new_id))
@@ -262,6 +262,8 @@ def role_update_cmd(api: ZoeAPI, args):
         role_update['can_access_api'] = True if args.can_access_api else False
     if args.can_customize_resources is not None:
         role_update['can_customize_resources'] = True if args.can_customize_resources else False
+    if args.can_access_full_zapp_shop is not None:
+        role_update['can_access_full_zapp_shop'] = True if args.can_access_full_zapp_shop else False
     api.role.update(args.id, role_update)
 
 
@@ -348,7 +350,25 @@ def user_delete_cmd(api: ZoeAPI, args):
 
 def user_update_cmd(api: ZoeAPI, args):
     """Updates a user."""
-    api.user.update(args.id, {})  # FIXME
+    user_update = {}
+    if args.email is not None:
+        user_update['email'] = args.email
+    if args.fs_uid is not None:
+        user_update['fs_uid'] = args.fs_uid
+    if args.password is not None:
+        user_update['password'] = args.password
+    if args.enabled is not None:
+        user_update['enabled'] = args.enabled
+    if args.auth_source is not None:
+        user_update['auth_source'] = args.auth_source
+    if args.priority is not None:
+        user_update['priority'] = args.priority
+    if args.role_id is not None:
+        user_update['role_id'] = args.role_id
+    if args.quota_id is not None:
+        user_update['quota_id'] = args.quota_id
+
+    api.user.update(args.id, user_update)
 
 
 ENV_HELP_TEXT = '''To authenticate with Zoe you need to define three environment variables:
@@ -449,6 +469,7 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     sub_parser.add_argument('can_delete_executions', choices=[0, 1], type=int, help="Can delete executions permanently")
     sub_parser.add_argument('can_access_api', choices=[0, 1], type=int, help="Can access the REST API")
     sub_parser.add_argument('can_customize_resources', choices=[0, 1], type=int, help="Can customize resource reservations before starting executions")
+    sub_parser.add_argument('can_access_full_zapp_shop', choices=[0, 1], type=int, help="Can access all ZApps in the ZApp shop")
     sub_parser.set_defaults(func=role_create_cmd)
 
     sub_parser = subparser.add_parser('role-delete', help="Delete a role")
@@ -464,6 +485,7 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     sub_parser.add_argument('--can_delete_executions', choices=[0, 1], type=int, help="Can delete executions permanently")
     sub_parser.add_argument('--can_access_api', choices=[0, 1], type=int, help="Can access the REST API")
     sub_parser.add_argument('--can_customize_resources', choices=[0, 1], type=int, help="Can customize resource reservations before starting executions")
+    sub_parser.add_argument('--can_access_full_zapp_shop', choices=[0, 1], type=int, help="Can access all ZApps in the ZApp shop")
     sub_parser.set_defaults(func=role_update_cmd)
 
     # Users

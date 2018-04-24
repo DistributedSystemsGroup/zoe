@@ -176,3 +176,9 @@ class UserTable(BaseTable):
         query = 'DELETE FROM "user" WHERE id = %s'
         self.cursor.execute(query, (user_id,))
         self.sql_manager.commit()
+
+    def update(self, user_id, **fields):
+        """Update a user record."""
+        if 'password' in fields:
+            fields['password'] = hash_algo.hash(fields['password'])
+        super().update(user_id, **fields)
