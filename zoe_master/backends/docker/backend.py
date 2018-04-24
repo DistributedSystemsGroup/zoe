@@ -93,6 +93,7 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
             node_stats = _checker.host_stats[host_conf.name]
             platform_stats.nodes.append(node_stats)
 
+        platform_stats.timestamp = time.time()
         return platform_stats
 
     def _update_node_state(self, host_conf: DockerHostConfig, node_stats: NodeStats, get_usage_stats: bool):
