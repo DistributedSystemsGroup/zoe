@@ -96,6 +96,8 @@ class ZAppStartWeb(ZoeWebRequestHandler):
         exec_name = self.get_argument('exec_name')
 
         app_descr = self._set_parameters(zapp.zoe_description, zapp.parameters, self.current_user.role)
+        for service in app_descr['services']:
+            service.labels.append(zapp.labels)
 
         try:
             self.get_argument('download_json')

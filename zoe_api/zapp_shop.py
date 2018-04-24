@@ -59,6 +59,10 @@ class ZApp:
         self.readable_description = self.read_description()
         self.json_file = zapp['description']
         self.zoe_description = self.parse_json_description()
+        if 'labels' in zapp:
+            self.labels = zapp['labels']
+        else:
+            self.labels = []
         self.parameters = []
         self.parse_parameters(zapp)
         if 'guest_access' in zapp:

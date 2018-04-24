@@ -34,7 +34,7 @@ class BaseAuthenticator:
     def __init__(self):
         self.state = SQLManager(get_conf())
 
-    def full_auth(self, username, password) -> Union[None, User]:  # pylint: disable=too-many-return-statements
+    def full_auth(self, username: str, password: str) -> Union[None, User]:  # pylint: disable=too-many-return-statements
         """This method verifies the username and the password against one of the external auth sources."""
         user = self.state.user.select(only_one=True, **{"username": username})
         if user is None or not user.enabled:
