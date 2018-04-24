@@ -53,7 +53,7 @@ class BaseTable:
 
     def delete(self, record_id):
         """Delete a record from this table."""
-        query = "DELETE FROM {} WHERE id = %s".format(self.table_name)
+        query = 'DELETE FROM "{}" WHERE id = %s'.format(self.table_name)
         self.cursor.execute(query, (record_id,))
         self.sql_manager.commit()
 
@@ -66,7 +66,7 @@ class BaseTable:
             value_list.append(value)
         set_q = ", ".join(arg_list)
         value_list.append(record_id)
-        q_base = 'UPDATE {} SET '.format(self.table_name) + set_q + ' WHERE id=%s'
+        q_base = 'UPDATE "{}" SET '.format(self.table_name) + set_q + ' WHERE id=%s'
         query = self.cursor.mogrify(q_base, value_list)
         self.cursor.execute(query)
         self.sql_manager.commit()
