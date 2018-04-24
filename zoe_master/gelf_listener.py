@@ -56,7 +56,7 @@ class GELFUDPHandler(socketserver.DatagramRequestHandler):
             open(log_file_path, 'w').write('ZOE HEADER: log file for service {} running on host {}\n'.format(service_name, host))
 
         with open(log_file_path, 'a') as logfile:
-            logfile.write(timestamp + ' ' + message + '\n')
+            logfile.write(timestamp + ' ' + message.encode('utf-8') + '\n')
 
 
 class ZoeLoggerUDPServer(socketserver.UDPServer):
