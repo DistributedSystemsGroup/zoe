@@ -43,8 +43,6 @@ class StatsManager(threading.Thread):
         self.deployment_name = get_conf().deployment_name
         self.stop = threading.Event()
         self._current_platform_stats = None
-        self.barrier = threading.Event()
-        self.barrier.clear()
         if get_conf().kairosdb_enable:
             self.usage_metrics = KairosDBInMetrics()
         else:
@@ -91,8 +89,6 @@ class StatsManager(threading.Thread):
                     node.cores_in_use = node_cores
                     node.memory_in_use = node_memory
 
-            self.barrier.set()
-            self.barrier.clear()
             sleep_time = self.METRIC_INTERVAL - (time.time() - time_start)
             if sleep_time > 0 and self.stop.wait(timeout=sleep_time):
                 break
@@ -100,5 +96,4 @@ class StatsManager(threading.Thread):
     @property
     def current_stats(self):
         """Returns a snapshot of the current metrics."""
-        self.barrier.wait()
         return deepcopy(self._current_platform_stats)
