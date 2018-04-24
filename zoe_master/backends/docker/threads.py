@@ -91,6 +91,12 @@ class DockerStateSynchronizer(threading.Thread):
                             log.warning('Terminating dead and orphan container {}'.format(cont['name']))
                             my_engine.terminate_container(cont['id'], delete=True)
                         continue
+                    if service.status == service.TERMINATING_STATUS:
+                        if service.backend_id is not None:
+                            my_engine.terminate_container(service.backend_id, delete=True)
+                        else:
+                            service.set_inactive()
+
                     self._update_service_status(service, cont)
                     self.host_stats[host_config.name].memory_reserved += service.resource_reservation.memory.min
                     self.host_stats[host_config.name].cores_reserved += service.resource_reservation.cores.min

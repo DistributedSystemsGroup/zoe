@@ -79,7 +79,12 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
     def terminate_service(self, service: Service) -> None:
         """Terminate and delete a container."""
         conf = self._get_config(service.backend_host)
-        engine = DockerClient(conf)
+        service.set_terminating()
+        try:
+            engine = DockerClient(conf)
+        except ZoeException as e:
+            log.error('Cannot terminate service {}: {}'.format(service.id, str(e)))
+            return
         if service.backend_id is not None:
             engine.terminate_container(service.backend_id, delete=True)
         else:
