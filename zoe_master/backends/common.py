@@ -39,14 +39,13 @@ def gen_environment(execution: Execution, service: Service, env_subst_dict: Dict
 
     env_list.append(('EXECUTION_ID', str(execution.id)))
     env_list.append(('DEPLOY_NAME', get_conf().deployment_name))
-    env_list.append(('UID', execution.owner.fs_uid))
-    env_list.append(('GID', get_conf().fs_group_id))
-    env_list.append(('USER', execution.owner.username))
+    env_list.append(('ZOE_UID', execution.owner.fs_uid))
+    env_list.append(('ZOE_GID', get_conf().fs_group_id))
+    env_list.append(('ZOE_USER', execution.owner.username))
     env_list.append(('SERVICE_NAME', service.name))
 
     wk_vol = ZoeFSWorkspace().get(execution.owner)
     env_list.append(('ZOE_WORKSPACE', wk_vol.mount_point))
-    env_list.append(('HOME', wk_vol.mount_point))
     return env_list
 
 

@@ -106,7 +106,7 @@ class DockerStateSynchronizer(threading.Thread):
                     }
                 self.host_stats[host_config.name].service_stats = stats
 
-                self.host_stats[host_config.name].images = []
+                tmp_images = []
                 for dk_image in my_engine.list_images():
                     image = {
                         'id': dk_image.attrs['Id'],
@@ -117,7 +117,8 @@ class DockerStateSynchronizer(threading.Thread):
                         if name[-7:] == ':latest':  # add an image with the name without 'latest' to fake Docker image lookup algorithm
                             image['names'].append(name[:-7])
                             break
-                    self.host_stats[host_config.name].images.append(image)
+                    tmp_images.append(image)
+                self.host_stats[host_config.name].images = tmp_images
 
             sleep_time = CHECK_INTERVAL - (time.time() - time_start)
             if sleep_time <= 0:
