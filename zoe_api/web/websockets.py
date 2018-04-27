@@ -72,16 +72,19 @@ class WebSocketEndpointWeb(ZoeWSRequestHandler):
                     response['endpoints'] = endpoints
             self.write_message(response)
         elif request['command'] == 'service_logs':
-            log_obj = self.api_endpoint.service_logs(self.current_user, request['service_id'])
+            try:
+                log_obj = self.api_endpoint.service_logs(self.current_user, request['service_id'])
+            except zoe_api.exceptions.ZoeException as e:
+                self.write_message(str(e))
+            else:
+                while not self.connection_closed:
+                    try:
+                        log_line = yield THREAD_POOL.submit(next, log_obj)
+                    except StopIteration:
+                        yield tornado.gen.sleep(0.2)
+                        continue
 
-            while not self.connection_closed:
-                try:
-                    log_line = yield THREAD_POOL.submit(next, log_obj)
-                except StopIteration:
-                    yield tornado.gen.sleep(0.2)
-                    continue
-
-                self.write_message(log_line)
+                    self.write_message(log_line)
         elif request['command'] == 'system_status':
             stats = self.api_endpoint.statistics_scheduler()
             self.write_message(json.dumps(stats))
