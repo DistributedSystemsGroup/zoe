@@ -51,6 +51,5 @@ def zoe_configuration():
     zoe_api_args.log_file = 'stderr'
     zoe_api_args.max_core_limit = 1
     zoe_api_args.max_memory_limit = 2
-    zoe_api_args.no_user_edit_limits_web = False
     zoe_api_args.additional_volumes = ''
     return zoe_api_args

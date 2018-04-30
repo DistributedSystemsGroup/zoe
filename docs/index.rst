@@ -50,10 +50,13 @@ Main documentation
   :maxdepth: 1
 
   install
-  kube_backend
   config_file
+  users
+  roles
+  quotas
   logging
   proxy
+  kube_backend
 
 Zoe applications
 ^^^^^^^^^^^^^^^^
@@ -61,7 +64,6 @@ Zoe applications
 .. toctree::
   :maxdepth: 1
 
-  zapps/classification
   zapps/howto_zapp
   zapps/zapp_format
 
@@ -75,8 +77,6 @@ Development and contributing to the project
   developer/index
   architecture
   quality
-  motivations
-  vision
   contributing
 
 External resources

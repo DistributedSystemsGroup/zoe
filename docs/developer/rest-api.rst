@@ -15,7 +15,45 @@ In case the request causes an error, an appropriate HTTP status code is returned
 
 With an error message detailing the kind of error that happened.
 
-Some endpoints require credentials for authentication. For now the API uses straightforward HTTP Basic authentication. In case credentials are missing or wrong a 401 status code will be returned.
+Some endpoints require credentials for authentication. The API uses HTTP Basic authentication. After the first successful authentication, a cookie will be returned in the response headers. The cookie can be used as an authentication token for the subsequent requests.
+
+Login endpoint
+--------------
+Get back a cookie for further authentication/authorization with other api endpoints instead of using HTTP basic username, password
+
+Request::
+
+   curl -u 'username:password' -c zoe_cookie.txt http://bf5:8080/api/<api_version>/login
+
+Will return a JSON document, like this::
+
+    {
+        "user": {
+            "fs_uid": 10000,
+            "email": "user@domain",
+            "quota_id": 1,
+            "auth_source": "pam",
+            "role_id": 1,
+            "id": 8,
+            "priority": 0,
+            "username": "user33",
+            "enabled": true
+        }
+    }
+
+And the file named ``zoe_cookie.txt`` contains the cookie information.
+
+Pass this cookie on each api request which requires authentication.
+
+Example::
+
+    curl -b zoe_cookie.txt http://bf5:8080/api/<api_version>/execution
+
+Note:
+
+- For zoe web interface, we require cookie_based mechanism for authentication/authorization.
+- Every unauthorized request will be redirected to **http://<hostname>:8080/login**
+- After a successful login, a cookie will be saved in the browser for further authentication/authorization purpose.
 
 Info endpoint
 -------------
@@ -64,7 +102,7 @@ Execution details
 
 Request (GET)::
 
-    curl -u 'username:password' http://bf5:8080/api/<api_version>/execution/<execution_id>
+    curl -b zoe_cookie.txt http://bf5:8080/api/<api_version>/execution/<execution_id>
 
 Where:
 
@@ -110,7 +148,7 @@ This endpoint terminates a running execution.
 
 Request (DELETE)::
 
-    curl -X DELETE -u 'username:password' http://bf5:8080/api/<api_version>/execution/<execution_id>
+    curl -X DELETE -b zoe_cookie.txt http://bf5:8080/api/<api_version>/execution/<execution_id>
 
 If the request is successful an empty response with status code 200 will be returned.
 
@@ -120,7 +158,7 @@ This endpoint deletes an execution from the database, terminating it if it is ru
 
 Request (DELETE)::
 
-    curl -u 'username:password' http://bf5:8080/api/<api_version>/execution/delete/<execution_id>
+    curl -b zoe_cookie.txt http://bf5:8080/api/<api_version>/execution/delete/<execution_id>
 
 If the request is successful an empty response with status code 200 will be returned.
 
@@ -131,7 +169,7 @@ This endpoint will list all executions belonging to the calling user. If the use
 
 Request (GET)::
 
-    curl -u 'username:password' http://bf5:8080/api/<api_version>/execution
+    curl -b zoe_cookie.txt http://bf5:8080/api/<api_version>/execution
 
 Will return a JSON document like this::
 
@@ -161,7 +199,7 @@ Starting from verion 0.7 of the API, the execution list can be filtered.
 
 You need to pass via the URL (GET parameters) the criteria to be used for filtering, for example::
 
-    curl -u 'username:password' http://bf5:8080/api/<api_version>/execution?status=terminated\&limit=1
+    curl -b zoe_cookie.txt http://bf5:8080/api/<api_version>/execution?status=terminated\&limit=1
 
 Valid criteria that can be used are:
 
@@ -183,13 +221,13 @@ Start execution
 
 Request (POST)::
 
-    curl -X POST -u 'username:password' --data-urlencode @filename http://bf5:8080/api/<api_version>/execution
+    curl -X POST -b zoe_cookie.txt --data-urlencode @filename http://bf5:8080/api/<api_version>/execution
 
 Needs a JSON document passed as the request body::
 
     {
         "application": <zapp json>,
-        'name': "experiment #33"
+        "name": "experiment #33"
     }
 
 Where:
@@ -212,7 +250,7 @@ Execution endpoints
 
 Request (GET)::
 
-    curl -X GET -u 'username:password' http://bf5:8080/api/<api_version>/execution/endpoints/<execution_id>
+    curl -b zoe_cookie.txt http://bf5:8080/api/<api_version>/execution/endpoints/<execution_id>
 
 
 Will return a JSON list like this::
@@ -237,7 +275,7 @@ Service details
 
 Request::
 
-    curl -u 'username:password' http://bf5:8080/api/<api_version>/service/<service_id>
+    curl -b zoe_cookie.txt http://bf5:8080/api/<api_version>/service/<service_id>
 
 Will return a JSON document like this::
 
@@ -274,7 +312,7 @@ Service standard output and error
 
 Request::
 
-    curl -u 'username:password' http://bf5:8080/api/<api_version>/service/logs/<service_id>
+    curl -b zoe_cookie.txt http://bf5:8080/api/<api_version>/service/logs/<service_id>
 
 Will stream the service instance output, starting from the time the service started. It will close the connection when the service exits.
 
@@ -334,31 +372,327 @@ Where:
 
 The actual content of the response may vary between different Zoe releases.
 
-Login endpoint
+User endpoints
 --------------
-Get back a cookie for further authentication/authorization with other api endpoints instead of using raw username, password
+
+These endpoints modify the user tables in Zoe. For more information about users, check :ref:`users`.
+
+Get from ID
+^^^^^^^^^^^
 
 Request::
 
-   curl -u 'username:password' -c zoe_cookie.txt http://bf5:8080/api/<api_version>/login
+   curl -b zoe_cookie.txt http://bf5:8080/api/<api_version>/user/<user_id>
 
 Will return a JSON document, like this::
 
     {
-        "role": "admin",
-        "uid": "admin"
+        "user": {
+            "fs_uid": 10000,
+            "email": "user@domain",
+            "quota_id": 1,
+            "auth_source": "pam",
+            "role_id": 1,
+            "id": 8,
+            "priority": 0,
+            "username": "user33",
+            "enabled": true
+        }
     }
 
-And a file named ``zoe_cookie.txt`` contains the cookie information.
+Create
+^^^^^^
 
-Pass this cookie on each api request which requires authentication.
+Request::
 
-Example::
+    curl -X POST -b zoe_cookie.txt --data-urlencode @filename http://bf5:8080/api/<api_version>/user
 
-    curl -b zoe_cookie.txt http://bf5:8080/api/<api_version>/execution
+Needs a JSON document passed as the request body::
 
-Note:
+    {
+        "username": <new username>,
+        "email": <email>,
+        "role_id": <ID of an existing role>,
+        "quota_id": <ID of an existing quota>,
+        "auth_source": <authentication method>
+    }
 
-- For zoe web interface, we require cookie_based mechanism for authentication/authorization.
-- Every unauthorized request will be redirected to **http://<hostname>:8080/login**
-- After a successful login, a cookie will be saved in the browser for further authentication/authorization purpose.
+Will return a JSON document like this::
+
+    {
+        "user_id": 23
+    }
+
+Where:
+
+* ``user_id`` is the ID of the new user just created.
+
+Please note that to set the password a second request to the update user endpoint needs to be performed.
+
+Search
+^^^^^^
+
+Request::
+
+     curl -b zoe_cookie.txt http://bf5:8080/api/<api_version>/user?username=<username>
+
+The following filters can be used:
+
+* username
+* email
+* priority
+* enabled
+* auth_source
+* role_id
+* quota_id
+
+Will return a JSON document like this::
+
+    {
+        "33": {
+        ... user object ...
+        },
+        "44": {
+        ... user object ...
+        }
+    }
+
+Delete
+^^^^^^
+
+Request::
+
+    curl -X DELETE -b zoe_cookie.txt http://bf5:8080/api/<api_version>/user/<user_id>
+
+If the request is successful an empty response with status code 200 will be returned.
+
+Update
+^^^^^^
+Request::
+
+    curl -X POST -b zoe_cookie.txt http://bf5:8080/api/<api_version>/user/<user_id>
+
+Needs a JSON document passed as the request body::
+
+    {
+        "username": <new username>,
+        "password": <new password>,
+        "email": <email>,
+        "role_id": <ID of an existing role>,
+        "quota_id": <ID of an existing quota>,
+        "auth_source": <authentication method>
+    }
+
+The document should contain only the fields to update.
+
+Role endpoints
+--------------
+
+These endpoints modify the role tables in Zoe. For more information about roles, check :ref:`roles`.
+
+Get from ID
+^^^^^^^^^^^
+
+Request::
+
+   curl -b zoe_cookie.txt http://bf5:8080/api/<api_version>/role/<role_id>
+
+Will return a JSON document, like this::
+
+    {
+        "role": {
+            "can_change_config": true,
+            "can_delete_executions": true,
+            "name": "admin",
+            "can_see_status": true,
+            "can_access_full_zapp_shop": true,
+            "id": 1,
+            "can_operate_others": true,
+            "can_customize_resources": true,
+            "can_access_api": true
+        }
+    }
+
+Create
+^^^^^^
+
+Request::
+
+    curl -X POST -b zoe_cookie.txt --data-urlencode @filename http://bf5:8080/api/<api_version>/role
+
+Needs a JSON document passed as the request body::
+
+    {
+        "name": <name of the new role>,
+        "can_change_config": <true|false>,
+        "can_delete_executions": <true|false>,
+        "can_see_status": <true|false>,
+        "can_access_full_zapp_shop": <true|false>,
+        "can_operate_others": <true|false>,
+        "can_customize_resources": <true|false>,
+        "can_access_api": <true|false>
+    }
+
+Will return a JSON document like this::
+
+    {
+        "role_id": 23
+    }
+
+Where:
+
+* ``role_id`` is the ID of the new role just created.
+
+
+Search
+^^^^^^
+
+Request::
+
+     curl -b zoe_cookie.txt http://bf5:8080/api/<api_version>/role?name=<role name>
+
+The following filters can be used:
+
+* name
+
+Will return a JSON document like this::
+
+    {
+        "3": {
+        ... role object ...
+        },
+        "44": {
+        ... role object ...
+        }
+    }
+
+Delete
+^^^^^^
+
+Request::
+
+    curl -X DELETE -b zoe_cookie.txt http://bf5:8080/api/<api_version>/role/<role_id>
+
+If the request is successful an empty response with status code 200 will be returned.
+
+Update
+^^^^^^
+
+Request::
+
+    curl -X POST -b zoe_cookie.txt @filename http://bf5:8080/api/<api_version>/role/<role_id>
+
+Needs a JSON document passed as the request body::
+
+    {
+        "name": <name of the new role>,
+        "can_change_config": <true|false>,
+        "can_delete_executions": <true|false>,
+        "can_see_status": <true|false>,
+        "can_access_full_zapp_shop": <true|false>,
+        "can_operate_others": <true|false>,
+        "can_customize_resources": <true|false>,
+        "can_access_api": <true|false>
+    }
+
+The document should contain only the fields to update.
+
+Quota endpoints
+---------------
+
+These endpoints modify the quota tables in Zoe. For more information about quotas, check :ref:`quotas`.
+
+Get from ID
+^^^^^^^^^^^
+
+Request::
+
+   curl -b zoe_cookie.txt http://bf5:8080/api/<api_version>/quota/<user_id>
+
+Will return a JSON document, like this::
+
+    {
+        "quota": {
+            "concurrent_executions": 5,
+            "cores": 5,
+            "id": 1,
+            "name": "default",
+            "memory": 34359738368
+        }
+    }
+
+
+Create
+^^^^^^
+
+Request::
+
+    curl -X POST -b zoe_cookie.txt --data-urlencode @filename http://bf5:8080/api/<api_version>/quota
+
+Needs a JSON document passed as the request body::
+
+    {
+        "name": <name of the new quota>,
+        "concurrent_executions": <maximum number of running executions>,
+        "memory": <maximum amount of memory reserved across all running executions>,
+        "cores": <maximum amount of cores reserved across all running executions>
+    }
+
+Will return a JSON document like this::
+
+    {
+        "quota_id": 23
+    }
+
+Where:
+
+* ``quota_id`` is the ID of the new quota just created.
+
+Search
+^^^^^^
+
+Request::
+
+     curl -b zoe_cookie.txt http://bf5:8080/api/<api_version>/quota?name=<quota name>
+
+The following filters can be used:
+
+* name
+
+Will return a JSON document like this::
+
+    {
+        "3": {
+        ... quota object ...
+        },
+        "44": {
+        ... quota object ...
+        }
+    }
+
+Delete
+^^^^^^
+
+Request::
+
+    curl -X DELETE -b zoe_cookie.txt http://bf5:8080/api/<api_version>/quota/<quota_id>
+
+If the request is successful an empty response with status code 200 will be returned.
+
+Update
+^^^^^^
+
+Request::
+
+    curl -X POST -b zoe_cookie.txt http://bf5:8080/api/<api_version>/quota/<quota_id>
+
+Needs a JSON document passed as the request body::
+
+    {
+        "name": <name of the new quota>,
+        "concurrent_executions": <maximum number of running executions>,
+        "memory": <maximum amount of memory reserved across all running executions>,
+        "cores": <maximum amount of cores reserved across all running executions>
+    }
+
+The document should contain only the fields to update.
