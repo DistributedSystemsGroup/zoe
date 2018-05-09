@@ -115,8 +115,8 @@ class ExecutionInspectWeb(ZoeWebRequestHandler):
 
         try:
             e = self.api_endpoint.execution_by_id(self.current_user, execution_id)
-        except zoe_api.exceptions.ZoeException as e:
-            self.set_status(e.status_code, e.message)
+        except zoe_api.exceptions.ZoeException as ex:
+            self.set_status(ex.status_code, ex.message)
             return
 
         services_info, endpoints = self.api_endpoint.execution_endpoints(self.current_user, e)

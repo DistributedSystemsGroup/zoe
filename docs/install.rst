@@ -99,21 +99,14 @@ Most of the ZApps expose a number of interfaces (web, REST and others) to the us
 * use a proxy, like the one developed for Zoe: :ref:`proxy`
 * use back-end network plugins to build custom topologies
 
-Authentication back-end
------------------------
+Authentication back-ends
+------------------------
 
-Zoe has a simple user model: users are authenticated against an external source of truth, that assigns also one of three roles:
+Zoe supports multiple user authentication back-ends. Multiple back-ends can coexist at the same time.
 
-* guest: cannot access the API (and the command-line tools) and can run one execution at a time
-* user: can use the API and has no limits on executions
-* admin: can operate on executions belonging to other users, can delete records of past executions
+Check the :ref:`users` page for more details on the user model.
 
-Zoe supports two authentication back-ends:
-
-* LDAP and LDAP+SASL (``auth-type=ldap`` ot ``auth-type=ldapsasl``)
-* Text file (``auth-type=text``)
-
-As most of Zoe, the authentication back-end is pluggable and others can be easily implemented.
+Remember to disable or change the password of the default admin user.
 
 LDAP
 ^^^^
