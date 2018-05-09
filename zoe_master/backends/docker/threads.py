@@ -119,6 +119,8 @@ class DockerStateSynchronizer(threading.Thread):
                             break
                     tmp_images.append(image)
                 self.host_stats[host_config.name].images = tmp_images
+                self.host_stats[host_config.name].timestamp = time_start
+                self.host_stats[host_config.name].valid = True
 
             sleep_time = CHECK_INTERVAL - (time.time() - time_start)
             if sleep_time <= 0:

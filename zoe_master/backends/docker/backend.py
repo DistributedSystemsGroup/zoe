@@ -200,6 +200,9 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
     def list_available_images(self, node_name):
         """List the images available on the specified node."""
         node_stats = _checker.host_stats[node_name]
+
+        if node_stats.status == 'offline':
+            return []
         return node_stats.images
 
     def update_service(self, service, cores=None, memory=None):

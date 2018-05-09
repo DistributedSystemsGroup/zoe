@@ -45,6 +45,7 @@ class NodeStats(Stats):
         self.status = 'offline'
         self.service_stats = {}
         self.images = []
+        self.valid = False
 
     def serialize(self):
         """Convert the object into a dict."""

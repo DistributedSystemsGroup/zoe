@@ -35,6 +35,8 @@ def _digest_application_description(state: SQLManager, execution: Execution):
         images += list_available_images(node)
 
     images = [name for image in images for name in image['names']]
+    if len(images) == 0:
+        log.warning('The image list reported by the back-end is empty')
     for service_descr in execution.description['services']:
         if service_descr['image'] not in images:
             execution.set_error()

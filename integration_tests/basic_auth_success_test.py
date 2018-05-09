@@ -48,6 +48,7 @@ class TestZoeRest:
         with open('integration_tests/zapp.json', encoding='utf-8') as data_file:
             data = json.loads(data_file.read())
 
+        time.sleep(10)  # wait for test Zoe to start and load the docker status
         req = requests.post(ZOE_API_URI + 'execution', auth=ZOE_AUTH, json={"application": data, "name": "requests"}, timeout=TIMEOUT)
         assert req.status_code == 201
         exec_id = str(req.json()['execution_id'])
