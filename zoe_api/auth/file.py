@@ -37,7 +37,7 @@ class PlainTextAuthenticator:
         with open(self.passwd_file, "r") as passwd:
             passwd_reader = csv.reader(passwd)
             for row in passwd_reader:
-                if len(row) != 3:
+                if len(row) != 2:
                     continue
                 file_username = row[0]
                 file_password = row[1]
