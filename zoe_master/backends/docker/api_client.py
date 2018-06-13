@@ -101,7 +101,7 @@ class DockerClient:
                 assert isinstance(volume, VolumeDescriptionHostPath)
                 run_args['volumes'][volume.path] = {'bind': volume.mount_point, 'mode': ("ro" if volume.readonly else "rw")}
             else:
-                log.error('Swarm backend does not support volume type {}'.format(volume.type))
+                log.error('Docker backend does not support volume type {}'.format(volume.type))
 
         if service_instance.memory_limit is not None:
             run_args['mem_limit'] = service_instance.memory_limit.max
