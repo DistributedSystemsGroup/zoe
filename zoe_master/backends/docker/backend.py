@@ -83,7 +83,7 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
         if service.backend_id is not None:
             engine.terminate_container(service.backend_id, delete=True)
         else:
-            log.error('Cannot terminate service {}, since it has not backend ID'.format(service.name))
+            log.error('Cannot terminate service {}, since it has no backend ID'.format(service.name))
         service.set_backend_status(service.BACKEND_DESTROY_STATUS)
 
     def platform_state(self) -> ClusterStats:
@@ -193,34 +193,8 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
 
     def list_available_images(self, node_name):
         """List the images available on the specified node."""
-        host_conf = None
-        for conf in self.docker_config:
-            if conf.name == node_name:
-                host_conf = conf
-                break
-        if host_conf is None:
-            log.error('Unknown node {}, returning empty image list'.format(node_name))
-            return []
-
-        try:
-            my_engine = DockerClient(host_conf)
-        except ZoeException as e:
-            log.error(str(e))
-            return []
-
-        image_list = []
-        for dk_image in my_engine.list_images():
-            image = {
-                'id': dk_image.attrs['Id'],
-                'size': dk_image.attrs['Size'],
-                'names': dk_image.tags  # type: list
-            }
-            for name in image['names']:
-                if name[-7:] == ':latest':  # add an image with the name without 'latest' to fake Docker image lookup algorithm
-                    image['names'].append(name[:-7])
-                    break
-            image_list.append(image)
-        return image_list
+        node_stats = _checker.host_stats[node_name]
+        return node_stats.images
 
     def update_service(self, service, cores=None, memory=None):
         """Update a service reservation."""
@@ -239,4 +213,4 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
             cpu_quota = int(cores * 100000)
             engine.update(service.backend_id, cpu_quota=cpu_quota, mem_reservation=memory)
         else:
-            log.error('Cannot update service {} ({}), since it has no backend ID'.format(service.name, service.id))
+            log.error('Cannot update reservations for service {} ({}), since it has no backend ID'.format(service.name, service.id))

@@ -44,6 +44,7 @@ class NodeStats(Stats):
         self.labels = []
         self.status = 'offline'
         self.service_stats = {}
+        self.images = []
 
     def serialize(self):
         """Convert the object into a dict."""
@@ -60,7 +61,8 @@ class NodeStats(Stats):
             'memory_in_use': self.memory_in_use,
             'labels': list(self.labels),
             'status': self.status,
-            'service_stats': self.service_stats
+            'service_stats': self.service_stats,
+            'images': self.images
         }
         return ret
 

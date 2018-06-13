@@ -17,6 +17,7 @@
 
 import logging
 import os
+from typing import Mapping
 
 import zoe_api.exceptions
 import zoe_api.master_api
@@ -51,11 +52,19 @@ class APIEndpoint:
             raise zoe_api.exceptions.ZoeAuthException()
         return e
 
-    def execution_list(self, uid, role, **filters):
+    def execution_list(self, uid: str, role: str, **filters: Mapping[str, str]):
         """Generate a optionally filtered list of executions."""
+        if role != 'admin':
+            filters['user_id'] = uid
         execs = self.sql.executions.select(**filters)
-        ret = [e for e in execs if e.user_id == uid or role == 'admin']
-        return ret
+        return execs
+
+    def execution_count(self, uid: str, role: str, **filters: Mapping[str, str]):
+        """Count the number of executions optionally filtered."""
+        if role != 'admin':
+            filters['user_id'] = uid
+        execs = self.sql.executions.count(**filters)
+        return execs
 
     def zapp_validate(self, application_description):
         """Validates the passed ZApp description against the supported schema."""

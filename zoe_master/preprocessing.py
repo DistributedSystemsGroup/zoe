@@ -69,6 +69,9 @@ def _digest_application_description(state: SQLManager, execution: Execution):
             counter += 1
         assert counter == total_count
 
+    if get_conf().scheduler_policy == 'DYNSIZE':
+        execution.set_size(execution.total_reservations.cores.min * execution.total_reservations.memory.min)
+
     return True
 
 

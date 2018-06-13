@@ -67,10 +67,13 @@ class Execution(BaseRecord):
         self._status = d['status']
         self.error_message = d['error_message']
 
-        try:
-            self.size = self.description['size']
-        except KeyError:
-            self.size = self.description['priority']  # zapp format v2
+        if d['size'] is not None:
+            self.size = float(d['size'])
+        else:
+            try:
+                self.size = self.description['size']
+            except KeyError:
+                self.size = self.description['priority']  # zapp format v2
 
         self.termination_lock = threading.Lock()
 
@@ -86,7 +89,8 @@ class Execution(BaseRecord):
             'time_end': None if self.time_end is None else (self.time_end - datetime.datetime(1970, 1, 1)) / datetime.timedelta(seconds=1),
             'status': self._status,
             'error_message': self.error_message,
-            'services': [s.id for s in self.services]
+            'services': [s.id for s in self.services],
+            'size': self.size
         }
 
     def __eq__(self, other):
@@ -129,6 +133,11 @@ class Execution(BaseRecord):
         """Contains an error message in case the status is 'error'."""
         self.error_message = message
         self.sql_manager.executions.update(self.id, error_message=self.error_message)
+
+    def set_size(self, new_size):
+        """Changes the size of the execution, for policies that calculate the size automatically."""
+        self.size = new_size
+        self.sql_manager.executions.update(self.id, size=new_size)
 
     @property
     def is_active(self):
@@ -225,6 +234,7 @@ class ExecutionTable(BaseTable):
             user_id TEXT NOT NULL,
             description JSON NOT NULL,
             status TEXT NOT NULL,
+            size NUMERIC NOT NULL,
             execution_manager_id TEXT NULL,
             time_submit TIMESTAMP NOT NULL,
             time_start TIMESTAMP NULL,
@@ -236,12 +246,12 @@ class ExecutionTable(BaseTable):
         """Create a new execution in the state."""
         status = Execution.SUBMIT_STATUS
         time_submit = datetime.datetime.utcnow()
-        query = self.cursor.mogrify('INSERT INTO execution (id, name, user_id, description, status, time_submit) VALUES (DEFAULT, %s,%s,%s,%s,%s) RETURNING id', (name, user_id, description, status, time_submit))
+        query = self.cursor.mogrify('INSERT INTO execution (id, name, user_id, description, status, size, time_submit) VALUES (DEFAULT, %s,%s,%s,%s,%s,%s) RETURNING id', (name, user_id, description, status, description['size'], time_submit))
         self.cursor.execute(query)
         self.sql_manager.commit()
         return self.cursor.fetchone()[0]
 
-    def select(self, only_one=False, limit=-1, **kwargs):
+    def select(self, only_one=False, limit=-1, base=0, **kwargs):
         """
         Return a list of executions.
 
@@ -249,6 +259,8 @@ class ExecutionTable(BaseTable):
         :type only_one: bool
         :param limit: limit the result to this number of entries
         :type limit: int
+        :type base: int
+        :param base: the base value to use when limiting result count
         :param kwargs: filter executions based on their fields/columns
         :return: one or more executions
         """
@@ -275,11 +287,11 @@ class ExecutionTable(BaseTable):
                 args_list.append(value)
             q += ' AND '.join(filter_list)
             if limit > 0:
-                q += ' ORDER BY id DESC LIMIT {}'.format(limit)
+                q += ' ORDER BY id DESC LIMIT {} OFFSET {}'.format(limit, base)
             query = self.cursor.mogrify(q, args_list)
         else:
             if limit > 0:
-                q_base += ' ORDER BY id DESC LIMIT {}'.format(limit)
+                q_base += ' ORDER BY id DESC LIMIT {} OFFSET {}'.format(limit, base)
             query = self.cursor.mogrify(q_base)
 
         self.cursor.execute(query)
@@ -290,3 +302,40 @@ class ExecutionTable(BaseTable):
             return Execution(row, self.sql_manager)
         else:
             return [Execution(x, self.sql_manager) for x in self.cursor]
+
+    def count(self, **kwargs):
+        """
+        Return a list of executions.
+
+        :param kwargs: filter executions based on their fields/columns
+        :return: one or more executions
+        """
+        q_base = 'SELECT COUNT(*) FROM execution'
+        if len(kwargs) > 0:
+            q = q_base + " WHERE "
+            filter_list = []
+            args_list = []
+            for key, value in kwargs.items():
+                if key == 'earlier_than_submit':
+                    filter_list.append('"time_submit" <= to_timestamp(%s)')
+                elif key == 'earlier_than_start':
+                    filter_list.append('"time_start" <= to_timestamp(%s)')
+                elif key == 'earlier_than_end':
+                    filter_list.append('"time_end" <= to_timestamp(%s)')
+                elif key == 'later_than_submit':
+                    filter_list.append('"time_submit" >= to_timestamp(%s)')
+                elif key == 'later_than_start':
+                    filter_list.append('"time_start" >= to_timestamp(%s)')
+                elif key == 'later_than_end':
+                    filter_list.append('"time_end" >= to_timestamp(%s)')
+                else:
+                    filter_list.append('{} = %s'.format(key))
+                args_list.append(value)
+            q += ' AND '.join(filter_list)
+            query = self.cursor.mogrify(q, args_list)
+        else:
+            query = self.cursor.mogrify(q_base)
+
+        self.cursor.execute(query)
+        row = self.cursor.fetchone()
+        return row[0]
