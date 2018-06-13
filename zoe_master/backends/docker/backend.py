@@ -119,14 +119,14 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
         if info['Labels'] is not None:
             node_stats.labels += set(info['Labels'])
 
-        node_stats.memory_reserved = sum([cont['memory_soft_limit'] for cont in container_list if cont['memory_soft_limit'] != node_stats.memory_total])
+        node_stats.memory_reserved = sum([cont['memory_hard_limit'] for cont in container_list if cont['memory_hard_limit'] != node_stats.memory_total])
         node_stats.cores_reserved = sum([cont['cpu_quota'] / cont['cpu_period'] for cont in container_list if cont['cpu_period'] != 0])
 
         stats = {}
         for cont in container_list:
             stats[cont['id']] = {}
             stats[cont['id']]['core_limit'] = cont['cpu_quota'] / cont['cpu_period']
-            stats[cont['id']]['mem_limit'] = cont['memory_soft_limit']
+            stats[cont['id']]['mem_limit'] = cont['memory_hard_limit']
         node_stats.service_stats = stats
 
         if get_usage_stats:

@@ -77,12 +77,12 @@ class DockerStateSynchronizer(threading.Thread):
                 if info['Labels'] is not None:
                     self.host_stats[host_config.name].labels.union(set(info['Labels']))
 
-                self.host_stats[host_config.name].memory_allocated = sum([cont['memory_soft_limit'] for cont in container_list if cont['memory_soft_limit'] != info['MemTotal']])
+                self.host_stats[host_config.name].memory_allocated = sum([cont['memory_hard_limit'] for cont in container_list if cont['memory_hard_limit'] != info['MemTotal']])
                 self.host_stats[host_config.name].cores_allocated = sum([cont['cpu_quota'] / cont['cpu_period'] for cont in container_list if cont['cpu_period'] != 0])
 
                 stats = {}
-                self.host_stats[host_config.name].memory_reserved = 0
-                self.host_stats[host_config.name].cores_reserved = 0
+                tmp_memory_reserved = 0
+                tmp_cores_reserved = 0
                 for cont in container_list:
                     service = self.state.services.select(only_one=True, backend_host=host_config.name, backend_id=cont['id'])
                     if service is None:
@@ -92,12 +92,14 @@ class DockerStateSynchronizer(threading.Thread):
                             my_engine.terminate_container(cont['id'], delete=True)
                         continue
                     self._update_service_status(service, cont)
-                    self.host_stats[host_config.name].memory_reserved += service.resource_reservation.memory.min
-                    self.host_stats[host_config.name].cores_reserved += service.resource_reservation.cores.min
+                    tmp_memory_reserved += service.resource_reservation.memory.min
+                    tmp_cores_reserved += service.resource_reservation.cores.min
                     stats[service.id] = {
                         'core_limit': cont['cpu_quota'] / cont['cpu_period'],
-                        'mem_limit': cont['memory_soft_limit']
+                        'mem_limit': cont['memory_hard_limit']
                     }
+                self.host_stats[host_config.name].memory_reserved = tmp_memory_reserved
+                self.host_stats[host_config.name].cores_reserved = tmp_cores_reserved
                 self.host_stats[host_config.name].service_stats = stats
 
                 self.host_stats[host_config.name].images = []
