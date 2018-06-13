@@ -104,10 +104,10 @@ class DockerClient:
                 log.error('Docker backend does not support volume type {}'.format(volume.type))
 
         if service_instance.memory_limit is not None:
-            run_args['mem_limit'] = service_instance.memory_limit.max
-            run_args['mem_reservation'] = service_instance.memory_limit.min
-            if service_instance.memory_limit.max == service_instance.memory_limit.min:
-                run_args['mem_reservation'] -= 1
+            run_args['mem_limit'] = service_instance.memory_limit.min
+#            run_args['mem_reservation'] = service_instance.memory_limit.min
+#            if service_instance.memory_limit.max == service_instance.memory_limit.min:
+#                run_args['mem_reservation'] -= 1
 
         if service_instance.core_limit is not None:
             run_args['cpu_quota'] = int(100000 * service_instance.core_limit.min)
