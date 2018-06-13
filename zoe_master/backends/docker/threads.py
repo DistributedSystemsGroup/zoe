@@ -50,7 +50,7 @@ class DockerStateSynchronizer(threading.Thread):
 
         self.start()
 
-    def _host_subthread(self, host_config: DockerHostConfig):
+    def _host_subthread(self, host_config: DockerHostConfig):  # pylint: disable=too-many-locals
         log.info("Synchro thread for host {} started".format(host_config.name))
 
         self.host_stats[host_config.name] = NodeStats(host_config.name)
