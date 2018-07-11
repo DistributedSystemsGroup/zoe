@@ -73,3 +73,8 @@ class ServiceInstance:
         self.ports = []
         for port in service.ports:
             self.ports.append(BackendPort(port.internal_number, port.protocol))
+
+        if service.network is not None:
+            self.network = service.network
+        else:
+            self.network = get_conf().overlay_network_name,

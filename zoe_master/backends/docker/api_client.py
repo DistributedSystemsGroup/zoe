@@ -78,7 +78,7 @@ class DockerClient:
             'memswap_limit': 0,
             'name': service_instance.name,
             'network_disabled': False,
-            'network_mode': get_conf().overlay_network_name,
+            'network_mode': service_instance.network,
             'image': service_instance.image_name,
             'command': service_instance.command,
             'hostname': service_instance.hostname,
