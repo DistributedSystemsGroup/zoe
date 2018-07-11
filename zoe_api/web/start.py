@@ -118,8 +118,8 @@ class HomeWeb(ZoeRequestHandler):
         last_running_executions += self.api_endpoint.execution_list(uid, role, **filters)
 
         running_reservations = [e.total_reservations for e in last_running_executions]
-        total_memory = sum([r.memory.max for r in running_reservations])
-        total_cores = sum([r.cores.max for r in running_reservations])
+        total_memory = sum([r.memory.min for r in running_reservations])
+        total_cores = sum([r.cores.min for r in running_reservations])
 
         template_vars = {
             "uid": uid,

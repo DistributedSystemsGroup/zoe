@@ -48,7 +48,7 @@ class SimulatedNode:
         elif not set(service.labels).issubset(self.labels):
             return 'service required labels {} to be defined on the node'.format(service.labels)
         elif not self._image_is_available(service.image_name):
-            return 'image {} is not available on this node'.format(service.image_name)
+            return 'image {} is not available on node {}'.format(service.image_name, self.name)
         else:
             return 'unknown reason'
 
@@ -140,6 +140,7 @@ class SimulatedPlatform:
                     candidate_nodes.append(node)
                 else:
                     reasons += 'node {}: {} ## '.format(node.name, node.service_why_unfit(service))
+                    log.debug('node rejected: {}'.format(node.service_why_unfit(service)))
             if len(candidate_nodes) == 0:  # this service does not fit anywhere
                 self.deallocate_essential(execution)
                 log.info('Cannot fit essential service {} anywhere, reasons: {}'.format(service.id, reasons))
