@@ -341,7 +341,6 @@ class KubernetesClient:
             log.info('created service on Kubernetes cluster')
         except Exception as ex:
             log.error(ex)
-        return
 
     def inspect_service(self, name) -> Dict[str, Any]:
         """Get information of a specific service."""

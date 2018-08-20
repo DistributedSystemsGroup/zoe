@@ -35,8 +35,8 @@ LOG_FORMAT = '%(asctime)-15s %(levelname)s %(threadName)s->%(name)s: %(message)s
 
 
 def _check_configuration_sanity():
-    if not os.path.exists(os.path.join(config.get_conf().workspace_base_path, zoe_lib.config.get_conf().workspace_deployment_path)):
-        log.error('Workspace base directory does not exist: {}'.format(os.path.join(zoe_lib.config.get_conf().workspace_base_path, config.get_conf().workspace_deployment_path)))
+    if not os.path.exists(os.path.join(zoe_lib.config.get_conf().workspace_base_path, zoe_lib.config.get_conf().workspace_deployment_path)):
+        log.error('Workspace base directory does not exist: {}'.format(os.path.join(zoe_lib.config.get_conf().workspace_base_path, zoe_lib.config.get_conf().workspace_deployment_path)))
         return 1
     return 0
 
