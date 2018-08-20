@@ -65,15 +65,3 @@ api-test:
   image: zoerepo/${ZOE_TEST_IMAGE}
   script:
     - bash ./run_integration_tests.sh
-
-mirror-github:
-  stage: deploy
-  image: python:3.5
-  before_script:
-    - which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )
-    - eval $(ssh-agent -s)
-    - ssh-add <(echo "$SSH_PRIVATE_KEY")
-    - mkdir -p ~/.ssh
-    - 'echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-  script:
-    - ssh -A ubuntu@${STAGING_IP} /home/ubuntu/mirror-github.sh
