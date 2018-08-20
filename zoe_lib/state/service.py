@@ -146,6 +146,11 @@ class Service(BaseRecord):
         except KeyError:
             self.labels = []
 
+        try:
+            self.network = self.description['network']
+        except KeyError:
+            self.network = None
+
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""
         return {

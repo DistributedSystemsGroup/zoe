@@ -14,7 +14,6 @@ ARGS = [
     '--dbname', 'zoe',
     '--dbpass', 'zoepass',
     '--master-url', 'tcp://localhost:4850',
-    '--auth-type', 'text',
     '--listen-port', '5100',
     '--workspace-base-path', '/tmp',
     '--workspace-deployment-path', 'integration_test',

@@ -1,4 +1,4 @@
-# Copyright (c) 2016, Daniele Venzano
+# Copyright (c) 2018, Daniele Venzano
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,10 +15,59 @@
 
 """Base authenticator class."""
 
+import logging
+from typing import Union
+
+import pexpect
+
+from zoe_api.auth.file import PlainTextAuthenticator
+from zoe_api.auth.ldap import LDAPAuthenticator
+from zoe_lib.state import SQLManager, User
+from zoe_lib.config import get_conf
+
+log = logging.getLogger(__name__)
+
 
 class BaseAuthenticator:
     """Base authenticator class."""
 
-    def auth(self, username, password):
-        """The methods that needs to be overridden by implementations."""
-        raise NotImplementedError
+    def __init__(self):
+        self.state = SQLManager(get_conf())
+
+    def full_auth(self, username: str, password: str) -> Union[None, User]:  # pylint: disable=too-many-return-statements
+        """This method verifies the username and the password against one of the external auth sources."""
+        user = self.state.user.select(only_one=True, **{"username": username})
+        if user is None or not user.enabled:
+            return None
+
+        if user.auth_source == "textfile" and PlainTextAuthenticator(get_conf().auth_file).auth(username, password):
+            return user
+        elif user.auth_source == "ldap" and LDAPAuthenticator(get_conf(), sasl=False).auth(username, password):
+            return user
+        elif user.auth_source == "ldap+sasl" and LDAPAuthenticator(get_conf(), sasl=True).auth(username, password):
+            return user
+        elif user.auth_source == "internal" and user.check_password(password):
+            return user
+        elif user.auth_source == "pam" and pam_authenticate(username, password):
+            return user
+        else:
+            log.error('Unknown auth source {} for user {}, cannot authenticate'.format(user.auth_source, user.username))
+            return None
+
+
+def pam_authenticate(username, password):
+    """Use su for testing credentials. Using directly the PAM library would be more performant, but would also require Zoe to run as root."""
+
+    try:
+        child = pexpect.spawn('/bin/su', ['-', username])
+        child.expect('Password:')
+        child.sendline(password)
+        result = child.expect(['su: Authentication failure', username])
+        child.close()
+    except pexpect.TIMEOUT as err:
+        log.error("Error authenticating. Reason: {}".format(err))
+        return False
+    if result == 0:
+        return False
+    else:
+        return True

@@ -28,12 +28,12 @@ Workspaces:
 
 * ``workspace-deployment-path`` : path appended to the ``workspace-base-path`` to distinguish this deployment. If left unspecified it is equal to the deployment name
 * ``workspace-base-path = /mnt/zoe-workspaces`` : Base directory where user workspaces will be created. This directory should reside on a shared filesystem visible by all hosts where containers will be run.
+* ``fs-group-id = 5001`` : Group ID to use for all Zoe users in workspace files
 
 Metrics:
 
-* ``influxdb-dbname = zoe`` : Name of the InfluxDB database to use for storing metrics
-* ``influxdb-url = http://localhost:8086`` : URL of the InfluxDB service (ex. )
-* ``influxdb-enable = False`` : Enable metric output toward influxDB
+* ``kairosdb-enable = false`` : Enable gathering of usage metrics recorded in KairosDB
+* ``kairosdb-url = http://localhost:8090`` : URL of KairosDB REST API
 
 Service logs (see: :ref:`logging`):
 
@@ -60,31 +60,24 @@ API options:
 Master options:
 
 * ``api-listen-uri = tcp://*:4850`` : ZeroMQ server connection string, used for the master listening endpoint
-* ``kairosdb-enable = false`` : Enable gathering of usage metrics recorded in KairosDB
-* ``kairosdb-url = http://localhost:8090`` : URL of KairosDB REST API
 * ``overlay-network-name = zoe`` : name of the pre-configured Docker overlay network Zoe should use (Swarm backend)
 * ``max-core-limit = 16`` : maximum amount of cores a user is able to reserve
 * ``max-memory-limit = 64`` : maximum amount of memory a user is able to reserve
-* ``no-user-edit-limits-web = False`` : if set to true, users are NOT allowed to modify ZApp reservations via the web interface
 * ``additional-volumes = <none>`` : list of additional volumes to mount in every service, for every ZApp (ex. /mnt/data:data,/mnt/data_n:data_n)
 
 Authentication:
 
-* ``auth-type = text`` : Authentication type (text, ldap or ldapsasl)
 * ``auth-file = zoepass.csv`` : Path to the CSV file containing user,pass,role lines for text authentication
 * ``ldap-server-uri = ldap://localhost`` : LDAP server to use for user authentication
 * ``ldap-bind-user = ou=something,dc=any,dc=local`` : LDAP user for binding to the server
 * ``ldap-bind-password = mysecretpassword`` : Password for the bind user
 * ``ldap-base-dn = ou=something,dc=any,dc=local`` : LDAP base DN for users
-* ``ldap-admin-gid = 5000`` : LDAP group ID for admins
-* ``ldap-user-gid = 5001`` : LDAP group ID for users
-* ``ldap-guest-gid = 5002`` : LDAP group ID for guests
-* ``ldap-group-name = gidNumber`` : LDAP user attribute that contains the group names/IDs
 
 Scheduler options:
 
 * ``scheduler-class = <ZoeElasticScheduler>`` : Scheduler class to use for scheduling ZApps (default: elastic scheduler)
 * ``scheduler-policy = <FIFO | SIZE>`` : Scheduler policy to use for scheduling ZApps (default: FIFO)
+* ``placement-policy = <waterfill | random | average>`` : how containers should be placed on hosts (default: average)
 
 ZApp shop:
 
@@ -92,15 +85,7 @@ ZApp shop:
 
 Back-end choice:
 
-* ``backend = <DockerEngine|Swarm|Kubernetes>`` : cluster back-end to use to run ZApps, default is DockerEngine
-
-Swarm back-end options:
-
-* ``backend-swarm-url = zk://zk1:2181,zk2:2181,zk3:2181`` : connection string to the Swarm API endpoint. Can be expressed by a plain http URL or as a zookeeper node list in case Swarm is configured for HA.
-* ``backend-swarm-zk-path = /docker`` : ZooKeeper path used by Docker Swarm
-* ``backend-swarm-tls-cert = cert.pem`` : Docker TLS certificate file
-* ``backend-swarm-tls-key = key.pem`` : Docker TLS private key file
-* ``backend-swarm-tls-ca = ca.pem`` : Docker TLS CA certificate file
+* ``backend = <DockerEngine|Kubernetes>`` : cluster back-end to use to run ZApps, default is DockerEngine
 
 Kubernetes back-end:
 

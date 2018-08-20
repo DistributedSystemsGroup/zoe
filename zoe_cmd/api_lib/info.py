@@ -19,7 +19,7 @@ This module contains the Zoe Info API.
 
 import logging
 
-from zoe_lib.api_base import ZoeAPIBase
+from zoe_cmd.api_lib.api_base import ZoeAPIBase
 from zoe_lib.exceptions import ZoeAPIException
 
 log = logging.getLogger(__name__)
@@ -37,8 +37,6 @@ class ZoeInfoAPI(ZoeAPIBase):
         """
         data, status_code = self._rest_get('/info')
         if status_code != 200:
-            if status_code == 404:
-                raise ZoeAPIException('API endpoint not found')
-            raise ZoeAPIException(data['message'])
+            raise ZoeAPIException(data)
         else:
             return data

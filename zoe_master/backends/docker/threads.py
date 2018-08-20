@@ -91,6 +91,12 @@ class DockerStateSynchronizer(threading.Thread):
                             log.warning('Terminating dead and orphan container {}'.format(cont['name']))
                             my_engine.terminate_container(cont['id'], delete=True)
                         continue
+                    if service.status == service.TERMINATING_STATUS:
+                        if service.backend_id is not None:
+                            my_engine.terminate_container(service.backend_id, delete=True)
+                        else:
+                            service.set_inactive()
+
                     self._update_service_status(service, cont)
                     tmp_memory_reserved += service.resource_reservation.memory.min
                     tmp_cores_reserved += service.resource_reservation.cores.min
@@ -102,7 +108,7 @@ class DockerStateSynchronizer(threading.Thread):
                 self.host_stats[host_config.name].cores_reserved = tmp_cores_reserved
                 self.host_stats[host_config.name].service_stats = stats
 
-                self.host_stats[host_config.name].images = []
+                tmp_images = []
                 for dk_image in my_engine.list_images():
                     image = {
                         'id': dk_image.attrs['Id'],
@@ -113,7 +119,10 @@ class DockerStateSynchronizer(threading.Thread):
                         if name[-7:] == ':latest':  # add an image with the name without 'latest' to fake Docker image lookup algorithm
                             image['names'].append(name[:-7])
                             break
-                    self.host_stats[host_config.name].images.append(image)
+                    tmp_images.append(image)
+                self.host_stats[host_config.name].images = tmp_images
+                self.host_stats[host_config.name].timestamp = time_start
+                self.host_stats[host_config.name].valid = True
 
             sleep_time = CHECK_INTERVAL - (time.time() - time_start)
             if sleep_time <= 0:

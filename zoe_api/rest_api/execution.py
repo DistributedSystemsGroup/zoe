@@ -15,114 +15,68 @@
 
 """The Execution API endpoints."""
 
-from tornado.web import RequestHandler
 import tornado.escape
 
-from zoe_api.rest_api.utils import catch_exceptions, get_auth, manage_cors_headers
-import zoe_api.exceptions
-from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
+from zoe_api.rest_api.request_handler import ZoeAPIRequestHandler
+from zoe_api.exceptions import ZoeException
 
 
-class ExecutionAPI(RequestHandler):
+class ExecutionAPI(ZoeAPIRequestHandler):
     """The Execution API endpoint."""
 
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-
-    def set_default_headers(self):
-        """Set up the headers for enabling CORS."""
-        manage_cors_headers(self)
-
-    def options(self, execution_id):  # pylint: disable=unused-argument
-        """Needed for CORS."""
-        self.set_status(204)
-        self.finish()
-
-    @catch_exceptions
     def get(self, execution_id):
         """GET a single execution by its ID."""
-        uid, role = get_auth(self)
+        if self.current_user is None:
+            return
 
-        e = self.api_endpoint.execution_by_id(uid, role, execution_id)
+        try:
+            e = self.api_endpoint.execution_by_id(self.current_user, execution_id)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
+            return
 
         self.write(e.serialize())
 
-    @catch_exceptions
     def delete(self, execution_id: int):
         """
         Terminate an execution.
 
         :param execution_id: the execution to be terminated
         """
-        uid, role = get_auth(self)
+        if self.current_user is None:
+            return
 
-        success, message = self.api_endpoint.execution_terminate(uid, role, execution_id)
-        if not success:
-            raise zoe_api.exceptions.ZoeRestAPIException(message, 400)
-
-        self.set_status(204)
-
-    def data_received(self, chunk):
-        """Not implemented as we do not use stream uploads"""
-        pass
+        try:
+            self.api_endpoint.execution_terminate(self.current_user, execution_id)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
+        else:
+            self.set_status(204)
 
 
-class ExecutionDeleteAPI(RequestHandler):
+class ExecutionDeleteAPI(ZoeAPIRequestHandler):
     """The ExecutionDelete API endpoints."""
 
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-
-    def set_default_headers(self):
-        """Set up the headers for enabling CORS."""
-        manage_cors_headers(self)
-
-    @catch_exceptions
-    def options(self, execution_id):  # pylint: disable=unused-argument
-        """Needed for CORS."""
-        self.set_status(204)
-        self.finish()
-
-    @catch_exceptions
     def delete(self, execution_id: int):
         """
         Delete an execution.
 
         :param execution_id: the execution to be deleted
         """
-        uid, role = get_auth(self)
+        if self.current_user is None:
+            return
 
-        success, message = self.api_endpoint.execution_delete(uid, role, execution_id)
-        if not success:
-            raise zoe_api.exceptions.ZoeRestAPIException(message, 400)
-
-        self.set_status(204)
-
-    def data_received(self, chunk):
-        """Not implemented as we do not use stream uploads"""
-        pass
+        try:
+            self.api_endpoint.execution_delete(self.current_user, execution_id)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
+        else:
+            self.set_status(204)
 
 
-class ExecutionCollectionAPI(RequestHandler):
+class ExecutionCollectionAPI(ZoeAPIRequestHandler):
     """The Execution Collection API endpoints."""
 
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-
-    def set_default_headers(self):
-        """Set up the headers for enabling CORS."""
-        manage_cors_headers(self)
-
-    @catch_exceptions
-    def options(self):
-        """Needed for CORS."""
-        self.set_status(204)
-        self.finish()
-
-    @catch_exceptions
     def get(self):
         """
         Returns a list of all active executions.
@@ -146,7 +100,8 @@ class ExecutionCollectionAPI(RequestHandler):
 
         :return:
         """
-        uid, role = get_auth(self)
+        if self.current_user is None:
+            return
 
         filt_dict = {}
 
@@ -169,68 +124,59 @@ class ExecutionCollectionAPI(RequestHandler):
                 else:
                     filt_dict[filt[0]] = filt[1](self.request.arguments[filt[0]][0])
 
-        execs = self.api_endpoint.execution_list(uid, role, **filt_dict)
+        try:
+            execs = self.api_endpoint.execution_list(self.current_user, **filt_dict)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
+            return
 
         self.write(dict([(e.id, e.serialize()) for e in execs]))
 
-    @catch_exceptions
     def post(self):
         """
         Starts an execution, given an application description. Takes a JSON object.
 
         :return: the new execution_id
         """
-        uid, role = get_auth(self)
+        if self.current_user is None:
+            return
 
         try:
             data = tornado.escape.json_decode(self.request.body)
         except ValueError:
-            raise zoe_api.exceptions.ZoeRestAPIException('Error decoding JSON data')
+            self.set_status(400, 'Error decoding JSON data')
+            return
 
         application_description = data['application']
         exec_name = data['name']
 
-        new_id = self.api_endpoint.execution_start(uid, role, exec_name, application_description)
+        try:
+            new_id = self.api_endpoint.execution_start(self.current_user, exec_name, application_description)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
+            return
 
         self.set_status(201)
         self.write({'execution_id': new_id})
 
-    def data_received(self, chunk):
-        """Not implemented as we do not use stream uploads"""
-        pass
 
-
-class ExecutionEndpointsAPI(RequestHandler):
+class ExecutionEndpointsAPI(ZoeAPIRequestHandler):
     """The ExecutionEndpoints API endpoint."""
 
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-
-    def set_default_headers(self):
-        """Set up the headers for enabling CORS."""
-        manage_cors_headers(self)
-
-    @catch_exceptions
-    def options(self):
-        """Needed for CORS."""
-        self.set_status(204)
-        self.finish()
-
-    @catch_exceptions
     def get(self, execution_id: int):
         """
         Get a list of execution endpoints.
 
         :param execution_id: the execution to be deleted
         """
-        uid, role = get_auth(self)
+        if self.current_user is None:
+            return
 
-        execution = self.api_endpoint.execution_by_id(uid, role, execution_id)
-        services_, endpoints = self.api_endpoint.execution_endpoints(uid, role, execution)
+        try:
+            execution = self.api_endpoint.execution_by_id(self.current_user, execution_id)
+            services_, endpoints = self.api_endpoint.execution_endpoints(self.current_user, execution)
+        except ZoeException as e:
+            self.set_status(e.status_code, e.message)
+            return
 
         self.write({'endpoints': endpoints})
-
-    def data_received(self, chunk):
-        """Not implemented as we do not use stream uploads"""
-        pass

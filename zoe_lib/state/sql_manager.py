@@ -27,6 +27,9 @@ import zoe_lib.exceptions
 from .service import ServiceTable
 from .execution import ExecutionTable
 from .port import PortTable
+from .quota import QuotaTable
+from .user import UserTable
+from .role import RoleTable
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +39,7 @@ psycopg2.extensions.register_adapter(dict, psycopg2.extras.Json)
 class SQLManager:
     """The SQLManager class, should be used as a singleton."""
     def __init__(self, conf):
-        self.user = conf.dbuser
+        self.dbuser = conf.dbuser
         self.password = conf.dbpass
         self.host = conf.dbhost
         self.port = conf.dbport
@@ -47,7 +50,7 @@ class SQLManager:
 
     def _connect(self):
         dsn = 'dbname=' + self.dbname + \
-              ' user=' + self.user + \
+              ' user=' + self.dbuser + \
               ' password=' + self.password + \
               ' host=' + self.host + \
               ' port=' + str(self.port)
@@ -83,7 +86,25 @@ class SQLManager:
         """Access the port state."""
         return PortTable(self)
 
+    @property
+    def quota(self) -> QuotaTable:
+        """Access the quota state."""
+        return QuotaTable(self)
+
+    @property
+    def role(self) -> RoleTable:
+        """Access the role state."""
+        return RoleTable(self)
+
+    @property
+    def user(self) -> UserTable:
+        """Access the user state."""
+        return UserTable(self)
+
     def _create_tables(self):
+        self.quota.create()
+        self.role.create()
+        self.user.create()
         self.executions.create()
         self.services.create()
         self.ports.create()

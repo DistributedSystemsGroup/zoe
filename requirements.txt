@@ -3,7 +3,7 @@ requests>=2.9.1
 docker>=2.1.0
 tornado>=4.3
 humanfriendly
-psycopg2>=2.6.1
+psycopg2-binary>=2.6.1
 pyzmq>=15.2.0
 typing
 python-consul
@@ -12,3 +12,5 @@ sphinx
 jsonschema
 tabulate
 markdown
+passlib
+pexpect

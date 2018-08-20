@@ -1,4 +1,4 @@
-{% extends "base_user.html" %}
+{% extends "base_user.jinja2" %}
 {% block title %}Home{% endblock %}
 
 {% block custom_head %}
@@ -33,7 +33,7 @@
     <tr>
         <th>ID</th>
         <th>Execution name</th>
-        {% if role == "admin" %}
+        {% if user.role.can_operate_others %}
         <th>User</th>
         {% endif %}
         <th>Status</th>
@@ -48,8 +48,8 @@
             <tr>
                 <td>{{ e.id }}</td>
                 <td class="exec-name"><a href="/executions/inspect/{{ e.id }}">{{ e.name }}</a></td>
-                {% if role == "admin" %}
-                <td>{{ e.user_id }}</td>
+                {% if user.role.can_operate_others %}
+                <td>{{ e.owner.username }}</td>
                 {% endif %}
                 <td>{{ e.status }}</td>
                 <td sorttable_customkey="{{ e.time_submit }}"><script>format_timestamp("{{ e.time_submit }}")</script></td>

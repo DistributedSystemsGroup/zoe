@@ -20,6 +20,8 @@ import logging
 import threading
 import functools
 
+import psycopg2
+
 from zoe_lib.state.base import BaseRecord, BaseTable
 
 log = logging.getLogger(__name__)
@@ -217,6 +219,11 @@ class Execution(BaseRecord):
             return 0
         return functools.reduce(lambda x, y: x + y, [s.resource_reservation for s in self.services])
 
+    @property
+    def owner(self):
+        """Returns the full user object that owns this execution."""
+        return self.sql_manager.user.select(only_one=True, **{'id': self.user_id})
+
     def __repr__(self):
         return str(self.id)
 
@@ -231,7 +238,7 @@ class ExecutionTable(BaseTable):
         self.cursor.execute('''CREATE TABLE execution (
             id SERIAL PRIMARY KEY,
             name TEXT NOT NULL,
-            user_id TEXT NOT NULL,
+            user_id INT REFERENCES "user",
             description JSON NOT NULL,
             status TEXT NOT NULL,
             size NUMERIC NOT NULL,
@@ -294,7 +301,15 @@ class ExecutionTable(BaseTable):
                 q_base += ' ORDER BY id DESC LIMIT {} OFFSET {}'.format(limit, base)
             query = self.cursor.mogrify(q_base)
 
-        self.cursor.execute(query)
+        try:
+            self.cursor.execute(query)
+        except psycopg2.Error as e:
+            log.error('db error: {}'.format(e))
+            if only_one:
+                return None
+            else:
+                return []
+
         if only_one:
             row = self.cursor.fetchone()
             if row is None:
@@ -336,6 +351,11 @@ class ExecutionTable(BaseTable):
         else:
             query = self.cursor.mogrify(q_base)
 
-        self.cursor.execute(query)
+        try:
+            self.cursor.execute(query)
+        except psycopg2.Error as e:
+            log.error('db error: {}'.format(e))
+            return 0
+
         row = self.cursor.fetchone()
         return row[0]

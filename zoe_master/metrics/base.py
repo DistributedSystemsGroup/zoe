@@ -26,8 +26,6 @@ from zoe_master.metrics.kairosdb import KairosDBInMetrics
 
 log = logging.getLogger(__name__)
 
-METRIC_INTERVAL = 20
-
 
 def time_diff_ms(start: float, end: float) -> int:
     """Return a time difference in milliseconds."""
@@ -36,6 +34,8 @@ def time_diff_ms(start: float, end: float) -> int:
 
 class StatsManager(threading.Thread):
     """Class for collecting and sending out metrics and statistics."""
+
+    METRIC_INTERVAL = 20
 
     def __init__(self, state):
         super().__init__(name='metrics', daemon=True)
@@ -89,7 +89,7 @@ class StatsManager(threading.Thread):
                     node.cores_in_use = node_cores
                     node.memory_in_use = node_memory
 
-            sleep_time = METRIC_INTERVAL - (time.time() - time_start)
+            sleep_time = self.METRIC_INTERVAL - (time.time() - time_start)
             if sleep_time > 0 and self.stop.wait(timeout=sleep_time):
                 break
 

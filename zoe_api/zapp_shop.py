@@ -59,6 +59,10 @@ class ZApp:
         self.readable_description = self.read_description()
         self.json_file = zapp['description']
         self.zoe_description = self.parse_json_description()
+        if 'labels' in zapp:
+            self.labels = zapp['labels']
+        else:
+            self.labels = []
         self.parameters = []
         self.parse_parameters(zapp)
         if 'guest_access' in zapp:
@@ -69,6 +73,14 @@ class ZApp:
             self.logo = zapp['logo']
         else:
             self.logo = 'logo.png'
+        if 'enabled_for' in zapp:
+            self.enabled_for = zapp['enabled_for']
+        else:
+            self.enabled_for = ["all"]
+        if 'disabled_for' in zapp:
+            self.disabled_for = zapp['disabled_for']
+        else:
+            self.disabled_for = []
 
     def parse_parameters(self, zapp_manifest):
         """Translates the parameters from the manifest into objects."""
@@ -95,8 +107,11 @@ def zshop_list_apps(role):
 
     zapp_cat = {}
     for zapp in zapps:
-        if role == 'guest' and not zapp.guest_access:
-            continue
+        if not role.can_access_full_zapp_shop:
+            if role.name in zapp.disabled_for:
+                continue
+            if role.name not in zapp.enabled_for and "all" not in zapp.enabled_for:
+                continue
         if zapp.category in zapp_cat:
             zapp_cat[zapp.category].append(zapp)
         else:

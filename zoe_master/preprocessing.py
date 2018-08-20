@@ -35,6 +35,8 @@ def _digest_application_description(state: SQLManager, execution: Execution):
         images += list_available_images(node)
 
     images = [name for image in images for name in image['names']]
+    if len(images) == 0:
+        log.warning('The image list reported by the back-end is empty')
     for service_descr in execution.description['services']:
         if service_descr['image'] not in images:
             execution.set_error()
@@ -44,6 +46,10 @@ def _digest_application_description(state: SQLManager, execution: Execution):
     for service_descr in execution.description['services']:
         essential_count = service_descr['essential_count']
         total_count = service_descr['total_count']
+        if essential_count > total_count:
+            execution.set_error()
+            execution.set_error_message('total_count is less than essential_count for service {}'.format(service_descr['name']))
+            return False
         elastic_count = total_count - essential_count
         counter = 0
         for service_n_ in range(essential_count):

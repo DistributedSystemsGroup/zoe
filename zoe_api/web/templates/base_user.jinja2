@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.jinja2" %}
 
 {% block content_header %}
 <div class="header">
@@ -15,14 +15,14 @@
         <div class="nav-item">
             <a href="{{ reverse_url("execution_list") }}">Executions</a>
         </div>
-        {% if role == "admin" %}
+        {% if user.role.can_see_status %}
         <div class="nav-item">
             <a href="{{ reverse_url("status") }}">Status</a>
         </div>
         {% endif %}
     </div>
     <div id="user_info">
-        {{ uid }} ({{ role }}) <a href="{{ reverse_url("logout") }}">logout</a>
+        {{ user.username }} ({{ user.role.name }}) <a href="{{ reverse_url("logout") }}">logout</a>
     </div>
 </div>
 {% endblock %}

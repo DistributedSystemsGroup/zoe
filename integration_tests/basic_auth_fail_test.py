@@ -10,10 +10,10 @@ TIMEOUT = 5
 class TestZoeRestAuthFails:
     """Test case class."""
 
-    def test_userinfo(self, zoe_api_process):
-        """Test userinfo api endpoint."""
-        print('Test userinfo api endpoint')
-        req = requests.get(ZOE_API_URI + 'userinfo', auth=WRONG_AUTH)
+    def test_user(self, zoe_api_process):
+        """Test user api endpoint."""
+        print('Test user api endpoint')
+        req = requests.get(ZOE_API_URI + 'user', auth=WRONG_AUTH)
         assert req.status_code == 401
 
     def test_3_execution_details(self, zoe_api_process):

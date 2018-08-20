@@ -153,6 +153,10 @@
           },
           "minItems": 0,
           "uniqueItems": true
+        },
+        "network": {
+          "type": "string",
+          "minLength": 1
         }
       },
       "additionalProperties": false,

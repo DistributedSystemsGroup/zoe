@@ -1,4 +1,4 @@
-{% extends "base_user.html" %}
+{% extends "base_user.jinja2" %}
 
 {% block title %}ZApp Shop{% endblock %}
 
@@ -64,7 +64,7 @@
         {%  endfor %}
     {% endif %}
     <hr>
-    {%  if role != "guest" %}
+    {%  if user.role.can_access_api %}
         <label class="label-inline"><input type="checkbox" onchange="set_submit_text(this)" name="download_json"> Download JSON with these parameters for command-line execution</label>
         <br><br>
     {% endif %}

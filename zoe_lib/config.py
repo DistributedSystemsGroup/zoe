@@ -74,13 +74,10 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--service-logs-base-path', help='Path where service logs coming from the GELF listener will be stored', default='/var/lib/zoe/service-logs')
 
         # API options
-        argparser.add_argument('--listen-address', type=str, help='Address to listen to for incoming connections', default="0.0.0.0")
+        argparser.add_argument('--listen-address', help='Address to listen to for incoming connections', default="0.0.0.0")
         argparser.add_argument('--listen-port', type=int, help='Port to listen to for incoming connections', default=5001)
         argparser.add_argument('--master-url', help='URL of the Zoe master process', default='tcp://127.0.0.1:4850')
         argparser.add_argument('--cookie-secret', help='secret used to encrypt cookies', default='changeme')
-
-        # API auth options
-        argparser.add_argument('--auth-type', help='Authentication type (text, ldap or ldapsasl)', default='text')
 
         argparser.add_argument('--auth-file', help='Path to the CSV file containing user,pass,role lines for text authentication', default='zoepass.csv')
 
@@ -88,10 +85,8 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--ldap-bind-user', help='Full LDAP user to use for binding', default='ou=something,dc=any,dc=local')
         argparser.add_argument('--ldap-bind-password', help='Password for the bind user', default='mysecretpassword')
         argparser.add_argument('--ldap-base-dn', help='LDAP base DN for users', default='ou=something,dc=any,dc=local')
-        argparser.add_argument('--ldap-admin-gid', help='LDAP group ID for admins', default='5000')
-        argparser.add_argument('--ldap-user-gid', help='LDAP group ID for users', default='5001')
-        argparser.add_argument('--ldap-guest-gid', help='LDAP group ID for guests', default='5002')
-        argparser.add_argument('--ldap-group-name', help='LDAP user field containing group names/IDs', default='gidNumber')
+
+        argparser.add_argument('--fs-group-id', type=int, help='Group ID to use for all Zoe users in workspace files', default='5001')
 
         # Proxy options
         argparser.add_argument('--proxy-path', help='Proxy base path', default='127.0.0.1')
@@ -115,7 +110,6 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--log-file', help='output logs to a file', default='stderr')
         argparser.add_argument('--max-core-limit', help='Maximum amount of cores users are able to reserve', type=int, default=16)
         argparser.add_argument('--max-memory-limit', help='Maximum amount of memory services can use (in GiB)', type=int, default=64)
-        argparser.add_argument('--no-user-edit-limits-web', action='store_true', help='Disable editing ZApp resource limits from the web interface (only admins will able to)')
         argparser.add_argument('--additional-volumes', help='Additional volumes to mount in services filesystems. (ex: /mnt/data:data,/mnt/data_n:data_n)', default='')
         argparser.add_argument('--enable-plots', action='store_true', help='Enable generation of URLs to Grafana')
 

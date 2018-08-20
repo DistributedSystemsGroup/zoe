@@ -39,11 +39,12 @@ def gen_environment(execution: Execution, service: Service, env_subst_dict: Dict
 
     env_list.append(('EXECUTION_ID', str(execution.id)))
     env_list.append(('DEPLOY_NAME', get_conf().deployment_name))
-    env_list.append(('UID', execution.user_id))
+    env_list.append(('ZOE_UID', execution.owner.fs_uid))
+    env_list.append(('ZOE_GID', get_conf().fs_group_id))
+    env_list.append(('ZOE_USER', execution.owner.username))
     env_list.append(('SERVICE_NAME', service.name))
-    env_list.append(('PROXY_PATH', get_conf().proxy_path))
 
-    wk_vol = ZoeFSWorkspace().get(execution.user_id)
+    wk_vol = ZoeFSWorkspace().get(execution.owner)
     env_list.append(('ZOE_WORKSPACE', wk_vol.mount_point))
     return env_list
 
@@ -52,8 +53,7 @@ def gen_volumes(service: Service, execution: Execution) -> List[VolumeDescriptio
     """Return the list of default volumes to be added to all containers."""
     vol_list = service.volumes
 
-    fswk = ZoeFSWorkspace()
-    wk_vol = fswk.get(execution.user_id)
+    wk_vol = ZoeFSWorkspace().get(execution.owner)
 
     vol_list.append(wk_vol)
 
@@ -70,7 +70,7 @@ def gen_labels(service: Service, execution: Execution):
         'zoe_execution_id': str(execution.id),
         'zoe_service_name': service.name,
         'zoe_service_id': str(service.id),
-        'zoe_owner': execution.user_id,
+        'zoe_owner': execution.owner.username,
         'zoe_deployment_name': get_conf().deployment_name,
         'zoe_type': 'app_service'
     }

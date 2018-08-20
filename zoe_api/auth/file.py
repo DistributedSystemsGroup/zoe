@@ -21,15 +21,14 @@ import os
 
 import zoe_api.auth.base
 import zoe_api.exceptions
-from zoe_lib.config import get_conf
 
 log = logging.getLogger(__name__)
 
 
-class PlainTextAuthenticator(zoe_api.auth.base.BaseAuthenticator):
+class PlainTextAuthenticator:
     """A basic plain text file authenticator."""
-    def __init__(self):
-        self.passwd_file = get_conf().auth_file
+    def __init__(self, filename):
+        self.passwd_file = filename
         if not os.access(self.passwd_file, os.R_OK):
             raise zoe_api.exceptions.ZoeNotFoundException('Password file not found at: {}'.format(self.passwd_file))
 
@@ -38,11 +37,10 @@ class PlainTextAuthenticator(zoe_api.auth.base.BaseAuthenticator):
         with open(self.passwd_file, "r") as passwd:
             passwd_reader = csv.reader(passwd)
             for row in passwd_reader:
-                if len(row) != 3:
+                if len(row) != 2:
                     continue
                 file_username = row[0]
                 file_password = row[1]
-                file_role = row[2]
                 if file_username == username and file_password == password:
-                    return username, file_role
+                    return True
             raise zoe_api.exceptions.ZoeAuthException('Unknown user or password.')

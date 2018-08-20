@@ -11,7 +11,7 @@ variables:
   POSTGRES_USER: zoeuser
   POSTGRES_PASSWORD: zoepass
   ZOE_TEST_IMAGE: zoe-test:$CI_PIPELINE_ID
-  ZOE_COMMON_OPTIONS: --debug --deployment-name test${CI_BUILD_REF} --dbuser ${POSTGRES_USER} --dbhost postgres --dbport 5432 --dbname ${POSTGRES_DB} --dbpass ${POSTGRES_PASSWORD} --master-url tcp://localhost:4850 --auth-type text --listen-port 5100 --workspace-base-path /tmp
+  ZOE_COMMON_OPTIONS: --debug --deployment-name test${CI_BUILD_REF} --dbuser ${POSTGRES_USER} --dbhost postgres --dbport 5432 --dbname ${POSTGRES_DB} --dbpass ${POSTGRES_PASSWORD} --master-url tcp://localhost:4850 --listen-port 5100 --workspace-base-path /tmp --overlay-network-name bridge
 
 cache:
   paths:

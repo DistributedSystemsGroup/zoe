@@ -14,31 +14,29 @@
 # limitations under the License.
 
 """
-This module contains the Zoe Info API.
+This module contains the Zoe Statistics API.
 """
 
 import logging
 
-from zoe_lib.api_base import ZoeAPIBase
+from zoe_cmd.api_lib.api_base import ZoeAPIBase
+from zoe_lib.exceptions import ZoeAPIException
 
 log = logging.getLogger(__name__)
 
 
-class ZoeValidationAPI(ZoeAPIBase):
+class ZoeStatisticsAPI(ZoeAPIBase):
     """
-    The Info API class. This API exports static information about Zoe, versions and configuration.
+    The Statistics API class. This API exports dynamic information about Zoe inner status and counters.
     """
-    def validate(self, application_description):
+    def scheduler(self):
         """
-        Queries Zoe for versions and local configuration parameters.
+        Queries Zoe for scheduler statistics.
 
         :return:
         """
-        zapp = {
-            "application": application_description,
-        }
-        data_, status_code = self._rest_post('/zapp_validate', zapp)
+        data, status_code = self._rest_get('/statistics/scheduler')
         if status_code != 200:
-            return False
+            raise ZoeAPIException(data)
         else:
-            return True
+            return data

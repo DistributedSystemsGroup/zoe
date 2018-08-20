@@ -18,7 +18,7 @@ This module contains all service-related API calls that a Zoe client can use.
 """
 import logging
 
-from zoe_lib.api_base import ZoeAPIBase
+from zoe_cmd.api_lib.api_base import ZoeAPIBase
 from zoe_lib.exceptions import ZoeAPIException
 
 log = logging.getLogger(__name__)
@@ -44,7 +44,7 @@ class ZoeServiceAPI(ZoeAPIBase):
         elif status_code == 404:
             raise ZoeAPIException('service "{}" not found'.format(container_id))
         else:
-            raise ZoeAPIException('error retrieving service {}'.format(container_id))
+            raise ZoeAPIException('error retrieving service {}: {}'.format(container_id, cont))
 
     def get_logs(self, container_id):
         """

@@ -15,44 +15,28 @@
 
 """The Info API endpoint."""
 
-from tornado.web import RequestHandler
 import tornado.escape
 
-from zoe_api.rest_api.utils import catch_exceptions, manage_cors_headers
-from zoe_api.api_endpoint import APIEndpoint  # pylint: disable=unused-import
-import zoe_api.exceptions
+from zoe_api.rest_api.request_handler import ZoeAPIRequestHandler
+from zoe_api.exceptions import ZoeException
 
 
-class ZAppValidateAPI(RequestHandler):
+class ZAppValidateAPI(ZoeAPIRequestHandler):
     """The Info API endpoint."""
 
-    def initialize(self, **kwargs):
-        """Initializes the request handler."""
-        self.api_endpoint = kwargs['api_endpoint']  # type: APIEndpoint
-
-    def set_default_headers(self):
-        """Set up the headers for enabling CORS."""
-        manage_cors_headers(self)
-
-    def options(self):
-        """Needed for CORS."""
-        self.set_status(204)
-        self.finish()
-
-    @catch_exceptions
     def post(self):
         """HTTP GET method."""
         try:
-            data = tornado.escape.json_decode(self.request.body)
+            application_description = tornado.escape.json_decode(self.request.body)
         except ValueError:
-            raise zoe_api.exceptions.ZoeRestAPIException('Error decoding JSON data')
+            self.set_status(400, 'Error decoding JSON data')
+            return
 
-        application_description = data['application']
-
-        self.api_endpoint.zapp_validate(application_description)
+        try:
+            self.api_endpoint.zapp_validate(application_description)
+        except ZoeException as e:
+            self.set_status(e.status_code, "Invalid application description")
+            self.write(e.message)
+            return
 
         self.write({'validation': 'ok'})
-
-    def data_received(self, chunk):
-        """Not implemented as we do not use stream uploads"""
-        pass

@@ -79,7 +79,12 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
     def terminate_service(self, service: Service) -> None:
         """Terminate and delete a container."""
         conf = self._get_config(service.backend_host)
-        engine = DockerClient(conf)
+        service.set_terminating()
+        try:
+            engine = DockerClient(conf)
+        except ZoeException as e:
+            log.error('Cannot terminate service {}: {}'.format(service.id, str(e)))
+            return
         if service.backend_id is not None:
             engine.terminate_container(service.backend_id, delete=True)
         else:
@@ -93,6 +98,7 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
             node_stats = _checker.host_stats[host_conf.name]
             platform_stats.nodes.append(node_stats)
 
+        platform_stats.timestamp = time.time()
         return platform_stats
 
     def _update_node_state(self, host_conf: DockerHostConfig, node_stats: NodeStats, get_usage_stats: bool):
@@ -194,6 +200,9 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
     def list_available_images(self, node_name):
         """List the images available on the specified node."""
         node_stats = _checker.host_stats[node_name]
+
+        if node_stats.status == 'offline':
+            return []
         return node_stats.images
 
     def update_service(self, service, cores=None, memory=None):

@@ -50,7 +50,7 @@ class ServiceInstance:
             'zoe.execution.id': str(execution.id),
             'zoe.service.name': service.name,
             'zoe.service.id': str(service.id),
-            'zoe.owner': execution.user_id,
+            'zoe.owner': execution.owner.username,
             'zoe.deployment_name': get_conf().deployment_name,
             'zoe.type': 'service_{}'.format('essential' if service.essential else 'elastic'),
             'zoe.zapp_size': execution.size
@@ -73,3 +73,8 @@ class ServiceInstance:
         self.ports = []
         for port in service.ports:
             self.ports.append(BackendPort(port.internal_number, port.protocol))
+
+        if service.network is not None:
+            self.network = service.network
+        else:
+            self.network = get_conf().overlay_network_name
