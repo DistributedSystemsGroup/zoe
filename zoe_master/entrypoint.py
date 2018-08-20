@@ -20,7 +20,7 @@
 import logging
 import os
 
-import zoe_lib.config as config
+import zoe_lib.config
 from zoe_lib.state import SQLManager
 import zoe_master.backends.interface
 import zoe_master.scheduler
@@ -35,8 +35,8 @@ LOG_FORMAT = '%(asctime)-15s %(levelname)s %(threadName)s->%(name)s: %(message)s
 
 
 def _check_configuration_sanity():
-    if not os.path.exists(os.path.join(config.get_conf().workspace_base_path, config.get_conf().workspace_deployment_path)):
-        log.error('Workspace base directory does not exist: {}'.format(os.path.join(config.get_conf().workspace_base_path, config.get_conf().workspace_deployment_path)))
+    if not os.path.exists(os.path.join(config.get_conf().workspace_base_path, zoe_lib.config.get_conf().workspace_deployment_path)):
+        log.error('Workspace base directory does not exist: {}'.format(os.path.join(zoe_lib.config.get_conf().workspace_base_path, config.get_conf().workspace_deployment_path)))
         return 1
     return 0
 
@@ -46,8 +46,8 @@ def main(test_conf=None):
     The entrypoint for the zoe-master script.
     :return: int
     """
-    config.load_configuration(test_conf)
-    args = config.get_conf()
+    zoe_lib.config.load_configuration(test_conf)
+    args = zoe_lib.config.get_conf()
 
     log_args = {
         'level': logging.DEBUG if args.debug else logging.INFO,
@@ -81,7 +81,7 @@ def main(test_conf=None):
     log.info("Starting ZMQ API server...")
     api_server = APIManager(metrics, scheduler, state)
 
-    if config.get_conf().gelf_listener != 0:
+    if zoe_lib.config.get_conf().gelf_listener != 0:
         gelf_listener = GELFListener()
     else:
         gelf_listener = None

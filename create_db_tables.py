@@ -18,10 +18,10 @@
 import sys
 import time
 
-import zoe_lib.config as config
+import zoe_lib.config
 import zoe_lib.state.sql_manager
 
-config.load_configuration()
+zoe_lib.config.load_configuration()
 
 print("Warning, this script will delete the database tables for the deployment '{}' before creating new ones".format(config.get_conf().deployment_name))
 print("If you are installing Zoe for the first time, you have nothing to worry about")
@@ -33,4 +33,4 @@ except KeyboardInterrupt:
     print("Aborted.")
     sys.exit(1)
 
-zoe_lib.state.sql_manager.SQLManager(config.get_conf()).init_db(force=True)
+zoe_lib.state.sql_manager.SQLManager(zoe_lib.config.get_conf()).init_db(force=True)

@@ -20,7 +20,7 @@ import time
 
 import zmq
 
-import zoe_lib.config as config
+import zoe_lib.config
 from zoe_lib.state import SQLManager
 import zoe_master.preprocessing
 from zoe_master.exceptions import ZoeException
@@ -35,7 +35,7 @@ class APIManager:
     def __init__(self, metrics: StatsManager, scheduler: ZoeBaseScheduler, state: SQLManager) -> None:
         self.context = zmq.Context()
         self.zmq_s = self.context.socket(zmq.REP)
-        self.listen_uri = config.get_conf().api_listen_uri
+        self.listen_uri = zoe_lib.config.get_conf().api_listen_uri
         self.zmq_s.bind(self.listen_uri)
         self.debug_has_replied = False
         self.metrics = metrics

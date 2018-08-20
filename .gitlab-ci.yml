@@ -20,7 +20,7 @@ cache:
 
 pylint:
   stage: static-test
-  image: python:3.4
+  image: python:3.5
   script:
     - pip install -U pip setuptools
     - pip install -r requirements.txt
@@ -30,8 +30,8 @@ pylint:
 unittests:
   stage: static-test
   services:
-    - postgres:9.3
-  image: python:3.4
+    - postgres:9.5
+  image: python:3.5
   script:
     - pip install -U pip setuptools
     - pip install -r requirements.txt
@@ -40,7 +40,7 @@ unittests:
 
 docs-test:
   stage: static-test
-  image: python:3.4
+  image: python:3.5
   script:
     - pip install -U pip setuptools
     - pip install -r requirements.txt
@@ -61,7 +61,7 @@ images:
 api-test:
   stage: integration-test
   services:
-    - postgres:9.3
+    - postgres:9.5
   image: zoerepo/${ZOE_TEST_IMAGE}
   script:
     - echo 'admin,admin,admin' > zoepass.csv
@@ -71,7 +71,7 @@ api-test:
 
 mirror-github:
   stage: deploy
-  image: python:3.4
+  image: python:3.5
   before_script:
     - which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )
     - eval $(ssh-agent -s)

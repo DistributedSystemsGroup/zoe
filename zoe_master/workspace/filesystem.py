@@ -18,7 +18,7 @@
 import logging
 import os
 
-import zoe_lib.config as config
+import zoe_lib.config
 from zoe_lib.state import VolumeDescriptionHostPath, User
 import zoe_master.workspace.base
 
@@ -28,7 +28,7 @@ log = logging.getLogger(__name__)
 class ZoeFSWorkspace(zoe_master.workspace.base.ZoeWorkspaceBase):
     """Filesystem workspace class."""
     def __init__(self):
-        self.base_path = os.path.join(config.get_conf().workspace_base_path, config.get_conf().workspace_deployment_path)
+        self.base_path = os.path.join(zoe_lib.config.get_conf().workspace_base_path, zoe_lib.config.get_conf().workspace_deployment_path)
 
     def exists(self, username):
         """Check if the workspace for user_id exists."""
@@ -53,7 +53,7 @@ class ZoeFSWorkspace(zoe_master.workspace.base.ZoeWorkspaceBase):
         if not self.exists(user.username):
             try:
                 os.makedirs(self.get_path(user.username), 0x700)
-                os.chown(self.get_path(user.username), user.fs_uid, config.get_conf().fs_group_id)
+                os.chown(self.get_path(user.username), user.fs_uid, zoe_lib.config.get_conf().fs_group_id)
             except OSError as e:
                 log.warning("Cannot create user workspace automatically: {}".format(str(e)))
         else:

@@ -113,7 +113,7 @@ class DockerStateSynchronizer(threading.Thread):
                     image = {
                         'id': dk_image.attrs['Id'],
                         'size': dk_image.attrs['Size'],
-                        'names': dk_image.tags  # type: list
+                        'names': dk_image.tags
                     }
                     for name in image['names']:
                         if name[-7:] == ':latest':  # add an image with the name without 'latest' to fake Docker image lookup algorithm

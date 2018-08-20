@@ -61,7 +61,7 @@ class ExecutionProgress:
 class ZoeElasticScheduler:
     """The Scheduler class for size-based scheduling. Policy can be "FIFO" or "SIZE"."""
     def __init__(self, state: SQLManager, policy, metrics: StatsManager):
-        if policy != 'FIFO' and policy != 'SIZE' and policy != 'DYNSIZE':
+        if policy not in ('FIFO', 'SIZE', 'DYNSIZE'):
             raise UnsupportedSchedulerPolicyError
         self.metrics = metrics
         self.trigger_semaphore = threading.Semaphore(0)

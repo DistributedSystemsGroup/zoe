@@ -130,7 +130,7 @@ class ExecutionCollectionAPI(ZoeAPIRequestHandler):
             self.set_status(e.status_code, e.message)
             return
 
-        self.write(dict([(e.id, e.serialize()) for e in execs]))
+        self.write({e.id: e.serialize() for e in execs})
 
     def post(self):
         """

@@ -352,7 +352,7 @@ class KubernetesClient:
 
             info = {
                 'service_name': name,
-                'port_forwarding': []  # type: List[Dict]
+                'port_forwarding': []
             }
 
             if 'clusterIP' in srv_info['spec']:

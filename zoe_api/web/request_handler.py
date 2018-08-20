@@ -34,7 +34,7 @@ from zoe_api.exceptions import ZoeAuthException
 log = logging.getLogger(__name__)
 
 
-class JinjaApp(object):
+class JinjaApp:
     """A Jinja2-capable Tornado application."""
     def __init__(self, application, jinja_options=None):
         self.application = application

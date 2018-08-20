@@ -102,7 +102,7 @@ class QuotaCollectionAPI(ZoeAPIRequestHandler):
             self.set_status(e.status_code, e.message)
             return
 
-        self.write(dict([(r.id, r.serialize()) for r in quota]))
+        self.write({r.id: r.serialize() for r in quota})
 
     def post(self):
         """HTTP POST method."""

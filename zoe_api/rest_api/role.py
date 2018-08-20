@@ -102,7 +102,7 @@ class RoleCollectionAPI(ZoeAPIRequestHandler):
             self.set_status(e.status_code, e.message)
             return
 
-        self.write(dict([(r.id, r.serialize()) for r in role]))
+        self.write({r.id: r.serialize() for r in role})
 
     def post(self):
         """HTTP POST method."""

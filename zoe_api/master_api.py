@@ -20,7 +20,7 @@ from typing import Dict, Any, Tuple
 
 import zmq
 
-import zoe_lib.config as config
+import zoe_lib.config
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class APIManager:
         self.context = zmq.Context(1)
         self.zmq_s = None
         self.poll = zmq.Poller()
-        self.master_uri = config.get_conf().master_url  # type: str
+        self.master_uri = zoe_lib.config.get_conf().master_url  # type: str
         self._connect()
 
     def _connect(self):

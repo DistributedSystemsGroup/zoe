@@ -118,7 +118,7 @@ class UserCollectionAPI(ZoeAPIRequestHandler):
             self.set_status(e.status_code, e.message)
             return
 
-        self.write(dict([(u.id, u.serialize()) for u in users]))
+        self.write({u.id: u.serialize() for u in users})
 
     def post(self):
         """HTTP POST method."""

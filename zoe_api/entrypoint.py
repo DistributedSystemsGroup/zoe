@@ -22,7 +22,7 @@ from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.web import Application
 
-import zoe_lib.config as config
+import zoe_lib.config
 import zoe_lib.state
 import zoe_api.api_endpoint
 import zoe_api.rest_api
@@ -40,8 +40,8 @@ def zoe_web_main(test_conf=None) -> int:
     This is the entry point for the Zoe Web script.
     :return: int
     """
-    config.load_configuration(test_conf)
-    args = config.get_conf()
+    zoe_lib.config.load_configuration(test_conf)
+    args = zoe_lib.config.get_conf()
 
     log_args = {
         'level': logging.DEBUG if args.debug else logging.INFO,
@@ -53,7 +53,7 @@ def zoe_web_main(test_conf=None) -> int:
     logging.getLogger("MARKDOWN").setLevel(logging.WARNING)
     logging.getLogger("tornado").setLevel(logging.WARNING)
 
-    sql_manager = zoe_lib.state.SQLManager(config.get_conf())
+    sql_manager = zoe_lib.state.SQLManager(zoe_lib.config.get_conf())
     sql_manager.init_db()
 
     master_api = zoe_api.master_api.APIManager()
@@ -62,7 +62,7 @@ def zoe_web_main(test_conf=None) -> int:
     app_settings = {
         'static_path': os.path.join(os.path.dirname(__file__), "web", "static"),
         'template_path': os.path.join(os.path.dirname(__file__), "web", "templates"),
-        'cookie_secret': config.get_conf().cookie_secret,
+        'cookie_secret': zoe_lib.config.get_conf().cookie_secret,
         'login_url': '/login',
         'debug': args.debug
     }
