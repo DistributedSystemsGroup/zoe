@@ -61,6 +61,7 @@ def zoe_web_main(test_conf=None) -> int:
 
     app_settings = {
         'static_path': os.path.join(os.path.dirname(__file__), "web", "static"),
+        'static_url_prefix': args.reverse_proxy_path + '/static/',
         'template_path': os.path.join(os.path.dirname(__file__), "web", "templates"),
         'cookie_secret': zoe_lib.config.get_conf().cookie_secret,
         'login_url': '/login',
