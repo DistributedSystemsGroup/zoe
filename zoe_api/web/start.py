@@ -24,7 +24,7 @@ class RootWeb(ZoeWebRequestHandler):
 
     def get(self):
         """Home page without authentication."""
-        self.redirect(self.reverse_url("/user"))
+        self.redirect(self.reverse_url("home_user"))
 
 
 class LoginWeb(ZoeWebRequestHandler):
@@ -46,7 +46,7 @@ class LoginWeb(ZoeWebRequestHandler):
         if not self.get_secure_cookie('zoe'):
             cookie_val = user.username
             self.set_secure_cookie('zoe', cookie_val)
-        self.redirect(self.get_argument("next", self.reverse_url("user")))
+        self.redirect(self.get_argument("next", self.reverse_url("home_user")))
 
 
 class LogoutWeb(ZoeWebRequestHandler):
