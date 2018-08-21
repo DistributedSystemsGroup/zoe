@@ -30,9 +30,8 @@ from zoe_api.rest_api.statistics import SchedulerStatsAPI
 from zoe_api.rest_api.login import LoginAPI
 from zoe_api.rest_api.validation import ZAppValidateAPI
 
+import zoe_lib.config
 from zoe_lib.version import ZOE_API_VERSION
-
-API_PATH = '/api/' + ZOE_API_VERSION
 
 
 def api_init(api_endpoint) -> List[tornado.web.URLSpec]:
@@ -40,32 +39,33 @@ def api_init(api_endpoint) -> List[tornado.web.URLSpec]:
     route_args = {
         'api_endpoint': api_endpoint
     }
+    api_path = zoe_lib.config.get_conf().reverse_proxy_path + '/api/' + ZOE_API_VERSION
 
     api_routes = [
-        tornado.web.url(API_PATH + r'/info', InfoAPI, route_args),
-        tornado.web.url(API_PATH + r'/login', LoginAPI, route_args),
-        tornado.web.url(API_PATH + r'/zapp_validate', ZAppValidateAPI, route_args),
+        tornado.web.url(api_path + r'/info', InfoAPI, route_args),
+        tornado.web.url(api_path + r'/login', LoginAPI, route_args),
+        tornado.web.url(api_path + r'/zapp_validate', ZAppValidateAPI, route_args),
 
-        tornado.web.url(API_PATH + r'/user/([0-9]+)', UserAPI, route_args),
-        tornado.web.url(API_PATH + r'/user', UserCollectionAPI, route_args),
+        tornado.web.url(api_path + r'/user/([0-9]+)', UserAPI, route_args),
+        tornado.web.url(api_path + r'/user', UserCollectionAPI, route_args),
 
-        tornado.web.url(API_PATH + r'/role/([0-9]+)', RoleAPI, route_args),
-        tornado.web.url(API_PATH + r'/role', RoleCollectionAPI, route_args),
+        tornado.web.url(api_path + r'/role/([0-9]+)', RoleAPI, route_args),
+        tornado.web.url(api_path + r'/role', RoleCollectionAPI, route_args),
 
-        tornado.web.url(API_PATH + r'/quota/([0-9]+)', QuotaAPI, route_args),
-        tornado.web.url(API_PATH + r'/quota', QuotaCollectionAPI, route_args),
+        tornado.web.url(api_path + r'/quota/([0-9]+)', QuotaAPI, route_args),
+        tornado.web.url(api_path + r'/quota', QuotaCollectionAPI, route_args),
 
-        tornado.web.url(API_PATH + r'/execution/([0-9]+)', ExecutionAPI, route_args),
-        tornado.web.url(API_PATH + r'/execution/delete/([0-9]+)', ExecutionDeleteAPI, route_args),
-        tornado.web.url(API_PATH + r'/execution/endpoints/([0-9]+)', ExecutionEndpointsAPI, route_args),
-        tornado.web.url(API_PATH + r'/execution', ExecutionCollectionAPI, route_args),
+        tornado.web.url(api_path + r'/execution/([0-9]+)', ExecutionAPI, route_args),
+        tornado.web.url(api_path + r'/execution/delete/([0-9]+)', ExecutionDeleteAPI, route_args),
+        tornado.web.url(api_path + r'/execution/endpoints/([0-9]+)', ExecutionEndpointsAPI, route_args),
+        tornado.web.url(api_path + r'/execution', ExecutionCollectionAPI, route_args),
 
-        tornado.web.url(API_PATH + r'/service/([0-9]+)', ServiceAPI, route_args),
-        tornado.web.url(API_PATH + r'/service/logs/([0-9]+)', ServiceLogsAPI, route_args),
+        tornado.web.url(api_path + r'/service/([0-9]+)', ServiceAPI, route_args),
+        tornado.web.url(api_path + r'/service/logs/([0-9]+)', ServiceLogsAPI, route_args),
 
-        tornado.web.url(API_PATH + r'/discovery/by_group/([0-9]+)/([a-z0-9A-Z\-]+)', DiscoveryAPI, route_args),
+        tornado.web.url(api_path + r'/discovery/by_group/([0-9]+)/([a-z0-9A-Z\-]+)', DiscoveryAPI, route_args),
 
-        tornado.web.url(API_PATH + r'/statistics/scheduler', SchedulerStatsAPI, route_args)
+        tornado.web.url(api_path + r'/statistics/scheduler', SchedulerStatsAPI, route_args)
     ]
 
     return api_routes

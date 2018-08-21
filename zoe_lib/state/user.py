@@ -127,7 +127,7 @@ class UserTable(BaseTable):
         )''')
         self.cursor.execute('CREATE UNIQUE INDEX users_username_uindex ON "user" (username)')
         hashed_default_pw = hash_algo.hash('admin')
-        query = self.cursor.mogrify('INSERT INTO "user" (id, username, password, fs_uid, email, priority, enabled, auth_source, role_id, quota_id) VALUES (DEFAULT, %s, %s, 0, NULL, DEFAULT, DEFAULT, %s, 1, 1)', ('admin', hashed_default_pw, 'internal'))
+        query = self.cursor.mogrify('INSERT INTO "user" (id, username, password, fs_uid, email, priority, enabled, auth_source, role_id, quota_id) VALUES (DEFAULT, %s, %s, 999, NULL, DEFAULT, DEFAULT, %s, 1, 1)', ('admin', hashed_default_pw, 'internal'))
         self.cursor.execute(query)
         self.sql_manager.commit()
 

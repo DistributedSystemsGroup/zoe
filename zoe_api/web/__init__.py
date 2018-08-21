@@ -25,6 +25,7 @@ import zoe_api.web.executions
 import zoe_api.web.zapp_shop
 import zoe_api.web.status
 
+import zoe_lib.config
 from zoe_lib.version import ZOE_API_VERSION, ZOE_VERSION
 
 
@@ -34,27 +35,28 @@ def web_init(api_endpoint) -> List[tornado.web.URLSpec]:
     route_args = {
         'api_endpoint': api_endpoint
     }
+    base_path = zoe_lib.config.get_conf().reverse_proxy_path
     web_routes = [
-        tornado.web.url(r'/', zoe_api.web.start.RootWeb, route_args, name='root'),
-        tornado.web.url(r'/user', zoe_api.web.start.HomeWeb, route_args, name='home_user'),
-        tornado.web.url(r'/login', zoe_api.web.start.LoginWeb, route_args, name='login'),
-        tornado.web.url(r'/logout', zoe_api.web.start.LogoutWeb, route_args, name='logout'),
+        tornado.web.url(base_path + r'/', zoe_api.web.start.RootWeb, route_args, name='root'),
+        tornado.web.url(base_path + r'/user', zoe_api.web.start.HomeWeb, route_args, name='home_user'),
+        tornado.web.url(base_path + r'/login', zoe_api.web.start.LoginWeb, route_args, name='login'),
+        tornado.web.url(base_path + r'/logout', zoe_api.web.start.LogoutWeb, route_args, name='logout'),
 
-        tornado.web.url(r'/executions', zoe_api.web.executions.ExecutionListWeb, route_args, name='execution_list'),
-        tornado.web.url(r'/executions/([0-9]+)', zoe_api.web.executions.ExecutionListWeb, route_args, name='execution_list_page'),
-        tornado.web.url(r'/executions/start', zoe_api.web.executions.ExecutionStartWeb, route_args, name='execution_start'),
-        tornado.web.url(r'/executions/restart/([0-9]+)', zoe_api.web.executions.ExecutionRestartWeb, route_args, name='execution_restart'),
-        tornado.web.url(r'/executions/terminate/([0-9]+)', zoe_api.web.executions.ExecutionTerminateWeb, route_args, name='execution_terminate'),
-        tornado.web.url(r'/executions/inspect/([0-9]+)', zoe_api.web.executions.ExecutionInspectWeb, route_args, name='execution_inspect'),
-        tornado.web.url(r'/service/logs/([0-9]+)', zoe_api.web.executions.ServiceLogsWeb, route_args, name='service_logs'),
+        tornado.web.url(base_path + r'/executions', zoe_api.web.executions.ExecutionListWeb, route_args, name='execution_list'),
+        tornado.web.url(base_path + r'/executions/([0-9]+)', zoe_api.web.executions.ExecutionListWeb, route_args, name='execution_list_page'),
+        tornado.web.url(base_path + r'/executions/start', zoe_api.web.executions.ExecutionStartWeb, route_args, name='execution_start'),
+        tornado.web.url(base_path + r'/executions/restart/([0-9]+)', zoe_api.web.executions.ExecutionRestartWeb, route_args, name='execution_restart'),
+        tornado.web.url(base_path + r'/executions/terminate/([0-9]+)', zoe_api.web.executions.ExecutionTerminateWeb, route_args, name='execution_terminate'),
+        tornado.web.url(base_path + r'/executions/inspect/([0-9]+)', zoe_api.web.executions.ExecutionInspectWeb, route_args, name='execution_inspect'),
+        tornado.web.url(base_path + r'/service/logs/([0-9]+)', zoe_api.web.executions.ServiceLogsWeb, route_args, name='service_logs'),
 
-        tornado.web.url(r'/websocket', zoe_api.web.websockets.WebSocketEndpointWeb, route_args, name='websocket'),
+        tornado.web.url(base_path + r'/websocket', zoe_api.web.websockets.WebSocketEndpointWeb, route_args, name='websocket'),
 
-        tornado.web.url(r'/zapp-shop', zoe_api.web.zapp_shop.ZAppShopHomeWeb, route_args, name='zappshop'),
-        tornado.web.url(r'/zapp-shop/logo/([0-9a-z_\-.]+)', zoe_api.web.zapp_shop.ZAppLogoWeb, route_args, name='zappshop_logo'),
-        tornado.web.url(r'/zapp-shop/start/([0-9a-z_\-.]+)', zoe_api.web.zapp_shop.ZAppStartWeb, route_args, name='zappshop_start'),
+        tornado.web.url(base_path + r'/zapp-shop', zoe_api.web.zapp_shop.ZAppShopHomeWeb, route_args, name='zappshop'),
+        tornado.web.url(base_path + r'/zapp-shop/logo/([0-9a-z_\-.]+)', zoe_api.web.zapp_shop.ZAppLogoWeb, route_args, name='zappshop_logo'),
+        tornado.web.url(base_path + r'/zapp-shop/start/([0-9a-z_\-.]+)', zoe_api.web.zapp_shop.ZAppStartWeb, route_args, name='zappshop_start'),
 
-        tornado.web.url(r'/status', zoe_api.web.status.StatusEndpointWeb, route_args, name='status')
+        tornado.web.url(base_path + r'/status', zoe_api.web.status.StatusEndpointWeb, route_args, name='status')
     ]
 
     return web_routes
