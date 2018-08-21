@@ -2,7 +2,7 @@
 {% block title %}Zoe system status{% endblock %}
 
 {% block custom_head %}
-    <script src="/static/Chart.min.js" type="application/javascript"></script>
+    <script src="{{ static_url("Chart.min.js") }}" type="application/javascript"></script>
     <script>
     Chart.scaleService.updateScaleDefaults('linear', {
         ticks: {

@@ -4,9 +4,9 @@
     {% block head %}
     <meta charset="UTF-8">
     <title>{% block title %}{% endblock %} - Zoe</title>
-    <script src="/static/jquery-2.1.4.min.js" type="application/javascript"></script>
-    <script src="/static/zoe.js" type="application/javascript"></script>
-    <link rel="stylesheet" href="/static/zoe.css" type="text/css">
+    <script src="{{ static_url("jquery-2.1.4.min.js") }}" type="application/javascript"></script>
+    <script src="{{ static_url("zoe.js") }}" type="application/javascript"></script>
+    <link rel="stylesheet" href="{{ static_url("zoe.css") }}" type="text/css">
     {% endblock %}
     {% block custom_head %}
     {% endblock %}

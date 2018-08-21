@@ -2,9 +2,9 @@
 {% block title %}Home{% endblock %}
 
 {% block custom_head %}
-    <script src="/static/sorttable.js" type="application/javascript"></script>
-    <script src="/static/moment.min.js" type="application/javascript"></script>
-    <script src="/static/moment-timezone.min.js" type="application/javascript"></script>
+    <script src="{{ static_url("sorttable.js") }}" type="application/javascript"></script>
+    <script src="{{ static_url("moment.min.js") }}" type="application/javascript"></script>
+    <script src="{{ static_url("moment-timezone.min.js") }}" type="application/javascript"></script>
     <script>
     function format_timestamp(ts) {
         var m = moment.utc(ts);

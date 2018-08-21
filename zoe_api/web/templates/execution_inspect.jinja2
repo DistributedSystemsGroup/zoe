@@ -2,8 +2,8 @@
 {% block title %}Inspect execution {{ e.name }}{% endblock %}
 
 {% block custom_head %}
-    <script src="/static/moment.min.js" type="application/javascript"></script>
-    <script src="/static/moment-timezone.min.js" type="application/javascript"></script>
+    <script src="{{ static_url("moment.min.js") }}" type="application/javascript"></script>
+    <script src="{{ static_url("moment-timezone.min.js") }}" type="application/javascript"></script>
     <script>
     let locale = window.navigator.userLanguage || window.navigator.language;
     moment.locale(locale);
