@@ -40,7 +40,7 @@
         {% for e in running_executions %}
             <tr>
                 <td>{{ e.id }}</td>
-                <td><a href="/executions/inspect/{{ e.id }}">{{ e.name }}</a></td>
+                <td><a href="{{ reverse_url("execution_inspect", e.id) }}">{{ e.name }}</a></td>
                 <td>{{ e.status }}</td>
                 {% if e.time_start == None %}
                 <td>not yet</td>
@@ -53,9 +53,9 @@
                 <td><script>format_timestamp("{{ e.time_end }}")</script></td>
                 {% endif %}
                 {% if e.is_active %}
-                    <td><a href="/executions/terminate/{{ e.id }}">Terminate</a></td>
+                    <td><a href="{{ reverse_url("execution_terminate", e.id) }}">Terminate</a></td>
                 {% else %}
-                    <td><a href="/executions/restart/{{ e.id }}">Restart</a></td>
+                    <td><a href="{{ reverse_url("execution_restart", e.id) }}">Restart</a></td>
                 {% endif %}
             </tr>
         {% endfor %}
@@ -82,7 +82,7 @@
         {% for e in last_executions %}
             <tr>
                 <td>{{ e.id }}</td>
-                <td><a href="/executions/inspect/{{ e.id }}">{{ e.name }}</a></td>
+                <td><a href="{{ reverse_url("execution_inspect", e.id) }}">{{ e.name }}</a></td>
                 <td>{{ e.status }}</td>
                 {% if e.time_start == None %}
                 <td>not yet</td>
@@ -95,9 +95,9 @@
                 <td><script>format_timestamp("{{ e.time_end }}")</script></td>
                 {% endif %}
                 {% if e.is_active %}
-                    <td><a href="/executions/terminate/{{ e.id }}">Terminate</a></td>
+                    <td><a href="{{ reverse_url("execution_terminate", e.id) }}">Terminate</a></td>
                 {% else %}
-                    <td><a href="/executions/restart/{{ e.id }}">Restart</a></td>
+                    <td><a href="{{ reverse_url("execution_restart", e.id) }}">Restart</a></td>
                 {% endif %}
             </tr>
         {% endfor %}

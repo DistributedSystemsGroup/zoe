@@ -38,11 +38,11 @@
     <li>Status: <span style="font-weight: bold;">{{ e.status }}</span></li>
     {% if e.is_running %}
     <li>Actions:
-        <a href="/executions/terminate/{{ e.id }}">Terminate</a>
+        <a href="{{ reverse_url("execution_terminate", e.id) }}">Terminate</a>
     </li>
     {% elif e.status == "terminated" %}
     <li>Actions:
-        <a href="/executions/restart/{{ e.id }}">Restart</a>
+        <a href="{{ reverse_url("execution_restart", e.id) }}">Restart</a>
     </li>
     {% endif %}
     {% if grafana_url is defined %}

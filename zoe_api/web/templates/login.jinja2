@@ -10,7 +10,7 @@
 <div id="loginbox">
     <img alt="ZOE logo" src="{{ static_url("logo.png") }}">
     <div id="login-form">
-        <form action="/login" method="post" id="login_form">
+        <form action="{{ reverse_url("login") }}" method="post" id="login_form">
             <label for="username">Username:</label>
             <input autocapitalize="off" autocorrect="off" class="text-input" id="username" name="username" tabindex="1" type="text" value=""><br>
 
