@@ -147,16 +147,16 @@ def quota_ls_cmd(api: ZoeAPI, args):
     if 'name' in args:
         filters['name'] = args.name
     quotas = api.quota.list(filters)
-    tabular_data = [[q['id'], q['name'], q['concurrent_executions'], q['memory'], q['cores']] for q in sorted(quotas, key=lambda x: x['id'])]
-    headers = ['ID', 'Name', 'Conc. Executions', 'Memory', 'Cores']
+    tabular_data = [[q['id'], q['name'], q['concurrent_executions'], q['memory'], q['cores'], quota['runtime_limit']] for q in sorted(quotas, key=lambda x: x['id'])]
+    headers = ['ID', 'Name', 'Conc. Executions', 'Memory', 'Cores', 'Runtime limit (h)']
     print(tabulate(tabular_data, headers))
 
 
 def quota_get_cmd(api: ZoeAPI, args):
     """Get a quota by its ID."""
     quota = api.quota.get(args.id)
-    tabular_data = [[quota['id'], quota['name'], quota['concurrent_executions'], quota['memory'], quota['cores']]]
-    headers = ['ID', 'Name', 'Conc. Executions', 'Memory', 'Cores']
+    tabular_data = [[quota['id'], quota['name'], quota['concurrent_executions'], quota['memory'], quota['cores'], quota['runtime_limit']]]
+    headers = ['ID', 'Name', 'Conc. Executions', 'Memory', 'Cores', 'Runtime limit (h)']
     print(tabulate(tabular_data, headers))
 
 

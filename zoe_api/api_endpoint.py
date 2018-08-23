@@ -37,7 +37,7 @@ class APIEndpoint:
     :type master: zoe_api.master_api.APIManager
     :type sql: zoe_lib.sql_manager.SQLManager
     """
-    def __init__(self, master_api, sql_manager: zoe_lib.state.SQLManager):
+    def __init__(self, master_api, sql_manager: zoe_lib.state.sql_manager.SQLManager):
         self.master = master_api
         self.sql = sql_manager
 

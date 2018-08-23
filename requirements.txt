@@ -13,4 +13,4 @@ jsonschema
 tabulate
 markdown
 passlib
-pexpect
+python-pam

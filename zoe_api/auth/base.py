@@ -18,7 +18,7 @@
 import logging
 from typing import Union
 
-import pexpect
+import pam
 
 from zoe_api.auth.file import PlainTextAuthenticator
 from zoe_api.auth.ldap import LDAPAuthenticator
@@ -56,18 +56,24 @@ class BaseAuthenticator:
 
 
 def pam_authenticate(username, password):
-    """Use su for testing credentials. Using directly the PAM library would be easier, but would also require Zoe to run as root."""
+    """Use the PAM module to authenticate. Zoe needs access to /etc/shadow."""
 
-    try:
-        child = pexpect.spawn('/bin/su', ['-', username])
-        child.expect('Password:')
-        child.sendline(password)
-        result = child.expect(['su: Authentication failure', username])
-        child.close()
-    except pexpect.TIMEOUT as err:
-        log.error("Error authenticating. Reason: {}".format(err))
-        return False
-    if result == 0:
-        return False
-    else:
-        return True
+    p = pam.pam()
+    return p.authenticate(username, password)
+
+# def pam_authenticate(username, password):
+#     """Use su for testing credentials. Using directly the PAM library would be easier, but would also require Zoe to run as root."""
+#
+#     try:
+#         child = pexpect.spawn('/bin/su', ['-', username])
+#         child.expect('Password:')
+#         child.sendline(password)
+#         result = child.expect(['su: Authentication failure', username])
+#         child.close()
+#     except pexpect.TIMEOUT as err:
+#         log.error("Error authenticating. Reason: {}".format(err))
+#         return False
+#     if result == 0:
+#         return False
+#     else:
+#         return True
