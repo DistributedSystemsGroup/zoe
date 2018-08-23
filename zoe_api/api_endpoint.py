@@ -15,6 +15,7 @@
 
 """The real API, exposed as web pages or REST API."""
 
+from datetime import timedelta, datetime
 import logging
 import os
 from typing import List
@@ -70,7 +71,7 @@ class APIEndpoint:
         except zoe_lib.exceptions.InvalidApplicationDescription as e:
             raise zoe_api.exceptions.ZoeRestAPIException('Invalid application description: {}'.format(e.message), status_code=400)
 
-    def _check_quota(self, user: zoe_lib.state.User, application_description):  # pylint: disable=unused-argument
+    def _check_quota(self, user: zoe_lib.state.User, application_description):
         """Check quota for given user and execution."""
         quota = self.sql.quota.select(only_one=True, **{'id': user.quota_id})
 
@@ -79,10 +80,29 @@ class APIEndpoint:
         running_execs += self.sql.executions.select(**{'status': 'scheduled', 'user_id': user.id})
         running_execs += self.sql.executions.select(**{'status': 'image download', 'user_id': user.id})
         running_execs += self.sql.executions.select(**{'status': 'submitted', 'user_id': user.id})
-        if len(running_execs) >= quota.concurrent_executions:
+        if quota.concurrent_executions != 0 and len(running_execs) >= quota.concurrent_executions:
             raise zoe_api.exceptions.ZoeQuotaException('You cannot run more than {} executions at a time, quota exceeded.'.format(quota.concurrent_executions))
 
-        # TODO: implement core and memory quotas
+        if quota.cores != 0 and quota.memory != 0:
+            return
+
+        reserved_cores = 0
+        reserved_mem = 0
+        for e in running_execs:
+            for s in e.services:
+                reserved_cores += s.resource_reservation.cores.min
+                reserved_mem += s.resource_reservation.memory.min
+
+        new_exec_cores = 0
+        new_exec_memory = 0
+        for s in application_description['services']:
+            new_exec_cores += s['resources']['cores']['min'] * s['total_count']
+            new_exec_memory += s['resources']['memory']['min'] * s['total_count']
+
+        if quota.cores < reserved_cores + new_exec_cores:
+            raise zoe_api.exceptions.ZoeQuotaException('You requested {} cores more than your quota allows, quota exceeded.'.format((reserved_cores + new_exec_cores) - quota.cores))
+        if quota.memory < reserved_mem + new_exec_memory:
+            raise zoe_api.exceptions.ZoeQuotaException('You requested {}B memory more than your quota allows, quota exceeded.'.format((reserved_mem + new_exec_memory) - quota.memory))
 
     def execution_start(self, user: zoe_lib.state.User, exec_name, application_description):
         """Start an execution."""
@@ -231,7 +251,7 @@ class APIEndpoint:
         users = self.sql.user.select(**filters)
         return users
 
-    def user_new(self, user: zoe_lib.state.User, username: str, email: str, role_id: int, quota_id: int, auth_source: str, fs_uid: int) -> int:
+    def user_new(self, user: zoe_lib.state.User, username: str, email: str, role_id: int, quota_id: int, auth_source: str, fs_uid: int) -> int:  # pylint: disable=too-many-arguments
         """Creates a new user."""
         if not user.role.can_change_config:
             raise zoe_api.exceptions.ZoeAuthException()
@@ -350,7 +370,7 @@ class APIEndpoint:
         if not user.role.can_change_config:
             raise zoe_api.exceptions.ZoeAuthException()
 
-        role_id = self.sql.quota.insert(quota_data['name'], quota_data['concurrent_executions'], quota_data['memory'], quota_data['cores'])
+        role_id = self.sql.quota.insert(quota_data['name'], quota_data['concurrent_executions'], quota_data['memory'], quota_data['cores'], quota_data['runtime_limit'])
         return role_id
 
     def quota_list(self, user: zoe_lib.state.User, **filters) -> List[zoe_lib.state.Quota]:
@@ -383,3 +403,21 @@ class APIEndpoint:
             raise zoe_api.exceptions.ZoeRestAPIException('Cannot rename default quota')
 
         self.sql.quota.update(quota_id, **quota_data)
+
+    def verify_runtime_limit(self):
+        """Scan the active executions and kill all those that exceed the runtime_limit quota."""
+        running_execs = self.sql.executions.select(**{'status': 'running'})
+        running_execs += self.sql.executions.select(**{'status': 'starting'})
+        running_execs += self.sql.executions.select(**{'status': 'scheduled'})
+        running_execs += self.sql.executions.select(**{'status': 'image download'})
+        running_execs += self.sql.executions.select(**{'status': 'submitted'})
+
+        for e in running_execs:
+            runtime_limit = e.owner.quota.runtime_limit
+            if runtime_limit == 0:
+                continue
+            runtime_limit = timedelta(hours=runtime_limit)
+            if e.time_submit + runtime_limit > datetime.utcnow():
+                log.info('Automatically terminating execution {} that has exceeded the run time limit'.format(e.id))
+                self.execution_terminate(e.owner, e.id)
+

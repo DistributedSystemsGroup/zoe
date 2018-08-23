@@ -436,9 +436,10 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
 
     sub_parser = subparser.add_parser('quota-create', help="Create a new quota")
     sub_parser.add_argument('name', help="Quota name")
-    sub_parser.add_argument('concurrent_executions', type=int, help="Maximum number of concurrent executions")
-    sub_parser.add_argument('memory', type=int, help="Maximum memory in bytes across all running executions")
-    sub_parser.add_argument('cores', type=int, help="Maximum number of cores across all running executions")
+    sub_parser.add_argument('concurrent_executions', type=int, help="Maximum number of concurrent executions (0 means no limit)")
+    sub_parser.add_argument('memory', type=int, help="Maximum memory in bytes across all running executions (0 means no limit)")
+    sub_parser.add_argument('cores', type=int, help="Maximum number of cores across all running executions (0 means no limit)")
+    sub_parser.add_argument('runtime_limit', type=int, help="Maximum number of hours an execution is allowed to run (0 means no limit)")
     sub_parser.set_defaults(func=quota_create_cmd)
 
     sub_parser = subparser.add_parser('quota-delete', help="Delete a quota")
@@ -448,9 +449,10 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     sub_parser = subparser.add_parser('quota-update', help="Update an existing quota")
     sub_parser.add_argument('id', type=int, help="ID of the quota to update")
     sub_parser.add_argument('--name', help="Quota name")
-    sub_parser.add_argument('--concurrent_executions', type=int, help="Maximum number of concurrent executions")
-    sub_parser.add_argument('--memory', type=int, help="Maximum memory in bytes across all running executions")
-    sub_parser.add_argument('--cores', type=int, help="Maximum number of cores across all running executions")
+    sub_parser.add_argument('--concurrent_executions', type=int, help="Maximum number of concurrent executions (0 means no limit)")
+    sub_parser.add_argument('--memory', type=int, help="Maximum memory in bytes across all running executions (0 means no limit)")
+    sub_parser.add_argument('--cores', type=int, help="Maximum number of cores across all running executions (0 means no limit)")
+    sub_parser.add_argument('--runtime_limit', type=int, help="Maximum number of hours an execution is allowed to run (0 means no limit)")
     sub_parser.set_defaults(func=quota_update_cmd)
 
     # Roles

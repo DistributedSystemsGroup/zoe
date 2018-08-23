@@ -32,6 +32,7 @@ class Quota(BaseRecord):
         self.concurrent_executions = d['concurrent_executions']
         self.memory = d['memory']
         self.cores = d['cores']
+        self.runtime_limit = d['runtime_limit']
 
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""
@@ -40,7 +41,8 @@ class Quota(BaseRecord):
             'name': self.name,
             'concurrent_executions': self.concurrent_executions,
             'cores': self.cores,
-            'memory': self.memory
+            'memory': self.memory,
+            'runtime_limit': self.runtime_limit
         }
 
     def set_concurrent_executions(self, value):
@@ -58,6 +60,11 @@ class Quota(BaseRecord):
         self.cores = value
         self.sql_manager.quota_update(self.id, cores=value)
 
+    def set_runtime_limit(self, value):
+        """Setter for the runtime limit."""
+        self.runtime_limit = value
+        self.sql_manager.quota_update(self.id, runtime_limit=value)
+
 
 class QuotaTable(BaseTable):
     """Abstraction for the quota table in the database."""
@@ -71,9 +78,10 @@ class QuotaTable(BaseTable):
             name TEXT NOT NULL,
             concurrent_executions INT NOT NULL,
             memory BIGINT NOT NULL,
-            cores INT NOT NULL
+            cores INT NOT NULL,
+            runtime_limit INT NOT NULL
         )''')
-        self.cursor.execute('''INSERT INTO quota (id, name, concurrent_executions, memory, cores) VALUES (DEFAULT, 'default', 5, 34359738368, 20)''')
+        self.cursor.execute('''INSERT INTO quota (id, name, concurrent_executions, memory, cores, runtime_limit) VALUES (DEFAULT, 'default', 5, 34359738368, 20, 24)''')
 
     def select(self, only_one=False, **kwargs):
         """
@@ -106,9 +114,9 @@ class QuotaTable(BaseTable):
         else:
             return [Quota(x, self.sql_manager) for x in self.cursor]
 
-    def insert(self, name, concurrent_executions, memory, cores):
+    def insert(self, name, concurrent_executions, memory, cores, runtime_limit):
         """Adds a new quota to the state."""
-        query = self.cursor.mogrify('INSERT INTO quota (id, name, concurrent_executions, memory, cores) VALUES (DEFAULT, %s, %s, %s, %s) RETURNING id', (name, concurrent_executions, memory, cores))
+        query = self.cursor.mogrify('INSERT INTO quota (id, name, concurrent_executions, memory, cores, runtime_limit) VALUES (DEFAULT, %s, %s, %s, %s, %s) RETURNING id', (name, concurrent_executions, memory, cores, runtime_limit))
         self.cursor.execute(query)
         self.sql_manager.commit()
         return self.cursor.fetchone()[0]
