@@ -51,7 +51,6 @@ class BaseAuthenticator:
         elif user.auth_source == "pam" and pam_authenticate(username, password):
             return user
         else:
-            log.error('Unknown auth source {} for user {}, cannot authenticate'.format(user.auth_source, user.username))
             return None
 
 
