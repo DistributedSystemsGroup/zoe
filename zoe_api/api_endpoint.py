@@ -231,7 +231,7 @@ class APIEndpoint:
         users = self.sql.user.select(**filters)
         return users
 
-    def user_new(self, user: zoe_lib.state.User, username: str, email: str, role_id: int, quota_id: int, auth_source: str) -> int:
+    def user_new(self, user: zoe_lib.state.User, username: str, email: str, role_id: int, quota_id: int, auth_source: str, fs_uid: int) -> int:
         """Creates a new user."""
         if not user.role.can_change_config:
             raise zoe_api.exceptions.ZoeAuthException()
@@ -241,7 +241,7 @@ class APIEndpoint:
         if self.quota_by_id(quota_id) is None:
             raise zoe_api.exceptions.ZoeNotFoundException("Quota {} does not exist".format(quota_id))
 
-        return self.sql.user.insert(username, email, auth_source, role_id, quota_id)
+        return self.sql.user.insert(username, email, auth_source, role_id, quota_id, fs_uid)
 
     def user_update(self, user: zoe_lib.state.User, user_id, user_data):
         """Update a user."""
@@ -277,6 +277,8 @@ class APIEndpoint:
             if 'password' in user_data:
                 update_fields['password'] = user_data['password']
                 update_fields['auth_source'] = 'internal'
+            if 'fs_uid' in user_data:
+                update_fields['fs_uid'] = user_data['fs_uid']
 
         self.sql.user.update(user_id, **update_fields)
 

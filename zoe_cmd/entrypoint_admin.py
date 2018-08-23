@@ -147,7 +147,7 @@ def quota_ls_cmd(api: ZoeAPI, args):
     if 'name' in args:
         filters['name'] = args.name
     quotas = api.quota.list(filters)
-    tabular_data = [[q['id'], q['name'], q['concurrent_executions'], q['memory'], q['cores']] for q in sorted(quotas)]
+    tabular_data = [[q['id'], q['name'], q['concurrent_executions'], q['memory'], q['cores']] for q in sorted(quotas, key=lambda x: x['id'])]
     headers = ['ID', 'Name', 'Conc. Executions', 'Memory', 'Cores']
     print(tabulate(tabular_data, headers))
 
@@ -204,7 +204,7 @@ def role_ls_cmd(api: ZoeAPI, args):
     if args.name is not None:
         filters['name'] = args.name
     roles = api.role.list(filters)
-    tabular_data = [[r['id'], r['name'], b2t(r['can_see_status']), b2t(r['can_change_config']), b2t(r['can_operate_others']), b2t(r['can_delete_executions']), b2t(r['can_access_api']), b2t(r['can_customize_resources'])] for r in sorted(roles)]
+    tabular_data = [[r['id'], r['name'], b2t(r['can_see_status']), b2t(r['can_change_config']), b2t(r['can_operate_others']), b2t(r['can_delete_executions']), b2t(r['can_access_api']), b2t(r['can_customize_resources'])] for r in sorted(roles, key=lambda x: x['id'])]
     headers = ['ID', 'Name', 'See status', 'Change config', 'Operate others', 'Delete execs', 'API access', 'Customize resources']
     print(tabulate(tabular_data, headers))
 
@@ -328,17 +328,18 @@ def user_create_cmd(api: ZoeAPI, args):
         'username': args.username,
         'email': args.email,
         'auth_source': args.auth_source,
+        'fs_uid': args.fs_uid
     }
-    quota = api.quota.list({'name': args.quota})[0]
-    if quota is None:
+    quota = api.quota.list({'name': args.quota})
+    if len(quota) == 0:
         print('Unknown quota')
         return
-    user['quota_id'] = quota['id']
-    role = api.role.list({'name': args.role})[0]
-    if role is None:
+    user['quota_id'] = quota[0]['id']
+    role = api.role.list({'name': args.role})
+    if len(role) == 0:
         print('Unknown role')
         return
-    user['role_id'] = role['id']
+    user['role_id'] = role[0]['id']
     new_id = api.user.create(user)
     print('New user created with ID: {}'.format(new_id))
 
@@ -505,6 +506,7 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     sub_parser.add_argument('username', help="Username")
     sub_parser.add_argument('email', help="Email")
     sub_parser.add_argument('auth_source', choices=['internal', 'ldap', 'ldap+ssl', 'textfile', 'pam'], help="Authentication method")
+    sub_parser.add_argument('fs_uid', help="Filesystem UID", type=int)
     sub_parser.add_argument('role', help="Role name")
     sub_parser.add_argument('quota', help="Quota name")
     sub_parser.set_defaults(func=user_create_cmd)

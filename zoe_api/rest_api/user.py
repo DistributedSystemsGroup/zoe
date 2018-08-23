@@ -132,7 +132,7 @@ class UserCollectionAPI(ZoeAPIRequestHandler):
             return
 
         try:
-            new_id = self.api_endpoint.user_new(self.current_user, data['username'], data['email'], data['role_id'], data['quota_id'], data['auth_source'])
+            new_id = self.api_endpoint.user_new(self.current_user, data['username'], data['email'], data['role_id'], data['quota_id'], data['auth_source'], data['fs_uid'])
         except KeyError:
             self.set_status(400, 'Error decoding JSON data')
             return
