@@ -91,6 +91,7 @@ def load_configuration(test_conf=None):
         # Proxy options
         argparser.add_argument('--proxy-path', help='Proxy base path', default='127.0.0.1')
         argparser.add_argument('--reverse-proxy-path', help='Base path in case Zoe is behind a reverse proxy under a path', default='')
+        argparser.add_argument('--websocket_base', help='Base URL for websocket connections, you need to change it only when running Zoe behind a reverse proxy', default='ws://{{ server_address }}')
 
         # Scheduler
         argparser.add_argument('--scheduler-class', help='Scheduler class to use for scheduling ZApps', choices=['ZoeElasticScheduler'], default='ZoeElasticScheduler')

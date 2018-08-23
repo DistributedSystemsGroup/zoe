@@ -56,7 +56,7 @@ class BaseAuthenticator:
 
 
 def pam_authenticate(username, password):
-    """Use su for testing credentials. Using directly the PAM library would be more performant, but would also require Zoe to run as root."""
+    """Use su for testing credentials. Using directly the PAM library would be easier, but would also require Zoe to run as root."""
 
     try:
         child = pexpect.spawn('/bin/su', ['-', username])

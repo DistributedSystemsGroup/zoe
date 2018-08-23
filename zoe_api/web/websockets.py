@@ -45,6 +45,10 @@ class WebSocketEndpointWeb(ZoeWSRequestHandler):
         if self.current_user is None:
             self.close(401, "Unauthorized")
 
+    def check_origin(self, origin):
+        """Check connection origin."""
+        return True
+
     @tornado.gen.coroutine
     def on_message(self, message):
         """WebSocket message handler."""

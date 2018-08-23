@@ -13,7 +13,7 @@
 <p><a href="{{ reverse_url("execution_inspect", service.execution_id) }}">Back to execution details</a></p>
 
 <script type="application/javascript">
-var ws = new WebSocket('ws://{{ server_address }}/websocket');
+var ws = new WebSocket('{{ websocket_base }}/websocket');
 ws.onopen = function (e) {
     ws.send(JSON.stringify({
         command: "service_logs",
