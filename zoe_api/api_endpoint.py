@@ -89,15 +89,15 @@ class APIEndpoint:
         reserved_cores = 0
         reserved_mem = 0
         for e in running_execs:
-            for s in e.services:
-                reserved_cores += s.resource_reservation.cores.min
-                reserved_mem += s.resource_reservation.memory.min
+            for service in e.services:
+                reserved_cores += service.resource_reservation.cores.min
+                reserved_mem += service.resource_reservation.memory.min
 
         new_exec_cores = 0
         new_exec_memory = 0
-        for s in application_description['services']:
-            new_exec_cores += s['resources']['cores']['min'] * s['total_count']
-            new_exec_memory += s['resources']['memory']['min'] * s['total_count']
+        for service in application_description['services']:
+            new_exec_cores += service['resources']['cores']['min'] * service['total_count']
+            new_exec_memory += service['resources']['memory']['min'] * service['total_count']
 
         if quota.cores < reserved_cores + new_exec_cores:
             raise zoe_api.exceptions.ZoeQuotaException('You requested {} cores more than your quota allows, quota exceeded.'.format((reserved_cores + new_exec_cores) - quota.cores))
@@ -420,4 +420,3 @@ class APIEndpoint:
             if e.time_submit + runtime_limit > datetime.utcnow():
                 log.info('Automatically terminating execution {} that has exceeded the run time limit'.format(e.id))
                 self.execution_terminate(e.owner, e.id)
-

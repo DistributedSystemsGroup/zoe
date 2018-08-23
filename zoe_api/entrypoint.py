@@ -75,8 +75,8 @@ def zoe_web_main(test_conf=None) -> int:
     http_server.bind(args.listen_port, args.listen_address)
     http_server.start(num_processes=1)
 
-    pc = PeriodicCallback(api_endpoint.verify_runtime_limit, 300000)
-    pc.start()
+    runtime_limit_cb = PeriodicCallback(api_endpoint.verify_runtime_limit, 300000)
+    runtime_limit_cb.start()
 
     try:
         IOLoop.current().start()
