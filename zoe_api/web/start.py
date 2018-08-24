@@ -15,8 +15,13 @@
 
 """Main points of entry for the Zoe web interface."""
 
+import os
+import subprocess
+
 from zoe_api.web.request_handler import ZoeWebRequestHandler
 from zoe_api.auth.base import BaseAuthenticator
+
+import zoe_lib.config
 
 
 class RootWeb(ZoeWebRequestHandler):
@@ -100,10 +105,26 @@ class HomeWeb(ZoeWebRequestHandler):
         total_memory = sum([r.memory.min for r in running_reservations])
         total_cores = sum([r.cores.min for r in running_reservations])
 
+        if zoe_lib.config.get_conf().enable_cephfs_quotas:
+            try:
+                disk_quota = subprocess.check_output(['sudo', '/usr/bin/getfattr', '-n', 'ceph.quota.max_bytes', os.path.join(zoe_lib.config.get_conf().workspace_base_path, zoe_lib.config.get_conf().workspace_deployment_path, self.current_user.username)])
+            except subprocess.CalledProcessError:
+                disk_quota = -1
+                disk_usage = -1
+            else:
+                disk_quota = int(disk_quota.decode('utf-8').split('=')[1].lstrip('"').strip().rstrip('"'))
+                disk_usage = os.stat(os.path.join(zoe_lib.config.get_conf().workspace_base_path, zoe_lib.config.get_conf().workspace_deployment_path, self.current_user.username)).st_size
+
+        else:
+            disk_quota = -1
+            disk_usage = -1
+
         template_vars = {
             "total_memory": total_memory,
             "total_cores": total_cores,
             'last_executions': sorted(last_executions, key=lambda e: e.id),
-            'running_executions': sorted(last_running_executions, key=lambda e: e.id)
+            'running_executions': sorted(last_running_executions, key=lambda e: e.id),
+            'disk_quota': disk_quota,
+            'disk_usage': disk_usage
         }
         self.render('home_user.jinja2', **template_vars)

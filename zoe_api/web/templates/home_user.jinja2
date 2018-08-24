@@ -23,6 +23,9 @@
     <li>{{ running_executions|length }} of {{ user.quota.concurrent_executions }} running execution{{ "s" if user.quota.concurrent_executions > 1 }}</li>
     <li><script>format_bytes({{ total_memory }}, 2);</script> of <script>format_bytes({{ user.quota.memory }}, 2);</script> of memory</li>
     <li>{{ total_cores }} of {{ user.quota.cores }} cores</li>
+    {% if disk_quota > -1 %}
+    <li><script>format_bytes({{ disk_usage }}, 2)</script> of <script>format_bytes({{ disk_quota }}, 2)</script> of disk space</li>
+    {% endif %}
     <li>Executions will be automatically killed after <script>document.write(moment.duration({{ user.quota.runtime_limit }}, "hours").humanize())</script></li>
     </ul>
 
