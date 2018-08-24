@@ -37,6 +37,7 @@
     {%  endif %}
     <li>Status: <span style="font-weight: bold;">{{ e.status }}</span></li>
     {% if e.is_running %}
+    <li>Will be killed at: <script>format_timestamp("{{ killed_at }}")</script></li>
     <li>Actions:
         <a href="{{ reverse_url("execution_terminate", e.id) }}">Terminate</a>
     </li>

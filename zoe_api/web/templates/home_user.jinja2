@@ -17,10 +17,14 @@
 {% block content %}
     <h2>Welcome to Zoe Analytics</h2>
 
-    <p>You have {{ running_executions|length }} execution{{ "s" if running_executions|length != 1 }} running{% if running_executions|length > 0 %}
-    with a total reservation of <script>format_bytes({{ total_memory }}, 2);</script> of memory and {{ total_cores }} cores.
-        {% else %}.{% endif %}
-    </p>
+    <h3>Quota usage</h3>
+    <ul>
+    <li>Your quota is: {{ user.quota.name }}</li>
+    <li>{{ running_executions|length }} of {{ user.quota.concurrent_executions }} running execution{{ "s" if user.quota.concurrent_executions > 1 }}</li>
+    <li><script>format_bytes({{ total_memory }}, 2);</script> of <script>format_bytes({{ user.quota.memory }}, 2);</script> of memory</li>
+    <li>{{ total_cores }} of {{ user.quota.cores }} cores</li>
+    <li>Executions will be automatically killed after <script>document.write(moment.duration({{ user.quota.runtime_limit }}, "hours").humanize())</script></li>
+    </ul>
 
     {% if running_executions|length > 0 %}
     <div class="execution_table">
@@ -105,5 +109,17 @@
     </table>
     </div>
     {% endif %}
+
+    <h3>Role details</h3>
+    <ul>
+        <li>Your role is: {{ user.role.name }}</li>
+        <li>Can access status page: {{ user.role.can_see_status }}</li>
+        <li>Can change Zoe configuration: {{ user.role.can_change_config }}</li>
+        <li>Can operate on other users: {{ user.role.can_operate_others }}</li>
+        <li>Can delete executions: {{ user.role.can_delete_executions }}</li>
+        <li>Can access the API: {{ user.role.can_access_api }}</li>
+        <li>Can customize ZApp resource reservations: {{ user.role.can_customize_resources }}</li>
+        <li>Can access the full ZApp shop: {{ user.role.can_access_full_zapp_shop }}</li>
+    </ul>
 
 {% endblock %}

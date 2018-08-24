@@ -125,6 +125,7 @@ class ExecutionInspectWeb(ZoeWebRequestHandler):
             "e": e,
             "services_info": services_info,
             "endpoints": endpoints,
+            'killed_at': e.time_submit + datetime.timedelta(hours=e.owner.quota.runtime_limit)
         }
 
         if get_conf().enable_plots and e.time_start is not None:
