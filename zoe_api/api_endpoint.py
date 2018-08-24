@@ -417,6 +417,6 @@ class APIEndpoint:
             if runtime_limit == 0:
                 continue
             runtime_limit = timedelta(hours=runtime_limit)
-            if e.time_submit + runtime_limit > datetime.utcnow():
+            if e.time_submit + runtime_limit < datetime.utcnow():
                 log.info('Automatically terminating execution {} that has exceeded the run time limit'.format(e.id))
                 self.execution_terminate(e.owner, e.id)
