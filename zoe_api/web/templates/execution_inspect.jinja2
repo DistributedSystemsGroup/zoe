@@ -22,7 +22,7 @@
 <ul>
     <li>Application name: {{ e.description['name'] }}</li>
     {% if user.role.can_operate_others %}
-    <li>Owner: {{ e.user_id }}</li>
+    <li>Owner: {{ e.owner.username }}</li>
     {% endif %}
     <li>Time submitted: <script>format_timestamp("{{ e.time_submit }}")</script></li>
     {% if e.time_start == None %}
