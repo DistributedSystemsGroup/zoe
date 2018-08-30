@@ -95,7 +95,10 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
         """Get the platform state."""
         platform_stats = ClusterStats()
         for host_conf in self.docker_config:  # type: DockerHostConfig
-            node_stats = _checker.host_stats[host_conf.name]
+            try:
+                node_stats = _checker.host_stats[host_conf.name]
+            except KeyError:
+                continue
             platform_stats.nodes.append(node_stats)
 
         platform_stats.timestamp = time.time()
