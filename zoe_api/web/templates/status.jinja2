@@ -240,7 +240,7 @@
             {% if service.backend_status == "started" %}
             <td class="{{ 'running' if service.essential }}">
                 {% if user.role.can_operate_others %}
-                    <a href="{{ reverse_url('execution_inspect', service['execution_id']) }}">{{ service['name'] }}</a>
+                    <a href="{{ reverse_url('execution_inspect', service['execution_id']) }}">{{ service['execution_id'] }}:{{ service['name'] }}</a>
                 {% else %}
                     {{ service['name'] }}
                 {% endif %}
