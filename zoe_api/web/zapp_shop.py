@@ -96,7 +96,7 @@ class ZAppStartWeb(ZoeWebRequestHandler):
         exec_name = self.get_argument('exec_name')
 
         if self.current_user.role.can_customize_resources:
-            app_descr = self._set_parameters(zapp.zoe_description, zapp.parameters, self.current_user.role)
+            app_descr = self._set_parameters(zapp.zoe_description, zapp.parameters)
         else:
             app_descr = zapp.zoe_description
 
@@ -123,7 +123,7 @@ class ZAppStartWeb(ZoeWebRequestHandler):
 
         self.redirect(self.reverse_url('execution_inspect', new_id))
 
-    def _set_parameters(self, app_descr, params, role):
+    def _set_parameters(self, app_descr, params):
         for param in params:
             argument_name = param.name + '-' + param.kind
             if param.kind == 'environment':
