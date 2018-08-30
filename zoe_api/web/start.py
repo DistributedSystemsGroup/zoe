@@ -101,7 +101,7 @@ class HomeWeb(ZoeWebRequestHandler):
         }
         last_running_executions += self.api_endpoint.execution_list(self.current_user, **filters)
 
-        running_reservations = [e.total_reservations for e in last_running_executions]
+        running_reservations = [e.total_reservations for e in last_running_executions if e.total_reservations is not None]
         total_memory = sum([r.memory.min for r in running_reservations])
         total_cores = sum([r.cores.min for r in running_reservations])
 

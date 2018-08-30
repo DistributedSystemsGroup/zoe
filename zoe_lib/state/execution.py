@@ -216,7 +216,7 @@ class Execution(BaseRecord):
     def total_reservations(self):
         """Return the union/sum of resources reserved by all services of this execution."""
         if len(self.services) == 0:
-            return 0
+            return None
         return functools.reduce(lambda x, y: x + y, [s.resource_reservation for s in self.services])
 
     @property
