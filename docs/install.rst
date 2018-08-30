@@ -201,7 +201,7 @@ Parameters:
 
 Parameters are values of the JSON description that are modified at run time.
 
-* kind : the kind of parameter, it can be ``command`` or ``environment``
+* kind : the kind of parameter, it can be ``service_count``, ``command`` or ``environment``
 * name : the machine-friendly name of the parameter
 * readable_name : the human-friendly name of the parameter
 * description : an helpful description
@@ -211,12 +211,13 @@ Parameters are values of the JSON description that are modified at run time.
 * min : if ``type`` is integer, this is required and is the minimum value the user can set
 * step : if ``type`` is integer, this is required and is the step for moving between values
 
-Parameters can be of two kinds:
+Parameters can be of the following kinds:
 
 * environment : the parameter is passed as an environment variable. The name of the environment variable is stored in the ``name`` field. The JSON description is modified by setting the user-defined value in the environment variable with the corresponding name. All services that have the variable defined are modified.
 * command : the service named ``name`` has its start-up command changed to the user-defined value
+* service_count : the service named ``name`` has its total_count and essential_count changed to the user-defined value
 
-By default users with the ``user`` and ``admin`` roles have access also to resource parameters via the web interface. They can set the amount of memory and cores to reserve before starting their execution. The configuration option ``no-user-edit-limits-web`` can be used to disable access to this feature.
+By default users with the ``user`` and ``admin`` roles have also access to parameters via the web interface. They can set the amount of memory and cores to reserve before starting their execution. The configuration option ``no-user-edit-limits-web`` can be used to disable access to this feature.
 
 To get started, in the ``contrib/zapp-shop-sample/`` directory there is a sample of the structure needed for a working zapp-shop, including some data science related ZApps. Copy it as-is in your ZApp shop directory to have some Zapps to play with.
 

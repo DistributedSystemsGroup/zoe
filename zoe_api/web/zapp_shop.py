@@ -95,7 +95,11 @@ class ZAppStartWeb(ZoeWebRequestHandler):
 
         exec_name = self.get_argument('exec_name')
 
-        app_descr = self._set_parameters(zapp.zoe_description, zapp.parameters, self.current_user.role)
+        if self.current_user.role.can_customize_resources:
+            app_descr = self._set_parameters(zapp.zoe_description, zapp.parameters, self.current_user.role)
+        else:
+            app_descr = zapp.zoe_description
+
         if len(zapp.labels) > 0:
             for service in app_descr['services']:
                 if 'labels' in service:
@@ -132,34 +136,38 @@ class ZAppStartWeb(ZoeWebRequestHandler):
                     if service['name'] == param.name:
                         service['command'] = self.get_argument(argument_name)
                         break
+            elif param.kind == 'service_count':
+                for service in app_descr['services']:
+                    if service['name'] == param.name:
+                        service['total_count'] = int(self.get_argument(argument_name))
+                        service['essential_count'] = int(self.get_argument(argument_name))
             else:
                 log.warning('Unknown parameter kind: {}, ignoring...'.format(param.kind))
 
-        if role.can_customize_resources:
-            for service in app_descr['services']:
-                argument_name = service['name'] + '-resource_memory_min'
-                try:
-                    self.get_argument(argument_name)
-                except MissingArgumentError:
-                    pass
+        for service in app_descr['services']:
+            argument_name = service['name'] + '-resource_memory_min'
+            try:
+                self.get_argument(argument_name)
+            except MissingArgumentError:
+                pass
+            else:
+                if float(self.get_argument(argument_name)) >= get_conf().max_memory_limit:
+                    val = int(get_conf().max_memory_limit * (1024 ** 3))
                 else:
-                    if float(self.get_argument(argument_name)) >= get_conf().max_memory_limit:
-                        val = int(get_conf().max_memory_limit * (1024 ** 3))
-                    else:
-                        val = int(float(self.get_argument(argument_name)) * (1024 ** 3))
-                    service["resources"]["memory"]["min"] = val
+                    val = int(float(self.get_argument(argument_name)) * (1024 ** 3))
+                service["resources"]["memory"]["min"] = val
 
-                argument_name = service['name'] + '-resource_cores_min'
-                try:
-                    self.get_argument(argument_name)
-                except MissingArgumentError:
-                    pass
+            argument_name = service['name'] + '-resource_cores_min'
+            try:
+                self.get_argument(argument_name)
+            except MissingArgumentError:
+                pass
+            else:
+                if float(self.get_argument(argument_name)) >= get_conf().max_core_limit:
+                    val = get_conf().max_core_limit
                 else:
-                    if float(self.get_argument(argument_name)) >= get_conf().max_core_limit:
-                        val = get_conf().max_core_limit
-                    else:
-                        val = float(self.get_argument(argument_name))
-                    service["resources"]["cores"]["min"] = val
-                    break
+                    val = float(self.get_argument(argument_name))
+                service["resources"]["cores"]["min"] = val
+                break
 
         return app_descr

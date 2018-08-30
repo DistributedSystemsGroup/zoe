@@ -37,37 +37,37 @@
     {% endfor %}
     </ul>
 
-    <h4>Start-up parameters:</h4>
-    <form action="{{ reverse_url("zappshop_start", "") }}{{ zapp.id }}-{{ zapp.manifest_index }}" method="post" id="zapp_start_form">
-    <input type="hidden" name="zapp-id" value="{{ zapp.id }}-{{ zapp.manifest_index }}">
-    <label>Execution name:&nbsp;<input type="text" name="exec_name" value="{{ zapp.zoe_description.name }}" maxlength="16" size="18" required/></label><br/>
-    {% for param in zapp.parameters %}
-        <label>{{ param.readable_name }}
-            {% if param.type == "number" and "memory" in param.kind %}
-        (GiB) <input name="{{ param.name }}-{{ param.kind }}" value="{{ param.default }}" required size="5" title="{{ param.description }}" type="{{ param.type }}" min="{{ param.min }}" max="{{ param.max }}" step="{{ param.step }}"/>
-            {% elif param.type == "number" %}
-        <input name="{{ param.name }}-{{ param.kind }}" value="{{ param.default }}" required size="5" title="{{ param.description }}" type="{{ param.type }}" min="{{ param.min }}" max="{{ param.max }}" step="{{ param.step }}"/>
-            {% else %}
-        <input name="{{ param.name }}-{{ param.kind }}" value="{{ param.default if param.default != None }}" required title="{{ param.description }}" size="128" type="{{ param.type }}" />
-            {% endif %}
-        </label><br/>
-    {% endfor %}
     {% if resources_are_customizable %}
+        <h4>Start-up parameters:</h4>
+        <form action="{{ reverse_url("zappshop_start", "") }}{{ zapp.id }}-{{ zapp.manifest_index }}" method="post" id="zapp_start_form">
+        <input type="hidden" name="zapp-id" value="{{ zapp.id }}-{{ zapp.manifest_index }}">
+        <label>Execution name:&nbsp;<input type="text" name="exec_name" value="{{ zapp.zoe_description.name }}" maxlength="16" size="18" required/></label><br/>
+        {% for param in zapp.parameters %}
+            <label>{{ param.readable_name }}
+            {% if param.type == "number" and "memory" in param.kind %}
+                (GiB) <input name="{{ param.name }}-{{ param.kind }}" value="{{ param.default }}" required size="5" title="{{ param.description }}" type="{{ param.type }}" min="{{ param.min }}" max="{{ param.max }}" step="{{ param.step }}"/>
+            {% elif param.type == "number" %}
+                <input name="{{ param.name }}-{{ param.kind }}" value="{{ param.default }}" required size="5" title="{{ param.description }}" type="{{ param.type }}" min="{{ param.min }}" max="{{ param.max }}" step="{{ param.step }}"/>
+            {% else %}
+                <input name="{{ param.name }}-{{ param.kind }}" value="{{ param.default if param.default != None }}" required title="{{ param.description }}" size="128" type="{{ param.type }}" />
+            {% endif %}
+            </label><br/>
+        {% endfor %}
         {% for service in zapp.zoe_description.services %}
-        <div class="resource-form">
-        <h5>{{ service.name }}</h5>
-        <label>Memory allocation (GiB)
-            <input name="{{ service.name }}-resource_memory_min" value="{{ service["resources"]["memory"]["min"] / (1024 ** 3) }}" required title="Memory soft limit, service can use more memory if there is no contention" type="number" min="0.5" max="{{ max_memory_limit }}" step="0.5"/></label>
-        <label>Minimum core allocation:
-            <input name="{{ service.name }}-resource_cores_min" value="{{ service["resources"]["cores"]["min"] }}" required title="No less than this amount of cores will be allocated to this service" type="number" min="0.1" max="{{ max_core_limit }}" step="0.1"/></label>
-        </div>
+            <div class="resource-form">
+            <h5>{{ service.name }}</h5>
+            <label>Memory allocation (GiB)
+                <input name="{{ service.name }}-resource_memory_min" value="{{ service["resources"]["memory"]["min"] / (1024 ** 3) }}" required title="Memory soft limit, service can use more memory if there is no contention" type="number" min="0.5" max="{{ max_memory_limit }}" step="0.5"/></label>
+            <label>Minimum core allocation:
+                <input name="{{ service.name }}-resource_cores_min" value="{{ service["resources"]["cores"]["min"] }}" required title="No less than this amount of cores will be allocated to this service" type="number" min="0.1" max="{{ max_core_limit }}" step="0.1"/></label>
+            </div>
         {%  endfor %}
     {% endif %}
-    <hr>
-    {%  if user.role.can_access_api %}
-        <label class="label-inline"><input type="checkbox" onchange="set_submit_text(this)" name="download_json"> Download JSON with these parameters for command-line execution</label>
-        <br><br>
-    {% endif %}
+        <hr>
+        {%  if user.role.can_access_api %}
+            <label class="label-inline"><input type="checkbox" onchange="set_submit_text(this)" name="download_json"> Download JSON with these parameters for command-line execution</label>
+            <br><br>
+        {% endif %}
         <button id="submit" type="submit">Start</button>
         <button type="reset">Reset</button>
     </form>
