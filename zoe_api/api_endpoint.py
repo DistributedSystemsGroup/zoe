@@ -18,7 +18,7 @@
 from datetime import timedelta, datetime
 import logging
 import os
-from typing import List
+from typing import List, Union
 
 import zoe_api.exceptions
 import zoe_api.master_api
@@ -41,13 +41,13 @@ class APIEndpoint:
         self.master = master_api
         self.sql = sql_manager
 
-    def execution_by_id(self, user: zoe_lib.state.User, execution_id: int) -> zoe_lib.state.Execution:
+    def execution_by_id(self, user: Union[None, zoe_lib.state.User], execution_id: int) -> zoe_lib.state.Execution:
         """Lookup an execution by its ID."""
         e = self.sql.executions.select(id=execution_id, only_one=True)
         if e is None:
             raise zoe_api.exceptions.ZoeNotFoundException('No such execution')
         assert isinstance(e, zoe_lib.state.Execution)
-        if e.user_id != user.id and not user.role.can_operate_others:
+        if user is not None and e.user_id != user.id and not user.role.can_operate_others:
             raise zoe_api.exceptions.ZoeAuthException()
         return e
 

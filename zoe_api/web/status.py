@@ -16,7 +16,7 @@
 """Main points of entry for the Zoe web interface."""
 
 from zoe_api.web.request_handler import ZoeWebRequestHandler
-from zoe_api.exceptions import ZoeException
+from zoe_api.exceptions import ZoeException, ZoeAuthException
 
 
 class StatusEndpointWeb(ZoeWebRequestHandler):
@@ -33,9 +33,9 @@ class StatusEndpointWeb(ZoeWebRequestHandler):
 
         executions_in_queue = {}
         for exec_id in stats['queue']:
-            executions_in_queue[exec_id] = self.api_endpoint.execution_by_id(self.current_user, exec_id)
+            executions_in_queue[exec_id] = self.api_endpoint.execution_by_id(None, exec_id)
         for exec_id in stats['running_queue']:
-            executions_in_queue[exec_id] = self.api_endpoint.execution_by_id(self.current_user, exec_id)
+            executions_in_queue[exec_id] = self.api_endpoint.execution_by_id(None, exec_id)
 
         services_per_node = {}
         for node in stats['platform_stats']['nodes']:

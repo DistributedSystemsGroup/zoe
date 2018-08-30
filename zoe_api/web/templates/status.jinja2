@@ -41,7 +41,11 @@
     <div class="scheduler_queue">
     {% for id in stats['queue'] %}
         <div class="queue_item" id="{{ id }}">
-            <a href="{{ reverse_url('execution_inspect', id) }}">{{ id }}</a> ({{ executions_in_queue[id].user_id }})
+            {% if user.role.can_operate_others %}
+            <a href="{{ reverse_url('execution_inspect', id) }}">{{ id }}</a> ({{ executions_in_queue[id].owner.username }})
+            {% else %}
+            {{ id }} ({{ executions_in_queue[id].owner.username }})
+            {% endif %}
             {% for service in executions_in_queue[id].services %}
                 {% if service.essential %}
                 <div class="service essential {{ 'running' if not service.is_dead() }}">
@@ -71,8 +75,12 @@
     <p>This queue is unsorted, all services here should be green.</p>
     <div class="scheduler_queue">
     {% for id in stats['running_queue'] %}
-                <div class="queue_item" id="{{ id }}">
-            <a href="{{ reverse_url('execution_inspect', id) }}">{{ id }}</a> ({{ executions_in_queue[id].user_id }})
+            <div class="queue_item" id="{{ id }}">
+            {% if user.role.can_operate_others %}
+            <a href="{{ reverse_url('execution_inspect', id) }}">{{ id }}</a> ({{ executions_in_queue[id].owner.username }})
+            {% else %}
+            {{ id }} ({{ executions_in_queue[id].owner.username }})
+            {% endif %}
             {% for service in executions_in_queue[id].services %}
                 {% if service.essential %}
                 <div class="service essential {{ 'running' if service.status == service.ACTIVE_STATUS }}">
@@ -230,7 +238,14 @@
         <td class="cell-host">{{ node.name }}</td>
         {% for service in services_per_node[node.name] %}
             {% if service.backend_status == "started" %}
-            <td class="{{ 'running' if service.essential }}"><a href="{{ reverse_url('execution_inspect', service['execution_id']) }}">{{ service['name'] }}</a> (M: <script>format_bytes({{ node.service_stats[service['id']]['mem_limit'] }});</script> C: {{ '%0.2f'|format(node.service_stats[service['id']]['core_limit']|float) }})</td>
+            <td class="{{ 'running' if service.essential }}">
+                {% if user.role.can_operate_others %}
+                    <a href="{{ reverse_url('execution_inspect', service['execution_id']) }}">{{ service['name'] }}</a>
+                {% else %}
+                    {{ service['name'] }}
+                {% endif %}
+                (M: <script>format_bytes({{ node.service_stats[service['id']]['mem_limit'] }});</script> C: {{ '%0.2f'|format(node.service_stats[service['id']]['core_limit']|float) }})
+            </td>
             {% endif %}
         {% endfor %}
     </tr>
