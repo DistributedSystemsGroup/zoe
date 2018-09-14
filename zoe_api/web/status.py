@@ -16,7 +16,7 @@
 """Main points of entry for the Zoe web interface."""
 
 from zoe_api.web.request_handler import ZoeWebRequestHandler
-from zoe_api.exceptions import ZoeException, ZoeAuthException
+from zoe_api.exceptions import ZoeException
 
 
 class StatusEndpointWeb(ZoeWebRequestHandler):
