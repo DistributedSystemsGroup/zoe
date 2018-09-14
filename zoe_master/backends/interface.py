@@ -96,22 +96,19 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
         except ZoeStartExecutionRetryException as ex:
             log.warning('Temporary failure starting service {} of execution {}: {}'.format(service.id, execution.id, ex.message))
             service.set_error(ex.message)
-            execution.set_error_message(ex.message)
-            terminate_execution(execution)
+            terminate_execution(execution, reason=ex.message)
             execution.set_scheduled()
             return "requeue"
         except ZoeStartExecutionFatalException as ex:
             log.error('Fatal error trying to start service {} of execution {}: {}'.format(service.id, execution.id, ex.message))
             service.set_error(ex.message)
-            execution.set_error_message(ex.message)
-            terminate_execution(execution)
+            terminate_execution(execution, reason=ex.message)
             execution.set_error()
             return "fatal"
         except Exception as ex:
             log.error('Fatal error trying to start service {} of execution {}'.format(service.id, execution.id))
             log.exception('BUG, this error should have been caught earlier')
-            execution.set_error_message(str(ex))
-            terminate_execution(execution)
+            terminate_execution(execution, reason=str(ex))
             execution.set_error()
             return "fatal"
         else:
@@ -169,11 +166,11 @@ def terminate_service(service: Service) -> None:
         log.debug('Service {} terminated'.format(service.name))
 
 
-def terminate_execution(execution: Execution) -> None:
+def terminate_execution(execution: Execution, reason: Union[None, str]=None) -> None:
     """Terminate an execution."""
     for service in execution.services:  # type: Service
         terminate_service(service)
-    execution.set_terminated()
+    execution.set_terminated(reason)
 
 
 def get_platform_state() -> ClusterStats:

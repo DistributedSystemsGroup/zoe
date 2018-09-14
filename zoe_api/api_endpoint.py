@@ -120,7 +120,7 @@ class APIEndpoint:
 
         return new_id
 
-    def execution_terminate(self, user: zoe_lib.state.User, exec_id: int):
+    def execution_terminate(self, user: zoe_lib.state.User, exec_id: int, reason: str):
         """Terminate an execution."""
         e = self.sql.executions.select(id=exec_id, only_one=True)
         assert isinstance(e, zoe_lib.state.Execution)
@@ -131,7 +131,7 @@ class APIEndpoint:
             raise zoe_api.exceptions.ZoeAuthException('You are not authorized to terminate this execution')
 
         if e.is_active:
-            success, message = self.master.execution_terminate(exec_id)
+            success, message = self.master.execution_terminate(exec_id, reason)
             if not success:
                 raise zoe_api.exceptions.ZoeRestAPIException(message)
         else:
@@ -419,4 +419,4 @@ class APIEndpoint:
             runtime_limit = timedelta(hours=runtime_limit)
             if e.time_submit + runtime_limit < datetime.utcnow():
                 log.info('Automatically terminating execution {} that has exceeded the run time limit'.format(e.id))
-                self.execution_terminate(e.owner, e.id)
+                self.execution_terminate(e.owner, e.id, 'Run time quota exceeded')

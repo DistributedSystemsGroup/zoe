@@ -119,11 +119,14 @@ class Execution(BaseRecord):
         self._status = self.CLEANING_UP_STATUS
         self.sql_manager.executions.update(self.id, status=self._status)
 
-    def set_terminated(self):
+    def set_terminated(self, reason=None):
         """The execution is not running."""
         self._status = self.TERMINATED_STATUS
         self.time_end = datetime.datetime.utcnow()
-        self.sql_manager.executions.update(self.id, status=self._status, time_end=self.time_end)
+        if reason is not None:
+            self.sql_manager.executions.update(self.id, status=self._status, time_end=self.time_end, error_message=reason)
+        else:
+            self.sql_manager.executions.update(self.id, status=self._status, time_end=self.time_end)
 
     def set_error(self):
         """The scheduler encountered an error starting or running the execution."""
@@ -242,7 +245,6 @@ class ExecutionTable(BaseTable):
             description JSON NOT NULL,
             status TEXT NOT NULL,
             size NUMERIC NOT NULL,
-            execution_manager_id TEXT NULL,
             time_submit TIMESTAMP NOT NULL,
             time_start TIMESTAMP NULL,
             time_end TIMESTAMP NULL,

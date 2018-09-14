@@ -47,7 +47,7 @@ class ExecutionAPI(ZoeAPIRequestHandler):
             return
 
         try:
-            self.api_endpoint.execution_terminate(self.current_user, execution_id)
+            self.api_endpoint.execution_terminate(self.current_user, execution_id, 'user {} request from API'.format(self.current_user))
         except ZoeException as e:
             self.set_status(e.status_code, e.message)
         else:

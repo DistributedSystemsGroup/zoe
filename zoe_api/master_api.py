@@ -86,11 +86,12 @@ class APIManager:
         }
         return self._request_reply(msg)
 
-    def execution_terminate(self, exec_id: int) -> APIReturnType:
+    def execution_terminate(self, exec_id: int, reason: str) -> APIReturnType:
         """Terminate an execution."""
         msg = {
             'command': 'execution_terminate',
-            'exec_id': exec_id
+            'exec_id': exec_id,
+            'reason': reason
         }
         return self._request_reply(msg)
 

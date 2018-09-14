@@ -55,6 +55,9 @@
 {% if e.status == 'error' %}
 <p>Error message: <code>{{ e.error_message }}</code></p>
 {% endif %}
+{% if e.status == 'terminated' %}
+<p>Termination reason: <code>{{ e.error_message }}</code></p>
+{% endif %}
 
 <div id="endpoints">
 <h3>Endpoints</h3>

@@ -88,15 +88,16 @@ def execution_submit(state: SQLManager, scheduler: ZoeBaseScheduler, execution: 
         scheduler.incoming(execution)
 
 
-def execution_terminate(scheduler: ZoeBaseScheduler, execution: Execution):
-    """Remove an execution form the scheduler."""
+def execution_terminate(scheduler: ZoeBaseScheduler, execution: Execution, reason: str):
+    """Remove an execution from the scheduler."""
     if execution.is_running or execution.status == execution.SCHEDULED_STATUS:
         execution.set_cleaning_up()
+        execution.set_error_message(reason)
         scheduler.terminate(execution)
     elif execution.status == execution.SUBMIT_STATUS or execution.status == execution.STARTING_STATUS:
         return  # It is unsafe to terminate executions in these statuses
     elif execution.status == execution.ERROR_STATUS or execution.status == execution.CLEANING_UP_STATUS:
-        terminate_execution(execution)
+        terminate_execution(execution, reason)
     elif execution.status == execution.TERMINATED_STATUS:
         return
 
