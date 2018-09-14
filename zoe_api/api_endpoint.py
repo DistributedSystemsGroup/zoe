@@ -77,7 +77,7 @@ class APIEndpoint:
 
         running_execs = self.sql.executions.select(**{'status': 'running', 'user_id': user.id})
         running_execs += self.sql.executions.select(**{'status': 'starting', 'user_id': user.id})
-        running_execs += self.sql.executions.select(**{'status': 'scheduled', 'user_id': user.id})
+        running_execs += self.sql.executions.select(**{'status': 'queued', 'user_id': user.id})
         running_execs += self.sql.executions.select(**{'status': 'image download', 'user_id': user.id})
         running_execs += self.sql.executions.select(**{'status': 'submitted', 'user_id': user.id})
         if quota.concurrent_executions != 0 and len(running_execs) >= quota.concurrent_executions:
@@ -408,7 +408,7 @@ class APIEndpoint:
         """Scan the active executions and kill all those that exceed the runtime_limit quota."""
         running_execs = self.sql.executions.select(**{'status': 'running'})
         running_execs += self.sql.executions.select(**{'status': 'starting'})
-        running_execs += self.sql.executions.select(**{'status': 'scheduled'})
+        running_execs += self.sql.executions.select(**{'status': 'queued'})
         running_execs += self.sql.executions.select(**{'status': 'image download'})
         running_execs += self.sql.executions.select(**{'status': 'submitted'})
 

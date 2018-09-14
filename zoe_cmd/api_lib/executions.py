@@ -67,7 +67,7 @@ class ZoeExecutionsAPI(ZoeAPIBase):
 
         The list can be filtered by passing arguments. Any combination of the following filters is supported:
 
-        * status: one of submitted, scheduled, starting, error, running, cleaning up, terminated
+        * status: one of submitted, queued, starting, error, running, cleaning up, terminated
         * name: execution mane
         * user_id: user_id owning the execution (admin only)
         * limit: limit the number of returned entries

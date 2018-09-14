@@ -354,7 +354,7 @@ class ZoeElasticScheduler:
                     execution.set_cleaning_up()
                     self.terminate(execution)
                     break
-        # Check for executions that need to be rescheduled because one of the elastic components died
+        # Check for executions that need to be re-queued because one of the elastic components died
         # Do it in two loops to prevent rescheduling executions that need to be terminated
         for execution in self.queue_running:
             for service in execution.services:

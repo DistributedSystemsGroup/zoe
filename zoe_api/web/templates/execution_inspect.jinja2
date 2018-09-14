@@ -70,7 +70,7 @@
 {% else %}
     {% if e.status == "running" %}
         <p>This execution does not have any active endpoint</p>
-    {% elif e.status == "submitted" or e.status == "starting" or e.status == "scheduled" %}
+    {% elif e.status == "submitted" or e.status == "starting" or e.status == "queued" %}
         <p>Please wait, the execution is starting up. This page will refresh automatically.</p>
     {% else %}
         <p>No endpoints are available</p>

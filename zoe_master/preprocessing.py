@@ -83,18 +83,23 @@ def _digest_application_description(state: SQLManager, execution: Execution):
 
 def execution_submit(state: SQLManager, scheduler: ZoeBaseScheduler, execution: Execution):
     """Submit a new execution to the scheduler."""
+    if execution.status != execution.SUBMIT_STATUS:
+        log.warning('Trying to start an execution in state {}'.format(execution.status))
+        return
     if _digest_application_description(state, execution):
-        execution.set_scheduled()
+        execution.set_queued()
         scheduler.incoming(execution)
 
 
 def execution_terminate(scheduler: ZoeBaseScheduler, execution: Execution, reason: str):
     """Remove an execution from the scheduler."""
-    if execution.is_running or execution.status == execution.SCHEDULED_STATUS:
+    if execution.is_running or execution.status == execution.QUEUED_STATUS:
         execution.set_cleaning_up()
         execution.set_error_message(reason)
         scheduler.terminate(execution)
-    elif execution.status == execution.SUBMIT_STATUS or execution.status == execution.STARTING_STATUS:
+    elif execution.status == execution.SUBMIT_STATUS:
+        execution.set_terminated(reason)
+    elif execution.status == execution.STARTING_STATUS:
         return  # It is unsafe to terminate executions in these statuses
     elif execution.status == execution.ERROR_STATUS or execution.status == execution.CLEANING_UP_STATUS:
         terminate_execution(execution, reason)
@@ -108,7 +113,7 @@ def restart_resubmit_scheduler(state: SQLManager, scheduler: ZoeBaseScheduler):
     for e in submitted_execs:
         execution_submit(state, scheduler, e)
 
-    sched_execs = state.executions.select(status=Execution.SCHEDULED_STATUS)
+    sched_execs = state.executions.select(status=Execution.QUEUED_STATUS)
     for e in sched_execs:
         scheduler.incoming(e)
 

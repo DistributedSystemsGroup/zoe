@@ -37,7 +37,7 @@ class Execution(BaseRecord):
     """
 
     SUBMIT_STATUS = "submitted"
-    SCHEDULED_STATUS = "scheduled"
+    QUEUED_STATUS = "queued"
     STARTING_STATUS = "starting"
     ERROR_STATUS = "error"
     RUNNING_STATUS = "running"
@@ -98,9 +98,9 @@ class Execution(BaseRecord):
     def __eq__(self, other):
         return self.id == other.id
 
-    def set_scheduled(self):
+    def set_queued(self):
         """The execution has been added to the scheduler queues."""
-        self._status = self.SCHEDULED_STATUS
+        self._status = self.QUEUED_STATUS
         self.sql_manager.executions.update(self.id, status=self._status)
 
     def set_starting(self):
@@ -150,7 +150,7 @@ class Execution(BaseRecord):
         Returns False if the execution ended completely
         :return:
         """
-        return self._status == self.SUBMIT_STATUS or self._status == self.SCHEDULED_STATUS or self._status == self.RUNNING_STATUS or self._status == self.STARTING_STATUS or self._status == self.CLEANING_UP_STATUS
+        return self._status == self.SUBMIT_STATUS or self._status == self.QUEUED_STATUS or self._status == self.RUNNING_STATUS or self._status == self.STARTING_STATUS or self._status == self.CLEANING_UP_STATUS
 
     @property
     def is_running(self):

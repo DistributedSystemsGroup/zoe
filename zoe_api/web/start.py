@@ -91,7 +91,7 @@ class HomeWeb(ZoeWebRequestHandler):
 
         filters = {
             "user_id": self.current_user.id,
-            "status": "scheduled"
+            "status": "queued"
         }
         last_running_executions += self.api_endpoint.execution_list(self.current_user, **filters)
 

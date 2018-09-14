@@ -131,7 +131,7 @@ Will return a JSON document like this::
 
 Where:
 
-* ``status`` is the execution status. It can be on of "submitted", "scheduled", "starting", "error", "running", "cleaning up", "terminated"
+* ``status`` is the execution status. It can be on of "submitted", "queued", "starting", "error", "running", "cleaning up", "terminated"
 * ``description`` is the full ZApp description as submitted by the user
 * ``error_message`` contains the error message in case ``status`` is equal to error
 * ``time_submit`` is the time the execution was submitted to Zoe
@@ -203,7 +203,7 @@ You need to pass via the URL (GET parameters) the criteria to be used for filter
 
 Valid criteria that can be used are:
 
-* status: one of submitted, scheduled, starting, error, running, cleaning up, terminated
+* status: one of submitted, queued, starting, error, running, cleaning up, terminated
 * name: execution mane
 * user_id: user_id owning the execution (admin only)
 * limit: limit the number of returned entries

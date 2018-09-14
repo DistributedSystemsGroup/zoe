@@ -97,9 +97,9 @@ def exec_start_cmd(api: ZoeAPI, args):
     app_descr = json.load(args.jsonfile)
     exec_id = api.executions.start(args.name, app_descr)
     if not args.synchronous:
-        print("Application scheduled successfully with ID {}, use the exec-get command to check its status".format(exec_id))
+        print("Execution created successfully with ID {}, use the exec-get command to check its status".format(exec_id))
     else:
-        print("Application scheduled successfully with ID {}, waiting for status change".format(exec_id))
+        print("Execution created successfully with ID {}, waiting for status change".format(exec_id))
         old_status = 'submitted'
         while True:
             execution = api.executions.get(exec_id)
@@ -224,7 +224,7 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     argparser_app_list = subparser.add_parser('exec-ls', help="List all executions for the calling user")
     argparser_app_list.add_argument('--limit', type=int, help='Limit the number of executions')
     argparser_app_list.add_argument('--name', help='Show only executions with this name')
-    argparser_app_list.add_argument('--status', choices=["submitted", "scheduled", "starting", "error", "running", "cleaning up", "terminated"], help='Show only executions with this status')
+    argparser_app_list.add_argument('--status', choices=["submitted", "queued", "starting", "error", "running", "cleaning up", "terminated"], help='Show only executions with this status')
     argparser_app_list.add_argument('--earlier-than-submit', help='Show only executions submitted earlier than this timestamp (seconds since UTC epoch)')
     argparser_app_list.add_argument('--earlier-than-start', help='Show only executions started earlier than this timestamp (seconds since UTC epoch)')
     argparser_app_list.add_argument('--earlier-than-end', help='Show only executions ended earlier than this timestamp (seconds since UTC epoch)')

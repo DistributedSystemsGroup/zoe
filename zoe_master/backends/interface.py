@@ -97,7 +97,7 @@ def service_list_to_containers(execution: Execution, service_list: List[Service]
             log.warning('Temporary failure starting service {} of execution {}: {}'.format(service.id, execution.id, ex.message))
             service.set_error(ex.message)
             terminate_execution(execution, reason=ex.message)
-            execution.set_scheduled()
+            execution.set_queued()
             return "requeue"
         except ZoeStartExecutionFatalException as ex:
             log.error('Fatal error trying to start service {} of execution {}: {}'.format(service.id, execution.id, ex.message))
