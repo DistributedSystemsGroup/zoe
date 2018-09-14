@@ -15,10 +15,14 @@
                 [
                     "PYTHONHASHSEED",
                     "42"
+                ],
+                [
+                    "SPARK_HOME",
+                    "/opt/spark"
                 ]
             ],
             "essential_count": 1,
-            "image": "zapps/spark2-master:4764",
+            "image": "zapps/spark-master:10396",
             "monitor": false,
             "name": "spark-master",
             "ports": [
@@ -64,6 +68,10 @@
                     "{dns_name#self}"
                 ],
                 [
+                    "SPARK_HOME",
+                    "/opt/spark"
+                ],
+                [
                     "PYTHONHASHSEED",
                     "42"
                 ],
@@ -73,7 +81,7 @@
                 ]
             ],
             "essential_count": 1,
-            "image": "zapps/spark2-worker:4764",
+            "image": "zapps/spark-worker:10396",
             "monitor": false,
             "name": "spark-worker",
             "ports": [],
@@ -93,19 +101,23 @@
             "volumes": []
         },
         {
-            "command": "wordcount.py hdfs://192.168.45.157/datasets/gutenberg_big_2x.txt hdfs://192.168.45.157/tmp/wcount-out",
+            "command": null,
             "environment": [
                 [
-                    "SPARK_MASTER_IP",
-                    "{dns_name#spark-master0}"
-                ],
-                [
-                    "SPARK_EXECUTOR_RAM",
-                    "11273240064"
+                    "SPARK_MASTER",
+                    "spark://{dns_name#spark-master0}:7077"
                 ],
                 [
                     "SPARK_DRIVER_RAM",
                     "2147483648"
+                ],
+                [
+                    "SPARK_WORKER_RAM",
+                    "11273240064"
+                ],
+                [
+                    "SPARK_HOME",
+                    "/opt/spark"
                 ],
                 [
                     "HADOOP_USER_NAME",
@@ -114,17 +126,20 @@
                 [
                     "PYTHONHASHSEED",
                     "42"
-                ],
-                [
-                    "NAMENODE_HOST",
-                    "hdfs-namenode.zoe"
                 ]
             ],
             "essential_count": 1,
-            "image": "zapps/spark2-submit:4764",
+            "image": "zapps/spark-jupyter-notebook:10396",
             "monitor": true,
-            "name": "spark-submit",
-            "ports": [],
+            "name": "spark-jupyter",
+            "ports": [
+                {
+                    "name": "Jupyter Notebook interface",
+                    "port_number": 8888,
+                    "protocol": "tcp",
+                    "url_template": "http://{ip_port}/"
+                }
+            ],
             "replicas": 1,
             "resources": {
                 "cores": {
@@ -136,7 +151,7 @@
                     "min": 12884901888
                 }
             },
-            "startup_order": 2,
+            "startup_order": 0,
             "total_count": 1,
             "volumes": []
         }

@@ -1,26 +1,23 @@
 {
-    "name": "tf-notebook",
+    "name": "pydatasci",
     "services": [
         {
-            "command": null,
-            "environment": [
-                [
-                    "NB_UID",
-                    "1000"
-                ],
-                [
-                    "HOME",
-                    "/mnt/workspace"
-                ]
-            ],
+            "command": "jupyter lab --no-browser --NotebookApp.token='' --allow-root --ip=0.0.0.0",
+            "environment": [],
             "essential_count": 1,
-            "image": "jupyter/tensorflow-notebook:latest",
+            "image": "zapps/pydatasci:10396",
             "monitor": true,
-            "name": "jupyter",
+            "name": "py-notebook",
             "ports": [
                 {
                     "name": "Jupyter Notebook interface",
                     "port_number": 8888,
+                    "protocol": "tcp",
+                    "url_template": "http://{ip_port}/"
+                },
+                {
+                    "name": "Tensorboard",
+                    "port_number": 6006,
                     "protocol": "tcp",
                     "url_template": "http://{ip_port}/"
                 }
@@ -28,18 +25,17 @@
             "replicas": 1,
             "resources": {
                 "cores": {
-                    "max": 4,
-                    "min": 4
+                    "max": 2,
+                    "min": 2
                 },
                 "memory": {
-                    "max": 4294967296,
-                    "min": 4294967296
+                    "max": 6442450944,
+                    "min": 6442450944
                 }
             },
             "startup_order": 0,
             "total_count": 1,
-            "volumes": [],
-            "work_dir": "/mnt/workspace"
+            "volumes": []
         }
     ],
     "size": 512,

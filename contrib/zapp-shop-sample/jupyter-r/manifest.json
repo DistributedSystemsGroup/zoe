@@ -5,7 +5,7 @@
             "category": "Data science",
             "readable_descr": "README-r.md",
             "name": "R notebook",
-            "description": "r-notebook.json",
+            "description": "rdatasci.json",
             "parameters": []
         }
     ]

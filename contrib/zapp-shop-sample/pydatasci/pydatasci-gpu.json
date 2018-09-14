@@ -1,22 +1,31 @@
 {
-    "name": "microsoft-mls",
+    "name": "pydatasci-gpu",
     "services": [
         {
-            "command": null,
+            "command": "jupyter lab --no-browser --NotebookApp.token='' --allow-root --ip=0.0.0.0",
             "environment": [
                 [
-                    "ACCEPT_EULA",
-                    "yes"
+                    "NVIDIA_VISIBLE_DEVICES",
+                    "all"
                 ]
             ],
             "essential_count": 1,
-            "image": "microsoft/mmlspark:0.10",
+            "image": "zapps/pydatasci-gpu:10396",
+            "labels": [
+                "gpu"
+            ],
             "monitor": true,
-            "name": "mls-notebook",
+            "name": "py-notebook",
             "ports": [
                 {
-                    "name": "Notebook web interface",
+                    "name": "Jupyter Notebook interface",
                     "port_number": 8888,
+                    "protocol": "tcp",
+                    "url_template": "http://{ip_port}/"
+                },
+                {
+                    "name": "Tensorboard",
+                    "port_number": 6006,
                     "protocol": "tcp",
                     "url_template": "http://{ip_port}/"
                 }
@@ -24,8 +33,8 @@
             "replicas": 1,
             "resources": {
                 "cores": {
-                    "max": 4,
-                    "min": 4
+                    "max": 2,
+                    "min": 2
                 },
                 "memory": {
                     "max": 6442450944,

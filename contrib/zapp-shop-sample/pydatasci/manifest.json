@@ -1,0 +1,31 @@
+{
+    "version": 1,
+    "zapps": [
+        {
+            "category": "Data science",
+            "readable_descr": "README-datascience.md",
+            "name": "Data science notebook",
+            "description": "pydatasci.json",
+            "parameters": [],
+            "guest_access": true
+        },
+        {
+            "category": "Data science",
+            "readable_descr": "README-datascience.md",
+            "name": "Data science notebook GPU",
+            "description": "pydatasci-gpu.json",
+            "parameters": [
+                {
+                    "kind": "environment",
+                    "name": "NVIDIA_VISIBLE_DEVICES",
+                    "readable_name": "GPU",
+                    "description": "Which GPU to enable for this execution (e.g. all: all GPUs, 0: just GPU #0, 0,2: GPU #0 and #2)",
+                    "type": "string",
+                    "default": "all"
+                }
+            ],
+            "guest_access": false
+        }
+    ]
+}
+
