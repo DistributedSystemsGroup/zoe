@@ -164,11 +164,11 @@ class UserOAuthCallbackAPI(ZoeAPIRequestHandler):
 
         egitlab = EurecomGitLabClient(client_id=zoe_lib.config.get_conf().oauth_client_id, client_secret=zoe_lib.config.get_conf().oauth_client_secret, redirect_uri=zoe_lib.config.get_conf().oauth_redirect_uri)
         token = egitlab.get_token(code=code, grant_type="authorization_code")
-        r = requests.get(egitlab.userinfo_url, headers={'Authorization': 'Bearer {}'.format(token['access_token'])})
-        if r.status_code != 200:
+        resp = requests.get(egitlab.userinfo_url, headers={'Authorization': 'Bearer {}'.format(token['access_token'])})
+        if resp.status_code != 200:
             self.redirect(self.reverse_url("login"))
             return
-        data = r.json()
+        data = resp.json()
         email = data['email']
         username = data['nickname']
         user = self.api_endpoint.user_by_name(username)

@@ -7,7 +7,7 @@ import requests
 from .errors import ConfigurationError
 
 
-class OAuth2(object):
+class OAuth2:
     """Main OAuth2 class."""
     client_id = None
     client_secret = None
@@ -20,7 +20,7 @@ class OAuth2(object):
 
     def __init__(self, client_id=None, client_secret=None, site=None,
                  redirect_uri=None, authorization_url=None,
-                 token_url=None, revoke_url=None, scope_sep=None):
+                 token_url=None, revoke_url=None, scope_sep=None):  # pylint: disable=too-many-arguments
         """
         Initializes the hook with OAuth2 parameters
         """
