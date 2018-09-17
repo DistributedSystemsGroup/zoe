@@ -166,7 +166,7 @@ def terminate_service(service: Service) -> None:
         log.debug('Service {} terminated'.format(service.name))
 
 
-def terminate_execution(execution: Execution, reason: Union[None, str]=None) -> None:
+def terminate_execution(execution: Execution, reason: Union[None, str] = None) -> None:
     """Terminate an execution."""
     for service in execution.services:  # type: Service
         terminate_service(service)
