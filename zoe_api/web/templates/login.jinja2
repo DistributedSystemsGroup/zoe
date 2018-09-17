@@ -9,6 +9,10 @@
 
 <div id="loginbox">
     <img alt="ZOE logo" src="{{ static_url("logo.png") }}">
+{% if error %}
+    <p style="color: red;">{{ error }}</p>
+{% endif %}
+
     <div id="login-form">
         <form action="{{ reverse_url("login") }}" method="post" id="login_form">
             <label for="username">Username:</label>
@@ -18,8 +22,14 @@
             <input class="text-input" id="password" name="password" tabindex="2" type="password" value="">
 
             <div id="form_btn">
-                <input id="signin-btn" class="btn btn-blue" type="submit" value="Login" tabindex="3">
+                <button id="signin-btn" class="btn btn-blue" type="submit" name="login" value="userpass" tabindex="3">Login</button>
             </div>
+            {% if with_gitlab_oauth %}
+                Or login with:
+                <div class="form_btn">
+                    <button id="signin-btn-oauth" class="btn btn-blue" type="submit" name="login" value="OAUTH" tabindex="3">Eurecom GitLab</button>
+                </div>
+            {% endif %}
         </form>
     </div>
 </div>

@@ -21,7 +21,7 @@ import tornado.web
 
 from zoe_api.rest_api.execution import ExecutionAPI, ExecutionCollectionAPI, ExecutionDeleteAPI, ExecutionEndpointsAPI
 from zoe_api.rest_api.info import InfoAPI
-from zoe_api.rest_api.user import UserAPI, UserCollectionAPI
+from zoe_api.rest_api.user import UserAPI, UserCollectionAPI, UserOAuthCallbackAPI
 from zoe_api.rest_api.role import RoleAPI, RoleCollectionAPI
 from zoe_api.rest_api.quota import QuotaAPI, QuotaCollectionAPI
 from zoe_api.rest_api.service import ServiceAPI, ServiceLogsAPI
@@ -46,6 +46,7 @@ def api_init(api_endpoint) -> List[tornado.web.URLSpec]:
         tornado.web.url(api_path + r'/login', LoginAPI, route_args),
         tornado.web.url(api_path + r'/zapp_validate', ZAppValidateAPI, route_args),
 
+        tornado.web.url(api_path + r'/user/oauth2', UserOAuthCallbackAPI, route_args),
         tornado.web.url(api_path + r'/user/([0-9]+)', UserAPI, route_args),
         tornado.web.url(api_path + r'/user', UserCollectionAPI, route_args),
 

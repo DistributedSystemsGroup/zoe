@@ -20,6 +20,7 @@ import subprocess
 
 from zoe_api.web.request_handler import ZoeWebRequestHandler
 from zoe_api.auth.base import BaseAuthenticator
+from zoe_api.auth.requests_oauth2 import EurecomGitLabClient
 
 import zoe_lib.config
 
@@ -29,7 +30,7 @@ class RootWeb(ZoeWebRequestHandler):
 
     def get(self):
         """Home page without authentication."""
-        self.redirect(self.reverse_url("home_user"))
+        self.redirect(self.reverse_url("login"))
 
 
 class LoginWeb(ZoeWebRequestHandler):
@@ -37,21 +38,31 @@ class LoginWeb(ZoeWebRequestHandler):
 
     def get(self):
         """Login page."""
-        self.render('login.jinja2')
+        template_vars = {}
+        if zoe_lib.config.get_conf().oauth_client_id != '':
+            template_vars['with_gitlab_oauth'] = True
+        self.render('login.jinja2', **template_vars)
 
     def post(self):
         """Try to authenticate."""
-        username = self.get_argument("username", "")
-        password = self.get_argument("password", "")
-        user = BaseAuthenticator().full_auth(username, password)
-        if user is None:
-            self.redirect(self.get_argument("next", self.reverse_url("login")))
+        login_type = self.get_argument('login', 'userpass')
+        if login_type == 'OAUTH':
+            egitlab = EurecomGitLabClient(client_id=zoe_lib.config.get_conf().oauth_client_id, client_secret=zoe_lib.config.get_conf().oauth_client_secret, redirect_uri=zoe_lib.config.get_conf().oauth_redirect_uri)
+            auth_url = egitlab.authorize_url(scope=['openid', 'read_user'], response_type='code')
+            self.redirect(auth_url)
             return
+        else:
+            username = self.get_argument("username", "")
+            password = self.get_argument("password", "")
+            user = BaseAuthenticator().full_auth(username, password)
+            if user is None:
+                self.redirect(self.reverse_url("login"))
+                return
 
-        if not self.get_secure_cookie('zoe'):
-            cookie_val = user.username
-            self.set_secure_cookie('zoe', cookie_val)
-        self.redirect(self.get_argument("next", self.reverse_url("home_user")))
+            if not self.get_secure_cookie('zoe'):
+                cookie_val = user.username
+                self.set_secure_cookie('zoe', cookie_val)
+            self.redirect(self.get_argument("next", self.reverse_url("home_user")))
 
 
 class LogoutWeb(ZoeWebRequestHandler):
@@ -60,7 +71,7 @@ class LogoutWeb(ZoeWebRequestHandler):
     def get(self):
         """Login page."""
         self.clear_cookie('zoe')
-        self.redirect(self.get_argument("next", self.reverse_url("login")))
+        self.redirect(self.reverse_url("login"))
 
 
 class HomeWeb(ZoeWebRequestHandler):

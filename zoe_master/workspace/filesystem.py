@@ -51,11 +51,7 @@ class ZoeFSWorkspace(zoe_master.workspace.base.ZoeWorkspaceBase):
     def get(self, user: User):
         """Return a VolumeDescription for the user workspace."""
         if not self.exists(user.username):
-            try:
-                os.makedirs(self.get_path(user.username), 0x700)
-                os.chown(self.get_path(user.username), user.fs_uid, zoe_lib.config.get_conf().fs_group_id)
-            except OSError as e:
-                log.warning("Cannot create user workspace automatically: {}".format(str(e)))
+            log.warning("Workspace for user {} does not exist".format(user.username))
         else:
             if os.stat(self.get_path(user.username)).st_uid != user.fs_uid:
                 log.warning('The user fs_uid in the database does not match the workspace owner for user {}'.format(user.username))

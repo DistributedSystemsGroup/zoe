@@ -37,11 +37,11 @@
     {% endfor %}
     </ul>
 
+    <h4>Start-up parameters:</h4>
+    <form action="{{ reverse_url("zappshop_start", "") }}{{ zapp.id }}-{{ zapp.manifest_index }}" method="post" id="zapp_start_form">
+    <input type="hidden" name="zapp-id" value="{{ zapp.id }}-{{ zapp.manifest_index }}">
+    <label>Execution name:&nbsp;<input type="text" name="exec_name" value="{{ zapp.zoe_description.name }}" maxlength="16" size="18" required/></label><br/>
     {% if resources_are_customizable %}
-        <h4>Start-up parameters:</h4>
-        <form action="{{ reverse_url("zappshop_start", "") }}{{ zapp.id }}-{{ zapp.manifest_index }}" method="post" id="zapp_start_form">
-        <input type="hidden" name="zapp-id" value="{{ zapp.id }}-{{ zapp.manifest_index }}">
-        <label>Execution name:&nbsp;<input type="text" name="exec_name" value="{{ zapp.zoe_description.name }}" maxlength="16" size="18" required/></label><br/>
         {% for param in zapp.parameters %}
             <label>{{ param.readable_name }}
             {% if param.type == "number" and "memory" in param.kind %}

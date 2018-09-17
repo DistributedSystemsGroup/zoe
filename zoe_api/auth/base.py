@@ -20,6 +20,7 @@ from typing import Union
 
 import pam
 
+from zoe_api.auth.requests_oauth2 import EurecomGitLabClient
 from zoe_api.auth.file import PlainTextAuthenticator
 from zoe_api.auth.ldap import LDAPAuthenticator
 from zoe_lib.state import SQLManager, User
@@ -50,6 +51,10 @@ class BaseAuthenticator:
             return user
         elif user.auth_source == "pam" and pam_authenticate(username, password):
             return user
+        elif user.auth_source == "oauth2":
+            egitlab = EurecomGitLabClient(client_id=get_conf().oauth_client_id, client_secret=get_conf().oauth_client_secret, redirect_uri=get_conf().oauth_redirect_uri)
+            auth_url = egitlab.authorize_url(scope=['openid', 'read_user'], response_type='code')
+
         else:
             return None
 

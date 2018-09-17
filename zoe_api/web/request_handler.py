@@ -27,6 +27,7 @@ from jinja2 import Environment, FileSystemLoader, Markup, TemplateSyntaxError
 
 from tornado.escape import squeeze, linkify, url_escape, xhtml_escape
 
+import zoe_lib.config
 import zoe_lib.version
 from zoe_api.custom_request_handler import ZoeRequestHandler
 from zoe_api.exceptions import ZoeAuthException
@@ -145,7 +146,8 @@ class ZoeWebRequestHandler(ZoeRequestHandler):
         try:
             user = super().get_current_user()
         except ZoeAuthException as e:
-            self.render('login.jinja2', error=e.message)
+            with_gitlab_oauth = zoe_lib.config.get_conf().oauth_client_id != ''
+            self.render('login.jinja2', error=e.message, with_gitlab_oauth=with_gitlab_oauth)
             return None
         return user
 

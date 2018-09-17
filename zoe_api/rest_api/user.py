@@ -15,10 +15,19 @@
 
 """The User API endpoints."""
 
+import logging
+import os
+
+import requests
 import tornado.escape
 
 from zoe_api.rest_api.request_handler import ZoeAPIRequestHandler
 from zoe_api.exceptions import ZoeException
+from zoe_api.auth.requests_oauth2 import EurecomGitLabClient
+
+import zoe_lib.config
+
+log = logging.getLogger(__name__)
 
 
 class UserAPI(ZoeAPIRequestHandler):
@@ -142,3 +151,39 @@ class UserCollectionAPI(ZoeAPIRequestHandler):
 
         self.set_status(201)
         self.write({'user_id': new_id})
+
+
+class UserOAuthCallbackAPI(ZoeAPIRequestHandler):
+    """The User OAUTH callback endpoint."""
+    def get(self):
+        """Callback."""
+        code = self.get_argument('code', None)
+        if code is None:
+            self.redirect(self.reverse_url("login"))
+            return
+
+        egitlab = EurecomGitLabClient(client_id=zoe_lib.config.get_conf().oauth_client_id, client_secret=zoe_lib.config.get_conf().oauth_client_secret, redirect_uri=zoe_lib.config.get_conf().oauth_redirect_uri)
+        token = egitlab.get_token(code=code, grant_type="authorization_code")
+        r = requests.get(egitlab.userinfo_url, headers={'Authorization': 'Bearer {}'.format(token['access_token'])})
+        if r.status_code != 200:
+            self.redirect(self.reverse_url("login"))
+            return
+        data = r.json()
+        email = data['email']
+        username = data['nickname']
+        user = self.api_endpoint.user_by_name(username)
+        if user is not None:
+            if user.email != email:
+                self.api_endpoint.user_update(user, user.id, {'email': email})
+        else:
+            log.info('Creating new user {} from OAuth login'.format(username))
+            admin = self.api_endpoint.user_by_name('admin')
+            role = self.api_endpoint.role_by_name(zoe_lib.config.get_conf().oauth_role)
+            quota = self.api_endpoint.quota_by_name(zoe_lib.config.get_conf().oauth_quota)
+            self.api_endpoint.user_new(admin, username, email, role.id, quota.id, 'gitlab-eurecom', -1)
+            user = self.api_endpoint.user_by_name(username)
+            os.system('sudo {} {} {}'.format(zoe_lib.config.get_conf().oauth_create_workspace_script, user.username, user.fs_uid))
+        if not self.get_secure_cookie('zoe'):
+            cookie_val = user.username
+            self.set_secure_cookie('zoe', cookie_val)
+        self.redirect(self.get_argument("next", self.reverse_url("home_user")))

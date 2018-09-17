@@ -64,7 +64,12 @@ class SQLManager:
         except psycopg2.InterfaceError:
             self._connect()
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cur.execute('SET search_path TO {},public'.format(self.schema))
+        try:
+            cur.execute('SET search_path TO {},public'.format(self.schema))
+        except psycopg2.InternalError:
+            self._connect()
+            cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur.execute('SET search_path TO {},public'.format(self.schema))
         return cur
 
     def commit(self):
