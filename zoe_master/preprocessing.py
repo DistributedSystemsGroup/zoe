@@ -97,11 +97,13 @@ def execution_terminate(scheduler: ZoeBaseScheduler, execution: Execution, reaso
         execution.set_cleaning_up()
         execution.set_error_message(reason)
         scheduler.terminate(execution)
+    elif execution.status == execution.CLEANING_UP_STATUS:
+        scheduler.terminate(execution)
     elif execution.status == execution.SUBMIT_STATUS:
         execution.set_terminated(reason)
     elif execution.status == execution.STARTING_STATUS:
         return  # It is unsafe to terminate executions in these statuses
-    elif execution.status == execution.ERROR_STATUS or execution.status == execution.CLEANING_UP_STATUS:
+    elif execution.status == execution.ERROR_STATUS:
         terminate_execution(execution, reason)
     elif execution.status == execution.TERMINATED_STATUS:
         return

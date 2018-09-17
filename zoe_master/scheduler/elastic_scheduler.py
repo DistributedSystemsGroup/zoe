@@ -109,7 +109,6 @@ class ZoeElasticScheduler:
         self.queue_termination.append(execution)
 
     def _terminate_executions(self):
-        count = 0
         while len(self.queue_termination) > 0:
             execution = self.queue_termination.pop(0)
             execution.set_cleaning_up()
@@ -128,9 +127,6 @@ class ZoeElasticScheduler:
 
             terminate_execution(execution)
             log.debug('Execution {} terminated successfully'.format(execution.id))
-            count += 1
-        self.core_limit_recalc_trigger.set()
-        return count != 0
 
     def _refresh_execution_sizes(self):
         if self.policy == "FIFO":
@@ -170,17 +166,18 @@ class ZoeElasticScheduler:
         while True:
             ret = self.trigger_semaphore.acquire(timeout=1)
             if not ret:  # Semaphore timeout, do some cleanup
-                if self._terminate_executions():
-                    auto_trigger = 1
                 auto_trigger -= 1
                 if auto_trigger == 0:
                     auto_trigger = SELF_TRIGGER_TIMEOUT
                     self.trigger()
                 continue
+
             if self.loop_quit:
                 break
 
             self._check_dead_services()
+            self._terminate_executions()
+
             if len(self.queue) == 0:
                 log.debug("Scheduler loop has been triggered, but the queue is empty")
                 self.core_limit_recalc_trigger.set()
