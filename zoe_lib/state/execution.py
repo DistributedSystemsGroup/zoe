@@ -17,7 +17,6 @@
 
 import datetime
 import logging
-import threading
 import functools
 
 import psycopg2
@@ -76,8 +75,6 @@ class Execution(BaseRecord):
                 self.size = self.description['size']
             except KeyError:
                 self.size = self.description['priority']  # zapp format v2
-
-        self.termination_lock = threading.Lock()
 
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""
