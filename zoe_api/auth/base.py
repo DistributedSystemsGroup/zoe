@@ -20,7 +20,6 @@ from typing import Union
 
 import pam
 
-from zoe_api.auth.requests_oauth2 import EurecomGitLabClient
 from zoe_api.auth.file import PlainTextAuthenticator
 from zoe_api.auth.ldap import LDAPAuthenticator
 from zoe_lib.state import SQLManager, User
