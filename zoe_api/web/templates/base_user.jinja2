@@ -20,6 +20,17 @@
             <a href="{{ reverse_url("status") }}">Status</a>
         </div>
         {% endif %}
+        {% if user.role.can_change_config %}
+        <div class="nav-item">
+            <a href="{{ reverse_url("admin_users") }}">Users</a>
+        </div>
+        <div class="nav-item">
+            <a href="{{ reverse_url("admin_roles") }}">Roles</a>
+        </div>
+        <div class="nav-item">
+            <a href="{{ reverse_url("admin_quotas") }}">Quotas</a>
+        </div>
+        {% endif %}
     </div>
     <div id="user_info">
         {{ user.username }} ({{ user.role.name }}) <a href="{{ reverse_url("logout") }}">logout</a>

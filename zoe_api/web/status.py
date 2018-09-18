@@ -24,7 +24,7 @@ class StatusEndpointWeb(ZoeWebRequestHandler):
 
     def get(self):
         """Status and statistics page."""
-        if self.current_user is None:
+        if self.current_user is None or not self.current_user.role.can_see_status:
             return
 
         stats = self.api_endpoint.statistics_scheduler()

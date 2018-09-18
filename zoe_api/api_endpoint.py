@@ -283,20 +283,19 @@ class APIEndpoint:
             if 'auth_source' in user_data:
                 update_fields['auth_source'] = user_data['auth_source']
                 if user_data['auth_source'] != 'internal':
-                    user_data['password'] = None
+                    update_fields['password'] = None
             if 'quota_id' in user_data:
                 quota = self.quota_by_id(user_data['quota_id'])
                 if quota is None:
                     raise zoe_api.exceptions.ZoeRestAPIException('No quota with ID {}'.format(user_data['quota_id']))
                 update_fields['quota_id'] = quota.id
-            if 'role' in user_data:
+            if 'role_id' in user_data:
                 role = self.role_by_id(user_data['role_id'])
                 if role is None:
                     raise zoe_api.exceptions.ZoeRestAPIException('No role with ID {}'.format(user_data['role_id']))
                 update_fields['role_id'] = role.id
             if 'password' in user_data:
                 update_fields['password'] = user_data['password']
-                update_fields['auth_source'] = 'internal'
             if 'fs_uid' in user_data:
                 update_fields['fs_uid'] = user_data['fs_uid']
 

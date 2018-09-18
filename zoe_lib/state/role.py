@@ -51,6 +51,15 @@ class Role(BaseRecord):
             'can_access_full_zapp_shop': self.can_access_full_zapp_shop
         }
 
+    def __repr__(self):
+        return self.name
+
+    def __eq__(self, other):
+        if isinstance(other, Role):
+            return self.id == other.id
+        else:
+            return False
+
 
 class RoleTable(BaseTable):
     """Abstraction for the role table in the database."""

@@ -65,6 +65,15 @@ class Quota(BaseRecord):
         self.runtime_limit = value
         self.sql_manager.quota_update(self.id, runtime_limit=value)
 
+    def __repr__(self):
+        return self.name
+
+    def __eq__(self, other):
+        if isinstance(other, Quota):
+            return self.id == other.id
+        else:
+            return False
+
 
 class QuotaTable(BaseTable):
     """Abstraction for the quota table in the database."""

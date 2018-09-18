@@ -105,6 +105,15 @@ class User(BaseRecord):
         """Get the quota for this user."""
         return self.sql_manager.quota.select(only_one=True, id=self.quota_id)
 
+    def __repr__(self):
+        return self.username
+
+    def __eq__(self, other):
+        if isinstance(other, User):
+            return self.id == other.id
+        else:
+            return False
+
 
 class UserTable(BaseTable):
     """Abstraction for the user table in the database."""
@@ -182,6 +191,6 @@ class UserTable(BaseTable):
 
     def update(self, user_id, **fields):
         """Update a user record."""
-        if 'password' in fields:
+        if 'password' in fields and fields['password'] is not None:
             fields['password'] = hash_algo.hash(fields['password'])
         super().update(user_id, **fields)

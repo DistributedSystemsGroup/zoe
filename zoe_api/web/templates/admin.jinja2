@@ -1,0 +1,62 @@
+{% extends "base_user.jinja2" %}
+{% block title %}Zoe {{ kind }} admin{% endblock %}
+
+{% block custom_head %}
+{% endblock %}
+
+{% block content %}
+<h2>Zoe {{ kind }} admin</h2>
+
+<table id="exec_list" class="app_list">
+    <thead>
+    <tr>
+        <th>ID</th>
+        {% for h in column_names %}
+        <th>{{ h }}</th>
+        {% endfor %}
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in rows|sort(attribute='id') %}
+        {% set row_index = loop.index0 %}
+        <tr>
+            <td><form id="form{{ row_index }}" method="post" action="{{ reverse_url('admin_' + kind) }}"><input type="hidden" name="id" value="{{ row.id }}">{{ row.id }}</form></td>
+        {% for key in column_keys %}
+            {% if column_types[key] == None %}
+                <td>{{ row[key] }}</td>
+            {% elif column_types[key] == 'text' %}
+                <td><input form="form{{ row_index }}" type="text" name="{{ key }}" value="{{ row[key] }}" title="{{ key }}"></td>
+            {% elif column_types[key] == 'number' %}
+                <td><input form="form{{ row_index }}" type="number" name="{{ key }}" value="{{ row[key] }}" title="{{ key }}"></td>
+            {% elif column_types[key] == 'bytes' %}
+                <td><input form="form{{ row_index }}" type="number" name="{{ key }}" value="{{ row[key]/(1024**3) }}" title="{{ key }}"></td>
+            {% elif column_types[key] == 'bool' %}
+                {% if row[key] %}
+                <td><input form="form{{ row_index }}" type="checkbox" name="{{ key }}" checked title="{{ key }}"></td>
+                {% else %}
+                <td><input form="form{{ row_index }}" type="checkbox" name="{{ key }}" title="{{ key }}"></td>
+                {% endif %}
+            {% elif column_types[key] == 'list' %}
+                <td>
+                <select form="form{{ row_index }}" title="{{ key }}" name="{{ key }}">
+                    {% for item in lists[key] %}
+                        {% if row[key] == item %}
+                        <option value="{{ item }}" selected>{{ item }}</option>
+                        {% else %}
+                        <option value="{{ item }}">{{ item }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+                </td>
+            {% endif %}
+        {% endfor %}
+            <td>
+                <button form="form{{ row_index }}" name="action" type="submit" value="update">Update</button>
+                <button form="form{{ row_index }}" name="action" type="submit" value="delete">Delete</button>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -24,6 +24,7 @@ import zoe_api.web.websockets
 import zoe_api.web.executions
 import zoe_api.web.zapp_shop
 import zoe_api.web.status
+import zoe_api.web.admin
 
 import zoe_lib.config
 from zoe_lib.version import ZOE_API_VERSION, ZOE_VERSION
@@ -56,7 +57,11 @@ def web_init(api_endpoint) -> List[tornado.web.URLSpec]:
         tornado.web.url(base_path + r'/zapp-shop/logo/([0-9a-z_\-.]+)', zoe_api.web.zapp_shop.ZAppLogoWeb, route_args, name='zappshop_logo'),
         tornado.web.url(base_path + r'/zapp-shop/start/([0-9a-z_\-.]+)', zoe_api.web.zapp_shop.ZAppStartWeb, route_args, name='zappshop_start'),
 
-        tornado.web.url(base_path + r'/status', zoe_api.web.status.StatusEndpointWeb, route_args, name='status')
+        tornado.web.url(base_path + r'/status', zoe_api.web.status.StatusEndpointWeb, route_args, name='status'),
+
+        tornado.web.url(base_path + r'/admin/users', zoe_api.web.admin.UsersEndpointWeb, route_args, name='admin_users'),
+        tornado.web.url(base_path + r'/admin/roles', zoe_api.web.admin.RolesEndpointWeb, route_args, name='admin_roles'),
+        tornado.web.url(base_path + r'/admin/quotas', zoe_api.web.admin.QuotasEndpointWeb, route_args, name='admin_quotas')
     ]
 
     return web_routes
