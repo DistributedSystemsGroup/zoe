@@ -54,11 +54,11 @@ class UsersEndpointWeb(ZoeWebRequestHandler):
         if self.current_user is None or not self.current_user.role.can_change_config:
             return
 
-        user_id = int(self.get_argument('id'))
         if self.get_argument('action') == 'update':
+            user_id = int(self.get_argument('id'))
             user_data = {
                 'email': None if self.get_argument('email') == '' or self.get_argument('email') == 'None' else self.get_argument('email'),
-                'enabled': True if self.get_argument('enabled') == 'on' else False,
+                'enabled': True if self.get_argument('enabled', 'off') == 'on' else False,
                 'fs_uid': int(self.get_argument('fs_uid')),
                 'auth_source': self.get_argument('auth_source'),
                 'role_id': self.api_endpoint.role_by_name(self.get_argument('role')).id,
@@ -67,7 +67,16 @@ class UsersEndpointWeb(ZoeWebRequestHandler):
 
             self.api_endpoint.user_update(self.current_user, user_id, user_data)
         elif self.get_argument('action') == 'delete':
+            user_id = int(self.get_argument('id'))
             self.api_endpoint.user_delete(self.current_user, user_id)
+        elif self.get_argument('action') == 'create':
+            self.api_endpoint.user_new(self.current_user,
+                                       self.get_argument('username'),
+                                       None if self.get_argument('email') == '' or self.get_argument('email') == 'None' else self.get_argument('email'),
+                                       self.api_endpoint.role_by_name(self.get_argument('role')).id,
+                                       self.api_endpoint.quota_by_name(self.get_argument('quota')).id,
+                                       self.get_argument('auth_source'),
+                                       int(self.get_argument('fs_uid')))
         self.redirect(self.reverse_url('admin_users'))
 
 
@@ -102,6 +111,36 @@ class RolesEndpointWeb(ZoeWebRequestHandler):
         if self.current_user is None or not self.current_user.role.can_change_config:
             return
 
+        if self.get_argument('action') == 'update':
+            role_id = int(self.get_argument('id'))
+            role_data = {
+                'can_see_status': True if self.get_argument('can_see_status', 'off') == 'on' else False,
+                'can_change_config': True if self.get_argument('can_change_config', 'off') == 'on' else False,
+                'can_operate_others': True if self.get_argument('can_operate_others', 'off') == 'on' else False,
+                'can_delete_executions': True if self.get_argument('can_delete_executions', 'off') == 'on' else False,
+                'can_access_api': True if self.get_argument('can_access_api', 'off') == 'on' else False,
+                'can_customize_resources': True if self.get_argument('can_customize_resources', 'off') == 'on' else False,
+                'can_access_full_zapp_shop': True if self.get_argument('can_access_full_zapp_shop', 'off') == 'on' else False
+            }
+
+            self.api_endpoint.role_update(self.current_user, role_id, role_data)
+        elif self.get_argument('action') == 'delete':
+            role_id = int(self.get_argument('id'))
+            self.api_endpoint.role_delete(self.current_user, role_id)
+        elif self.get_argument('action') == 'create':
+            role_data = {
+                'name': self.get_argument('name'),
+                'can_see_status': True if self.get_argument('can_see_status', 'off') == 'on' else False,
+                'can_change_config': True if self.get_argument('can_change_config', 'off') == 'on' else False,
+                'can_operate_others': True if self.get_argument('can_operate_others', 'off') == 'on' else False,
+                'can_delete_executions': True if self.get_argument('can_delete_executions', 'off') == 'on' else False,
+                'can_access_api': True if self.get_argument('can_access_api', 'off') == 'on' else False,
+                'can_customize_resources': True if self.get_argument('can_customize_resources', 'off') == 'on' else False,
+                'can_access_full_zapp_shop': True if self.get_argument('can_access_full_zapp_shop', 'off') == 'on' else False
+            }
+            self.api_endpoint.role_new(self.current_user, role_data)
+        self.redirect(self.reverse_url('admin_roles'))
+
 
 class QuotasEndpointWeb(ZoeWebRequestHandler):
     """Handler class"""
@@ -130,3 +169,27 @@ class QuotasEndpointWeb(ZoeWebRequestHandler):
         """Form submitted."""
         if self.current_user is None or not self.current_user.role.can_change_config:
             return
+
+        if self.get_argument('action') == 'update':
+            quota_id = int(self.get_argument('id'))
+            quota_data = {
+                'concurrent_executions': int(self.get_argument('concurrent_executions')),
+                'cores': int(self.get_argument('cores')),
+                'memory': int(float(self.get_argument('memory')) * (1024**3)),
+                'runtime_limit':  int(self.get_argument('runtime_limit'))
+            }
+
+            self.api_endpoint.quota_update(self.current_user, quota_id, quota_data)
+        elif self.get_argument('action') == 'delete':
+            quota_id = int(self.get_argument('id'))
+            self.api_endpoint.quota_delete(self.current_user, quota_id)
+        elif self.get_argument('action') == 'create':
+            quota_data = {
+                'name': self.get_argument('name'),
+                'concurrent_executions': int(self.get_argument('concurrent_executions')),
+                'cores': int(self.get_argument('cores')),
+                'memory': int(float(self.get_argument('memory')) * (1024 ** 3)),
+                'runtime_limit': int(self.get_argument('runtime_limit'))
+            }
+            self.api_endpoint.quota_new(self.current_user, quota_data)
+        self.redirect(self.reverse_url('admin_quotas'))

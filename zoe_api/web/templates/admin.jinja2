@@ -59,4 +59,30 @@
     {% endfor %}
     </tbody>
 </table>
+    {% if kind != "users" %}
+    <h3>Create new {{ kind }}</h3>
+    <form method="post" action="{{ reverse_url('admin_' + kind) }}">
+    {% for key in column_keys %}
+    <label>
+        {{ column_names[loop.index0] }}:
+        {% if column_types[key] == 'text' or column_types[key] == None %}
+            <input type="text" name="{{ key }}" title="{{ key }}">
+        {% elif column_types[key] == 'number' %}
+            <input type="number" name="{{ key }}" title="{{ key }}">
+        {% elif column_types[key] == 'bytes' %}
+            <input type="number" name="{{ key }}" title="{{ key }}">
+        {% elif column_types[key] == 'bool' %}
+            <input type="checkbox" name="{{ key }}" title="{{ key }}">
+        {% elif column_types[key] == 'list' %}
+            <select title="{{ key }}" name="{{ key }}">
+                {% for item in lists[key] %}
+                <option value="{{ item }}">{{ item }}</option>
+                {% endfor %}
+            </select>
+        {% endif %}
+    </label><br>
+    {% endfor %}
+    <button name="action" type="submit" value="create">Create</button>
+    </form>
+    {% endif %}
 {% endblock %}

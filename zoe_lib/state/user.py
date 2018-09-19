@@ -42,7 +42,10 @@ class User(BaseRecord):
         self.quota_id = d['quota_id']
 
         if self.auth_source == "pam":
-            self.fs_uid = pwd.getpwnam(self.username).pw_uid
+            try:
+                self.fs_uid = pwd.getpwnam(self.username).pw_uid
+            except KeyError:
+                self.fs_uid = d['fs_uid']
 
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""
