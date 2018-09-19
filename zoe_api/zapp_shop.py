@@ -65,10 +65,6 @@ class ZApp:
             self.labels = []
         self.parameters = []
         self.parse_parameters(zapp)
-        if 'guest_access' in zapp:
-            self.guest_access = zapp['guest_access']
-        else:
-            self.guest_access = False
         if 'logo' in zapp:
             self.logo = zapp['logo']
         else:

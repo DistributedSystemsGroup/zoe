@@ -180,7 +180,7 @@ The ``manifest.json`` file gather all this information together for the ZApp Sho
                         "default": "./my-tf-app/main.py"
                     }
                 ],
-                "guest_access": true
+                "disabled_for": ["role_A"]
             }
         ]
     }
@@ -195,7 +195,7 @@ For each ZApp:
 * description : the name of the json file with the Zoe description
 * readable_descr : the name of the markdown file containing user documentation for the ZApp
 * parameters : a list of parameters the user can set to tune the ZApp before starting it
-* guest_access (optional) : if true the ZApp is visible to guest users, default is false
+* disabled_for (optional) : list of roles that will not see this ZApp in the app shop
 
 Parameters:
 

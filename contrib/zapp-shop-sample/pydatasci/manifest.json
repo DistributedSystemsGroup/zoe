@@ -6,8 +6,7 @@
             "readable_descr": "README-datascience.md",
             "name": "Data science notebook",
             "description": "pydatasci.json",
-            "parameters": [],
-            "guest_access": true
+            "parameters": []
         },
         {
             "category": "Data science",
@@ -23,8 +22,7 @@
                     "type": "string",
                     "default": "all"
                 }
-            ],
-            "guest_access": false
+            ]
         }
     ]
 }
