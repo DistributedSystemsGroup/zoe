@@ -124,11 +124,12 @@ class Execution(BaseRecord):
             zk.start()
             for service in self.services:
                 for port in service.ports:
-                    endpoint = port.url_template.format(**{"ip_port": port.external_ip + ":" + str(port.external_port)})
-                    traefik_name = 'zoe_exec_{}_{}'.format(self.id, port.id)
-                    zk.create('/traefik/backends/{}/servers/server/url'.format(traefik_name), endpoint, makepath=True)
-                    zk.create('/traefik/frontends/{}/routes/path/rule'.format(traefik_name), 'PathPrefix:{}/{}'.format(zoe_lib.config.get_conf().traefik_base_url, port.proxy_key()), makepath=True)
-                    zk.create('/traefik/frontends/{}/backend'.format(traefik_name), traefik_name, makepath=True)
+                    if port.enable_proxy:
+                        endpoint = port.url_template.format(**{"ip_port": port.external_ip + ":" + str(port.external_port)}).encode('utf-8')
+                        traefik_name = 'zoe_exec_{}_{}'.format(self.id, port.id)
+                        zk.create('/traefik/backends/{}/servers/server/url'.format(traefik_name), endpoint, makepath=True)
+                        zk.create('/traefik/frontends/{}/routes/path/rule'.format(traefik_name), 'PathPrefix:{}/{}'.format(zoe_lib.config.get_conf().traefik_base_url, port.proxy_key()).encode('utf-8'), makepath=True)
+                        zk.create('/traefik/frontends/{}/backend'.format(traefik_name), traefik_name.encode('utf-8'), makepath=True)
             zk.create('/traefik/alias')
             zk.delete('/traefik/alias')
             zk.stop()
@@ -141,8 +142,12 @@ class Execution(BaseRecord):
         if zoe_lib.config.get_conf().traefik_zk_ips is not None:
             zk = KazooClient(hosts=zoe_lib.config.get_conf().traefik_zk_ips)
             zk.start()
-            zk.delete('/traefik/backends/zoe_exec_{}', recursive=True)
-            zk.delete('/traefik/frontends/zoetest', recursive=True)
+            for service in self.services:
+                for port in service.ports:
+                    if port.enable_proxy:
+                        traefik_name = 'zoe_exec_{}_{}'.format(self.id, port.id)
+                        zk.delete('/traefik/backends/{}'.format(traefik_name), recursive=True)
+                        zk.delete('/traefik/frontends/{}'.format(traefik_name), recursive=True)
             zk.create('/traefik/alias')
             zk.delete('/traefik/alias')
             zk.stop()

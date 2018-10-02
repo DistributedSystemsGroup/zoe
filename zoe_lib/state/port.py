@@ -39,6 +39,10 @@ class Port(BaseRecord):
         self.protocol = self.description['protocol']
         self.url_template = self.description['url_template']
         self.readable_name = self.description['name']
+        if 'proxy' in self.description:
+            self.enable_proxy = self.description['proxy']
+        else:
+            self.enable_proxy = False
 
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""
@@ -67,7 +71,7 @@ class Port(BaseRecord):
 
     def proxy_key(self):
         """Return unique identifier that can be used ti generate proxy URLs."""
-        return hashlib.sha256("{}:{}".format(self.id, zoe_lib.config.get_conf().cookie_secret)).hexdigest()
+        return hashlib.sha256("{}:{}".format(self.id, zoe_lib.config.get_conf().cookie_secret).encode('utf-8')).hexdigest()
 
 
 class PortTable(BaseTable):
