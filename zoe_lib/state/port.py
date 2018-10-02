@@ -15,9 +15,11 @@
 
 """Interface to PostgresQL for Zoe state."""
 
+import hashlib
 import logging
 
 from zoe_lib.state.base import BaseRecord, BaseTable
+import zoe_lib.config
 
 log = logging.getLogger(__name__)
 
@@ -61,6 +63,10 @@ class Port(BaseRecord):
         self.sql_manager.ports.update(self.id, external_ip=None, external_port=None)
         self.external_port = None
         self.external_ip = None
+
+    def proxy_key(self):
+        """Return unique identifier that can be used ti generate proxy URLs."""
+        return hashlib.sha256("{}:{}".format(self.id, zoe_lib.config.get_conf().cookie_secret)).hexdigest()
 
 
 class PortTable(BaseTable):

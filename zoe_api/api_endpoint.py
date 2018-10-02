@@ -207,12 +207,14 @@ class APIEndpoint:
         endpoints = []
         for service in execution.services:
             services_info.append(self.service_by_id(user, service.id))
-            for port in service.description['ports']:
-                port_key = str(port['port_number']) + "/" + port['protocol']
-                backend_port = self.sql.ports.select(only_one=True, service_id=service.id, internal_name=port_key)
-                if backend_port is not None and backend_port.external_ip is not None:
-                    endpoint = port['url_template'].format(**{"ip_port": backend_port.external_ip + ":" + str(backend_port.external_port)})
-                    endpoints.append((port['name'], endpoint))
+            for port in service.ports:
+                if port.external_ip is not None:
+                    endpoint = port.url_template.format(**{"ip_port": port.external_ip + ":" + str(port.external_port)})
+                    if zoe_lib.config.get_conf().traefik_zk_ips is None:
+                        endpoint_ext = None
+                    else:
+                        endpoint_ext = '/{}/{}'.format(zoe_lib.config.get_conf().traefik_base_url, port.proxy_key())
+                    endpoints.append((port.name, endpoint, endpoint_ext))
 
         return services_info, endpoints
 

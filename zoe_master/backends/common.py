@@ -43,6 +43,9 @@ def gen_environment(execution: Execution, service: Service, env_subst_dict: Dict
     env_list.append(('ZOE_GID', get_conf().fs_group_id))
     env_list.append(('ZOE_USER', execution.owner.username))
     env_list.append(('SERVICE_NAME', service.name))
+    if get_conf().traefik_zk_ips is not None:
+        for port in service.ports:
+            env_list.append(('REVERSE_PROXY_PATH_{}'.format(port.internal_number), '/{}/{}'.format(get_conf().traefik_base_url, port.proxy_key())))
 
     wk_vol = ZoeFSWorkspace().get(execution.owner)
     env_list.append(('ZOE_WORKSPACE', wk_vol.mount_point))

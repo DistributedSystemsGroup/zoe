@@ -21,7 +21,13 @@ import functools
 
 import psycopg2
 
+try:
+    from kazoo.client import KazooClient
+except ImportError:
+    KazooClient = None
+
 from zoe_lib.state.base import BaseRecord, BaseTable
+import zoe_lib.config
 
 log = logging.getLogger(__name__)
 
@@ -110,11 +116,36 @@ class Execution(BaseRecord):
         self._status = self.RUNNING_STATUS
         self.time_start = datetime.datetime.utcnow()
         self.sql_manager.executions.update(self.id, status=self._status, time_start=self.time_start)
+        #  This hackish code is here to support dynamic reverse proxying of web interfaces running in Zoe executions (e.g. jupyter)
+        #  The idea is to use Træfik to do the reverse proxying, configured to use zookeeper to store dynamic configuration
+        #  Zoe updates ZooKeeper whenever an execution runs or is terminated and Træfik craetes or deletes the route automatically
+        if zoe_lib.config.get_conf().traefik_zk_ips is not None:
+            zk = KazooClient(hosts=zoe_lib.config.get_conf().traefik_zk_ips)
+            zk.start()
+            for service in self.services:
+                for port in service.ports:
+                    endpoint = port.url_template.format(**{"ip_port": port.external_ip + ":" + str(port.external_port)})
+                    traefik_name = 'zoe_exec_{}_{}'.format(self.id, port.id)
+                    zk.create('/traefik/backends/{}/servers/server/url'.format(traefik_name), endpoint, makepath=True)
+                    zk.create('/traefik/frontends/{}/routes/path/rule'.format(traefik_name), 'PathPrefix:{}/{}'.format(zoe_lib.config.get_conf().traefik_base_url, port.proxy_key()), makepath=True)
+                    zk.create('/traefik/frontends/{}/backend'.format(traefik_name), traefik_name, makepath=True)
+            zk.create('/traefik/alias')
+            zk.delete('/traefik/alias')
+            zk.stop()
 
     def set_cleaning_up(self):
         """The services of the execution are being terminated."""
         self._status = self.CLEANING_UP_STATUS
         self.sql_manager.executions.update(self.id, status=self._status)
+        #  See comment in method above
+        if zoe_lib.config.get_conf().traefik_zk_ips is not None:
+            zk = KazooClient(hosts=zoe_lib.config.get_conf().traefik_zk_ips)
+            zk.start()
+            zk.delete('/traefik/backends/zoe_exec_{}', recursive=True)
+            zk.delete('/traefik/frontends/zoetest', recursive=True)
+            zk.create('/traefik/alias')
+            zk.delete('/traefik/alias')
+            zk.stop()
 
     def set_terminated(self, reason=None):
         """The execution is not running."""
