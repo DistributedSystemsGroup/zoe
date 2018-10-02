@@ -184,6 +184,9 @@
         "url_template": {
           "type": "string",
           "regex": "^[a-z]?://HOST:PORT/[a-zA-Z0-9./\\-_]$"
+        },
+        "proxy": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
