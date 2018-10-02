@@ -120,19 +120,19 @@ class Execution(BaseRecord):
         #  The idea is to use Træfik to do the reverse proxying, configured to use zookeeper to store dynamic configuration
         #  Zoe updates ZooKeeper whenever an execution runs or is terminated and Træfik craetes or deletes the route automatically
         if zoe_lib.config.get_conf().traefik_zk_ips is not None:
-            zk = KazooClient(hosts=zoe_lib.config.get_conf().traefik_zk_ips)
-            zk.start()
+            zk_cli = KazooClient(hosts=zoe_lib.config.get_conf().traefik_zk_ips)
+            zk_cli.start()
             for service in self.services:
                 for port in service.ports:
                     if port.enable_proxy:
                         endpoint = port.url_template.format(**{"ip_port": port.external_ip + ":" + str(port.external_port)}).encode('utf-8')
                         traefik_name = 'zoe_exec_{}_{}'.format(self.id, port.id)
-                        zk.create('/traefik/backends/{}/servers/server/url'.format(traefik_name), endpoint, makepath=True)
-                        zk.create('/traefik/frontends/{}/routes/path/rule'.format(traefik_name), 'PathPrefix:{}/{}'.format(zoe_lib.config.get_conf().traefik_base_url, port.proxy_key()).encode('utf-8'), makepath=True)
-                        zk.create('/traefik/frontends/{}/backend'.format(traefik_name), traefik_name.encode('utf-8'), makepath=True)
-            zk.create('/traefik/alias')
-            zk.delete('/traefik/alias')
-            zk.stop()
+                        zk_cli.create('/traefik/backends/{}/servers/server/url'.format(traefik_name), endpoint, makepath=True)
+                        zk_cli.create('/traefik/frontends/{}/routes/path/rule'.format(traefik_name), 'PathPrefix:{}/{}'.format(zoe_lib.config.get_conf().traefik_base_url, port.proxy_key()).encode('utf-8'), makepath=True)
+                        zk_cli.create('/traefik/frontends/{}/backend'.format(traefik_name), traefik_name.encode('utf-8'), makepath=True)
+            zk_cli.create('/traefik/alias')
+            zk_cli.delete('/traefik/alias')
+            zk_cli.stop()
 
     def set_cleaning_up(self):
         """The services of the execution are being terminated."""
@@ -140,17 +140,17 @@ class Execution(BaseRecord):
         self.sql_manager.executions.update(self.id, status=self._status)
         #  See comment in method above
         if zoe_lib.config.get_conf().traefik_zk_ips is not None:
-            zk = KazooClient(hosts=zoe_lib.config.get_conf().traefik_zk_ips)
-            zk.start()
+            zk_cli = KazooClient(hosts=zoe_lib.config.get_conf().traefik_zk_ips)
+            zk_cli.start()
             for service in self.services:
                 for port in service.ports:
                     if port.enable_proxy:
                         traefik_name = 'zoe_exec_{}_{}'.format(self.id, port.id)
-                        zk.delete('/traefik/backends/{}'.format(traefik_name), recursive=True)
-                        zk.delete('/traefik/frontends/{}'.format(traefik_name), recursive=True)
-            zk.create('/traefik/alias')
-            zk.delete('/traefik/alias')
-            zk.stop()
+                        zk_cli.delete('/traefik/backends/{}'.format(traefik_name), recursive=True)
+                        zk_cli.delete('/traefik/frontends/{}'.format(traefik_name), recursive=True)
+            zk_cli.create('/traefik/alias')
+            zk_cli.delete('/traefik/alias')
+            zk_cli.stop()
 
     def set_terminated(self, reason=None):
         """The execution is not running."""
