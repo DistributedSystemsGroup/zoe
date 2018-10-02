@@ -109,7 +109,7 @@ class APIEndpoint:
         try:
             zoe_lib.applications.app_validate(application_description)
         except zoe_lib.exceptions.InvalidApplicationDescription as e:
-            log.info('Invalid application description: ' + e.message)
+            log.info('Invalid application description: {}'.format(e.message))
             raise zoe_api.exceptions.ZoeRestAPIException('Invalid application description')
 
         self._check_quota(user, application_description)
