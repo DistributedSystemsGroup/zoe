@@ -65,7 +65,7 @@
 <ul>
 {% for endp in endpoints|sort %}
     {% if endp[2] != None %}
-        <li><a href="{{ endp[2] }}" target="_blank">{{ endp[0] }}</a> (<a href="{{ endp[1] }}">internal link</a>)</li>
+        <li><a href="{{ endp[2] }}" target="_blank">{{ endp[0] }}</a> (<a href="{{ endp[1] }}" target="_blank" title="Direct connection without proxy, works only in Eurecom">internal link</a>)</li>
     {% else %}
     <li><a href="{{ endp[1] }}" target="_blank">{{ endp[0] }}</a> ({{ endp[1] }})</li>
     {% endif %}
