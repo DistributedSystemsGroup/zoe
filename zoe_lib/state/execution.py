@@ -125,7 +125,11 @@ class Execution(BaseRecord):
             for service in self.services:
                 for port in service.ports:
                     if port.enable_proxy:
-                        endpoint = port.url_template.format(**{"ip_port": port.external_ip + ":" + str(port.external_port)}).encode('utf-8')
+                        format_args = {
+                            "ip_port": port.external_ip + ":" + str(port.external_port),
+                            "proxy_path": '{}/{}'.format(zoe_lib.config.get_conf().traefik_base_url, port.proxy_key())
+                        }
+                        endpoint = port.url_template.format(**format_args).encode('utf-8')
                         traefik_name = 'zoe_exec_{}_{}'.format(self.id, port.id)
                         zk_cli.create('/traefik/backends/{}/servers/server/url'.format(traefik_name), endpoint, makepath=True)
                         zk_cli.create('/traefik/frontends/{}/routes/path/rule'.format(traefik_name), 'PathPrefix:{}/{}'.format(zoe_lib.config.get_conf().traefik_base_url, port.proxy_key()).encode('utf-8'), makepath=True)
