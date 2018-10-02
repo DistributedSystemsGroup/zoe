@@ -73,6 +73,7 @@ class TestZoeRest:
         assert req.status_code == 200
 
         print('Test terminate execution api endpoint')
+        time.sleep(10)
         req = requests.delete(ZOE_API_URI + 'execution/' + exec_id, auth=ZOE_AUTH, timeout=TIMEOUT)
         assert req.status_code == 204
         time.sleep(4)
