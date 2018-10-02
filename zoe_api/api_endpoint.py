@@ -210,11 +210,12 @@ class APIEndpoint:
             services_info.append(self.service_by_id(user, service.id))
             for port in service.ports:
                 if port.external_ip is not None:
-                    endpoint = port.url_template.format(**{"ip_port": port.external_ip + ":" + str(port.external_port)})
                     if zoe_lib.config.get_conf().traefik_zk_ips is None or not port.enable_proxy:
+                        endpoint = port.url_template.format(**{"ip_port": port.external_ip + ":" + str(port.external_port)})
                         endpoint_ext = None
                     else:
                         endpoint_ext = '{}/{}'.format(zoe_lib.config.get_conf().traefik_base_url, port.proxy_key())
+                        endpoint = port.url_template.format(**{"ip_port": port.external_ip + ":" + str(port.external_port), "proxy_path": endpoint_ext})
                     endpoints.append((port.readable_name, endpoint, endpoint_ext))
 
         return services_info, endpoints
