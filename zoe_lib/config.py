@@ -62,7 +62,9 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--api-listen-uri', help='ZMQ API listen address', default='tcp://*:4850')
 
         argparser.add_argument('--kairosdb-enable', action="store_true", help='Enable usage metric input from KairosDB')
-        argparser.add_argument('--kairosdb-url', help='URL of the KairosDB service (ex. http://localhost:8086)', default='http://localhost:8090')
+        argparser.add_argument('--kairosdb-url', help='URL of the KairosDB service (ex. http://localhost:8090)', default='http://localhost:8090')
+        argparser.add_argument('--influxdb-enable', action="store_true", help='Enable usage metric input from InfluxDB')
+        argparser.add_argument('--influxdb-url', help='URL of the InfluxDB service (ex. http://localhost:8086)', default='http://localhost:8086')
 
         argparser.add_argument('--workspace-base-path', help='Base directory where user workspaces will be created. Must be visible at this path on all hosts.', default='/mnt/zoe-workspaces')
         argparser.add_argument('--workspace-deployment-path', help='Path appended to the workspace path to distinguish this deployment. If unspecified is equal to the deployment name.', default='--default--')

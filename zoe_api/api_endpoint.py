@@ -214,7 +214,7 @@ class APIEndpoint:
                         endpoint_ext = None
                     else:
                         endpoint_ext = '/{}/{}'.format(zoe_lib.config.get_conf().traefik_base_url, port.proxy_key())
-                    endpoints.append((port.name, endpoint, endpoint_ext))
+                    endpoints.append((port.readable_name, endpoint, endpoint_ext))
 
         return services_info, endpoints
 

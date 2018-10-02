@@ -38,6 +38,7 @@ class Port(BaseRecord):
         self.internal_number = self.description['port_number']
         self.protocol = self.description['protocol']
         self.url_template = self.description['url_template']
+        self.readable_name = self.description['name']
 
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""

@@ -23,6 +23,7 @@ from copy import deepcopy
 from zoe_lib.config import get_conf
 from zoe_master.backends.interface import get_platform_state
 from zoe_master.metrics.kairosdb import KairosDBInMetrics
+from zoe_master.metrics.influxdb import InfluxDBInMetrics
 
 log = logging.getLogger(__name__)
 
@@ -45,6 +46,8 @@ class StatsManager(threading.Thread):
         self._current_platform_stats = None
         if get_conf().kairosdb_enable:
             self.usage_metrics = KairosDBInMetrics()
+        elif get_conf().influxdb_enable:
+            self.usage_metrics = InfluxDBInMetrics()
         else:
             self.usage_metrics = None
 
