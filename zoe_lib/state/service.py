@@ -61,12 +61,17 @@ class ResourceReservation:
     def __init__(self, data):
         self.memory = ResourceLimits(data['memory'], "bytes")
         self.cores = ResourceLimits(data['cores'], 'units')
+        if 'shm' in data:
+            self.shm = data['shm_size']
+        else:
+            self.shm = 0
 
     def __add__(self, other):
         if isinstance(other, ResourceReservation):
             res = {
                 'memory': self.memory + other.memory,
-                'cores': self.cores + other.cores
+                'cores': self.cores + other.cores,
+                'shm': self.shm + other.shm
             }
             return ResourceReservation(res)
         else:

@@ -99,7 +99,7 @@ class DockerClient:
         for volume in service_instance.volumes:
             if volume.type == "host_directory":
                 assert isinstance(volume, VolumeDescriptionHostPath)
-                run_args['volumes'][volume.path] = {'bind': volume.mount_point, 'mode': ("ro" if volume.readonly else "rw")}
+                run_args['volumes'][volume.path] = {'bi nd': volume.mount_point, 'mode': ("ro" if volume.readonly else "rw")}
             else:
                 log.error('Docker backend does not support volume type {}'.format(volume.type))
 
@@ -111,6 +111,9 @@ class DockerClient:
 
         if service_instance.core_limit is not None:
             run_args['cpu_quota'] = int(100000 * service_instance.core_limit.min)
+
+        if service_instance.shm_size > 0:
+            run_args['shm_size'] = service_instance.shm_size
 
         if get_conf().gelf_address != '':
             run_args['log_config'] = {

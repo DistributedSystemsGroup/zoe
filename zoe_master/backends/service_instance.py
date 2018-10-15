@@ -45,6 +45,8 @@ class ServiceInstance:
             if self.core_limit.max > get_conf().max_core_limit:
                 self.core_limit = get_conf().max_core_limit
 
+        self.shm_size = service.resource_reservation.shm
+
         self.labels = {
             'zoe.execution.name': execution.name,
             'zoe.execution.id': str(execution.id),

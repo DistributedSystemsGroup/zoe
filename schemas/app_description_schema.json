@@ -129,7 +129,12 @@
                 "min",
                 "max"
               ]
-            }
+            },
+            "shm_size": {
+              "type": "number",
+              "multipleOf": 1.0,
+              "minimum": 0
+            },
           },
           "additionalProperties": false,
           "required": [
