@@ -97,7 +97,7 @@ class ExecutionTerminateWeb(ZoeWebRequestHandler):
             return
 
         try:
-            self.api_endpoint.execution_terminate(self.current_user, execution_id, 'user {} request from web interface'.format(self.current_user))
+            self.api_endpoint.execution_terminate(self.current_user, execution_id, 'user {} request from web interface'.format(self.current_user.username))
         except zoe_api.exceptions.ZoeException as e:
             self.set_status(e.status_code, e.message)
             return
