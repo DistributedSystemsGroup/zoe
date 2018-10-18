@@ -27,10 +27,10 @@ To contribute code and/or documentation you should follow this workflow:
 
 1. check the issue tracker on GitHub to see if someone is already working on your idea
 2. open a new issue stating your idea and how you wish to implement it
-2. fork the Zoe repository via Eurecom's GitLab
-3. create a branch that will hold your changes
-4. ... develop and debug ...
-5. when you are ready propose your changes on the mailing list
+3. fork the Zoe repository via Eurecom's GitLab
+4. create a branch that will hold your changes
+5. ... develop and debug ...
+6. when you are ready propose your changes on the mailing list
 
 Zoe maintainers will review your code, give constructive feedback and eventually perform a pull and a merge.
 

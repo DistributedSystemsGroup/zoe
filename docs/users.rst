@@ -19,7 +19,7 @@ Each user has a :ref:`roles` and a :ref:`quotas` associated.
 By default Zoe has an admin user (with password "admin"), created during the first startup. While deploying Zoe, this user must be disabled or its password changed. The default password is a security risk.
 
 Experimental OAuth2 support
---------------------------
+---------------------------
 
 This version of Zoe includes an experimental OAuth2 client implementation that points to a GitLab instance in Eurecom's infrastructure. To use it with your own OAuth2 provider, you need to modify the source code under ``zoe_api/auth/requests_oauth2/services.py``, ``zoe_api/rest_api/user.py`` and ``zoe_api/web/start.py``.
 
