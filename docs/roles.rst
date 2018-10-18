@@ -21,4 +21,4 @@ By default three roles are created:
  * superuser : has can_see_status, can_access_api, can_customize_resources and can_access_full_zapp_shop
  * user : has no capabilities
 
-Zoe will refuse to delete or modify the admin role.
+Zoe will refuse to delete or modify the admin role. Other roles can be created and modificed via the zoe-admin.py tool or the web interface.

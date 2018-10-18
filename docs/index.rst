@@ -76,7 +76,6 @@ Development and contributing to the project
 
   developer/index
   architecture
-  quality
   contributing
 
 External resources

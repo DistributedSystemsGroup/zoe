@@ -13,29 +13,21 @@ Development repository
 ----------------------
 Development happens at `Eurecom's GitLab repository <https://gitlab.eurecom.fr/zoe/main>`_. The GitHub repository is a read-only mirror.
 
-The choice of GitLab over GitHub is due to the CI pipeline that we set-up to test Zoe. Please note the issue tracking happens on GitHub.
+The choice of GitLab over GitHub is due to the CI pipeline that we set-up to test Zoe. Please note the issue tracking for the Zoe project happens on GitHub.
 
 Bug reports and feature requests
 --------------------------------
 
 Bug reports and feature requests are handled through the GitHub issue system at: `https://github.com/DistributedSystemsGroup/zoe/issues <https://github.com/DistributedSystemsGroup/zoe/issues>`_
 
-The issue system should be used for only for bug reports or feature requests. If you have more general questions, you need help setting up Zoe or running some application, please use the mailing list.
-
-Mailing list
-------------
-
-The mailing list: `http://www.freelists.org/list/zoe <http://www.freelists.org/list/zoe>`_
-
-Use the mailing list to stay up-to-date with what other developers are working on, to discuss and propose your ideas. We prefer small and incremental contributions, so it is important to keep in touch with the rest of the community to receive feedback. This way your contribution will be much more easily accepted.
-
 Code and documentation contributions
 ------------------------------------
 
 To contribute code and/or documentation you should follow this workflow:
 
-1. announce your idea on the mailing list, to prevent duplicated work
-2. fork the Zoe repository via GitHub (if you don't already have a fork)
+1. check the issue tracker on GitHub to see if someone is already working on your idea
+2. open a new issue stating your idea and how you wish to implement it
+2. fork the Zoe repository via Eurecom's GitLab
 3. create a branch that will hold your changes
 4. ... develop and debug ...
 5. when you are ready propose your changes on the mailing list
@@ -59,4 +51,12 @@ In general, if your code passes pylint, run with our configuration file with a 1
 Code quality and tests
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Contributors can setup their own CI pipeline following the quality guidelines (:ref:`quality`). At a bare minimum all code should be tested via the `run_tests.sh` script available in the root of the repository. Accepted contributions will be run through the CI pipeline at Eurecom before being published on the public repository.
+Before committing, all code should be tested via the `run_tests.sh` script available in the root of the repository.
+
+All contributions to the codebase are centralised into a repository at Eurecom. There, every commit (on any branch) triggers a continuous integration pipeline that verifies code quality and runs tests. Only commits and merges on the master branch for which the CI succeeds are pushed to the public repository.
+
+A description of the CI pipeline is available in the :ref:`ci-gitlab` page.
+
+Sphinx documentation is tested with the ``doc8`` tool with default options.
+
+Refer to the :ref:`integration-test` documentation for details on integration testing.
