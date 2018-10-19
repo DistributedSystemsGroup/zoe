@@ -17,7 +17,7 @@ zoe.conf
 --------
 
 The Zoe config file have a simple format of ``<option name> = <value>``. Dash characters can be use for comments.
-All Zoe processes use one single configuration file, called zoe.conf. It is searched in the current working directory and in ``/etc/zoe/``.
+All Zoe processes use a single configuration file, called zoe.conf. It is looked up in the current working directory and in ``/etc/zoe/``.
 
 Common options:
 
@@ -34,6 +34,8 @@ Metrics:
 
 * ``kairosdb-enable = false`` : Enable gathering of usage metrics recorded in KairosDB
 * ``kairosdb-url = http://localhost:8090`` : URL of KairosDB REST API
+* ``influxdb-enable = false`` : Enable gathering of usage metrics recorded in InfluxDB
+* ``kairosdb-url = http://localhost:8086`` : URL of InfluxDB REST API
 
 Service logs (see: :ref:`logging`):
 
@@ -60,7 +62,6 @@ API options:
 Master options:
 
 * ``api-listen-uri = tcp://*:4850`` : ZeroMQ server connection string, used for the master listening endpoint
-* ``overlay-network-name = zoe`` : name of the pre-configured Docker overlay network Zoe should use (Swarm backend)
 * ``max-core-limit = 16`` : maximum amount of cores a user is able to reserve
 * ``max-memory-limit = 64`` : maximum amount of memory a user is able to reserve
 * ``additional-volumes = <none>`` : list of additional volumes to mount in every service, for every ZApp (ex. /mnt/data:data,/mnt/data_n:data_n)
@@ -94,6 +95,7 @@ Kubernetes back-end:
 DockerEngine back-end:
 
 * ``backend-docker-config-file = docker.conf`` : name of the DockerEngine back-end configuration file
+* ``overlay-network-name = zoe`` : Name of the Docker network Zoe should use (can be overridden in the ZApp definition)
 
 Proxy options:
 

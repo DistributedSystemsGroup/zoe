@@ -29,27 +29,25 @@ DockerEngine
 
 The DockerEngine back-end uses one or more nodes with Docker Engine installed and configured to listen to network requests.
 
-The Docker Engines must be configured to enable `multi host networking <https://docs.docker.com/engine/userguide/networking/overlay-standalone-swarm/>`_.
-
 This sample config file, usually found in ``/etc/docker/daemon.conf`` may help to get you started::
 
    {
       "dns": ["192.168.46.1"],
-      "dns-search": ["bigfoot.eurecom.fr"],
+      "dns-search": ["zoe.example.com"],
       "tlsverify": true,
-      "tlscacert": "/mnt/certs/cacert.pem"
+      "tlscacert": "/mnt/certs/cert-authority/ca.pem"
       "tlscert": "/mnt/certs/cert.pem",
       "tlskey": "/mnt/certs/key.pem",
-      "hosts": ["tcp://bf11.bigfoot.eurecom.fr:2375", "unix:///var/run/docker.sock"]
+      "hosts": ["tcp://worker1.zoe.example.com:2375", "unix:///var/run/docker.sock"]
     }
 
 Once you have your docker hosts up and running, to tell the back-end which nodes are available and how to connect to them, you need to create a file with this format::
 
     [DEFAULT]
     use_tls: no
-    tls_cert: /mnt/cephfs/admin/cert-authority/container-router/cert.pem
-    tls_key: /mnt/cephfs/admin/cert-authority/container-router/key.pem
-    tls_ca: /mnt/cephfs/admin/cert-authority/ca.pem
+    tls_cert: /mnt/certs/client/cert.pem
+    tls_key: /mnt/certs/client/key.pem
+    tls_ca: /mnt/certs/cert-authority/ca.pem
 
     [foo]
     address: localhost:2375
@@ -66,7 +64,7 @@ Once you have your docker hosts up and running, to tell the back-end which nodes
     use_tls: yes
     labels: gpu,ssd
 
-This sample configuration describes three hosts. The DEFAULT section contains items that are common to all hosts, in any case  these entries can be overwritten in the host definition.
+This sample configuration describes three hosts. The DEFAULT section contains items that are common to all hosts, however they can be overwritten in the host definition.
 
 Host ``foo`` does not use TLS (from the default config item), Zoe needs to connect to localhost on port 2375 to talk to it and users connecting to containers running on this host need to use the ``192.168.45.42`` address to connect. This ``external_address`` will be used by Zoe to generate links in the web interface.
 
@@ -92,6 +90,10 @@ At Eurecom we use CephFS, but we know of successful Zoe deployments based on NFS
 
 Networking
 ----------
+
+Containers spawned by Zoe need to be able to talk to each other on the network like they where on the same broadcast domain, even when they run on different hosts. Network configuration is back-end dependent: both Kubernetes and Docker provide their own systems to manage the virtual network between containers.
+
+Docker provides a feature called ``multi host networking``. An alternative that we found more efficient and simple to setup and maintain is `Flannel <https://github.com/coreos/flannel>`_.
 
 Most of the ZApps expose a number of interfaces (web, REST and others) to the user. Zoe configures the active back-end to expose these ports, but does not perform any additional action to configure routing or DNS to make the ports accessible. Keeping in mind that the back-end network configuration is outside Zoe's competence area, here there is non-exhaustive list of the possible configurations:
 
@@ -136,10 +138,9 @@ The file location can be specified in the ``zoe.conf`` file and it needs to be r
 Managing Zoe applications
 -------------------------
 
-At the very base, ZApps are composed of a container image and a JSON description. The container image can be stored on the Docker nodes,  in a local private registry, or in a public one, accessible via the Internet.
+ZApps are composed of a container image and a JSON description. The container image can be stored on the Docker nodes, in a local private registry or in the public Docker Hub (or any other public registry).
 
-Zoe does not provide a way to automatically build images, push them to a local registry, or pull them to the hosts when needed. At Eurecom we provide an automated environment based on GItLab's CI features: users are able to customize their applications (JSON and Dockerfiles) by working on git repositories. Images are rebuilt and pushed on commit and JSON files are generated and copied to the ZApp shop directory. You can check out how we do it here:
-https://gitlab.eurecom.fr/zoe-apps
+Zoe does not provide a way to automatically build images, push them to a local registry, or pull them to the hosts when needed. At Eurecom we provide an automated environment based on GitLab's CI features: users are able to customize their applications (JSON and Dockerfiles) by working on git repositories. Images are rebuilt and pushed on commit and JSON files are generated and copied to the ZApp shop directory. You can check out a few examples here: https://gitlab.eurecom.fr/zoe-apps
 
 The ZApp Shop
 ^^^^^^^^^^^^^
@@ -292,34 +293,30 @@ Docker 1.9/Swarm 1.0 multi-host networking can be used in Zoe:
 
 This means that you will also need a key-value store supported by Docker. We use Zookeeper, it is available in Debian and Ubuntu without the need for external package repositories and is very easy to set up.
 
+An alternative is Flannel. It can be configured to use IP routing without tunneling, that improves performance under heavy workloads. Flannel required etcd.
+
+* https://github.com/coreos/flannel
+
 Images: Docker Hub Vs local Docker registry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A few sample ZApps have their images available on the Docker Hub. Images can be manually (or via a CI pipeline) pulled on all the worker nodes.
+The ZApps we use at Eurecom have their images available on the Docker Hub. Images can be manually (or via a CI pipeline) pulled on all the worker nodes.
 
-A Docker Registry becomes interesting to have if you have lot of image build activity and you need to keep track of who builds what, establish ACLs, etc.
+An internal Docker Registry becomes interesting to have if you have lot of image build activity and you need to keep track of who builds what, establish ACLs, etc.
+
+The simplest way to manage images is to load them on the Docker Hub and pull them on all the hosts via some automation tool, like Ansible.
 
 Zoe
 ^^^
 
 Zoe is written in Python and uses the ``requirements.txt`` file to list the package dependencies needed for all components of Zoe. Not all of them are needed in all cases, for example you need the ``pykube`` library only if you use the Kubernetes back-end.
 
-Currently this is the recommended procedure, once the initial Swarm setup has been done:
+Currently this is the recommended procedure, once the initial back-end setup has been done:
 
 1. Clone the zoe repository
 2. Install Python package dependencies: ``pip3 install -r requirements.txt``
-3. Create new configuration files for the master and the api processes (:ref:`config_file`), you will need also access to a postgres database
+3. Create new configuration files for the master and the api processes (:ref:`config_file`), you will need postgres credentials
 4. Setup supervisor to manage Zoe processes: in the ``contrib/supervisor/`` directory you can find the configuration file for supervisor. You need to modify the paths to point to where you cloned Zoe and the user (Zoe does not need special privileges).
 5. Start running ZApps!
 
 In case of troubles, check the logs for errors. Zoe basic functionality can be tested via the ``zoe.py stats`` command. It will query the ``zoe-api`` process, that in turn will query the ``zoe-master`` process.
-
-.. _api-manager-label:
-
-API Managers
-------------
-
-To provide TLS termination, authentication, load balancing, metrics, and other services to the Zoe API, you can use an API manager in front of the Zoe API. For example:
-
-* Tyk: https://tyk.io/tyk-documentation/get-started/with-tyk-on-premise/
-* Kong: https://getkong.org/docs/0.10.x/proxy/

@@ -22,10 +22,10 @@ Because of this in Zoe we decided to leave the maximum freedom to administrators
 
 In this case the logs command line, API and web interface will not be operational.
 
-Swarm-only integrated log management
-------------------------------------
+Docker engine integrated log management
+---------------------------------------
 
-When using the Swarm back-end, however, Zoe can configure the containers to produce the output in UDP GELF format and send them to a configured destination, via the ``gelf-address`` option. Each messages is enriched with labels to help matching each log line to the ZApp and service that produced it.
+When using the Docker Engine back-end Zoe can configure the containers to produce the output in UDP GELF format and send them to a configured destination, via the ``gelf-address`` option. Each messages is enriched with labels to help matching each log line to the ZApp and service that produced it.
 
 GELF is understood by many tools, like Graylog or the `ELK <https://www.elastic.co/products>`_ and it is possible to store the service output in Elasticsearch and make it searchable via Kibana, for example.
 
