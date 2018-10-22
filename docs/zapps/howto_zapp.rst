@@ -36,7 +36,7 @@ The ZApp format is versioned. Zoe checks the version field as first thing to mak
 The PyDataSci ZApp
 ------------------
 
-Clone the `PyDataSci ZApp <https://gitlab.eurecom.fr/zoe/pydaatsci>`_ repository.
+Clone the `PyDataSci ZApp <https://gitlab.eurecom.fr/zoe/pydatasci>`_ repository.
 
 The repository actually contains two ZApps, a normal one and a GPU-enabled one. Both contain the same set of libraries, the only difference being in the NVidia drivers and associated libraries.
 
