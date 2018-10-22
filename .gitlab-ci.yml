@@ -57,6 +57,7 @@ images:
   script:
     - docker build --pull -t zoerepo/${ZOE_TEST_IMAGE} -f Dockerfile.test .
     - docker push zoerepo/${ZOE_TEST_IMAGE}
+    - docker rm -f nginx0-1-integration_test || true
 
 api-test:
   stage: integration-test

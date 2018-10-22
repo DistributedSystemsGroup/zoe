@@ -142,6 +142,8 @@ The Elastic scheduler together with the DockerEngine back-end will behave in the
 * for memory, a soft limit will be set at the "min" resource level and an hard limit to the amount set in the ``max-memory-limit`` option. See Docker documentation about the exact definitions of soft and hard limits
 * for cores, they will be allocated dynamically and automatically: a service that has cores.min set to 4 will have at least cores. If more are available on the node it is running on, more will be given
 
+Additionally, an optional parameter for shared memory can be specified. This does not have a minimum and maximum, but it is a simple value in bytes. The key is ``shm_size`` and is equivalent to the Docker option ``--shm-size``. It may be useful to tune for GPU applications. The parameter is understood only by the DockerEngine back-end.
+
 startup_order
 ^^^^^^^^^^^^^
 
@@ -169,6 +171,11 @@ labels
 array of strings
 
 This entry is optional. Labels will be used by the scheduler to take placement decisions for services. Services that have labels "ssd" and "gpu" will be placed only on hosts declared with both labels. If no hosts with "ssd" and "gpu" are available, the ZApp is left in the queue.
+
+network
+^^^^^^^
+
+Name of the network to connect this service (containers) to. This parameter is optional and defaults to empty, meaning attach to the default network. In some cases it may be interesting to connect an entire ZApp or part of it to a different virtual network, specified via the back-end.
 
 ports
 ^^^^^
@@ -209,6 +216,13 @@ port_number
 number
 
 The port number where the service is listening for connections. The external (user-visible) port number will be chosen by the back-end.
+
+proxy
+^^^^^
+
+boolean
+
+Whether to tell the reverse proxy to dynamically generate an external URL for this endpoint. The parameter is optional and defaults to false.
 
 Example
 -------
