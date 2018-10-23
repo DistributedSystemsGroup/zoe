@@ -31,14 +31,4 @@ Using the Docker executor, we configured our runner with these options::
       [runners.cache]
         Insecure = false
 
-Please note that since our private registry is protected with TLS, we need to pass also the CA certificate to be able to push Docker images build inside the CI pipeline.
-
-Variables
----------
-
-To run the tests a number of variables need to be set from the GitLab interface:
-
-* SSH_PRIVATE_KEY: private key to be used to deploy via rsync the staging build
-* STAGING_IP: IP/hostname of the staging server
-* WEB_STAGING_PATH: path for the web interface on the staging server
-* ZOE_STAGING_PATH: path for Zoe on the staging server
+Please note that since our private registry is protected with TLS, we need to pass also the CA certificate to be able to push Docker images built inside the CI pipeline.

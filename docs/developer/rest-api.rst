@@ -7,19 +7,13 @@ Zoe can be used from the command line or the web interface. For more complex tas
 
 The API is provided by the zoe-api processes, on the same port of the web interface (5001 by default). Every URL of the API contains, after the hostname and port, the path ``/api/<api version>/``. **The current API version is 0.7**.
 
-In case the request causes an error, an appropriate HTTP status code is returned. The reply will also contain a JSON document in this format::
-
-    {
-        "message": "missing or wrong authentication information"
-    }
-
-With an error message detailing the kind of error that happened.
+In case the request causes an error, an appropriate HTTP status code is returned. The Status header will also contain a human-readable string detailing the error.
 
 Some endpoints require credentials for authentication. The API uses HTTP Basic authentication. After the first successful authentication, a cookie will be returned in the response headers. The cookie can be used as an authentication token for the subsequent requests.
 
 Login endpoint
 --------------
-Get back a cookie for further authentication/authorization with other api endpoints instead of using HTTP basic username, password
+Get back a cookie for further authentication/authorization with other api endpoints instead of using HTTP basic for each request.
 
 Request::
 
@@ -49,11 +43,6 @@ Example::
 
     curl -b zoe_cookie.txt http://bf5:8080/api/<api_version>/execution
 
-Note:
-
-- For zoe web interface, we require cookie_based mechanism for authentication/authorization.
-- Every unauthorized request will be redirected to **http://<hostname>:8080/login**
-- After a successful login, a cookie will be saved in the browser for further authentication/authorization purpose.
 
 Info endpoint
 -------------
@@ -66,7 +55,7 @@ This endpoint does not need authentication. It returns general, static, informat
 Will return a JSON document, like this::
 
     {
-        "version" : "2017.12",
+        "version" : "2018.11",
         "deployment_name" : "prod",
         "application_format_version" : 3,
         "api_version" : "0.7"
@@ -131,7 +120,7 @@ Will return a JSON document like this::
 
 Where:
 
-* ``status`` is the execution status. It can be on of "submitted", "queued", "starting", "error", "running", "cleaning up", "terminated"
+* ``status`` is the execution status. It can be one of "submitted", "queued", "starting", "error", "running", "cleaning up", "terminated"
 * ``description`` is the full ZApp description as submitted by the user
 * ``error_message`` contains the error message in case ``status`` is equal to error
 * ``time_submit`` is the time the execution was submitted to Zoe
@@ -195,7 +184,7 @@ Will return a JSON document like this::
 
 It is a map with the execution IDs as keys and the full execution details as values.
 
-Starting from verion 0.7 of the API, the execution list can be filtered.
+Starting from version 0.7 of the API, the execution list can be filtered.
 
 You need to pass via the URL (GET parameters) the criteria to be used for filtering, for example::
 
@@ -370,7 +359,7 @@ Where:
 * ``termination_threads_count`` is the number of executions that are pending for termination and cleanup
 * ``queue_length`` is the number of executions in the queue waiting to be started
 
-The actual content of the response may vary between different Zoe releases.
+The actual content of the response may vary depending on the Zoe release.
 
 User endpoints
 --------------
@@ -427,7 +416,7 @@ Where:
 
 * ``user_id`` is the ID of the new user just created.
 
-Please note that to set the password a second request to the update user endpoint needs to be performed.
+Please note that to set the password a second request to the update user endpoint needs to be performed. The workspace will not be created by Zoe.
 
 Search
 ^^^^^^
@@ -465,6 +454,8 @@ Request::
     curl -X DELETE -b zoe_cookie.txt http://bf5:8080/api/<api_version>/user/<user_id>
 
 If the request is successful an empty response with status code 200 will be returned.
+
+Please note that only the user entry in the database and all its executions will be deleted. The workspace will not be deleted.
 
 Update
 ^^^^^^

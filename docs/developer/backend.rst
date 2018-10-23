@@ -5,7 +5,7 @@ Back-end abstraction
 
 The container back-end Zoe uses is configurable at runtime. Internally there is an API that Zoe, in particular the scheduler, uses to communicate with the container back-end. This document explains the API, so that new back-ends can be created and maintained.
 
-Zoe assumes back-ends are composed of multiple nodes. In case the back-end is not clustered or does not expose per-node information, it can be implemented in Zoe as exposing a single node.
+Zoe assumes back-ends are composed of multiple nodes. In case the back-end is not clustered or does not expose per-node information, it can be implemented in Zoe as exposing a single big node. In this case, however, many of the smart scheduling features of Zoe will be unavailable.
 
 Package structure
 -----------------
