@@ -62,7 +62,7 @@ class ResourceReservation:
         self.memory = ResourceLimits(data['memory'], "bytes")
         self.cores = ResourceLimits(data['cores'], 'units')
         if 'shm' in data:
-            self.shm = data['shm_size']
+            self.shm = data['shm']
         else:
             self.shm = 0
 
