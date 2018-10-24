@@ -330,6 +330,7 @@ class ZoeElasticScheduler:
                 if service.essential and service.backend_status == service.BACKEND_DIE_STATUS:
                     log.info("Essential service {} ({}) of execution {} died, terminating execution".format(service.id, service.name, execution.id))
                     service.restarted()
+                    execution.set_error_message("Essential service {} died".format(service.name))
                     self.terminate(execution)
                     break
         # Check for executions that need to be re-queued because one of the elastic components died
