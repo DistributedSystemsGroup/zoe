@@ -65,8 +65,6 @@
                 {% endif %}
                 {% if e.is_active %}
                     <td><a href="{{ reverse_url("execution_terminate", e.id) }}">Terminate</a></td>
-                {% else %}
-                    <td><a href="{{ reverse_url("execution_restart", e.id) }}">Restart</a></td>
                 {% endif %}
             </tr>
         {% endfor %}

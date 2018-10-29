@@ -41,10 +41,6 @@
     <li>Actions:
         <a href="{{ reverse_url("execution_terminate", e.id) }}">Terminate</a>
     </li>
-    {% elif e.status == "terminated" %}
-    <li>Actions:
-        <a href="{{ reverse_url("execution_restart", e.id) }}">Restart</a>
-    </li>
     {% endif %}
     {% if grafana_url is defined %}
     <li>
