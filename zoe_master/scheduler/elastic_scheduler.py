@@ -134,7 +134,10 @@ class ZoeElasticScheduler:
             return
         elif self.policy == "DYNSIZE":
             for execution in self.queue:  # type: Execution
-                exec_data = self.additional_exec_state[execution.id]
+                try:
+                    exec_data = self.additional_exec_state[execution.id]
+                except KeyError:
+                    continue
                 if exec_data.last_time_scheduled == 0:
                     continue
                 elif execution.size <= 0:
