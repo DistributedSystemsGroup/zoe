@@ -28,8 +28,7 @@ from zoe_master.backends.docker.config import DockerConfig, DockerHostConfig  # 
 from zoe_master.backends.docker.threads import DockerStateSynchronizer
 from zoe_master.backends.service_instance import ServiceInstance
 from zoe_master.exceptions import ZoeStartExecutionRetryException, ZoeStartExecutionFatalException, ZoeException, ZoeNotEnoughResourcesException
-from zoe_master.metrics.kairosdb import KairosDBInMetrics
-from zoe_master.stats import ClusterStats, NodeStats
+from zoe_master.stats import ClusterStats
 
 log = logging.getLogger(__name__)
 
