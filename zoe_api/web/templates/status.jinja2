@@ -29,7 +29,7 @@
     <ul>
         <li>Queue length: <span id="sched_queue_len">{{ stats.queue_length }}</span></li>
         <li>Running queue length: <span id="sched_running_queue_len">{{ stats.running_length }}</span></li>
-        <li>On-going clean-up threads: <span id="termination_threads_count">{{ stats.termination_threads_count }}</span></li>
+        <li>Clean-up queue length: <span id="termination_threads_count">{{ stats.termination_queue_length }}</span></li>
     </ul>
 
     <h4>Queue</h4>
@@ -75,6 +75,41 @@
     <p>This queue is unsorted, all services here should be green.</p>
     <div class="scheduler_queue">
     {% for id in stats['running_queue'] %}
+            <div class="queue_item" id="{{ id }}">
+            {% if user.role.can_operate_others %}
+            <a href="{{ reverse_url('execution_inspect', id) }}">{{ id }}</a> ({{ executions_in_queue[id].owner.username }})
+            {% else %}
+            {{ id }} ({{ executions_in_queue[id].owner.username }})
+            {% endif %}
+            {% for service in executions_in_queue[id].services %}
+                {% if service.essential %}
+                <div class="service essential {{ 'running' if service.status == service.ACTIVE_STATUS }}">
+                    {{ service['name'] }}<br/>
+                    M: <script>format_bytes({{ service['resource_reservation']['memory']['min'] }});</script><br/>
+                    C: {{ service['resource_reservation']['cores']['min'] }}
+                </div>
+                {% endif %}
+            {% endfor %}
+            {% for service in executions_in_queue[id].services %}
+                {% if not service.essential %}
+                <div class="service {{ 'running' if service.status == service.ACTIVE_STATUS }}">
+                    {{ service['name'] }}<br/>
+                    M: <script>format_bytes({{ service['resource_reservation']['memory']['min'] }});</script><br/>
+                    C: {{ service['resource_reservation']['cores']['min'] }}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endfor %}
+    {% if stats['running_queue']|length == 0 %}
+    <p>The running queue is empty.</p>
+    {% endif %}
+    </div>
+
+    <h4>Clean-up queue</h4>
+    <p>This queue contains executions that are waiting to be cleaned-up.</p>
+    <div class="scheduler_queue">
+    {% for id in stats['termination_queue'] %}
             <div class="queue_item" id="{{ id }}">
             {% if user.role.can_operate_others %}
             <a href="{{ reverse_url('execution_inspect', id) }}">{{ id }}</a> ({{ executions_in_queue[id].owner.username }})

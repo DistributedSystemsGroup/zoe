@@ -36,6 +36,8 @@ class StatusEndpointWeb(ZoeWebRequestHandler):
             executions_in_queue[exec_id] = self.api_endpoint.execution_by_id(None, exec_id)
         for exec_id in stats['running_queue']:
             executions_in_queue[exec_id] = self.api_endpoint.execution_by_id(None, exec_id)
+        for exec_id in stats['termination_queue']:
+            executions_in_queue[exec_id] = self.api_endpoint.execution_by_id(None, exec_id)
 
         services_per_node = {}
         for node in stats['platform_stats']['nodes']:
