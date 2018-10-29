@@ -59,7 +59,7 @@ class DockerStateSynchronizer(threading.Thread):
             time_start = time.time()
             try:
                 my_engine = DockerClient(host_config)
-                container_list = my_engine.list(only_label={'zoe_deployment_name': get_conf().deployment_name})
+                container_list = my_engine.list(only_label='zoe_deployment_name={}'.format(get_conf().deployment_name))
                 running_container_list = my_engine.list(status='running')
                 info = my_engine.info()
             except ZoeException as e:
