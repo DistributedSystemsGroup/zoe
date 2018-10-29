@@ -243,33 +243,28 @@ class DockerClient:
             if not res:
                 break
 
-    def list(self, only_label=None) -> List[dict]:
+    def list(self, only_label=None, status=None) -> List[dict]:
         """
         List running or defined containers.
 
         :param only_label: filter containers with only a certain label
+        :param status: filter containers with only a certain status (one of restarting, running, paused, exited)
         :return: a list of containers
         """
+        filters = {}
+        if only_label is not None:
+            filters['label'] = only_label
+        if status is not None:
+            filters['status'] = status
         try:
-            ret = self.cli.containers.list(all=True)
+            ret = self.cli.containers.list(all=True, filters=filters)
         except docker.errors.APIError as ex:
             raise ZoeException(str(ex))
         except requests.exceptions.RequestException as ex:
             raise ZoeException(str(ex))
-        if only_label is None:
-            only_label = {}
         conts = []
         for cont_info in ret:
-            match = True
-            for key, value in only_label.items():
-                if key not in cont_info.attrs['Config']['Labels']:
-                    match = False
-                    break
-                if cont_info.attrs['Config']['Labels'][key] != value:
-                    match = False
-                    break
-            if match:
-                conts.append(self._container_summary(cont_info))
+            conts.append(self._container_summary(cont_info))
 
         return conts
 

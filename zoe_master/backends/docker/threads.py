@@ -60,6 +60,7 @@ class DockerStateSynchronizer(threading.Thread):
             try:
                 my_engine = DockerClient(host_config)
                 container_list = my_engine.list(only_label={'zoe_deployment_name': get_conf().deployment_name})
+                running_container_list = my_engine.list(status='running')
                 info = my_engine.info()
             except ZoeException as e:
                 self.host_stats[host_config.name].status = 'offline'
@@ -70,7 +71,7 @@ class DockerStateSynchronizer(threading.Thread):
                     log.info('Node {} is now online'.format(host_config.name))
                     self.host_stats[host_config.name].status = 'online'
 
-                self.host_stats[host_config.name].container_count = info['Containers']
+                self.host_stats[host_config.name].container_count = len(running_container_list)
                 self.host_stats[host_config.name].cores_total = info['NCPU']
                 self.host_stats[host_config.name].memory_total = info['MemTotal']
                 self.host_stats[host_config.name].labels = host_config.labels
