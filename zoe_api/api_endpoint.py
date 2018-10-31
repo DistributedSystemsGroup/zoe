@@ -83,7 +83,7 @@ class APIEndpoint:
         if quota.concurrent_executions != 0 and len(running_execs) >= quota.concurrent_executions:
             raise zoe_api.exceptions.ZoeQuotaException('You cannot run more than {} executions at a time, quota exceeded.'.format(quota.concurrent_executions))
 
-        if quota.cores != 0 and quota.memory != 0:
+        if quota.cores == 0 and quota.memory == 0:
             return
 
         reserved_cores = 0
@@ -99,9 +99,9 @@ class APIEndpoint:
             new_exec_cores += service['resources']['cores']['min'] * service['total_count']
             new_exec_memory += service['resources']['memory']['min'] * service['total_count']
 
-        if quota.cores < reserved_cores + new_exec_cores:
+        if quota.cores != 0 and quota.cores < reserved_cores + new_exec_cores:
             raise zoe_api.exceptions.ZoeQuotaException('You requested {} cores more than your quota allows, quota exceeded.'.format((reserved_cores + new_exec_cores) - quota.cores))
-        if quota.memory < reserved_mem + new_exec_memory:
+        if quota.memory != 0 and quota.memory < reserved_mem + new_exec_memory:
             raise zoe_api.exceptions.ZoeQuotaException('You requested {}B memory more than your quota allows, quota exceeded.'.format((reserved_mem + new_exec_memory) - quota.memory))
 
     def execution_start(self, user: zoe_lib.state.User, exec_name, application_description):
