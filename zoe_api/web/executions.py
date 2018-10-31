@@ -156,6 +156,8 @@ class ServiceLogsWeb(ZoeWebRequestHandler):
 
         template_vars = {
             "service": service,
-            "websocket_base": get_conf().websocket_base + get_conf().reverse_proxy_path
+            "log_path": "{}/{}/{}/{}.txt".format(get_conf().log_url, get_conf().deployment_name, service.execution_id, service.name),
+            "websocket_base": get_conf().websocket_base + get_conf().reverse_proxy_path,
+            'use_websockets': get_conf().log_use_websockets
         }
         self.render('service_logs.jinja2', **template_vars)

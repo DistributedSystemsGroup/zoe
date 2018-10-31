@@ -1,5 +1,8 @@
 {% extends "base_user.jinja2" %}
 {% block title %}Service {{ service.name }} logs{% endblock %}
+{% block custom_head %}
+    <script type="text/javascript" src="{{ static_url("logtail.js") }}"></script>
+{% endblock %}
 {% block content %}
     <h1>Zoe - Analytics on demand</h1>
 
@@ -9,10 +12,16 @@
 
 <textarea class="logoutput" id="logoutput" readonly>
 </textarea>
+<a id="pause" href='#'>Pause</a>
+
+    {% if not use_websockets %}
+    <p>Please note: only the last 30kB of the log are shown when the page is loaded.</p>
+    {% endif %}
 
 <p><a href="{{ reverse_url("execution_inspect", service.execution_id) }}">Back to execution details</a></p>
 
 <script type="application/javascript">
+    {% if use_websockets %}
 var ws = new WebSocket('{{ websocket_base }}/websocket');
 ws.onopen = function (e) {
     ws.send(JSON.stringify({
@@ -20,13 +29,14 @@ ws.onopen = function (e) {
         service_id: {{ service.id }}
     }));
 };
-
 var log_element = $('#logoutput');
 ws.onmessage = function (evt) {
     log_element.append(evt.data);
     log_element.scrollTop(log_element[0].scrollHeight);
 };
-
+    {% else %}
+logtail("{{ log_path }}");
+    {% endif %}
 </script>
 
 {% endblock %}

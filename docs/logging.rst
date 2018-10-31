@@ -23,7 +23,7 @@ Because of this in Zoe we decided to leave the maximum freedom to administrators
 In this case the logs command line, API and web interface will not be operational.
 
 Docker engine integrated log management
----------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When using the Docker Engine back-end Zoe can configure the containers to produce the output in UDP GELF format and send them to a configured destination, via the ``gelf-address`` option. Each messages is enriched with labels to help matching each log line to the ZApp and service that produced it.
 
@@ -36,3 +36,8 @@ Additionally the Zoe master can itself be configured to act as a log collector. 
 In this case the logs command line, API and web interface will work normally.
 
 Please note that the GELF listener implemented in the Zoe Master process is not built to manage high loads of incoming log messages. If the incoming rate is too high, UDP packets (and hence log lines) may be dropped and lost.
+
+There are two ways to show the logs on the web interface:
+
+1. An implementation of log streaming via web sockets
+2. the directory tree created above must be exported via HTTP by an external web server that supports the Range header. This choice is due to performance and reliability. The option ``log-url`` must contain the base url where the directory tree is exposed.

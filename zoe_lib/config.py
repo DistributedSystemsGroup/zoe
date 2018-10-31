@@ -74,6 +74,8 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--gelf-address', help='Enable Docker GELF log output to this destination (ex. udp://1.2.3.4:7896)', default='')
         argparser.add_argument('--gelf-listener', type=int, help='Enable the internal GELF log listener on this port, set to 0 to disable', default='7896')
         argparser.add_argument('--service-logs-base-path', help='Path where service logs coming from the GELF listener will be stored', default='/var/lib/zoe/service-logs')
+        argparser.add_argument('--log-url', help='URL where log files are available via HTTP as /deployment-name/execution-id/service-name.txt', default='https://cloud-platform.eurecom.fr/zoe-logs/')
+        argparser.add_argument('--log-use-websockets', help='Use websockets or standard ajax with an external web server for serving service logs', action="store_true")
 
         # API options
         argparser.add_argument('--listen-address', help='Address to listen to for incoming connections', default="0.0.0.0")
