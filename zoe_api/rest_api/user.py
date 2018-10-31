@@ -169,7 +169,12 @@ class UserOAuthCallbackAPI(ZoeAPIRequestHandler):
             self.redirect(self.reverse_url("login"))
             return
         data = resp.json()
-        email = data['email']
+        try:
+            email = data['email']
+        except KeyError:
+            with_gitlab_oauth = zoe_lib.config.get_conf().oauth_client_id != ''
+            self.render('login.jinja2', error='Email address not set to public in GitLab settings', with_gitlab_oauth=with_gitlab_oauth)
+            return
         username = data['nickname']
         user = self.api_endpoint.user_by_name(username)
         if user is not None:
