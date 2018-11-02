@@ -125,7 +125,7 @@ class ZoeElasticScheduler:
                 pass
 
             terminate_execution(execution)
-            log.debug('Execution {} terminated successfully'.format(execution.id))
+            log.info('Execution {} terminated successfully'.format(execution.id))
 
     def _refresh_execution_sizes(self):
         if self.policy == "FIFO":
@@ -236,7 +236,7 @@ class ZoeElasticScheduler:
                     free_resources = current_free_resources
 
                 placements = cluster_status_snapshot.get_service_allocation()
-                log.debug('Allocation after simulation: {}'.format(placements))
+                log.info('Allocation after simulation: {}'.format(placements))
 
                 # We port the results of the simulation into the real cluster
                 for job in jobs_to_launch:  # type: Execution
@@ -257,7 +257,7 @@ class ZoeElasticScheduler:
                     start_elastic(job, placements)
 
                     if job.all_services_active:
-                        log.debug('execution {}: all services are active'.format(job.id))
+                        log.info('execution {}: all services are active'.format(job.id))
                         jobs_to_attempt_scheduling.remove(job)
                         self.queue.remove(job)
                         self.queue_running.append(job)
