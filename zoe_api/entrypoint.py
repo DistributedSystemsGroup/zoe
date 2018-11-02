@@ -72,7 +72,7 @@ def zoe_web_main(test_conf=None) -> int:
     JinjaApp.init_app(app)
 
     log.info("Starting HTTP server...")
-    http_server = HTTPServer(app)
+    http_server = HTTPServer(app, xheaders=True)
     http_server.bind(args.listen_port, args.listen_address)
     http_server.start(num_processes=1)
 
