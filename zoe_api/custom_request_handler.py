@@ -43,14 +43,11 @@ class ZoeRequestHandler(tornado.web.RequestHandler):
         if self.get_secure_cookie('zoe'):  # cookie auth
             username = tornado.escape.xhtml_escape(self.get_secure_cookie('zoe'))
             user = self.api_endpoint.user_by_name(username)
-            method = "cookie"
         elif auth_header is not None and auth_header.startswith('Basic '):  # basic auth
             auth_decoded = base64.decodebytes(bytes(auth_header[6:], 'ascii')).decode('utf-8')
             username, password = auth_decoded.split(':', 2)
             user = BaseAuthenticator().full_auth(username, password)
-            method = "basic_auth"
         else:
-            method = None
             user = None
 
         if user is None:
@@ -58,8 +55,15 @@ class ZoeRequestHandler(tornado.web.RequestHandler):
         if not user.enabled:
             raise ZoeAuthException('User has been disabled by the administrator')
 
-        log.debug('Authentication done using {} (user {} from {} for {})'.format(method, user.username, self.request.remote_ip, self.request.path))
         return user
+
+    def on_finish(self):
+        """Log request."""
+        try:
+            user = ZoeRequestHandler.get_current_user(self)
+        except ZoeAuthException:
+            user = "not authenticated"
+        log.info("{} {} {} ({}, {}) {:.2f}ms".format(self.get_status(), self.request.method, self.request.path, self.request.remote_ip, user, self.request.request_time()))
 
     def data_received(self, chunk):
         """Not implemented as we do not use stream uploads"""

@@ -191,4 +191,5 @@ class UserOAuthCallbackAPI(ZoeAPIRequestHandler):
         if not self.get_secure_cookie('zoe'):
             cookie_val = user.username
             self.set_secure_cookie('zoe', cookie_val)
+            log.debug('User {} authenticated via gitlab (from {})'.format(user.username, self.request.remote_ip))
         self.redirect(self.get_argument("next", self.reverse_url("home_user")))

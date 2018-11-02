@@ -41,14 +41,19 @@ class BaseAuthenticator:
             return None
 
         if user.auth_source == "textfile" and PlainTextAuthenticator(get_conf().auth_file).auth(username, password):
+            log.info('User {} authenticated via textfile'.format(user.username))
             return user
         elif user.auth_source == "ldap" and LDAPAuthenticator(get_conf(), sasl=False).auth(username, password):
+            log.info('User {} authenticated via ldap'.format(user.username))
             return user
         elif user.auth_source == "ldap+sasl" and LDAPAuthenticator(get_conf(), sasl=True).auth(username, password):
+            log.info('User {} authenticated via ldap+sasl'.format(user.username))
             return user
         elif user.auth_source == "internal" and user.check_password(password):
+            log.info('User {} authenticated via internal db'.format(user.username))
             return user
         elif user.auth_source == "pam" and pam_authenticate(username, password):
+            log.info('User {} authenticated via PAM'.format(user.username))
             return user
         else:
             return None

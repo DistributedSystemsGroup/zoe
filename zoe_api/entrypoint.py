@@ -51,6 +51,7 @@ def zoe_web_main(test_conf=None) -> int:
         log_args['filename'] = args.log_file
     logging.basicConfig(**log_args)
     logging.getLogger("MARKDOWN").setLevel(logging.WARNING)
+    logging.getLogger("asyncio").setLevel(logging.INFO)
     logging.getLogger("tornado").setLevel(logging.WARNING)
 
     sql_manager = zoe_lib.state.SQLManager(zoe_lib.config.get_conf())
