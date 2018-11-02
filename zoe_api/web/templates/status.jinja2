@@ -21,6 +21,9 @@
         <li><a href="#scheduler">Scheduler</a></li>
         <li><a href="#platform">Platform</a></li>
         <li><a href="#service-distrib">Service distribution</a></li>
+        {% if eurecom %}
+        <li><a href="#logs">Zoe process logs</a></li>
+        {% endif %}
     </ul>
     </div>
 
@@ -287,6 +290,14 @@
     {% endfor %}
     </tbody>
     </table>
+
+    {% if eurecom %}
+    <h3 class="section"><a name="logs">Zoe process</a></h3>
+    <ul>
+        <li><a href="http://192.168.46.31:9001">Zoe API</a></li>
+        <li><a href="http://192.168.46.31:9002">Zoe master</a></li>
+    </ul>
+    {% endif %}
 
     <script>
     function refresh_page() {

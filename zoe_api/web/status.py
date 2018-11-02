@@ -17,6 +17,7 @@
 
 from zoe_api.web.request_handler import ZoeWebRequestHandler
 from zoe_api.exceptions import ZoeException
+from zoe_lib.config import get_conf
 
 
 class StatusEndpointWeb(ZoeWebRequestHandler):
@@ -55,7 +56,8 @@ class StatusEndpointWeb(ZoeWebRequestHandler):
             "stats": stats,
             "executions_in_queue": executions_in_queue,
             "services_per_node": services_per_node,
-            "max_service_count": max_service_count
+            "max_service_count": max_service_count,
+            'eurecom': get_conf().eurecom
         }
 
         self.render('status.jinja2', **template_vars)

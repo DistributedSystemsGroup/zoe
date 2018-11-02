@@ -128,6 +128,7 @@ def load_configuration(test_conf=None):
         argparser.add_argument('--additional-volumes', help='Additional volumes to mount in services filesystems. (ex: /mnt/data:data,/mnt/data_n:data_n)', default='')
         argparser.add_argument('--enable-plots', action='store_true', help='Enable generation of URLs to Grafana')
         argparser.add_argument('--enable-cephfs-quotas', action='store_true', help='Enable reading cephfs quotas (needs sudo configuration)')
+        argparser.add_argument('--eurecom', action='store_true', help='Enable options specific to Eurecom\'s deployment')
 
         opts = argparser.parse_args()
         if opts.debug:
