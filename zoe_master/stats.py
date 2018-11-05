@@ -80,6 +80,10 @@ class ClusterStats(Stats):
             'container_count': self.container_count,
             'memory_total': self.memory_total,
             'cores_total': self.cores_total,
+            'memory_reserved': sum([n.memory_reserved for n in self.nodes]),
+            'cores_reserved': sum([n.cores_reserved for n in self.nodes]),
+            'memory_in_use': sum([n.memory_in_use for n in self.nodes]),
+            'cores_in_use': sum([n.cores_in_use for n in self.nodes]),
             'nodes': [x.serialize() for x in self.nodes]
         }
 
@@ -92,6 +96,26 @@ class ClusterStats(Stats):
     def cores_total(self) -> int:
         """Total number of cores installed."""
         return sum([node.cores_total for node in self.nodes])
+
+    @property
+    def memory_reserved(self) -> int:
+        """Total memory reserved in the whole platform."""
+        return sum([node.memory_reserved for node in self.nodes])
+
+    @property
+    def cores_reserved(self) -> int:
+        """Total number of cores reserved."""
+        return sum([node.cores_reserved for node in self.nodes])
+
+    @property
+    def memory_in_use(self) -> int:
+        """Total memory in use in the whole platform."""
+        return sum([node.memory_in_use for node in self.nodes])
+
+    @property
+    def cores_in_use(self) -> int:
+        """Total number of cores in use."""
+        return sum([node.cores_in_use for node in self.nodes])
 
     @property
     def container_count(self) -> int:
