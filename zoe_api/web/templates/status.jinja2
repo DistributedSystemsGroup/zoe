@@ -105,7 +105,7 @@
         </div>
     {% endfor %}
     {% if stats['running_queue']|length == 0 %}
-    <p>The running queue is empty.</p>
+    <p>The queue is empty.</p>
     {% endif %}
     </div>
 
@@ -139,8 +139,8 @@
             {% endfor %}
         </div>
     {% endfor %}
-    {% if stats['running_queue']|length == 0 %}
-    <p>The running queue is empty.</p>
+    {% if stats['termination_queue']|length == 0 %}
+    <p>The queue is empty.</p>
     {% endif %}
     </div>
 
