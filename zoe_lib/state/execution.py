@@ -82,6 +82,8 @@ class Execution(BaseRecord):
             except KeyError:
                 self.size = self.description['priority']  # zapp format v2
 
+        self.app_name = self.description['name']
+
     def serialize(self):
         """Generates a dictionary that can be serialized in JSON."""
         return {

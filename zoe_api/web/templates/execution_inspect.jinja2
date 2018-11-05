@@ -20,7 +20,7 @@
 <h2>Detailed information for execution {{ e.name }} ({{ e.id }})</h2>
 <div id="contents">
 <ul>
-    <li>Application name: {{ e.description['name'] }}</li>
+    <li>Application name: {{ e.app_name }}</li>
     {% if user.role.can_operate_others %}
     <li>Owner: {{ e.owner.username }}</li>
     {% endif %}

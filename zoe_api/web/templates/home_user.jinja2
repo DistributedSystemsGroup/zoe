@@ -36,6 +36,7 @@
     <thead>
     <tr>
         <th>ID</th>
+        <th>ZApp</th>
         <th>Execution name</th>
         <th>Status</th>
         <th>Started</th>
@@ -47,6 +48,7 @@
         {% for e in running_executions %}
             <tr>
                 <td>{{ e.id }}</td>
+                <td class="exec-name">{{ e.app_name }}</td>
                 <td><a href="{{ reverse_url("execution_inspect", e.id) }}">{{ e.name }}</a></td>
                 <td>{{ e.status }}</td>
                 {% if e.time_start == None %}
@@ -76,6 +78,7 @@
     <thead>
     <tr>
         <th>ID</th>
+        <th>ZApp</th>
         <th>Execution name</th>
         <th>Status</th>
         <th>Started</th>
@@ -87,6 +90,7 @@
         {% for e in last_executions %}
             <tr>
                 <td>{{ e.id }}</td>
+                <td class="exec-name">{{ e.app_name }}</td>
                 <td><a href="{{ reverse_url("execution_inspect", e.id) }}">{{ e.name }}</a></td>
                 <td>{{ e.status }}</td>
                 {% if e.time_start == None %}

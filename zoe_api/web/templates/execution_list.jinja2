@@ -32,6 +32,7 @@
     <thead>
     <tr>
         <th>ID</th>
+        <th>ZApp</th>
         <th>Execution name</th>
         {% if user.role.can_operate_others %}
         <th>User</th>
@@ -47,6 +48,7 @@
         {% for e in executions %}
             <tr>
                 <td>{{ e.id }}</td>
+                <td class="exec-name">{{ e.app_name }}</td>
                 <td class="exec-name"><a href="{{ reverse_url("execution_inspect", e.id) }}">{{ e.name }}</a></td>
                 {% if user.role.can_operate_others %}
                 <td>{{ e.owner.username }}</td>
