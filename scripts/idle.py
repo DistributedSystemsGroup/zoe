@@ -12,6 +12,7 @@ import time
 import random
 import collections
 import glob
+import os
 
 from zoe_cmd.utils import read_auth
 from zoe_cmd.api_lib import ZoeAPI
@@ -150,7 +151,8 @@ Args = collections.namedtuple('Args', ['auth_file'])
 
 def main():
     """Main."""
-    args = Args('/home/venzano/.zoerc')
+    fauth = os.path.join(os.getenv('HOME'), '.zoerc')
+    args = Args(fauth)
     auth = read_auth(args)
     api = ZoeAPI(auth['url'], auth['user'], auth['pass'])
     zapps = []
