@@ -16,6 +16,7 @@ import os
 
 from zoe_cmd.utils import read_auth
 from zoe_cmd.api_lib import ZoeAPI
+import zoe_lib.exceptions
 
 TOTAL_JOBS = 1000
 USAGE_WATERMARK = 0.4
@@ -54,7 +55,12 @@ def load_zapp(filename):
 def submit_zapp(zapps, name, api):
     """Submits one ZApp for execution."""
     zapp = random.choice(zapps)
-    ret = api.executions.start(name, zapp)
+    try:
+        ret = api.executions.start(name, zapp)
+    except zoe_lib.exceptions.ZoeAPIException as e:
+        print('Error starting ZApp: {}'.format(str(e)))
+        ret = None
+
     return ret
 
 
@@ -113,7 +119,8 @@ def keep_some_running(zapps, exec_name, api):
             while usage <= USAGE_WATERMARK:
                 print("Platform usage is {:.2f}, can start one more".format(usage))
                 zapp_id = submit_zapp(zapps, exec_name, api)
-                print("ZApp submitted with ID {}".format(zapp_id))
+                if zapp_id is not None:
+                    print("ZApp submitted with ID {}".format(zapp_id))
                 time.sleep(5)
                 queue_length = check_queue_length(api)
                 if queue_length > 0:
