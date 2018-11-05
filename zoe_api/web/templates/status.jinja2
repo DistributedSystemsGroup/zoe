@@ -148,7 +148,7 @@
     <ul>
         <li>Total containers: {{ stats.platform_stats.container_count }}</li>
         <li>Memory: <script>format_bytes({{ stats.platform_stats.memory_total }}, 2)</script> total, <script>format_bytes({{ stats.platform_stats.memory_reserved }}, 2)</script> reserved, <script>format_bytes({{ stats.platform_stats.memory_in_use }}, 2)</script> in use</li>
-        <li>Cores: {{ stats.platform_stats.cores_total }} total, {{ stats.platform_stats.cores_reserved }} reserved, {{ stats.platform_stats.cores_in_use }} in use</li>
+        <li>Cores: {{ '%.2f' % stats.platform_stats.cores_total }} total, {{ '%.2f' % stats.platform_stats.cores_reserved }} reserved, {{ '%.2f' % stats.platform_stats.cores_in_use }} in use</li>
     </ul>
 
     <div class="platform_node_detail">
