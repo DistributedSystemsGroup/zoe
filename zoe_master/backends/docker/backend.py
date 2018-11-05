@@ -160,3 +160,5 @@ class DockerEngineBackend(zoe_master.backends.base.BaseBackend):
             engine.update(service.backend_id, cpu_quota=cpu_quota, mem_reservation=memory)
         else:
             log.error('Cannot update reservations for service {} ({}), since it has no backend ID'.format(service.name, service.id))
+            if service.status == service.INACTIVE_STATUS:
+                service.set_backend_status(service.BACKEND_UNDEFINED_STATUS)
