@@ -146,6 +146,7 @@
 
     <h3 class="section"><a name="platform">Platform</a></h3>
     <ul>
+        <li>Current load: cores {{ '%.2f' % platform_load[0] }}, memory {{ '%.2f' % platform_load[1] }}</li>
         <li>Total containers: {{ stats.platform_stats.container_count }}</li>
         <li>Memory: <script>format_bytes({{ stats.platform_stats.memory_total }}, 2)</script> total, <script>format_bytes({{ stats.platform_stats.memory_reserved }}, 2)</script> reserved, <script>format_bytes({{ stats.platform_stats.memory_in_use }}, 2)</script> in use</li>
         <li>Cores: {{ '%.2f' % stats.platform_stats.cores_total }} total, {{ '%.2f' % stats.platform_stats.cores_reserved }} reserved, {{ '%.2f' % stats.platform_stats.cores_in_use }} in use</li>
