@@ -70,7 +70,7 @@ class StatusEndpointWeb(ZoeWebRequestHandler):
             "services_per_node": services_per_node,
             "max_service_count": max_service_count,
             'eurecom': get_conf().eurecom,
-            'platform_load': self._calculate_load()
+            'platform_load': self._calculate_load(stats)
         }
 
         self.render('status.jinja2', **template_vars)
