@@ -131,11 +131,11 @@ def keep_some_running(zapps, exec_name, api):
                 continue
         elif state == "shrink":
             while usage > USAGE_WATERMARK:
-                print("Platform usage is {} (target {}), terminating some executions".format(queue_length, usage, USAGE_WATERMARK - USAGE_HYSTERESIS))
+                print("Platform usage is {} (target {}), queue length is {}, terminating some executions".format(usage, USAGE_WATERMARK - USAGE_HYSTERESIS, queue_length))
                 if 0 < len(currently_running) <= BATCH_SIZE_TO_KILL:
                     to_kill = currently_running
                 else:
-                    to_kill = currently_running.sort()[-5:]
+                    to_kill = sorted(currently_running)[-5:]
                 print("Terminating {}".format(to_kill))
                 for exec_id in to_kill:
                     terminate_zapp(exec_id, api)
