@@ -22,6 +22,7 @@ import requests
 import tornado.escape
 
 from zoe_api.rest_api.request_handler import ZoeAPIRequestHandler
+from zoe_api.web.request_handler import ZoeWebRequestHandler
 from zoe_api.exceptions import ZoeException
 from zoe_api.auth.requests_oauth2 import EurecomGitLabClient
 
@@ -153,7 +154,7 @@ class UserCollectionAPI(ZoeAPIRequestHandler):
         self.write({'user_id': new_id})
 
 
-class UserOAuthCallbackAPI(ZoeAPIRequestHandler):
+class UserOAuthCallbackAPI(ZoeWebRequestHandler):
     """The User OAUTH callback endpoint."""
     def get(self):
         """Callback."""
@@ -173,7 +174,7 @@ class UserOAuthCallbackAPI(ZoeAPIRequestHandler):
             email = data['email']
         except KeyError:
             with_gitlab_oauth = zoe_lib.config.get_conf().oauth_client_id != ''
-            self.render('login.jinja2', error='Email address not set to public in GitLab settings', with_gitlab_oauth=with_gitlab_oauth)
+            self.render('login.jinja2', error='No public email address set in GitLab settings', with_gitlab_oauth=with_gitlab_oauth)
             return
         username = data['nickname']
         user = self.api_endpoint.user_by_name(username)

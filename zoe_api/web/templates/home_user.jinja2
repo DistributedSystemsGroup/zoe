@@ -116,13 +116,27 @@
     <h3>Role details</h3>
     <ul>
         <li>Your role is: {{ user.role.name }}</li>
-        <li>Can access status page: {{ user.role.can_see_status }}</li>
-        <li>Can change Zoe configuration: {{ user.role.can_change_config }}</li>
-        <li>Can operate on other users: {{ user.role.can_operate_others }}</li>
-        <li>Can delete executions: {{ user.role.can_delete_executions }}</li>
-        <li>Can access the API: {{ user.role.can_access_api }}</li>
-        <li>Can customize ZApp resource reservations: {{ user.role.can_customize_resources }}</li>
-        <li>Can access the full ZApp shop: {{ user.role.can_access_full_zapp_shop }}</li>
+        {% if user.role.can_see_status %}
+        <li>You can access the status page</li>
+        {% endif %}
+        {% if user.role.can_change_config %}
+        <li>You can change Zoe configuration</li>
+        {% endif %}
+        {% if user.role.can_operate_others %}
+        <li>You can operate on other users</li>
+        {% endif %}
+        {% if user.role.can_delete_executions %}
+        <li>You can delete executions</li>
+        {% endif %}
+        {% if user.role.can_access_api %}
+        <li>You can access the API</li>
+        {% endif %}
+        {% if user.role.can_customize_resources %}
+        <li>You can customize ZApp resource reservations</li>
+        {% endif %}
+        {% if user.role.can_access_full_zapp_shop %}
+        <li>You can access the full ZApp shop</li>
+        {% endif %}
     </ul>
 
 {% endblock %}
