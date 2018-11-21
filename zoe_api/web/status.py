@@ -23,6 +23,18 @@ from zoe_lib.config import get_conf
 class StatusEndpointWeb(ZoeWebRequestHandler):
     """Handler class"""
 
+    def _calculate_load(self, sched):
+        core_total = sched['platform_stats']['cores_total']
+        memory_total = sched['platform_stats']['memory_total']
+        core_reserved = 0
+        memory_reserved = 0
+        for node in sched['platform_stats']['nodes']:
+            core_reserved += node['cores_reserved']
+            memory_reserved += node['memory_reserved']
+        core_usage = core_reserved / core_total
+        memory_usage = memory_reserved / memory_total
+        return core_usage, memory_usage
+
     def get(self):
         """Status and statistics page."""
         if self.current_user is None or not self.current_user.role.can_see_status:
@@ -57,7 +69,8 @@ class StatusEndpointWeb(ZoeWebRequestHandler):
             "executions_in_queue": executions_in_queue,
             "services_per_node": services_per_node,
             "max_service_count": max_service_count,
-            'eurecom': get_conf().eurecom
+            'eurecom': get_conf().eurecom,
+            'platform_load': self._calculate_load(stats)
         }
 
         self.render('status.jinja2', **template_vars)
