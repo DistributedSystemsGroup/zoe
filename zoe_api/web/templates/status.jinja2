@@ -279,10 +279,11 @@
             {% if service.backend_status == "started" %}
             <td class="{{ 'running' if service.essential }}">
                 {% if user.role.can_operate_others %}
-                    <a href="{{ reverse_url('execution_inspect', service['execution_id']) }}">{{ service['execution_id'] }}:{{ service['name'] }}</a>
+                    <a href="{{ reverse_url('execution_inspect', service['execution_id']) }}">{{ service['execution_id'] }}&nbsp;{{ service['name'] }}</a><br>
                 {% else %}
-                    {{ service['name'] }}
+                    {{ service['execution_id'] }}&nbsp;{{ service['name'] }}<br>
                 {% endif %}
+                {{ service.execution.owner }}<br>
                 (M: <script>format_bytes({{ node.service_stats[service['id']]['mem_limit'] }});</script> C: {{ '%0.2f'|format(node.service_stats[service['id']]['core_limit']|float) }})
             </td>
             {% endif %}
