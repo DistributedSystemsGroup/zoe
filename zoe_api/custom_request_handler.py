@@ -67,7 +67,6 @@ class ZoeRequestHandler(tornado.web.RequestHandler):
 
     def data_received(self, chunk):
         """Not implemented as we do not use stream uploads"""
-        pass
 
 
 class ZoeWSRequestHandler(tornado.websocket.WebSocketHandler):
@@ -104,7 +103,6 @@ class ZoeWSRequestHandler(tornado.websocket.WebSocketHandler):
 
     def data_received(self, chunk):
         """Not implemented as we do not use stream uploads"""
-        pass
 
     def on_message(self, message):
         """Must be implemented by a subclass."""

@@ -30,19 +30,15 @@ class ZoeException(Exception):
 
 class ZoeStartExecutionRetryException(ZoeException):
     """Execution emitted in case the Execution failed to start for a transient error."""
-    pass
 
 
 class ZoeStartExecutionFatalException(ZoeException):
     """Execution emitted in case the Execution failed to start for a fatal error."""
-    pass
 
 
 class UnsupportedSchedulerPolicyError(ZoeException):
     """The configuration asks for a combination of scheduler and policy that is unsupported."""
-    pass
 
 
 class ZoeNotEnoughResourcesException(ZoeException):
     """Service failed to start due to not enough available resources."""
-    pass

@@ -110,4 +110,3 @@ class WebSocketEndpointWeb(ZoeWSRequestHandler):
 
     def data_received(self, chunk):
         """Not implemented as we do not use stream uploads"""
-        pass
