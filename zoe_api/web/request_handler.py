@@ -56,7 +56,7 @@ class JinjaApp:
             'auto_reload': app_settings.get('autoreload', False),
             'loader': _loader,
             'cache_size': 50 if app_settings.get('compiled_template_cache', True) else 0,
-            'autoescape': True if app_settings.get('autoescape', 'xhtml_escape') == "xhtml_escape" else False,
+            'autoescape': app_settings.get('autoescape', 'xhtml_escape') == "xhtml_escape"
         }
 
         _jinja_config.update(**(jinja_options or {}))

@@ -228,13 +228,13 @@ def role_create_cmd(api: ZoeAPI, args):
     """Create a new role."""
     role = {
         'name': args.name,
-        'can_see_status': True if args.can_see_status else False,
-        'can_change_config': True if args.can_change_config else False,
-        'can_operate_others': True if args.can_operate_others else False,
-        'can_delete_executions': True if args.can_delete_executions else False,
-        'can_access_api': True if args.can_access_api else False,
-        'can_customize_resources': True if args.can_customize_resources else False,
-        'can_access_full_zapp_shop': True if args.can_access_full_zapp_shop else False
+        'can_see_status': bool(args.can_see_status),
+        'can_change_config': bool(args.can_change_config),
+        'can_operate_others': bool(args.can_operate_others),
+        'can_delete_executions': bool(args.can_delete_executions),
+        'can_access_api': bool(args.can_access_api),
+        'can_customize_resources': bool(args.can_customize_resources),
+        'can_access_full_zapp_shop': bool(args.can_access_full_zapp_shop)
     }
     new_id = api.role.create(role)
     print('New role created with ID: {}'.format(new_id))
@@ -251,19 +251,19 @@ def role_update_cmd(api: ZoeAPI, args):
     if args.name is not None:
         role_update['name'] = args.name
     if args.can_see_status is not None:
-        role_update['can_see_status'] = True if args.can_see_status else False
+        role_update['can_see_status'] = bool(args.can_see_status)
     if args.can_change_config is not None:
-        role_update['can_change_config'] = True if args.can_change_config else False
+        role_update['can_change_config'] = bool(args.can_change_config)
     if args.can_operate_others is not None:
-        role_update['can_operate_others'] = True if args.can_operate_others else False
+        role_update['can_operate_others'] = bool(args.can_operate_others)
     if args.can_delete_executions is not None:
-        role_update['can_delete_executions'] = True if args.can_delete_executions else False
+        role_update['can_delete_executions'] = bool(args.can_delete_executions)
     if args.can_access_api is not None:
-        role_update['can_access_api'] = True if args.can_access_api else False
+        role_update['can_access_api'] = bool(args.can_access_api)
     if args.can_customize_resources is not None:
-        role_update['can_customize_resources'] = True if args.can_customize_resources else False
+        role_update['can_customize_resources'] = bool(args.can_customize_resources)
     if args.can_access_full_zapp_shop is not None:
-        role_update['can_access_full_zapp_shop'] = True if args.can_access_full_zapp_shop else False
+        role_update['can_access_full_zapp_shop'] = bool(args.can_access_full_zapp_shop)
     api.role.update(args.id, role_update)
 
 
