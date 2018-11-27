@@ -273,7 +273,7 @@ def user_ls_cmd(api: ZoeAPI, args):
     if args.username is not None:
         filters['username'] = args.username
     if args.enabled is not None:
-        filters['enabled'] = True if args.enabled == 1 else False
+        filters['enabled'] = args.enabled == 1
     if args.auth_source is not None:
         filters['auth_source'] = args.auth_source
     if args.role is not None:
