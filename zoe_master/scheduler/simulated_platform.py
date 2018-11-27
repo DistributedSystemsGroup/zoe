@@ -33,6 +33,8 @@ class SimulatedNode:
 
     def service_fits(self, service: Service) -> bool:
         """Checks whether a service can fit in this node"""
+        if 'disabled' in self.labels:
+            return False
         ret = set(service.labels).issubset(self.labels)
         ret = ret and service.resource_reservation.memory.min < self.node_free_memory()
         ret = ret and service.resource_reservation.cores.min <= self.node_free_cores()
@@ -41,12 +43,14 @@ class SimulatedNode:
 
     def service_why_unfit(self, service) -> str:
         """Generate an explanation of why the service does not fit this node."""
+        if 'disabled' in self.labels:
+            return 'host disabled by the administrator'
         if service.resource_reservation.memory.min >= self.node_free_memory():
             return 'needs {} bytes of memory'.format(self.node_free_memory() - service.resource_reservation.memory.min)
         elif service.resource_reservation.cores.min > self.node_free_cores():
             return 'needs {} more cores'.format(self.node_free_cores() - service.resource_reservation.cores.min)
         elif not set(service.labels).issubset(self.labels):
-            return 'service required labels {} to be defined on the node'.format(service.labels)
+            return 'service requires labels {} to be defined on the node'.format(service.labels)
         elif not self._image_is_available(service.image_name):
             return 'image {} is not available on node {}'.format(service.image_name, self.name)
         else:
