@@ -22,7 +22,7 @@ from zoe_master.backends.kubernetes.api_client import KubernetesClient
 from zoe_master.exceptions import ZoeStartExecutionRetryException, ZoeStartExecutionFatalException, ZoeException, ZoeNotEnoughResourcesException
 from zoe_master.backends.service_instance import ServiceInstance
 import zoe_master.backends.base
-from zoe_master.backends.kubernetes.threads import KubernetesMonitor, KubernetesStateSynchronizer
+from zoe_master.backends.kubernetes.threads import KubernetesMonitor
 from zoe_master.stats import NodeStats, ClusterStats  # pylint: disable=unused-import
 
 log = logging.getLogger(__name__)
