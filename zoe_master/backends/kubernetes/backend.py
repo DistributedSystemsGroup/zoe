@@ -22,7 +22,7 @@ from zoe_master.backends.kubernetes.api_client import KubernetesClient
 from zoe_master.exceptions import ZoeStartExecutionRetryException, ZoeStartExecutionFatalException, ZoeException, ZoeNotEnoughResourcesException
 from zoe_master.backends.service_instance import ServiceInstance
 import zoe_master.backends.base
-from zoe_master.backends.kubernetes.threads import KubernetesMonitor
+from zoe_master.backends.kubernetes.threads import KubernetesMonitor, KubernetesStateSynchronizer
 from zoe_master.stats import NodeStats, ClusterStats  # pylint: disable=unused-import
 
 log = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ class KubernetesBackend(zoe_master.backends.base.BaseBackend):
 
     @classmethod
     def shutdown(cls):
-        """Performs a clean shutdown of the resources used by Swarm backend."""
+        """Performs a clean shutdown of the resources used by Kubernetes backend."""
         _monitor.quit()
 #        _checker.quit()
 
@@ -56,12 +56,15 @@ class KubernetesBackend(zoe_master.backends.base.BaseBackend):
         try:
             self.kube.spawn_service(service_instance)
             rc_info = self.kube.spawn_replication_controller(service_instance)
+            sr_info = self.kube.inspect_service(service_instance.name)
         except ZoeNotEnoughResourcesException:
             raise ZoeStartExecutionRetryException('Not enough free resources to satisfy reservation request for service {}'.format(service_instance.name))
         except ZoeException as e:
             raise ZoeStartExecutionFatalException(str(e))
 
-        return rc_info["backend_id"], rc_info['ip_address'], None
+        ports = {x['port']: x['nodePort'] for x in sr_info['port_forwarding']}
+
+        return rc_info["backend_id"], rc_info['ip_address'], ports
 
     def terminate_service(self, service: Service) -> None:
         """Terminate and delete a container."""
@@ -81,4 +84,18 @@ class KubernetesBackend(zoe_master.backends.base.BaseBackend):
 
     def update_service(self, service, cores=None, memory=None):
         """Update a service reservation."""
-        log.error('Reservation update not implemented in the Swarm back-end')
+        log.error('Reservation update not implemented in the Kubernetes back-end')
+
+    def node_list(self):
+        """Return a list of node names."""
+        info = self.kube.info()
+        return [node.name for node in info.nodes]
+
+    def list_available_images(self, node_name):
+        """List the images available on the specified node."""
+        info = self.kube.info()
+
+        for node in info.nodes:
+            if node.name == node_name:
+                return node.images
+        return []

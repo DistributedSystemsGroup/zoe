@@ -57,6 +57,8 @@ class SimulatedNode:
             return 'unknown reason'
 
     def _image_is_available(self, image_name) -> bool:
+        if get_conf().backend != 'DockerEngine':
+            return True
         for image in self.images:
             if image_name in image['names']:
                 return True

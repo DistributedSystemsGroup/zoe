@@ -29,19 +29,20 @@ log = logging.getLogger(__name__)
 
 def _digest_application_description(state: SQLManager, execution: Execution):
     """Read an application description and expand it into services that can be deployed."""
-    nodes = node_list()
-    images = []
-    for node in nodes:
-        images += list_available_images(node)
+    if get_conf().backend == 'DockerEngine':
+        nodes = node_list()
+        images = []
+        for node in nodes:
+            images += list_available_images(node)
 
-    images = [name for image in images for name in image['names']]
-    if len(images) == 0:
-        log.warning('The image list reported by the back-end is empty')
-    for service_descr in execution.description['services']:
-        if service_descr['image'] not in images:
-            execution.set_error()
-            execution.set_error_message('image {} is not available'.format(service_descr['image']))
-            return False
+        images = [name for image in images for name in image['names']]
+        if len(images) == 0:
+            log.warning('The image list reported by the back-end is empty')
+        for service_descr in execution.description['services']:
+            if service_descr['image'] not in images:
+                execution.set_error()
+                execution.set_error_message('image {} is not available'.format(service_descr['image']))
+                return False
 
     for service_descr in execution.description['services']:
         essential_count = service_descr['essential_count']

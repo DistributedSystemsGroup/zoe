@@ -243,16 +243,17 @@ class KubernetesClient:
         config.set_spec_container_name(service_instance.name)
 
         if len(service_instance.environment) > 0:
-            config.set_spec_container_env(service_instance.environment)
+            envs = {e[0]: str(e[1]) for e in service_instance.environment}
+            config.set_spec_container_env(envs)
 
         if len(service_instance.ports) > 0:
             config.set_spec_container_ports(service_instance.ports)
 
         if service_instance.memory_limit is not None:
-            config.set_spec_container_mem_limit(service_instance.memory_limit.max)
+            config.set_spec_container_mem_limit(service_instance.memory_limit.min)
 
         if service_instance.core_limit is not None:
-            config.set_spec_container_core_limit(service_instance.core_limit.max)
+            config.set_spec_container_core_limit(service_instance.core_limit.min)
 
         if len(service_instance.volumes) > 0:
             config.set_spec_container_volumes(service_instance.volumes, service_instance.name)
@@ -267,7 +268,7 @@ class KubernetesClient:
             log.info('Created ReplicationController on Kubernetes cluster')
             info = self.inspect_replication_controller(service_instance.name)
         except Exception as ex:
-            log.error(ex)
+            log.exception(ex)
 
         return info
 
@@ -306,7 +307,7 @@ class KubernetesClient:
         except pykube.exceptions.ObjectDoesNotExist:
             return None
         except Exception as ex:
-            log.error(ex)
+            log.exception(ex)
             return None
 
         return info
@@ -319,7 +320,7 @@ class KubernetesClient:
             for rep in repcon_list:
                 rclist.append(self.inspect_replication_controller(rep.name))
         except Exception as ex:
-            log.error(ex)
+            log.exception(ex)
         return rclist
 
     def spawn_service(self, service_instance: ServiceInstance):
@@ -340,7 +341,7 @@ class KubernetesClient:
             pykube.Service(self.api, config.get_json()).create()
             log.info('created service on Kubernetes cluster')
         except Exception as ex:
-            log.error(ex)
+            log.exception(ex)
 
     def inspect_service(self, name) -> Dict[str, Any]:
         """Get information of a specific service."""
@@ -363,9 +364,9 @@ class KubernetesClient:
 
             for i in range(length):  # type: int
                 info['port_forwarding'][i]['port'] = srv_info['spec']['ports'][i]['port']
-                info['port_forwarding'][i]['nodePort'] = srv_info['spec']['ports'][i]['nodePort']
+                info['port_forwarding'][i]['nodePort'] = srv_info['spec']['ports'][i]['targetPort']
         except Exception as ex:
-            log.error(ex)
+            log.exception(ex)
             info = None
 
         return info
@@ -398,7 +399,7 @@ class KubernetesClient:
 
             log.info('Service deleted on Kubernetes cluster')
         except Exception as ex:
-            log.error(ex)
+            log.exception(ex)
 
     def info(self) -> ClusterStats:  # pylint: disable=too-many-locals
         """Retrieve Kubernetes cluster statistics."""
@@ -413,12 +414,16 @@ class KubernetesClient:
             nss.cores_total = float(node.obj['status']['allocatable']['cpu'])
             nss.memory_total = humanfriendly.parse_size(node.obj['status']['allocatable']['memory'])
             nss.labels = node.obj['metadata']['labels']
+            nss.status = 'online'
             node_dict[str(socket.gethostbyname(node.name))] = nss
 
         # Get information from all running pods, then accumulate to nodes
         pod_list = pykube.Pod.objects(self.api).filter(namespace=pykube.all).iterator()
         for pod in pod_list:
-            host_ip = pod.obj['status']['hostIP']
+            try:
+                host_ip = pod.obj['status']['hostIP']
+            except KeyError:
+                continue
             nss = node_dict[host_ip]
             nss.container_count += 1
             spec_cont = pod.obj['spec']['containers'][0]

@@ -32,10 +32,22 @@ How it works
   * Create each **replication controller** per each service of a Zapp. Replication Controller assures to have at least a number of **replicas** (pod) always running.
   * Create a Kubernetes **service** per each **replication controller**, which has the same **labels** and **label selectors** with the associated **replication controller**. The service would help the zapp service be exposed to the network by exposing the same port of the service on all kubernetes nodes.
 
+Additional notes
+----------------
+
+The host running Zoe must be able to translate via DNS/hosts K8S node names and IPs.
+
+Many of the features of the Zoe scheduler have not been implemented for the Kubernetes back-end.
+
+Kubernetes network configuration can be done in many different ways. The Zoe Kubernetes back-end implements a very simple algorithm for setting and retrieving port forwading information to show on the web interface. You will have to customize this implementation to support your own Kubernetes deployment, with the network and port forwarding back-end of your choice.
+
+This version of Zoe has been tested with microk8s v.1.12
+
 References
 ----------
 * Kubernetes: https://kubernetes.io/
 * Kubernetes Replication Controller : https://kubernetes.io/docs/user-guide/replication-controller/
 * Kubernetes Service: https://kubernetes.io/docs/user-guide/services/
 * Kubernetes Limit and Request: https://kubernetes.io/docs/user-guide/compute-resources/
+* Microk8s: https://microk8s.io/
 

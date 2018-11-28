@@ -88,7 +88,7 @@ class KubernetesMonitor(threading.Thread):
         self.stop = True
 
 
-CHECK_INTERVAL = 300
+CHECK_INTERVAL = 10
 
 
 class KubernetesStateSynchronizer(threading.Thread):
