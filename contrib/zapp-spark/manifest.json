@@ -19,6 +19,17 @@
                     "step": 536870912
                 },
                 {
+                    "kind": "service_count",
+                    "name": "spark-worker",
+                    "readable_name": "Spark worker count",
+                    "description": "How many workers to spawn",
+                    "type": "int",
+                    "default": 4,
+                    "min": 1,
+                    "max": 16,
+                    "step": 1
+                },
+                {
                     "kind": "environment",
                     "name": "SPARK_WORKER_RAM",
                     "readable_name": "Spark worker memory (bytes)",
@@ -35,12 +46,20 @@
                     "readable_name": "Spark worker cores",
                     "description": "Number of cores each worker has access to, must be equal to the core limit for the worker service",
                     "type": "int",
-                    "default": 6,
+                    "default": 2,
                     "min": 1,
                     "max": 16,
                     "step": 1
                 }
-            ]
+            ],
+            "disabled_for": ["student"]
+        },
+        {
+            "category": "Labs",
+            "name": "CLOUDS",
+            "description": "clouds.json",
+            "readable_descr": "README-clouds.md",
+            "parameters": []
         }
     ]
 }

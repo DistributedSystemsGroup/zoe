@@ -1,0 +1,53 @@
+{
+    "name": "pydatasci-gpu",
+    "services": [
+        {
+            "command": "/usr/local/bin/start_notebook.sh",
+            "environment": [
+                [
+                    "NVIDIA_VISIBLE_DEVICES",
+                    "all"
+                ]
+            ],
+            "essential_count": 1,
+            "image": "zapps/pydatasci-gpu:10396",
+            "labels": [
+                "gpu"
+            ],
+            "monitor": true,
+            "name": "py-notebook",
+            "ports": [
+                {
+                    "name": "Jupyter Notebook interface",
+                    "port_number": 8888,
+                    "protocol": "tcp",
+                    "proxy": true,
+                    "url_template": "http://{ip_port}{proxy_path}"
+                },
+                {
+                    "name": "Tensorboard",
+                    "port_number": 6006,
+                    "protocol": "tcp",
+                    "url_template": "http://{ip_port}/"
+                }
+            ],
+            "replicas": 1,
+            "resources": {
+                "cores": {
+                    "max": 2,
+                    "min": 2
+                },
+                "memory": {
+                    "max": 6442450944,
+                    "min": 6442450944
+                }
+            },
+            "startup_order": 0,
+            "total_count": 1,
+            "volumes": []
+        }
+    ],
+    "size": 512,
+    "version": 3,
+    "will_end": false
+}

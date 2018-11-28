@@ -40,8 +40,8 @@
                     "min": 1
                 },
                 "memory": {
-                    "max": 536870912,
-                    "min": 536870912
+                    "max": 1073741824,
+                    "min": 1073741824
                 }
             },
             "startup_order": 0,
@@ -137,7 +137,8 @@
                     "name": "Jupyter Notebook interface",
                     "port_number": 8888,
                     "protocol": "tcp",
-                    "url_template": "http://{ip_port}/"
+                    "proxy": true,
+                    "url_template": "http://{ip_port}{proxy_path}"
                 }
             ],
             "replicas": 1,

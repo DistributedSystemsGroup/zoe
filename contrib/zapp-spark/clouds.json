@@ -1,0 +1,172 @@
+{
+    "name": "clouds",
+    "services": [
+        {
+            "command": null,
+            "environment": [
+                [
+                    "SPARK_MASTER_IP",
+                    "{dns_name#self}"
+                ],
+                [
+                    "HADOOP_USER_NAME",
+                    "{user_name}"
+                ],
+                [
+                    "PYTHONHASHSEED",
+                    "42"
+                ],
+                [
+                    "SPARK_HOME",
+                    "/opt/spark"
+                ]
+            ],
+            "essential_count": 1,
+            "image": "zapps/spark-master:10396",
+            "labels": [
+                "labs"
+            ],
+            "monitor": false,
+            "name": "spark-master",
+            "ports": [
+                {
+                    "name": "Spark master web interface",
+                    "port_number": 8080,
+                    "protocol": "tcp",
+                    "url_template": "http://{ip_port}/"
+                }
+            ],
+            "replicas": 1,
+            "resources": {
+                "cores": {
+                    "max": 1,
+                    "min": 1
+                },
+                "memory": {
+                    "max": 1073741824,
+                    "min": 1073741824
+                }
+            },
+            "startup_order": 0,
+            "total_count": 1,
+            "volumes": []
+        },
+        {
+            "command": null,
+            "environment": [
+                [
+                    "SPARK_WORKER_CORES",
+                    "3"
+                ],
+                [
+                    "SPARK_WORKER_RAM",
+                    "11273240064"
+                ],
+                [
+                    "SPARK_MASTER_IP",
+                    "{dns_name#spark-master0}"
+                ],
+                [
+                    "SPARK_LOCAL_IP",
+                    "{dns_name#self}"
+                ],
+                [
+                    "SPARK_HOME",
+                    "/opt/spark"
+                ],
+                [
+                    "PYTHONHASHSEED",
+                    "42"
+                ],
+                [
+                    "HADOOP_USER_NAME",
+                    "{user_name}"
+                ]
+            ],
+            "essential_count": 1,
+            "image": "zapps/spark-worker:10396",
+            "labels": [
+                "labs"
+            ],
+            "monitor": false,
+            "name": "spark-worker",
+            "ports": [],
+            "replicas": 1,
+            "resources": {
+                "cores": {
+                    "max": 3,
+                    "min": 3
+                },
+                "memory": {
+                    "max": 12884901888,
+                    "min": 12884901888
+                }
+            },
+            "startup_order": 1,
+            "total_count": 2,
+            "volumes": []
+        },
+        {
+            "command": null,
+            "environment": [
+                [
+                    "SPARK_MASTER",
+                    "spark://{dns_name#spark-master0}:7077"
+                ],
+                [
+                    "SPARK_DRIVER_RAM",
+                    "2147483648"
+                ],
+                [
+                    "SPARK_WORKER_RAM",
+                    "11273240064"
+                ],
+                [
+                    "SPARK_HOME",
+                    "/opt/spark"
+                ],
+                [
+                    "HADOOP_USER_NAME",
+                    "{user_name}"
+                ],
+                [
+                    "PYTHONHASHSEED",
+                    "42"
+                ]
+            ],
+            "essential_count": 1,
+            "image": "zapps/spark-jupyter-notebook:10396",
+            "labels": [
+                "labs"
+            ],
+            "monitor": true,
+            "name": "spark-jupyter",
+            "ports": [
+                {
+                    "name": "Jupyter Notebook interface",
+                    "port_number": 8888,
+                    "protocol": "tcp",
+                    "proxy": true,
+                    "url_template": "http://{ip_port}{proxy_path}"
+                }
+            ],
+            "replicas": 1,
+            "resources": {
+                "cores": {
+                    "max": 2,
+                    "min": 2
+                },
+                "memory": {
+                    "max": 12884901888,
+                    "min": 12884901888
+                }
+            },
+            "startup_order": 0,
+            "total_count": 1,
+            "volumes": []
+        }
+    ],
+    "size": 512,
+    "version": 3,
+    "will_end": false
+}

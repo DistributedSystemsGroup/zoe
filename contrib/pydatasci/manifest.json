@@ -6,6 +6,14 @@
             "readable_descr": "README-datascience.md",
             "name": "Data science notebook",
             "description": "pydatasci.json",
+            "parameters": [],
+            "disabled_for": ["student"]
+        },
+        {
+            "category": "Labs",
+            "readable_descr": "README-malis.md",
+            "name": "MALIS",
+            "description": "pydatasci-malis.json",
             "parameters": []
         },
         {
@@ -22,7 +30,8 @@
                     "type": "string",
                     "default": "all"
                 }
-            ]
+            ],
+            "disabled_for": ["student"]
         }
     ]
 }

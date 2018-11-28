@@ -1,0 +1,30 @@
+{
+    "version": 1,
+    "zapps": [
+        {
+            "category": "Third party",
+            "name": "Boinc client",
+            "description": "boinc.json",
+            "readable_descr": "README.md",
+            "parameters": [
+                {
+                    "kind": "environment",
+                    "name": "PROJECT_URL",
+                    "readable_name": "Project URL",
+                    "description": "The BOINC project URL",
+                    "type": "string",
+                    "default": "www.worldcommunitygrid.org"
+                },
+                {
+                    "kind": "environment",
+                    "name": "PROJECT_KEY",
+                    "readable_name": "Project key",
+                    "description": "The BOINC project key, needed to upload results and statistics to the BOINC server",
+                    "type": "string",
+                    "default": null
+                }
+            ],
+            "disabled_for": ["student"]
+        }
+    ]
+}

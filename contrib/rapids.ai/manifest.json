@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "zapps": [
+        {
+            "category": "Third party",
+            "readable_descr": "README.md",
+            "name": "Rapids.AI",
+            "description": "rapidsai.json",
+            "parameters": [],
+            "disabled_for": ["student"]
+        }
+    ]
+}
+

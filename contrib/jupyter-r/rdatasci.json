@@ -2,7 +2,7 @@
     "name": "rdatasci",
     "services": [
         {
-            "command": "/opt/conda/bin/jupyter lab --no-browser --NotebookApp.token='' --allow-root --ip=0.0.0.0",
+            "command": "/usr/local/bin/start_notebook.sh",
             "environment": [],
             "essential_count": 1,
             "image": "zapps/rdatasci:10396",
@@ -13,7 +13,8 @@
                     "name": "Jupyter Notebook interface",
                     "port_number": 8888,
                     "protocol": "tcp",
-                    "url_template": "http://{ip_port}/"
+                    "proxy": true,
+                    "url_template": "http://{ip_port}{proxy_path}"
                 }
             ],
             "replicas": 1,

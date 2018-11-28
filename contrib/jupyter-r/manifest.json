@@ -6,7 +6,8 @@
             "readable_descr": "README-r.md",
             "name": "R notebook",
             "description": "rdatasci.json",
-            "parameters": []
+            "parameters": [],
+            "disabled_for": ["student"]
         }
     ]
 }

@@ -1,8 +1,8 @@
 {
-    "name": "pydatasci-gpu",
+    "name": "rapidsai",
     "services": [
         {
-            "command": "jupyter lab --no-browser --NotebookApp.token='' --allow-root --ip=0.0.0.0",
+            "command": "/usr/local/bin/start_rapids.sh",
             "environment": [
                 [
                     "NVIDIA_VISIBLE_DEVICES",
@@ -10,24 +10,19 @@
                 ]
             ],
             "essential_count": 1,
-            "image": "zapps/pydatasci-gpu:10396",
+            "image": "zapps/rapidsai:10396",
             "labels": [
                 "gpu"
             ],
             "monitor": true,
-            "name": "py-notebook",
+            "name": "rapidsai-nb",
             "ports": [
                 {
                     "name": "Jupyter Notebook interface",
                     "port_number": 8888,
                     "protocol": "tcp",
-                    "url_template": "http://{ip_port}/"
-                },
-                {
-                    "name": "Tensorboard",
-                    "port_number": 6006,
-                    "protocol": "tcp",
-                    "url_template": "http://{ip_port}/"
+                    "proxy": true,
+                    "url_template": "http://{ip_port}{proxy_path}"
                 }
             ],
             "replicas": 1,

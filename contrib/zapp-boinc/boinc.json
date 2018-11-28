@@ -1,0 +1,40 @@
+{
+    "name": "boinc",
+    "services": [
+        {
+            "command": null,
+            "environment": [
+                [
+                    "PROJECT_URL",
+                    "www.worldcommunitygrid.org"
+                ],
+                [
+                    "PROJECT_KEY",
+                    "Your key here"
+                ]
+            ],
+            "essential_count": 1,
+            "image": "zapps/boinc:10396",
+            "monitor": true,
+            "name": "boinc-client",
+            "ports": [],
+            "replicas": 1,
+            "resources": {
+                "cores": {
+                    "max": 1,
+                    "min": 1
+                },
+                "memory": {
+                    "max": 536870912,
+                    "min": 536870912
+                }
+            },
+            "startup_order": 0,
+            "total_count": 1,
+            "volumes": []
+        }
+    ],
+    "size": 128,
+    "version": 3,
+    "will_end": false
+}
