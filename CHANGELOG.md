@@ -1,5 +1,21 @@
 # Zoe Changelog
 
+## Version 2018.12
+
+* Implement a disabled label that lets admins disable hosts for maintenance reasons
+* Support running behind a reverse proxy
+* Option to get usage metrics from influxdb/telegraf
+* Show termination reasons on the web interface
+* GitLab authentication via OAuth2
+* Add a PAM login option
+* Implement alternative to websockets for log streaming to the web interface
+* Implement users, roles and quotas
+* Implement pagination for the execution list
+* Implement RANDOM and WATERFILL placement policies
+* Dynamic job size calculation lets prevents starvation of jobs waiting in the queue
+* Perform synchronous termination at the end of the scheduler loop to prevent race conditions
+* Removed deprecated features: Swarm back-end and the simple scheduler
+
 ## Version 2017.12
 
 * New Docker Engine back-end, the Swarm back-end is now deprecated

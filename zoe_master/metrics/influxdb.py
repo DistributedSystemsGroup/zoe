@@ -47,7 +47,7 @@ class InfluxDBInMetrics:
         cpu_results = data['results'][0]
         assert cpu_results['statement_id'] == 0
         if 'series' in cpu_results:
-            val = cpu_results['series'][0]['values'][0][1]
+            val = cpu_results['series'][0]['values'][1][1]
             if val is None:
                 ret['cpu_usage'] = 0
             else:
@@ -58,7 +58,7 @@ class InfluxDBInMetrics:
         mem_results = data['results'][1]
         assert mem_results['statement_id'] == 1
         if 'series' in mem_results:
-            val = mem_results['series'][0]['values'][0][1]
+            val = mem_results['series'][0]['values'][1][1]
             if val is None:
                 ret['mem_usage'] = 0
             else:
