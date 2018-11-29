@@ -31,8 +31,8 @@ class InfluxDBInMetrics:
 
     def get_service_usage(self, service_id):
         """Query the DB for the current usage metrics."""
-        query_cpu = 'SELECT mean("usage_percent") / 100 FROM "docker_container_cpu" WHERE "zoe_service_id" = \'{}\' AND "zoe_deployment_name" = \'{}\' AND time >= now() - 3m GROUP BY time(2m) ORDER BY time DESC LIMIT 1'.format(service_id, get_conf().deployment_name)
-        query_mem = 'SELECT mean("usage") FROM "docker_container_mem" WHERE "zoe_service_id" = \'{}\' AND "zoe_deployment_name" = \'{}\' AND time >= now() - 3m GROUP BY time(2m) ORDER BY time DESC LIMIT 1'.format(service_id, get_conf().deployment_name)
+        query_cpu = 'SELECT mean("usage_percent") / 100 FROM "docker_container_cpu" WHERE "zoe_service_id" = \'{}\' AND "zoe_deployment_name" = \'{}\' AND time >= now() - 3m GROUP BY time(1m) ORDER BY time DESC LIMIT 2'.format(service_id, get_conf().deployment_name)
+        query_mem = 'SELECT mean("usage") FROM "docker_container_mem" WHERE "zoe_service_id" = \'{}\' AND "zoe_deployment_name" = \'{}\' AND time >= now() - 3m GROUP BY time(1m) ORDER BY time DESC LIMIT 2'.format(service_id, get_conf().deployment_name)
 
         url = self.base_url + '/query'
         resp = requests.post(url, data={"db": 'telegraf', 'q': query_cpu + ';' + query_mem})
