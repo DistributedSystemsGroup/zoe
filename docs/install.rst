@@ -72,6 +72,8 @@ Host ``bar`` uses TLS and host ``baz`` has also two labels that can be matched w
 
 You tell Zoe the location of this file using the ``backend-docker-config-file`` option in zoe.conf.
 
+The special label ``disabled`` can be set to tell Zoe to stop scheduling services on that host. In time executions will terminate and the host will be left empty and can be removed from the cluster for maintenance.
+
 Kubernetes
 ^^^^^^^^^^
 
