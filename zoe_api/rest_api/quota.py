@@ -30,6 +30,11 @@ class QuotaAPI(ZoeAPIRequestHandler):
             return
 
         try:
+            quota_id = int(quota_id)
+        except ValueError:
+            self.set_status(400, "Parameter must be an integer")
+
+        try:
             quota = self.api_endpoint.quota_by_id(quota_id)
         except ZoeException as e:
             self.set_status(e.status_code, e.message)
@@ -45,6 +50,11 @@ class QuotaAPI(ZoeAPIRequestHandler):
         """HTTP POST method, to edit a quota."""
         if self.current_user is None:
             return
+
+        try:
+            quota_id = int(quota_id)
+        except ValueError:
+            self.set_status(400, "Parameter must be an integer")
 
         try:
             data = tornado.escape.json_decode(self.request.body)
@@ -67,6 +77,11 @@ class QuotaAPI(ZoeAPIRequestHandler):
         """HTTP DELETE method."""
         if self.current_user is None:
             return
+
+        try:
+            quota_id = int(quota_id)
+        except ValueError:
+            self.set_status(400, "Parameter must be an integer")
 
         try:
             self.api_endpoint.quota_delete(self.current_user, quota_id)

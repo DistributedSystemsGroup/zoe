@@ -38,6 +38,11 @@ class ServiceAPI(ZoeAPIRequestHandler):
             return
 
         try:
+            service_id = int(service_id)
+        except ValueError:
+            self.set_status(400, "Parameter must be an integer")
+
+        try:
             service = self.api_endpoint.service_by_id(self.current_user, service_id)
         except ZoeException as e:
             self.set_status(e.status_code, e.message)
@@ -68,6 +73,11 @@ class ServiceLogsAPI(ZoeAPIRequestHandler):
         """HTTP GET method."""
         if self.current_user is None:
             return
+
+        try:
+            service_id = int(service_id)
+        except ValueError:
+            self.set_status(400, "Parameter must be an integer")
 
         try:
             log_obj = self.api_endpoint.service_logs(self.current_user, service_id)

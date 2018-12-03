@@ -30,6 +30,11 @@ class ExecutionAPI(ZoeAPIRequestHandler):
             return
 
         try:
+            execution_id = int(execution_id)
+        except ValueError:
+            self.set_status(400, "Parameter must be an integer")
+
+        try:
             e = self.api_endpoint.execution_by_id(self.current_user, execution_id)
         except ZoeException as e:
             self.set_status(e.status_code, e.message)
@@ -45,6 +50,11 @@ class ExecutionAPI(ZoeAPIRequestHandler):
         """
         if self.current_user is None:
             return
+
+        try:
+            execution_id = int(execution_id)
+        except ValueError:
+            self.set_status(400, "Parameter must be an integer")
 
         try:
             self.api_endpoint.execution_terminate(self.current_user, execution_id, 'user {} request from API'.format(self.current_user))
@@ -65,6 +75,11 @@ class ExecutionDeleteAPI(ZoeAPIRequestHandler):
         """
         if self.current_user is None:
             return
+
+        try:
+            execution_id = int(execution_id)
+        except ValueError:
+            self.set_status(400, "Parameter must be an integer")
 
         try:
             self.api_endpoint.execution_delete(self.current_user, execution_id)
@@ -171,6 +186,11 @@ class ExecutionEndpointsAPI(ZoeAPIRequestHandler):
         """
         if self.current_user is None:
             return
+
+        try:
+            execution_id = int(execution_id)
+        except ValueError:
+            self.set_status(400, "Parameter must be an integer")
 
         try:
             execution = self.api_endpoint.execution_by_id(self.current_user, execution_id)

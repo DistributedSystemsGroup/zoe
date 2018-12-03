@@ -28,6 +28,11 @@ class DiscoveryAPI(ZoeAPIRequestHandler):
             return
 
         try:
+            execution_id = int(execution_id)
+        except ValueError:
+            self.set_status(400, "Parameter must be an integer")
+
+        try:
             self.api_endpoint.execution_by_id(self.current_user, execution_id)
             if service_group != 'all':
                 services = self.api_endpoint.service_list(self.current_user, service_group=service_group, execution_id=execution_id)

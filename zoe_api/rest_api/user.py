@@ -39,6 +39,11 @@ class UserAPI(ZoeAPIRequestHandler):
         if self.current_user is None:
             return
 
+        try:
+            user_id = int(user_id)
+        except ValueError:
+            self.set_status(400, "Parameter must be an integer")
+
         if user_id == self.current_user.id:
             ret = {
                 'user': self.current_user.serialize()
@@ -61,6 +66,11 @@ class UserAPI(ZoeAPIRequestHandler):
             return
 
         try:
+            user_id = int(user_id)
+        except ValueError:
+            self.set_status(400, "Parameter must be an integer")
+
+        try:
             data = tornado.escape.json_decode(self.request.body)
         except ValueError:
             self.set_status(400, 'Error decoding JSON data')
@@ -81,6 +91,11 @@ class UserAPI(ZoeAPIRequestHandler):
         """HTTP DELETE method."""
         if self.current_user is None:
             return
+
+        try:
+            user_id = int(user_id)
+        except ValueError:
+            self.set_status(400, "Parameter must be an integer")
 
         try:
             self.api_endpoint.user_delete(self.current_user, user_id)

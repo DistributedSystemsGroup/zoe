@@ -30,6 +30,11 @@ class RoleAPI(ZoeAPIRequestHandler):
             return
 
         try:
+            role_id = int(role_id)
+        except ValueError:
+            self.set_status(400, "Parameter must be an integer")
+
+        try:
             role = self.api_endpoint.role_by_id(role_id)
         except ZoeException as e:
             self.set_status(e.status_code, e.message)
@@ -45,6 +50,11 @@ class RoleAPI(ZoeAPIRequestHandler):
         """HTTP POST method, to edit a role."""
         if self.current_user is None:
             return
+
+        try:
+            role_id = int(role_id)
+        except ValueError:
+            self.set_status(400, "Parameter must be an integer")
 
         try:
             data = tornado.escape.json_decode(self.request.body)
@@ -67,6 +77,11 @@ class RoleAPI(ZoeAPIRequestHandler):
         """HTTP DELETE method."""
         if self.current_user is None:
             return
+
+        try:
+            role_id = int(role_id)
+        except ValueError:
+            self.set_status(400, "Parameter must be an integer")
 
         try:
             self.api_endpoint.role_delete(self.current_user, role_id)
