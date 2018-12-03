@@ -316,7 +316,7 @@ def user_get_cmd(api: ZoeAPI, args):
     """Get a user by its ID."""
     user = api.user.get(args.id)
     role = api.role.get(user['role_id'])
-    quota = api.quota.get(role['quota_id'])
+    quota = api.quota.get(user['quota_id'])
     tabular_data = [[user['id'], user['username'], user['email'], user['fs_uid'], user['priority'], user['enabled'], user['auth_source'], role['name'], quota['name']]]
     headers = ['ID', 'Username', 'Email', 'FS UID', 'Priority', 'Enabled', 'Auth source', 'Role', 'Quota']
     print(tabulate(tabular_data, headers))
