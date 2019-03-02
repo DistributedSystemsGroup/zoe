@@ -422,7 +422,7 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     argparser_execution_rm.set_defaults(func=exec_rm_cmd)
 
     argparser_execution_kill_user = subparser.add_parser('user-terminate', help="Terminate all executions of a user")
-    argparser_execution_kill_user.add_argument('user_id', help="User name")
+    argparser_execution_kill_user.add_argument('user_id', help="User ID")
     argparser_execution_kill_user.set_defaults(func=exec_kill_user_cmd)
 
     # Quotas
@@ -522,7 +522,7 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
     sub_parser.add_argument('--email', help="Change the email")
     sub_parser.add_argument('--fs_uid', type=int, help="Filesystem UID")
     sub_parser.add_argument('--password', help="Change or set the password for internal authentication")
-    sub_parser.add_argument('--enabled', type=int, choices=[0, 1], help="Enable or disable the user")
+    sub_parser.add_argument('--enabled', choices=["true", "false"], help="Enable or disable the user")
     sub_parser.add_argument('--auth_source', choices=['internal', 'ldap', 'ldap+ssl', 'textfile', 'pam'], help="Change the authentication source")
     sub_parser.add_argument('--priority', type=int, help="Change priority")
     sub_parser.add_argument('--role_id', help="Change role")
