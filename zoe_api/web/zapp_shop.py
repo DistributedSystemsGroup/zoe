@@ -168,6 +168,5 @@ class ZAppStartWeb(ZoeWebRequestHandler):
                 else:
                     val = float(self.get_argument(argument_name))
                 service["resources"]["cores"]["min"] = val
-                break
 
         return app_descr
