@@ -130,7 +130,7 @@
                 "max"
               ]
             },
-            "shm_size": {
+            "shm": {
               "type": "number",
               "multipleOf": 1.0,
               "minimum": 0
