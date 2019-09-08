@@ -109,7 +109,10 @@ def exec_start_cmd(api: ZoeAPI, args):
                 old_status = current_status
             if current_status == 'running':
                 break
-            time.sleep(1)
+            time.sleep(0.2)
+        if args.running:
+            print('Execution running')
+            exit(0)
         monitor_service_id = None
         for service_id in execution['services']:
             service = api.services.get(service_id)
@@ -217,6 +220,7 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
 
     argparser_exec_start = subparser.add_parser('start', help="Start an application")
     argparser_exec_start.add_argument('-s', '--synchronous', action='store_true', help="Do not detach, wait for execution to finish, print main service log")
+    argparser_exec_start.add_argument('-r', '--running', action='store_true', help="Do not detach, wait for execution to start (state: running)")
     argparser_exec_start.add_argument('name', help="Name of the execution")
     argparser_exec_start.add_argument('jsonfile', type=FileType("r"), help='Application description')
     argparser_exec_start.set_defaults(func=exec_start_cmd)
