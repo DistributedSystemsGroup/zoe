@@ -21,6 +21,7 @@ from datetime import datetime, timezone
 import json
 import logging
 import os
+import pprint
 import sys
 import time
 from argparse import ArgumentParser, Namespace, FileType, RawDescriptionHelpFormatter
@@ -198,9 +199,7 @@ def logs_cmd(api: ZoeAPI, args):
 def stats_cmd(api: ZoeAPI, args_):
     """Prints statistics on Zoe internals."""
     sched = api.statistics.scheduler()
-    print('Scheduler queue length: {}'.format(sched['queue_length']))
-    print('Scheduler running queue length: {}'.format(sched['running_length']))
-    print('Termination threads count: {}'.format(sched['termination_threads_count']))
+    pprint.pprint(sched)
 
 
 ENV_HELP_TEXT = '''To authenticate with Zoe you need to define three environment variables:
