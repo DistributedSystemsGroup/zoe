@@ -178,6 +178,7 @@ def exec_kill_cmd(api: ZoeAPI, args):
     """Kill an execution."""
     api.executions.terminate(args.id)
     if args.synchronous:
+        old_status = None
         while True:
             execution = api.executions.get(args.id)
             current_status = execution['status']
