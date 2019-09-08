@@ -177,6 +177,17 @@ def exec_get_cmd(api: ZoeAPI, args):
 def exec_kill_cmd(api: ZoeAPI, args):
     """Kill an execution."""
     api.executions.terminate(args.id)
+    if args.synchronous:
+        while True:
+            execution = api.executions.get(exec_id)
+            current_status = execution['status']
+            if old_status != current_status:
+                print('Execution is now {}'.format(current_status))
+                old_status = current_status
+            if current_status == 'terminated':
+                break
+            time.sleep(0.2)
+        print('Execution terminated')
 
 
 def logs_cmd(api: ZoeAPI, args):
@@ -247,6 +258,7 @@ def process_arguments() -> Tuple[ArgumentParser, Namespace]:
 
     argparser_execution_kill = subparser.add_parser('terminate', help="Terminates an execution")
     argparser_execution_kill.add_argument('id', type=int, help="Execution id")
+    argparser_execution_kill.add_argument('-s', '--synchronous', action='store_true', help="Do not detach, wait for execution to terminate")
     argparser_execution_kill.set_defaults(func=exec_kill_cmd)
 
     argparser_logs = subparser.add_parser('logs', help="Streams the service logs")
